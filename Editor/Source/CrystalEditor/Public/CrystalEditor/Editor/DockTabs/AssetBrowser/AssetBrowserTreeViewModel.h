@@ -1,6 +1,6 @@
 #pragma once
 
-namespace CE
+namespace CE::Editor
 {
     CLASS()
     class CRYSTALEDITOR_API AssetBrowserTreeViewModel : public FTreeViewModel

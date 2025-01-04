@@ -1,6 +1,6 @@
 #include "CrystalEditor.h"
 
-namespace CE
+namespace CE::Editor
 {
 
     AssetBrowserTreeViewModel::AssetBrowserTreeViewModel()
@@ -15,11 +15,19 @@ namespace CE
 
     FModelIndex AssetBrowserTreeViewModel::GetIndex(u32 row, u32 column, const FModelIndex& parent)
     {
-        return FModelIndex();
+        if (!parent.IsValid())
+        {
+            return CreateIndex(row, column, nullptr);
+        }
+        return {};
     }
 
     u32 AssetBrowserTreeViewModel::GetRowCount(const FModelIndex& parent)
     {
+        if (!parent.IsValid())
+        {
+            return 1;
+        }
         return 0;
     }
 
@@ -30,6 +38,15 @@ namespace CE
 
     void AssetBrowserTreeViewModel::SetData(u32 row, FWidget& rowWidget, const FModelIndex& parent)
     {
+        FTreeViewRow& treeRow = rowWidget.As<FTreeViewRow>();
+
+        FTreeViewCell& cell = *treeRow.GetCell(0);
+
+        cell
+        .Text("File")
+        .IconEnabled(false)
+            ;
     }
+
 } // namespace CE
 

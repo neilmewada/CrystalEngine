@@ -17,6 +17,7 @@ namespace CE::Editor
 
     protected: // - Internal -
 
+        FTreeViewRow& GenerateRow();
 
     public: // - Fusion Properties - 
 

@@ -2,6 +2,10 @@
 
 namespace CE::Editor
 {
+    class AssetBrowserTreeView;
+    class AssetBrowserTreeViewModel;
+
+
     CLASS()
     class CRYSTALEDITOR_API AssetBrowser : public EditorMinorDockTab
     {
@@ -18,6 +22,8 @@ namespace CE::Editor
 
     protected: // - Internal -
 
+        Ref<AssetBrowserTreeViewModel> model = nullptr;
+        Ref<AssetBrowserTreeView> treeView = nullptr;
 
         FUSION_WIDGET;
     };

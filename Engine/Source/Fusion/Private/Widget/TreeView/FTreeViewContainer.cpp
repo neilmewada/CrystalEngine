@@ -237,9 +237,19 @@ namespace CE
 
                     int childrenCount = model->GetRowCount(index);
 
-                    for (int c = 0; c < treeView->header->GetColumnCount() && c < rowWidget->GetCellCount(); ++c)
+                    int headerCount = rowWidget->GetCellCount();
+                    if (treeView->header)
                     {
-                        f32 minWidth = treeView->header->GetColumn(c)->GetComputedSize().x;
+                        headerCount = treeView->header->GetColumnCount();
+                    }
+
+                    for (int c = 0; c < headerCount && c < rowWidget->GetCellCount(); ++c)
+                    {
+                        f32 minWidth = GetComputedSize().x / Math::Min<f32>(headerCount, rowWidget->GetCellCount());
+                        if (treeView->header)
+                        {
+	                        minWidth = treeView->header->GetColumn(c)->GetComputedSize().x;
+                        }
                         rowWidget->Visible(true);
 
                         FTreeViewCell& cell = *rowWidget->GetCell(c);
