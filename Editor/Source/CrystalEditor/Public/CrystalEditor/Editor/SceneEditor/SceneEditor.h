@@ -43,6 +43,8 @@ namespace CE::Editor
 
         SceneOutlinerTab* sceneOutlinerTab = nullptr;
 
+        Ref<AssetBrowser> assetBrowser;
+
         DetailsTab* detailsTab = nullptr;
 
         // Sandbox

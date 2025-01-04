@@ -41,6 +41,12 @@
 
 #include "CrystalEditor/Editor/DockTabs/Details/DetailsTab.h"
 
+// - Asset Browser -
+
+#include "CrystalEditor/Editor/DockTabs/AssetBrowser/AssetBrowser.h"
+#include "CrystalEditor/Editor/DockTabs/AssetBrowser/AssetBrowserTreeView.h"
+#include "CrystalEditor/Editor/DockTabs/AssetBrowser/AssetBrowserTreeViewModel.h"
+
 // - Project Settings Editor -
 
 #include "CrystalEditor/Editor/ProjectSettingsEditor/ProjectSettingsEditor.h"

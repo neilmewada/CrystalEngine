@@ -242,6 +242,8 @@ namespace CE::Editor
 
                         FAssignNew(EditorMinorDockspace, bottom)
                         .DockTabs(
+                            FAssignNew(AssetBrowser, assetBrowser),
+
                             FNew(EditorMinorDockTab)
                             .Title("Logs")
                             .Content(
