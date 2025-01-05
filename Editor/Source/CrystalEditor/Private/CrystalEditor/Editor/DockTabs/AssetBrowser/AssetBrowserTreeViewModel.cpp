@@ -44,7 +44,7 @@ namespace CE::Editor
 
         cell
         .Text("File")
-        .IconEnabled(false)
+        .IconEnabled(true)
             ;
     }
 

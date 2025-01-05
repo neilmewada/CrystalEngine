@@ -17,6 +17,8 @@ namespace CE::Editor
 
     protected: // - Internal -
 
+        void OnPostComputeLayout() override;
+
         FTreeViewRow& GenerateRow();
 
     public: // - Fusion Properties - 

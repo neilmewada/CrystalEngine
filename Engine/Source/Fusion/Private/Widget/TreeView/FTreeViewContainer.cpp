@@ -243,9 +243,13 @@ namespace CE
                         headerCount = treeView->header->GetColumnCount();
                     }
 
+                    f32 availWidth = treeView->GetComputedSize().width - 
+                        treeView->Padding().left - treeView->Padding().right - 
+                        Margin().left - Margin().right;
+
                     for (int c = 0; c < headerCount && c < rowWidget->GetCellCount(); ++c)
                     {
-                        f32 minWidth = GetComputedSize().x / Math::Min<f32>(headerCount, rowWidget->GetCellCount());
+                        f32 minWidth = availWidth / Math::Min<f32>(headerCount, rowWidget->GetCellCount());
                         if (treeView->header)
                         {
 	                        minWidth = treeView->header->GetColumn(c)->GetComputedSize().x;

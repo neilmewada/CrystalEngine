@@ -15,7 +15,7 @@ namespace CE
         FBrush downwardArrow = FBrush("/Engine/Resources/Icons/CaretDown");
 
         Child(
-            FNew(FHorizontalStack)
+            FAssignNew(FHorizontalStack, contentStack)
             .ContentHAlign(HAlign::Left)
             .ContentVAlign(VAlign::Fill)
             .VAlign(VAlign::Fill)
@@ -33,13 +33,14 @@ namespace CE
                 .VAlign(VAlign::Center)
                 .Enabled(true)
                 .Visible(false)
-                .Margin(Vec4(0, 0, 5, 0))
+                .Margin(Vec4(0, 0, 7.5f, 0))
                 .Style("ExpandCaretButton"),
 
                 FAssignNew(FImage, icon)
                 .Width(11)
                 .Height(11)
                 .VAlign(VAlign::Center)
+                .Margin(Vec4(0, 0, 2.5f, 0))
                 .Enabled(false),
 
                 FAssignNew(FLabel, label)

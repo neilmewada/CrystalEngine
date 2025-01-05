@@ -21,6 +21,7 @@ namespace CE
         FImageButton* arrowIcon = nullptr;
         FImage* icon = nullptr;
         FLabel* label = nullptr;
+        FHorizontalStack* contentStack = nullptr;
 
     public: // - Fusion Properties -
 
@@ -31,6 +32,8 @@ namespace CE
 
         FUSION_PROPERTY_WRAPPER2(Enabled, arrowIcon, ArrowEnabled);
         FUSION_PROPERTY_WRAPPER2(Visible, arrowIcon, ArrowVisible);
+
+        FUSION_PROPERTY_WRAPPER2(Padding, contentStack, ContentPadding);
 
         FUSION_PROPERTY_WRAPPER2(Enabled, icon, IconEnabled);
         FUSION_PROPERTY_WRAPPER2(Background, icon, IconBackground);
