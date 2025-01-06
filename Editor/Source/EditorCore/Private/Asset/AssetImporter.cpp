@@ -84,6 +84,7 @@ namespace CE::Editor
 
 		for (auto job : jobs)
 		{
+			job->regenerateUuid = false;
 			job->includePaths = includePaths;
 			job->targetPlatform = targetPlatform;
 			job->SetAutoDelete(true);

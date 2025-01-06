@@ -44,8 +44,52 @@ namespace CE::Editor
 		if (!sourcePath.Exists())
 			return false;
 
-		// Clear the bundle of any subobjects/assets, we will build the asset from scratch
+		// 1. Retrieve original Uuids
+
+		Uuid cubeMapUuid = Uuid::Random();
+		Uuid diffuseUuid = Uuid::Random();
+		Uuid textureUuid = Uuid::Random();
+
+		if (!regenerateUuid)
+		{
+			for (int i = 0; i < bundle->GetSubObjectCount(); ++i)
+			{
+				Ref<Object> subObject = bundle->GetSubObject(i);
+
+				if (subObject->IsOfType<TextureCube>())
+				{
+					cubeMapUuid = subObject->GetUuid();
+
+					for (int j = 0; j < subObject->GetSubObjectCount(); ++j)
+					{
+						if (subObject->GetSubObject(j)->IsOfType<TextureCube>())
+						{
+							diffuseUuid = Uuid::Random();
+							break;
+						}
+					}
+
+					break;
+				}
+			}
+
+			for (int i = 0; i < bundle->GetSubObjectCount(); ++i)
+			{
+				Ref<Object> subObject = bundle->GetSubObject(i);
+
+				if (subObject->IsOfType<Texture2D>())
+				{
+					textureUuid = subObject->GetUuid();
+
+					break;
+				}
+			}
+		}
+
+		// 2. Clear the bundle of any subobjects/assets, we will build the asset from scratch
 		bundle->DestroyAllSubObjects();
+
+		// 3. Check if compression is force disabled for this path
 
 		bool forceUncompressed = false;
 		String relativeProductPath = "";
@@ -81,10 +125,14 @@ namespace CE::Editor
 			}
 		}
 
+		// 4. Find valid file name to use as object name
+
 		String extension = sourcePath.GetFileName().GetExtension().GetString();
 		String fileName = sourcePath.GetFileName().RemoveExtension().GetString();
 		// Make sure we can use the fileName as name of an object
 		fileName = FixObjectName(fileName);
+
+		// 5. Load raw image
 
 		CMImage image = CMImage::LoadFromFile(sourcePath);
 		if (!image.IsValid())
@@ -94,12 +142,16 @@ namespace CE::Editor
 		{
 			image.Free();
 		};
+
+		// 6. Check if it's a CubeMap
 		
 		bool isCubeMap = false;
 		if (extension == ".hdr" && image.GetWidth() == image.GetHeight() * 2)
 		{
 			isCubeMap = importHdrAsCubemap;
 		}
+
+		// 7. Find valid compression format for the pixel format
 
 		CMImageFormat imageFormat = image.GetFormat();
 		CMImageSourceFormat targetSourceFormat = CMImageSourceFormat::None;
@@ -188,24 +240,30 @@ namespace CE::Editor
 				break;
 			}
 		}
+
+		// 8. Do the actual processing
 		
 		if (isCubeMap) // Process CubeMap
 		{
-			return ProcessCubeMap(fileName, bundle.Get(), image, pixelFormat, compressionFormat, targetSourceFormat);
+			return ProcessCubeMap(fileName, bundle.Get(), image, 
+				pixelFormat, compressionFormat, targetSourceFormat,
+				cubeMapUuid, diffuseUuid);
 		}
 		else
 		{
-			return ProcessTex2D(fileName, bundle.Get(), image, pixelFormat, compressionFormat, targetSourceFormat);
+			return ProcessTex2D(fileName, bundle.Get(), image, 
+				pixelFormat, compressionFormat, targetSourceFormat,
+				textureUuid);
 		}
-
-		return true;
 	}
 
 	bool TextureAssetImportJob::ProcessCubeMap(const String& name, Bundle* bundle, const CMImage& sourceImage, TextureFormat pixelFormat,
 		TextureSourceCompressionFormat compressionFormat,
-		CMImageSourceFormat targetSourceFormat)
+		CMImageSourceFormat targetSourceFormat,
+		Uuid cubeMapUuid, Uuid diffuseUuid)
 	{
-		TextureCube* texture = CreateObject<TextureCube>(bundle, name);
+		TextureCube* texture = CreateObject<TextureCube>(bundle, name, OF_NoFlags,
+			TextureCube::StaticClass(), nullptr, cubeMapUuid);
 
 		// Temporary code
 		
@@ -254,7 +312,9 @@ namespace CE::Editor
 
 		if (convoluteCubemap && diffuseConvolutionResolution > 0)
 		{
-			TextureCube* diffuseConvolution = CreateObject<TextureCube>(texture, name + "_Diffuse");
+
+			TextureCube* diffuseConvolution = CreateObject<TextureCube>(texture, name + "_Diffuse",
+				OF_NoFlags, TextureCube::StaticClass(), nullptr, diffuseUuid);
 
 			diffuseConvolution->anisoLevel = 0;
 			diffuseConvolution->width = diffuseConvolution->height = diffuseConvolutionResolution;
@@ -288,9 +348,11 @@ namespace CE::Editor
 
 	bool TextureAssetImportJob::ProcessTex2D(const String& name, Bundle* bundle, const CMImage& image, TextureFormat pixelFormat,
 		TextureSourceCompressionFormat compressionFormat,
-		CMImageSourceFormat targetSourceFormat)
+		CMImageSourceFormat targetSourceFormat,
+		Uuid textureUuid)
 	{
-		Ref<Texture2D> texture = CreateObject<Texture2D>(bundle, name);
+		Ref<Texture2D> texture = CreateObject<Texture2D>(bundle, name,
+			OF_NoFlags, Texture2D::StaticClass(), nullptr, textureUuid);
 
 		texture->anisoLevel = anisotropy;
 		texture->width = image.GetWidth();

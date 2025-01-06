@@ -115,6 +115,7 @@ namespace CE::Editor
 
 		b8 generateDistributionAsset = false;
 		b8 isGameAsset = false;
+		b8 regenerateUuid = false;
 		
 		IO::Path sourcePath{};
 		IO::Path productPath{};
