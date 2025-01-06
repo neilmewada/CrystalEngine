@@ -15,7 +15,24 @@ namespace CE::Editor
 
     FModelIndex AssetBrowserTreeViewModel::GetParent(const FModelIndex& index)
     {
-	    
+	    if (!index.IsValid() || index.GetDataPtr() == nullptr)
+	        return FModelIndex();
+
+        PathTreeNode* node = (PathTreeNode*)index.GetDataPtr();
+
+        PathTreeNode* parent = node->parent;
+        if (parent == nullptr)
+            return FModelIndex();
+
+        PathTreeNode* parentsParent = parent->parent;
+        if (parentsParent == nullptr)
+            return FModelIndex();
+
+        int parentsIndex = parentsParent->children.IndexOf(parent);
+        if (parentsIndex == -1)
+            return FModelIndex();
+
+        return CreateIndex(parentsIndex, 0, parent);
     }
 
     FModelIndex AssetBrowserTreeViewModel::GetIndex(u32 row, u32 column, const FModelIndex& parent)

@@ -45,6 +45,15 @@ namespace CE
             if (mouseEvent->type == FEventType::MousePress && mouseEvent->IsLeftButton())
             {
                 treeView->SelectRow(index);
+
+                if (mouseEvent->isDoubleClick && mouseEvent->sender == this)
+                {
+                    int col = treeView->ExpandableColumn();
+                    if (col >= 0 && col < GetCellCount() && GetCell(col)->ArrowVisible())
+                    {
+                        GetCell(col)->OnToggleExpansion().Invoke();
+                    }
+                }
             }
             else if (mouseEvent->type == FEventType::MouseEnter)
             {
