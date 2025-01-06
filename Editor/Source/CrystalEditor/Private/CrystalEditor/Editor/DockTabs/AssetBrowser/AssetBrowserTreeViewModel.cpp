@@ -13,6 +13,11 @@ namespace CE::Editor
         
     }
 
+    FModelIndex AssetBrowserTreeViewModel::GetParent(const FModelIndex& index)
+    {
+	    
+    }
+
     FModelIndex AssetBrowserTreeViewModel::GetIndex(u32 row, u32 column, const FModelIndex& parent)
     {
         AssetRegistry* registry = AssetManager::Get()->GetRegistry();
