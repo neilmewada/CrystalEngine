@@ -15,20 +15,54 @@ namespace CE::Editor
 
     FModelIndex AssetBrowserTreeViewModel::GetIndex(u32 row, u32 column, const FModelIndex& parent)
     {
+        AssetRegistry* registry = AssetManager::Get()->GetRegistry();
+        if (registry == nullptr)
+            return {};
+
+        PathTreeNode* parentNode = nullptr;
+
         if (!parent.IsValid())
         {
-            return CreateIndex(row, column, nullptr);
+            AssetRegistry* registry = AssetManager::Get()->GetRegistry();
+
+            parentNode = registry->GetCachedDirectoryPathTree().GetRootNode();
         }
-        return {};
+        else
+        {
+            parentNode = (PathTreeNode*)parent.GetDataPtr();
+        }
+
+        if (parentNode == nullptr || row >= parentNode->children.GetSize() || row < 0)
+            return {};
+
+        return CreateIndex(row, column, parentNode->children[row]);
     }
 
     u32 AssetBrowserTreeViewModel::GetRowCount(const FModelIndex& parent)
     {
+        AssetRegistry* registry = AssetManager::Get()->GetRegistry();
+        if (registry == nullptr)
+            return 0;
+
+        PathTreeNode* parentNode = nullptr;
+
         if (!parent.IsValid())
         {
-            return 1;
+            AssetRegistry* registry = AssetManager::Get()->GetRegistry();
+
+            parentNode = registry->GetCachedDirectoryPathTree().GetRootNode();
         }
-        return 0;
+        else
+        {
+            parentNode = (PathTreeNode*)parent.GetDataPtr();
+        }
+
+        if (parentNode == nullptr)
+        {
+            return 0;
+        }
+
+        return parentNode->children.GetSize();
     }
 
     u32 AssetBrowserTreeViewModel::GetColumnCount(const FModelIndex& parent)
@@ -38,13 +72,23 @@ namespace CE::Editor
 
     void AssetBrowserTreeViewModel::SetData(u32 row, FWidget& rowWidget, const FModelIndex& parent)
     {
-        FTreeViewRow& treeRow = rowWidget.As<FTreeViewRow>();
+        FTreeViewRow* rowCast = Object::CastTo<FTreeViewRow>(&rowWidget);
+        if (rowCast == nullptr)
+            return;
+
+        FTreeViewRow& treeRow = *rowCast;
+
+        FModelIndex index = GetIndex(row, 0, parent);
+        if (!index.IsValid() || index.GetDataPtr() == nullptr)
+            return;
+
+        PathTreeNode* node = (PathTreeNode*)index.GetDataPtr();
 
         FTreeViewCell& cell = *treeRow.GetCell(0);
 
         cell
-        .Text("File")
-        .IconEnabled(true)
+            .Text(node->name.GetString())
+			.IconEnabled(true)
             ;
     }
 

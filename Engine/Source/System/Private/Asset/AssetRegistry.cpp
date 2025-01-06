@@ -121,7 +121,8 @@ namespace CE
 
 		AssetData* assetData = nullptr;
 		bool newEntry = false;
-		int originalIndex = cachedPrimaryAssetsByParentPath[parentRelativePathStr].IndexOf([&](AssetData* data) -> bool { return data->bundleName == load->GetName(); });
+		int originalIndex = cachedPrimaryAssetsByParentPath[parentRelativePathStr]
+			.IndexOf([&](AssetData* data) -> bool { return data->bundleName == load->GetName(); });
 
 		if (originalIndex >= 0)
 		{
