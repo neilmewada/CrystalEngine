@@ -401,7 +401,17 @@ namespace CE
 
             if (!treeView->AutoHeight())
             {
-                contentSize.height += children[i]->GetIntrinsicSize().height;
+                f32 rowHeight = 0;
+                if (!treeView->m_RowHeightDelegate.IsValid())
+                {
+                    rowHeight = treeView->m_RowHeight;
+                }
+                else
+                {
+                    rowHeight = treeView->m_RowHeightDelegate(children[i]->index);
+                }
+
+                contentSize.height += Math::Max(rowHeight, children[i]->GetIntrinsicSize().height);
             }
         }
 
@@ -456,12 +466,14 @@ namespace CE
             }
 
             child->SetComputedPosition(curPos);
-            child->SetComputedSize(Vec2(availableSize.x, Math::Max(rowHeight, child->GetIntrinsicSize().y)));
+            child->SetComputedSize(Vec2(availableSize.x, Math::Max(rowHeight, child->GetIntrinsicSize().height)));
 
         	child->PlaceSubWidgets();
 
             curPos.y += child->computedSize.y;
         }
+
+        String::IsAlphabet('a');
     }
     
 }
