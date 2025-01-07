@@ -68,7 +68,6 @@ namespace CE::Editor
                 continue;
 
             PathTreeNode* node = (PathTreeNode*)index.GetDataPtr();
-            CE_LOG(Info, All, "Selected: {}", node->name);
 
             break;
         }
