@@ -32,6 +32,7 @@ namespace CE::Editor
                     .Title("Content")
                     .ExpandableContent(
                         FAssignNew(AssetBrowserTreeView, treeView)
+                        .OnSelectionChanged(FUNCTION_BINDING(this, OnDirectorySelectionChanged))
                         .Background(Color::RGBA(26, 26, 26))
                         .VAlign(VAlign::Fill)
                         .HAlign(HAlign::Fill)
@@ -53,6 +54,24 @@ namespace CE::Editor
 
         treeView->Model(model.Get());
     }
-    
+
+    void AssetBrowser::OnDirectorySelectionChanged(FItemSelectionModel* selectionModel)
+    {
+        if (selectionModel == nullptr || model == nullptr)
+            return;
+
+        const HashSet<FModelIndex>& selection = selectionModel->GetSelection();
+
+        for (FModelIndex index : selection)
+        {
+            if (!index.IsValid() || index.GetDataPtr() == nullptr)
+                continue;
+
+            PathTreeNode* node = (PathTreeNode*)index.GetDataPtr();
+            CE_LOG(Info, All, "Selected: {}", node->name);
+
+            break;
+        }
+    }
 }
 

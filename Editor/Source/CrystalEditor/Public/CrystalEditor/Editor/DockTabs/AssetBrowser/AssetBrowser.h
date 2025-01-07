@@ -22,6 +22,9 @@ namespace CE::Editor
 
     protected: // - Internal -
 
+        FUNCTION()
+        void OnDirectorySelectionChanged(FItemSelectionModel* selectionModel);
+
         Ref<AssetBrowserTreeViewModel> model = nullptr;
         Ref<AssetBrowserTreeView> treeView = nullptr;
 

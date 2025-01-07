@@ -552,9 +552,6 @@ namespace CE
         ScriptEvent() = default;
         virtual ~ScriptEvent() = default;
 
-        ScriptEvent(ScriptEvent&& move) = default;
-        ScriptEvent& operator=(ScriptEvent&& move) = default;
-
         // Operators
 
         void operator+=(const FunctionBinding& binding)

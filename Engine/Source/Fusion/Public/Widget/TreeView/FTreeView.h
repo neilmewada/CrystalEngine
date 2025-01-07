@@ -67,6 +67,8 @@ namespace CE
         FUSION_PROPERTY_WRAPPER(VerticalScroll, scrollBox);
         FUSION_PROPERTY_WRAPPER(HorizontalScroll, scrollBox);
 
+        FUSION_EVENT_WRAPPER(OnSelectionChanged, m_SelectionModel);
+
         Self& Header(FTreeViewHeader& header);
 
         FUSION_WIDGET;
