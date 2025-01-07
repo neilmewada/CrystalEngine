@@ -52,38 +52,26 @@ namespace CE::Editor
 
 		if (!regenerateUuid)
 		{
-			for (int i = 0; i < bundle->GetSubObjectCount(); ++i)
-			{
-				Ref<Object> subObject = bundle->GetSubObject(i);
-
-				if (subObject->IsOfType<TextureCube>())
+			FetchObjectUuids(bundle, {
 				{
-					cubeMapUuid = subObject->GetUuid();
-
-					for (int j = 0; j < subObject->GetSubObjectCount(); ++j)
-					{
-						if (subObject->GetSubObject(j)->IsOfType<TextureCube>())
+					.clazz = TextureCube::StaticClass(),
+					.outUuid = &cubeMapUuid,
+					.children = {
 						{
-							diffuseUuid = Uuid::Random();
-							break;
+							.clazz = TextureCube::StaticClass(),
+							.outUuid = &diffuseUuid,
 						}
 					}
-
-					break;
 				}
-			}
+			});
 
-			for (int i = 0; i < bundle->GetSubObjectCount(); ++i)
-			{
-				Ref<Object> subObject = bundle->GetSubObject(i);
-
-				if (subObject->IsOfType<Texture2D>())
+			FetchObjectUuids(bundle, {
 				{
-					textureUuid = subObject->GetUuid();
-
-					break;
+					.clazz = Texture2D::StaticClass(),
+					.outUuid = &textureUuid
 				}
-			}
+			});
+
 		}
 
 		// 2. Clear the bundle of any subobjects/assets, we will build the asset from scratch
@@ -264,8 +252,6 @@ namespace CE::Editor
 	{
 		TextureCube* texture = CreateObject<TextureCube>(bundle, name, OF_NoFlags,
 			TextureCube::StaticClass(), nullptr, cubeMapUuid);
-
-		// Temporary code
 		
 		if (compressionFormat == TextureSourceCompressionFormat::None)
 		{
@@ -286,10 +272,10 @@ namespace CE::Editor
 		Ref<CE::Shader> iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/CubeMap/IBLConvolution");
 		Ref<CE::Shader> mipmapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/Utils/MipMapGen");
 
-		ShaderCollection* equirectShaderCollection = equirectShader->GetShaderCollection();
-		ShaderCollection* iblShaderCollection = iblShader->GetShaderCollection();
-		ShaderCollection* iblConvolutionShaderCollection = iblConvolutionShader->GetShaderCollection();
-		ShaderCollection* mipMapShaderCollection = mipmapShader->GetShaderCollection();
+		RPI::ShaderCollection* equirectShaderCollection = equirectShader->GetShaderCollection();
+		RPI::ShaderCollection* iblShaderCollection = iblShader->GetShaderCollection();
+		RPI::ShaderCollection* iblConvolutionShaderCollection = iblConvolutionShader->GetShaderCollection();
+		RPI::ShaderCollection* mipMapShaderCollection = mipmapShader->GetShaderCollection();
 
 		RPI::CubeMapOfflineProcessInfo processInfo{};
 		processInfo.name = name;
@@ -312,7 +298,6 @@ namespace CE::Editor
 
 		if (convoluteCubemap && diffuseConvolutionResolution > 0)
 		{
-
 			TextureCube* diffuseConvolution = CreateObject<TextureCube>(texture, name + "_Diffuse",
 				OF_NoFlags, TextureCube::StaticClass(), nullptr, diffuseUuid);
 

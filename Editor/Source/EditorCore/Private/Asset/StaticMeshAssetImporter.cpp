@@ -26,6 +26,37 @@ namespace CE::Editor
 		if (!sourcePath.Exists())
 			return false;
 
+		Uuid meshUuid = Uuid::Random();
+		Uuid modelAssetUuid = Uuid::Random();
+		Uuid lodAssetUuid = Uuid::Random();
+
+		for (int i = 0; i < bundle->GetSubObjectCount(); ++i)
+		{
+			Ref<Object> object = bundle->GetSubObject(i);
+
+			if (object->IsOfType<StaticMesh>())
+			{
+				Ref<StaticMesh> staticMesh = static_cast<Ref<StaticMesh>>(object);
+				meshUuid = staticMesh->GetUuid();
+
+				if (staticMesh->GetSubObjectCount() >= 1 &&
+					staticMesh->GetSubObject(0)->IsOfType<RPI::ModelAsset>())
+				{
+					Ref<RPI::ModelAsset> modelAsset = static_cast<RPI::ModelAsset*>(staticMesh->GetSubObject(0));
+
+					modelAssetUuid = modelAsset->GetUuid();
+
+					if (modelAsset->GetSubObjectCount() >= 1 &&
+						modelAsset->GetSubObject(0)->IsOfType<RPI::ModelLodAsset>())
+					{
+						lodAssetUuid = modelAsset->GetSubObject(0)->GetUuid();
+					}
+				}
+
+				break;
+			}
+		}
+
 		// Clear the bundle of any subobjects/assets, we will build the asset from scratch
 		bundle->DestroyAllSubObjects();
 
@@ -73,12 +104,18 @@ namespace CE::Editor
 			delete scene;
 		};
 
-		Ref<StaticMesh> staticMesh = CreateObject<StaticMesh>(bundle.Get(), fileName);
+		Ref<StaticMesh> staticMesh = CreateObject<StaticMesh>(bundle.Get(), fileName,
+			OF_NoFlags, StaticMesh::StaticClass(), nullptr,
+			meshUuid);
 
-		Ref<RPI::ModelAsset> modelAsset = CreateObject<RPI::ModelAsset>(staticMesh.Get(), "ModelAsset");
+		Ref<RPI::ModelAsset> modelAsset = CreateObject<RPI::ModelAsset>(staticMesh.Get(), "ModelAsset",
+			OF_NoFlags, RPI::ModelAsset::StaticClass(), nullptr,
+			modelAssetUuid);
 		staticMesh->modelAsset = modelAsset;
 
-		Ref<RPI::ModelLodAsset> lod = CreateObject<RPI::ModelLodAsset>(modelAsset.Get(), "Lod0");
+		Ref<RPI::ModelLodAsset> lod = CreateObject<RPI::ModelLodAsset>(modelAsset.Get(), "Lod0", 
+			OF_NoFlags, RPI::ModelLodAsset::StaticClass(), nullptr,
+			lodAssetUuid);
 		modelAsset->lods.Add(lod);
 		
 		const Array<CMMesh>& meshes = scene->GetMeshes();
@@ -99,11 +136,11 @@ namespace CE::Editor
 			}
 		}
 
-		RHI::IndexFormat indexFormat = IndexFormat::Uint32;
+		RHI::IndexFormat indexFormat = RHI::IndexFormat::Uint32;
 		u32 bytesPerIndex = 4;
 		if (totalVertices < NumericLimits<u16>::Max())
 		{
-			indexFormat = IndexFormat::Uint16;
+			indexFormat = RHI::IndexFormat::Uint16;
 			bytesPerIndex = 2;
 		}
 
@@ -175,7 +212,7 @@ namespace CE::Editor
 
 			for (u32 i = 0; i < numIndices; i++)
 			{
-				if (indexFormat == IndexFormat::Uint16)
+				if (indexFormat == RHI::IndexFormat::Uint16)
 				{
 					*((u16*)subMesh.indicesData.GetDataPtr() + i) = indexStartValueOffset + mesh.indices[i];
 				}

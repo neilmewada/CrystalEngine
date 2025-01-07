@@ -21,14 +21,25 @@ namespace CE::Editor
             .SplitterSize(5.0f)
             .SplitterDrawRatio(0.5f)
             .Direction(FSplitDirection::Horizontal)
+            .ContentVAlign(VAlign::Fill)
             (
                 FNew(FStyledWidget)
+                .Padding(Vec4(1, 1, 1, 1) * 5)
                 .FillRatio(0.2f)
+                .VAlign(VAlign::Fill)
                 (
-                    FAssignNew(AssetBrowserTreeView, treeView)
-                    .Background(Color::RGBA(26, 26, 26))
+                    FNew(FExpandableSection)
+                    .Title("Content")
+                    .ExpandableContent(
+                        FAssignNew(AssetBrowserTreeView, treeView)
+                        .Background(Color::RGBA(26, 26, 26))
+                        .VAlign(VAlign::Fill)
+                        .HAlign(HAlign::Fill)
+                    )
+                    .ContentFillRatio(1.0f)
                     .VAlign(VAlign::Fill)
                     .HAlign(HAlign::Fill)
+                    .Name("AssetBrowserTreeViewSection")
                 ),
                 
                 FNew(FVerticalStack)

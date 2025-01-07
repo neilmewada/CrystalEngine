@@ -106,6 +106,15 @@ namespace CE::Editor
 
 	protected:
 
+		struct UuidFetcher
+		{
+			ClassType* clazz = nullptr;
+			Uuid* outUuid = nullptr;
+			Array<UuidFetcher> children;
+		};
+
+		void FetchObjectUuids(const Ref<Bundle>& bundle, const Array<UuidFetcher>& uuidFetchers);
+
 		Array<IO::Path> includePaths{};
 
 		PlatformName targetPlatform;

@@ -34,6 +34,11 @@ namespace CE
         if (!m_Child || !m_Child->Enabled())
             return;
 
+        if (GetName() == "ExpandableSectionContent")
+        {
+            String::IsAlphabet('a');
+        }
+
         Vec4 childMargin = m_Child->Margin();
         Vec2 childIntrinsicSize = m_Child->GetIntrinsicSize();
         Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right + childMargin.left + childMargin.right,

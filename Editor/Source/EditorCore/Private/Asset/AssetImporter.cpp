@@ -122,15 +122,45 @@ namespace CE::Editor
 		numJobsInProgress--;
 	}
 
+	void AssetImportJob::FetchObjectUuids(const Ref<Bundle>& bundle, const Array<UuidFetcher>& uuidFetchers)
+	{
+		std::function<void(const Ref<Object>&, const Array<UuidFetcher>&)> visitor =
+			[&](const Ref<Object>& object, const Array<UuidFetcher>& fetchers)
+			{
+				int count = Math::Min<int>(object->GetSubObjectCount(), fetchers.GetSize());
+
+				for (int i = 0; i < count; ++i)
+				{
+					Ref<Object> subObject = object->GetSubObject(i);
+					if (subObject->GetClass() == fetchers[i].clazz)
+					{
+						if (fetchers[i].outUuid != nullptr)
+						{
+							*fetchers[i].outUuid = subObject->GetUuid();
+						}
+
+						visitor(subObject, fetchers[i].children);
+					}
+				}
+			};
+
+		visitor(bundle.Get(), uuidFetchers);
+	}
+
 	void AssetImportJob::Finish()
 	{
-		importer->OnAssetImportJobFinish(this);
+		
 	}
 
 	void AssetImportJob::Process()
 	{
 		success = false;
 		errorMessage = "";
+
+		defer(&)
+		{
+			importer->OnAssetImportJobFinish(this);
+		};
 
 		if (!sourcePath.Exists() || sourcePath.IsDirectory())
 		{

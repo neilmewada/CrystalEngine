@@ -33,6 +33,7 @@ namespace CE
         FStyledWidget* containerStyle = nullptr;
         FTreeViewHeader* header = nullptr;
         FTreeViewContainer* container = nullptr;
+        FScrollBox* scrollBox = nullptr;
 
         bool isVerticalScrollVisible = false;
         bool isVerticalScrollDragged = false;
@@ -62,6 +63,9 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(FRowHeightDelegate, RowHeightDelegate);
 
         FUSION_LAYOUT_PROPERTY(FGenerateRowDelegate, GenerateRowDelegate);
+
+        FUSION_PROPERTY_WRAPPER(VerticalScroll, scrollBox);
+        FUSION_PROPERTY_WRAPPER(HorizontalScroll, scrollBox);
 
         Self& Header(FTreeViewHeader& header);
 

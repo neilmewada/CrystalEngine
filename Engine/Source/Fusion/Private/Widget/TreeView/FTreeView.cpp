@@ -32,6 +32,7 @@ namespace CE
             FNew(FVerticalStack)
             .VAlign(VAlign::Fill)
             .HAlign(HAlign::Fill)
+            .Name("DebugVStack")
             (
                 FAssignNew(FStyledWidget, headerContainer)
                 .HAlign(HAlign::Fill),
@@ -40,7 +41,7 @@ namespace CE
                 .HAlign(HAlign::Fill)
                 .FillRatio(1.0f)
                 (
-                    FNew(FScrollBox)
+                    FAssignNew(FScrollBox, scrollBox)
                     .VerticalScroll(true)
                     .HorizontalScroll(false)
                     .Child(

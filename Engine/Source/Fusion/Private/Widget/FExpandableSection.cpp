@@ -20,6 +20,7 @@ namespace CE
             .Gap(0)
             .VAlign(VAlign::Fill)
             .HAlign(HAlign::Fill)
+            .Name("ExpandableSectionStack")
             (
                 FAssignNew(FButton, header)
                 .OnClicked([this]
