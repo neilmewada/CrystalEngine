@@ -10,6 +10,24 @@ namespace CE
 		RemoveAll();
 	}
 
+	bool PathTreeNode::ChildExistsRecursive(PathTreeNode* child)
+	{
+		for (PathTreeNode* childNode : children)
+		{
+			if (childNode == child)
+			{
+				return true;
+			}
+
+			if (ChildExistsRecursive(childNode))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	bool PathTreeNode::ChildExists(const String& name)
 	{
 		for (auto child : children)

@@ -24,6 +24,8 @@ namespace CE
 			return *this;
 		}
 
+		bool ChildExistsRecursive(PathTreeNode* child);
+
 		bool ChildExists(const String& name);
 
 		PathTreeNode* GetOrAddChild(const String& name, PathTreeNodeType type = PathTreeNodeType::Directory,

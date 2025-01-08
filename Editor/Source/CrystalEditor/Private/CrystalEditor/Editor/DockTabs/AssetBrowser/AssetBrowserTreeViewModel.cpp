@@ -13,6 +13,19 @@ namespace CE::Editor
         
     }
 
+    void AssetBrowserTreeViewModel::Init()
+    {
+        AssetManager* assetManager = AssetManager::Get();
+        if (!assetManager)
+            return;
+
+        AssetRegistry* registry = assetManager->GetRegistry();
+        if (!registry)
+            return;
+
+        
+    }
+
     FModelIndex AssetBrowserTreeViewModel::GetParent(const FModelIndex& index)
     {
 	    if (!index.IsValid() || index.GetDataPtr() == nullptr)
@@ -45,8 +58,6 @@ namespace CE::Editor
 
         if (!parent.IsValid())
         {
-            AssetRegistry* registry = AssetManager::Get()->GetRegistry();
-
             parentNode = registry->GetCachedDirectoryPathTree().GetRootNode();
         }
         else

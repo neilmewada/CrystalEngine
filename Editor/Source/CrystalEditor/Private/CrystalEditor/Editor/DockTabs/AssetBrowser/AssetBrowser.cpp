@@ -28,7 +28,7 @@ namespace CE::Editor
                 .FillRatio(0.2f)
                 .VAlign(VAlign::Fill)
                 (
-                    FNew(FExpandableSection)
+                    FAssignNew(FExpandableSection, directorySection)
                     .Title("Content")
                     .ExpandableContent(
                         FAssignNew(AssetBrowserTreeView, treeView)
@@ -38,6 +38,7 @@ namespace CE::Editor
                         .HAlign(HAlign::Fill)
                     )
                     .ContentFillRatio(1.0f)
+                    .OnExpansionChanged(FUNCTION_BINDING(this, OnLeftExpansionChanged))
                     .VAlign(VAlign::Fill)
                     .HAlign(HAlign::Fill)
                     .Name("AssetBrowserTreeViewSection")
@@ -50,7 +51,11 @@ namespace CE::Editor
         )
         .Style("EditorMinorDockTab");
 
+        leftSections = { directorySection };
+
         model = CreateObject<AssetBrowserTreeViewModel>(this, "Model");
+
+        model->Init();
 
         treeView->Model(model.Get());
     }
@@ -62,7 +67,7 @@ namespace CE::Editor
 
         const HashSet<FModelIndex>& selection = selectionModel->GetSelection();
 
-        for (FModelIndex index : selection)
+        for (const FModelIndex& index : selection)
         {
             if (!index.IsValid() || index.GetDataPtr() == nullptr)
                 continue;
@@ -70,6 +75,17 @@ namespace CE::Editor
             PathTreeNode* node = (PathTreeNode*)index.GetDataPtr();
 
             break;
+        }
+    }
+
+    void AssetBrowser::OnLeftExpansionChanged(FExpandableSection* section)
+    {
+        for (Ref<FExpandableSection> expandableSection : leftSections)
+        {
+	        if (expandableSection != section)
+	        {
+		        expandableSection->Expanded(false);
+	        }
         }
     }
 }

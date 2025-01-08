@@ -26,6 +26,8 @@ namespace CE
                 .OnClicked([this]
                 {
                     Expanded(!Expanded());
+
+                    m_OnExpansionChanged.Broadcast(this);
                 })
                 .Background(Color::Green())
                 .Child(

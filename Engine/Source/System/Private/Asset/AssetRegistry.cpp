@@ -65,7 +65,7 @@ namespace CE
 	{
 		Array<String> result{};
 
-		auto directoryNode = directoryTree.GetNode(path);
+		auto directoryNode = cachedDirectoryTree.GetNode(path);
 		if (directoryNode == nullptr)
 			return result;
 
@@ -79,7 +79,7 @@ namespace CE
 
 	PathTreeNode* AssetRegistry::GetDirectoryNode(const Name& path)
 	{
-		return directoryTree.GetNode(path);
+		return cachedDirectoryTree.GetNode(path);
 	}
 
 	Name AssetRegistry::ResolveBundlePath(const Uuid& bundleUuid)
@@ -163,8 +163,11 @@ namespace CE
 		load->BeginDestroy();
 		load = nullptr;
 
-		if (listener != nullptr)
-			listener->OnAssetImported(bundleName, sourcePath);
+		for (IAssetRegistryListener* listener : listeners)
+		{
+			if (listener != nullptr)
+				listener->OnAssetImported(bundleName, sourcePath);
+		}
 		
 		onAssetImported.Broadcast(bundleName);
 		onAssetRegistryModified.Broadcast();
@@ -201,8 +204,11 @@ namespace CE
 		cachedPathTree.RemovePath(relativePathName);
 		cachedAssetsByPath.Remove(relativePathName);
 
-		if (listener != nullptr)
-			listener->OnAssetImported(bundleName);
+		for (IAssetRegistryListener* listener : listeners)
+		{
+			if (listener != nullptr)
+				listener->OnAssetImported(bundleName);
+		}
 
 		onAssetRegistryModified.Broadcast();
 	}
@@ -214,10 +220,10 @@ namespace CE
 
 		// Clear the path tree
 		cachedPathTree.RemoveAll();
-		directoryTree.RemoveAll();
+		cachedDirectoryTree.RemoveAll();
 
-		cachedPathTree.AddPath("/Game"); directoryTree.AddPath("/Game");
-		cachedPathTree.AddPath("/Engine"); directoryTree.AddPath("/Engine");
+		cachedPathTree.AddPath("/Game"); cachedDirectoryTree.AddPath("/Game");
+		cachedPathTree.AddPath("/Engine"); cachedDirectoryTree.AddPath("/Engine");
 #if PAL_TRAIT_BUILD_EDITOR
 		//pathTree.AddPath("/Editor"); directoryTree.AddPath("/Editor");
 #endif
@@ -243,7 +249,7 @@ namespace CE
                         if (!relativePathStr.IsEmpty())
 						{
 							cachedPathTree.AddPath(relativePathStr);
-							directoryTree.AddPath(relativePathStr);
+							cachedDirectoryTree.AddPath(relativePathStr);
 						}
 					}
                     else if (item.GetExtension() == ".casset") // Product asset file
@@ -319,7 +325,7 @@ namespace CE
 						if (!relativePathStr.IsEmpty())
 						{
 							cachedPathTree.AddPath(relativePathStr);
-							directoryTree.AddPath(relativePathStr);
+							cachedDirectoryTree.AddPath(relativePathStr);
 						}
 					}
 					else if (item.GetExtension() == ".casset") // Product asset file
@@ -381,7 +387,7 @@ namespace CE
 						if (!relativePathStr.IsEmpty())
 						{
 							cachedPathTree.AddPath(relativePathStr);
-							directoryTree.AddPath(relativePathStr);
+							cachedDirectoryTree.AddPath(relativePathStr);
 						}
 					}
 					else if (item.GetExtension() == ".casset") // Product asset file
@@ -447,6 +453,8 @@ namespace CE
 		{
 			cachedAssetBySourcePath[assetData->sourceAssetPath] = assetData;
 		}
+
+
 	}
 
 	void AssetRegistry::DeleteAssetEntry(const Name& bundleName)

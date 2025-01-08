@@ -14,6 +14,8 @@ namespace CE::Editor
 
         virtual ~AssetBrowserTreeViewModel();
 
+        void Init();
+
         FModelIndex GetParent(const FModelIndex& index) override;
 
         FModelIndex GetIndex(u32 row, u32 column, const FModelIndex& parent) override;

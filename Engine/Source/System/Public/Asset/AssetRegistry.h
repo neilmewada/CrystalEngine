@@ -11,9 +11,15 @@ namespace CE
 
 	struct IAssetRegistryListener
 	{
+		virtual ~IAssetRegistryListener() {}
+
 		virtual void OnAssetImported(const Name& bundleName, const Name& sourcePath = "") {}
 
 		virtual void OnAssetDeleted(const Name& bundleName) {}
+
+		virtual void OnDirectoryTreeUpdated(PathTree& directoryTree) {}
+
+		virtual void OnAssetPathTreeUpdated(PathTree& pathTree) {}
 	};
 
 	CLASS()
@@ -31,7 +37,7 @@ namespace CE
 
 		inline PathTree& GetCachedDirectoryPathTree()
 		{
-			return directoryTree;
+			return cachedDirectoryTree;
 		}
 
 		struct SourceAssetChange
@@ -86,7 +92,7 @@ namespace CE
 		void AddAssetEntry(const Name& bundleName, AssetData* assetData);
 		void DeleteAssetEntry(const Name& bundleName);
 
-		PathTree directoryTree{};
+		PathTree cachedDirectoryTree{};
 		PathTree cachedPathTree{};
 
 		b8 cacheInitialized = false;
@@ -106,7 +112,7 @@ namespace CE
 		
 		Mutex mutex{};
 
-		IAssetRegistryListener* listener = nullptr;
+		Array<IAssetRegistryListener*> listeners;
 
 		// Asset Registry State
 

@@ -25,8 +25,15 @@ namespace CE::Editor
         FUNCTION()
         void OnDirectorySelectionChanged(FItemSelectionModel* selectionModel);
 
+        FUNCTION()
+        void OnLeftExpansionChanged(FExpandableSection* section);
+
         Ref<AssetBrowserTreeViewModel> model = nullptr;
         Ref<AssetBrowserTreeView> treeView = nullptr;
+
+        Ref<FExpandableSection> directorySection;
+
+        Array<Ref<FExpandableSection>> leftSections;
 
         FUSION_WIDGET;
     };

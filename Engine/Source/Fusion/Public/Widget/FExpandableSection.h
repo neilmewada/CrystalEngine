@@ -32,6 +32,8 @@ namespace CE
         FUSION_PROPERTY_WRAPPER2(Text, titleLabel, Title);
         FUSION_PROPERTY_WRAPPER2(FillRatio, content, ContentFillRatio);
 
+        FUSION_EVENT(ScriptEvent<void(FExpandableSection*)>, OnExpansionChanged);
+
         FUSION_WIDGET;
         friend class FExpandableSectionStyle;
     };
