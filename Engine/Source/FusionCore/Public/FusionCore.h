@@ -95,6 +95,7 @@ namespace CE
 #include "Widget/FContainerWidget.h"
 
 #include "Widget/Layout/FStackBox.h"
+#include "Widget/Layout/FWrapBox.h"
 #include "Widget/Layout/FOverlayStack.h"
 #include "Widget/Layout/FSplitBox.h"
 #include "Widget/Layout/FScrollBox.h"

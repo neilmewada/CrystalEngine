@@ -21,12 +21,12 @@ namespace CE::Editor
 	{
 		Super::Initialize();
 		
-		assetRegistry->listener = this;
+		assetRegistry->listeners.Add(this);
 	}
 
 	void EditorAssetManager::Shutdown()
 	{
-		assetRegistry->listener = nullptr;
+		assetRegistry->listeners.Remove(this);
 
 		Super::Shutdown();
 	}

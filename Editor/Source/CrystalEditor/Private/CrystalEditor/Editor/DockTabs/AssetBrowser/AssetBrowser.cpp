@@ -47,6 +47,9 @@ namespace CE::Editor
                 FNew(FVerticalStack)
                 .ContentHAlign(HAlign::Fill)
                 .FillRatio(0.8f)
+                (
+                    FNew(FHorizontalStack)
+                )
             )
         )
         .Style("EditorMinorDockTab");
@@ -65,7 +68,19 @@ namespace CE::Editor
         if (selectionModel == nullptr || model == nullptr)
             return;
 
+        AssetRegistry* registry = AssetManager::Get()->GetRegistry();
+        if (registry == nullptr)
+            return;
+        PathTree& directoryTree = registry->GetCachedDirectoryPathTree();
+
         const HashSet<FModelIndex>& selection = selectionModel->GetSelection();
+
+        if (selection.IsEmpty())
+        {
+            currentDirectory = nullptr;
+            UpdateAssetGridView();
+            return;
+        }
 
         for (const FModelIndex& index : selection)
         {
@@ -73,6 +88,16 @@ namespace CE::Editor
                 continue;
 
             PathTreeNode* node = (PathTreeNode*)index.GetDataPtr();
+
+            if (!directoryTree.GetRootNode()->ChildExistsRecursive(node))
+            {
+                // Directory was deleted!
+                selectionModel->ClearSelection(); // This will recursively call current function again
+                break;
+            }
+
+            currentDirectory = node;
+            UpdateAssetGridView();
 
             break;
         }
@@ -88,5 +113,11 @@ namespace CE::Editor
 	        }
         }
     }
+
+    void AssetBrowser::UpdateAssetGridView()
+    {
+
+    }
+
 }
 
