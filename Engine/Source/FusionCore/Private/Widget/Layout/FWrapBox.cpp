@@ -56,7 +56,8 @@ namespace CE
             }
             else if (m_WrapDirection == FWrapBoxDirection::Vertical)
             {
-                // TODO:
+                curPos.y += childSize.height + m_Gap.height;
+                // TODO
             }
         }
     }

@@ -54,7 +54,7 @@ namespace RenderingTests
             return;
         }
 
-        auto scheduler = FrameScheduler::Get();
+        auto scheduler = RHI::FrameScheduler::Get();
 
         int imageIndex = scheduler->BeginExecution();
 
