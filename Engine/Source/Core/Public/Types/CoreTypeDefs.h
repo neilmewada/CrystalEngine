@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 
 namespace CE
 {
@@ -33,9 +34,9 @@ typedef uintptr_t UintPtr;
 typedef intptr_t PtrDiff;
 
 #if IS_64BIT
-    typedef u64 SIZE_T;
+    typedef size_t SIZE_T;
     typedef s64 SSIZE_T;
 #else
-    typedef u32 SIZE_T;
+    typedef size_t SIZE_T;
     typedef s32 SSIZE_T;
 #endif

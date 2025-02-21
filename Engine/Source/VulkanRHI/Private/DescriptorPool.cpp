@@ -69,7 +69,8 @@ namespace CE::Vulkan
 		VkResult result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
 		int counter = 0;
 
-		if (result == VK_ERROR_OUT_OF_POOL_MEMORY)
+		if (result == VK_ERROR_OUT_OF_POOL_MEMORY ||
+			result == VK_ERROR_FRAGMENTED_POOL)
 		{
 			// If we need a lot of descriptor sets allocated
 			if (numDescriptorSets > initialSize)

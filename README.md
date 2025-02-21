@@ -75,21 +75,24 @@ Contains all the editor modules.
 
 # Screenshots
 
+### Color Picker
+
+![](./Screenshots/ColorPicker_Fusion.png)
 
 ### Project browser window:
 
 ![](./Screenshots/ProjectBrowser.png)
 
-
 ### PBR Demo:
 
 ![](./Screenshots/IBL%20Demo%20Night.png)
 
+--- 
 ### Credits
 
 <a href="https://www.flaticon.com/">Icons by FlatIcon - flaticon.com</a>
 
 This project includes some code, both original and modified, from the O3DE project (https://github.com/o3de/o3de) under the MIT License.
 
-Other than that, all the systems in the engine, like object system, Reflection, Serialization, Fusion Widget library, etc are entirely our own implementation. While it may draw conceptual inspiration from other frameworks, all code and algorithms have been developed independently.
+Other than that, all the systems in the engine, like object system, Reflection, Serialization, Fusion Widget library, etc. are entirely our own implementation. While it may draw conceptual inspiration from other frameworks, all code and algorithms have been developed independently.
 
