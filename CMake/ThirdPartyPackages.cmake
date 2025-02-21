@@ -34,7 +34,11 @@ find_package(ispctexturecompressor REQUIRED)
 
 # Vulkan
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
-    message(STATUS "Vulkan SDK: $ENV{VULKAN_SDK}")
+    if (DEFINED ENV{VULKAN_SDK})
+        message(STATUS "Vulkan SDK: $ENV{VULKAN_SDK}")
+    else ()
+        message(FATAL_ERROR "Environment variable not set for VULKAN_SDK!")
+    endif ()
 
     find_package(Vulkan REQUIRED
         COMPONENTS SPIRV-Tools dxc
