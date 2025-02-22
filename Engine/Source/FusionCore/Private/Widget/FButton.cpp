@@ -73,6 +73,14 @@ namespace CE
 	            {
                     buttonState |= FButtonState::Pressed;
                     ApplyStyle();
+
+	                if (dropDownMenu.IsValid())
+	                {
+	                    Vec2 popupPos = GetGlobalPosition() + Vec2(0, GetComputedSize().height);
+	                    dropDownMenu->MinWidth(GetComputedSize().width);
+
+	                    GetContext()->PushLocalPopup(dropDownMenu.Get(), popupPos, Vec2(), GetComputedSize());
+	                }
 	            }
                 if (mouseEvent->isDoubleClick)
                 {
@@ -122,5 +130,11 @@ namespace CE
         }
     }
 
+    FButton::Self& FButton::DropDownMenu(FMenuPopup& dropDownMenu)
+    {
+        this->dropDownMenu = &dropDownMenu;
+
+        return *this;
+    }
 }
 

@@ -28,6 +28,7 @@ namespace CE
 
     protected: // - Internal -
 
+        void OnPaint(FPainter* painter) override;
 
     public: // - Fusion Properties - 
 

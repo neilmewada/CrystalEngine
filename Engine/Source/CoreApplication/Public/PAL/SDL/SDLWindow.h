@@ -64,7 +64,7 @@ namespace CE
 
         friend class SDLApplication;
         
-        SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true, bool isHidden = false);
+        SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true, bool isHidden = false, int displayIndex = -1);
 
         SDLPlatformWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info);
 

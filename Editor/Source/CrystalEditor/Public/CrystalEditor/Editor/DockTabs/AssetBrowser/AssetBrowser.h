@@ -37,6 +37,7 @@ namespace CE::Editor
         Array<Ref<FExpandableSection>> leftSections;
 
         Ref<FHorizontalStack> searchBarStack;
+        Ref<FWrapBox> assetWrapBox;
 
         PathTreeNode* currentDirectory = nullptr;
 

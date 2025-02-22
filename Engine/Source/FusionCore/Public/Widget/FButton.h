@@ -1,7 +1,10 @@
 #pragma once
 
+
 namespace CE
 {
+    class FMenuPopup;
+
     ENUM(Flags)
     enum class FButtonState : u8
     {
@@ -53,6 +56,7 @@ namespace CE
     private:
 
         bool cursorPushed = false;
+        Ref<FMenuPopup> dropDownMenu;
 
     public: // - Fusion Properties -
 
@@ -60,6 +64,8 @@ namespace CE
         FUSION_EVENT(FVoidEvent, OnDoubleClicked);
 
         FUSION_PROPERTY(SystemCursor, Cursor);
+
+        Self& DropDownMenu(FMenuPopup& dropDownMenu);
 
         bool Interactable() const { return !IsInteractionDisabled(); }
 

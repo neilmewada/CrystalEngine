@@ -23,9 +23,9 @@ ce_add_target(${PROJECT_NAME} TOOL
         PRIVATE
             ThirdParty::cxxopts
             CE::Core
-            CE::System
+            CE::Engine
             CE::EditorCore
-            CE::EditorSystem
+            CE::EditorEngine
         TARGETS Config
     RUNTIME_DEPENDENCIES
 

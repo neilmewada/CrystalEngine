@@ -9,7 +9,7 @@ add_subdirectory(Styles)
 
 # Editor Modules
 add_subdirectory(Source/EditorCore)
-add_subdirectory(Source/EditorSystem)
+add_subdirectory(Source/EditorEngine)
 add_subdirectory(Source/CrystalEditor)
 
 # Editor Executables

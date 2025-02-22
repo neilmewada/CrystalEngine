@@ -28,7 +28,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PUBLIC
             CE::FusionCore
             CE::EditorCore
-            CE::EditorSystem
+            CE::EditorEngine
     RUNTIME_DEPENDENCIES
 
 )

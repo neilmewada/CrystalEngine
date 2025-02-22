@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "CoreRHI.h"
-#include "System.h"
+#include "Engine.h"
 
 #include "EditorGlobals.h"
 

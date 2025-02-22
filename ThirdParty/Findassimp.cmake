@@ -10,6 +10,8 @@ set(PACKAGE_NAME "assimp")
 set(ASSIMP_BUILD_TESTS OFF  CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
 
+add_compile_options(-Wno-conversion)
+
 add_subdirectory(vendor/${PACKAGE_NAME})
 
 add_library(${TARGET_WITH_NAMESPACE} ALIAS assimp)

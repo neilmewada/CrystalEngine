@@ -52,6 +52,8 @@ namespace CE
     	bool fullscreen = false;
     	bool resizable = true;
         bool hidden = false;
+        // -1 means automatic, 0 means first display.
+        int displayIndex = -1;
         PlatformWindowFlags windowFlags = PlatformWindowFlags::DestroyOnClose;
     };
 
@@ -110,6 +112,8 @@ namespace CE
         virtual Rect GetScreenBounds(int displayIndex = 0) = 0;
 
         virtual void SetSystemCursor(SystemCursor cursor) = 0;
+        
+        virtual int GetCurrentDisplayIndex() { return 0; }
 
         virtual PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true) = 0;
 

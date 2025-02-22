@@ -272,8 +272,11 @@ namespace CE
                 }
             }
             else if ((int)keyEvent->key >= (int)KeyCode::KeypadDivide && (int)keyEvent->key <= (int)KeyCode::KeypadPeriod &&
-                keyEvent->key != KeyCode::KeypadEnter &&
-                EnumHasFlag(keyEvent->modifiers, KeyModifier::Num))
+                keyEvent->key != KeyCode::KeypadEnter
+#if PLATFORM_WINDOWS
+                     && EnumHasFlag(keyEvent->modifiers, KeyModifier::Num)
+#endif
+                     )
             {
                 switch (keyEvent->key)
                 {

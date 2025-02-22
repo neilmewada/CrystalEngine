@@ -85,7 +85,7 @@ namespace CE
 		return SDL_HITTEST_NORMAL; // SDL_HITTEST_NORMAL <- Windows behaviour
 	}
 
-	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable, bool isHidden)
+	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable, bool isHidden, int displayIndex)
 	{
 		u32 flags = SDL_WINDOW_ALLOW_HIGHDPI;
 		if (resizable)
@@ -99,10 +99,26 @@ namespace CE
 			flags |= SDL_WINDOW_MAXIMIZED;
 		if (fullscreen)
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+        
+        if (displayIndex == -1)
+        {
+            SDLPlatformWindow* mainWindow = (SDLPlatformWindow*)PlatformApplication::Get()->GetMainWindow();
+            if (mainWindow == nullptr)
+            {
+                displayIndex = PlatformApplication::Get()->GetCurrentDisplayIndex();
+            }
+            else
+            {
+                displayIndex = SDL_GetWindowDisplayIndex(mainWindow->handle);
+            }
+        }
+        
+        if (displayIndex < 0)
+        {
+            displayIndex = 0;
+        }
 
-		handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
-        
-        
+		handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), width, height, flags);
 	}
 
 	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info)
@@ -128,8 +144,27 @@ namespace CE
 			flags |= SDL_WINDOW_TOOLTIP;
 		if (EnumHasFlag(info.windowFlags, PlatformWindowFlags::Utility))
 			flags |= SDL_WINDOW_UTILITY;
+        
+        int displayIndex = info.displayIndex;
+        if (displayIndex == -1)
+        {
+            SDLPlatformWindow* mainWindow = (SDLPlatformWindow*)PlatformApplication::Get()->GetMainWindow();
+            if (mainWindow == nullptr)
+            {
+                displayIndex = PlatformApplication::Get()->GetCurrentDisplayIndex();
+            }
+            else
+            {
+                displayIndex = SDL_GetWindowDisplayIndex(mainWindow->handle);
+            }
+        }
+        
+        if (displayIndex < 0)
+        {
+            displayIndex = 0;
+        }
 		
-		handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
+        handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), width, height, flags);
 	}
 
 	void SDLPlatformWindow::GetWindowSize(u32* outWidth, u32* outHeight)

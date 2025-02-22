@@ -175,6 +175,8 @@ namespace CE
             return Rect();
 
         f32 scrollBarHeight = computedSize.y * (computedSize.y / child->computedSize.y);
+        scrollBarHeight = Math::Max(scrollBarHeight, MinScrollBarHeight);
+
         f32 normalizedScrollY = NormalizedScrollY();
         Vec2 barPos = Vec2(computedPosition.x + computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth,
             computedPosition.y + normalizedScrollY * (computedSize.y - scrollBarHeight));
@@ -197,6 +199,8 @@ namespace CE
         f32 computedSizeX = computedSize.x - endOffset;
 
         f32 scrollBarSize = computedSizeX * computedSizeX / child->computedSize.x;
+        scrollBarSize = Math::Max(scrollBarSize, MinScrollBarHeight);
+
         f32 normalizedScrollX = NormalizedScrollX();
         Vec2 barPos = Vec2(computedPosition.x + normalizedScrollX * (computedSizeX - scrollBarSize),
             computedPosition.y + computedSize.y - m_ScrollBarMargin - m_ScrollBarWidth);
@@ -472,9 +476,6 @@ namespace CE
 
         if (child && isVerticalScrollVisible)
         {
-            f32 scrollBarHeight = computedSize.y / child->computedSize.y;
-            scrollBarHeight = Math::Max(scrollBarHeight, MinScrollBarHeight);
-            
             Vec2 barSize = Vec2(m_ScrollBarWidth, computedSize.y);
             Rect barRegion = Rect::FromSize(Vec2(computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth, 
                 0), barSize);
