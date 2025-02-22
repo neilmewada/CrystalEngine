@@ -195,6 +195,8 @@ namespace CE
 
 				child->ApplySizeConstraints();
 
+				child->PlaceSubWidgets();
+
 				curPos.x += child->computedSize.width + child->m_Margin.left + child->m_Margin.right + m_Gap;
 			}
 			else if (m_Direction == FStackBoxDirection::Vertical)
@@ -232,10 +234,10 @@ namespace CE
 
 				child->ApplySizeConstraints();
 
+				child->PlaceSubWidgets();
+
 				curPos.y += child->computedSize.height + child->m_Margin.top + child->m_Margin.bottom + m_Gap;
 			}
-			
-			child->PlaceSubWidgets();
 		}
 	}
 

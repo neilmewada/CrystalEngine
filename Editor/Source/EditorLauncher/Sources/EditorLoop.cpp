@@ -108,7 +108,7 @@ void EditorLoop::LoadEngineModules()
 	ModuleManager::Get().LoadModule("FusionCore");
 	ModuleManager::Get().LoadModule("Fusion");
 
-	ModuleManager::Get().LoadModule("System");
+	ModuleManager::Get().LoadModule("Engine");
 }
 
 void EditorLoop::UnloadEngineModules()
@@ -116,7 +116,7 @@ void EditorLoop::UnloadEngineModules()
 	ModuleManager::Get().UnloadModule("Fusion");
 	ModuleManager::Get().UnloadModule("FusionCore");
 
-	ModuleManager::Get().UnloadModule("System");
+	ModuleManager::Get().UnloadModule("Engine");
 	ModuleManager::Get().UnloadModule("CoreRPI");
 }
 
@@ -125,7 +125,7 @@ void EditorLoop::LoadEditorModules()
 	ModuleManager::Get().LoadModule("EditorCore");
 	ModuleManager::Get().LoadModule("EditorWidgets");
 
-	ModuleManager::Get().LoadModule("EditorSystem");
+	ModuleManager::Get().LoadModule("EditorEngine");
 
 	ModuleManager::Get().LoadModule("CrystalEditor");
 
@@ -142,7 +142,7 @@ void EditorLoop::UnloadEditorModules()
 
 	ModuleManager::Get().UnloadModule("CrystalEditor");
 
-	ModuleManager::Get().UnloadModule("EditorSystem");
+	ModuleManager::Get().UnloadModule("EditorEngine");
 
 	ModuleManager::Get().UnloadModule("EditorWidgets");
 	ModuleManager::Get().UnloadModule("EditorCore");

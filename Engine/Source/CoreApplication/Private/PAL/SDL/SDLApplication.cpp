@@ -208,6 +208,7 @@ namespace CE
 
 		auto window = new SDLPlatformWindow(title, width, height, info);
 		windowList.Add(window);
+        
 		for (auto messageHandler : messageHandlers)
 		{
 			messageHandler->OnWindowCreated(window);

@@ -291,11 +291,6 @@ namespace CE
 
 		if (hoveredWidget != prevHoveredWidget)
 		{
-			/*if (hoveredWidget != nullptr)
-				CE_LOG(Info, All, "Hover Changed: {}", hoveredWidget->GetName());
-			else
-				CE_LOG(Info, All, "Hover Changed: NULL");*/
-
 			prevHoveredWidget = hoveredWidget;
 		}
 
@@ -310,6 +305,8 @@ namespace CE
 			focusEvent.focusedWidget = owningWidget;
 			focusEvent.direction = FEventDirection::BottomToTop;
 
+			CE_LOG(Info, All, "Focus GOT  1: {}", owningWidget->GetName());
+
 			owningWidget->HandleEvent(&focusEvent);
 		}
 		else if (owningWidget && !IsFocused() && owningWidget->IsFocused())
@@ -320,6 +317,8 @@ namespace CE
 			focusEvent.sender = owningWidget;
 			focusEvent.focusedWidget = nullptr;
 			focusEvent.direction = FEventDirection::TopToBottom;
+
+			CE_LOG(Info, All, "Focus LOST 1: {}", owningWidget->GetName());
 
 			owningWidget->HandleEvent(&focusEvent);
 
@@ -357,6 +356,8 @@ namespace CE
 					focusEvent.gotFocus = false;
 					focusEvent.direction = FEventDirection::TopToBottom;
 
+					CE_LOG(Info, All, "Focus LOST 2: {}", base->GetName());
+
 					base->HandleEvent(&focusEvent);
 				}
 				else
@@ -367,6 +368,8 @@ namespace CE
 					focusEvent.focusedWidget = widgetToFocus.Get();
 					focusEvent.gotFocus = false;
 					focusEvent.direction = FEventDirection::BottomToTop;
+
+					CE_LOG(Info, All, "Focus LOST 3: {}", curFocusWidget->GetName());
 
 					curFocusWidget->HandleEvent(&focusEvent);
 				}
@@ -379,6 +382,8 @@ namespace CE
 				focusEvent.sender = focusEvent.focusedWidget = widgetToFocus.Get();
 				focusEvent.gotFocus = true;
 				focusEvent.direction = FEventDirection::BottomToTop;
+
+				CE_LOG(Info, All, "Focus GOT  2: {}", widgetToFocus->GetName());
 
 				widgetToFocus->HandleEvent(&focusEvent);
 			}

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(Engine)
+# project(Engine)
 set(CURRENT_BUNDLE_CATEGORY "Engine")
 
 # Assets
@@ -38,7 +38,7 @@ add_subdirectory(Source/Fusion)
 ######################################
 # System Modules
 
-add_subdirectory(Source/System)
+add_subdirectory(Source/Engine)
 
 if(${CE_STANDALONE})
     add_subdirectory(Source/GameSystem)

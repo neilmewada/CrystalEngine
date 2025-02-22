@@ -28,7 +28,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
         PUBLIC
             CE::Core
-            CE::System
+            CE::Engine
     RUNTIME_DEPENDENCIES
 
 )

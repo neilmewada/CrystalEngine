@@ -45,7 +45,7 @@ namespace CE
             (
                 FAssignNew(FLabel, label)
                 .Text("")
-                .FontSize(10)
+                .FontSize(9)
             )
         );
     }
@@ -114,7 +114,7 @@ namespace CE
                     {
                         if (curMenuOwner->IsOfType<FMenuPopup>())
                         {
-                            FMenuPopup* menuPopup = static_cast<FMenuPopup*>(curMenuOwner);
+                            auto* menuPopup = static_cast<FMenuPopup*>(curMenuOwner);
                             menuPopup->ClosePopup();
 
                             if (menuPopup->ownerItem != nullptr)

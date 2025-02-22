@@ -126,7 +126,7 @@ namespace CE::Vulkan
 
 		const Array<RHI::Scope*>& producers = frameGraph->producers;
 		constexpr u64 u64Max = NumericLimits<u64>::Max();
-		constexpr u64 acquireTimeout = 100'000'000; // 0.1 second
+        constexpr u64 acquireTimeout = 100'000'000; // 0.1 second
 		VkResult result = VK_SUCCESS;
 
 		if (swapChainExists)

@@ -466,9 +466,9 @@ namespace CE
 		ModuleManager::Get().LoadModule("FusionCore");
 		ModuleManager::Get().LoadModule("Fusion");
 
-		ModuleManager::Get().LoadModule("System");
+		ModuleManager::Get().LoadModule("Engine");
 		ModuleManager::Get().LoadModule("EditorCore");
-		ModuleManager::Get().LoadModule("EditorSystem");
+		ModuleManager::Get().LoadModule("EditorEngine");
 	}
 
 	void AssetProcessor::PostInit()
@@ -522,9 +522,9 @@ namespace CE
 		delete app;
 		app = nullptr;
 
-		ModuleManager::Get().UnloadModule("EditorSystem");
+		ModuleManager::Get().UnloadModule("EditorEngine");
 		ModuleManager::Get().UnloadModule("EditorCore");
-		ModuleManager::Get().UnloadModule("System");
+		ModuleManager::Get().UnloadModule("Engine");
 
 		ModuleManager::Get().UnloadModule("Fusion");
 		ModuleManager::Get().UnloadModule("FusionCore");

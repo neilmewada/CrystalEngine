@@ -33,7 +33,7 @@ static void TestBegin(bool gui)
 	ModuleManager::Get().LoadModule("VulkanRHI");
 	ModuleManager::Get().LoadModule("CoreRPI");
 	ModuleManager::Get().LoadModule("CrystalWidgets");
-	ModuleManager::Get().LoadModule("System");
+	ModuleManager::Get().LoadModule("Engine");
 	ModuleManager::Get().LoadModule("GameSystem");
 
 	PlatformApplication* app = PlatformApplication::Get();
@@ -84,7 +84,7 @@ static void TestEnd(bool gui)
 	delete app;
 
 	ModuleManager::Get().UnloadModule("GameSystem");
-	ModuleManager::Get().UnloadModule("System");
+	ModuleManager::Get().UnloadModule("Engine");
 	ModuleManager::Get().UnloadModule("CrystalWidgets");
 	ModuleManager::Get().UnloadModule("CoreRPI");
 	ModuleManager::Get().UnloadModule("VulkanRHI");

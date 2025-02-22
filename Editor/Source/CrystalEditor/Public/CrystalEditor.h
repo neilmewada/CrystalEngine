@@ -7,7 +7,7 @@
 #include "EditorCore.h"
 #include "FusionCore.h"
 #include "Fusion.h"
-#include "EditorSystem.h"
+#include "EditorEngine.h"
 
 // ------------------------------------------------
 // Project Browser

@@ -315,15 +315,22 @@ namespace CE
 		popup->context = nullptr;
 		localPopupStack.RemoveAt(index);
 
-		if (curFocusWidget != nullptr && curFocusWidget->ParentExistsRecursive(popup))
+		FRootContext* rootContext = Object::CastTo<FRootContext>(GetRootContext());
+
+		if (rootContext && rootContext->curFocusWidget != nullptr &&
+			(rootContext->curFocusWidget == popup || rootContext->curFocusWidget->ParentExistsRecursive(popup)))
 		{
 			if (localPopupStack.NotEmpty())
 			{
-				SetFocusWidget(localPopupStack.Top().Get());
+				rootContext->SetFocusWidget(localPopupStack.Top().Get());
+			}
+			else if (popup->IsOfType<FMenuPopup>() && ((FMenuPopup*)popup)->ownerItem != nullptr)
+			{
+				rootContext->SetFocusWidget(((FMenuPopup*)popup)->ownerItem);
 			}
 			else if (owningWidget)
 			{
-				SetFocusWidget(owningWidget);
+				rootContext->SetFocusWidget(owningWidget);
 			}
 		}
 

@@ -39,7 +39,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::CoreRHI
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
             CE::FusionCore
-            CE::System
+            CE::Engine
         MAC_FRAMEWORKS Cocoa
     RUNTIME_DEPENDENCIES
         

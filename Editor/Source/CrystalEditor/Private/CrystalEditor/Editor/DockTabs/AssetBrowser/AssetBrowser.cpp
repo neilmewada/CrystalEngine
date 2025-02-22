@@ -43,12 +43,74 @@ namespace CE::Editor
                     .HAlign(HAlign::Fill)
                     .Name("AssetBrowserTreeViewSection")
                 ),
-                
+
                 FNew(FVerticalStack)
                 .ContentHAlign(HAlign::Fill)
                 .FillRatio(0.8f)
                 (
-                    FNew(FHorizontalStack)
+                    FAssignNew(FHorizontalStack, searchBarStack)
+                    .ContentVAlign(VAlign::Center)
+                    .ContentHAlign(HAlign::Left)
+                    .MinHeight(25)
+                    .Padding(Vec4(1, 1, 1, 1) * 2.5f)
+                    (
+                        FNew(FWidget)
+                        .FillRatio(1.0f),
+
+                        FNew(FTextButton)
+                        .Text("Settings")
+                        .FontSize(9)
+                        .DropDownMenu(
+                            FNew(FMenuPopup)
+                            .Content(
+                                FNew(FMenuItem)
+                                .Text("Option 1"),
+
+                                FNew(FMenuItem)
+                                .Text("Option 2")
+                            )
+                            .BlockInteraction(false)
+                            .AutoClose(true)
+                            .As<FMenuPopup>()
+                        )
+                    ),
+
+                    FNew(FStyledWidget)
+                    .Background(Color::Black())
+                    .HAlign(HAlign::Fill)
+                    .Height(1),
+
+                    FNew(FScrollBox)
+                    .VerticalScroll(true)
+                    .HorizontalScroll(false)
+                    .HAlign(HAlign::Fill)
+                    .FillRatio(1.0f)
+                    (
+                        FAssignNew(FWrapBox, assetWrapBox)
+                        .Gap(Vec2(10, 10))
+                        .HAlign(HAlign::Fill)
+                        .VAlign(VAlign::Top)
+                        .Padding(Vec4(1, 1, 0.5f, 1) * 10.0f)
+                        (
+                            FForEach(30, [this](int i) -> FWidget&
+                            {
+                                return
+                                FNew(FStyledWidget)
+                                .Background(Color::Cyan())
+                                .Width(50)
+                                .Height(70)
+                                (
+                                    FNew(FLabel)
+                                    .Text(String::Format("{}", i + 1))
+                                    .FontSize(12)
+                                    .Foreground(Color::Black())
+                                    .HAlign(HAlign::Center)
+                                    .VAlign(VAlign::Center)
+                                )
+                                ;
+                            })
+                        )
+                    )
                 )
             )
         )
@@ -77,8 +139,11 @@ namespace CE::Editor
 
         if (selection.IsEmpty())
         {
-            currentDirectory = nullptr;
-            UpdateAssetGridView();
+            if (currentDirectory != nullptr)
+            {
+                currentDirectory = nullptr;
+                UpdateAssetGridView();
+            }
             return;
         }
 
@@ -96,8 +161,11 @@ namespace CE::Editor
                 break;
             }
 
-            currentDirectory = node;
-            UpdateAssetGridView();
+            if (currentDirectory != node)
+            {
+                currentDirectory = node;
+                UpdateAssetGridView();
+            }
 
             break;
         }
@@ -116,7 +184,7 @@ namespace CE::Editor
 
     void AssetBrowser::UpdateAssetGridView()
     {
-
+        CE_LOG(Info, All, "AssetBrowser::UpdateAssetGridView()");
     }
 
 }
