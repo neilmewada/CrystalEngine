@@ -68,6 +68,12 @@ namespace CE::Editor
 			.Style(this, button->GetName())
 			;
 
+    	if (!selectableButton)
+    	{
+    		selectableButton = CreateObject<FSelectableButtonStyle>(this, "SelectableButton");
+			Add(selectableButton);
+    	}
+
 		if (!clearButton)
 		{
 			clearButton = CreateObject<FCustomButtonStyle>(this, "Button_Clear");

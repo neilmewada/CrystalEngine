@@ -40,6 +40,7 @@ namespace CE::Editor
         Ref<FWrapBox> assetWrapBox;
 
         PathTreeNode* currentDirectory = nullptr;
+        Array<Ref<FSelectableButton>> selectables;
 
         FUSION_WIDGET;
     };

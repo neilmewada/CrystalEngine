@@ -76,9 +76,9 @@ namespace CE::Editor
                     ),
 
                     FNew(FStyledWidget)
-                    .Background(Color::Black())
+                    .Background(Color::RGBA(26, 26, 26))
                     .HAlign(HAlign::Fill)
-                    .Height(1),
+                    .Height(0.5f),
 
                     FNew(FScrollBox)
                     .VerticalScroll(true)
@@ -91,25 +91,6 @@ namespace CE::Editor
                         .HAlign(HAlign::Fill)
                         .VAlign(VAlign::Top)
                         .Padding(Vec4(1, 1, 0.5f, 1) * 10.0f)
-                        (
-                            FForEach(30, [this](int i) -> FWidget&
-                            {
-                                return
-                                FNew(FStyledWidget)
-                                .Background(Color::Cyan())
-                                .Width(50)
-                                .Height(70)
-                                (
-                                    FNew(FLabel)
-                                    .Text(String::Format("{}", i + 1))
-                                    .FontSize(12)
-                                    .Foreground(Color::Black())
-                                    .HAlign(HAlign::Center)
-                                    .VAlign(VAlign::Center)
-                                )
-                                ;
-                            })
-                        )
                     )
                 )
             )
@@ -184,7 +165,44 @@ namespace CE::Editor
 
     void AssetBrowser::UpdateAssetGridView()
     {
-        CE_LOG(Info, All, "AssetBrowser::UpdateAssetGridView()");
+        assetWrapBox->DestroyAllChildren();
+        selectables.Clear();
+
+        if (currentDirectory != nullptr)
+        {
+            for (int i = 0; i < currentDirectory->children.GetSize(); i++)
+            {
+                FSelectableButton* selectable = nullptr;
+
+                assetWrapBox->AddChild(
+                    FAssignNew(FSelectableButton, selectable)
+                    .OnSelect([this](FSelectableButton* button)
+                    {
+                        for (const auto& selectable : selectables)
+                        {
+                            if (selectable != button)
+                            {
+                                selectable->Deselect();
+                            }
+                        }
+                    })
+                    .Width(50)
+                    .Height(70)
+                    .Style("SelectableButton")
+                    (
+                        FNew(FLabel)
+                        .Text(String::Format("{}", i + 1))
+                        .FontSize(12)
+                        .Foreground(Color::White())
+                        .HAlign(HAlign::Center)
+                        .VAlign(VAlign::Center)
+                    )
+                );
+
+                selectables.Add(selectable);
+            }
+        }
+
     }
 
 }
