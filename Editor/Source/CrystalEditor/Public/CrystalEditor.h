@@ -44,6 +44,7 @@
 // - Asset Browser -
 
 #include "CrystalEditor/Editor/DockTabs/AssetBrowser/AssetBrowser.h"
+#include "CrystalEditor/Editor/DockTabs/AssetBrowser/AssetBrowserItem.h"
 #include "CrystalEditor/Editor/DockTabs/AssetBrowser/AssetBrowserTreeView.h"
 #include "CrystalEditor/Editor/DockTabs/AssetBrowser/AssetBrowserTreeViewModel.h"
 
