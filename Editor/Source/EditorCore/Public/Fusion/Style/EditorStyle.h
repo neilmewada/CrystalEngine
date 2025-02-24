@@ -47,10 +47,10 @@ namespace CE::Editor
 		FTextButtonStyle* underlineButton = nullptr;
 
 		FIELD()
-		FCustomButtonStyle* windowCloseButton = nullptr;
+		FWindowControlButtonStyle* windowCloseButton = nullptr;
 
 		FIELD()
-		FCustomButtonStyle* windowControlButton = nullptr;
+		FWindowControlButtonStyle* windowControlButton = nullptr;
 
 		FIELD()
 		FTextInputPlainStyle* textInput = nullptr;

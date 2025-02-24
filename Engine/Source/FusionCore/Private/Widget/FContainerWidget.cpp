@@ -108,6 +108,18 @@ namespace CE
         }
     }
 
+    void FContainerWidget::MoveChildToIndex(FWidget* child, int index)
+    {
+        int curIndex = children.IndexOf(child);
+        if (curIndex < 0 || index < 0 || index >= children.GetSize())
+            return;
+
+        children.RemoveAt(curIndex);
+        children.InsertAt(index, child);
+
+        MarkLayoutDirty();
+    }
+
     void FContainerWidget::DestroyAllChildren()
     {
 	    for (int i = children.GetSize() - 1; i >= 0; --i)

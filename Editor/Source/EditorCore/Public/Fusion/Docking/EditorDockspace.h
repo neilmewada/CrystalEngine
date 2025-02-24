@@ -46,13 +46,15 @@ namespace CE::Editor
         FImage* minimizeIcon = nullptr;
         FStyledWidget* content = nullptr;
         FTitleBar* titleBar = nullptr;
+        FHorizontalStack* titleBarContainer = nullptr;
         FLabel* titleBarLabel = nullptr;
         FStyledWidget* projectLabelParent = nullptr;
         FLabel* projectLabel = nullptr;
 
         FImage* logo = nullptr;
-        FButton* minimizeButton = nullptr;
-        FButton* maximizeButton = nullptr;
+        FWindowControlButton* minimizeButton = nullptr;
+        FWindowControlButton* maximizeButton = nullptr;
+        FWindowControlButton* closeButton = nullptr;
 
         FHorizontalStack* tabWell = nullptr;
 

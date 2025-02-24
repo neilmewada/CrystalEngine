@@ -1,4 +1,4 @@
-#include "FusionCoreTest.h"
+#include "FusionTest.h"
 
 
 
@@ -433,11 +433,7 @@ namespace WidgetTests
 		                    )
 		                )
                         .Height(120)
-                        .HAlign(HAlign::Fill),
-
-                        FNew(FColorPicker)
-                        .Width(150)
-                        .Height(150)
+                        .HAlign(HAlign::Fill)
                     )
                 )
             )

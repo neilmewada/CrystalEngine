@@ -26,6 +26,8 @@ namespace CE
 
         void InsertChild(int index, FWidget* child);
 
+        void MoveChildToIndex(FWidget* child, int index);
+
         void DestroyAllChildren();
         void QueueDestroyAllChildren();
         void RemoveAllChildren();

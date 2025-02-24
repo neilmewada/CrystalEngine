@@ -32,9 +32,11 @@ namespace CE
         FStackBox* content = nullptr;
         FTitleBar* titleBar = nullptr;
         FLabel* titleBarLabel = nullptr;
+        FHorizontalStack* controlContainer = nullptr;
 
-        FButton* minimizeButton = nullptr;
-        FButton* maximizeButton = nullptr;
+        FWindowControlButton* minimizeButton = nullptr;
+        FWindowControlButton* maximizeButton = nullptr;
+        FWindowControlButton* closeButton = nullptr;
 
     public:
 
