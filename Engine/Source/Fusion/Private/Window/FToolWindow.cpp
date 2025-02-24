@@ -12,7 +12,7 @@ namespace CE
     {
         Color tintColor = interactable ? Color::White() : Color::RGBA(255, 255, 255, 80);
 
-        maximizeIcon->Background(maximizeIcon->Background().WithTint(tintColor));
+        //maximizeIcon->Background(maximizeIcon->Background().WithTint(tintColor));
         maximizeButton->SetInteractionEnabled(interactable);
     }
 
@@ -20,7 +20,7 @@ namespace CE
     {
         Color tintColor = interactable ? Color::White() : Color::RGBA(255, 255, 255, 80);
 
-        minimizeIcon->Background(minimizeIcon->Background().WithTint(tintColor));
+        //minimizeIcon->Background(minimizeIcon->Background().WithTint(tintColor));
         minimizeButton->SetInteractionEnabled(interactable);
     }
 

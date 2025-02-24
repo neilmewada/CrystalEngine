@@ -59,7 +59,12 @@ namespace CE
                 break;
             }
 
-            button.IconVisible(shouldShowIcon);
+            if (button.IsInteractionDisabled())
+            {
+                bg = Color::RGBA(90, 90, 90);
+            }
+
+            button.IconVisible(shouldShowIcon && !button.IsInteractionDisabled());
 
             button
             .Background(bg)
