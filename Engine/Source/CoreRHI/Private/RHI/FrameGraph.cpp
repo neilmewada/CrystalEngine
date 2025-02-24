@@ -171,7 +171,7 @@ namespace CE::RHI
 				endScopes.Add(scope);
 		}
 
-#if false
+#if true
 
 		// For debugging
 		FileStream jsonFile = FileStream(PlatformDirectories::GetLaunchDir() / "Temp/FrameGraph.json", Stream::Permissions::WriteOnly);

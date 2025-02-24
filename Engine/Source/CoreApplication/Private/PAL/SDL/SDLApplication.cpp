@@ -33,6 +33,10 @@ namespace CE
 		SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "0");
 		SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "0");
 
+#if PLATFORM_MAC
+		SDL_SetHint(SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES, "1");
+#endif
+
 #if PAL_TRAIT_BUILD_EDITOR
 		// Hints for editor window
 		SDL_SetHint("SDL_BORDERLESS_WINDOWED_STYLE", "1");
@@ -400,7 +404,7 @@ namespace CE
 		{
 			for (auto window : windowList)
 			{
-				if ((u32)window->GetWindowId() == event.window.windowID) // Found the minimized window
+				if ((u32)window->GetWindowId() == event.window.windowID) // Found the window
 				{
 					for (ApplicationMessageHandler* handler : messageHandlers)
 					{
@@ -410,11 +414,25 @@ namespace CE
 				}
 			}
 		}
+		else if (event.window.event == SDL_WINDOWEVENT_SHOWN)
+		{
+			for (auto window : windowList)
+			{
+				if ((u32)window->GetWindowId() == event.window.windowID) // Found the window
+				{
+					for (ApplicationMessageHandler* handler : messageHandlers)
+					{
+						handler->OnWindowShown(window);
+					}
+					break;
+				}
+			}
+		}
 		else if (event.window.event == SDL_WINDOWEVENT_RESTORED)
 		{
 			for (auto window : windowList)
 			{
-				if ((u32)window->GetWindowId() == event.window.windowID) // Found the minimized window
+				if ((u32)window->GetWindowId() == event.window.windowID) // Found the window
 				{
 					for (ApplicationMessageHandler* handler : messageHandlers)
 					{
@@ -428,7 +446,7 @@ namespace CE
 		{
 			for (auto window : windowList)
 			{
-				if ((u32)window->GetWindowId() == event.window.windowID) // Found the maximized window
+				if ((u32)window->GetWindowId() == event.window.windowID) // Found the window
 				{
 					for (ApplicationMessageHandler* handler : messageHandlers)
 					{

@@ -209,4 +209,4 @@ namespace WidgetTests
 
 }
 
-#include "FusionCoreTest.rtti.h"
+#include "FusionTest.rtti.h"

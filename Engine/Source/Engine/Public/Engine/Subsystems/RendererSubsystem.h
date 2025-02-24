@@ -43,6 +43,7 @@ namespace CE
 
 		void OnSceneDestroyed(CE::Scene* scene);
 
+		void OnWindowShown(PlatformWindow* window) override;
 		void OnWindowCreated(PlatformWindow* window) override;
 		void OnWindowDestroyed(PlatformWindow* window) override;
 		void OnWindowClosed(PlatformWindow* window) override;

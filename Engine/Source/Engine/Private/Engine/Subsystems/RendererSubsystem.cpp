@@ -18,6 +18,11 @@ namespace CE
 		return 2;
     }
 
+	void RendererSubsystem::OnWindowShown(PlatformWindow* window)
+	{
+		RebuildFrameGraph();
+	}
+
     void RendererSubsystem::OnWindowCreated(PlatformWindow* window)
     {
 		RebuildFrameGraph();
@@ -374,6 +379,11 @@ namespace CE
 					if (!renderViewport->IsVisibleInHierarchy())
 						continue;
 					FNativeContext* nativeContext = static_cast<FNativeContext*>(renderViewport->GetContext());
+					PlatformWindow* platformWindow = nativeContext->GetPlatformWindow();
+					if (platformWindow && (platformWindow->IsHidden() || platformWindow->IsMinimized()))
+					{
+						continue;
+					}
 
 					for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
 					{

@@ -139,9 +139,18 @@ namespace CE::Editor
 
 		if (!windowCloseButton)
 		{
-			windowCloseButton = CreateObject<FCustomButtonStyle>(this, "Button_WindowClose");
+			windowCloseButton = CreateObject<FWindowControlButtonStyle>(this, "Button_WindowClose");
 			Add("Button.WindowClose", windowCloseButton);
 		}
+
+    	if (PlatformMisc::GetCurrentPlatform() == PlatformName::Mac)
+    	{
+
+    	}
+    	else
+    	{
+
+    	}
 
 		windowCloseButton->background = Color::Clear();
 		windowCloseButton->hoveredBackground = Color::RGBA(161, 57, 57);
@@ -154,9 +163,18 @@ namespace CE::Editor
 
 		if (!windowControlButton)
 		{
-			windowControlButton = CreateObject<FCustomButtonStyle>(this, "Button_WindowControl");
+			windowControlButton = CreateObject<FWindowControlButtonStyle>(this, "Button_WindowControl");
 			Add("Button.WindowControl", windowControlButton);
 		}
+
+    	if (PlatformMisc::GetCurrentPlatform() == PlatformName::Mac)
+    	{
+
+    	}
+    	else
+    	{
+
+    	}
 
 		windowControlButton->background = Color::Clear();
 		windowControlButton->hoveredBackground = Color::RGBA(58, 58, 58);

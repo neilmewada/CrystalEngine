@@ -126,6 +126,7 @@ namespace CE
         void SetBrushTiling(FBrushTiling tiling) { this->tiling = tiling; }
 
         const Color& GetFillColor() const { return fillColor; }
+        void SetFillColor(const Color& color) { this->fillColor = color; }
 
         const Name& GetImageName() const { return imageName; }
 

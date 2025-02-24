@@ -165,7 +165,7 @@ namespace CE::Editor
                     .Height(40)
                     .HAlign(HAlign::Fill)
                     (
-                        FNew(FHorizontalStack)
+                        FAssignNew(FHorizontalStack, titleBarContainer)
                         .ContentVAlign(VAlign::Center)
                         .HAlign(HAlign::Fill)
                         .VAlign(VAlign::Fill)
@@ -205,7 +205,42 @@ namespace CE::Editor
 
                             // - Window Controls -
 
-                            FAssignNew(FButton, minimizeButton)
+                            FAssignNew(FWindowControlButton, minimizeButton)
+                            .ControlType(FWindowControlType::Minimize)
+                            .OnClicked([this]
+                            {
+                                static_cast<FNativeContext*>(GetContext())->Minimize();
+                            })
+                            .Name("WindowMinimizeButton")
+                            .Style("Button.WindowControl"),
+
+                            FAssignNew(FWindowControlButton, maximizeButton)
+                            .ControlType(FWindowControlType::Maximize)
+                            .OnClicked([this]
+                            {
+                                FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
+                                if (nativeContext->IsMaximized())
+                                {
+                                    nativeContext->Restore();
+                                }
+                                else
+                                {
+                                    nativeContext->Maximize();
+                                }
+                            })
+                            .Name("WindowMaximizeButton")
+                            .Style("Button.WindowControl"),
+
+                            FAssignNew(FWindowControlButton, closeButton)
+                            .ControlType(FWindowControlType::Close)
+                            .OnClicked([this]
+                            {
+                                GetContext()->QueueDestroy();
+                            })
+                            .Name("WindowCloseButton")
+                            .Style("Button.WindowClose")
+
+                            /*FAssignNew(FButton, minimizeButton)
                             .OnClicked([this]
                                 {
                                     static_cast<FNativeContext*>(GetContext())->Minimize();
@@ -249,7 +284,7 @@ namespace CE::Editor
                                 .VAlign(VAlign::Center)
                             ),
 
-                            FNew(FButton)
+                            FAssignNew(FButton, closeButton)
                             .OnClicked([this]
                                 {
                                     GetContext()->QueueDestroy();
@@ -265,7 +300,7 @@ namespace CE::Editor
                                 .Height(9)
                                 .HAlign(HAlign::Center)
                                 .VAlign(VAlign::Center)
-                            )
+                            )*/
                         )
                     ),
 
@@ -281,6 +316,26 @@ namespace CE::Editor
 
             ) // End of Child
         );
+
+        Array<Ref<FWindowControlButton>> controlGroup = {
+            closeButton,
+            minimizeButton,
+            maximizeButton
+        };
+
+        closeButton->SetControlGroup(controlGroup);
+        minimizeButton->SetControlGroup(controlGroup);
+        maximizeButton->SetControlGroup(controlGroup);
+
+        if (PlatformMisc::GetCurrentPlatform() == PlatformName::Mac)
+        {
+            titleBarContainer->MoveChildToIndex(closeButton, 0);
+            titleBarContainer->MoveChildToIndex(minimizeButton, 1);
+            titleBarContainer->MoveChildToIndex(maximizeButton, 2);
+
+            closeButton->Margin(Vec4(2.5f, 0, -1, 0));
+            minimizeButton->Margin(Vec4(0, 0, -1, 0));
+        }
     }
 
     void EditorDockspace::OnBeginDestroy()
@@ -294,7 +349,7 @@ namespace CE::Editor
     {
 	    Super::OnMaximized();
 
-        maximizeIcon->Background(FBrush("/Engine/Resources/Icons/RestoreIcon"));
+        maximizeButton->SetMaximizedState(true);
 
 #if PLATFORM_WINDOWS
         // This is needed on Windows to prevent things from rendering outside the screen edges when maximized
@@ -306,7 +361,7 @@ namespace CE::Editor
     {
         Super::OnRestored();
 
-        maximizeIcon->Background(FBrush("/Engine/Resources/Icons/MaximizeIcon"));
+        maximizeButton->SetMaximizedState(false);
 
 #if PLATFORM_WINDOWS
         borderWidget->Padding(Vec4(1, 1, 1, 1) * 1);

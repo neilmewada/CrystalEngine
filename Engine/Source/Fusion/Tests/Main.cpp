@@ -2,7 +2,7 @@
 #include "Fusion.h"
 #include "VulkanRHI.h"
 
-#include "FusionCoreTest.h"
+#include "FusionTest.h"
 
 #include <gtest/gtest.h>
 

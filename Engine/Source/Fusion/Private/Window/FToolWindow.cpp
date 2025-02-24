@@ -70,32 +70,24 @@ namespace CE
                                 .FillRatio(1.0f)
                             ),
 
-                            FNew(FHorizontalStack)
+                            FAssignNew(FHorizontalStack, controlContainer)
                             .HAlign(HAlign::Fill)
                             .VAlign(VAlign::Fill)
                             (
                                 FNew(FWidget)
                                 .FillRatio(1.0f),
 
-                                FAssignNew(FButton, minimizeButton)
+                                FAssignNew(FWindowControlButton, minimizeButton)
+                                .ControlType(FWindowControlType::Minimize)
                                 .OnClicked([this]
                                     {
                                         static_cast<FNativeContext*>(GetContext())->Minimize();
                                     })
-                                .Padding(Vec4(17, 8, 17, 8))
                                 .Name("WindowMinimizeButton")
-                                .Style("Button.WindowControl")
-                                .VAlign(VAlign::Fill)
-                                (
-                                    FAssignNew(FImage, minimizeIcon)
-                                    .Background(FBrush("/Engine/Resources/Icons/MinimizeIcon"))
-                                    .Width(11)
-                                    .Height(11)
-                                    .HAlign(HAlign::Center)
-                                    .VAlign(VAlign::Center)
-                                ),
+                                .Style("Button.WindowControl"),
 
-                                FAssignNew(FButton, maximizeButton)
+                                FAssignNew(FWindowControlButton, maximizeButton)
+                                .ControlType(FWindowControlType::Maximize)
                                 .OnClicked([this]
                                     {
                                         FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
@@ -108,37 +100,18 @@ namespace CE
                                             nativeContext->Maximize();
                                         }
                                     })
-                                .Padding(Vec4(17, 8, 17, 8))
                                 .Name("WindowMaximizeButton")
-                                .Style("Button.WindowControl")
-                                .VAlign(VAlign::Fill)
-                                (
-                                    FAssignNew(FImage, maximizeIcon)
-                                    .Background(FBrush("/Engine/Resources/Icons/MaximizeIcon"))
-                                    .Width(11)
-                                    .Height(11)
-                                    .HAlign(HAlign::Center)
-                                    .VAlign(VAlign::Center)
-                                ),
+                                .Style("Button.WindowControl"),
 
-                                FNew(FButton)
+                                FAssignNew(FWindowControlButton, closeButton)
+                                .ControlType(FWindowControlType::Close)
                                 .OnClicked([this]
                                     {
                                         OnClickClose();
                                         GetContext()->QueueDestroy();
                                     })
-                                .Padding(Vec4(18, 8, 18, 8))
                                 .Name("WindowCloseButton")
                                 .Style("Button.WindowClose")
-                                .VAlign(VAlign::Fill)
-                                (
-                                    FNew(FImage)
-                                    .Background(FBrush("/Engine/Resources/Icons/CrossIcon"))
-                                    .Width(10)
-                                    .Height(10)
-                                    .HAlign(HAlign::Center)
-                                    .VAlign(VAlign::Center)
-                                )
                             )
                         )
                     ),
@@ -159,6 +132,26 @@ namespace CE
             )
         );
 
+        Array<Ref<FWindowControlButton>> controlGroup = {
+            closeButton,
+            minimizeButton,
+            maximizeButton
+        };
+
+        closeButton->SetControlGroup(controlGroup);
+        minimizeButton->SetControlGroup(controlGroup);
+        maximizeButton->SetControlGroup(controlGroup);
+
+        if (PlatformMisc::GetCurrentPlatform() == PlatformName::Mac)
+        {
+            controlContainer->MoveChildToIndex(closeButton, 0);
+            controlContainer->MoveChildToIndex(minimizeButton, 1);
+            controlContainer->MoveChildToIndex(maximizeButton, 2);
+
+            closeButton->Margin(Vec4(2.5f, 0, -1, 0));
+            minimizeButton->Margin(Vec4(0, 0, -1, 0));
+        }
+
         this->Style("ToolWindow");
     }
 
@@ -166,7 +159,7 @@ namespace CE
     {
 	    Super::OnMaximized();
 
-        maximizeIcon->Background(FBrush("/Engine/Resources/Icons/RestoreIcon"));
+        maximizeButton->SetMaximizedState(true);
 
 #if PLATFORM_WINDOWS
         // This is needed on Windows to prevent things from rendering outside the screen edges when maximized
@@ -183,7 +176,7 @@ namespace CE
     {
         Super::OnRestored();
 
-        maximizeIcon->Background(FBrush("/Engine/Resources/Icons/MaximizeIcon"));
+        maximizeButton->SetMaximizedState(false);
 
 #if PLATFORM_WINDOWS
         borderWidget->Padding(Vec4(1, 1, 1, 1) * 1);
