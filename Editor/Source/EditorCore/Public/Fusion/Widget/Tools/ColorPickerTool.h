@@ -29,6 +29,8 @@ namespace CE::Editor
 
         void ParseHexInput();
 
+        void OnClickClose() override;
+
         FUNCTION()
         void OnClickOk();
 

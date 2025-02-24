@@ -80,7 +80,7 @@ EditorLauncher "/path/to/project.cproject"
 
 ## Building standalone (optional, ignore for now)
 
-The standalone build has the GameSystem_Test application, which you can run to play-test the engine in standalone mode.
+The standalone build has the GameEngine_Test application, which you can run to play-test the engine in standalone mode.
 
 ```sh
 cmake -B Build/Windows-Standalone -S . -DCE_STANDALONE=ON -DCE_HOST_BUILD_DIR="<Path To host tools binary dir>" -DCMAKE_SYSTEM_NAME=Windows -Wno-Dev
@@ -89,5 +89,5 @@ cmake -B Build/Windows-Standalone -S . -DCE_STANDALONE=ON -DCE_HOST_BUILD_DIR="<
 The path to host tools binary directory in our situation is:
 `C:/CrystalEngine/Build/Windows/Debug`. `Build/Windows` is the host tools solution directory, and the binary files will be produced in the Debug folder, if you have chosen to build Debug target for host tools.
 
-Note: For now, there is no real use of standalone builds, and they are incomplete yet. You can run the `GameSystem_Test` target in standalone build to do a basic play test of the standalone engine.
+Note: For now, there is no real use of standalone builds, and they are incomplete yet. You can run the `GameEngine_Test` target in standalone build to do a basic play test of the standalone engine.
 

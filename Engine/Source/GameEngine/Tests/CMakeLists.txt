@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(TEST_TARGET GameSystem)
+set(TEST_TARGET GameEngine)
 
 set(TEST_NAME ${TEST_TARGET}_Test)
 project(${TEST_NAME})

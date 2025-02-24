@@ -373,6 +373,13 @@ namespace CE::Editor
         UpdateFields(nullptr, true);
     }
 
+    void ColorPickerTool::OnClickClose()
+    {
+        Super::OnClickClose();
+
+        OnClickCancel();
+    }
+
     void ColorPickerTool::OnClickOk()
     {
         m_OnColorChanged(this);

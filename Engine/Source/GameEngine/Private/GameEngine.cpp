@@ -1,10 +1,10 @@
-#include "GameSystem.h"
+#include "GameEngine.h"
 
-#include "GameSystem.private.h"
+#include "GameEngine.private.h"
 
 namespace CE
 {
-	class GameSystemModule : public CE::Module
+	class GameEngineModule : public CE::Module
 	{
 	public:
 
@@ -26,5 +26,5 @@ namespace CE
 	};
 }
 
-CE_IMPLEMENT_MODULE(GameSystem, CE::GameSystemModule)
+CE_IMPLEMENT_MODULE(GameEngine, CE::GameEngineModule)
 
