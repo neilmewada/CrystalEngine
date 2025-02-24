@@ -36,6 +36,7 @@ namespace CE
 
         Ref<FImage> icon;
         FWindowControlType controlType = FWindowControlType::Undefined;
+
         Array<Ref<FWindowControlButton>> controlGroup;
 
     public: // - Fusion Properties - 
