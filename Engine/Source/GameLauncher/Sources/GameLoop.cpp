@@ -96,7 +96,7 @@ void GameLoop::LoadEngineModules()
 	ModuleManager::Get().LoadModule("Fusion");
 
 	ModuleManager::Get().LoadModule("Engine");
-	ModuleManager::Get().LoadModule("GameSystem");
+	ModuleManager::Get().LoadModule("GameEngine");
 	// TODO: Sandbox
 	ModuleManager::Get().LoadModule("Sandbox");
 }
@@ -109,7 +109,7 @@ void GameLoop::UnloadEngineModules()
 	// TODO: Sandbox
 	ModuleManager::Get().UnloadModule("Sandbox");
 
-	ModuleManager::Get().UnloadModule("GameSystem");
+	ModuleManager::Get().UnloadModule("GameEngine");
 	ModuleManager::Get().UnloadModule("Engine");
 
 	// CoreRPI should always shutdown after the engine modules!

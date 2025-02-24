@@ -5,7 +5,7 @@
 #include "CoreRHI.h"
 #include "Engine.h"
 
-// GameSystem includes
+// GameEngine includes
 #include "Engine/GameEngine.h"
 #include "Engine/Subsystems/GameViewportSubsystem.h"
 

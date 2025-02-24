@@ -41,7 +41,7 @@ add_subdirectory(Source/Fusion)
 add_subdirectory(Source/Engine)
 
 if(${CE_STANDALONE})
-    add_subdirectory(Source/GameSystem)
+    add_subdirectory(Source/GameEngine)
     add_subdirectory(Source/Sandbox)
     add_subdirectory(Source/GameLauncher)
 endif()

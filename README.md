@@ -2,7 +2,7 @@
 
 A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based render architecture, and a declarative syntax Widget GUI framework that is used by the editor.
 
-![](./Screenshots/NewEditor.png)
+![](./Screenshots/NewEditor_Mac.png)
 
 ### Check more [screenshots below](#screenshots).
 
@@ -10,16 +10,18 @@ A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based rende
 
 ## Requirements
 
-The engine and editor compiles and runs on **Windows (x64)**, Linux (Ubuntu) and Mac (Apple Silicon). However, Windows is the main platform of focus.
+The engine and editor compiles and runs on **Windows (x64)**, Linux (Ubuntu) and Mac (Apple Silicon).
 
-Even though the engine & editor compiles and runs on Mac (Apple Silicon), it is however unusable at this time with multiple issues, like incorrect mouse input. etc.
+**Update**: I am currently developing this engine on an Apple Silicon MacBook Pro, so I can't guarantee the stability of Windows and Linux builds at the moment.
 
 ## Building
 
 Clone the repo using following command:
 
-```
+```sh
 git clone --recursive https://github.com/neelmewada/CrystalEngine.git
+
+# Or if you want to clone submodules after cloning this repo:
 git submodule update --init --recursive
 ```
 
@@ -27,7 +29,7 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 
 ## Features
 
-- Modular engine architecture.
+- Modular engine architecture with cross platform support.
 - Use HLSL to write shaders for Vulkan.
 - Forward PBR rendering with CubeMap IBL.
 - Directional shadow maps.
@@ -36,7 +38,7 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 - Automatic C++ runtime reflection generation.
 - Object serialization: Custom binary format and JSON.
 - Frame graph based GPU scheduling with automatic resource dependencies.
-- **Fusion** framework for declarative GUI apps with text & SDF geometry rendering.
+- **Fusion** framework for declarative GUI apps with text rendering.
 - **Fusion** uses the engine's builtin renderer instead of 3rd party imgui frameworks.
 
 ## Modules Overview
@@ -58,19 +60,19 @@ All modules inside the core domain are at the low level of the engine.
 * **FusionCore**: Widgets library used to build GUI applications with declarative syntax.
 * **Fusion**: Adds more high level Fusion widgets like TreeView, ListView and more.
 
-### System domain
+### Engine domain
 
-System domain modules are at high level of the engine.
+Engine domain modules are at high level of the engine.
 
-* **System**: The main module that contains the high level game engine systems, game framework, etc.
-* **GameSystem**: Only for standalone builds. Runtime implementation of System module.
+* **Engine**: The main module that contains the high level game engine systems, game framework, etc.
+* **GameEngine**: Only for standalone builds. Runtime implementation of System module.
 
 ### Editor domain
 
 Contains all the editor modules.
 
 * **EditorCore**: Implements Asset processing and serves as the foundation of the editor & host tools.
-* **EditorEngine**: Host/editor implementation of the System module i.e. Engine.
+* **EditorEngine**: Host/editor implementation of the Engine module.
 * **CrystalEditor**: Contains all the editor related GUI and features and uses Fusion for the widgets.
 
 # Screenshots

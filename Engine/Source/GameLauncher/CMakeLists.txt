@@ -30,7 +30,7 @@ ce_add_target(${PROJECT_NAME} GUIAPP
             CE::CoreRHI
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
             CE::Engine
-            CE::GameSystem
+            CE::GameEngine
             CE::Sandbox
         TARGETS 
             Config

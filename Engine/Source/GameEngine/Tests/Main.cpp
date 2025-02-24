@@ -1,6 +1,6 @@
 #include "Core.h"
 
-#include "GameSystem.h"
+#include "GameEngine.h"
 #include "VulkanRHI.h"
 
 #include <gtest/gtest.h>
@@ -9,7 +9,7 @@ using namespace CE;
 
 #include "TestFeatureProcessor.h"
 
-#include "GameSystem_Test.private.h"
+#include "GameEngine_Test.private.h"
 
 using namespace CE;
 
@@ -34,7 +34,7 @@ static void TestBegin(bool gui)
 	ModuleManager::Get().LoadModule("CoreRPI");
 	ModuleManager::Get().LoadModule("CrystalWidgets");
 	ModuleManager::Get().LoadModule("Engine");
-	ModuleManager::Get().LoadModule("GameSystem");
+	ModuleManager::Get().LoadModule("GameEngine");
 
 	PlatformApplication* app = PlatformApplication::Get();
 
@@ -83,7 +83,7 @@ static void TestEnd(bool gui)
 	app->Shutdown();
 	delete app;
 
-	ModuleManager::Get().UnloadModule("GameSystem");
+	ModuleManager::Get().UnloadModule("GameEngine");
 	ModuleManager::Get().UnloadModule("Engine");
 	ModuleManager::Get().UnloadModule("CrystalWidgets");
 	ModuleManager::Get().UnloadModule("CoreRPI");
