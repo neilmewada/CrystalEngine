@@ -12,6 +12,9 @@ namespace CE
 {
     static inline float  ImRsqrt(float x) { return 1.0f / sqrtf(x); }
 
+    static constexpr int CircleAutoSegmentMin = 4;
+    static constexpr int CircleAutoSegmentMax = 512;
+
     static Vec2 RoundVector(Vec2 in)
     {
         return Vec2(Math::Round(in.x), Math::Round(in.y));
@@ -19,7 +22,8 @@ namespace CE
 
     FusionRenderer2::FusionRenderer2()
     {
-        circleSegmentMaxError = 0.25f;
+        // Can be overridden in Config
+        circleSegmentMaxError = 0.2f;
     }
 
     FusionRenderer2::~FusionRenderer2()

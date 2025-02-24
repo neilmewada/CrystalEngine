@@ -28,9 +28,7 @@ namespace CE
         static constexpr u32 GradientKeyArrayIncrement = 128;
         static constexpr u32 OpacityStackIncrement = 64;
 
-        static constexpr u32 ArcFastTableSize = 48;
-        static constexpr int CircleAutoSegmentMin = 4;
-        static constexpr int CircleAutoSegmentMax = 512;
+        static constexpr u32 ArcFastTableSize = 48;// 48
 
         static constexpr f32 MinOpacity = 0.001f;
         static constexpr u32 MaxClipRectStack = 24;
