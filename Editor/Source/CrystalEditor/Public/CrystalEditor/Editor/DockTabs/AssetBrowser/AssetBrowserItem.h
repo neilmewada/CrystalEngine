@@ -19,11 +19,16 @@ namespace CE::Editor
 
     public: // - Public API -
 
+        void SetData(PathTreeNode* node);
+
+        CE::Name GetFullPath() const { return fullPath; }
 
     protected: // - Internal -
 
         Ref<FLabel> titleLabel;
         Ref<FLabel> subtitleLabel;
+
+        CE::Name fullPath;
 
     public: // - Fusion Properties -
 

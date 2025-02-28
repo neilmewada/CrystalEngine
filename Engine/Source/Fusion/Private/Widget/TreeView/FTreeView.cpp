@@ -57,6 +57,12 @@ namespace CE
         );
     }
 
+    void FTreeView::ExpandRow(const FModelIndex& index, bool recursive)
+    {
+        container->ExpandRow(index, recursive);
+    }
+
+
     void FTreeView::OnFusionPropertyModified(const CE::Name& propertyName)
     {
 	    Super::OnFusionPropertyModified(propertyName);

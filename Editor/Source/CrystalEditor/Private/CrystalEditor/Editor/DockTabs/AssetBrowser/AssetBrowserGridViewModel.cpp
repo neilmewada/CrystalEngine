@@ -17,6 +17,8 @@ namespace CE::Editor
     {
         // Update the PathTreeNode* pointer in case the path tree nodes were recreated
         SetCurrentDirectory(currentPath);
+
+
     }
 
     void AssetBrowserGridViewModel::Init()
@@ -67,9 +69,7 @@ namespace CE::Editor
         if (!node)
             return;
 
-        item
-            .Title(node->name.GetString())
-        ;
+        item.SetData(node);
     }
 
 

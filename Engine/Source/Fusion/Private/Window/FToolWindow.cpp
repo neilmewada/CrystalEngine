@@ -148,7 +148,7 @@ namespace CE
             controlContainer->MoveChildToIndex(minimizeButton, 1);
             controlContainer->MoveChildToIndex(maximizeButton, 2);
 
-            closeButton->Margin(Vec4(2.5f, 0, -1, 0));
+            closeButton->Margin(Vec4(5, 0, -1, 0));
             minimizeButton->Margin(Vec4(0, 0, -1, 0));
         }
 

@@ -9,7 +9,7 @@ namespace CE::Editor
 
 
     CLASS()
-    class CRYSTALEDITOR_API AssetBrowser : public EditorMinorDockTab
+    class CRYSTALEDITOR_API AssetBrowser : public EditorMinorDockTab, public IAssetRegistryListener
     {
         CE_CLASS(AssetBrowser, EditorMinorDockTab)
     protected:
@@ -18,9 +18,11 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void OnAssetPathTreeUpdated(PathTree& pathTree) override;
+
     public: // - Public API -
 
-
+        void SetCurrentPath(const CE::Name& path);
 
     protected: // - Internal -
 

@@ -271,7 +271,7 @@ namespace CE::Editor
             titleBarContainer->MoveChildToIndex(minimizeButton, 1);
             titleBarContainer->MoveChildToIndex(maximizeButton, 2);
 
-            closeButton->Margin(Vec4(2.5f, 0, -1, 0));
+            closeButton->Margin(Vec4(10, 0, -1, 0));
             minimizeButton->Margin(Vec4(0, 0, -1, 0));
         }
     }
