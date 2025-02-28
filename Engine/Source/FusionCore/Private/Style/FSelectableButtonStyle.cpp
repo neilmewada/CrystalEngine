@@ -13,7 +13,7 @@ namespace CE
 
         background = Color::RGBA(56, 56, 56);
         disabledBackground = Color::RGBA(46, 46, 46);
-        hoveredBackground = Color::RGBA(62, 62, 62);
+        hoveredBackground = Color::RGBA(66, 66, 66);
     }
 
     FSelectableButtonStyle::~FSelectableButtonStyle()

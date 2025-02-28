@@ -3,36 +3,66 @@
 
 namespace CE::Editor
 {
-
-    class EditorCoreModule : public Module
+	Ref<EditorStyle> gEditorStyle = nullptr;
+	
+    void EditorCoreModule::StartupModule()
     {
-    public:
+        
+    }
 
-        void StartupModule() override
-        {
-            
-        }
+    void EditorCoreModule::ShutdownModule()
+    {
 
-        void ShutdownModule() override
-        {
+		if (ProjectManager::TryGet())
+		{
+            ProjectManager::TryGet()->BeginDestroy();
+		}
+    }
 
-			if (ProjectManager::TryGet())
-			{
-                ProjectManager::TryGet()->BeginDestroy();
-			}
-        }
+    void EditorCoreModule::RegisterTypes()
+    {
 
-        void RegisterTypes() override
-        {
+    }
 
-        }
+    void EditorCoreModule::DeregisterTypes()
+    {
 
-        void DeregisterTypes() override
-        {
+    }
 
-        }
+    void EditorCoreModule::InitializeStyle(EditorStyle* style)
+    {
+    	gEditorStyle = style;
 
-    };
+    	auto app = FusionApplication::TryGet();
+
+    	if (app)
+    	{
+    		FStyleManager* styleManager = app->GetStyleManager();
+
+    		FRootContext* rootContext = app->GetRootContext();
+
+    		gEditorStyle->Initialize();
+
+    		styleManager->RegisterStyleSet(gEditorStyle.Get());
+    		rootContext->SetDefaultStyleSet(gEditorStyle.Get());
+    	}
+    }
+
+    void EditorCoreModule::ShutdownStyle()
+    {
+    	if (gEditorStyle)
+    	{
+    		gEditorStyle->Shutdown();
+
+    		gEditorStyle->BeginDestroy();
+    		gEditorStyle = nullptr;
+    	}
+    }
+
+    Ref<EditorStyle> EditorCoreModule::GetEditorStyle()
+    {
+    	return gEditorStyle;
+    }
 
 } // namespace CE
 

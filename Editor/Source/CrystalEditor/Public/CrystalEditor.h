@@ -9,6 +9,9 @@
 #include "Fusion.h"
 #include "EditorEngine.h"
 
+// Common
+#include "CrystalEditor/Style/CrystalEditorStyle.h"
+
 // ------------------------------------------------
 // Project Browser
 // ------------------------------------------------

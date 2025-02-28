@@ -23,6 +23,7 @@ namespace CE::Editor
     protected: // - Internal -
 
         Ref<FLabel> titleLabel;
+        Ref<FLabel> subtitleLabel;
 
     public: // - Fusion Properties -
 

@@ -14,15 +14,41 @@ namespace CE::Editor
 
         (*this)
             .Width(80)
-            .Height(100)
+            .Height(110)
             .Style("SelectableButton")
             (
-                FAssignNew(FLabel, titleLabel)
-                .Text("Asset")
-                .FontSize(9)
-                .Foreground(Color::White())
-                .HAlign(HAlign::Center)
-                .VAlign(VAlign::Bottom)
+                FNew(FVerticalStack)
+                .Gap(2)
+                .ContentHAlign(HAlign::Fill)
+                .HAlign(HAlign::Fill)
+                .VAlign(VAlign::Fill)
+                (
+                    FNew(FStyledWidget)
+                    .Background(Color::Black())
+                    .BackgroundShape(FRoundedRectangle(5, 5, 0, 0))
+                    .Height(70),
+
+                    FAssignNew(FLabel, titleLabel)
+                    .Text("Asset")
+                    .FontSize(9)
+                    .WordWrap(FWordWrap::Normal)
+                    .Foreground(Color::White())
+                    .HAlign(HAlign::Left)
+                    .VAlign(VAlign::Bottom)
+                    .Margin(Vec4(2.5f, 0, 0, 0))
+                    .Height(20),
+
+                    FNew(FWidget)
+                    .FillRatio(1.0f),
+
+                    FAssignNew(FLabel, subtitleLabel)
+                    .Text("Asset Type")
+                    .FontSize(7)
+                    .Foreground(Color::White().WithAlpha(0.5f))
+                    .HAlign(HAlign::Left)
+                    .VAlign(VAlign::Bottom)
+                    .Margin(Vec4(2.5f, 0, 0, 0))
+                )
             )
         ;
     }

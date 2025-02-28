@@ -13,18 +13,18 @@ namespace CE::Editor
 
 		EditorStyle();
 
-		static void Initialize();
-		static void Shutdown();
+		void Initialize();
+		void Shutdown();
 
-		static EditorStyle* Get();
+		static Ref<EditorStyle> Get();
 
-	private:
+	protected:
 
-		void InitializeDefault();
+		virtual void InitializeDefault();
 
 		void InitProjectBrowserStyle();
 
-		void InitEditorStyle();
+		virtual void InitEditorStyle();
 
 	public:
 

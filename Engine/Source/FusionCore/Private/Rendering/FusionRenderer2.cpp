@@ -14,6 +14,7 @@ namespace CE
 
     static constexpr int CircleAutoSegmentMin = 4;
     static constexpr int CircleAutoSegmentMax = 512;
+    static constexpr f32 MinFontSize = 4;
 
     static Vec2 RoundVector(Vec2 in)
     {
@@ -1194,14 +1195,14 @@ namespace CE
         Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
 
         Name fontFamily = font.GetFamily();
-        int fontSize = font.GetFontSize();
+        f32 fontSize = font.GetFontSize();
 
         if (fontSize <= 0)
             fontSize = fontManager->GetDefaultFontSize();
         if (!fontFamily.IsValid())
             fontFamily = fontManager->GetDefaultFontFamily();
 
-        fontSize = Math::Max(fontSize, 6);
+        fontSize = Math::Max(fontSize, MinFontSize);
 
         const bool isFixedWidth = width > 0.1f;
 
@@ -1271,7 +1272,9 @@ namespace CE
                         FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
                         f32 atlasFontSize = prevGlyph.fontSize;
 
-                        outQuads[j] = Rect::FromSize(curPos.x, curPos.y,
+                        outQuads[j] = Rect::FromSize(
+                            curPos.x + (f32)prevGlyph.xOffset * (f32)fontSize / (f32)prevGlyph.fontSize / systemDpiScaling,
+                            curPos.y - (f32)prevGlyph.yOffset * (f32)fontSize / (f32)prevGlyph.fontSize / systemDpiScaling,
                             (f32)prevGlyph.GetWidth() * (f32)fontSize / (f32)prevGlyph.fontSize / systemDpiScaling,
                             (f32)prevGlyph.GetHeight() * (f32)fontSize / (f32)prevGlyph.fontSize / systemDpiScaling);
 
@@ -1323,14 +1326,14 @@ namespace CE
         Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
 
         Name fontFamily = font.GetFamily();
-        int fontSize = font.GetFontSize();
+        f32 fontSize = font.GetFontSize();
 
         if (fontSize <= 0)
             fontSize = fontManager->GetDefaultFontSize();
         if (!fontFamily.IsValid())
             fontFamily = fontManager->GetDefaultFontFamily();
 
-        fontSize = Math::Max(fontSize, 6);
+        fontSize = Math::Max(fontSize, MinFontSize);
 
         const bool isFixedWidth = width > 0.1f;
 
@@ -1345,7 +1348,7 @@ namespace CE
 
         const FFontMetrics& metrics = fontAtlas->GetMetrics();
 
-        const float startY = metrics.ascender * (f32)fontSize * metricsScaling;
+        const float startY = metrics.ascender * fontSize * metricsScaling;
         constexpr float startX = 0;
 
         float maxX = startX;
@@ -1425,14 +1428,14 @@ namespace CE
         Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
 
         Name fontFamily = font.GetFamily();
-        int fontSize = font.GetFontSize();
+        f32 fontSize = font.GetFontSize();
 
         if (fontSize <= 0)
             fontSize = fontManager->GetDefaultFontSize();
         if (!fontFamily.IsValid())
             fontFamily = fontManager->GetDefaultFontFamily();
 
-        fontSize = Math::Max(fontSize, 6);
+        fontSize = Math::Max<f32>(fontSize, MinFontSize);
 
         const bool isFixedWidth = width > 0.1f;
 
@@ -1544,14 +1547,14 @@ namespace CE
         Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
 
         Name fontFamily = font.GetFamily();
-        int fontSize = font.GetFontSize();
+        f32 fontSize = font.GetFontSize();
 
         if (fontSize <= 0)
             fontSize = fontManager->GetDefaultFontSize();
         if (!fontFamily.IsValid())
             fontFamily = fontManager->GetDefaultFontFamily();
 
-        fontSize = Math::Max(fontSize, 6);
+        fontSize = Math::Max<f32>(fontSize, MinFontSize);
 
 #if PLATFORM_MAC
         fontSize *= FusionApplication::Get()->GetDefaultScalingFactor();
