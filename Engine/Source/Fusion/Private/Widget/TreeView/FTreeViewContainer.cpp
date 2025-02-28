@@ -67,6 +67,26 @@ namespace CE
         }
     }
 
+    void FTreeViewContainer::ExpandRow(const FModelIndex& index, bool recursive)
+    {
+        if (!index.IsValid())
+            return;
+
+        expandedRows.Add(index);
+
+        if (recursive && treeView->m_Model)
+        {
+            FModelIndex parent = treeView->m_Model->GetParent(index);
+
+            while (parent.IsValid())
+            {
+                expandedRows.Add(parent);
+
+                parent = treeView->m_Model->GetParent(parent);
+            }
+        }
+    }
+
     FWidget* FTreeViewContainer::HitTest(Vec2 localMousePos)
     {
         FWidget* thisHitTest = Super::HitTest(localMousePos);

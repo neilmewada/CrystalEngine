@@ -26,7 +26,15 @@ namespace CE::Editor
                     FNew(FStyledWidget)
                     .Background(Color::Black())
                     .BackgroundShape(FRoundedRectangle(5, 5, 0, 0))
-                    .Height(70),
+                    .Height(70)
+                    (
+                        FNew(FStyledWidget)
+                        .Background(FBrush("/Editor/Assets/Icons/Folder_Large"))
+                        .Width(48)
+                        .Height(48)
+                        .HAlign(HAlign::Center)
+                        .VAlign(VAlign::Center)
+                    ),
 
                     FAssignNew(FLabel, titleLabel)
                     .Text("Asset")
@@ -95,6 +103,16 @@ namespace CE::Editor
 
     }
 
-    
+    void AssetBrowserItem::SetData(PathTreeNode* node)
+    {
+        fullPath = nullptr;
+
+        if (!node)
+            return;
+
+        Title(node->name.GetString());
+        fullPath = node->GetFullPath();
+    }
+
 }
 

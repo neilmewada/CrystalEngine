@@ -61,7 +61,8 @@ namespace CE::Editor
         if (parentsIndex == -1)
             return FModelIndex();
 
-        return CreateIndex(parentsIndex, 0, parent);
+        FModelIndex retIndex = CreateIndex(parentsIndex, 0, parent);
+        return retIndex;
     }
 
     FModelIndex AssetBrowserTreeViewModel::GetIndex(u32 row, u32 column, const FModelIndex& parent)
@@ -81,10 +82,50 @@ namespace CE::Editor
             parentNode = (PathTreeNode*)parent.GetDataPtr();
         }
 
-        if (parentNode == nullptr || row >= parentNode->children.GetSize() || row < 0)
+        if (parentNode == nullptr || row >= parentNode->children.GetSize())
             return {};
 
-        return CreateIndex(row, column, parentNode->children[row]);
+        FModelIndex index = CreateIndex(row, column, parentNode->children[row]);
+        return index;
+    }
+
+    FModelIndex AssetBrowserTreeViewModel::FindIndex(PathTreeNode* node)
+    {
+        FModelIndex parent = {};
+        FModelIndex result = {};
+
+        Array<PathTreeNode*> paths;
+        PathTreeNode* cur = node;
+
+        while (cur != nullptr && cur->parent != nullptr)
+        {
+            paths.InsertAt(0, cur);
+            cur = cur->parent;
+        }
+
+        for (int i = 0; i < paths.GetSize(); ++i)
+        {
+            int rows = GetRowCount(parent);
+            bool found = false;
+
+            for (int row = 0; row < rows; ++row)
+            {
+                FModelIndex index = GetIndex(row, 0, parent);
+                PathTreeNode* indexNode = static_cast<PathTreeNode*>(index.GetDataPtr());
+                if (indexNode->GetFullPath() == paths[i]->GetFullPath())
+                {
+                    found = true;
+                    parent = index;
+                    result = index;
+                    break;
+                }
+            }
+
+            if (!found)
+                return {};
+        }
+
+        return result;
     }
 
     u32 AssetBrowserTreeViewModel::GetRowCount(const FModelIndex& parent)

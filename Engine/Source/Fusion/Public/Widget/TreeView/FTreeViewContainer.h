@@ -33,6 +33,8 @@ namespace CE
 
         bool CapturesMouseWheel() const override { return true; }
 
+        void ExpandRow(const FModelIndex& index, bool recursive = true);
+
     protected:
 
         FTreeViewContainer();

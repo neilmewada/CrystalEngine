@@ -32,8 +32,6 @@ namespace CE::Editor
         Name currentPath;
         PathTreeNode* currentDirectory = nullptr;
 
-        WeakRef<AssetBrowserTreeView> owner = nullptr;
-
         friend class AssetBrowserTreeView;
     };
     

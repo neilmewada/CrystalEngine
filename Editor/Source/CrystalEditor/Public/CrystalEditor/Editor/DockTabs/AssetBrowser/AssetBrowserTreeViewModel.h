@@ -22,11 +22,17 @@ namespace CE::Editor
 
         FModelIndex GetIndex(u32 row, u32 column, const FModelIndex& parent) override;
 
+        FModelIndex FindIndex(PathTreeNode* node);
+
         u32 GetRowCount(const FModelIndex& parent) override;
 
         u32 GetColumnCount(const FModelIndex& parent) override;
 
         void SetData(u32 row, FWidget& rowWidget, const FModelIndex& parent) override;
+
+    private:
+
+
     };
     
 } // namespace CE

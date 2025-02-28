@@ -40,9 +40,29 @@ namespace CE::Editor
                 AddChild(
                     FAssignNew(AssetBrowserItem, item)
                     .Owner(this)
-                    .OnSelect([this](FSelectableButton* selectedItem)
+                    .OnDoubleClick([this](FSelectableButton* button)
                     {
+                        if (auto registry = AssetRegistry::Get())
+                        {
+                            PathTree& tree = registry->GetCachedPathTree();
+                            AssetBrowserItem* item = static_cast<AssetBrowserItem*>(button);
+                            CE::Name path = item->GetFullPath();
+                            PathTreeNode* curNode = tree.GetNode(path);
+                            if (curNode == nullptr)
+                                return;
 
+                            if (auto owner = m_Owner.Lock())
+                            {
+                                if (curNode->nodeType == PathTreeNodeType::Directory)
+                                {
+                                    owner->SetCurrentPath(path);
+                                }
+                                else if (curNode->nodeType == PathTreeNodeType::Asset)
+                                {
+                                    // Do nothing when double-clicking an asset
+                                }
+                            }
+                        }
                     })
                 );
 

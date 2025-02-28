@@ -21,6 +21,8 @@ namespace CE
 
         bool SupportsFocusEvents() const override { return true; }
 
+        void ExpandRow(const FModelIndex& index, bool recursive);
+
     protected:
 
         FTreeView();

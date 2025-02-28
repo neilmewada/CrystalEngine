@@ -109,6 +109,11 @@ namespace CE::Editor
         gridView->Model(gridViewModel);
     }
 
+    void AssetBrowser::OnAssetPathTreeUpdated(PathTree& pathTree)
+    {
+        treeView->OnModelUpdate();
+    }
+
     void AssetBrowser::OnDirectorySelectionChanged(FItemSelectionModel* selectionModel)
     {
         if (selectionModel == nullptr || treeViewModel == nullptr)
@@ -174,6 +179,24 @@ namespace CE::Editor
 
         gridView->OnModelUpdate();
     }
+
+    void AssetBrowser::SetCurrentPath(const CE::Name& path)
+    {
+        AssetRegistry* registry = AssetRegistry::Get();
+        if (!registry)
+            return;
+
+        PathTreeNode* node = registry->GetCachedPathTree().GetNode(path);
+        if (!node || node->nodeType != PathTreeNodeType::Directory)
+            return;
+        FModelIndex index = treeViewModel->FindIndex(node);
+        if (!index.IsValid())
+            return;
+
+        treeView->SelectionModel()->Select(index);
+        treeView->ExpandRow(treeViewModel->GetParent(index), true);
+    }
+
 
 }
 
