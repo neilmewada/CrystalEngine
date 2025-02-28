@@ -2,6 +2,9 @@
 
 namespace CE
 {
+    class FSelectableButton;
+    DECLARE_SCRIPT_EVENT(FSelectableButtonEvent, FSelectableButton*);
+
     ENUM(Flags)
     enum class FSelectableButtonState : u8
     {
@@ -44,7 +47,9 @@ namespace CE
 
     public: // - Fusion Properties -
 
-        FUSION_EVENT(ScriptEvent<void(FSelectableButton*)>, OnSelect);
+        FUSION_EVENT(FSelectableButtonEvent, OnSelect);
+        FUSION_EVENT(FSelectableButtonEvent, OnDoubleClick);
+        FUSION_EVENT(FSelectableButtonEvent, OnRightClick);
 
         FUSION_WIDGET;
     };

@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS()
-    class CRYSTALEDITOR_API AssetBrowserItem : public FButton
+    class CRYSTALEDITOR_API AssetBrowserItem : public FSelectableButton
     {
-        CE_CLASS(AssetBrowserItem, FButton)
+        CE_CLASS(AssetBrowserItem, FSelectableButton)
     protected:
 
         AssetBrowserItem();
@@ -17,9 +17,11 @@ namespace CE::Editor
 
     protected: // - Internal -
 
+        Ref<FLabel> titleLabel;
 
-    public: // - Fusion Properties - 
+    public: // - Fusion Properties -
 
+        FUSION_PROPERTY_WRAPPER2(Text, titleLabel, Title);
 
         FUSION_WIDGET;
     };

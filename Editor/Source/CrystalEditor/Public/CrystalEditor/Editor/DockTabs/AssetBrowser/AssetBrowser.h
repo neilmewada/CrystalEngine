@@ -4,6 +4,8 @@ namespace CE::Editor
 {
     class AssetBrowserTreeView;
     class AssetBrowserTreeViewModel;
+    class AssetBrowserGridView;
+    class AssetBrowserGridViewModel;
 
 
     CLASS()
@@ -30,16 +32,20 @@ namespace CE::Editor
 
         void UpdateAssetGridView();
 
-        Ref<AssetBrowserTreeViewModel> model = nullptr;
+        Ref<AssetBrowserTreeViewModel> treeViewModel = nullptr;
         Ref<AssetBrowserTreeView> treeView = nullptr;
 
         Ref<FExpandableSection> directorySection;
         Array<Ref<FExpandableSection>> leftSections;
 
         Ref<FHorizontalStack> searchBarStack;
-        Ref<FWrapBox> assetWrapBox;
+
+        Ref<AssetBrowserGridViewModel> gridViewModel = nullptr;
+        Ref<AssetBrowserGridView> gridView;
 
         PathTreeNode* currentDirectory = nullptr;
+        CE::Name currentPath = {};
+
         Array<Ref<FSelectableButton>> selectables;
 
         FUSION_WIDGET;

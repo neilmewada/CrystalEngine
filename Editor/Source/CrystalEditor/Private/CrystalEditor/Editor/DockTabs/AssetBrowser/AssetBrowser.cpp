@@ -86,7 +86,8 @@ namespace CE::Editor
                     .HAlign(HAlign::Fill)
                     .FillRatio(1.0f)
                     (
-                        FAssignNew(FWrapBox, assetWrapBox)
+                        FAssignNew(AssetBrowserGridView, gridView)
+                        .Owner(this)
                         .Gap(Vec2(10, 10))
                         .HAlign(HAlign::Fill)
                         .VAlign(VAlign::Top)
@@ -99,16 +100,18 @@ namespace CE::Editor
 
         leftSections = { directorySection };
 
-        model = CreateObject<AssetBrowserTreeViewModel>(this, "Model");
+        treeViewModel = CreateObject<AssetBrowserTreeViewModel>(this, "TreeViewModel");
+        treeViewModel->Init();
+        treeView->Model(treeViewModel.Get());
 
-        model->Init();
-
-        treeView->Model(model.Get());
+        gridViewModel = CreateObject<AssetBrowserGridViewModel>(this, "GridViewModel");
+        gridViewModel->Init();
+        gridView->Model(gridViewModel);
     }
 
     void AssetBrowser::OnDirectorySelectionChanged(FItemSelectionModel* selectionModel)
     {
-        if (selectionModel == nullptr || model == nullptr)
+        if (selectionModel == nullptr || treeViewModel == nullptr)
             return;
 
         AssetRegistry* registry = AssetManager::Get()->GetRegistry();
@@ -123,6 +126,7 @@ namespace CE::Editor
             if (currentDirectory != nullptr)
             {
                 currentDirectory = nullptr;
+                currentPath = {};
                 UpdateAssetGridView();
             }
             return;
@@ -145,6 +149,7 @@ namespace CE::Editor
             if (currentDirectory != node)
             {
                 currentDirectory = node;
+                currentPath = node->GetFullPath();
                 UpdateAssetGridView();
             }
 
@@ -165,7 +170,13 @@ namespace CE::Editor
 
     void AssetBrowser::UpdateAssetGridView()
     {
-        assetWrapBox->DestroyAllChildren();
+        gridViewModel->SetCurrentDirectory(currentPath);
+
+        gridView->OnModelUpdate();
+
+        return;
+
+        gridView->DestroyAllChildren();
         selectables.Clear();
 
         if (currentDirectory != nullptr)
@@ -174,7 +185,7 @@ namespace CE::Editor
             {
                 FSelectableButton* selectable = nullptr;
 
-                assetWrapBox->AddChild(
+                gridView->AddChild(
                     FAssignNew(FSelectableButton, selectable)
                     .OnSelect([this](FSelectableButton* button)
                     {

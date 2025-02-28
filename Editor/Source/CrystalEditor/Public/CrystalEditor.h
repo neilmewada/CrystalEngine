@@ -47,6 +47,8 @@
 #include "CrystalEditor/Editor/DockTabs/AssetBrowser/AssetBrowserItem.h"
 #include "CrystalEditor/Editor/DockTabs/AssetBrowser/AssetBrowserTreeView.h"
 #include "CrystalEditor/Editor/DockTabs/AssetBrowser/AssetBrowserTreeViewModel.h"
+#include "CrystalEditor/Editor/DockTabs/AssetBrowser/AssetBrowserGridViewModel.h"
+#include "CrystalEditor/Editor/DockTabs/AssetBrowser/AssetBrowserGridView.h"
 
 // - Project Settings Editor -
 

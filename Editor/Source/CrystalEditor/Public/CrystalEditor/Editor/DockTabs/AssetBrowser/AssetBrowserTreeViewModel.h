@@ -9,6 +9,8 @@ namespace CE::Editor
     protected:
 
         AssetBrowserTreeViewModel();
+
+        void OnBeforeDestroy() override;
         
     public:
 

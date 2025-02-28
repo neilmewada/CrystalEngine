@@ -67,9 +67,14 @@ namespace CE
 	            }
                 if (mouseEvent->isDoubleClick)
                 {
-
+                    m_OnDoubleClick(this);
                 }
                 event->Consume(this);
+            }
+            else if (mouseEvent->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Right && !mouseEvent->isConsumed &&
+                !mouseEvent->isDoubleClick)
+            {
+                m_OnRightClick(this);
             }
             else if (mouseEvent->type == FEventType::MouseRelease && mouseEvent->buttons == MouseButtonMask::Left)
             {
