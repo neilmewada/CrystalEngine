@@ -91,7 +91,7 @@ namespace CE
         stagingBuffer = RHI::gDynamicRHI->CreateBuffer(stagingDesc);
         stagingBufferFence = RHI::gDynamicRHI->CreateFence(true);
 
-        stagingCommandQueue = RHI::gDynamicRHI->GetPrimaryTransferQueue();
+        stagingCommandQueue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
         stagingCommandList = RHI::gDynamicRHI->AllocateCommandList(stagingCommandQueue);
 
         textureSrg->FlushBindings();

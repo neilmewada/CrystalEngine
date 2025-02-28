@@ -10,7 +10,10 @@ set(PACKAGE_NAME "assimp")
 set(ASSIMP_BUILD_TESTS OFF  CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
 
-add_compile_options(-Wno-conversion)
+if(PAL_PLATFORM_IS_MAC)
+    add_compile_options(-Wno-conversion)
+endif()
+
 
 add_subdirectory(vendor/${PACKAGE_NAME})
 

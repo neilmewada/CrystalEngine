@@ -172,7 +172,7 @@ namespace CE::RPI
         {
             int totalMipLevels = texture->GetMipLevelCount();
 
-            RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryTransferQueue();
+            RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
             auto commandList = RHI::gDynamicRHI->AllocateCommandList(queue);
             auto uploadFence = RHI::gDynamicRHI->CreateFence(false);
 
@@ -298,7 +298,7 @@ namespace CE::RPI
 
         int totalMipLevels = texture->GetMipLevelCount();
 
-        RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryTransferQueue();
+        RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
         auto commandList = RHI::gDynamicRHI->AllocateCommandList(queue);
         auto uploadFence = RHI::gDynamicRHI->CreateFence(false);
 

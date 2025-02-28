@@ -13,7 +13,7 @@ Although, the engine can be compiled on macOS too, it is unusable with lots of i
 The following is required to be installed to your computer along with environment variables set up.
 
 - Git for windows: This is required for using the bash shell that comes with it. Make sure the folder containing sh.exe `C:\Program Files\Git\bin` is added to the PATH environment variables.
-- Vulkan SDK: Minimum required version is **1.3.290**. Older versions won't work because they come with old DxCompiler binaries.
+- Vulkan SDK: Minimum required version is **1.3.290**. And you need to install the debug shader libraries too. Older versions won't work because they come with old DxCompiler binaries.
 - Make sure that `VULKAN_SDK` environment variable is set to the vulkan SDK directory!
 - CMake 3.25 or higher: Use the one that comes with Visual Studio.
 - Visual Studio 2022 OR CLion.
