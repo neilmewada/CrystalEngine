@@ -289,23 +289,37 @@ namespace CE::Vulkan
 		vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queuePropertyCount, queueFamilyProperties.GetData());
 
 		Array<VkDeviceQueueCreateInfo> queueCreateInfos{};
+		queueCreateInfos.Resize(queueFamilyProperties.GetSize());
+
 		float queuePriority = 1.0f;
 		Array<float> queuePriorities{};
+		int totalQueues = 0;
+
+		for (int familyIdx = 0; familyIdx < queueFamilyProperties.GetSize(); familyIdx++)
+		{
+			totalQueues += queueFamilyProperties[familyIdx].queueCount;
+		}
+
+		queuePriorities.Resize(totalQueues);
+
+		int baseIdx = 0;
 
 		for (int familyIdx = 0; familyIdx < queueFamilyProperties.GetSize(); familyIdx++)
 		{
 			int queueCount = queueFamilyProperties[familyIdx].queueCount;
-			queuePriorities.Resize(queueCount);
+
 			for (int i = 0; i < queueCount; i++)
-				queuePriorities[i] = 1.0f;
+				queuePriorities[baseIdx + i] = 1.0f;
 
 			VkDeviceQueueCreateInfo queueCI = {};
 			queueCI.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 			queueCI.queueFamilyIndex = familyIdx;
 			queueCI.queueCount = queueCount;
-			queueCI.pQueuePriorities = queuePriorities.GetData();
+			queueCI.pQueuePriorities = &queuePriorities[baseIdx];
 
-			queueCreateInfos.Add(queueCI);
+			queueCreateInfos[familyIdx] = queueCI;
+
+			baseIdx += queueCount;
 		}
 
 		VkDeviceCreateInfo deviceCI = {};
