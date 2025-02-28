@@ -61,11 +61,11 @@ namespace CE::Editor
 
 		GetDefaultWidget<FButton>()
 			.Padding(Vec4(10, 5, 10, 5))
-			.Style(this, button->GetName())
+			.Style(button->GetName())
 			;
 		GetDefaultWidget<FTextButton>()
 			.Padding(Vec4(10, 5, 10, 5))
-			.Style(this, button->GetName())
+			.Style(button->GetName())
 			;
 
     	if (!selectableButton)
@@ -134,7 +134,7 @@ namespace CE::Editor
 		}
 
 		GetDefaultWidget<FScrollBox>()
-			.Style(this, scrollBox->GetName())
+			.Style(scrollBox->GetName())
 			;
 
 		if (!windowCloseButton)
@@ -198,9 +198,9 @@ namespace CE::Editor
 		textInput->cornerRadius = Vec4(5, 5, 5, 5);
 
 		GetDefaultWidget<FTextInput>()
-			.Style(this, textInput->GetName());
+			.Style(textInput->GetName());
 		GetDefaultWidget<NumericEditorField>()
-			.Style(this, textInput->GetName());
+			.Style(textInput->GetName());
 
 		if (!expandableSection)
 		{
@@ -209,7 +209,7 @@ namespace CE::Editor
 		}
 
 		GetDefaultWidget<FExpandableSection>()
-			.Style(this, expandableSection->GetName());
+			.Style(expandableSection->GetName());
 			
 		if (!comboBox)
 		{
@@ -239,7 +239,7 @@ namespace CE::Editor
 
 		GetDefaultWidget<FComboBox>()
 			.ItemStyle(comboBoxItem)
-			.Style(this, comboBox->GetName());
+			.Style(comboBox->GetName());
 
 		if (!comboBoxPopup)
 		{
@@ -252,7 +252,7 @@ namespace CE::Editor
 		comboBoxPopup->borderWidth = 1.0f;
 
 		GetDefaultWidget<FComboBoxPopup>()
-			.Style(this, comboBoxPopup->GetName());
+			.Style(comboBoxPopup->GetName());
 
 		if (!checkbox)
 		{
@@ -278,7 +278,7 @@ namespace CE::Editor
 		checkbox->foregroundPressedColor = checkboxForeground;
 
 		GetDefaultWidget<FCheckbox>()
-			.Style(this, checkbox->GetName());
+			.Style(checkbox->GetName());
 
 		if (!tabView)
 		{
@@ -292,7 +292,7 @@ namespace CE::Editor
 		tabView->tabItemShape = FRoundedRectangle(3, 3, 0, 0);
 
 		GetDefaultWidget<FTabView>()
-			.Style(this, tabView->GetName());
+			.Style(tabView->GetName());
 
 		if (!expandCaretButton)
 		{
@@ -353,10 +353,10 @@ namespace CE::Editor
 		menuPopup->itemHoverBackground = highlightColor;
 
 		GetDefaultWidget<FMenuPopup>()
-			.Style(this, menuPopup->GetName());
+			.Style(menuPopup->GetName());
 
 		GetDefaultWidget<EditorMenuPopup>()
-			.Style(this, menuPopup->GetName());
+			.Style(menuPopup->GetName());
 
 		if (!menuBar)
 		{
@@ -369,7 +369,7 @@ namespace CE::Editor
 		menuBar->itemHoverBackground = highlightColor;
 
 		GetDefaultWidget<FMenuBar>()
-			.Style(this, menuBar->GetName());
+			.Style(menuBar->GetName());
 
 		if (!toolWindow)
 		{
@@ -378,7 +378,7 @@ namespace CE::Editor
 		}
 
 		GetDefaultWidget<FToolWindow>()
-			.Style(this, toolWindow->GetName());
+			.Style(toolWindow->GetName());
 
 		InitProjectBrowserStyle();
 		InitEditorStyle();
@@ -437,7 +437,7 @@ namespace CE::Editor
 		}
 
 		GetDefaultWidget<ComponentTreeView>()
-			.Style(this, componentTreeView->GetName());
+			.Style(componentTreeView->GetName());
 
 		if (!editorDockspace)
 		{
@@ -446,7 +446,7 @@ namespace CE::Editor
 		}
 
 		GetDefaultWidget<EditorDockspace>()
-			.Style(this, editorDockspace->GetName());
+			.Style(editorDockspace->GetName());
 
 		if (!editorMinorDockspace)
 		{
@@ -455,7 +455,7 @@ namespace CE::Editor
 		}
 
 		GetDefaultWidget<EditorMinorDockspace>()
-			.Style(this, editorMinorDockspace->GetName());
+			.Style(editorMinorDockspace->GetName());
 
 		if (!editorDockTab)
 		{
@@ -466,7 +466,7 @@ namespace CE::Editor
 		editorDockTab->background = Color::RGBA(26, 26, 26);
 
 		GetDefaultWidget<EditorDockTab>()
-			.Style(this, editorDockTab->GetName());
+			.Style(editorDockTab->GetName());
 
 		if (!editorMinorDockTab)
 		{
@@ -475,7 +475,7 @@ namespace CE::Editor
 		}
 
 		GetDefaultWidget<EditorMinorDockTab>()
-			.Style(this, editorMinorDockTab->GetName());
+			.Style(editorMinorDockTab->GetName());
 
 		if (!editorToolBar)
 		{
@@ -488,7 +488,7 @@ namespace CE::Editor
 		editorToolBar->borderWidth = 0.0f;
 
 		GetDefaultWidget<EditorToolBar>()
-			.Style(this, editorToolBar->GetName());
+			.Style(editorToolBar->GetName());
 
 		if (!editorMenuBar)
 		{
@@ -508,7 +508,7 @@ namespace CE::Editor
 		editorMenuBar->itemPadding = Vec4(2, 1, 2, 1) * 5;
 		
 		GetDefaultWidget<EditorMenuBar>()
-			.Style(this, editorMenuBar->GetName());
+			.Style(editorMenuBar->GetName());
 
 		if (!treeView)
 		{
@@ -517,7 +517,7 @@ namespace CE::Editor
 		}
 
 		GetDefaultWidget<FTreeView>()
-			.Style(this, treeView->GetName());
+			.Style(treeView->GetName());
 
 		if (!detailsRow)
 		{

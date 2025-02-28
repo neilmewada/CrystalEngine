@@ -39,6 +39,11 @@ namespace CE
 		return AssetManager::GetRegistry();
 	}
 
+	void AssetRegistry::Refresh()
+	{
+
+	}
+
 	AssetData* AssetRegistry::GetPrimaryAssetByPath(const Name& path)
 	{
 		return cachedPrimaryAssetByPath[path];
@@ -91,6 +96,17 @@ namespace CE
 			return Name();
 		return assetData->bundleName;
 	}
+
+	void AssetRegistry::AddRegistryListener(IAssetRegistryListener* listener)
+	{
+		listeners.Add(listener);
+	}
+
+	void AssetRegistry::RemoveRegistryListener(IAssetRegistryListener* listener)
+	{
+		listeners.Remove(listener);
+	}
+
 
 	void AssetRegistry::OnAssetImported(const IO::Path& bundleAbsolutePath, const Name& sourcePath)
 	{
@@ -166,7 +182,10 @@ namespace CE
 		for (IAssetRegistryListener* listener : listeners)
 		{
 			if (listener != nullptr)
+			{
 				listener->OnAssetImported(bundleName, sourcePath);
+				listener->OnAssetPathTreeUpdated(cachedPathTree);
+			}
 		}
 		
 		onAssetImported.Broadcast(bundleName);
@@ -207,7 +226,10 @@ namespace CE
 		for (IAssetRegistryListener* listener : listeners)
 		{
 			if (listener != nullptr)
+			{
 				listener->OnAssetImported(bundleName);
+				listener->OnAssetPathTreeUpdated(cachedPathTree);
+			}
 		}
 
 		onAssetRegistryModified.Broadcast();

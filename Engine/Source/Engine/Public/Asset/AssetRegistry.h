@@ -9,6 +9,8 @@ namespace CE
 	}
 #endif
 
+	class AssetRegistry;
+
 	struct IAssetRegistryListener
 	{
 		virtual ~IAssetRegistryListener() {}
@@ -35,9 +37,16 @@ namespace CE
 
 		static AssetRegistry* Get();
 
-		inline PathTree& GetCachedDirectoryPathTree()
+		void Refresh();
+
+		PathTree& GetCachedDirectoryPathTree()
 		{
 			return cachedDirectoryTree;
+		}
+
+		PathTree& GetCachedPathTree()
+		{
+			return cachedPathTree;
 		}
 
 		struct SourceAssetChange
@@ -65,6 +74,9 @@ namespace CE
 		PathTreeNode* GetDirectoryNode(const Name& path);
 		
 		Name ResolveBundlePath(const Uuid& uuid) override;
+
+		void AddRegistryListener(IAssetRegistryListener* listener);
+		void RemoveRegistryListener(IAssetRegistryListener* listener);
 
 	protected:
 

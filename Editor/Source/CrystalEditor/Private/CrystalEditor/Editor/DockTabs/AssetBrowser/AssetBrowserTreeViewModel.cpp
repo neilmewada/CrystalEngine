@@ -26,6 +26,22 @@ namespace CE::Editor
         
     }
 
+    void AssetBrowserTreeViewModel::OnBeforeDestroy()
+    {
+        Super::OnBeforeDestroy();
+
+        AssetManager* assetManager = AssetManager::Get();
+        if (!assetManager)
+            return;
+
+        AssetRegistry* registry = assetManager->GetRegistry();
+        if (!registry)
+            return;
+
+
+    }
+
+
     FModelIndex AssetBrowserTreeViewModel::GetParent(const FModelIndex& index)
     {
 	    if (!index.IsValid() || index.GetDataPtr() == nullptr)
