@@ -132,7 +132,7 @@ namespace CE
             )
         );
 
-        Array<Ref<FWindowControlButton>> controlGroup = {
+        Array<WeakRef<FWindowControlButton>> controlGroup = {
             closeButton,
             minimizeButton,
             maximizeButton

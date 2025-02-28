@@ -1,6 +1,6 @@
 # Crystal Engine
 
-A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based render architecture, and a declarative syntax Widget GUI framework that is used by the editor.
+A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based render architecture, and a declarative syntax Widget GUI framework built from scratch that is used for the editor GUI.
 
 ![](./Screenshots/NewEditor_Mac.png)
 
@@ -79,7 +79,7 @@ Contains all the editor modules.
 
 ### Color Picker
 
-![](./Screenshots/ColorPicker_Fusion.png)
+<img src="./Screenshots/ColorPicker_Fusion.png" height="500" width="auto"/>
 
 ### Project browser window:
 
