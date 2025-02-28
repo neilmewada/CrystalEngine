@@ -15,6 +15,12 @@ namespace CE::Editor
 
     }
 
+    void AssetBrowserGridView::DeselectAll()
+    {
+        selectedItems.Clear();
+        OnSelectionUpdated();
+    }
+
     void AssetBrowserGridView::OnModelUpdate()
     {
         DestroyAllChildren();
@@ -33,6 +39,7 @@ namespace CE::Editor
 
                 AddChild(
                     FAssignNew(AssetBrowserItem, item)
+                    .Owner(this)
                     .OnSelect([this](FSelectableButton* selectedItem)
                     {
 

@@ -40,6 +40,9 @@ namespace CE
 
     protected: // - Internal -
 
+        virtual void OnSelected() {}
+        virtual void OnDeselected() {}
+
         void HandleEvent(FEvent* event) override;
 
         FIELD()

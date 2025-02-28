@@ -12,6 +12,11 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void OnSelected() override;
+        void OnDeselected() override;
+
+        void HandleEvent(FEvent* event) override;
+
     public: // - Public API -
 
 
@@ -20,6 +25,8 @@ namespace CE::Editor
         Ref<FLabel> titleLabel;
 
     public: // - Fusion Properties -
+
+        FUSION_PROPERTY(WeakRef<AssetBrowserGridView>, Owner);
 
         FUSION_PROPERTY_WRAPPER2(Text, titleLabel, Title);
 
