@@ -30,14 +30,14 @@ namespace CE
 
         const auto& GetControlGroup() const { return controlGroup; }
 
-        void SetControlGroup(const Array<Ref<FWindowControlButton>>& controlGroup) { this->controlGroup = controlGroup; }
+        void SetControlGroup(const Array<WeakRef<FWindowControlButton>>& controlGroup) { this->controlGroup = controlGroup; }
 
     protected: // - Internal -
 
         Ref<FImage> icon;
         FWindowControlType controlType = FWindowControlType::Undefined;
 
-        Array<Ref<FWindowControlButton>> controlGroup;
+        Array<WeakRef<FWindowControlButton>> controlGroup;
 
     public: // - Fusion Properties - 
 

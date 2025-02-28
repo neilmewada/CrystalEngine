@@ -5,6 +5,9 @@ namespace CE
     class FGridViewItem;
     class FGridViewContainer;
 
+    DECLARE_SCRIPT_DELEGATE(FGenerateItemDelegate, FGridViewItem&);
+    DECLARE_SCRIPT_DELEGATE(FUpdateItemDelegate, void, FGridViewItem&);
+
     CLASS()
     class FUSION_API FGridView : public FStyledWidget
     {
@@ -25,6 +28,8 @@ namespace CE
 
     public: // - Fusion Properties - 
 
+        FUSION_PROPERTY(FGenerateItemDelegate, OnGenerateItem);
+        FUSION_PROPERTY(FUpdateItemDelegate, OnUpdateItem);
 
         FUSION_WIDGET;
     };

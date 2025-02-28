@@ -239,68 +239,6 @@ namespace CE::Editor
                             })
                             .Name("WindowCloseButton")
                             .Style("Button.WindowClose")
-
-                            /*FAssignNew(FButton, minimizeButton)
-                            .OnClicked([this]
-                                {
-                                    static_cast<FNativeContext*>(GetContext())->Minimize();
-                                })
-                            .Padding(Vec4(17, 8, 17, 8))
-                            .Name("WindowMinimizeButton")
-                            .Style("Button.WindowControl")
-                            .VAlign(VAlign::Top)
-                            (
-                                FAssignNew(FImage, minimizeIcon)
-                                .Background(FBrush("/Engine/Resources/Icons/MinimizeIcon"))
-                                .Width(9)
-                                .Height(9)
-                                .HAlign(HAlign::Center)
-                                .VAlign(VAlign::Center)
-                            ),
-
-                            FAssignNew(FButton, maximizeButton)
-                            .OnClicked([this]
-                                {
-                                    FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
-                                    if (nativeContext->IsMaximized())
-                                    {
-                                        nativeContext->Restore();
-                                    }
-                                    else
-                                    {
-                                        nativeContext->Maximize();
-                                    }
-                                })
-                            .Padding(Vec4(17, 8, 17, 8))
-                            .Name("WindowMaximizeButton")
-                            .Style("Button.WindowControl")
-                            .VAlign(VAlign::Top)
-                            (
-                                FAssignNew(FImage, maximizeIcon)
-                                .Background(FBrush("/Engine/Resources/Icons/MaximizeIcon"))
-                                .Width(9)
-                                .Height(9)
-                                .HAlign(HAlign::Center)
-                                .VAlign(VAlign::Center)
-                            ),
-
-                            FAssignNew(FButton, closeButton)
-                            .OnClicked([this]
-                                {
-                                    GetContext()->QueueDestroy();
-                                })
-                            .Padding(Vec4(18, 8, 18, 8))
-                            .Name("WindowCloseButton")
-                            .Style("Button.WindowClose")
-                            .VAlign(VAlign::Top)
-                            (
-                                FNew(FImage)
-                                .Background(FBrush("/Engine/Resources/Icons/CrossIcon"))
-                                .Width(9)
-                                .Height(9)
-                                .HAlign(HAlign::Center)
-                                .VAlign(VAlign::Center)
-                            )*/
                         )
                     ),
 
@@ -317,7 +255,7 @@ namespace CE::Editor
             ) // End of Child
         );
 
-        Array<Ref<FWindowControlButton>> controlGroup = {
+        Array<WeakRef<FWindowControlButton>> controlGroup = {
             closeButton,
             minimizeButton,
             maximizeButton
