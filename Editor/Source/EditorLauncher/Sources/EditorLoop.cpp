@@ -164,6 +164,8 @@ void EditorLoop::PostInit()
 	LoadEngineModules();
 	LoadEditorModules();
 
+	EditorCoreModule* editorCore = static_cast<EditorCoreModule*>(ModuleManager::Get().GetLoadedModule("EditorCore"));
+
 	// Load Project
 	LoadProject();
 
@@ -182,7 +184,8 @@ void EditorLoop::PostInit()
 
 	FusionApplication* fApp = FusionApplication::Get();
 
-	EditorStyle::Initialize();
+	Ref<CrystalEditorStyle> editorStyle = CreateObject<CrystalEditorStyle>(nullptr, "EditorStyle");
+	editorCore->InitializeStyle(editorStyle.Get());
 
 	gEngine->Initialize();
 
@@ -301,6 +304,8 @@ void EditorLoop::RunLoop()
 
 void EditorLoop::PreShutdown()
 {
+	EditorCoreModule* editorCore = static_cast<EditorCoreModule*>(ModuleManager::Get().GetLoadedModule("EditorCore"));
+
 	auto app = PlatformApplication::Get();
 	app->RemoveTickHandler(tickDelegateHandle);
 
@@ -321,7 +326,7 @@ void EditorLoop::PreShutdown()
 
 	fApp->PreShutdown();
 
-	EditorStyle::Shutdown();
+	editorCore->ShutdownStyle();
 
 	fApp->Shutdown();
 	fApp->BeginDestroy();

@@ -82,6 +82,25 @@
 
 namespace CE::Editor
 {
+
+    class EDITORCORE_API EditorCoreModule : public Module
+    {
+    public:
+
+        void StartupModule() override;
+
+        void ShutdownModule() override;
+
+        void RegisterTypes() override;
+
+        void DeregisterTypes() override;
+
+        void InitializeStyle(EditorStyle* style);
+        void ShutdownStyle();
+
+        Ref<EditorStyle> GetEditorStyle();
+
+    };
     
 } // namespace CE::Editor
 

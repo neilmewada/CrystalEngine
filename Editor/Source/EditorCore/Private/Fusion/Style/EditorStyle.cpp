@@ -2,7 +2,7 @@
 
 namespace CE::Editor
 {
-	static EditorStyle* gEditorStyle = nullptr;
+
 
     EditorStyle::EditorStyle()
     {
@@ -11,34 +11,20 @@ namespace CE::Editor
 
     void EditorStyle::Initialize()
     {
-		auto app = FusionApplication::TryGet();
-
-		if (app)
-		{
-			FStyleManager* styleManager = app->GetStyleManager();
-
-			FRootContext* rootContext = app->GetRootContext();
-
-			gEditorStyle = CreateObject<EditorStyle>(nullptr, "RootEditorStyle");
-			gEditorStyle->InitializeDefault();
-
-			styleManager->RegisterStyleSet(gEditorStyle);
-			rootContext->SetDefaultStyleSet(gEditorStyle);
-		}
+    	InitializeDefault();
     }
 
     void EditorStyle::Shutdown()
     {
-		if (gEditorStyle)
-		{
-			gEditorStyle->BeginDestroy();
-			gEditorStyle = nullptr;
-		}
+
     }
 
-    EditorStyle* EditorStyle::Get()
+    Ref<EditorStyle> EditorStyle::Get()
     {
-		return gEditorStyle;
+		EditorCoreModule* module = static_cast<EditorCoreModule*>(ModuleManager::Get().GetLoadedModule(MODULE_NAME));
+    	if (!module)
+    		return nullptr;
+    	return module->GetEditorStyle();
     }
 
     void EditorStyle::InitializeDefault()
