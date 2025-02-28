@@ -173,47 +173,6 @@ namespace CE::Editor
         gridViewModel->SetCurrentDirectory(currentPath);
 
         gridView->OnModelUpdate();
-
-        return;
-
-        gridView->DestroyAllChildren();
-        selectables.Clear();
-
-        if (currentDirectory != nullptr)
-        {
-            for (int i = 0; i < currentDirectory->children.GetSize(); i++)
-            {
-                FSelectableButton* selectable = nullptr;
-
-                gridView->AddChild(
-                    FAssignNew(FSelectableButton, selectable)
-                    .OnSelect([this](FSelectableButton* button)
-                    {
-                        for (const auto& selectable : selectables)
-                        {
-                            if (selectable != button)
-                            {
-                                selectable->Deselect();
-                            }
-                        }
-                    })
-                    .Width(50)
-                    .Height(70)
-                    .Style("SelectableButton")
-                    (
-                        FNew(FLabel)
-                        .Text(String::Format("{}", i + 1))
-                        .FontSize(12)
-                        .Foreground(Color::White())
-                        .HAlign(HAlign::Center)
-                        .VAlign(VAlign::Center)
-                    )
-                );
-
-                selectables.Add(selectable);
-            }
-        }
-
     }
 
 }

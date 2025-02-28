@@ -26,6 +26,49 @@ namespace CE::Editor
             )
         ;
     }
+
+    void AssetBrowserItem::HandleEvent(FEvent* event)
+    {
+        if (auto owner = m_Owner.Lock())
+        {
+            if (event->IsMouseEvent() && !IsInteractionDisabled() && IsVisible())
+            {
+                FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
+
+                if (mouseEvent->type == FEventType::MousePress && mouseEvent->sender == this)
+                {
+                    if (mouseEvent->buttons == MouseButtonMask::Left)
+                    {
+                        if (!EnumHasFlag(mouseEvent->keyModifiers, KeyModifier::Ctrl))
+                        {
+                            owner->DeselectAll();
+                        }
+                    }
+                    else if (mouseEvent->buttons == MouseButtonMask::Right)
+                    {
+
+                    }
+                }
+            }
+        }
+
+        Super::HandleEvent(event);
+    }
+
+
+    void AssetBrowserItem::OnSelected()
+    {
+        Super::OnSelected();
+
+
+    }
+
+    void AssetBrowserItem::OnDeselected()
+    {
+        Super::OnDeselected();
+
+    }
+
     
 }
 

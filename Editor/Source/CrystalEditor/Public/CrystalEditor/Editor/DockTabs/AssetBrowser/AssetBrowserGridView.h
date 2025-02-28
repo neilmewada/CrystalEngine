@@ -31,6 +31,8 @@ namespace CE::Editor
         // Will redraw the items
         void OnModelUpdate();
 
+        void DeselectAll();
+
     protected: // - Internal -
 
         HashSet<AssetBrowserItem*> selectedItems;
