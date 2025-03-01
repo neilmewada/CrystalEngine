@@ -1960,6 +1960,10 @@ namespace CE
             auto app = FusionApplication::Get();
 
             String imageName = currentBrush.GetImageName().GetString();
+            if (imageName.EndsWith("CrossIcon"))
+            {
+                String::IsAlphabet('a');
+            }
 
             auto image = app->GetImageAtlas()->FindImage(currentBrush.GetImageName());
             if (!image.IsValid())
@@ -2199,8 +2203,8 @@ namespace CE
             {
                 if (minMaxPos != nullptr)
                 {
-                    return Vec2(Math::Clamp01((pos.x - minMaxPos->min.x) / (minMaxPos->max.x - minMaxPos->min.x)),
-                        Math::Clamp01((pos.y - minMaxPos->min.y) / (minMaxPos->max.y - minMaxPos->min.y)));
+                    return Vec2(((pos.x - minMaxPos->min.x) / (minMaxPos->max.x - minMaxPos->min.x)),
+                        ((pos.y - minMaxPos->min.y) / (minMaxPos->max.y - minMaxPos->min.y)));
                 }
                 return whitePixelUV;
             };
@@ -2268,7 +2272,7 @@ namespace CE
                 // Inner
                 vertexWritePtr[0].position.x = pos0.x + offset.x; vertexWritePtr[0].position.y = pos0.y + offset.y; vertexWritePtr[0].uv = calculateUV(pos0); vertexWritePtr[0].color = color;        // Inner
                 // Outer
-            	vertexWritePtr[1].position.x = pos1.x + offset.x; vertexWritePtr[1].position.y = pos1.y + offset.y; vertexWritePtr[1].uv = calculateUV(pos0); vertexWritePtr[1].color = transparentColor;  // Outer
+            	vertexWritePtr[1].position.x = pos1.x + offset.x; vertexWritePtr[1].position.y = pos1.y + offset.y; vertexWritePtr[1].uv = calculateUV(pos1); vertexWritePtr[1].color = transparentColor;  // Outer
                 vertexWritePtr[0].drawType = drawType; vertexWritePtr[0].index = (int)drawDataArray.GetCount() - 1;
                 vertexWritePtr[1].drawType = drawType; vertexWritePtr[1].index = (int)drawDataArray.GetCount() - 1;
                 

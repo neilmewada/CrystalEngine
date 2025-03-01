@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_157" : {
+        "_158" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_160" : {
+        "_161" : {
             "name" : "DrawItem2D",
             "members" : [
                 {
@@ -99,12 +99,12 @@
                 }
             ]
         },
-        "_159" : {
+        "_160" : {
             "name" : "type.StructuredBuffer.DrawItem2D",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_160",
+                    "type" : "_161",
                     "array" : [
                         0
                     ],
@@ -116,7 +116,7 @@
                 }
             ]
         },
-        "_163" : {
+        "_164" : {
             "name" : "ClipItem2D",
             "members" : [
                 {
@@ -143,12 +143,12 @@
                 }
             ]
         },
-        "_162" : {
+        "_163" : {
             "name" : "type.StructuredBuffer.ClipItem2D",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_163",
+                    "type" : "_164",
                     "array" : [
                         0
                     ],
@@ -160,7 +160,7 @@
                 }
             ]
         },
-        "_166" : {
+        "_167" : {
             "name" : "ShapeItem2D",
             "members" : [
                 {
@@ -205,12 +205,12 @@
                 }
             ]
         },
-        "_165" : {
+        "_166" : {
             "name" : "type.StructuredBuffer.ShapeItem2D",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_166",
+                    "type" : "_167",
                     "array" : [
                         0
                     ],
@@ -222,7 +222,7 @@
                 }
             ]
         },
-        "_169" : {
+        "_170" : {
             "name" : "LineItem2D",
             "members" : [
                 {
@@ -242,12 +242,12 @@
                 }
             ]
         },
-        "_168" : {
+        "_169" : {
             "name" : "type.StructuredBuffer.LineItem2D",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_169",
+                    "type" : "_170",
                     "array" : [
                         0
                     ],
@@ -259,7 +259,7 @@
                 }
             ]
         },
-        "_172" : {
+        "_173" : {
             "name" : "ClipItemData",
             "members" : [
                 {
@@ -269,12 +269,12 @@
                 }
             ]
         },
-        "_171" : {
+        "_172" : {
             "name" : "type.StructuredBuffer.ClipItemData",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_172",
+                    "type" : "_173",
                     "array" : [
                         0
                     ],
@@ -286,7 +286,7 @@
                 }
             ]
         },
-        "_174" : {
+        "_175" : {
             "name" : "type._DrawDataConstants",
             "members" : [
                 {
@@ -296,7 +296,7 @@
                 }
             ]
         },
-        "_179" : {
+        "_180" : {
             "name" : "GlyphItem",
             "members" : [
                 {
@@ -311,12 +311,12 @@
                 }
             ]
         },
-        "_178" : {
+        "_179" : {
             "name" : "type.StructuredBuffer.GlyphItem",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_179",
+                    "type" : "_180",
                     "array" : [
                         0
                     ],
@@ -400,7 +400,7 @@
     ],
     "ssbos" : [
         {
-            "type" : "_159",
+            "type" : "_160",
             "name" : "type.StructuredBuffer.DrawItem2D",
             "readonly" : true,
             "block_size" : 0,
@@ -408,7 +408,7 @@
             "binding" : 0
         },
         {
-            "type" : "_162",
+            "type" : "_163",
             "name" : "type.StructuredBuffer.ClipItem2D",
             "readonly" : true,
             "block_size" : 0,
@@ -416,7 +416,7 @@
             "binding" : 1
         },
         {
-            "type" : "_165",
+            "type" : "_166",
             "name" : "type.StructuredBuffer.ShapeItem2D",
             "readonly" : true,
             "block_size" : 0,
@@ -424,7 +424,7 @@
             "binding" : 2
         },
         {
-            "type" : "_168",
+            "type" : "_169",
             "name" : "type.StructuredBuffer.LineItem2D",
             "readonly" : true,
             "block_size" : 0,
@@ -432,7 +432,7 @@
             "binding" : 3
         },
         {
-            "type" : "_171",
+            "type" : "_172",
             "name" : "type.StructuredBuffer.ClipItemData",
             "readonly" : true,
             "block_size" : 0,
@@ -440,7 +440,7 @@
             "binding" : 4
         },
         {
-            "type" : "_178",
+            "type" : "_179",
             "name" : "type.StructuredBuffer.GlyphItem",
             "readonly" : true,
             "block_size" : 0,
@@ -450,14 +450,14 @@
     ],
     "ubos" : [
         {
-            "type" : "_157",
+            "type" : "_158",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,
             "binding" : 0
         },
         {
-            "type" : "_174",
+            "type" : "_175",
             "name" : "type._DrawDataConstants",
             "block_size" : 4,
             "set" : 6,
