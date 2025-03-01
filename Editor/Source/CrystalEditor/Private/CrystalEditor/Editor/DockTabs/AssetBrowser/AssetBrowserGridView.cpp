@@ -5,7 +5,7 @@ namespace CE::Editor
 
     AssetBrowserGridView::AssetBrowserGridView()
     {
-
+        
     }
 
     void AssetBrowserGridView::Construct()
