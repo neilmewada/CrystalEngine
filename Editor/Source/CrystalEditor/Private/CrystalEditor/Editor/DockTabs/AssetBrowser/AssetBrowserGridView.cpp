@@ -23,7 +23,7 @@ namespace CE::Editor
 
     void AssetBrowserGridView::OnModelUpdate()
     {
-        DestroyAllChildren();
+        QueueDestroyAllChildren();
         items.Clear();
 
         if (!m_Model)
