@@ -17,7 +17,11 @@ namespace CE
     {
         Super::InitEditorStyle();
 
-
+        if (!assetBrowserItem)
+        {
+            assetBrowserItem = CreateObject<AssetBrowserItemStyle>(this, "AssetBrowserItem");
+            Add(assetBrowserItem.Get());
+        }
     }
 
     

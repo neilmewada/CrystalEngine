@@ -10,6 +10,7 @@
 #include "EditorEngine.h"
 
 // Common
+#include "CrystalEditor/Style/AssetBrowserItemStyle.h"
 #include "CrystalEditor/Style/CrystalEditorStyle.h"
 
 // ------------------------------------------------

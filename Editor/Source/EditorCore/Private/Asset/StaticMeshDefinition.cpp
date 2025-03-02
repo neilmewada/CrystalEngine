@@ -17,4 +17,8 @@ namespace CE::Editor
         return GetStaticClass<StaticMeshAssetImporter>();
     }
 
+    SubClassType<Asset> StaticMeshAssetDefinition::GetAssetClass()
+    {
+        return CE::StaticMesh::StaticClass();
+    }
 } // namespace CE::Editor

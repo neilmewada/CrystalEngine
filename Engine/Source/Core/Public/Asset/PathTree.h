@@ -62,6 +62,7 @@ namespace CE
 		virtual ~PathTree();
 
 		bool AddPath(const Name& path, void* userData = nullptr, u32 userDataSize = 0);
+		bool AddPath(const Name& path, PathTreeNodeType nodeType, void* userData = nullptr, u32 userDataSize = 0);
 
 		bool RemovePath(const Name& path);
 

@@ -15,5 +15,9 @@ namespace CE::Editor
 	{
 		return GetStaticClass<ShaderAssetImporter>();
 	}
-    
+
+	SubClassType<Asset> ShaderAssetDefinition::GetAssetClass()
+	{
+		return CE::Shader::StaticClass();
+	}
 } // namespace CE::Editor

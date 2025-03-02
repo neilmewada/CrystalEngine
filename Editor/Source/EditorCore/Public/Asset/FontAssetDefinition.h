@@ -14,6 +14,8 @@ namespace CE::Editor
 
 		virtual SubClass<AssetImporter> GetAssetImporterClass() override;
 
+		virtual SubClassType<Asset> GetAssetClass() override;
+
 	};
 
 } // namespace CE::Editor

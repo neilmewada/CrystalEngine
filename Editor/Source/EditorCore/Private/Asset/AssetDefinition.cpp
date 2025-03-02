@@ -12,5 +12,10 @@ namespace CE::Editor
     {
         
     }
-    
+
+    CE::Name AssetDefinition::GetIconPath()
+    {
+        return "/Editor/Assets/Icons/AssetIcons/DefaultFile";
+    }
+
 } // namespace CE::Editor

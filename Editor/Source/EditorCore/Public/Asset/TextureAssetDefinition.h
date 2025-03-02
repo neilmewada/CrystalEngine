@@ -14,6 +14,10 @@ namespace CE::Editor
 
 		virtual SubClassType<AssetImporter> GetAssetImporterClass() override;
 
+		virtual SubClassType<Asset> GetAssetClass() override;
+
+		virtual CE::Name GetIconPath() override;
+
 	};
 
 } // namespace CE::Editor

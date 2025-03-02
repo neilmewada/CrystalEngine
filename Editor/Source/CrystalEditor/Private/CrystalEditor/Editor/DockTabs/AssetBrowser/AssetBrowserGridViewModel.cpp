@@ -32,6 +32,8 @@ namespace CE::Editor
             return;
 
         registry->AddRegistryListener(this);
+
+        currentDirectory = registry->GetCachedPathTree().GetRootNode();
     }
 
     void AssetBrowserGridViewModel::OnBeforeDestroy()
