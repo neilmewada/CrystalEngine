@@ -55,6 +55,8 @@ namespace CE
         FUSION_PROPERTY(f32, VerticalScrollSensitivity);
         FUSION_PROPERTY(f32, HorizontalScrollSensitivity);
 
+        FUSION_EVENT(ScriptEvent<void(FScrollBox*)>, OnBackgroundClicked);
+
         Self& NormalizedScrollY(f32 value);
         f32 NormalizedScrollY();
 

@@ -12,6 +12,8 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        Style("EditorMinorDockTab");
+
         (*this)
         .Title("Assets")
         .Content(
@@ -83,6 +85,10 @@ namespace CE::Editor
                     FNew(FScrollBox)
                     .VerticalScroll(true)
                     .HorizontalScroll(false)
+                    .OnBackgroundClicked([this]
+                    {
+                        gridView->DeselectAll();
+                    })
                     .HAlign(HAlign::Fill)
                     .FillRatio(1.0f)
                     (
@@ -95,8 +101,7 @@ namespace CE::Editor
                     )
                 )
             )
-        )
-        .Style("EditorMinorDockTab");
+        );
 
         leftSections = { directorySection };
 
@@ -107,6 +112,10 @@ namespace CE::Editor
         gridViewModel = CreateObject<AssetBrowserGridViewModel>(this, "GridViewModel");
         gridViewModel->Init();
         gridView->Model(gridViewModel);
+
+        currentPath = "/";
+        currentDirectory = AssetRegistry::Get()->GetCachedPathTree().GetRootNode();
+        UpdateAssetGridView();
     }
 
     void AssetBrowser::OnAssetPathTreeUpdated(PathTree& pathTree)
@@ -144,12 +153,12 @@ namespace CE::Editor
 
             PathTreeNode* node = (PathTreeNode*)index.GetDataPtr();
 
-            if (!directoryTree.GetRootNode()->ChildExistsRecursive(node))
+            /*if (!directoryTree.GetRootNode()->ChildExistsRecursive(node))
             {
                 // Directory was deleted!
                 selectionModel->ClearSelection(); // This will recursively call current function again
                 break;
-            }
+            }*/
 
             if (currentDirectory != node)
             {

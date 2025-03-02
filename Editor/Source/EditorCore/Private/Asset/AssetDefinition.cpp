@@ -18,4 +18,9 @@ namespace CE::Editor
         return "/Editor/Assets/Icons/AssetIcons/DefaultFile";
     }
 
+    String AssetDefinition::GetTypeDisplayName()
+    {
+        return GetAssetClass()->GetName().GetLastComponent();
+    }
+
 } // namespace CE::Editor

@@ -308,6 +308,11 @@ namespace CE
                     isHScroll = true;
                 }
             }
+
+            if (mouseEvent->type == FEventType::MousePress && event->sender == this && !isVScroll && !isHScroll)
+            {
+                m_OnBackgroundClicked(this);
+            }
             
             if (mouseEvent->type == FEventType::DragBegin && event->sender == this)
             {

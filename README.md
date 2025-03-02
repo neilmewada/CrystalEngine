@@ -1,6 +1,6 @@
 # Crystal Engine
 
-A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based render architecture, and a declarative syntax Widget GUI framework built from scratch that is used for the editor GUI.
+A WIP cross-platform Vulkan game engine with PBR rendering, Directed Acyclic FrameGraph based render architecture, and a declarative syntax Widget GUI framework built from scratch that is used for the editor GUI.
 
 ![](./Screenshots/NewEditor_Mac.png)
 
@@ -12,7 +12,7 @@ A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based rende
 
 The engine and editor compiles and runs on **Windows (x64)**, Linux (Ubuntu) and Mac (Apple Silicon).
 
-**Update**: I am currently developing this engine on an Apple Silicon MacBook Pro, so I can't guarantee the stability of Windows and Linux builds at the moment.
+**Update**: I am currently developing this engine on an Apple Silicon MacBook Pro, so I can't guarantee the stability of Windows and Linux builds at the moment. Feel free to go ahead and compile it on your device and share your experience!
 
 ## Building
 

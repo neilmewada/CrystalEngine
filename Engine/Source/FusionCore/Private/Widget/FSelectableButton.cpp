@@ -74,7 +74,17 @@ namespace CE
             else if (mouseEvent->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Right && !mouseEvent->isConsumed &&
                 !mouseEvent->isDoubleClick)
             {
+                if (m_RightClickSelects && !EnumHasFlag(buttonState, FSelectableButtonState::Active))
+                {
+                    buttonState |= FSelectableButtonState::Active;
+                    ApplyStyle();
+
+                    m_OnSelect(this);
+                }
+
                 m_OnRightClick(this);
+
+                event->Consume(this);
             }
             else if (mouseEvent->type == FEventType::MouseRelease && mouseEvent->buttons == MouseButtonMask::Left)
             {

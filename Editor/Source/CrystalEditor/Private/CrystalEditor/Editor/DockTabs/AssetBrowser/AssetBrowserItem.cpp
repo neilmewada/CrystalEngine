@@ -13,6 +13,7 @@ namespace CE::Editor
         Super::Construct();
 
         (*this)
+            .RightClickSelects(true)
             .Width(80)
             .Height(110)
             .Style("AssetBrowserItem")
@@ -70,16 +71,12 @@ namespace CE::Editor
 
                 if (mouseEvent->type == FEventType::MousePress && mouseEvent->sender == this)
                 {
-                    if (mouseEvent->buttons == MouseButtonMask::Left)
+                    if (mouseEvent->buttons == MouseButtonMask::Left || mouseEvent->buttons == MouseButtonMask::Right)
                     {
                         if (!EnumHasFlag(mouseEvent->keyModifiers, KeyModifier::Ctrl))
                         {
                             owner->DeselectAll();
                         }
-                    }
-                    else if (mouseEvent->buttons == MouseButtonMask::Right)
-                    {
-
                     }
                 }
             }
