@@ -39,7 +39,7 @@ namespace CE
 	    return Super::GetLodSubMeshCount(lodIndex);
     }
 
-    void StaticMeshComponent::SetStaticMesh(StaticMesh* staticMesh)
+    void StaticMeshComponent::SetStaticMesh(Ref<StaticMesh> staticMesh)
     {
         this->staticMesh = staticMesh;
         meshChanged = true;
