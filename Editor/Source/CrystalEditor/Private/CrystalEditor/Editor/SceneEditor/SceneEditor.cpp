@@ -86,12 +86,24 @@ namespace CE::Editor
                 cubeMesh->SetModelAsset(cubeModel);
             }
 
+            Ref<StaticMesh> chairMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Engine/Assets/Sandbox/chair");
+            StaticMeshActor* chairActor = CreateObject<StaticMeshActor>(scene, "ChairActor");
+            scene->AddActor(chairActor);
+            {
+                StaticMeshComponent* meshComponent = chairActor->GetMeshComponent();
+                meshComponent->SetStaticMesh(chairMesh);
+                meshComponent->SetLocalPosition(Vec3(0, 0, 5));
+                meshComponent->SetLocalEulerAngles(Vec3(-90, -180, 0));
+                meshComponent->SetLocalScale(Vec3(1, 1, 1) * 0.05f);
+                meshComponent->SetMaterial(plasticMaterial, 0, 0);
+            }
+
             StaticMeshActor* sphereActor = CreateObject<StaticMeshActor>(scene, "SphereMesh");
             scene->AddActor(sphereActor);
 	        {
 		        StaticMeshComponent* meshComponent = sphereActor->GetMeshComponent();
             	meshComponent->SetStaticMesh(sphereMesh);
-            	meshComponent->SetLocalPosition(Vec3(0, 0, 5));
+            	meshComponent->SetLocalPosition(Vec3(3, 0, 5));
             	meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
             	meshComponent->SetMaterial(aluminumMaterial, 0, 0);
 	        }

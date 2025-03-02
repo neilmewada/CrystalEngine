@@ -17,7 +17,7 @@ namespace CE
 
 		virtual u32 GetLodSubMeshCount(u32 lodIndex) override;
 
-		void SetStaticMesh(StaticMesh* staticMesh);
+		void SetStaticMesh(Ref<StaticMesh> staticMesh);
         
 	protected:
 
@@ -28,7 +28,7 @@ namespace CE
 		void Tick(f32 delta) override;
 
 		FIELD(EditAnywhere, Category = "Static Mesh")
-		StaticMesh* staticMesh = nullptr;
+		Ref<StaticMesh> staticMesh = nullptr;
 
 		RPI::ModelHandle meshHandle{};
 
