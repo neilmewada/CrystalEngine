@@ -24,6 +24,8 @@ namespace CE::Editor
         virtual SubClassType<Asset> GetAssetClass() = 0;
 
         virtual CE::Name GetIconPath();
+
+    	virtual String GetTypeDisplayName();
         
     protected:
         

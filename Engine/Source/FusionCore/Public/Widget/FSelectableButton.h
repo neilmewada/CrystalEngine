@@ -54,6 +54,8 @@ namespace CE
         FUSION_EVENT(FSelectableButtonEvent, OnDoubleClick);
         FUSION_EVENT(FSelectableButtonEvent, OnRightClick);
 
+        FUSION_PROPERTY(bool, RightClickSelects);
+
         FUSION_WIDGET;
     };
     
