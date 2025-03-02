@@ -151,6 +151,30 @@ namespace CE
 		return true;
 	}
 
+	bool PathTree::AddPath(const Name& path, PathTreeNodeType nodeType, void* userData, u32 userDataSize)
+	{
+		if (!path.IsValid())
+			return false;
+
+		const String& pathStr = path.GetString();
+		if (!pathStr.StartsWith("/"))
+			return false;
+
+		Array<String> components = {};
+		pathStr.Split(Array<String>{ "/", "\\" }, components);
+
+		PathTreeNode* curNode = rootNode;
+
+		for (int i = 0; i < components.GetSize(); i++)
+		{
+			const String& component = components[i];
+
+			curNode = curNode->GetOrAddChild(component, nodeType, userData, userDataSize);
+		}
+
+		return true;
+	}
+
 	bool PathTree::RemovePath(const Name& path)
 	{
 		if (!path.IsValid())

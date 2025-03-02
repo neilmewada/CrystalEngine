@@ -15,7 +15,7 @@ namespace CE::Editor
         (*this)
             .Width(80)
             .Height(110)
-            .Style("SelectableButton")
+            .Style("AssetBrowserItem")
             (
                 FNew(FVerticalStack)
                 .Gap(2)
@@ -23,12 +23,12 @@ namespace CE::Editor
                 .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Fill)
                 (
-                    FNew(FStyledWidget)
+                    FAssignNew(FStyledWidget, iconBg)
                     .Background(Color::Black())
                     .BackgroundShape(FRoundedRectangle(5, 5, 0, 0))
                     .Height(70)
                     (
-                        FNew(FStyledWidget)
+                        FAssignNew(FStyledWidget, icon)
                         .Background(FBrush("/Editor/Assets/Icons/Folder_Large"))
                         .Width(48)
                         .Height(48)
@@ -57,8 +57,7 @@ namespace CE::Editor
                     .VAlign(VAlign::Bottom)
                     .Margin(Vec4(2.5f, 0, 0, 0))
                 )
-            )
-        ;
+            );
     }
 
     void AssetBrowserItem::HandleEvent(FEvent* event)
@@ -110,8 +109,40 @@ namespace CE::Editor
         if (!node)
             return;
 
+        isDirectory = node->nodeType == PathTreeNodeType::Directory;
+
+        titleLabel->HAlign(isDirectory ? HAlign::Center : HAlign::Left);
+        iconBg->Background(isDirectory ? Color::Clear() : Color::Black());
+        subtitleLabel->Visible(!isDirectory);
+        auto assetData = (AssetData*)node->userData;
+
+        icon->Background(isDirectory 
+            ? FBrush("/Editor/Assets/Icons/Folder_Large")
+            : FBrush("/Editor/Assets/Icons/AssetIcons/DefaultFile"));
+
+        if (!isDirectory && assetData != nullptr)
+        {
+            Array<String> split;
+            assetData->assetClassPath.GetString().Split({ "::", "." }, split);
+
+            ClassType* assetClass = ClassType::FindClass(assetData->assetClassPath);
+            if (assetClass != nullptr)
+            {
+                AssetDefinition* assetDef = GetAssetDefinitionRegistry()->FindAssetDefinition(assetClass);
+                if (assetDef)
+                {
+                    icon->Background(FBrush(assetDef->GetIconPath()));
+                }
+            }
+
+            subtitleLabel->Text(split.GetLast());
+        }
+
         Title(node->name.GetString());
+
         fullPath = node->GetFullPath();
+
+        ApplyStyle();
     }
 
 }

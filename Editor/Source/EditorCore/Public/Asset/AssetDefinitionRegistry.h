@@ -14,6 +14,8 @@ namespace CE::Editor
         ~AssetDefinitionRegistry();
 
 		AssetDefinition* FindAssetDefinition(const String& sourceExtension);
+
+        AssetDefinition* FindAssetDefinition(const SubClass<Asset>& assetClass);
         
     protected:
         
@@ -26,6 +28,7 @@ namespace CE::Editor
         DelegateHandle classDeregHandle = 0;
         
         Array<AssetDefinition*> assetDefinitions{};
+
     };
     
 } // namespace CE::Editor

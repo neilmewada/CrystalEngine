@@ -460,7 +460,7 @@ namespace CE
 			return;
 
 		allAssetDatas.Add(assetData);
-		cachedPathTree.AddPath(bundleName, assetData);
+		cachedPathTree.AddPath(bundleName, PathTreeNodeType::Asset, assetData);
 		cachedAssetsByPath[bundleName].Add(assetData);
 		cachedPrimaryAssetByPath[bundleName] = assetData;
 		cachedPrimaryAssetByBundleUuid[assetData->bundleUuid] = assetData;

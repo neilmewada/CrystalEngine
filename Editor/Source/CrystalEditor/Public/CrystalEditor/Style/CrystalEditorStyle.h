@@ -16,6 +16,8 @@ namespace CE
 
         void InitEditorStyle() override;
 
+        Ref<AssetBrowserItemStyle> assetBrowserItem;
+
     };
     
 } // namespace CE

@@ -16,4 +16,9 @@ namespace CE::Editor
 		return GetStaticClass<FontAssetImporter>();
 	}
 
+	SubClassType<Asset> FontAssetDefinition::GetAssetClass()
+	{
+		return CE::Font::StaticClass();
+	}
+
 } // namespace CE::Editor

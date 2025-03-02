@@ -20,6 +20,10 @@ namespace CE::Editor
         virtual const Array<String>& GetSourceExtensions() = 0;
         
         virtual SubClassType<AssetImporter> GetAssetImporterClass() = 0;
+
+        virtual SubClassType<Asset> GetAssetClass() = 0;
+
+        virtual CE::Name GetIconPath();
         
     protected:
         

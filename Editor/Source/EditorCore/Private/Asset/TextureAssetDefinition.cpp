@@ -16,4 +16,14 @@ namespace CE::Editor
 		return GetStaticClass<TextureAssetImporter>();
 	}
 
+	SubClassType<Asset> TextureAssetDefinition::GetAssetClass()
+	{
+		return CE::Texture::StaticClass();
+	}
+
+	CE::Name TextureAssetDefinition::GetIconPath()
+	{
+		return "/Editor/Assets/Icons/AssetIcons/Texture";
+	}
+
 } // namespace CE::Editor

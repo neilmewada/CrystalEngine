@@ -23,12 +23,17 @@ namespace CE::Editor
 
         CE::Name GetFullPath() const { return fullPath; }
 
+        bool IsDirectory() const { return isDirectory; }
+
     protected: // - Internal -
 
         Ref<FLabel> titleLabel;
         Ref<FLabel> subtitleLabel;
+        Ref<FStyledWidget> icon;
+        Ref<FStyledWidget> iconBg;
 
         CE::Name fullPath;
+        bool isDirectory = false;
 
     public: // - Fusion Properties -
 
