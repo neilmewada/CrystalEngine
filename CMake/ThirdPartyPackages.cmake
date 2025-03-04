@@ -18,7 +18,7 @@ option(BUILD_SHARED_LIBS OFF)
 
 # Enable these
 #find_package(dxcompiler REQUIRED)
-#find_package(ispctexturecompressor REQUIRED)
+find_package(ispctexturecompressor REQUIRED)
 
 #FetchContent_Declare(
 #    tracy
