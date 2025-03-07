@@ -138,10 +138,7 @@ namespace CE::Editor
                     FNew(FTextButton)
                     .FontSize(10)
                     .Text("Randomize")
-                    .OnClicked([this]
-                        {
-                            model->ModifyTextInCode();
-                        }),
+                    .OnClicked(FUNCTION_BINDING(model, ModifyTextInCode)),
 
                     FNew(FLabel)
                     .FontSize(13)

@@ -12,6 +12,7 @@ namespace CE::Editor
 
         void OnModelPropertyEdited(const CE::Name& propertyName, Object* modifyingObject) override;
 
+        FUNCTION()
         void ModifyTextInCode();
 
     public: // Model properties

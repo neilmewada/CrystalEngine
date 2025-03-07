@@ -8,11 +8,15 @@
 #define FNew(WidgetClass)\
 	(*CreateObject<WidgetClass>(this, #WidgetClass, OF_NoFlags))
 
+#define FNewNamed(WidgetClass, name)\
+	(*CreateObject<WidgetClass>(this, #WidgetClass, OF_NoFlags)).Name(name).As<WidgetClass>()
+
 #define FNewDynamic(WidgetClass, WidgetDynamicClass)\
 	(*CreateObject<WidgetClass>(this, #WidgetClass, OF_NoFlags, WidgetDynamicClass))
 
 #define FAssignNew(WidgetClass, VariableName) FNew(WidgetClass).Assign(VariableName)
 #define FAssignNewDynamic(WidgetClass, VariableName, WidgetDynamicClass) FNewDynamic(WidgetClass, WidgetDynamicClass).Assign(VariableName)
+#define FAssignNewNamed(WidgetClass, VariableName, name) FNew(WidgetClass).Name(name).Assign(VariableName)
 
 #define FAssignNewOwned(WidgetClass, VariableName, Parent) FNewOwned(WidgetClass, Parent).Assign(VariableName)
 #define FAssignNewOwnedDynamic(WidgetClass, VariableName, Parent, WidgetDynamicClass) FNewOwnedDynamic(WidgetClass, Parent, WidgetDynamicClass).Assign(VariableName)

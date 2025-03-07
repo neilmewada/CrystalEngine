@@ -100,6 +100,13 @@ namespace CE
             const SubClass<FWindow>& windowClass, 
             const PlatformWindowInfo& info = {});
 
+        template<typename TWindow> requires TIsBaseClassOf<FWindow, TWindow>::Value
+        Ref<TWindow> CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height,
+            const PlatformWindowInfo& info = {})
+        {
+            return (Ref<TWindow>)CreateNativeWindow(windowName, title, width, height, TWindow::StaticClass(), info);
+        }
+
         ScriptEvent<void(FGameWindow*)> onRenderViewportDestroyed;
 
         ScriptEvent<void(void)> onFrameGraphUpdateRequested;

@@ -434,11 +434,10 @@ namespace CE::Editor
                     )
                 ),
 
-                FNew(FMenuItem)
+                FNewNamed(FMenuItem, "HelpMenuItem")
                 .Text("Help")
                 .SubMenu(
-					FNew(EditorMenuPopup)
-                    .Name("HelpMenu")
+					FNewNamed(EditorMenuPopup, "HelpMenu")
                     .As<EditorMenuPopup>()
                     .Gap(0)
                     .Content(
@@ -449,6 +448,14 @@ namespace CE::Editor
                             SampleWidgetWindow::Show();
                         }),
 
+                        // TODO: Add Fusion Demo here
+                        FNew(FMenuItem)
+                        .Text("Fusion Demo")
+                        .OnClick([this]
+                        {
+                            FusionDemoWindow::Show();
+                        }),
+
 						FNew(FMenuItem)
                         .Text("About")
                         .OnClick([this]
@@ -457,7 +464,6 @@ namespace CE::Editor
                         })
                     )
                 )
-                .Name("HelpMenuItem")
             )
             ;
     }
