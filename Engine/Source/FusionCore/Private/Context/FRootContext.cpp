@@ -21,11 +21,11 @@ namespace CE
 
         for (int i = childContexts.GetSize() - 1; i >= 0; --i)
         {
-			FFusionContext* childContext = childContexts[i];
+			Ref<FFusionContext> childContext = childContexts[i];
 			if (!childContext->IsOfType<FNativeContext>())
 				continue;
 
-			TickNativeContextInput(static_cast<FNativeContext*>(childContext));
+			TickNativeContextInput(static_cast<FNativeContext*>(childContext.Get()));
         }
 
     }
@@ -38,7 +38,7 @@ namespace CE
 			return;
 
 		PlatformWindow* platformWindow = nativeContext->platformWindow;
-		FWidget* owningWidget = nativeContext->owningWidget;
+		Ref<FWidget> owningWidget = nativeContext->owningWidget;
 
 		if (!owningWidget || FusionApplication::Get()->isExposed || !platformWindow->IsShown())
 		{
@@ -301,9 +301,11 @@ namespace CE
 			FFocusEvent focusEvent{};
 			focusEvent.gotFocus = true;
 			focusEvent.type = FEventType::FocusChanged;
-			focusEvent.sender = owningWidget;
-			focusEvent.focusedWidget = owningWidget;
+			focusEvent.sender = owningWidget.Get();
+			focusEvent.focusedWidget = owningWidget.Get();
 			focusEvent.direction = FEventDirection::BottomToTop;
+
+			//CE_LOG(Info, All, "Focus GOT 1: {}", owningWidget->GetName());
 
 			owningWidget->HandleEvent(&focusEvent);
 		}
@@ -312,9 +314,11 @@ namespace CE
 			FFocusEvent focusEvent{};
 			focusEvent.gotFocus = false;
 			focusEvent.type = FEventType::FocusChanged;
-			focusEvent.sender = owningWidget;
+			focusEvent.sender = owningWidget.Get();
 			focusEvent.focusedWidget = nullptr;
 			focusEvent.direction = FEventDirection::TopToBottom;
+
+			//CE_LOG(Info, All, "Focus LOST 1: {}", owningWidget->GetName());
 
 			owningWidget->HandleEvent(&focusEvent);
 

@@ -26,6 +26,17 @@ namespace CE
 
     }
 
+    void FPopup::SetContextWidget(Ref<FWidget> widget)
+    {
+        this->contextWidget = widget;
+    }
+
+    Ref<FWidget> FPopup::GetContextWidget()
+    {
+        return contextWidget.Lock();
+    }
+
+
     void FPopup::HandleEvent(FEvent* event)
     {
         if (event->type == FEventType::FocusChanged)

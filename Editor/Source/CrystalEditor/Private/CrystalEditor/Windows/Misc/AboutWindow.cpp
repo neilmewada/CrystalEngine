@@ -103,14 +103,14 @@ namespace CE::Editor
         window->SetBorderless(true);
 
         FRootContext* rootContext = FusionApplication::Get()->GetRootContext();
-        FFusionContext* parentContext = rootContext;
+        Ref<FFusionContext> parentContext = rootContext;
         if (rootContext->GetChildContexts().NotEmpty())
         {
             // FRootContext should have only 1 NativeContext which is the primary Native Window
             parentContext = rootContext->GetChildContexts().GetFirst();
         }
 
-        FNativeContext* context = FNativeContext::Create(window, "AboutWindow", parentContext);
+        FNativeContext* context = FNativeContext::Create(window, "AboutWindow", parentContext.Get());
         parentContext->AddChildContext(context);
 
         AboutWindow* aboutWindow = nullptr;

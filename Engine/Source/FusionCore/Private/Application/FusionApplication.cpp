@@ -286,7 +286,7 @@ namespace CE
         ClassType* clazz = windowClass;
 
         FRootContext* rootContext = FusionApplication::Get()->GetRootContext();
-        FFusionContext* parentContext = rootContext;
+        Ref<FFusionContext> parentContext = rootContext;
         if (rootContext->GetChildContexts().NotEmpty())
         {
             // FRootContext should have only 1 NativeContext which is the primary Native Window
@@ -303,7 +303,7 @@ namespace CE
         PlatformWindow* window = PlatformApplication::Get()->CreatePlatformWindow(title, (u32)(width * scaling), (u32)(height * scaling), info);
         window->SetBorderless(true);
 
-        FNativeContext* context = FNativeContext::Create(window, windowName.GetString(), parentContext);
+        FNativeContext* context = FNativeContext::Create(window, windowName.GetString(), parentContext.Get());
         parentContext->AddChildContext(context);
 
         Ref<FWindow> outWindow = nullptr;
@@ -376,12 +376,12 @@ namespace CE
 
         for (int i = rootContext->childContexts.GetSize() - 1; i >= 0; i--)
         {
-            FFusionContext* context = rootContext->childContexts[i];
+            Ref<FFusionContext> context = rootContext->childContexts[i];
 
             if (!context->IsOfType<FNativeContext>())
                 continue;
 
-            FNativeContext* nativeContext = static_cast<FNativeContext*>(context);
+            FNativeContext* nativeContext = static_cast<FNativeContext*>(context.Get());
             
             if (window->IsMainWindow() || nativeContext->GetPlatformWindow() == window)
             {

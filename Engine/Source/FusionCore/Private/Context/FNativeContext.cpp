@@ -218,7 +218,7 @@ namespace CE
 
 		if (owningWidget != nullptr && owningWidget->IsOfType<FWindow>())
 		{
-			FWindow* windowWidget = static_cast<FWindow*>(owningWidget);
+			FWindow* windowWidget = static_cast<FWindow*>(owningWidget.Get());
 			windowWidget->OnMaximized();
 		}
 	}
@@ -234,7 +234,7 @@ namespace CE
 
 		if (owningWidget != nullptr && owningWidget->IsOfType<FWindow>())
 		{
-			FWindow* windowWidget = static_cast<FWindow*>(owningWidget);
+			FWindow* windowWidget = static_cast<FWindow*>(owningWidget.Get());
 			windowWidget->OnRestored();
 		}
 	}
@@ -250,7 +250,7 @@ namespace CE
 
 		if (owningWidget != nullptr && owningWidget->IsOfType<FWindow>())
 		{
-			FWindow* windowWidget = static_cast<FWindow*>(owningWidget);
+			FWindow* windowWidget = static_cast<FWindow*>(owningWidget.Get());
 			windowWidget->OnMinimized();
 		}
 	}
@@ -378,11 +378,12 @@ namespace CE
 	void FNativeContext::PushNativePopup(FPopup* popup, Vec2 globalPosition, Vec2 size)
 	{
 		ZoneScoped;
+		// TODO: This is broken!
 
 		if (!popup)
 			return;
 
-		for (FFusionContext* context : childContexts)
+		for (Ref<FFusionContext> context : childContexts)
 		{
 			if (context->owningWidget == popup)
 				return;

@@ -30,7 +30,7 @@ namespace CE
 
 		TickInput();
 
-		for (FFusionContext* childContext : childContexts)
+		for (Ref<FFusionContext> childContext : childContexts)
 		{
 			childContext->Tick();
 		}
@@ -82,7 +82,7 @@ namespace CE
 			}
 		}
 
-		for (FFusionContext* childContext : childContexts)
+		for (Ref<FFusionContext> childContext : childContexts)
 		{
 			childContext->DoLayout();
 		}
@@ -120,7 +120,7 @@ namespace CE
 		{
 			return parentContext->GetDefaultStyleSet();
 		}
-		return defaultStyleSet;
+		return defaultStyleSet.Get();
 	}
 
 	void FFusionContext::OnWidgetDestroyed(FWidget* widget)
@@ -170,7 +170,7 @@ namespace CE
 		if (parentContext == nullptr) // Root context
 			return true;
 
-		for (FFusionContext* childContext : childContexts)
+		for (Ref<FFusionContext> childContext : childContexts)
 		{
 			if (childContext->IsFocused())
 				return true;
@@ -197,7 +197,7 @@ namespace CE
 		layoutDirty = true;
 		dirty = true;
 
-		for (FFusionContext* childContext : childContexts)
+		for (Ref<FFusionContext> childContext : childContexts)
 		{
 			childContext->MarkLayoutDirty();
 		}
@@ -207,7 +207,7 @@ namespace CE
 	{
 		dirty = true;
 
-		for (FFusionContext* childContext : childContexts)
+		for (Ref<FFusionContext> childContext : childContexts)
 		{
 			childContext->MarkDirty();
 		}
@@ -287,7 +287,7 @@ namespace CE
 		
 	}
 
-	bool FFusionContext::ClosePopup(FPopup* popup)
+	bool FFusionContext::ClosePopup(Ref<FPopup> popup)
 	{
 		if (!popup)
 			return true;
@@ -318,19 +318,19 @@ namespace CE
 		FRootContext* rootContext = Object::CastTo<FRootContext>(GetRootContext());
 
 		if (rootContext && rootContext->curFocusWidget != nullptr &&
-			(rootContext->curFocusWidget == popup || rootContext->curFocusWidget->ParentExistsRecursive(popup)))
+			(rootContext->curFocusWidget == popup || rootContext->curFocusWidget->ParentExistsRecursive(popup.Get())))
 		{
 			if (localPopupStack.NotEmpty())
 			{
 				rootContext->SetFocusWidget(localPopupStack.Top().Get());
 			}
-			else if (popup->IsOfType<FMenuPopup>() && ((FMenuPopup*)popup)->ownerItem != nullptr)
+			else if (popup->IsOfType<FMenuPopup>() && ((FMenuPopup*)popup.Get())->ownerItem != nullptr)
 			{
-				rootContext->SetFocusWidget(((FMenuPopup*)popup)->ownerItem);
+				rootContext->SetFocusWidget(((FMenuPopup*)popup.Get())->ownerItem);
 			}
 			else if (owningWidget)
 			{
-				rootContext->SetFocusWidget(owningWidget);
+				rootContext->SetFocusWidget(owningWidget.Get());
 			}
 		}
 
@@ -393,7 +393,7 @@ namespace CE
 
 		for (int i = childContexts.GetSize() - 1; i >= 0; --i)
 		{
-			FFusionContext* context = childContexts[i];
+			FFusionContext* context = childContexts[i].Get();
 
 			if (context->IsNativeContext())
 			{
@@ -405,7 +405,7 @@ namespace CE
 
 			if (context->IsPopupWindow())
 			{
-				FPopup* popup = static_cast<FPopup*>(context->owningWidget);
+				FPopup* popup = static_cast<FPopup*>(context->owningWidget.Get());
 				if (popup->BlockInteraction())
 				{
 					return hoveredWidget;
@@ -445,7 +445,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		for (FFusionContext* childContext : childContexts)
+		for (Ref<FFusionContext> childContext : childContexts)
 		{
 			childContext->EmplaceFrameAttachments();
 		}
@@ -453,7 +453,7 @@ namespace CE
 
 	void FFusionContext::EnqueueScopes()
 	{
-		for (FFusionContext* childContext : childContexts)
+		for (Ref<FFusionContext> childContext : childContexts)
 		{
 			childContext->EnqueueScopes();
 		}
@@ -461,7 +461,7 @@ namespace CE
 
 	void FFusionContext::SetDrawListMask(RHI::DrawListMask& outMask)
 	{
-		for (FFusionContext* childContext : childContexts)
+		for (Ref<FFusionContext> childContext : childContexts)
 		{
 			childContext->SetDrawListMask(outMask);
 		}
@@ -469,7 +469,7 @@ namespace CE
 
 	void FFusionContext::EnqueueDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex)
 	{
-		for (FFusionContext* childContext : childContexts)
+		for (Ref<FFusionContext> childContext : childContexts)
 		{
 			childContext->EnqueueDrawPackets(drawList, imageIndex);
 		}
@@ -477,7 +477,7 @@ namespace CE
 
 	void FFusionContext::SetDrawPackets(RHI::DrawListContext& drawList)
 	{
-		for (FFusionContext* childContext : childContexts)
+		for (Ref<FFusionContext> childContext : childContexts)
 		{
 			childContext->SetDrawPackets(drawList);
 		}
@@ -490,7 +490,7 @@ namespace CE
 			owningWidget->ClearStyle();
 		}
 
-		for (FFusionContext* childContext : childContexts)
+		for (Ref<FFusionContext> childContext : childContexts)
 		{
 			childContext->OnStyleSetDeregistered(styleSet);
 		}
@@ -507,14 +507,14 @@ namespace CE
 		exposedEvent.type = eventType;
 		exposedEvent.direction = FEventDirection::TopToBottom;
 		exposedEvent.nativeContext = nativeContext;
-		exposedEvent.sender = owningWidget;
+		exposedEvent.sender = owningWidget.Get();
 
 		owningWidget->HandleEvent(&exposedEvent);
 
 		for (int i = localPopupStack.GetSize() - 1; i >= 0; --i)
 		{
 			exposedEvent.Reset();
-			exposedEvent.sender = owningWidget;
+			exposedEvent.sender = owningWidget.Get();
 
 			localPopupStack[i]->HandleEvent(&exposedEvent);
 		}
@@ -523,7 +523,7 @@ namespace CE
 		{
 			exposedEvent.Reset();
 
-			exposedEvent.sender = childContexts[i]->owningWidget;
+			exposedEvent.sender = childContexts[i]->owningWidget.Get();
 			if (exposedEvent.sender == nullptr)
 				continue;
 

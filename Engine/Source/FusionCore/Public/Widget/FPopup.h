@@ -20,6 +20,9 @@ namespace CE
 
         bool IsShown() const { return isShown; }
 
+        void SetContextWidget(Ref<FWidget> widget);
+        Ref<FWidget> GetContextWidget();
+
     protected:
 
         void HandleEvent(FEvent* event) override;
@@ -37,6 +40,9 @@ namespace CE
         bool isNativePopup = false;
         bool isShown = false;
         bool positionFound = false;
+
+        // The widget that created this popup. For ex: a button that opened a popup menu!
+        WeakRef<FWidget> contextWidget;
 
         FUSION_WIDGET;
     };

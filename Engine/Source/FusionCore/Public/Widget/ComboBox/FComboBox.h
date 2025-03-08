@@ -52,6 +52,8 @@ namespace CE
 
     protected:
 
+        void OnBeforeDestroy() override;
+
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
         void SelectItemInternal(FComboBoxItem* item);
@@ -70,7 +72,7 @@ namespace CE
         FComboBoxState state = FComboBoxState::Default;
 
         FIELD()
-        FComboBoxPopup* popupMenu = nullptr;
+        Ref<FComboBoxPopup> popupMenu = nullptr;
 
         FIELD()
         FVerticalStack* popupContent = nullptr;

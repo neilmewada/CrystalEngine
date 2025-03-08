@@ -83,6 +83,18 @@ namespace CE
         return -1;
     }
 
+    void FComboBox::OnBeforeDestroy()
+    {
+        Super::OnBeforeDestroy();
+
+        if (popupMenu != nullptr)
+        {
+            popupMenu->ClosePopup();
+            popupMenu = nullptr;
+        }
+    }
+
+
     void FComboBox::OnFusionPropertyModified(const CE::Name& propertyName)
     {
 	    Super::OnFusionPropertyModified(propertyName);
@@ -152,6 +164,8 @@ namespace CE
     		.MinWidth(60)
     		.MinHeight(30);
 
+        popupMenu->SetContextWidget(this);
+
         popupContent = popupMenu->GetContentStack();
 
         Child(
@@ -220,7 +234,7 @@ namespace CE
                         popupPosition.y += computedSize.height;
                         popupMenu->MinWidth(GetComputedSize().width);
 
-                        GetContext()->PushLocalPopup(popupMenu, popupPosition, Vec2(), computedSize);
+                        GetContext()->PushLocalPopup(popupMenu.Get(), popupPosition, Vec2(), computedSize);
                     }
 
                     ApplyStyle();

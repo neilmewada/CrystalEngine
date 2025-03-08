@@ -36,7 +36,7 @@ namespace CE
 
         void SetOwningWidget(FWidget* widget);
 
-        FWidget* GetOwningWidget() const { return owningWidget; }
+        Ref<FWidget> GetOwningWidget() const { return owningWidget; }
 
         FStyleSet* GetDefaultStyleSet();
 
@@ -73,7 +73,7 @@ namespace CE
 
         void PushLocalPopup(FPopup* popup, Vec2 globalPosition, Vec2 size = Vec2(), Vec2 controlSize = Vec2());
         virtual void PushNativePopup(FPopup* popup, Vec2 globalPosition, Vec2 size = Vec2());
-        bool ClosePopup(FPopup* popup);
+        bool ClosePopup(Ref<FPopup> popup);
 
         void SetDefaultStyleSet(FStyleSet* styleSet);
 
@@ -117,17 +117,17 @@ namespace CE
         virtual void NotifyWindowEvent(FEventType eventType, FNativeContext* nativeContext);
 
         FIELD()
-        Array<FFusionContext*> childContexts{};
+        Array<Ref<FFusionContext>> childContexts{};
 
         FIELD()
         FFusionContext* parentContext = nullptr;
 
         //! @brief Widget can be owned by a FusionContext directly, or by a native window!
         FIELD()
-        FWidget* owningWidget = nullptr;
+        Ref<FWidget> owningWidget = nullptr;
 
         FIELD()
-        FStyleSet* defaultStyleSet = nullptr;
+        Ref<FStyleSet> defaultStyleSet = nullptr;
 
         FIELD()
         b8 isIsolatedContext = true;
