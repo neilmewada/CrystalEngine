@@ -11,11 +11,13 @@ namespace CE
 		void StartupModule() override
 		{
 			gEngine = CreateObject<GameEngine>(nullptr, TEXT("GameEngine"), OF_Transient);
+			gEngine->AddToRoot();
 		}
 
 		void ShutdownModule() override
 		{
-			gEngine->Destroy();
+			gEngine->BeginDestroy();
+			gEngine->RemoveFromRoot();
 			gEngine = nullptr;
 		}
 

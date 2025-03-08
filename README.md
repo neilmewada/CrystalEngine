@@ -85,10 +85,6 @@ Contains all the editor modules.
 
 ![](./Screenshots/ProjectBrowser.png)
 
-### PBR Demo:
-
-![](./Screenshots/IBL%20Demo%20Night.png)
-
 --- 
 ### Credits
 

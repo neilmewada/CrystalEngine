@@ -17,6 +17,12 @@ namespace CE::RPI
 
         MeshDrawPacket(ModelLod* modelLod, u32 modelLodMeshIndex, RHI::ShaderResourceGroup* objectSrg, RPI::Material* material);
 
+        MeshDrawPacket(MeshDrawPacket&& move) noexcept;
+        MeshDrawPacket& operator=(MeshDrawPacket&& move) noexcept;
+
+        MeshDrawPacket(const MeshDrawPacket& copy);
+        MeshDrawPacket& operator=(const MeshDrawPacket& copy);
+
         bool Update(RPI::Scene* scene, bool forceUpdate = false);
 
         void SetStencilRef(u8 stencilRef) { this->stencilRef = stencilRef; }
@@ -30,9 +36,14 @@ namespace CE::RPI
         RPI::Material* GetMaterial() const { return material; }
 
     private:
+
+        void Move(MeshDrawPacket& move);
+
+        void CopyFrom(const MeshDrawPacket& from);
+
         void DoUpdate(RPI::Scene* scene);
 
-        RHI::DrawPacket* drawPacket = nullptr;
+        Ptr<RHI::DrawPacket> drawPacket = nullptr;
 
         RPI::ModelLod* modelLod = nullptr;
 

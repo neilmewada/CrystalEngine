@@ -8,7 +8,7 @@
         "COREMEDIA_API=",
         "CORESETTINGS_API=",
         "CORESHADER_API=",
-        "GAMESYSTEM_API=",
+        "GAMEENGINE_API=",
         "VULKANRHI_API=",
         "ENGINE_API=",
         "ENGINE_API=",

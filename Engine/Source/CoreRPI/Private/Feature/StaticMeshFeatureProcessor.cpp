@@ -124,7 +124,7 @@ namespace CE::RPI
 
 			objectSrgList.Add(objectSrg);
 
-			RPI::MeshDrawPacket& packet = drawPacketList.EmplaceBack(lod, modelLodIndex, objectSrg, material);
+			RPI::MeshDrawPacket& packet = drawPacketList.EmplaceBack(lod, i, objectSrg, material);
 			
 			packet.SetStencilRef(0);
 			packet.Update(scene, false);
@@ -257,8 +257,12 @@ namespace CE::RPI
 							}
 
 							const auto& meshDrawPacketList = it->drawPacketsListByLod[0];
-							RHI::DrawPacket* drawPacket = meshDrawPacketList[0].GetDrawPacket();
-							view->AddDrawPacket(drawPacket, 0);
+
+							for (int i = 0; i < meshDrawPacketList.GetSize(); ++i)
+							{
+								RHI::DrawPacket* drawPacket = meshDrawPacketList[i].GetDrawPacket();
+								view->AddDrawPacket(drawPacket, 0);
+							}
 						}
 					}
 				});

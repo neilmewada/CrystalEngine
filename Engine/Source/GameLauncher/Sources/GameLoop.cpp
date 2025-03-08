@@ -156,9 +156,9 @@ void GameLoop::PostInit()
 
 	AssetManager* assetManager = AssetManager::Get();
 
-	CE::Shader* standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
-	CE::Shader* iblConvolutionShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
-	CE::Shader* textureGenShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/TextureGen");
+	Ref<CE::Shader> standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+	Ref<CE::Shader> iblConvolutionShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
+	Ref<CE::Shader> textureGenShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/TextureGen");
 
 	RPI::RPISystemInitInfo rpiInitInfo{};
 	rpiInitInfo.standardShader = standardShader->GetShaderCollection();
@@ -232,7 +232,7 @@ void GameLoop::PreShutdown()
 	fApp->PreShutdown();
 
 	fApp->Shutdown();
-	fApp->Destroy();
+	fApp->BeginDestroy();
 
 	gEngine->PreShutdown();
 
@@ -297,9 +297,9 @@ void GameLoop::Shutdown()
 void GameLoop::LoadProject()
 {
 	// Load project (aka Setings)
-	Bundle* settingsBundle = GetSettingsBundle();
+	Ref<Bundle> settingsBundle = GetSettingsBundle();
 
-	ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
+	Ref<ProjectSettings> projectSettings = GetSettings<ProjectSettings>();
 	if (projectSettings != nullptr)
 	{
 		gProjectName = projectSettings->projectName;
@@ -329,7 +329,7 @@ void GameLoop::AppInit()
 	InputManager::Get().Initialize(app);
 
 	String windowTitle = gProjectName;
-	ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
+	Ref<ProjectSettings> projectSettings = GetSettings<ProjectSettings>();
 	if (projectSettings != nullptr)
 	{
 		windowTitle += " - v" + projectSettings->projectVersion;

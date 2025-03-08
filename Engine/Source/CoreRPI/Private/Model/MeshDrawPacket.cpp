@@ -11,7 +11,7 @@ namespace CE::RPI
 		}
 		perDrawSrgs.Clear();
 
-		delete drawPacket; drawPacket = nullptr;
+		drawPacket = nullptr;
 	}
 
 	MeshDrawPacket::MeshDrawPacket(ModelLod* modelLod, u32 modelLodMeshIndex, RHI::ShaderResourceGroup* objectSrg, RPI::Material* material)
@@ -38,6 +38,64 @@ namespace CE::RPI
 		needsUpdate = true;
 	}
 
+	MeshDrawPacket::MeshDrawPacket(MeshDrawPacket&& move) noexcept
+	{
+		Move(move);
+	}
+
+	MeshDrawPacket& MeshDrawPacket::operator=(MeshDrawPacket&& move) noexcept
+	{
+		Move(move);
+		return *this;
+	}
+
+	MeshDrawPacket::MeshDrawPacket(const MeshDrawPacket& copy)
+	{
+		CopyFrom(copy);
+	}
+
+	MeshDrawPacket& MeshDrawPacket::operator=(const MeshDrawPacket& copy)
+	{
+		CopyFrom(copy);
+		return *this;
+	}
+
+	void MeshDrawPacket::Move(MeshDrawPacket& move)
+	{
+		drawPacket = move.drawPacket;
+		modelLod = move.modelLod;
+		modelLodMeshIndex = move.modelLodMeshIndex;
+		objectSrg = move.objectSrg;
+		perDrawSrgs = move.perDrawSrgs;
+		material = move.material;
+		drawListFilter = move.drawListFilter;
+		stencilRef = move.stencilRef;
+		needsUpdate = move.needsUpdate;
+
+		move.drawPacket = nullptr;
+		move.modelLod = nullptr;
+		move.modelLodMeshIndex = 0;
+		move.objectSrg = nullptr;
+		move.perDrawSrgs = {};
+		move.material = nullptr;
+		move.drawListFilter = {};
+		move.stencilRef = 0;
+		move.needsUpdate = false;
+	}
+
+	void MeshDrawPacket::CopyFrom(const MeshDrawPacket& from)
+	{
+		drawPacket = from.drawPacket;
+		modelLod = from.modelLod;
+		modelLodMeshIndex = from.modelLodMeshIndex;
+		objectSrg = from.objectSrg;
+		perDrawSrgs = from.perDrawSrgs;
+		material = from.material;
+		drawListFilter = from.drawListFilter;
+		stencilRef = from.stencilRef;
+		needsUpdate = from.needsUpdate;
+	}
+
 	void MeshDrawPacket::DoUpdate(RPI::Scene* scene)
 	{
 		needsUpdate = false;
@@ -50,10 +108,7 @@ namespace CE::RPI
 			return;
 		}
 
-		if (drawPacket != nullptr)
-		{
-			delete drawPacket; drawPacket = nullptr;
-		}
+		drawPacket = nullptr;
 
 		ShaderCollection* shaderCollection = material->GetShaderCollection();
 		if (shaderCollection == nullptr)

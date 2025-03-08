@@ -19,7 +19,7 @@ namespace CE
         ASSERT(!gProjectPath.IsEmpty(), "GetGameDir() called while project path is NOT set!");
         return gProjectPath / "Game";
 #else
-        return GetAppRootDir() / "Game";
+        return GetGameInstallDirectory() / "Game";
 #endif
     }
 } // namespace CE

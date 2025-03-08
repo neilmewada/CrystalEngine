@@ -3,7 +3,7 @@
 namespace CE
 {
 	CLASS(NonSerialized, Config = Game)
-	class GAMESYSTEM_API GameEngine : public Engine
+	class GAMEENGINE_API GameEngine : public Engine
 	{
 		CE_CLASS(GameEngine, Engine)
 	public:

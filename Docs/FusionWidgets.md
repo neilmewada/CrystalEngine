@@ -22,7 +22,7 @@ Fusion lets you create widgets in C++ using declarative syntax and apply flexibl
 ### DPI Aware Rendering (New renderer)
 
 Here is the comparison between old renderer (left) and the new renderer (right) that is DPI-aware.
-<br><img src="../Screenshots/FusionSample.png" height=400/> <img src="../Screenshots/FusionSample_DPI.png" height=400/>
+<br><img src="../Screenshots/FusionSample.png" height=500/> <img src="../Screenshots/FusionSample_DPI.png" height=500/>
 
 ## Widget Sample
 

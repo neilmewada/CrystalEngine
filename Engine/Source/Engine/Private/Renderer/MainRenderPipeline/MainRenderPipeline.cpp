@@ -164,7 +164,6 @@ namespace CE
 
         RPI::RasterPass* directionalShadowPass = (RPI::RasterPass*)RPI::PassSystem::Get().CreatePass(this, "DirectionalShadowPass");
     	directionalShadowPass->SetViewTag("DirectionalLightShadow");
-        //directionalShadowPass->SetViewTag(mainViewTag);
         directionalShadowPass->SetDrawListTag(GetBuiltinDrawListTag(BuiltinDrawItemTag::Shadow));
 	    {
             // Directional Shadow Map

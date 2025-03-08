@@ -51,7 +51,7 @@ namespace CE
 		gameInstance->Shutdown();
 
 		gameInstances.Remove(gameInstance);
-		gameInstance->Destroy();
+		gameInstance->BeginDestroy();
 		gameInstance = nullptr;
 	}
 

@@ -3,7 +3,7 @@
 namespace CE
 {
     CLASS()
-    class GAMESYSTEM_API GameViewportSubsystem : public EngineSubsystem
+    class GAMEENGINE_API GameViewportSubsystem : public EngineSubsystem
     {
         CE_CLASS(GameViewportSubsystem, EngineSubsystem)
     public:

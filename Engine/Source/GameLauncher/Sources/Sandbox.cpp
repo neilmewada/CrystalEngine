@@ -5,16 +5,16 @@ void GameLoop::SetupTestScene()
 {
 	AssetManager* assetManager = AssetManager::Get();
 
-	TextureCube* skybox = assetManager->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
-	CE::Shader* standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
-	CE::Shader* skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
+	Ref<TextureCube> skybox = assetManager->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
+	Ref<CE::Shader> standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+	Ref<CE::Shader> skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
 
 	CE::Scene* scene = CreateObject<CE::Scene>(gEngine, "TestScene");
 
 	GameViewportSubsystem* viewportSubsystem = gEngine->GetSubsystem<GameViewportSubsystem>();
 	gameWindow = viewportSubsystem->GetGameWindow();
 
-	scene->SetSkyboxCubeMap(skybox);
+	scene->SetSkyboxCubeMap(skybox.Get());
 
 	viewportSubsystem->SetScene(scene);
 	gEngine->LoadScene(scene);

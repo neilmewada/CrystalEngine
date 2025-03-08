@@ -13,7 +13,10 @@ namespace CE::RPI
 
 	Scene::~Scene()
 	{
-		RHI::FrameScheduler::Get()->WaitUntilIdle();
+		if (auto scheduler = RHI::FrameScheduler::Get())
+		{
+			scheduler->WaitUntilIdle();
+		}
 
 		if (shaderResourceGroup)
 		{

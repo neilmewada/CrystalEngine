@@ -78,7 +78,7 @@ namespace CE::RPI
 		const Array<RHI::VertexBufferView>& GetTextQuad() const { return textQuadVertexBufferViews; }
 		RHI::DrawLinearArguments GetTextQuadDrawArgs() const { return textQuadDrawArgs; }
 
-		RHI::DrawListTag GetBuiltinDrawListTag(BuiltinDrawItemTag buitinTag) { return builtinDrawTags[buitinTag]; }
+		RHI::DrawListTag GetBuiltinDrawListTag(BuiltinDrawItemTag builtinTag) { return builtinDrawTags[builtinTag]; }
 
 		const auto& GetViewSrgLayout() const { return viewSrgLayout; }
 		const auto& GetSceneSrgLayout() const { return sceneSrgLayout; }

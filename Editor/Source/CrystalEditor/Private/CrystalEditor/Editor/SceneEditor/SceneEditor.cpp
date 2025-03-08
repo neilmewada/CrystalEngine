@@ -95,7 +95,9 @@ namespace CE::Editor
                 meshComponent->SetLocalPosition(Vec3(0, 0, 5));
                 meshComponent->SetLocalEulerAngles(Vec3(-90, -180, 0));
                 meshComponent->SetLocalScale(Vec3(1, 1, 1) * 0.05f);
+
                 meshComponent->SetMaterial(plasticMaterial, 0, 0);
+                meshComponent->SetMaterial(plasticMaterial, 0, 1);
             }
 
             StaticMeshActor* sphereActor = CreateObject<StaticMeshActor>(scene, "SphereMesh");

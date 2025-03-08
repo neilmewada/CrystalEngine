@@ -25,6 +25,8 @@ namespace CE
         DirectionalLight* sunActor = nullptr;
         DirectionalLightComponent* sunLight = nullptr;
 
+        CameraComponent* cameraComponent = nullptr;
+
 
     public:
 
