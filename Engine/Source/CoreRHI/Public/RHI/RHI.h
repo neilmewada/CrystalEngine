@@ -150,6 +150,7 @@ namespace CE::RHI
 		// - Pipeline State -
 
 		virtual RHI::PipelineState* CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc) = 0;
+    	virtual RHI::PipelineState* CreateComputePipeline(const RHI::ComputePipelineDescriptor& desc) = 0;
 		virtual void DestroyPipeline(const RHI::PipelineState* pipeline) = 0;
 
 		// - Helper Operations -

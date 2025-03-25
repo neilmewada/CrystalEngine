@@ -145,6 +145,7 @@ namespace CE::Vulkan
 		// - Pipeline State -
 
         virtual RHI::PipelineState* CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc) override;
+		virtual RHI::PipelineState* CreateComputePipeline(const RHI::ComputePipelineDescriptor& desc) override;
         virtual void DestroyPipeline(const RHI::PipelineState* pipeline) override;
 
 		// - Utilities -

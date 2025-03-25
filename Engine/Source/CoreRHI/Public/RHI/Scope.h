@@ -13,25 +13,25 @@ namespace CE::RHI
 	struct ExecuteCondition;
 	class FrameGraphVariable;
 
+	enum class ScopeOperation
+	{
+		Rasterization = 0,
+		Compute,
+		RayTracing,
+		Transfer
+	};
+
 	struct ScopeDescriptor
 	{
 		ScopeId id{};
 		RHI::HardwareQueueClass queueClass{};
+		ScopeOperation operation = ScopeOperation::Rasterization;
 	};
 
 	struct ScopeGroup
 	{
 		ScopeId groupId{};
 		Array<Scope*> scopes{};
-	};
-
-	enum class ScopeOperation
-	{
-		Rasterization = 0,
-		FullScreenPass,
-		Compute,
-		RayTracing,
-		Transfer
 	};
 
     class CORERHI_API Scope
@@ -76,7 +76,9 @@ namespace CE::RHI
 			return prevSubPass != nullptr || nextSubPass != nullptr;
 		}
 
-		inline RHI::HardwareQueueClass GetQueueClass() const { return queueClass; }
+		RHI::HardwareQueueClass GetQueueClass() const { return queueClass; }
+
+    	ScopeOperation GetOperation() const { return operation; }
 
 		void SetShaderResourceGroups(const Array<RHI::ShaderResourceGroup*>& srgs);
 		void AddShaderResourceGroups(RHI::ShaderResourceGroup* srg);
@@ -89,6 +91,8 @@ namespace CE::RHI
 		FrameGraph* frameGraph = nullptr;
 
 		RHI::HardwareQueueClass queueClass{};
+    	ScopeOperation operation = ScopeOperation::Rasterization;
+
 		Array<RHI::PipelineState*> usePipelines;
 
 		u32 groupCountX = 1;

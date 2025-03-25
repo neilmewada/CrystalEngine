@@ -104,8 +104,6 @@ namespace CE::Vulkan
         : Pipeline(device, desc)
         , desc(desc)
     {
-        auto srgManager = device->GetShaderResourceManager();
-
         SetupColorBlendState();
         SetupDepthStencilState();
         SetupShaderStages();

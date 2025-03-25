@@ -11,6 +11,7 @@ namespace CE::Vulkan
     {
     public:
         PipelineState(VulkanDevice* device, const RHI::GraphicsPipelineDescriptor& graphicsDesc);
+    	PipelineState(VulkanDevice* device, const RHI::ComputePipelineDescriptor& computeDesc);
         virtual ~PipelineState();
 
         virtual IPipelineLayout* GetPipelineLayout() override;

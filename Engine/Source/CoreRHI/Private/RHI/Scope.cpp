@@ -7,6 +7,7 @@ namespace CE::RHI
     {
 		id = desc.id;
 		queueClass = desc.queueClass;
+    	operation = desc.operation;
     }
 
 	Scope::~Scope()

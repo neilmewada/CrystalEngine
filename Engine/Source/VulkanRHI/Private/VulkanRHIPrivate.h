@@ -31,6 +31,7 @@
 #include "ShaderModule.h"
 #include "Pipeline.h"
 #include "GraphicsPipeline.h"
+#include "ComputePipeline.h"
 #include "PipelineState.h"
 
 #include "FrameBuffer.h"

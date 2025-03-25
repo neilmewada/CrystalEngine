@@ -510,6 +510,11 @@ namespace CE::Vulkan
         return new Vulkan::PipelineState(device, desc);
     }
 
+    RHI::PipelineState* VulkanRHI::CreateComputePipeline(const RHI::ComputePipelineDescriptor& desc)
+    {
+        return new Vulkan::PipelineState(device, desc);
+    }
+
     void VulkanRHI::DestroyPipeline(const RHI::PipelineState* pipeline)
     {
         delete pipeline;

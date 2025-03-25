@@ -335,6 +335,11 @@ namespace CE::RHI
 		CORERHI_API SIZE_T GetHash() const;
 	};
 
+	struct ComputePipelineDescriptor : PipelineDescriptor
+	{
+
+	};
+
 	class IPipelineLayout
 	{
 	protected:
@@ -368,6 +373,7 @@ namespace CE::RHI
 		PipelineStateType pipelineType{};
 
 		RHI::GraphicsPipelineDescriptor graphicsDescriptor{};
+		RHI::ComputePipelineDescriptor computeDescriptor{};
 	};
     
 } // namespace CE::RHI
