@@ -21,6 +21,8 @@
 // Assets
 #include "Asset/ShaderAssetDefinition.h"
 #include "Asset/ShaderAssetImporter.h"
+#include "Asset/ComputeShaderAssetDefinition.h"
+#include "Asset/ComputeShaderAssetImporter.h"
 #include "Asset/TextureAssetDefinition.h"
 #include "Asset/TextureAssetImporter.h"
 #include "Asset/StaticMeshDefinition.h"

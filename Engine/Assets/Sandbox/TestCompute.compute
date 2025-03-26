@@ -1,0 +1,11 @@
+
+#pragma kernel CSMain
+
+// SRG includes
+#include "Core/Macros.hlsli"
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 tid : SV_DispatchThreadID)
+{
+    
+}

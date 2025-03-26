@@ -150,6 +150,10 @@ namespace CE
 		{
 			wcharArgs.AddRange({ L"-T", L"ps_6_0" });
 		}
+		else if (buildConfig.stage == RHI::ShaderStage::Compute)
+		{
+			wcharArgs.AddRange({ L"-T", L"cs_6_0" });
+		}
 		else
 		{
 			return ERR_InvalidArgs;

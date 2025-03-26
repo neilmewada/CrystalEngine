@@ -24,6 +24,7 @@
 #include "Engine/Texture2D.h"
 #include "Engine/TextureCube.h"
 #include "Engine/Shader.h"
+#include "Engine/ComputeShader.h"
 #include "Engine/MaterialInterface.h"
 #include "Engine/Material.h"
 #include "Engine/MaterialInstance.h"
