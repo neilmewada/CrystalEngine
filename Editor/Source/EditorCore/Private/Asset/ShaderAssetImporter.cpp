@@ -119,7 +119,7 @@ namespace CE::Editor
 						RHI::ShaderStage::Vertex, variant.reflectionInfo);
 				if (reflectionResult != ShaderReflector::ERR_Success)
 				{
-					errorMessage = "Failed to reflect vertex shader. Error: " + compiler.GetErrorMessage();
+					errorMessage = "Failed to reflect vertex shader.";
 					return false;
 				}
 
@@ -149,7 +149,7 @@ namespace CE::Editor
 					RHI::ShaderStage::Fragment, variant.reflectionInfo);
 				if (reflectionResult != ShaderReflector::ERR_Success)
 				{
-					errorMessage = "Failed to reflect fragment shader. Error: " + compiler.GetErrorMessage();
+					errorMessage = "Failed to reflect fragment shader.";
 					return false;
 				}
 

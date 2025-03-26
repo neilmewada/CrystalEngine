@@ -16,6 +16,8 @@ namespace CE
 
 		bool PreprocessShader(ComputeShaderPreprocessData* outData);
 
+		inline const String& GetErrorMessage() const { return errorMessage; }
+
 	private:
 
 		enum TokenType
