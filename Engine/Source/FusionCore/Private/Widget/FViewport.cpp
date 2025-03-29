@@ -118,7 +118,7 @@ namespace CE
         f32 scaling = GetContext()->GetScaling();
 
         textureDescriptor.texture.name = GetName().GetString() + " FrameBuffer";
-        textureDescriptor.texture.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
+        textureDescriptor.texture.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead | TextureBindFlags::ShaderWrite;
         textureDescriptor.texture.arrayLayers = 1;
         textureDescriptor.texture.mipLevels = 1;
         textureDescriptor.texture.sampleCount = m_SampleCount;

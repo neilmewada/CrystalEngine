@@ -1098,11 +1098,6 @@ namespace CE
 
     Vec2 FusionRenderer2::DrawText(const String& text, Vec2 textPos, Vec2 size, FWordWrap wordWrap)
     {
-        if (text == "Mobility")
-        {
-            String::IsAlphabet('a');
-        }
-
         thread_local Array<Rect> quads{};
         const bool isFixedSize = !Math::ApproxEquals(size.x, 0.0f) && !Math::ApproxEquals(size.y, 0.0f);
 

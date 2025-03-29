@@ -104,10 +104,6 @@ namespace CE::RPI
 
 					pass->perPassSrgLayout = shader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerPass);
 				}
-				else if (pass->IsOfType<ComputePass>())
-				{
-					// TODO: Compute pass layout
-				}
 			});
     }
 

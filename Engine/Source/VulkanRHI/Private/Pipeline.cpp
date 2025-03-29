@@ -145,6 +145,10 @@ namespace CE::Vulkan
                     {
                         layoutBinding.stageFlags |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
                     }
+                    if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Compute))
+                    {
+                        layoutBinding.stageFlags |= VK_SHADER_STAGE_COMPUTE_BIT;
+                    }
 
                     switch (variable.type)
                     {

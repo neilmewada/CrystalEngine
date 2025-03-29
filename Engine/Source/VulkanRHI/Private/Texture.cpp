@@ -450,6 +450,8 @@ namespace CE::Vulkan
 			CE_LOG(Error, All, "Failed to create Vulkan Image View");
 			return;
 		}
+
+		device->SetObjectDebugName((uint64_t)imageView, VK_OBJECT_TYPE_IMAGE_VIEW, name.GetCString());
 	}
 
     Texture::Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc)

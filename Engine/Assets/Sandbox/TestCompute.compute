@@ -4,10 +4,11 @@
 // SRG includes
 #include "Core/Macros.hlsli"
 
-RWTexture2D<float4> _Texture : SRG_PerPass(u0);
+RWTexture2DArray<float4> _TextureTest : SRG_PerPass(u0);
 
 [numthreads(8, 8, 1)]
 void CSMain(uint3 tid : SV_DispatchThreadID)
 {
-    _Texture[tid.xy] = float4(_Texture[tid.xy].r, 0, 0, 1);
+    _TextureTest[uint3(tid.xy, 0)] = float4(_TextureTest[uint3(tid.xy, 0)].r, _TextureTest[uint3(tid.xy, 0)].g * 0.5, 0, 1);
+    _TextureTest[uint3(tid.xy, 1)] = float4(_TextureTest[uint3(tid.xy, 1)].r, _TextureTest[uint3(tid.xy, 1)].r * 0.5, 0, 1);
 }

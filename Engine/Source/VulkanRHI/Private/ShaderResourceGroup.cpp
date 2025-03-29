@@ -302,6 +302,10 @@ namespace CE::Vulkan
 			{
 				entry.stageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
 			}
+			if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Compute))
+			{
+				entry.stageFlags |= VK_SHADER_STAGE_COMPUTE_BIT;
+			}
 			if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Tessellation))
 			{
 				entry.stageFlags |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;

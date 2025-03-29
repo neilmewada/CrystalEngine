@@ -476,11 +476,6 @@ namespace CE
         if (fieldsCached)
             return;
 
-        if (name == "ReflectionFieldTest")
-        {
-            String::IsAlphabet('a');
-        }
-
         LockGuard lock{ cachedFieldsMutex };
 
         fieldsCached = true;

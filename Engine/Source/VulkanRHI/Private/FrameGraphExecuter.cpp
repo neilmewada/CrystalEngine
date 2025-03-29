@@ -606,6 +606,8 @@ namespace CE::Vulkan
 				// Graphics operation
 				if (!shouldNotExecuteAtAll && currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
 				{
+					commandList->ClearShaderResourceGroups();
+
 					VkRenderPassBeginInfo beginInfo{};
 					beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 					beginInfo.renderPass = renderPass->GetHandle();
@@ -766,6 +768,8 @@ namespace CE::Vulkan
 				}
 				else if (currentScope->queueClass == RHI::HardwareQueueClass::Compute)
 				{
+					commandList->ClearShaderResourceGroups();
+
 					// TODO: Add compute pass
 					RHI::PipelineState* pipelineToUse = nullptr;
 
@@ -779,6 +783,8 @@ namespace CE::Vulkan
 
 					if (pipelineToUse != nullptr)
 					{
+						commandList->BindPipelineState(pipelineToUse);
+
 						for (auto srg : currentScope->externalShaderResourceGroups)
 						{
 							commandList->SetShaderResourceGroup(srg);
@@ -788,6 +794,8 @@ namespace CE::Vulkan
 							commandList->SetShaderResourceGroup(currentScope->passShaderResourceGroup);
 						if (currentScope->subpassShaderResourceGroup)
 							commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
+
+						commandList->CommitShaderResources();;
 
 						commandList->Dispatch(Math::Max((u32)1, currentScope->groupCountX),
 							Math::Max((u32)1, currentScope->groupCountY),

@@ -19,6 +19,8 @@ namespace CE::RPI
 
         void SetShader(RPI::ComputeShader* shader);
 
+        PassAttachmentSizeSource dispatchSizeSource;
+
     protected:
 
         RPI::ComputeShader* shader = nullptr;
