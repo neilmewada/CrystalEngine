@@ -230,9 +230,22 @@ namespace CE::Vulkan
 								if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
 									break;
 
-								RHI::Texture* image = (RHI::Texture*)resource;
+								if (resource->GetResourceType() == ResourceType::Texture)
+								{
+									RHI::Texture* image = (RHI::Texture*)resource;
 
-								passShaderResourceGroup->Bind(imageIdx, attachmentName, image);
+									passShaderResourceGroup->Bind(imageIdx, attachmentName, image);
+								}
+								else if (resource->GetResourceType() == ResourceType::TextureView)
+								{
+									RHI::TextureView* image = (RHI::TextureView*)resource;
+
+									passShaderResourceGroup->Bind(imageIdx, attachmentName, image);
+								}
+								else
+								{
+									break;
+								}
 							}
 							else if (frameAttachment->IsBufferAttachment())
 							{
@@ -286,12 +299,25 @@ namespace CE::Vulkan
 								if (frameAttachment->IsImageAttachment())
 								{
 									RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
-									if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+									if (resource == nullptr)
 										break;
 
-									RHI::Texture* image = (RHI::Texture*)resource;
+									if (resource->GetResourceType() == RHI::ResourceType::Texture)
+									{
+										RHI::Texture* image = (RHI::Texture*)resource;
 
-									passShaderResourceGroup->Bind(imageIdx, scopeAttachment->GetShaderInputName(), image);
+										passShaderResourceGroup->Bind(imageIdx, scopeAttachment->GetShaderInputName(), image);
+									}
+									else if (resource->GetResourceType() == ResourceType::TextureView)
+									{
+										RHI::TextureView* image = (RHI::TextureView*)resource;
+
+										passShaderResourceGroup->Bind(imageIdx, scopeAttachment->GetShaderInputName(), image);
+									}
+									else
+									{
+										break;
+									}
 								}
 								else if (frameAttachment->IsBufferAttachment())
 								{
@@ -361,12 +387,25 @@ namespace CE::Vulkan
 							if (frameAttachment->IsImageAttachment())
 							{
 								RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
-								if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+								if (resource == nullptr)
 									break;
 
-								RHI::Texture* image = (RHI::Texture*)resource;
+								if (resource->GetResourceType() == RHI::ResourceType::Texture)
+								{
+									RHI::Texture* image = (RHI::Texture*)resource;
 
-								passShaderResourceGroup->Bind(imageIdx, scopeAttachment->GetShaderInputName(), image);
+									passShaderResourceGroup->Bind(imageIdx, scopeAttachment->GetShaderInputName(), image);
+								}
+								else if (resource->GetResourceType() == ResourceType::TextureView)
+								{
+									RHI::TextureView* image = (RHI::TextureView*)resource;
+
+									passShaderResourceGroup->Bind(imageIdx, scopeAttachment->GetShaderInputName(), image);
+								}
+								else
+								{
+									break;
+								}
 							}
 							else if (frameAttachment->IsBufferAttachment())
 							{

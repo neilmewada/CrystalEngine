@@ -32,10 +32,8 @@ namespace CE
     {
         for (int i = 0; i < frames.GetSize(); ++i)
         {
-            if (frames[i] != nullptr)
-            {
-                delete frames[i]; frames[i] = nullptr;
-            }
+            delete frames[i]; frames[i] = nullptr;
+            delete frameViews[i]; frameViews[i] = nullptr;
         }
 
         RPISystem::Get().QueueDestroy(textureSrg);
@@ -107,10 +105,8 @@ namespace CE
 
         for (int i = 0; i < frames.GetSize(); ++i)
         {
-	        if (frames[i] != nullptr)
-	        {
-                delete frames[i]; frames[i] = nullptr;
-	        }
+            delete frames[i]; frames[i] = nullptr;
+            delete frameViews[i]; frameViews[i] = nullptr;
         }
 
         RPI::TextureDescriptor textureDescriptor{};
@@ -129,6 +125,14 @@ namespace CE
         textureDescriptor.texture.depth = 1;
         textureDescriptor.texture.dimension = Dimension::Dim2DArray;
 
+	    RHI::TextureViewDescriptor textureViewDescriptor{};
+	    textureViewDescriptor.format = textureDescriptor.texture.format;
+	    textureViewDescriptor.arrayLayerCount = 1;
+	    textureViewDescriptor.mipLevelCount = 1;
+	    textureViewDescriptor.baseArrayLayer = 0;
+	    textureViewDescriptor.baseMipLevel = 0;
+	    textureViewDescriptor.dimension = Dimension::Dim2D;
+
         textureDescriptor.samplerDesc.addressModeU =
             textureDescriptor.samplerDesc.addressModeV =
             textureDescriptor.samplerDesc.addressModeW =
@@ -140,6 +144,9 @@ namespace CE
         for (int i = 0; i < frames.GetSize(); ++i)
         {
             frames[i] = new RPI::Texture(textureDescriptor);
+
+            textureViewDescriptor.texture = frames[i]->GetRhiTexture();
+            frameViews[i] = gDynamicRHI->CreateTextureView(textureViewDescriptor);
         }
 
         auto app = FusionApplication::Get();

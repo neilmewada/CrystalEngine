@@ -418,10 +418,25 @@ namespace CE::Vulkan
 							continue;
 
 						RHI::RHIResource* resource = imageAttachment->GetResource(imageIndex);
-						if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+						if (resource == nullptr)
 							continue;
 
-						Vulkan::Texture* image = dynamic_cast<Vulkan::Texture*>(resource);
+						Texture* image = nullptr;
+
+						if (resource->GetResourceType() == RHI::ResourceType::Texture)
+						{
+							image = dynamic_cast<Texture*>(resource);
+						}
+						else if (resource->GetResourceType() == RHI::ResourceType::TextureView)
+						{
+							TextureView* imageView = dynamic_cast<TextureView*>(resource);
+							image = (Texture*)imageView->GetTexture();
+						}
+						else
+						{
+							continue;
+						}
+
 						if (image == nullptr || image->GetImage() == nullptr)
 							continue;
 

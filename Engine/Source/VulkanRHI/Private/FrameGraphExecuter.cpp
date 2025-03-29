@@ -407,16 +407,28 @@ namespace CE::Vulkan
 							RHI::ImageFrameAttachment* imageFrameAttachment = (RHI::ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
 
 							RHI::RHIResource* resource = imageFrameAttachment->GetResource(currentSubmissionIndex);
-							if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+							if (resource == nullptr)
 								continue;
 							if (initializedAttachmentIds.Exists(imageFrameAttachment->GetId()))
+								continue;
+							if (resource->GetResourceType() != RHI::ResourceType::Buffer && resource->GetResourceType() != RHI::ResourceType::Texture &&
+								resource->GetResourceType() != RHI::ResourceType::TextureView)
 								continue;
 
 							initializedAttachmentIds.Add(imageFrameAttachment->GetId());
 
-							if (resource->GetResourceType() == RHI::ResourceType::Texture)
+							if (resource->GetResourceType() == RHI::ResourceType::Texture || resource->GetResourceType() == RHI::ResourceType::TextureView)
 							{
-								Vulkan::Texture* image = (Vulkan::Texture*)resource;
+								Vulkan::Texture* image = nullptr;//(Vulkan::Texture*)resource;
+								if (resource->GetResourceType() == RHI::ResourceType::Texture)
+								{
+									image = (Vulkan::Texture*)resource;
+								}
+								else if (resource->GetResourceType() == RHI::ResourceType::TextureView)
+								{
+									TextureView* imageView = (TextureView*)resource;
+									image = (Vulkan::Texture*)imageView->GetTexture();
+								}
 
 								VkImageLayout requiredLayout = image->curImageLayout;
 								VkPipelineStageFlags dstStageMask = 0;
@@ -723,11 +735,24 @@ namespace CE::Vulkan
 											!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
 											continue;
 
-										Vulkan::Texture* texture = (Vulkan::Texture*)scopeAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
-										if (texture == nullptr)
+										RHI::RHIResource* resource = scopeAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
+										if (resource == nullptr)
 											continue;
 
-										texture->curImageLayout = attachmentBinding.finalLayout;
+										if (resource->GetResourceType() == RHI::ResourceType::Texture)
+										{
+											Texture* texture = (Texture*)resource;
+											texture->curImageLayout = attachmentBinding.finalLayout;
+										}
+										else if (resource->GetResourceType() == RHI::ResourceType::TextureView)
+										{
+											TextureView* textureView = (TextureView*)resource;
+											Texture* texture = (Texture*)textureView->GetTexture();
+											if (texture != nullptr)
+											{
+												texture->curImageLayout = attachmentBinding.finalLayout;
+											}
+										}
 									}
 								}
 

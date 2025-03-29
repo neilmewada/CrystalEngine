@@ -44,8 +44,27 @@ namespace CE::Vulkan
 				if (!resource)
 					continue;
 
-				Texture* image = dynamic_cast<Texture*>(resource);
-				if (!image || image->GetImageView() == nullptr)
+				Texture* image = nullptr;
+				VkImageView imageView = nullptr;
+
+				if (resource->GetResourceType() == RHI::ResourceType::Texture)
+				{
+					image = (Texture*)resource;
+					imageView = image->GetImageView();
+				}
+				else if (resource->GetResourceType() == RHI::ResourceType::TextureView)
+				{
+					TextureView* textureView = (TextureView*)resource;
+					image = (Texture*)textureView->GetTexture();
+					imageView = textureView->GetImageView();
+				}
+				else
+				{
+					continue;
+				}
+
+				//Texture* image = dynamic_cast<Texture*>(resource);
+				if (!image || imageView == nullptr)
 					continue;
 
 				if (width == 0 || height == 0)
@@ -63,7 +82,7 @@ namespace CE::Vulkan
 					}
 				}
 
-				attachments.Add(image->GetImageView());
+				attachments.Add(imageView);
 				addedAttachments.Add(frameAttachment->GetId());
 			}
 

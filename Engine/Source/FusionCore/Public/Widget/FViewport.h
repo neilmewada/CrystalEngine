@@ -17,6 +17,7 @@ namespace CE
         u32 GetFrameCount() const { return frames.GetSize(); }
 
         RPI::Texture* GetFrame(u32 imageIndex) const { return frames[imageIndex]; }
+        RHI::TextureView* GetFrameView(u32 imageIndex) const { return frameViews[imageIndex]; }
 
         void Release();
 
@@ -43,6 +44,7 @@ namespace CE
         Vec2i currentSize = Vec2i(0, 0);
 
         StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount> frames{};
+        StaticArray<RHI::TextureView*, RHI::Limits::MaxSwapChainImageCount> frameViews{};
 
         RHI::ShaderResourceGroup* textureSrg = nullptr;
 

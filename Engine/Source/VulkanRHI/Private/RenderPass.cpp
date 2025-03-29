@@ -197,8 +197,20 @@ namespace CE::Vulkan
 						RHI::RHIResource* resource = imageFrameAttachment->GetResource();
 						if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
 							continue;
-						Texture* image = (Texture*)resource;
-						format = image->GetFormat();
+						if (resource->GetResourceType() == RHI::ResourceType::Texture)
+						{
+							Texture* image = (Texture*)resource;
+							format = image->GetFormat();
+						}
+						else if (resource->GetResourceType() == RHI::ResourceType::TextureView)
+						{
+							TextureView* imageView = (TextureView*)resource;
+							format = imageView->GetFormat();
+						}
+						else
+						{
+							continue;
+						}
 					}
 
 					bool initialUse = false;
