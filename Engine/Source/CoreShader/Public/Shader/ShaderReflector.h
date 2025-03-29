@@ -22,13 +22,13 @@ namespace CE
 			ERR_InvalidVertexInputNames,
 		};
 
-		ErrorCode ReflectSpirv(const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection);
+		ErrorCode ReflectSpirv(const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection, const String& entryPoint);
 
-		inline ErrorCode Reflect(ShaderBlobFormat shaderFormat, const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection)
+		inline ErrorCode Reflect(ShaderBlobFormat shaderFormat, const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection, const String& entryPoint)
 		{
 			if (shaderFormat == ShaderBlobFormat::Spirv)
 			{
-				return ReflectSpirv(byteCode, byteSize, curStage, outReflection);
+				return ReflectSpirv(byteCode, byteSize, curStage, outReflection, entryPoint);
 			}
 			return ERR_InvalidFormat;
 		}

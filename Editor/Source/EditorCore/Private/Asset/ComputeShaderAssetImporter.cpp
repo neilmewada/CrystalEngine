@@ -105,7 +105,7 @@ namespace CE::Editor
             {
                 ShaderReflector reflector{};
                 ShaderReflector::ErrorCode result2 = reflector.ReflectSpirv(shader->kernels.Top().GetDataPtr(),
-                    shader->kernels.Top().GetDataSize(), ShaderStage::Compute, shader->reflection);
+                    shader->kernels.Top().GetDataSize(), ShaderStage::Compute, shader->reflection, kernel.GetString());
 
                 if (result2 != ShaderReflector::ERR_Success)
                 {

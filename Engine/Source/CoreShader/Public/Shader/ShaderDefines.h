@@ -39,6 +39,9 @@ namespace CE
 		FIELD(ReadOnly)
 		ShaderStage rootConstantStages = ShaderStage::None;
 
+		FIELD(ReadOnly)
+		Vec3i invocationSize;
+
 		const VariableBindingMap& GetVariableNameMap() const;
 
 	private:

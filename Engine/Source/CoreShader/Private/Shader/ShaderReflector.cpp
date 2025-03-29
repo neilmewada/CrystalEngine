@@ -21,7 +21,7 @@ namespace CE
     }
 
 
-	ShaderReflector::ErrorCode ShaderReflector::ReflectSpirv(const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection)
+	ShaderReflector::ErrorCode ShaderReflector::ReflectSpirv(const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection, const String& entryPointStr)
 	{
 #if PLATFORM_DESKTOP
 		spirv_cross::CompilerReflection* reflection = new spirv_cross::CompilerReflection((const uint32_t*)byteCode, byteSize / 4);
@@ -108,6 +108,15 @@ namespace CE
 				}
 			}
 		}
+
+    	if (curStage == RHI::ShaderStage::Compute)
+    	{
+    		const auto& entryPoint = reflection->get_entry_point(entryPointStr.ToStdString(), spv::ExecutionModelGLCompute);
+
+    		outReflection.invocationSize.x = entryPoint.workgroup_size.x;
+    		outReflection.invocationSize.y = entryPoint.workgroup_size.y;
+    		outReflection.invocationSize.z = entryPoint.workgroup_size.z;
+    	}
 
 		std::function<void(Array<RHI::ShaderStructMember>&, spirv_cross::SPIRType, spirv_cross::TypeID)> reflectStruct = 
 			[&](Array<RHI::ShaderStructMember>& outStructMembers, spirv_cross::SPIRType type, spirv_cross::TypeID baseTypeId)

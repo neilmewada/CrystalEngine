@@ -22,11 +22,11 @@ namespace CE
 
 	    RPI::ParentPass* rootPass = passTree->GetRootPass();
 
-        // -------------------------------
-        // Attachments
-        // -------------------------------
+    	RPI::PassAttachment* pipelineOutput = renderPipeline->FindAttachment("PipelineOutput");
 
-	    RPI::PassAttachment* pipelineOutput = renderPipeline->FindAttachment("PipelineOutput");
+        // -------------------------------
+        // Transient Attachments
+        // -------------------------------
 
 		// - Depth Stencil -
 
@@ -290,9 +290,11 @@ namespace CE
     	{
     		auto computePass = CreateObject<RPI::ComputePass>(this, "TestComputePass");
     		{
+    			Vec3i invocationSize = computeShader->GetReflection().invocationSize;
+
     			computePass->SetShader(computeShader->GetRpiShader(0));
     			computePass->dispatchSizeSource.source = pipelineOutput->name;
-    			computePass->dispatchSizeSource.sizeMultipliers = Vec3(1 / 8.0f, 1 / 8.0f, 1);
+    			computePass->dispatchSizeSource.sizeMultipliers = Vec3(1.0f / invocationSize.x, 1.0f / invocationSize.y, 1.0f / invocationSize.z);
 
     			// _Texture
     			{

@@ -23,6 +23,8 @@ namespace CE
 
         int FindKernelIndex(const CE::Name& kernelName) const;
 
+        const ShaderReflection& GetReflection() const { return reflection; }
+
     protected:
 
         FIELD()
