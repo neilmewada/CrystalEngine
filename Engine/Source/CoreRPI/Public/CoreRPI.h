@@ -51,6 +51,7 @@ namespace CE::RPI
 #include "Pass/ParentPass.h"
 #include "Pass/GpuPass.h"
 #include "Pass/RasterPass.h"
+#include "Pass/ComputePass.h"
 #include "Pass/PassTree.h"
 #include "Pass/PassRegistry.h"
 #include "Pass/PassSystem.h"

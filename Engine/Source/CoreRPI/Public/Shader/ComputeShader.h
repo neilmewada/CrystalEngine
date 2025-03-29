@@ -6,7 +6,6 @@ namespace CE::RPI
     {
         Name shaderName{};
         ShaderReflection reflectionInfo;
-        Array<ShaderTagEntry> tags{};
         RHI::ShaderModuleDescriptor moduleDesc{};
         Name entryPoint{};
     };
@@ -18,6 +17,10 @@ namespace CE::RPI
         ComputeShader(const ComputerShaderDescriptor& desc);
 
         ~ComputeShader();
+
+        RHI::PipelineState* GetPipelineState() const { return computePipelineState; }
+
+        RHI::ShaderResourceGroupLayout GetPassSrgLayout() const;
 
     private:
 

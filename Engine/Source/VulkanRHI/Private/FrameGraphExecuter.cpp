@@ -308,13 +308,17 @@ namespace CE::Vulkan
 				Vulkan::Scope* currentScope = scopeChain[scopeIndex];
 				if (currentScope == nullptr)
 					continue;
+				if (currentScope->IsComputePass())
+				{
+					String::IsAlphabet('a');
+				}
 
 				executedScopes.Add(currentScope->id);
 
 				commandList->currentPass = currentScope->renderPass;
 				commandList->currentSubpass = currentScope->subpassIndex;
 
-				bool usesSwapChainAttachment = currentScope->swapChainsUsedByAttachments.NotEmpty();
+				//bool usesSwapChainAttachment = currentScope->swapChainsUsedByAttachments.NotEmpty();
 				RenderPass* renderPass = currentScope->renderPass;
 				FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
 				HashSet<RHI::AttachmentID> clearedAttachments{};
@@ -450,6 +454,8 @@ namespace CE::Vulkan
 									else
 									{
 										requiredLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+										if (currentSubPassScope->IsComputePass())
+											requiredLayout = VK_IMAGE_LAYOUT_GENERAL;
 										dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 									}
 									break;

@@ -281,6 +281,42 @@ namespace CE
             rootPass->AddChild(resolvePass);
 	    }
 
+    	auto assetManager = AssetManager::Get();
+    	Ref<CE::ComputeShader> computeShader = assetManager->LoadAssetAtPath<CE::ComputeShader>("/Engine/Assets/Sandbox/TestCompute");
+
+    	// - Test Compute Pass -
+    	if (false)
+	    {
+		    auto computePass = CreateObject<RPI::ComputePass>(this, "TestComputePass");
+		    {
+		    	computePass->SetShader(computeShader->GetRpiShader(0));
+
+		    	// _Texture
+			    {
+		    		RPI::PassSlot textureSlot{};
+		    		textureSlot.name = "Texture";
+		    		textureSlot.slotType = RPI::PassSlotType::InputOutput;
+		    		textureSlot.shaderInputName = "_Texture";
+		    		textureSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
+		    		textureSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
+		    		textureSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+
+		    		computePass->AddSlot(textureSlot);
+
+		    		RPI::PassAttachmentBinding textureBinding{};
+		    		textureBinding.name = "Texture";
+		    		textureBinding.slotType = RPI::PassSlotType::InputOutput;
+		    		textureBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+		    		textureBinding.connectedBinding = resolvePass->FindOutputBinding("Resolve");
+		    		textureBinding.fallbackBinding = nullptr;
+
+		    		computePass->AddAttachmentBinding(textureBinding);
+			    }
+
+		    	rootPass->AddChild(computePass);
+		    }
+	    }
+
         // -------------------------------
         // Apply Shader Layout
         // -------------------------------

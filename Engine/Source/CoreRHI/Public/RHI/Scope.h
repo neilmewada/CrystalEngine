@@ -67,7 +67,7 @@ namespace CE::RHI
 
 		bool UsesAttachment(AttachmentID attachmentId);
 
-		void SetPassSrgLayout(const RHI::ShaderResourceGroupLayout& layout) { passSrgLayout = layout; }
+		//void SetPassSrgLayout(const RHI::ShaderResourceGroupLayout& layout) { passSrgLayout = layout; }
 
 		static HashMap<ScopeAttachment*, ScopeAttachment*> FindCommonFrameAttachments(Scope* from, Scope* to);
 
@@ -79,6 +79,9 @@ namespace CE::RHI
 		RHI::HardwareQueueClass GetQueueClass() const { return queueClass; }
 
     	ScopeOperation GetOperation() const { return operation; }
+
+    	bool IsGraphicsPass() const { return operation == ScopeOperation::Rasterization; }
+    	bool IsComputePass() const { return operation == ScopeOperation::Compute; }
 
 		void SetShaderResourceGroups(const Array<RHI::ShaderResourceGroup*>& srgs);
 		void AddShaderResourceGroups(RHI::ShaderResourceGroup* srg);

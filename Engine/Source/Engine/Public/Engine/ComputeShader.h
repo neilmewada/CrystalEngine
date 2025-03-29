@@ -1,19 +1,12 @@
 #pragma once
 
-#if PAL_TRAIT_BUILD_EDITOR
-namespace CE::Editor
-{
-    class ComputeShaderAssetImportJob;
-}
-#endif
-
 namespace CE
 {
 
     CLASS()
-    class ENGINE_API ComputeShader : public Object
+    class ENGINE_API ComputeShader : public Asset
     {
-        CE_CLASS(ComputeShader, Object)
+        CE_CLASS(ComputeShader, Asset)
     protected:
 
         ComputeShader();
@@ -21,6 +14,14 @@ namespace CE
     public:
 
         virtual ~ComputeShader();
+
+        RPI::ComputeShader* GetRpiShader(int kernelIndex);
+
+        int GetNumOfKernels() const { return Math::Min(kernelNames.GetSize(), kernels.GetSize()); }
+
+        CE::Name GetKernelName(int kernelIndex) const;
+
+        int FindKernelIndex(const CE::Name& kernelName) const;
 
     protected:
 
@@ -32,6 +33,8 @@ namespace CE
 
         FIELD()
         ShaderReflection reflection;
+
+        HashMap<int, RPI::ComputeShader*> computeShaders;
 
 #if PAL_TRAIT_BUILD_EDITOR
         friend class CE::Editor::ComputeShaderAssetImportJob;

@@ -21,6 +21,8 @@ namespace CE::RHI
 
 		void BeginScope(const ScopeId& id);
 
+		void BeginScope(const ScopeId& id, ScopeOperation operation, HardwareQueueClass queueClass = HardwareQueueClass::Graphics);
+
 		bool ScopeQueueClass(HardwareQueueClass queueClass);
 
 		bool UseAttachment(const ImageScopeAttachmentDescriptor& descriptor,

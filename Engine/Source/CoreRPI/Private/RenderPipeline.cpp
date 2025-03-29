@@ -84,20 +84,30 @@ namespace CE::RPI
 
     void RenderPipeline::ApplyShaderLayout(RPI::ShaderCollection* shaderCollection)
     {
-		if (!shaderCollection || !passTree)
+		if (!passTree)
 			return;
 
 		passTree->IterateRecursively([shaderCollection](Pass* pass)
 			{
-				RHI::DrawListTag drawListTag = pass->GetDrawListTag();
-				if (!drawListTag.IsValid())
-					return;
+				if (pass->IsOfType<RasterPass>())
+				{
+					RHI::DrawListTag drawListTag = pass->GetDrawListTag();
+					if (!drawListTag.IsValid())
+						return;
 
-				RPI::Shader* shader = shaderCollection->GetShader(drawListTag);
-				if (!shader)
-					return;
+					if (!shaderCollection)
+						return;
 
-				pass->perPassSrgLayout = shader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerPass);
+					RPI::Shader* shader = shaderCollection->GetShader(drawListTag);
+					if (!shader)
+						return;
+
+					pass->perPassSrgLayout = shader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerPass);
+				}
+				else if (pass->IsOfType<ComputePass>())
+				{
+					// TODO: Compute pass layout
+				}
 			});
     }
 

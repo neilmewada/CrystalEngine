@@ -19,6 +19,8 @@ namespace CE::RPI
 
 	protected:
 
+		void EmplaceAttachments(FrameScheduler* scheduler) override;
+
 		//! @brief Shader resource group for this pass (SRG_PerPass)
 		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
 

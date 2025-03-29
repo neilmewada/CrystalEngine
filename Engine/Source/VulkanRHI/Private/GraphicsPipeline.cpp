@@ -104,6 +104,8 @@ namespace CE::Vulkan
         : Pipeline(device, desc)
         , desc(desc)
     {
+        pipelineType = PipelineStateType::Graphics;
+
         SetupColorBlendState();
         SetupDepthStencilState();
         SetupShaderStages();

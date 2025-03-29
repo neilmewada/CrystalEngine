@@ -42,6 +42,7 @@ namespace CE::Vulkan
 
 	bool Scope::CompileInternal(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
+		// TODO: Remove vkDeviceWaitIdle calls! They are bad for performance.
 		vkDeviceWaitIdle(device->GetHandle());
 
 		DestroySyncObjects();
@@ -127,38 +128,136 @@ namespace CE::Vulkan
 			}
 		}
 
-		if (prevSubPass == nullptr && nextSubPass != nullptr)
+		if (operation == RHI::ScopeOperation::Compute)
 		{
-			// TODO: Fix RenderPass with multiple subpasses
-			Vulkan::Scope* next = this;
-			this->subpassIndex = 0;
-			int i = 0;
+			String::IsAlphabet('a');
+		}
 
-			while (next != nullptr)
+		if (IsGraphicsPass())
+		{
+			if (prevSubPass == nullptr && nextSubPass != nullptr)
 			{
-				// Assign appropriate subpass indices
-				next->subpassIndex = i++;
-				next = (Vulkan::Scope*)next->nextSubPass;
+				// TODO: Fix RenderPass with multiple subpasses
+				Vulkan::Scope* next = this;
+				this->subpassIndex = 0;
+				int i = 0;
+
+				while (next != nullptr)
+				{
+					// Assign appropriate subpass indices
+					next->subpassIndex = i++;
+					next = (Vulkan::Scope*)next->nextSubPass;
+				}
+
+				RenderPassCache* rpCache = device->GetRenderPassCache();
+				RenderPass::Descriptor descriptor{};
+				RenderPass::BuildDescriptor(this, descriptor);
+				renderPass = rpCache->FindOrCreate(descriptor);
+
+				next = this;
+
+				while (next != nullptr)
+				{
+					bool foundPipelineLayout = false;
+					bool foundSubpassPipelineLayout = false;
+
+					for (RHI::PipelineState* rhiPipelineState : next->usePipelines)
+					{
+						auto pipelineState = (Vulkan::PipelineState*)rhiPipelineState;
+						Pipeline* pipeline = pipelineState->GetPipeline();
+						if (!pipeline || pipeline->GetPipelineType() != RHI::PipelineStateType::Graphics)
+							continue;
+						GraphicsPipeline* graphicsPipeline = (GraphicsPipeline*)pipeline;
+						graphicsPipeline->Compile(renderPass, subpassIndex);
+
+						// Setup SRG
+						auto pipelineLayout = (Vulkan::PipelineLayout*)rhiPipelineState->GetPipelineLayout();
+						if (pipelineLayout != nullptr && !foundPipelineLayout && pipelineLayout->srgLayouts.KeyExists(RHI::SRGType::PerPass))
+						{
+							foundPipelineLayout = true;
+							const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
+							next->passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+
+							// Bind Pass attachments to SRG
+						}
+
+						if (pipelineLayout != nullptr && !foundSubpassPipelineLayout && pipelineLayout->srgLayouts.KeyExists(RHI::SRGType::PerSubPass))
+						{
+							foundSubpassPipelineLayout = true;
+							const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerSubPass];
+							next->subpassShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+
+							// Bind Pass attachments to SRG
+						}
+					}
+
+					next->renderPass = renderPass;
+					next = (Vulkan::Scope*)next->nextSubPass;
+				}
 			}
-
-			RenderPassCache* rpCache = device->GetRenderPassCache();
-			RenderPass::Descriptor descriptor{};
-			RenderPass::BuildDescriptor(this, descriptor);
-			renderPass = rpCache->FindOrCreate(descriptor);
-
-			next = this;
-
-			while (next != nullptr)
+			else if (!IsSubPass())
 			{
+				// Compile Render Pass
+	            RenderPassCache* rpCache = device->GetRenderPassCache();
+	            RenderPass::Descriptor descriptor{};
+	            RenderPass::BuildDescriptor(this, descriptor);
+	            renderPass = rpCache->FindOrCreate(descriptor);
+				subpassIndex = 0;
 				bool foundPipelineLayout = false;
-				bool foundSubpassPipelineLayout = false;
 
-				for (RHI::PipelineState* rhiPipelineState : next->usePipelines)
+				if (!passSrgLayout.IsEmpty())
+				{
+					passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(passSrgLayout);
+
+					// Bind Pass attachments to SRG
+
+					for (auto scopeAttachment : attachments)
+					{
+						if (scopeAttachment->GetFrameAttachment() == nullptr)
+							continue;
+						if (scopeAttachment->GetUsage() != RHI::ScopeAttachmentUsage::Shader)
+							continue;
+
+						// Find the actual name in shader
+						Name attachmentName = scopeAttachment->GetShaderInputName();
+						RHI::FrameAttachment* frameAttachment = scopeAttachment->GetFrameAttachment();
+
+						for (int imageIdx = 0; imageIdx < RHI::Limits::MaxSwapChainImageCount; imageIdx++)
+						{
+							if (frameAttachment->IsImageAttachment())
+							{
+								RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
+								if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+									break;
+
+								RHI::Texture* image = (RHI::Texture*)resource;
+
+								passShaderResourceGroup->Bind(imageIdx, attachmentName, image);
+							}
+							else if (frameAttachment->IsBufferAttachment())
+							{
+								RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
+								if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Buffer)
+									break;
+
+								RHI::Buffer* buffer = (RHI::Buffer*)resource;
+
+								passShaderResourceGroup->Bind(imageIdx, attachmentName, buffer);
+							}
+						}
+					}
+
+					passShaderResourceGroup->FlushBindings();
+				}
+
+				// Pre-Compile Shader Pipelines
+				for (RHI::PipelineState* rhiPipelineState : usePipelines)
 				{
 					auto pipelineState = (Vulkan::PipelineState*)rhiPipelineState;
 					Pipeline* pipeline = pipelineState->GetPipeline();
 					if (!pipeline || pipeline->GetPipelineType() != RHI::PipelineStateType::Graphics)
 						continue;
+
 					GraphicsPipeline* graphicsPipeline = (GraphicsPipeline*)pipeline;
 					graphicsPipeline->Compile(renderPass, subpassIndex);
 
@@ -168,90 +267,71 @@ namespace CE::Vulkan
 					{
 						foundPipelineLayout = true;
 						const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
-						next->passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+						passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
 
 						// Bind Pass attachments to SRG
-					}
 
-					if (pipelineLayout != nullptr && !foundSubpassPipelineLayout && pipelineLayout->srgLayouts.KeyExists(RHI::SRGType::PerSubPass))
-					{
-						foundSubpassPipelineLayout = true;
-						const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerSubPass];
-						next->subpassShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+						for (auto scopeAttachment : attachments)
+						{
+							Name attachmentName = scopeAttachment->GetId();
+							if (scopeAttachment->GetFrameAttachment() == nullptr)
+								continue;
+							if (scopeAttachment->GetUsage() != RHI::ScopeAttachmentUsage::Shader)
+								continue;
 
-						// Bind Pass attachments to SRG
+							RHI::FrameAttachment* frameAttachment = scopeAttachment->GetFrameAttachment();
+
+							for (int imageIdx = 0; imageIdx < RHI::Limits::MaxSwapChainImageCount; imageIdx++)
+							{
+								if (frameAttachment->IsImageAttachment())
+								{
+									RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
+									if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+										break;
+
+									RHI::Texture* image = (RHI::Texture*)resource;
+
+									passShaderResourceGroup->Bind(imageIdx, scopeAttachment->GetShaderInputName(), image);
+								}
+								else if (frameAttachment->IsBufferAttachment())
+								{
+									RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
+									if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Buffer)
+										break;
+
+									RHI::Buffer* buffer = (RHI::Buffer*)resource;
+
+									passShaderResourceGroup->Bind(imageIdx, scopeAttachment->GetShaderInputName(), buffer);
+								}
+							}
+						}
+
+						passShaderResourceGroup->FlushBindings();
 					}
 				}
+			}
+			else
+			{
+				return true;
+			}
 
-				next->renderPass = renderPass;
-				next = (Vulkan::Scope*)next->nextSubPass;
+			for (int i = 0; i < imageCount; i++)
+			{
+				frameBuffers.Add(new FrameBuffer(device, this, i));
 			}
 		}
-		else if (!IsSubPass())
+		else if (IsComputePass())
 		{
-			// Compile Render Pass
-            RenderPassCache* rpCache = device->GetRenderPassCache();
-            RenderPass::Descriptor descriptor{};
-            RenderPass::BuildDescriptor(this, descriptor);
-            renderPass = rpCache->FindOrCreate(descriptor);
+			renderPass = nullptr;
 			subpassIndex = 0;
 			bool foundPipelineLayout = false;
 
-			if (!passSrgLayout.IsEmpty())
-			{
-				passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(passSrgLayout);
-
-				// Bind Pass attachments to SRG
-
-				for (auto scopeAttachment : attachments)
-				{
-					if (scopeAttachment->GetFrameAttachment() == nullptr)
-						continue;
-					if (scopeAttachment->GetUsage() != RHI::ScopeAttachmentUsage::Shader)
-						continue;
-
-					// TODO: Find the actual name in shader
-					Name attachmentName = scopeAttachment->GetShaderInputName();
-					RHI::FrameAttachment* frameAttachment = scopeAttachment->GetFrameAttachment();
-
-					for (int imageIdx = 0; imageIdx < RHI::Limits::MaxSwapChainImageCount; imageIdx++)
-					{
-						if (frameAttachment->IsImageAttachment())
-						{
-							RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
-							if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
-								break;
-
-							RHI::Texture* image = (RHI::Texture*)resource;
-
-							passShaderResourceGroup->Bind(imageIdx, attachmentName, image);
-						}
-						else if (frameAttachment->IsBufferAttachment())
-						{
-							RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
-							if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Buffer)
-								break;
-
-							RHI::Buffer* buffer = (RHI::Buffer*)resource;
-
-							passShaderResourceGroup->Bind(imageIdx, attachmentName, buffer);
-						}
-					}
-				}
-
-				passShaderResourceGroup->FlushBindings();
-			}
-			
-			// Pre-Compile Shader Pipelines
 			for (RHI::PipelineState* rhiPipelineState : usePipelines)
 			{
 				auto pipelineState = (Vulkan::PipelineState*)rhiPipelineState;
 				Pipeline* pipeline = pipelineState->GetPipeline();
-				if (!pipeline || pipeline->GetPipelineType() != RHI::PipelineStateType::Graphics)
+				if (!pipeline || pipeline->GetPipelineType() != RHI::PipelineStateType::Compute)
 					continue;
-
-				GraphicsPipeline* graphicsPipeline = (GraphicsPipeline*)pipeline;
-				graphicsPipeline->Compile(renderPass, subpassIndex);
 
 				// Setup SRG
 				auto pipelineLayout = (Vulkan::PipelineLayout*)rhiPipelineState->GetPipelineLayout();
@@ -259,10 +339,13 @@ namespace CE::Vulkan
 				{
 					foundPipelineLayout = true;
 					const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
-					passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+					if (passShaderResourceGroup == nullptr)
+					{
+						passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+					}
 
 					// Bind Pass attachments to SRG
-					
+
 					for (auto scopeAttachment : attachments)
 					{
 						Name attachmentName = scopeAttachment->GetId();
@@ -282,8 +365,8 @@ namespace CE::Vulkan
 									break;
 
 								RHI::Texture* image = (RHI::Texture*)resource;
-								
-								passShaderResourceGroup->Bind(imageIdx, "_" + attachmentName.GetString(), image);
+
+								passShaderResourceGroup->Bind(imageIdx, scopeAttachment->GetShaderInputName(), image);
 							}
 							else if (frameAttachment->IsBufferAttachment())
 							{
@@ -293,7 +376,7 @@ namespace CE::Vulkan
 
 								RHI::Buffer* buffer = (RHI::Buffer*)resource;
 
-								passShaderResourceGroup->Bind(imageIdx, "_" + attachmentName.GetString(), buffer);
+								passShaderResourceGroup->Bind(imageIdx, scopeAttachment->GetShaderInputName(), buffer);
 							}
 						}
 					}
@@ -301,15 +384,6 @@ namespace CE::Vulkan
 					passShaderResourceGroup->FlushBindings();
 				}
 			}
-		}
-		else
-		{
-			return true;
-		}
-
-		for (int i = 0; i < imageCount; i++)
-		{
-			frameBuffers.Add(new FrameBuffer(device, this, i));
 		}
 
 		return true;

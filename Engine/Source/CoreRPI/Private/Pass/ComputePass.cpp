@@ -3,24 +3,22 @@
 namespace CE::RPI
 {
 
-    RasterPass::RasterPass()
+    ComputePass::ComputePass()
     {
 
     }
 
-    RasterPass::~RasterPass()
+    ComputePass::~ComputePass()
     {
-	    
+        
     }
-	
-    void RasterPass::ProduceScopes(RHI::FrameScheduler* scheduler)
+
+    void ComputePass::ProduceScopes(RHI::FrameScheduler* scheduler)
     {
         Name scopeId = GetScopeId();
-        
-        scheduler->BeginScope(scopeId);
+
+        scheduler->BeginScope(scopeId, ScopeOperation::Compute, HardwareQueueClass::Compute);
         {
-            // - Use Attachments -
-            
             auto useAttachment = [&](const PassAttachmentBinding& attachmentBinding)
                 {
                     Ptr<PassAttachment> attachment = attachmentBinding.GetOriginalAttachment();
@@ -94,6 +92,15 @@ namespace CE::RPI
                 useAttachment(attachmentBinding);
             }
 
+            if (shader)
+            {
+                scheduler->UsePipeline(shader->GetPipelineState());
+            }
+            else
+            {
+                CE_LOG(Error, All, "Compute Pass ({}) does not have compute shader assigned!", GetName());
+            }
+
             // - Use SRGs -
 
             if (shaderResourceGroup)
@@ -111,12 +118,15 @@ namespace CE::RPI
                 scheduler->UseShaderResourceGroup(sceneSrg);
             }
 
-            if (!perPassSrgLayout.IsEmpty())
-            {
-                scheduler->UsePassSrgLayout(perPassSrgLayout);
-            }
+            scheduler->UsePassSrgLayout(shader->GetPassSrgLayout());;
         }
         scheduler->EndScope();
     }
 
-} // namespace CE::RPI
+    void ComputePass::SetShader(RPI::ComputeShader* shader)
+    {
+        this->shader = shader;
+    }
+
+} // namespace CE
+

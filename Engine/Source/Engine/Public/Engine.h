@@ -17,6 +17,13 @@
 // Engine
 ///////////////////////////////////////////////////////
 
+#if PAL_TRAIT_BUILD_EDITOR
+namespace CE::Editor
+{
+	class ComputeShaderAssetImportJob;
+}
+#endif
+
 // Asset Types
 #include "Engine/TextureDefines.h"
 #include "Engine/SamplerState.h"

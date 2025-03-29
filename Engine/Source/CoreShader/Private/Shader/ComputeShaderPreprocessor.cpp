@@ -92,7 +92,7 @@ namespace CE
 
             if (valid)
             {
-                tokens.Add(token);
+                outTokens.Add(token);
                 prevToken = token;
             }
         }

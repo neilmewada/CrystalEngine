@@ -25,13 +25,24 @@ namespace CE::RHI
 		RHI::ScopeDescriptor desc{};
 		desc.id = id;
 		desc.queueClass = RHI::HardwareQueueClass::Graphics;
+    	desc.operation = ScopeOperation::Rasterization;
 		this->currentScope = RHI::gDynamicRHI->CreateScope(desc);
+	}
+
+	void FrameGraphBuilder::BeginScope(const ScopeId& id, ScopeOperation operation, HardwareQueueClass queueClass)
+	{
+    	RHI::ScopeDescriptor desc{};
+    	desc.id = id;
+    	desc.queueClass = queueClass;
+    	desc.operation = operation;
+    	this->currentScope = RHI::gDynamicRHI->CreateScope(desc);
 	}
 
 	bool FrameGraphBuilder::ScopeQueueClass(HardwareQueueClass queueClass)
 	{
 		if (!currentScope || !frameGraph)
 			return false;
+
 		currentScope->queueClass = queueClass;
 		return true;
 	}
@@ -71,13 +82,13 @@ namespace CE::RHI
 	}
 
 	bool FrameGraphBuilder::UsePassSrgLayout(const RHI::ShaderResourceGroupLayout& srgLayout)
-	{
-		if (!currentScope || !frameGraph || srgLayout.IsEmpty())
-			return false;
+    {
+    	if (!currentScope || !frameGraph || srgLayout.IsEmpty())
+    		return false;
 
-		currentScope->passSrgLayout = srgLayout;
-		return true;
-	}
+    	currentScope->passSrgLayout = srgLayout;
+    	return true;
+    }
 
 	bool FrameGraphBuilder::UseAttachment(const BufferScopeAttachmentDescriptor& descriptor, ScopeAttachmentUsage usage, ScopeAttachmentAccess access)
 	{

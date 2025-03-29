@@ -53,7 +53,7 @@ namespace CE::RPI
 
 		Name GetScopeId() const;
 
-		const RHI::ShaderResourceGroupLayout& GetPerPassSrgLayout() const { return perPassSrgLayout; }
+		//const RHI::ShaderResourceGroupLayout& GetPerPassSrgLayout() const { return perPassSrgLayout; }
 
 		const Array<PassAttachmentBinding>& GetInputBindings() const { return inputBindings; }
 		const Array<PassAttachmentBinding>& GetInputOutputBindings() const { return inputOutputBindings; }

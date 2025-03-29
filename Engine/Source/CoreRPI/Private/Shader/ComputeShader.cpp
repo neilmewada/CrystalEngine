@@ -36,4 +36,16 @@ namespace CE::RPI
             shaderModule = nullptr;
         }
     }
+
+    RHI::ShaderResourceGroupLayout ComputeShader::GetPassSrgLayout() const
+    {
+        for (const auto& srgLayout : descriptor.reflectionInfo.srgLayouts)
+        {
+            if (srgLayout.srgType == SRGType::PerPass)
+            {
+                return srgLayout;
+            }
+        }
+        return {};
+    }
 }
