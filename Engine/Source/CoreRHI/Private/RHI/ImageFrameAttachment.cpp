@@ -49,6 +49,29 @@ namespace CE::RHI
 	    }
     }
 
+    ImageFrameAttachment::ImageFrameAttachment(AttachmentID id,
+	    const StaticArray<TextureView*, Limits::MaxSwapChainImageCount>& frames)
+		: FrameAttachment(id, RHI::AttachmentLifetimeType::External)
+    {
+    	for (int i = 0; i < frames.GetSize(); ++i)
+    	{
+    		SetResource(i, frames[i]);
+
+    		RHI::Texture* texture = frames[i]->GetTexture();
+
+    		descriptor.width = texture->GetWidth();
+    		descriptor.height = texture->GetHeight();
+    		descriptor.depth = texture->GetDepth();
+    		descriptor.format = frames[i]->GetFormat();
+    		descriptor.sampleCount = texture->GetSampleCount();
+    		descriptor.dimension = frames[i]->GetDimension();
+    		descriptor.arrayLayers = frames[i]->GetArrayLayerCount();
+    		descriptor.mipLevels = frames[i]->GetMipLevelCount();
+    		descriptor.bindFlags = texture->GetBindFlags();
+    		descriptor.defaultHeapType = MemoryHeapType::Default;
+    	}
+    }
+
     ImageFrameAttachment::~ImageFrameAttachment()
     {
         

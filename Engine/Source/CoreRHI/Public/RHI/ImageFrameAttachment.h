@@ -16,6 +16,9 @@ namespace CE::RHI
         //! Create an external FrameBuffer attachment
         ImageFrameAttachment(AttachmentID id, const StaticArray<Texture*, Limits::MaxSwapChainImageCount>& frames);
 
+    	//! Create an external FrameBuffer attachment
+    	ImageFrameAttachment(AttachmentID id, const StaticArray<TextureView*, Limits::MaxSwapChainImageCount>& frames);
+
         virtual ~ImageFrameAttachment();
 
 		virtual bool IsBufferAttachment() const override final { return false; }

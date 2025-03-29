@@ -17,6 +17,9 @@ namespace CE::RHI
 
 		//! Add an external FrameBuffer image attachment that uses different image per image index.
 		void EmplaceFrameAttachment(AttachmentID id, const StaticArray<Texture*, Limits::MaxSwapChainImageCount>& frames);
+
+		//! Add an external FrameBuffer image-view attachment that uses different image per image index.
+		void EmplaceFrameAttachment(AttachmentID id, const StaticArray<TextureView*, Limits::MaxSwapChainImageCount>& frames);
         
         void EmplaceFrameAttachment(AttachmentID id, SwapChain* swapChain);
 

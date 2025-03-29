@@ -400,7 +400,7 @@ namespace CE
 
 									passAttachment->attachmentId = String::Format("Viewport_{}", viewport->GetUuid());
 
-									StaticArray<RHI::Texture*, RHI::Limits::MaxSwapChainImageCount> frameBuffer{};
+									StaticArray<RHI::TextureView*, RHI::Limits::MaxSwapChainImageCount> frameBuffer{};
 
 									RHI::ImageScopeAttachmentDescriptor descriptor{};
 									descriptor.attachmentId = passAttachment->attachmentId;
@@ -416,7 +416,8 @@ namespace CE
 											viewport->RecreateFrameBuffer();
 										}
 
-										frameBuffer[i] = viewport->GetFrame(i)->GetRhiTexture();
+										//frameBuffer[i] = viewport->GetFrame(i)->GetRhiTexture();
+										frameBuffer[i] = viewport->GetFrameView(i);
 									}
 
 									attachmentDatabase.EmplaceFrameAttachment(passAttachment->attachmentId, frameBuffer);

@@ -286,7 +286,7 @@ namespace CE
     	auto assetManager = AssetManager::Get();
     	Ref<CE::ComputeShader> computeShader = assetManager->LoadAssetAtPath<CE::ComputeShader>("/Engine/Assets/Sandbox/TestCompute");
 
-    	if (true)
+    	if (false)
     	{
     		auto computePass = CreateObject<RPI::ComputePass>(this, "TestComputePass");
     		{
@@ -323,7 +323,7 @@ namespace CE
     	}
 
         // -------------------------------
-        // Apply Shader Layout
+        // Apply Shader Layout (SRG_PerPass)
         // -------------------------------
 
         Ref<CE::Shader> standardShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");

@@ -30,6 +30,16 @@ namespace CE::RHI
 		attachmentsById[id] = attachment;
 	}
 
+	void FrameAttachmentDatabase::EmplaceFrameAttachment(AttachmentID id,
+		const StaticArray<TextureView*, Limits::MaxSwapChainImageCount>& frames)
+	{
+    	if (attachmentsById.KeyExists(id))
+    		return;
+    	auto attachment = new ImageFrameAttachment(id, frames);
+    	attachments.Add(attachment);
+    	attachmentsById[id] = attachment;
+	}
+
 	void FrameAttachmentDatabase::EmplaceFrameAttachment(AttachmentID id, SwapChain* swapChain)
     {
 		if (attachmentsById.KeyExists(id))
