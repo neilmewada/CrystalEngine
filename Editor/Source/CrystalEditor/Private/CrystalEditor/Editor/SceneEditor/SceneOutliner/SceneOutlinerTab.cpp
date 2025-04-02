@@ -25,11 +25,11 @@ namespace CE::Editor
                     .Columns(
                         FNew(FTreeViewHeaderColumn)
                         .Title("Name")
-                        .FillRatio(0.75f),
+                        .FillRatio(0.5f),
 
                         FNew(FTreeViewHeaderColumn)
                         .Title("Type")
-                        .FillRatio(0.25f)
+                        .FillRatio(0.5f)
                     )
                 )
                 .RowHeight(25)

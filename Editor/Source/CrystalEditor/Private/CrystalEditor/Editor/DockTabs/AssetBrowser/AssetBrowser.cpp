@@ -74,17 +74,7 @@ namespace CE::Editor
                             .Gap(0)
                             .VAlign(VAlign::Fill)
                             .HAlign(HAlign::Left)
-                            /*(
-                                FForEach{ 24, [&](int index) -> FWidget&
-                                {
-                                    return
-                                    FNew(FTextButton)
-                                    .Text(index % 2 != 0 ? String::Format("Button {}", index) : "/")
-                                    .Style("Button.Icon")
-                                    .Padding(Vec4(1, 1, 1, 1) * 5.0f)
-                                    ;
-                                }}
-                            )*/
+                            .Padding(Vec4(1, 0, 1, 0) * 2.5f)
                         ),
 
                         FNew(FTextButton)
