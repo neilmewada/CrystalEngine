@@ -53,6 +53,14 @@ namespace CE
 
     }
 
+    void AssetProcessor::RunOnce()
+    {
+        if (!validScanPath)
+            return;
+
+
+    }
+
     
 } // namespace CE
 

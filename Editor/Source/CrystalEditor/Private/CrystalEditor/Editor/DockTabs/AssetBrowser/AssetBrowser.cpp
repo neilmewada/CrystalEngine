@@ -123,6 +123,9 @@ namespace CE::Editor
 
         leftSections = { directorySection };
 
+        AssetRegistry* registry = AssetRegistry::Get();
+        registry->AddRegistryListener(this);
+
         treeViewModel = CreateObject<AssetBrowserTreeViewModel>(this, "TreeViewModel");
         treeViewModel->Init();
         treeView->Model(treeViewModel.Get());
@@ -134,6 +137,17 @@ namespace CE::Editor
         currentPath = "/";
         currentDirectory = AssetRegistry::Get()->GetCachedPathTree().GetRootNode();
         UpdateAssetGridView();
+    }
+
+    void AssetBrowser::OnBeginDestroy()
+    {
+        Super::OnBeginDestroy();
+
+        AssetRegistry* registry = AssetRegistry::Get();
+        if (registry)
+        {
+            registry->RemoveRegistryListener(this);
+        }
     }
 
     void AssetBrowser::OnAssetPathTreeUpdated(PathTree& pathTree)

@@ -24,6 +24,8 @@ namespace CE
 
         void Initialize();
 
+        void RunOnce();
+
     protected:
 
         bool inProgress = false;

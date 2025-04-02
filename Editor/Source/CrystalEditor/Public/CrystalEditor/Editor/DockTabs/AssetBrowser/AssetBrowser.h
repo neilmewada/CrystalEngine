@@ -18,6 +18,8 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void OnBeginDestroy() override;
+
         void OnAssetPathTreeUpdated(PathTree& pathTree) override;
 
     public: // - Public API -

@@ -63,6 +63,12 @@ namespace CE::Editor
 
     void AssetBrowserItem::HandleEvent(FEvent* event)
     {
+        KeyModifier ctrlMod = KeyModifier::Ctrl;
+        if (PlatformMisc::GetCurrentPlatform() == PlatformName::Mac)
+        {
+            ctrlMod = KeyModifier::Gui; // Gui is Cmd on mac
+        }
+
         if (auto owner = m_Owner.Lock())
         {
             if (event->IsMouseEvent() && !IsInteractionDisabled() && IsVisible())
@@ -73,7 +79,7 @@ namespace CE::Editor
                 {
                     if (mouseEvent->buttons == MouseButtonMask::Left || mouseEvent->buttons == MouseButtonMask::Right)
                     {
-                        if (!EnumHasFlag(mouseEvent->keyModifiers, KeyModifier::Ctrl))
+                        if (!EnumHasFlag(mouseEvent->keyModifiers, ctrlMod))
                         {
                             owner->DeselectAll();
                         }

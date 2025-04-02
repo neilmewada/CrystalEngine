@@ -95,7 +95,7 @@ namespace CE::Editor
 
 	void AssetImporter::OnAssetImportJobFinish(AssetImportJob* job)
 	{
-		LockGuard<SharedMutex> lock{ mutex };
+		LockGuard guard{ mutex };
 
 		AssetImportJobResult importResult{};
 		importResult.success = job->success;

@@ -28,6 +28,8 @@ namespace CE::Editor
 
         bool SupportsKeyboardEvents() const override { return true; }
 
+        int GetSelectedItemCount();
+
         // Will redraw the items
         void OnModelUpdate();
 
@@ -35,7 +37,6 @@ namespace CE::Editor
 
     protected: // - Internal -
 
-        HashSet<AssetBrowserItem*> selectedItems;
         Array<AssetBrowserItem*> items;
 
     public: // - Fusion Properties - 

@@ -17,8 +17,21 @@ namespace CE::Editor
 
     void AssetBrowserGridView::DeselectAll()
     {
-        selectedItems.Clear();
-        OnSelectionUpdated();
+        for (AssetBrowserItem* item : items)
+        {
+            item->Deselect();
+        }
+    }
+
+    int AssetBrowserGridView::GetSelectedItemCount()
+    {
+        int count = 0;
+        for (AssetBrowserItem* item : items)
+        {
+            if (item->IsActive())
+                count++;
+        }
+        return count;
     }
 
     void AssetBrowserGridView::OnModelUpdate()
@@ -77,11 +90,11 @@ namespace CE::Editor
     {
         for (AssetBrowserItem* item : items)
         {
-            if (selectedItems.Exists(item))
+            //if (selectedItems.Exists(item))
             {
-                item->Select();
+                //item->Select();
             }
-            else
+            //else
             {
                 item->Deselect();
             }
@@ -90,6 +103,12 @@ namespace CE::Editor
 
     void AssetBrowserGridView::HandleEvent(FEvent* event)
     {
+        KeyModifier ctrlMod = KeyModifier::Ctrl;
+        if (PlatformMisc::GetCurrentPlatform() == PlatformName::Mac)
+        {
+            ctrlMod = KeyModifier::Gui; // Gui is Cmd on mac
+        }
+
         if (event->IsMouseEvent())
         {
             auto mouseEvent = static_cast<FMouseEvent*>(event);
@@ -99,12 +118,39 @@ namespace CE::Editor
             {
                 mouseEvent->Consume(this);
 
-                selectedItems.Clear();
-                OnSelectionUpdated();
+                DeselectAll();
+            }
+            else if (mouseEvent->sender == this && mouseEvent->buttons == MouseButtonMask::Right &&
+                mouseEvent->type == FEventType::MousePress)
+            {
+                mouseEvent->Consume(this);
+
+                if (EnumHasAnyFlags(mouseEvent->keyModifiers, KeyModifier::Shift | ctrlMod))
+                {
+                    // Right-click for items
+                }
+                else
+                {
+                    DeselectAll();
+                }
             }
         }
 
         Super::HandleEvent(event);
+
+        if (event->IsMouseEvent())
+        {
+            auto mouseEvent = static_cast<FMouseEvent*>(event);
+
+            if (mouseEvent->sender != nullptr && mouseEvent->sender->IsOfType<AssetBrowserItem>() &&
+                mouseEvent->buttons == MouseButtonMask::Right && mouseEvent->type == FEventType::MousePress)
+            {
+                int numSelected = GetSelectedItemCount();
+                // Right-click on items
+                AssetBrowserItem* item = static_cast<AssetBrowserItem*>(mouseEvent->sender);
+
+            }
+        }
     }
 
     
