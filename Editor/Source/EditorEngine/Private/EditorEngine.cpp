@@ -8,7 +8,7 @@ namespace CE::Editor
 {
 	EDITORENGINE_API AssetDefinitionRegistry* gAssetDefinitionRegistry = nullptr;
 
-    EDITORENGINE_API EditorEngine* gEditor = nullptr;
+    EDITORENGINE_API Ref<EditorEngine> gEditor = nullptr;
 
     class EditorEngineModule : public CE::Module
     {
@@ -16,7 +16,7 @@ namespace CE::Editor
         virtual void StartupModule() override
         {
             gEditor = CreateObject<EditorEngine>(nullptr, "EditorEngine", OF_Transient);
-            gEngine = gEditor;
+            gEngine = gEditor.Get();
         }
 
         virtual void ShutdownModule() override

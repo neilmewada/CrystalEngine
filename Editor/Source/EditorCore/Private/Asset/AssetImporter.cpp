@@ -122,6 +122,43 @@ namespace CE::Editor
 		numJobsInProgress--;
 	}
 
+	void AssetImportJob::BuildUuidTree(Ref<Bundle> bundle)
+	{
+    	rootNode.Clear();
+
+    	std::function<void(AssetUuidNode*, Object*)> visitor =
+    		[&](AssetUuidNode* parentNode, Object* object)
+    		{
+    			if (object == nullptr)
+    				return;
+
+    			if (parentNode != nullptr)
+    			{
+    				parentNode->children.Add({});
+    			}
+    			AssetUuidNode* node = nullptr;
+    			if (parentNode != nullptr)
+    			{
+    				node = &parentNode->children.Top();
+    			}
+    			else
+    			{
+    				node = &rootNode;
+    			}
+
+    			node->uuid = object->GetUuid();
+    			node->objectName = object->GetName();
+    			node->objectType = object->GetClass();
+
+			    for (int i = 0; i < object->GetSubObjectCount(); ++i)
+			    {
+				    visitor(node, object->GetSubObject(i));
+			    }
+    		};
+
+    	visitor(nullptr, bundle.Get());
+	}
+
 	void AssetImportJob::FetchObjectUuids(const Ref<Bundle>& bundle, const Array<UuidFetcher>& uuidFetchers)
 	{
 		std::function<void(const Ref<Object>&, const Array<UuidFetcher>&)> visitor =
@@ -240,6 +277,8 @@ namespace CE::Editor
     		.loadFully = true
     	};
 
+    	rootNode.Clear();
+
 		if (productPath.Exists())
 		{
 			bundle = Bundle::LoadBundleAbsolute(transient, productPath, args);
@@ -247,6 +286,10 @@ namespace CE::Editor
 			if (bundle == nullptr)
 			{
 				IO::Path::Remove(productPath);
+			}
+			else // Asset was already processed before, but it requires an update now!
+			{
+				BuildUuidTree(bundle);
 			}
 		}
 
@@ -272,8 +315,9 @@ namespace CE::Editor
 
 		if (!isGameAsset)
 		{
-			// TODO: Non-game assets (i.e. Non-user assets) must have a fixed UUID based on their path.
-			// Because They are generated locally when the engine is built.
+			// Non-game assets (i.e. Non-user assets) must have a fixed UUID based on their path.
+			// Because they are generated locally on user's PC when the engine is built.
+			// So we need to make sure that anyone who builds the engine has the same UUID for engine & editor assets.
 
 			HashMap<Name, int> objectPathNameCounter{};
 

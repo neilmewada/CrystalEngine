@@ -1,5 +1,5 @@
 
-#include "AssetProcessor.h"
+#include "AssetProcessorCLI.h"
 
 int main(int argc, char** argv)
 {

@@ -29,6 +29,11 @@ namespace CE::Editor
         projectLabelParent->Enabled(true);
         projectLabel->Text(projectSettings->projectName);
 
+	    if (PlatformMisc::GetCurrentPlatform() == PlatformName::Mac)
+	    {
+	        logo->Enabled(false);
+	    }
+
         Style("EditorDockspace");
     }
 

@@ -1,4 +1,4 @@
-#include "AssetProcessor.h"
+#include "AssetProcessorCLI.h"
 
 #define LOG(x) std::cout << x << std::endl;
 #define LOGERR(x) std::cerr << x << std::endl;

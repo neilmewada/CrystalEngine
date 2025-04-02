@@ -16,13 +16,23 @@ namespace CE::Editor
 	{
 		Super::PostInitialize();
 
+		assetProcessor = CreateObject<AssetProcessor>(this, "AssetProcessor");
 	}
 
 	void EditorEngine::PreShutdown()
 	{
 		Super::PreShutdown();
 
-		
+		assetProcessor->TerminateAllJobs();
+		assetProcessor->BeginDestroy();
+		assetProcessor = nullptr;
 	}
+
+	void EditorEngine::Tick(f32 deltaTime)
+	{
+		Super::Tick(deltaTime);
+
+	}
+
 
 } // namespace CE::Editor

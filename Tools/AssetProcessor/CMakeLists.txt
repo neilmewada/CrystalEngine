@@ -9,7 +9,7 @@ ce_add_target(${PROJECT_NAME} TOOL
     FOLDER Tools
     PCHHEADER
         PRIVATE
-            Source/${PROJECT_NAME}.h
+            Source/AssetProcessorCLI.h
     FILES_CMAKE
         PRIVATE
             ${PROJECT_NAME_LOWERCASE}_source_files.cmake

@@ -53,11 +53,32 @@ namespace CE::Editor
                     FAssignNew(FHorizontalStack, searchBarStack)
                     .ContentVAlign(VAlign::Center)
                     .ContentHAlign(HAlign::Left)
+                    .Gap(10.0f)
                     .MinHeight(25)
                     .Padding(Vec4(1, 1, 1, 1) * 2.5f)
                     (
-                        FNew(FWidget)
-                        .FillRatio(1.0f),
+                        FNew(FImageButton)
+                        .Image(FBrush("/Editor/Assets/Icons/Refresh"))
+                        .Width(18)
+                        .Height(18)
+                        .Padding(Vec4(1, 1, 1, 1) * 3)
+                        .Style("Button"),
+
+                        FNew(FHorizontalStack)
+                        .ContentHAlign(HAlign::Right)
+                        .Gap(2.5f)
+                        .ClipChildren(true)
+                        .VAlign(VAlign::Fill)
+                        .FillRatio(1.0f)
+                        (
+                            FForEach{ 12, [&](int index) -> FWidget&
+                            {
+                                return
+                                FNew(FTextButton)
+                                .Text(String::Format("Button {}", index))
+                                ;
+                            }}
+                        ),
 
                         FNew(FTextButton)
                         .Text("Settings")

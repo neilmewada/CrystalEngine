@@ -12,6 +12,22 @@ namespace CE::Editor
 		String errorMessage{};
 	};
 
+	struct AssetUuidNode
+	{
+		Uuid uuid;
+		ClassType* objectType = nullptr;
+		Name objectName;
+		Array<AssetUuidNode> children;
+
+		void Clear()
+		{
+			uuid = Uuid();
+			objectType = nullptr;
+			objectName = nullptr;
+			children.Clear();
+		}
+	};
+
     CLASS(Abstract, Config = Editor)
     class EDITORCORE_API AssetImporter : public Object
     {
@@ -117,6 +133,8 @@ namespace CE::Editor
 
 		void FetchObjectUuids(const Ref<Bundle>& bundle, const Array<UuidFetcher>& uuidFetchers);
 
+		void BuildUuidTree(Ref<Bundle> bundle);
+
 		Array<IO::Path> includePaths{};
 
 		PlatformName targetPlatform;
@@ -139,6 +157,7 @@ namespace CE::Editor
 	private:
 
 		bool success = false;
+		AssetUuidNode rootNode{};
 
 		friend class AssetImporter;
 	};
