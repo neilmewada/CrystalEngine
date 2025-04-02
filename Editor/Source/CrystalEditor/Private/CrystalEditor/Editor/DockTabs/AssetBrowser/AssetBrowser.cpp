@@ -64,20 +64,27 @@ namespace CE::Editor
                         .Padding(Vec4(1, 1, 1, 1) * 3)
                         .Style("Button"),
 
-                        FNew(FHorizontalStack)
-                        .ContentHAlign(HAlign::Right)
-                        .Gap(2.5f)
-                        .ClipChildren(true)
-                        .VAlign(VAlign::Fill)
+                        FNew(FScrollBox)
+                        .HideHorizontalScroll(true)
+                        .HorizontalScroll(true)
+                        .VerticalScroll(false)
                         .FillRatio(1.0f)
                         (
-                            FForEach{ 12, [&](int index) -> FWidget&
-                            {
-                                return
-                                FNew(FTextButton)
-                                .Text(String::Format("Button {}", index))
-                                ;
-                            }}
+                            FAssignNew(FHorizontalStack, breadCrumbsContainer)
+                            .Gap(0)
+                            .VAlign(VAlign::Fill)
+                            .HAlign(HAlign::Left)
+                            /*(
+                                FForEach{ 24, [&](int index) -> FWidget&
+                                {
+                                    return
+                                    FNew(FTextButton)
+                                    .Text(index % 2 != 0 ? String::Format("Button {}", index) : "/")
+                                    .Style("Button.Icon")
+                                    .Padding(Vec4(1, 1, 1, 1) * 5.0f)
+                                    ;
+                                }}
+                            )*/
                         ),
 
                         FNew(FTextButton)
@@ -161,7 +168,7 @@ namespace CE::Editor
             if (currentDirectory != nullptr)
             {
                 currentDirectory = nullptr;
-                currentPath = {};
+                currentPath = "/";
                 UpdateAssetGridView();
             }
             return;
@@ -173,13 +180,6 @@ namespace CE::Editor
                 continue;
 
             PathTreeNode* node = (PathTreeNode*)index.GetDataPtr();
-
-            /*if (!directoryTree.GetRootNode()->ChildExistsRecursive(node))
-            {
-                // Directory was deleted!
-                selectionModel->ClearSelection(); // This will recursively call current function again
-                break;
-            }*/
 
             if (currentDirectory != node)
             {
@@ -203,11 +203,67 @@ namespace CE::Editor
         }
     }
 
+    void AssetBrowser::UpdateBreadCrumbs()
+    {
+        breadCrumbsContainer->QueueDestroyAllChildren();
+
+        if (currentPath == "/")
+        {
+            breadCrumbsContainer->AddChild(
+                FNew(FTextButton)
+                .Text("/")
+                .OnClicked([this]
+                {
+                    SetCurrentPath("/");
+                })
+                .Style("Button.Icon")
+                .Padding(Vec4(1, 1, 1, 1) * 5.0f)
+            );
+
+            return;
+        }
+
+        Array<String> split;
+        currentPath.GetString().Split("/", split);
+        String pathIterator = "";
+
+        for (int i = 0; i < split.GetSize(); ++i)
+        {
+            pathIterator += "/";
+
+            breadCrumbsContainer->AddChild(
+                FNew(FTextButton)
+                .Text("/")
+                .OnClicked([pathIterator, this]
+                {
+                    SetCurrentPath(pathIterator);
+                })
+                .Style("Button.Icon")
+                .Padding(Vec4(1, 1, 1, 1) * 5.0f)
+            );
+
+            pathIterator += split[i];
+
+            breadCrumbsContainer->AddChild(
+                FNew(FTextButton)
+                .Text(split[i])
+                .OnClicked([pathIterator, this]
+                {
+                    SetCurrentPath(pathIterator);
+                })
+                .Style("Button.Icon")
+                .Padding(Vec4(1, 1, 1, 1) * 5.0f)
+            );
+        }
+    }
+
     void AssetBrowser::UpdateAssetGridView()
     {
         gridViewModel->SetCurrentDirectory(currentPath);
 
         gridView->OnModelUpdate();
+
+        UpdateBreadCrumbs();
     }
 
     void AssetBrowser::SetCurrentPath(const CE::Name& path)
@@ -219,6 +275,12 @@ namespace CE::Editor
         PathTreeNode* node = registry->GetCachedPathTree().GetNode(path);
         if (!node || node->nodeType != PathTreeNodeType::Directory)
             return;
+        if (node == registry->GetCachedPathTree().GetRootNode())
+        {
+            treeView->SelectionModel()->ClearSelection();
+            return;
+        }
+
         FModelIndex index = treeViewModel->FindIndex(node);
         if (!index.IsValid())
             return;

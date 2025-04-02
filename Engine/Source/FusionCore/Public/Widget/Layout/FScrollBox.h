@@ -38,6 +38,9 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(bool, VerticalScroll);
         FUSION_LAYOUT_PROPERTY(bool, HorizontalScroll);
 
+        FUSION_LAYOUT_PROPERTY(bool, HideVerticalScroll);
+        FUSION_LAYOUT_PROPERTY(bool, HideHorizontalScroll);
+
         FUSION_PROPERTY(FBrush, Background);
         FUSION_PROPERTY(Color, BorderColor);
         FUSION_PROPERTY(f32, BorderWidth);

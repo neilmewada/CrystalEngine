@@ -53,11 +53,11 @@ namespace CE
         Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right + childMargin.left + childMargin.right,
             m_Padding.top + m_Padding.bottom + childMargin.top + childMargin.bottom);
 
-        if (isVerticalScrollVisible)
+        if (isVerticalScrollVisible && !m_HideVerticalScroll)
         {
             availableSize.x -= m_ScrollBarMargin * 2 + m_ScrollBarWidth;
         }
-        if (isHorizontalScrollVisible)
+        if (isHorizontalScrollVisible && !m_HideHorizontalScroll)
         {
             availableSize.y -= m_ScrollBarMargin * 2 + m_ScrollBarWidth;
         }
@@ -77,6 +77,12 @@ namespace CE
         if (HorizontalScroll() && childHAlign == HAlign::Auto)
         {
             childHAlign = HAlign::Left;
+        }
+
+        if ((VerticalScroll() && childVAlign == VAlign::Fill) || (HorizontalScroll() && childHAlign == HAlign::Fill))
+        {
+            CE_LOG(Warn, All, "FScrollBox's child widget has a VAlign and/or HAlign set to Fill!\n"
+                              "This will prevent the scrolling behaviour from working properly.");
         }
 
         switch (childVAlign)
@@ -102,7 +108,7 @@ namespace CE
         {
         case HAlign::Auto:
         case HAlign::Fill:
-            if (isVerticalScrollVisible)
+            if (isVerticalScrollVisible && !m_HideVerticalScroll)
             {
                 child->computedSize.width -= m_ScrollBarMargin * 2 + m_ScrollBarWidth;
             }
@@ -191,7 +197,7 @@ namespace CE
             return Rect();
 
         f32 endOffset = 0;
-        if (isVerticalScrollVisible)
+        if (isVerticalScrollVisible && !m_HideVerticalScroll)
         {
             endOffset = m_ScrollBarMargin * 2 + m_ScrollBarWidth;
         }
@@ -215,7 +221,7 @@ namespace CE
         if (!GetChild())
             return;
 
-        if (isVerticalScrollVisible)
+        if (isVerticalScrollVisible && !m_HideVerticalScroll)
         {
             if (m_ScrollBarBackground.IsValidBrush() || m_ScrollBarBackgroundPen.IsValidPen())
             {
@@ -242,7 +248,7 @@ namespace CE
             painter->DrawShape(GetVerticalScrollBarRect().Translate(-computedPosition), m_ScrollBarShape);
         }
 
-        if (isHorizontalScrollVisible)
+        if (isHorizontalScrollVisible && !m_HideHorizontalScroll)
         {
             if (m_ScrollBarBackground.IsValidBrush() || m_ScrollBarBackgroundPen.IsValidPen())
             {
@@ -287,7 +293,7 @@ namespace CE
             bool isVScroll = false;
             bool isHScroll = false;
 
-            if (isVerticalScrollVisible)
+            if (isVerticalScrollVisible && !m_HideVerticalScroll)
             {
                 // localMousePos already contains this widget's computed position in it.
                 Rect scrollBar = GetVerticalScrollBarRect().Translate(-computedPosition);
@@ -298,7 +304,7 @@ namespace CE
                 }
             }
 
-            if (isHorizontalScrollVisible)
+            if (isHorizontalScrollVisible && !m_HideHorizontalScroll)
             {
                 // localMousePos already contains this widget's computed position in it.
                 Rect scrollBar = GetHorizontalScrollBarRect().Translate(-computedPosition);
@@ -353,7 +359,10 @@ namespace CE
             {
                 Vec2 wheelDelta = mouseEvent->wheelDelta;
 
-                if (isHorizontalScrollVisible && EnumHasFlag(mouseEvent->keyModifiers, KeyModifier::Shift))
+                // Reverse mouse wheel behavior on Mac with SDL
+                // TODO: Test this on Windows & Linux and make sure it works
+                if (isHorizontalScrollVisible && EnumHasFlag(mouseEvent->keyModifiers, KeyModifier::Shift) &&
+                    PlatformMisc::GetCurrentPlatform() != PlatformName::Mac)
                 {
                     wheelDelta.x = wheelDelta.y;
                     wheelDelta.y = 0;
@@ -470,7 +479,7 @@ namespace CE
 
         Vec2 transformedMousePos;
 
-    	if (child != nullptr && (isVerticalScrollVisible || isHorizontalScrollVisible))
+    	if (child != nullptr && ((isVerticalScrollVisible && !m_HideVerticalScroll) || (isHorizontalScrollVisible && !m_HideHorizontalScroll)))
     	{
             transformedMousePos = (Matrix4x4::Translation(computedSize * m_Anchor) *
                 Matrix4x4::Angle(-m_Angle) *
@@ -479,7 +488,7 @@ namespace CE
                 Vec4(mousePosition.x, mousePosition.y, 0, 1);
     	}
 
-        if (child && isVerticalScrollVisible)
+        if (child && isVerticalScrollVisible && !m_HideVerticalScroll)
         {
             Vec2 barSize = Vec2(m_ScrollBarWidth, computedSize.y);
             Rect barRegion = Rect::FromSize(Vec2(computedSize.x - m_ScrollBarMargin - m_ScrollBarWidth, 
@@ -491,7 +500,7 @@ namespace CE
             }
         }
 
-        if (child && isHorizontalScrollVisible)
+        if (child && isHorizontalScrollVisible && !m_HideHorizontalScroll)
         {
             Rect barRegion = Rect(computedPosition.x, computedPosition.y + computedSize.y - m_ScrollBarMargin * 2 - m_ScrollBarWidth, 
                 computedPosition.x + computedSize.x, computedPosition.y + computedSize.y);

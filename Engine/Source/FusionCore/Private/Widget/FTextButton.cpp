@@ -15,6 +15,7 @@ namespace CE
         Child(
             FAssignNew(FLabel, label)
             .Text("Text Button")
+            .VAlign(VAlign::Center)
         );
     }
 

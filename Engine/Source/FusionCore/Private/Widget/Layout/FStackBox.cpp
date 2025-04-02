@@ -144,6 +144,51 @@ namespace CE
 
 		//remainingSize = Math::Max(remainingSize, 0.0f);
 
+		f32 contentAlignmentRatio = 0.0f;
+
+		if (m_Direction == FStackBoxDirection::Horizontal)
+		{
+			switch (m_ContentHAlign)
+			{
+			case HAlign::Auto:
+				break;
+			case HAlign::Fill:
+				break;
+			case HAlign::Left:
+				contentAlignmentRatio = 0.0f;
+				break;
+			case HAlign::Center:
+				contentAlignmentRatio = 0.5f;
+				break;
+			case HAlign::Right:
+				contentAlignmentRatio = 1.0f;
+				break;
+			}
+
+			curPos.x += contentAlignmentRatio * remainingSize;
+		}
+		else if (m_Direction == FStackBoxDirection::Vertical)
+		{
+			switch (m_ContentVAlign)
+			{
+			case VAlign::Auto:
+				break;
+			case VAlign::Fill:
+				break;
+			case VAlign::Top:
+				contentAlignmentRatio = 0.0f;
+				break;
+			case VAlign::Center:
+				contentAlignmentRatio = 0.5f;
+				break;
+			case VAlign::Bottom:
+				contentAlignmentRatio = 1.0f;
+				break;
+			}
+
+			curPos.y += contentAlignmentRatio * remainingSize;
+		}
+
 		for (const auto& child : children)
 		{
 			if (!child->Enabled())

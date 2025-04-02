@@ -32,6 +32,8 @@ namespace CE::Editor
         FUNCTION()
         void OnLeftExpansionChanged(FExpandableSection* section);
 
+        void UpdateBreadCrumbs();
+
         void UpdateAssetGridView();
 
         Ref<AssetBrowserTreeViewModel> treeViewModel = nullptr;
@@ -47,6 +49,8 @@ namespace CE::Editor
 
         PathTreeNode* currentDirectory = nullptr;
         CE::Name currentPath = {};
+
+        Ref<FHorizontalStack> breadCrumbsContainer = nullptr;
 
         Array<Ref<FSelectableButton>> selectables;
 
