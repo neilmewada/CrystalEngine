@@ -16,14 +16,14 @@ namespace CE::RPI
     Material::Material(ShaderCollection* shaderCollection)
 		: ownsShaderCollection(false), shaderCollection(shaderCollection)
 	{
-        MaterialSystem::Get().RemoveMaterial(this);
-
         SetShaderCollection(shaderCollection);
+
+        MaterialSystem::Get().AddMaterial(this);
 	}
 
 	Material::~Material()
 	{
-        MaterialSystem::Get().materials.Remove(this);
+        MaterialSystem::Get().RemoveMaterial(this);
 
 		delete shaderResourceGroup; shaderResourceGroup = nullptr;
 
@@ -92,7 +92,7 @@ namespace CE::RPI
         if (shaderCollection == nullptr)
             return nullptr;
 
-        DrawListTag opaqueTag = RPISystem::Get().GetBuiltinDrawListTag(BuiltinDrawItemTag::Opaque);
+        RHI::DrawListTag opaqueTag = RPISystem::Get().GetBuiltinDrawListTag(BuiltinDrawItemTag::Opaque);
         if (!opaqueTag.IsValid())
             return nullptr;
 

@@ -124,6 +124,10 @@ namespace CE
 		String relativePathStr = "";
 		String parentRelativePathStr = "";
 
+		auto engineInstallDir = EngineDirectories::GetEngineInstallDirectory();
+		auto engineAssetsPath = engineInstallDir / "Engine/Assets";
+		auto editorAssetsPath = engineInstallDir / "Editor/Assets";
+
 		if (IO::Path::IsSubDirectory(bundleAbsolutePath, projectAssetsPath))
 		{
 			relativePathStr = IO::Path::GetRelative(bundleAbsolutePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
@@ -131,6 +135,16 @@ namespace CE
 				relativePathStr = "/" + relativePathStr;
 
 			parentRelativePathStr = IO::Path::GetRelative(bundleAbsolutePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
+			if (!parentRelativePathStr.StartsWith("/"))
+				parentRelativePathStr = "/" + parentRelativePathStr;
+		}
+		else if (IO::Path::IsSubDirectory(bundleAbsolutePath, engineAssetsPath) || IO::Path::IsSubDirectory(bundleAbsolutePath, editorAssetsPath))
+		{
+			relativePathStr = IO::Path::GetRelative(bundleAbsolutePath, engineInstallDir).RemoveExtension().GetString().Replace({ '\\' }, '/');
+			if (!relativePathStr.StartsWith("/"))
+				relativePathStr = "/" + relativePathStr;
+
+			parentRelativePathStr = IO::Path::GetRelative(bundleAbsolutePath, engineInstallDir).GetParentPath().GetString().Replace({ '\\' }, '/');
 			if (!parentRelativePathStr.StartsWith("/"))
 				parentRelativePathStr = "/" + parentRelativePathStr;
 		}
