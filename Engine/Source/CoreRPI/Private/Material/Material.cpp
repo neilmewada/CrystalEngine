@@ -5,7 +5,7 @@ namespace CE::RPI
     Material::Material(Shader* shader) : ownsShaderCollection(true)
     {
         shaderCollection = new ShaderCollection();
-        shaderCollection->Add(ShaderCollection::Item{ .shaderTag = shader->GetName(), .shader = shader, .enabled = true, .drawListOverride = DrawListTag() });
+        shaderCollection->Add(ShaderCollection::Item{ .shaderTag = shader->GetName(), .shader = shader, .enabled = true, .drawListOverride = RHI::DrawListTag() });
         currentShaderItem = 0;
 
         SetShaderCollection(shaderCollection);
