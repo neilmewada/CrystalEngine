@@ -75,8 +75,8 @@ The `EditorLauncher` executable launches the Project Browser by default. If you'
 </p>
 
 ```shell
-# Or you can open the editor launcher manually IF you have created the project once.
-EditorLauncher "/path/to/project.cproject"
+# Or you can open the editor launcher manually once you have created the project through Project Manager.
+EditorLauncher "/path/to/MyProjectName.cproject"
 ```
 
 ## Building standalone (optional, ignore for now)
