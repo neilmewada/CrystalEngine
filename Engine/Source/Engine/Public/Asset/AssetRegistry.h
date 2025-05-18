@@ -18,7 +18,9 @@ namespace CE
 
 		virtual void OnAssetImported(const Name& bundleName, const Name& sourcePath = "") {}
 
-		virtual void OnAssetDeleted(const Name& bundleName) {}
+		virtual void OnAssetUnloaded(Uuid bundleUuid) {}
+
+		virtual void OnAssetDeleted(const Name& bundlePath) {}
 
 		virtual void OnAssetRenamed(Uuid bundleUuid, const Name& oldName, const Name& newName) {}
 
@@ -92,8 +94,6 @@ namespace CE
 
 		void OnAssetImported(const IO::Path& bundleAbsolutePath, const Name& sourcePath = "");
 
-		void OnAssetDeleted(const Name& bundleName);
-
 		void OnDirectoryCreated(const IO::Path& absolutePath);
 
 		void OnDirectoryRenamed(const Name& originalPath, const Name& newName);
@@ -110,7 +110,7 @@ namespace CE
 	private:
 
 		void AddAssetEntry(const Name& bundleName, AssetData* assetData);
-		void DeleteAssetEntry(const Name& bundleName);
+		void DeleteAssetEntry(const Name& bundlePath);
 
 		PathTree cachedDirectoryTree{};
 		PathTree cachedPathTree{};

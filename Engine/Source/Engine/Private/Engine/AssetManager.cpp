@@ -152,6 +152,14 @@ namespace CE
 		if (bundle == nullptr)
 			return;
 
+		for (IAssetRegistryListener* listener : assetRegistry->listeners)
+		{
+			if (listener != nullptr)
+			{
+				listener->OnAssetUnloaded(bundle->GetUuid());
+			}
+		}
+
 		LockGuard lock{ loadedAssetsMutex };
 
 		loadedAssetsByPath.Remove(bundle->GetBundlePath());

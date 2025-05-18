@@ -20,6 +20,8 @@ namespace CE
         {
             buttonState |= FSelectableButtonState::Active;
             ApplyStyle();
+
+            m_OnSelect(this);
         }
     }
 

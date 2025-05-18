@@ -32,6 +32,8 @@ namespace CE::Editor
 
         void OnSceneLoaded(CE::Scene* scene) override;
 
+        void OnAssetUnloaded(Uuid bundleUuid) override;
+
         FUNCTION()
         void OnSelectionChanged(FItemSelectionModel* selectionModel);
 

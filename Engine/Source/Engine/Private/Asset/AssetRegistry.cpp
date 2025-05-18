@@ -203,32 +203,6 @@ namespace CE
 		}
 	}
 
-	void AssetRegistry::OnAssetDeleted(const Name& bundleName)
-	{
-		IO::Path bundlePath = Bundle::GetAbsoluteBundlePath(bundleName);
-
-		auto projectAssetsPath = gProjectPath / "Game/Assets";
-		String relativePathStr = "";
-		String parentRelativePathStr = "";
-
-		if (IO::Path::IsSubDirectory(bundlePath, projectAssetsPath))
-		{
-			relativePathStr = IO::Path::GetRelative(bundlePath, gProjectPath).RemoveExtension().GetString().Replace({ '\\' }, '/');
-			if (!relativePathStr.StartsWith("/"))
-				relativePathStr = "/" + relativePathStr;
-
-			parentRelativePathStr = IO::Path::GetRelative(bundlePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
-			if (!parentRelativePathStr.StartsWith("/"))
-				parentRelativePathStr = "/" + parentRelativePathStr;
-		}
-		else
-		{
-			return;
-		}
-
-		DeleteAssetEntry(bundleName);
-	}
-
 	void AssetRegistry::OnDirectoryCreated(const IO::Path& absolutePath)
 	{
 		auto projectAssetsPath = gProjectPath / "Game/Assets";
@@ -355,34 +329,11 @@ namespace CE
 
 			if (node->nodeType == PathTreeNodeType::Directory)
 			{
-				for (int i = cachedPrimaryAssetsByParentPath[curPath].GetSize() - 1; i >= 0; --i)
-				{
-					AssetData* assetData = cachedPrimaryAssetsByParentPath[curPath][i];
-					allAssetDatas.Remove(assetData);
-
-					delete assetData;
-				}
-
 				cachedPrimaryAssetsByParentPath.Remove(curPath);
 			}
 			else if (node->nodeType == PathTreeNodeType::Asset)
 			{
-				cachedPrimaryAssetByPath.Remove(curPath);
-				cachedAssetsByPath.Remove(curPath);
-
-				AssetManager* assetManager = AssetManager::Get();
-				Ref<Bundle> bundle = nullptr;
-
-				{
-					LockGuard lock{ assetManager->loadedAssetsMutex };
-
-					if (assetManager->loadedAssetsByPath.KeyExists(curPath))
-					{
-						bundle = assetManager->loadedAssetsByPath[curPath];
-					}
-				}
-
-				assetManager->UnloadAsset(bundle);
+				DeleteAssetEntry(curPath);
 			}
 
 			for (PathTreeNode* child : node->children)
@@ -390,6 +341,8 @@ namespace CE
 				visitor(child);
 			}
 		};
+
+		visitor(pathNode);
 
 		cachedPathTree.RemovePath(directoryPath);
 		cachedDirectoryTree.RemovePath(directoryPath);
@@ -766,12 +719,15 @@ namespace CE
 		}
 	}
 
-	void AssetRegistry::DeleteAssetEntry(const Name& bundleName)
+	void AssetRegistry::DeleteAssetEntry(const Name& bundlePath)
 	{
-		if (!cachedAssetsByPath.KeyExists(bundleName))
+		if (!cachedAssetsByPath.KeyExists(bundlePath))
 			return;
 
-		const Array<AssetData*>& assetDatas = cachedAssetsByPath[bundleName];
+		const Array<AssetData*>& assetDatas = cachedAssetsByPath[bundlePath];
+
+		String parentPathStr = IO::Path(bundlePath.GetString()).GetParentPath().GetString().Replace({ '\\' }, '/');
+		Name parentPath = parentPathStr;
 
 		for (AssetData* assetData : assetDatas)
 		{
@@ -788,6 +744,7 @@ namespace CE
 				}
 
 				cachedPrimaryAssetByBundleUuid.Remove(assetData->bundleUuid);
+				cachedPrimaryAssetsByParentPath[parentPath].Remove(assetData);
 
 				allAssetDatas.Remove(assetData);
 
@@ -800,20 +757,34 @@ namespace CE
 			}
 		}
 
-		cachedPathTree.RemovePath(bundleName);
-		cachedAssetsByPath.Remove(bundleName);
-		cachedPrimaryAssetByPath.Remove(bundleName);
+		AssetManager* assetManager = AssetManager::Get();
+		Ref<Bundle> bundle = nullptr;
 
-		String parentPathStr = IO::Path(bundleName.GetString()).GetParentPath().GetString().Replace({ '\\' }, '/');
-		Name parentPath = parentPathStr;
+		{
+			LockGuard lock{ assetManager->loadedAssetsMutex };
 
-		cachedPrimaryAssetsByParentPath.Remove(parentPath);
+			if (assetManager->loadedAssetsByPath.KeyExists(bundlePath))
+			{
+				bundle = assetManager->loadedAssetsByPath[bundlePath];
+			}
+		}
+
+		if (bundle != nullptr)
+		{
+			Uuid bundleUuid = bundle->GetUuid();
+
+			assetManager->UnloadAsset(bundle);
+		}
+
+		cachedPathTree.RemovePath(bundlePath);
+		cachedAssetsByPath.Remove(bundlePath);
+		cachedPrimaryAssetByPath.Remove(bundlePath);
 
 		for (IAssetRegistryListener* listener : listeners)
 		{
 			if (listener != nullptr)
 			{
-				listener->OnAssetImported(bundleName);
+				listener->OnAssetDeleted(bundlePath);
 				listener->OnAssetPathTreeUpdated(cachedPathTree);
 			}
 		}

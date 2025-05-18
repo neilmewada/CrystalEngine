@@ -60,6 +60,8 @@ namespace CE::Editor
 
         Array<AssetBrowserItem*> items;
         CE::Name currentPath;
+        CE::Name folderToRename;
+
 
     public: // - Fusion Properties - 
 

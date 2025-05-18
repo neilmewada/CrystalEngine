@@ -151,6 +151,19 @@ namespace CE::Editor
         }
     }
 
+    void MaterialEditor::OnAssetUnloaded(Uuid bundleUuid)
+    {
+        if (targetMaterial == nullptr)
+            return;
+        Ref<Bundle> materialBundle = targetMaterial->GetBundle();
+
+        if (!materialBundle || materialBundle->GetUuid() != bundleUuid)
+            return;
+
+        QueueDestroy();
+        materialBundle = nullptr;
+    }
+
     ClassType* MaterialEditor::GetTargetObjectType() const
     {
         return CE::Material::StaticClass();

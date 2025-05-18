@@ -63,6 +63,8 @@ namespace CE::Editor
 
         if (currentDirectory != nullptr)
         {
+            AssetBrowserItem* itemToRename = nullptr;
+
             for (int i = 0; i < currentDirectory->children.GetSize(); i++)
             {
                 AssetBrowserItem* item = nullptr;
@@ -107,7 +109,20 @@ namespace CE::Editor
 
                 items.Add(item);
 
-                item->SetData(currentDirectory->children[i]);
+                item->SetData(node);
+
+                if (folderToRename.IsValid() && node->GetFullPath() == folderToRename.GetString())
+                {
+                    itemToRename = item;
+                }
+            }
+
+            if (itemToRename != nullptr)
+            {
+                itemToRename->Select();
+                StartRenaming();
+
+                folderToRename = {};
             }
         }
     }

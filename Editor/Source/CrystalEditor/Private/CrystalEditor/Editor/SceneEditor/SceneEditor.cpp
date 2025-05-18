@@ -260,6 +260,12 @@ namespace CE::Editor
         sceneOutlinerTab->SetScene(scene);
     }
 
+    void SceneEditor::OnAssetUnloaded(Uuid bundleUuid)
+    {
+
+    }
+
+
     void SceneEditor::OnSelectionChanged(FItemSelectionModel* selectionModel)
     {
         const auto& selection = selectionModel->GetSelection();

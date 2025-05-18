@@ -356,6 +356,7 @@ namespace CE::Editor
         IO::Path newFolder = absolutePath / "NewFolder";
         if (!newFolder.Exists())
         {
+            gridView->folderToRename = path + "/NewFolder";
             IO::Path::CreateDirectories(newFolder);
             assetManager->OnDirectoryCreated(newFolder);
 	        return;
@@ -367,6 +368,7 @@ namespace CE::Editor
 
             if (!newFolder.Exists())
             {
+                gridView->folderToRename = path + String::Format("/NewFolder_{}", i);
                 IO::Path::CreateDirectories(newFolder);
                 assetManager->OnDirectoryCreated(newFolder);
 	            return;
