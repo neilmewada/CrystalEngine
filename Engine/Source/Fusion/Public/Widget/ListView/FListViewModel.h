@@ -2,26 +2,25 @@
 
 namespace CE
 {
-    class FListView;
-    class FListItem;
+    class FListViewRow;
 
-    CLASS()
+    CLASS(Abstract)
     class FUSION_API FListViewModel : public FDataModel
     {
         CE_CLASS(FListViewModel, FDataModel)
-    public:
+    protected:
 
         FListViewModel();
+        
+    public:
 
         virtual ~FListViewModel();
 
-    protected:
+        virtual int GetRowCount() = 0;
 
-        void OnModelPropertyEdited(const CE::Name& propertyName, Object* modifyingObject) override;
+        virtual void SetData(int row, FListViewRow& widget) = 0;
 
-    public:
-
-        MODEL_PROPERTY(Array<FListItem*>, ItemList);
+        virtual SubClass<FListViewRow> GetRowWidgetClass();
 
     };
     

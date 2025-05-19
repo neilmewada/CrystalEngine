@@ -2,31 +2,58 @@
 
 namespace CE
 {
+    class FListView;
+
+
     CLASS()
-    class FUSION_API FListViewContainer : public FContainerWidget
+    class FUSION_API FListViewContainer : public FWidget
     {
-        CE_CLASS(FListViewContainer, FContainerWidget)
-    public:
+        CE_CLASS(FListViewContainer, FWidget)
+    protected:
 
         FListViewContainer();
 
-        virtual ~FListViewContainer();
+        void Construct() override;
 
-        // - Public API -
+        void SetContextRecursively(FFusionContext* context) override;
+
+        void OnPostComputeLayout() override;
+
+        void OnPaint(FPainter* painter) override;
+
+    public: // - Public API -
+
+        FWidget* HitTest(Vec2 localMousePos) override;
+
+        bool ChildExistsRecursive(FWidget* child) override;
 
         void CalculateIntrinsicSize() override;
 
         void PlaceSubWidgets() override;
 
-    protected:
+        void ApplyStyleRecursively() override;
 
-        void OnPaint(FPainter* painter) override;
+        void HandleEvent(FEvent* event) override;
+
+    protected: // - Internal -
+
+        void UpdateRows();
+
+        void OnSelectionChanged();
+
+        using ListViewRowList = StableDynamicArray<FListViewRow*, 64, false>;
+
+        WeakRef<FListView> listView = nullptr;
+        ListViewRowList children;
+
+        f32 totalRowHeight = 0;
 
     public: // - Fusion Properties - 
 
-        FUSION_LAYOUT_PROPERTY(f32, Gap);
+        Self& ListView(Ref<FListView> listView);
 
         FUSION_WIDGET;
+        friend class FListView;
     };
     
 }

@@ -32,7 +32,6 @@ namespace CE
             FNew(FVerticalStack)
             .VAlign(VAlign::Fill)
             .HAlign(HAlign::Fill)
-            .Name("DebugVStack")
             (
                 FAssignNew(FStyledWidget, headerContainer)
                 .HAlign(HAlign::Fill),
@@ -61,7 +60,6 @@ namespace CE
     {
         container->ExpandRow(index, recursive);
     }
-
 
     void FTreeView::OnFusionPropertyModified(const CE::Name& propertyName)
     {

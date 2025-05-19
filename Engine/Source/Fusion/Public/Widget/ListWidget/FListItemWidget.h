@@ -33,7 +33,7 @@ namespace CE
 
         void HandleEvent(FEvent* event) override;
 
-        FListView* listView = nullptr;
+        FListWidget* listView = nullptr;
 
         FListItemState itemState = FListItemState::None;
 
@@ -42,7 +42,7 @@ namespace CE
 
         FUSION_WIDGET;
         friend class FListItemStyle;
-        friend class FListView;
+        friend class FListWidget;
     };
     
 }

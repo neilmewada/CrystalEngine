@@ -64,7 +64,9 @@ namespace CE
 	                rowBg = rowSelectionBackground;
                 }
                 else if (child->IsHovered())
+                {
                     rowBg = rowHoverBackground;
+                }
 
                 (*child)
                     .Background(rowBg)

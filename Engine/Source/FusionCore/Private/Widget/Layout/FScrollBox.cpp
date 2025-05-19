@@ -533,6 +533,8 @@ namespace CE
                 translation.y = -value * (child->computedSize.y - computedSize.y);
             }
             child->Translation(translation);
+
+            m_OnScrollValueChanged(this);
         }
         return *this;
     }
@@ -617,6 +619,8 @@ namespace CE
                 translation.x = -value * (child->computedSize.x - computedSize.x);
             }
             child->Translation(translation);
+
+            m_OnScrollValueChanged(this);
         }
         return *this;
     }

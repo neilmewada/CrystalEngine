@@ -463,8 +463,8 @@ namespace CE
 
         f32 scrollY = -Translation().y;
 
-        Vec2 curPos = Vec2(m_Padding.left, m_Padding.top);
         f32 remainingSize = 0;
+        Vec2 curPos = Vec2(m_Padding.left, m_Padding.top);
         Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right,
             m_Padding.top + m_Padding.bottom);
 
@@ -485,15 +485,15 @@ namespace CE
                 rowHeight = treeView->m_RowHeightDelegate(child->index);
             }
 
-            child->SetComputedPosition(curPos);
+            Vec2 childPos = curPos + Vec2(child->Margin().left, child->Margin().top);
+
+            child->SetComputedPosition(childPos);
             child->SetComputedSize(Vec2(availableSize.x, Math::Max(rowHeight, child->GetIntrinsicSize().height)));
 
         	child->PlaceSubWidgets();
 
             curPos.y += child->computedSize.y;
         }
-
-        String::IsAlphabet('a');
     }
     
 }

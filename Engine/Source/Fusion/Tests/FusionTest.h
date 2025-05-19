@@ -65,6 +65,8 @@ namespace WidgetTests
 
 		FTreeViewRow& GenerateTreeViewRow();
 
+		FListViewRow& GenerateListViewRow();
+
 		void OnBeginDestroy() override;
 
 		void OnWindowRestored(PlatformWindow* window) override;
@@ -87,10 +89,39 @@ namespace WidgetTests
 		FTextInput* modelTextInput = nullptr;
 		FVerticalStack* windowContent = nullptr;
 		class TreeViewModel* treeViewModel = nullptr;
+		class ListViewModel* listViewModel = nullptr;
 
 		int hitCounter = 0;
 
 		FUSION_WIDGET;
+	};
+
+	CLASS()
+	class ListViewModel : public FListViewModel
+	{
+		CE_CLASS(ListViewModel, FListViewModel)
+	public:
+
+		ListViewModel()
+		{
+		}
+
+		int GetRowCount() override
+		{
+			return 100;
+		}
+
+		void SetData(int row, FListViewRow& widget) override
+		{
+			FVerticalStack& parent = widget.GetChild()->As<FVerticalStack>();
+
+			FLabel& title = parent.GetChild(0)->As<FLabel>();
+			title.Text(String::Format("Item {}", row));
+
+			FLabel& description = parent.GetChild(1)->As<FLabel>();
+			description.Text(String::Format("This is item number {}.", row));
+		}
+
 	};
 
 	CLASS()

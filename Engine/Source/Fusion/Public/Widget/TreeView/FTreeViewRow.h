@@ -40,6 +40,8 @@ namespace CE
         bool isHovered = false;
         FTreeView* treeView = nullptr;
 
+        FListItemState itemState = FListItemState::None;
+
     public: // - Fusion Properties -
 
         template<typename... TWidget> requires TMatchAllBaseClass<FWidget, TWidget...>::Value

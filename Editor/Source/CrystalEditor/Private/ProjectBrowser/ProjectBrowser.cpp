@@ -57,11 +57,11 @@ namespace CE::Editor
                         .HAlign(HAlign::Fill)
                         .Padding(Vec4(1, 1, 1, 1) * 20)
                         (
-                            FAssignNew(FListView, recentsList)
+                            FAssignNew(FListWidget, recentsList)
                             .GenerateRowDelegate(MemberDelegate(&Self::GenerateRecentProjectRow, this))
                             .Bind_ItemList(BIND_PROPERTY_R(recentProjectsModel, ItemList))
                             .SelectionMode(FSelectionMode::Single)
-                            .OnSelectionChanged([this](FListView*)
+                            .OnSelectionChanged([this](FListWidget*)
                             {
                                 int index = recentsList->GetSelectedItemIndex();
                                 if (index >= 0)
@@ -173,7 +173,7 @@ namespace CE::Editor
                         .HAlign(HAlign::Fill)
                         .Padding(Vec4(1, 1, 1, 1) * 20)
                         (
-                            FAssignNew(FListView, newProjectList)
+                            FAssignNew(FListWidget, newProjectList)
                             .GenerateRowDelegate(MemberDelegate(&Self::GenerateNewProjectRow, this))
                             .Bind_ItemList(BIND_PROPERTY_R(newProjectModel, ItemList))
                             .SelectionMode(FSelectionMode::Single)
@@ -303,7 +303,7 @@ namespace CE::Editor
         GetContext()->QueueDestroy();
     }
 
-    FListItemWidget& ProjectBrowser::GenerateRecentProjectRow(FListItem* item, FListView* view)
+    FListItemWidget& ProjectBrowser::GenerateRecentProjectRow(FListItem* item, FListWidget* view)
     {
 	    auto projectItem = static_cast<RecentProjectItem*>(item);
 
@@ -325,7 +325,7 @@ namespace CE::Editor
     	;
     }
 
-    FListItemWidget& ProjectBrowser::GenerateNewProjectRow(FListItem* item, FListView* view)
+    FListItemWidget& ProjectBrowser::GenerateNewProjectRow(FListItem* item, FListWidget* view)
     {
         return FNew(FListItemWidget)
 			.Child(

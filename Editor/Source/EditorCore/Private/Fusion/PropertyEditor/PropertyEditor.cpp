@@ -136,7 +136,7 @@ namespace CE::Editor
         if (type == nullptr)
             return false;
 
-        return type->IsEnum() || type->IsStruct();
+        return type->IsEnum() || type->IsStruct() || type->IsClass();
     }
 
     bool PropertyEditor::IsExpandable()
@@ -461,6 +461,14 @@ namespace CE::Editor
         else if (field->IsObjectField())
         {
             // TODO: Object reference editor, check if it is asset or scene-object reference
+            right->AddChild(
+                FNew(ObjectEditorField)
+                .Assign(editorField)
+                .BindField(target, relativeFieldPath)
+                .History(objectEditor->GetEditorHistory())
+                .HAlign(HAlign::Left)
+                .VAlign(VAlign::Center)
+            );
         }
     }
 

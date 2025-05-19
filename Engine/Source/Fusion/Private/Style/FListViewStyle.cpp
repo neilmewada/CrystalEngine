@@ -24,28 +24,30 @@ namespace CE
 
         FListView& listView = widget.As<FListView>();
 
-        for (FListItemWidget* itemWidgetPtr : listView.itemWidgets)
+        for (int i = 0; i < listView.GetVisibleRowCount(); ++i)
         {
-            FListItemWidget& itemWidget = *itemWidgetPtr;
+            FListViewRow* row = listView.GetVisibleRow(i);
+            if (!row->Enabled())
+                continue;
 
-            FBrush bg = itemBackground;
+            FBrush bg = row->IsAlternate() ? alternateItemBackground : itemBackground;
             Color border = itemBorderColor;
 
-            if (itemWidget.IsSelected())
+            if (row->IsSelected())
             {
                 bg = selectedItemBackground;
                 border = selectedItemBorderColor;
             }
-            else if (itemWidget.IsHovered())
+            else if (row->IsHovered())
             {
                 bg = hoveredItemBackground;
                 border = hoveredItemBorderColor;
             }
 
-            itemWidget
+            (*row)
                 .Background(bg)
                 .Border(border, itemBorderWidth)
-                ;
+            ;
         }
     }
 

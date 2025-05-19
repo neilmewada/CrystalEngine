@@ -3,7 +3,7 @@
 namespace CE
 {
     typedef Delegate<f32(const FModelIndex&)> FRowHeightDelegate;
-    typedef Delegate<FTreeViewRow&()> FGenerateRowDelegate;
+    typedef Delegate<FTreeViewRow&()> FGenerateTreeViewRowDelegate;
 
     CLASS()
     class FUSION_API FTreeView : public FStyledWidget
@@ -64,7 +64,7 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(f32, Indentation);
         FUSION_LAYOUT_PROPERTY(FRowHeightDelegate, RowHeightDelegate);
 
-        FUSION_LAYOUT_PROPERTY(FGenerateRowDelegate, GenerateRowDelegate);
+        FUSION_LAYOUT_PROPERTY(FGenerateTreeViewRowDelegate, GenerateRowDelegate);
 
         FUSION_PROPERTY_WRAPPER(VerticalScroll, scrollBox);
         FUSION_PROPERTY_WRAPPER(HorizontalScroll, scrollBox);

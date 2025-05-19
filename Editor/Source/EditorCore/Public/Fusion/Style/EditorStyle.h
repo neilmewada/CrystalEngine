@@ -106,7 +106,7 @@ namespace CE::Editor
 		FTabViewStyle* projectBrowserTabView = nullptr;
 
 		FIELD()
-		FListViewStyle* projectBrowserListView = nullptr;
+		FListWidgetStyle* projectBrowserListView = nullptr;
 
 		// - Editor -
 
@@ -135,7 +135,13 @@ namespace CE::Editor
 		FTreeViewStyle* treeView = nullptr;
 
 		FIELD()
+		FListViewStyle* listView = nullptr;
+
+		FIELD()
 		FCustomButtonStyle* detailsRow = nullptr;
+
+		FIELD()
+		FCustomButtonStyle* objectEditorField = nullptr;
 
 	};
 

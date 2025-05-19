@@ -3,10 +3,10 @@
 namespace CE
 {
 
-	FListView::FListView()
-	{
-
-	}
+    FListView::FListView()
+    {
+        m_SelectionMode = FSelectionMode::Single;
+    }
 
     void FListView::Construct()
     {
@@ -16,116 +16,54 @@ namespace CE
             FAssignNew(FScrollBox, scrollBox)
             .VerticalScroll(true)
             .HorizontalScroll(false)
+            .OnScrollValueChanged([this]
+            {
+                container->UpdateRows();
+            })
             .Child(
-                FAssignNew(FListViewContainer, content)
+                FAssignNew(FListViewContainer, container)
+                .ListView(this)
                 .HAlign(HAlign::Fill)
-                .Padding(Vec4(1, 1, 1, 1) * 10)
+                .VAlign(VAlign::Top)
             )
             .HAlign(HAlign::Fill)
-            .Name("ListViewScrollBox")
+            .VAlign(VAlign::Fill)
         );
     }
 
-    void FListView::OnPostComputeLayout()
+    int FListView::GetVisibleRowCount()
     {
-	    Super::OnPostComputeLayout();
-
+        return container->children.GetCount();
     }
 
-    void FListView::OnFusionPropertyModified(const CE::Name& propertyName)
+    FListViewRow* FListView::GetVisibleRow(int index)
     {
-	    Super::OnFusionPropertyModified(propertyName);
-
-        thread_local const CE::Name ItemListName = "ItemList";
-
-        if (propertyName == ItemListName)
-        {
-            RegenerateRows();
-        }
+        return container->children[index];
     }
 
-    void FListView::SelectItem(int index)
+    void FListView::SelectRow(FListViewRow* row, bool additional)
     {
-        if (index < 0 || index >= itemWidgets.GetSize())
+        if (!row || m_SelectionMode == FSelectionMode::None)
+            return;
+        if (row->rowIndex < 0)
             return;
 
-        itemWidgets[index]->Select();
-    }
-
-    FListItemWidget* FListView::GetSelectedItem()
-    {
-        if (selectedItems.IsEmpty())
-            return nullptr;
-        return selectedItems[0];
-    }
-
-    int FListView::GetSelectedItemIndex()
-    {
-        if (selectedItems.IsEmpty())
-            return -1;
-	    return itemWidgets.IndexOf(selectedItems[0]);
-    }
-
-
-    void FListView::OnItemSelected(FListItemWidget* selectedItem)
-    {
-        if (m_SelectionMode == FSelectionMode::None)
-            return;
-
-        selectedItems.Clear();
-
-        for (FListItemWidget* item : itemWidgets)
+        if (m_SelectionMode == FSelectionMode::Single || !additional)
         {
-	        if (item != selectedItem && item->IsSelected())
-	        {
-                item->itemState &= ~FListItemState::Selected;
-	        }
-            else if (item == selectedItem && !item->IsSelected())
-            {
-                item->itemState |= FListItemState::Selected;
-                selectedItems.Add(item);
-            }
+            selectedRows.Clear();
         }
+
+        selectedRows.Add(row->rowIndex);
+
+        container->UpdateRows();
+        container->OnSelectionChanged();
 
         ApplyStyle();
-
-        m_OnSelectionChanged(this);
     }
 
-    void FListView::RegenerateRows()
+    bool FListView::IsRowSelected(int index)
     {
-        // Destroy previous FListItemWidget's
-
-        // TODO: Optimize row generation by using recycling, culling, etc
-
-        while (content->GetChildCount() > 0)
-        {
-            content->GetChild(0)->BeginDestroy();
-        }
-
-        itemWidgets.Clear();
-
-        if (m_GenerateRowDelegate.IsValid())
-        {
-            for (FListItem* item : m_ItemList)
-            {
-                FListItemWidget& itemWidget = m_GenerateRowDelegate(item, this);
-                itemWidget.listView = this;
-                content->AddChild(&itemWidget);
-                itemWidgets.Add(&itemWidget);
-            }
-        }
-
-        scrollBox->ClampTranslation();
-        MarkLayoutDirty();
+        return selectedRows.Exists(index);
     }
-
-    FListView::Self& FListView::GenerateRowDelegate(const GenerateRowCallback& callback)
-    {
-        m_GenerateRowDelegate = callback;
-        RegenerateRows();
-        return *this;
-    }
-
 }
 

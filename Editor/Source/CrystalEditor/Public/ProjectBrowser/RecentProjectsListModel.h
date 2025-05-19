@@ -13,9 +13,9 @@ namespace CE::Editor
     };
 
     CLASS()
-    class CRYSTALEDITOR_API RecentProjectsListModel : public FListViewModel
+    class CRYSTALEDITOR_API RecentProjectsListModel : public FListWidgetModel
     {
-        CE_CLASS(RecentProjectsListModel, FListViewModel)
+        CE_CLASS(RecentProjectsListModel, FListWidgetModel)
     public:
 
         RecentProjectsListModel();

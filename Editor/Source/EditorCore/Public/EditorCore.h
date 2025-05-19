@@ -53,6 +53,7 @@
 #include "Fusion/PropertyEditor/Fields/VectorEditorField.h"
 #include "Fusion/PropertyEditor/Fields/ColorEditorField.h"
 #include "Fusion/PropertyEditor/Fields/ColorComponentField.h"
+#include "Fusion/PropertyEditor/Fields/ObjectEditorField.h"
 
 #include "Fusion/PropertyEditor/ObjectEditor.h"
 #include "Fusion/PropertyEditor/ObjectEditorRegistry.h"

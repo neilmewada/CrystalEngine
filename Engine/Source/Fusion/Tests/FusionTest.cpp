@@ -233,6 +233,7 @@ namespace WidgetTests
         PlatformApplication::Get()->AddMessageHandler(this);
 
         treeViewModel = CreateObject<TreeViewModel>(this, "TreeViewModel");
+        listViewModel = CreateObject<ListViewModel>(this, "ListViewModel");
 
         FGradient gradient = FGradient();
         gradient.stops = {
@@ -416,7 +417,14 @@ namespace WidgetTests
                             .Text("Click Count 0")
                         ),
 
-                        FNew(FTreeView)
+                        FNew(FListView)
+                        .GenerateRowCallback(MemberDelegate(&Self::GenerateListViewRow, this))
+                        .RowHeight(50)
+                        .Model(listViewModel)
+                        .Height(120)
+                        .HAlign(HAlign::Fill)
+
+                        /*FNew(FTreeView)
                         .GenerateRowDelegate(MemberDelegate(&Self::GenerateTreeViewRow, this))
                         .Model(treeViewModel)
                         .RowHeight(25)
@@ -433,7 +441,7 @@ namespace WidgetTests
 		                    )
 		                )
                         .Height(120)
-                        .HAlign(HAlign::Fill)
+                        .HAlign(HAlign::Fill)*/
                     )
                 )
             )
@@ -460,6 +468,30 @@ namespace WidgetTests
         );
 
         return row;
+    }
+
+    FListViewRow& RenderingTestWidget::GenerateListViewRow()
+    {
+        return
+        FNew(FListViewRow)
+        .Child(
+            FNew(FVerticalStack)
+            .Gap(2.5f)
+            .ContentHAlign(HAlign::Left)
+            .VAlign(VAlign::Center)
+            .HAlign(HAlign::Left)
+            .Padding(Vec4(10, 0, 10, 0))
+            (
+                FNew(FLabel)
+                .Text("Title"),
+
+                FNew(FLabel)
+                .FontSize(8)
+                .Text("This is description!")
+                .Foreground(Color::RGBA(255, 255, 255, 140))
+            )
+        )
+        .As<FListViewRow>();
     }
 
     void RenderingTestWidget::OnPaint(FPainter* painter)

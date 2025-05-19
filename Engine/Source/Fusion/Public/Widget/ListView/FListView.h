@@ -7,58 +7,46 @@ namespace CE
     class FUSION_API FListView : public FStyledWidget
     {
         CE_CLASS(FListView, FStyledWidget)
-    public:
-
-        typedef Delegate<FListItemWidget&(FListItem*, FListView*)> GenerateRowCallback;
-
-        bool HasScrollBox() const { return scrollBox != nullptr; }
-
-        FScrollBox& GetScrollBox() const { return *scrollBox; }
-
-        void SelectItem(int index);
-
-        FListItemWidget* GetSelectedItem();
-
-        int GetSelectedItemIndex();
-
     protected:
 
         FListView();
 
-        void Construct() override final;
+        void Construct() override;
 
-        void OnPostComputeLayout() override;
+    public: // - Public API -
 
-        void OnFusionPropertyModified(const CE::Name& propertyName) override;
+        int GetVisibleRowCount();
 
-        void OnItemSelected(FListItemWidget* selectedItem);
+        FListViewRow* GetVisibleRow(int index);
 
-        void RegenerateRows();
+        void SelectRow(FListViewRow* row, bool additional = false);
 
-        FIELD()
-        GenerateRowCallback m_GenerateRowDelegate;
+        const HashSet<int>& GetSelectedRowIndices() const { return selectedRows; }
 
-        FListViewContainer* content = nullptr;
-        FScrollBox* scrollBox = nullptr;
+        bool IsRowSelected(int index);
 
-        Array<FListItemWidget*> itemWidgets;
-        Array<FListItemWidget*> selectedItems;
+    protected: // - Internal -
+
+        Ref<FScrollBox> scrollBox;
+        Ref<FListViewContainer> container;
+
+        HashSet<int> selectedRows;
 
     public: // - Fusion Properties - 
 
+        FUSION_LAYOUT_PROPERTY(f32, RowHeight);
+        FUSION_LAYOUT_PROPERTY(Delegate<f32(int)>, RowHeightDelegate);
+
         FUSION_PROPERTY(FSelectionMode, SelectionMode);
 
-        FUSION_PROPERTY_WRAPPER(Gap, content);
+        FUSION_PROPERTY(Ref<FListViewModel>, Model);
 
-        FUSION_DATA_PROPERTY(Array<FListItem*>, ItemList);
+        FUSION_LAYOUT_PROPERTY(Delegate<FListViewRow&()>, GenerateRowCallback);
 
         FUSION_EVENT(ScriptEvent<void(FListView*)>, OnSelectionChanged);
 
-        Self& GenerateRowDelegate(const GenerateRowCallback& callback);
-
         FUSION_WIDGET;
-        friend class FListItemWidget;
-        friend class FListViewStyle;
+        friend class FListViewContainer;
     };
     
 }

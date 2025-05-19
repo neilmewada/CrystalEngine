@@ -21,9 +21,9 @@ namespace CE::Editor
 
         void CloseWindow();
 
-        FListItemWidget& GenerateRecentProjectRow(FListItem* item, FListView* view);
+        FListItemWidget& GenerateRecentProjectRow(FListItem* item, FListWidget* view);
 
-        FListItemWidget& GenerateNewProjectRow(FListItem* item, FListView* view);
+        FListItemWidget& GenerateNewProjectRow(FListItem* item, FListWidget* view);
 
         FUNCTION()
         void ValidateInputFields(FTextInput* inputField);
@@ -47,8 +47,8 @@ namespace CE::Editor
         NewProjectListModel* newProjectModel = nullptr;
 
         FTabView* tabView = nullptr;
-        FListView* recentsList = nullptr;
-        FListView* newProjectList = nullptr;
+        FListWidget* recentsList = nullptr;
+        FListWidget* newProjectList = nullptr;
 
         FStyledWidget* recentWarningWidget = nullptr;
         FStyledWidget* newWarningWidget = nullptr;

@@ -298,6 +298,8 @@ namespace CE
 				curPos.y += child->computedSize.height + child->m_Margin.top + child->m_Margin.bottom + m_Gap;
 			}
 		}
+
+		OnPostComputeLayout();
 	}
 
 	void FStackBox::OnPaint(FPainter* painter)

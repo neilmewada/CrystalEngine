@@ -3,9 +3,9 @@
 namespace CE
 {
     CLASS()
-    class CRYSTALEDITOR_API NewProjectListModel : public FListViewModel
+    class CRYSTALEDITOR_API NewProjectListModel : public FListWidgetModel
     {
-        CE_CLASS(NewProjectListModel, FListViewModel)
+        CE_CLASS(NewProjectListModel, FListWidgetModel)
     public:
 
         virtual ~NewProjectListModel();

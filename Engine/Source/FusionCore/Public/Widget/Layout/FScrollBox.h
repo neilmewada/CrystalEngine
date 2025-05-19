@@ -60,6 +60,8 @@ namespace CE
 
         FUSION_EVENT(ScriptEvent<void(FScrollBox*)>, OnBackgroundClicked);
 
+        FUSION_EVENT(ScriptEvent<void(FScrollBox*)>, OnScrollValueChanged);
+
         Self& NormalizedScrollY(f32 value);
         f32 NormalizedScrollY();
 

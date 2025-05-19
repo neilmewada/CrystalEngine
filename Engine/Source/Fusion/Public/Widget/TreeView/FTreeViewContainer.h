@@ -53,7 +53,7 @@ namespace CE
             return *this;
         }
 
-        typedef StableDynamicArray<FTreeViewRow*, 64, false> TreeViewRowList;
+        using TreeViewRowList = StableDynamicArray<FTreeViewRow*, 64, false>;
 
         FTreeView* treeView = nullptr;
         TreeViewRowList children;

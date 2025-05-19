@@ -380,7 +380,7 @@ namespace CE::Editor
 
 		if (!projectBrowserListView)
 		{
-			projectBrowserListView = CreateObject<FListViewStyle>(this, "ProjectBrowserListView");
+			projectBrowserListView = CreateObject<FListWidgetStyle>(this, "ProjectBrowserListView");
 			Add("ProjectBrowserWindow.ListView", projectBrowserListView);
 		}
 
@@ -488,6 +488,15 @@ namespace CE::Editor
 		GetDefaultWidget<FTreeView>()
 			.Style(treeView->GetName());
 
+    	if (!listView)
+    	{
+    		listView = CreateObject<FListViewStyle>(this, "ListView");
+    		Add(listView);
+    	}
+
+    	GetDefaultWidget<FListView>()
+    		.Style(listView->GetName());
+
 		if (!detailsRow)
 		{
 			detailsRow = CreateObject<FCustomButtonStyle>(this, "Button_DetailsRow");
@@ -500,6 +509,21 @@ namespace CE::Editor
 		detailsRow->contentMoveY = 0;
 		detailsRow->borderColor = Color::Clear();
 		detailsRow->borderWidth = 0;
+
+    	if (!objectEditorField)
+    	{
+    		objectEditorField = CreateObject<FCustomButtonStyle>(this, "Button_ObjectEditorField");
+    		Add("Button.ObjectEditorField", objectEditorField);
+    	}
+
+    	objectEditorField->background = Color::RGBA(28, 28, 28);
+    	objectEditorField->hoveredBackground = Color::RGBA(64, 64, 64);
+    	objectEditorField->pressedBackground = highlightColor;
+    	objectEditorField->cornerRadius = Vec4(5, 5, 5, 5);
+    	objectEditorField->contentMoveY = 0;
+    	objectEditorField->borderColor = Color::RGBA(60, 60, 60);
+    	objectEditorField->hoveredBorderColor = Color::RGBA(74, 74, 74);
+    	objectEditorField->borderWidth = 1.0f;
     }
 
 } // namespace CE::Editor

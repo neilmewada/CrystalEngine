@@ -13,11 +13,9 @@ namespace CE
         
     }
 
-    void FListViewModel::OnModelPropertyEdited(const CE::Name& propertyName, Object* modifyingObject)
+    SubClass<FListViewRow> FListViewModel::GetRowWidgetClass()
     {
-	    Super::OnModelPropertyEdited(propertyName, modifyingObject);
-
+        return FListViewRow::StaticClass();
     }
-
 } // namespace CE
 

@@ -359,6 +359,14 @@ TEST(Fusion, TreeView)
 			expandCaretButton->hoverTintColor = Color::RGBA(190, 190, 190);
 			expandCaretButton->pressedTintColor = Color::RGBA(180, 180, 180);
 		}
+
+		{
+			auto listView = CreateObject<FListViewStyle>(rootStyle, "ListView");
+			rootStyle->Add(listView);
+
+			GetDefaultWidget<FListView>()
+				.Style(rootStyle, listView->GetName());
+		}
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();

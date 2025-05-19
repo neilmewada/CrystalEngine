@@ -3,12 +3,12 @@
 namespace CE
 {
     CLASS()
-    class FUSION_API FListViewStyle : public FStyledWidgetStyle
+    class FUSION_API FListWidgetStyle : public FStyledWidgetStyle
     {
-        CE_CLASS(FListViewStyle, FStyledWidgetStyle)
+        CE_CLASS(FListWidgetStyle, FStyledWidgetStyle)
     public:
 
-        virtual ~FListViewStyle();
+        virtual ~FListWidgetStyle();
 
         SubClass<FWidget> GetWidgetClass() const override;
 
@@ -16,21 +16,18 @@ namespace CE
 
     protected:
 
-        FListViewStyle();
+        FListWidgetStyle();
 
     public:
 
         FIELD()
-        FBrush itemBackground = Color::RGBA(26, 26, 26);
+        FBrush itemBackground;
 
         FIELD()
-        FBrush alternateItemBackground = Color::RGBA(21, 21, 21);
+        FBrush selectedItemBackground;
 
         FIELD()
-        FBrush selectedItemBackground = Color::RGBA(0, 112, 224);
-
-        FIELD()
-        FBrush hoveredItemBackground = Color::RGBA(36 ,36 , 36);
+        FBrush hoveredItemBackground;
 
         FIELD()
         Color itemBorderColor;
@@ -48,4 +45,4 @@ namespace CE
     
 } // namespace CE
 
-#include "FListViewStyle.rtti.h"
+#include "FListWidgetStyle.rtti.h"
