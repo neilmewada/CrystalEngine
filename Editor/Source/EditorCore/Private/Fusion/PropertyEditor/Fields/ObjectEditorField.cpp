@@ -44,7 +44,7 @@ namespace CE::Editor
                     .WordWrap(FWordWrap::NoWrap)
                     .HAlign(HAlign::Left)
                     .VAlign(VAlign::Center)
-                    .Width(82),
+                    .Width(92),
 
                     FNew(FImage)
                     .Background(assetCircle)
