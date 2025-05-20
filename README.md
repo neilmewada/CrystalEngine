@@ -84,7 +84,7 @@ Contains all the editor modules.
 
 ### Material Editor
 
-<img src="./Screenshots/MaterialEditor.png" height="600" width="auto">
+![](./Screenshots/MaterialEditor.png)
 
 ### Color Picker
 
