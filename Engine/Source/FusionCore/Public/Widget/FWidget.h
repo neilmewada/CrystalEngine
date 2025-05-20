@@ -145,6 +145,10 @@ namespace CE
         void Focus();
         void Unfocus();
 
+        bool IsInsidePopup();
+
+        FPopup* FindPopupInParent();
+
         //! @brief Returns true if this widget is enabled in parent hierarchy.
         //! Use this method sparingly, especially in recursive functions as it can add overhead.
         bool IsEnabledInHierarchy();

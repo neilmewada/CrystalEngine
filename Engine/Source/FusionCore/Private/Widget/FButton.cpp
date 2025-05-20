@@ -78,6 +78,10 @@ namespace CE
 	                {
 	                    Vec2 popupPos = GetGlobalPosition() + Vec2(0, GetComputedSize().height);
 	                    dropDownMenu->MinWidth(GetComputedSize().width);
+	                    if (FPopup* curPopup = FindPopupInParent())
+	                    {
+	                        dropDownMenu->SetParentPopup(curPopup);
+	                    }
 
 	                    GetContext()->PushLocalPopup(dropDownMenu.Get(), popupPos, Vec2(), GetComputedSize());
 	                }

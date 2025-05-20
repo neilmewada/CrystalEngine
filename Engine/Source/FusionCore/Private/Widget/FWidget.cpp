@@ -197,6 +197,26 @@ namespace CE
         }
     }
 
+    bool FWidget::IsInsidePopup()
+    {
+        if (parent == nullptr)
+            return false;
+        if (parent->IsOfType<FPopup>())
+            return true;
+
+        return parent->IsInsidePopup();
+    }
+
+    FPopup* FWidget::FindPopupInParent()
+    {
+        if (parent == nullptr)
+            return nullptr;
+        if (parent->IsOfType<FPopup>())
+            return (FPopup*)parent.Get();
+
+        return parent->FindPopupInParent();
+    }
+
     bool FWidget::IsEnabledInHierarchy()
     {
         ZoneScoped;

@@ -111,10 +111,11 @@ namespace CE::Editor
 
         Ref<AssetSelectionPopup> popup = CreateObject<AssetSelectionPopup>(this, "AssetSelector");
         popup->SetAssetClass((ClassType*)typeInfo);
+        popup->SetCurrentValue(curValue);
 
         GetContext()->PushLocalPopup(popup.Get(),
             button->GetGlobalPosition() + button->GetComputedSize() * Vec2(0, 1),
-            Vec2(-1, 280), button->GetComputedSize());
+            Vec2(-1, 340), button->GetComputedSize());
 
         WeakRef<ObjectEditorField> thisRef = this;
 
@@ -197,6 +198,8 @@ namespace CE::Editor
                 field->SetFieldValue<Object*>(instance, asset.Get());
             }
         }
+
+        curValue = initialValue;
     }
 
     void ObjectEditorField::UpdateValue()
@@ -231,6 +234,8 @@ namespace CE::Editor
         {
             value = field->GetFieldValue<Object*>(instance);
         }
+
+        curValue = value;
 
         if (value == nullptr)
         {

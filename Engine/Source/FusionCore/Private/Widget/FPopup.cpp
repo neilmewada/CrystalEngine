@@ -9,6 +9,18 @@ namespace CE
         m_AutoClose = true;
     }
 
+    bool FPopup::FocusParentExistsRecursive(FWidget* parent)
+    {
+        if (auto parentPopup = this->parentPopup.Lock())
+        {
+            if (parentPopup.Get() == parent || parentPopup->FocusParentExistsRecursive(parent))
+            {
+                return true;
+            }
+        }
+        return Super::FocusParentExistsRecursive(parent);
+    }
+
     void FPopup::ClosePopup()
     {
         if (!isShown)
@@ -34,6 +46,11 @@ namespace CE
     Ref<FWidget> FPopup::GetContextWidget()
     {
         return contextWidget.Lock();
+    }
+
+    void FPopup::SetParentPopup(Ref<FPopup> popup)
+    {
+        this->parentPopup = popup;
     }
 
 

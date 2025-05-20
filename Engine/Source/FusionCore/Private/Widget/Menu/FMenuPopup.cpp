@@ -43,16 +43,31 @@ namespace CE
 
                 if (focusedWidget != nullptr)
                 {
-                    FMenuItem* ownerItem = this->ownerItem;
+                    Ref<FMenuItem> ownerItem = this->ownerItem.Lock();
 
-                    if (ownerItem && !focusedWidget->ParentExistsRecursive(ownerItem))
+                    if (ownerItem && !focusedWidget->ParentExistsRecursive(ownerItem.Get()))
                     {
                         ClosePopup();
                     }
 
-                    if (ownerItem == nullptr && focusedWidget != this && !focusedWidget->ParentExistsRecursive(this))
+                    if (ownerItem == nullptr && focusedWidget != this && !focusedWidget->FocusParentExistsRecursive(this))
                     {
                         ClosePopup();
+
+                        Ref<FPopup> parentPopup = this->GetParentPopup();
+                        while (parentPopup)
+                        {
+                            // Do not close the parent popup if we are focused on that one now.
+                            if (parentPopup.Get() == focusedWidget)
+                                break;
+
+                            if (!focusedWidget->FocusParentExistsRecursive(parentPopup.Get()))
+                            {
+                                parentPopup->ClosePopup();
+                            }
+
+                            parentPopup = parentPopup->GetParentPopup();
+                        }
                     }
 
                     while (ownerItem != nullptr)
@@ -70,7 +85,7 @@ namespace CE
                                 menuOwnerPopup->ClosePopup();
                             }
 
-                            ownerItem = menuOwnerPopup->ownerItem;
+                            ownerItem = menuOwnerPopup->ownerItem.Lock();
                         }
                         else if (ownerMenu->IsOfType<FMenuBar>())
                         {
@@ -109,12 +124,15 @@ namespace CE
                 ownerItem->menuOwner->ApplyStyle();
         }
 
-        for (FMenuItem* menuItem : menuItems)
+        for (WeakRef<FMenuItem> menuItemRef : menuItems)
         {
-	        if (menuItem->subMenu)
-	        {
-                menuItem->subMenu->ClosePopup();
-	        }
+            if (Ref<FMenuItem> menuItem = menuItemRef.Lock())
+            {
+                if (menuItem->subMenu)
+                {
+                    menuItem->subMenu->ClosePopup();
+                }
+            }
         }
     }
 }

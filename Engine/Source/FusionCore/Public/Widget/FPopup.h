@@ -12,6 +12,8 @@ namespace CE
 
         // - Public API -
 
+        bool FocusParentExistsRecursive(FWidget* parent) override;
+
         void SetInitialSize(Vec2 size) { initialSize = size; }
 
         void ClosePopup();
@@ -22,6 +24,11 @@ namespace CE
 
         void SetContextWidget(Ref<FWidget> widget);
         Ref<FWidget> GetContextWidget();
+
+        // For internal use only!
+        void SetParentPopup(Ref<FPopup> popup);
+
+        Ref<FPopup> GetParentPopup() const { return parentPopup.Lock(); }
 
     protected:
 
@@ -45,6 +52,9 @@ namespace CE
 
         // The widget that created this popup. For ex: a button that opened a popup menu!
         WeakRef<FWidget> contextWidget;
+
+        // If this popup was opened inside another popup:
+        WeakRef<FPopup> parentPopup;
 
         FUSION_WIDGET;
     };

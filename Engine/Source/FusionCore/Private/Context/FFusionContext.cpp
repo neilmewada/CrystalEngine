@@ -78,6 +78,10 @@ namespace CE
 					{
 						popup->computedPosition.y -= popup->computedSize.y + popup->controlSize.y;
 					}
+					if (popupRect.max.x > availableSize.x)
+					{
+						popup->computedPosition.x -= popupRect.max.x - availableSize.x;
+					}
 					popup->initialPos = popup->computedPosition;
 
 					MarkLayoutDirty();
@@ -330,7 +334,7 @@ namespace CE
 			}
 			else if (popup->IsOfType<FMenuPopup>() && ((FMenuPopup*)popup.Get())->ownerItem != nullptr)
 			{
-				rootContext->SetFocusWidget(((FMenuPopup*)popup.Get())->ownerItem);
+				rootContext->SetFocusWidget(((FMenuPopup*)popup.Get())->ownerItem.Get());
 			}
 			else if (owningWidget)
 			{

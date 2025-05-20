@@ -23,13 +23,19 @@ namespace CE::Editor
 
         void SetAssetClass(ClassType* assetClass);
 
+        void SetCurrentValue(WeakRef<Object> curValue);
+
         void StartEditingSearchBox();
+
+        FMenuItem& NewMenuItem();
 
     protected: // - Internal -
 
         Ref<AssetSelectionListViewModel> model;
         Ref<AssetSelectionListView> listView;
         Ref<FTextInput> searchBox;
+
+        WeakRef<Object> curValue;
 
     public: // - Fusion Properties - 
 

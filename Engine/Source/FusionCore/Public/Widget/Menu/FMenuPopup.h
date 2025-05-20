@@ -14,7 +14,7 @@ namespace CE
 
         u32 GetMenuItemCount() const { return menuItems.GetSize(); }
 
-        FMenuItem* GetMenuItem(u32 index) const { return menuItems[index]; }
+        Ref<FMenuItem> GetMenuItem(u32 index) const { return menuItems[index].Lock(); }
 
         bool FocusParentExistsRecursive(FWidget* parent) override;
 
@@ -34,10 +34,10 @@ namespace CE
         void OnPopupClosed() override;
 
         FIELD()
-        Array<FMenuItem*> menuItems;
+        Array<WeakRef<FMenuItem>> menuItems;
 
         FIELD()
-        FMenuItem* ownerItem = nullptr;
+        WeakRef<FMenuItem> ownerItem = nullptr;
 
         FVerticalStack* container = nullptr;
 

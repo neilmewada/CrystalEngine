@@ -32,6 +32,8 @@ namespace CE::Editor
         Ref<FLabel> valueLabel;
         Ref<FLabel> pathLabel;
 
+        WeakRef<Object> curValue;
+
     public: // - Fusion Properties - 
 
 

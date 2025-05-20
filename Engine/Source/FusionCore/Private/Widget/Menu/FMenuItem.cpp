@@ -78,11 +78,14 @@ namespace CE
                     {
                         FMenuPopup* menuPopup = static_cast<FMenuPopup*>(menuOwner);
 
-                        for (FMenuItem* menuItem : menuPopup->menuItems)
+                        for (WeakRef<FMenuItem> menuItemRef : menuPopup->menuItems)
                         {
-	                        if (menuItem != this && menuItem->subMenu && menuItem->subMenu->IsShown())
+	                        if (Ref<FMenuItem> menuItem = menuItemRef.Lock())
 	                        {
-                                menuItem->subMenu->ClosePopup();
+	                            if (menuItem != this && menuItem->subMenu && menuItem->subMenu->IsShown())
+	                            {
+	                                menuItem->subMenu->ClosePopup();
+	                            }
 	                        }
                         }
                     }
