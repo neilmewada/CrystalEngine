@@ -82,13 +82,17 @@ Contains all the editor modules.
 
 # Screenshots
 
+### Material Editor
+
+<img src="./Screenshots/MaterialEditor.png" height="600" width="auto">
+
 ### Color Picker
 
 <img src="./Screenshots/ColorPicker_Fusion.png" height="500" width="auto"/>
 
 ### Project browser window:
 
-![](./Screenshots/ProjectBrowser.png)
+<img src="./Screenshots/ProjectBrowser.png" height="600" width="auto">
 
 --- 
 ### Credits
