@@ -142,10 +142,12 @@ namespace CE::Editor
 
         if (field->HasAttribute("ArrayElementTypeName") && field->GetAttribute("ArrayElementTypeName").IsString())
         {
+            hasElementTypeNameOverride = true;
             elementTypeNameOverride = field->GetAttribute("ArrayElementTypeName").GetStringValue();
         }
         else
         {
+            hasElementTypeNameOverride = false;
             elementTypeNameOverride = {};
         }
 
@@ -286,7 +288,7 @@ namespace CE::Editor
                 FHorizontalStack& left = *propertyEditor->GetLeft();
             	FHorizontalStack& right = *propertyEditor->GetRight();
 
-                if (arrayElements[i]->IsStructField() && elementTypeNameOverride.NotEmpty())
+                if (arrayElements[i]->IsStructField() && hasElementTypeNameOverride)
                 {
                     Ref<FLabel> typeLabel = right.FindChildByName<FLabel>("StructTypeLabel");
                     if (typeLabel)

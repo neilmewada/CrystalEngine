@@ -55,7 +55,7 @@ namespace CE
         FIELD(EditAnywhere, Category = "Shader", CategoryOrder = 0)
         Ref<CE::Shader> shader = nullptr;
 
-        FIELD(EditAnywhere, Category = "Properties", CategoryOrder = 1, ArrayEditorMode = "Static", ArrayElementName = ".name [{}]")
+        FIELD(EditAnywhere, Category = "Properties", CategoryOrder = 1, ArrayEditorMode = "Static", ArrayElementName = ".displayName", ArrayElementTypeName = "")
         Array<MaterialProperty> properties{};
 
         bool valuesModified = true;

@@ -57,6 +57,9 @@ namespace CE
         Name name{};
 
         FIELD()
+        Name displayName{};
+
+        FIELD()
         MaterialPropertyType propertyType = MaterialPropertyType::None;
 
         FIELD(EditAnywhere, DisplayName = "UInt Value", ShowIf = ".propertyType == UInt")
@@ -77,7 +80,7 @@ namespace CE
         FIELD()
         Matrix4x4 matrixValue = {};
 
-        FIELD(EditAnywhere, ShowIf = ".propertyType == Texture")
+        FIELD(EditAnywhere, ShowIf = ".propertyType == Texture", StructTypeName = "")
         MaterialTextureValue textureValue = {};
     };
 

@@ -316,7 +316,7 @@ namespace CE::Editor
 
 		menuPopup->background = Color::RGBA(56, 56, 56);
 		menuPopup->borderColor = Color::RGBA(26, 26, 26);
-		menuPopup->borderWidth = 0.5f;
+		menuPopup->borderWidth = 0.75f;
 		menuPopup->itemPadding = Vec4(10, 5, 10, 5);
 		menuPopup->itemHoverBackground = highlightColor;
 		menuPopup->separatorColor = menuPopup->separatorTitleColor = Color::RGBA(106, 106, 106);

@@ -58,6 +58,7 @@ namespace CE::Editor
         f32 fixedInputWidth = -1;
         ArrayEditMode arrayEditMode = ArrayEditMode::Default;
         String elementTypeNameOverride = {};
+        bool hasElementTypeNameOverride = false;
         String elementNameOverride = {};
 
         Array<Ptr<FieldType>> arrayElements;

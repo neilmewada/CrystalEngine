@@ -93,6 +93,7 @@ namespace CE
 		        }
 
                 property.name = defaultProp.name;
+	            property.displayName = defaultProp.displayName;
 
                 properties.Add(property);
                 propertyMap[property.name] = property;

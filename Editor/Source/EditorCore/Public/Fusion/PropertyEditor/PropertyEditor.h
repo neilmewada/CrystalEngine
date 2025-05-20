@@ -111,6 +111,9 @@ namespace CE::Editor
         WeakRef<PropertyEditor> parentEditor;
         WeakRef<ObjectEditor> parentObjectEditor;
 
+        bool hasStructTypeNameOverride = false;
+        CE::Name structTypeNameOverride;
+
     public: // - Fusion Properties - 
 
         FUSION_PROPERTY_WRAPPER2(Text, fieldNameLabel, FieldNameText);

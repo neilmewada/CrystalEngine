@@ -312,6 +312,17 @@ namespace CE::Editor
             return;
         }
 
+        if (field->HasAttribute("StructTypeName") && field->GetAttribute("StructTypeName").IsString())
+        {
+            hasStructTypeNameOverride = true;
+            structTypeNameOverride = field->GetAttribute("StructTypeName").GetStringValue();
+        }
+        else
+        {
+            hasStructTypeNameOverride = false;
+            structTypeNameOverride = {};
+        }
+
         showCondition.valid = false;
         showCondition.isEquality = false;
         showCondition.comparisonFieldName = "";
@@ -354,11 +365,16 @@ namespace CE::Editor
         if (fieldDeclType->IsStruct()) // - Struct Editor -
         {
             StructType* structType = (StructType*)fieldDeclType;
+            String structTypeName = structType->GetName().GetString();
+            if (hasStructTypeNameOverride)
+            {
+                structTypeName = structTypeNameOverride.GetString();
+            }
 
             right->AddChild(
                 FNew(FLabel)
                 .FontSize(10)
-                .Text(structType->GetName().GetString())
+                .Text(structTypeName)
                 .Name("StructTypeLabel")
             );
 

@@ -35,6 +35,9 @@ enum AttributeSpecifiers
 	//! @brief A macro to customize TypeName display for each array element.
 	ArrayElementTypeName,
 
+	//! @brief A macro to customize TypeName display for a struct field.
+	StructTypeName,
+
 	//! @brief A macro to disable visibility of an editor property based on a sibling field's value.
 	//! Example: FIELD(EditAnywhere, ShowIf = ".propertyType == UInt")
 	ShowIf,
