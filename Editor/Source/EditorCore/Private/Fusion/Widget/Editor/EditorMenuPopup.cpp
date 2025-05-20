@@ -7,6 +7,11 @@ namespace CE::Editor
     {
         m_MinWidth = 160;
     }
-    
+
+    void EditorMenuPopup::OnBeginDestroy()
+    {
+        Super::OnBeginDestroy();
+
+    }
 }
 

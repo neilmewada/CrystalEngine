@@ -66,6 +66,15 @@ namespace CE
 		return cachedPrimaryAssetsByParentPath[parentPath];
 	}
 
+	const Array<AssetData*>& AssetRegistry::GetAllAssetsOfType(TypeId typeId)
+	{
+		static Array<AssetData*> empty;
+		if (!cachedAssetsByType.KeyExists(typeId))
+			return empty;
+
+		return cachedAssetsByType[typeId];
+	}
+
 	Array<String> AssetRegistry::GetSubDirectoriesAtPath(const Name& path)
 	{
 		Array<String> result{};
@@ -171,6 +180,7 @@ namespace CE
 		Name primaryName = primaryObjectData.name;
 		Name primaryTypeName = primaryObjectData.typeName;
 		assetData->bundleName = load->GetName();
+		assetData->bundlePath = load->GetBundlePath();
 		assetData->assetName = primaryName;
 		assetData->assetClassTypeName = primaryTypeName;
 		assetData->bundleUuid = load->GetUuid();
@@ -398,6 +408,7 @@ namespace CE
 			for (AssetData* assetData : cachedAssetsByPath[newPath])
 			{
 				assetData->bundleName = newName;
+				assetData->bundlePath = newPath;
 			}
 		}
 		if (cachedPrimaryAssetByPath.KeyExists(originalPath))
@@ -406,6 +417,7 @@ namespace CE
 			cachedPrimaryAssetByPath.Remove(originalPath);
 
 			cachedPrimaryAssetByPath[newPath]->bundleName = newName;
+			cachedPrimaryAssetByPath[newPath]->bundlePath = newPath;
 		}
 
 		if (bundle == nullptr)
@@ -514,6 +526,7 @@ namespace CE
 							Name primaryName = primaryObjectData.name;
 							Name primaryTypeName = primaryObjectData.typeName;
 							assetData->bundleName = load->GetName();
+							assetData->bundlePath = load->GetBundlePath();
 							assetData->assetName = primaryName;
 							assetData->assetClassTypeName = primaryTypeName;
 							assetData->bundleUuid = load->GetUuid();
@@ -587,6 +600,7 @@ namespace CE
 							Name primaryName = primaryObjectData.name;
 							Name primaryTypeName = primaryObjectData.typeName;
 							assetData->bundleName = load->GetName();
+							assetData->bundlePath = load->GetBundlePath();
 							assetData->assetName = primaryName;
 							assetData->assetClassTypeName = primaryTypeName;
 							assetData->bundleUuid = load->GetUuid();
@@ -649,6 +663,7 @@ namespace CE
 							Name primaryName = primaryObjectData.name;
 							Name primaryTypeName = primaryObjectData.typeName;
 							assetData->bundleName = load->GetName();
+							assetData->bundlePath = load->GetBundlePath();
 							assetData->assetName = primaryName;
 							assetData->assetClassTypeName = primaryTypeName;
 							assetData->bundleUuid = load->GetUuid();

@@ -64,6 +64,8 @@ namespace CE::Editor
             return *this;
         }
 
+        fieldDeclId = field->GetDeclarationTypeId();
+
         this->targets = Array<WeakRef<Object>>{ target };
         this->relativeFieldPath = relativeFieldPath;
 

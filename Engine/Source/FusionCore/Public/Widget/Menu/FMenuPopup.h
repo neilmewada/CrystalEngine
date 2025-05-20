@@ -29,7 +29,7 @@ namespace CE
 
         void HandleEvent(FEvent* event) override;
 
-        void Construct() override final;
+        void Construct() override;
 
         void OnPopupClosed() override;
 

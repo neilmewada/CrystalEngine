@@ -13,6 +13,8 @@ namespace CE
 
         void Construct() override;
 
+        void OnFusionPropertyModified(const CE::Name& propertyName) override;
+
     public: // - Public API -
 
         int GetVisibleRowCount();
@@ -24,6 +26,8 @@ namespace CE
         const HashSet<int>& GetSelectedRowIndices() const { return selectedRows; }
 
         bool IsRowSelected(int index);
+
+        void OnModelUpdate();
 
     protected: // - Internal -
 

@@ -467,7 +467,7 @@ namespace CE
             else if (keyEvent->key == KeyCode::Escape)
             {
                 StopEditing(true);
-                Unfocus();
+                textInput->Unfocus(); // Added: textInput->
             }
         }
         else if (event->type == FEventType::FocusChanged)

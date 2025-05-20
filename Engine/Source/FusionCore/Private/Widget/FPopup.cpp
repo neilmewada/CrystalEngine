@@ -23,7 +23,7 @@ namespace CE
 
     void FPopup::OnPopupClosed()
     {
-
+        m_OnClosed(this);
     }
 
     void FPopup::SetContextWidget(Ref<FWidget> widget)

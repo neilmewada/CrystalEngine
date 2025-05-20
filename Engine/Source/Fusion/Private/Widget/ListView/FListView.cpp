@@ -31,6 +31,19 @@ namespace CE
         );
     }
 
+    void FListView::OnFusionPropertyModified(const CE::Name& propertyName)
+    {
+        Super::OnFusionPropertyModified(propertyName);
+
+        static CE::Name modelProperty = "Model";
+
+        if (propertyName == modelProperty && m_Model)
+        {
+            m_Model->listView = this;
+            m_Model->OnListViewAssigned();
+        }
+    }
+
     int FListView::GetVisibleRowCount()
     {
         return container->children.GetCount();
@@ -58,12 +71,19 @@ namespace CE
         container->UpdateRows();
         container->OnSelectionChanged();
 
+        m_OnSelectionChanged.Broadcast(this);
+
         ApplyStyle();
     }
 
     bool FListView::IsRowSelected(int index)
     {
         return selectedRows.Exists(index);
+    }
+
+    void FListView::OnModelUpdate()
+    {
+        container->UpdateRows();
     }
 }
 

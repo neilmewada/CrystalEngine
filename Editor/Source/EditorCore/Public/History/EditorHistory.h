@@ -23,7 +23,7 @@ namespace CE::Editor
             const SubClass<EditorOperation>& operationClass = EditorOperation::StaticClass());
 
         template<typename T>
-        void PerformOperation(const String& name, const Ref<Object>& target,
+        void PerformOperation(const String& name, Ref<Object> target,
             const CE::Name& relativeFieldPath,
             const T& initialValue, const T& newValue)
         {
@@ -42,11 +42,15 @@ namespace CE::Editor
                         {
                             return false;
                         }
-                        field->SetFieldValue<T>(instance, newValue);
 
+                        field->SetFieldValue<T>(instance, newValue);
                         if (!operation->IsEditorGui())
                         {
 	                        target->OnFieldChanged(relativeFieldPath);
+                        }
+                        else
+                        {
+                            target->OnFieldEdited(relativeFieldPath);
                         }
 
                         return true;
@@ -66,8 +70,106 @@ namespace CE::Editor
                         {
                             return false;
                         }
+
                         field->SetFieldValue<T>(instance, initialValue);
-                        target->OnFieldChanged(relativeFieldPath);
+
+                        if (!operation->IsEditorGui())
+                        {
+                            target->OnFieldChanged(relativeFieldPath);
+                        }
+                        else
+                        {
+                            target->OnFieldEdited(relativeFieldPath);
+                        }
+
+                        return true;
+                    }
+
+                    return false;
+                });
+        }
+
+        void PerformObjectOperation(const String& name, const Ref<Object>& target,
+            const CE::Name& relativeFieldPath,
+            WeakRef<Object> initialValue, WeakRef<Object> newValue)
+        {
+            WeakRef<Object> targetRef = target;
+
+            PerformOperation(name, target,
+                [targetRef, relativeFieldPath, newValue](const Ref<EditorOperation>& operation)
+                {
+                    if (Ref<Object> target = targetRef.Lock())
+                    {
+                        Ptr<FieldType> field;
+                        void* instance = nullptr;
+                        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+                            field, instance);
+                        if (!success || !field->IsObjectField())
+                        {
+                            return false;
+                        }
+
+                        if (field->IsStrongRefCounted())
+                        {
+                            field->SetFieldValue<Ref<Object>>(instance, newValue.Lock());
+                        }
+                        else if (field->IsWeakRefCounted())
+                        {
+                            field->SetFieldValue<WeakRef<Object>>(instance, newValue);
+                        }
+                        else
+                        {
+                            field->SetFieldValue<Object*>(instance, newValue.Get());
+                        }
+
+                        if (!operation->IsEditorGui())
+                        {
+                            target->OnFieldChanged(relativeFieldPath);
+                        }
+                        else
+                        {
+                            target->OnFieldEdited(relativeFieldPath);
+                        }
+
+                        return true;
+                    }
+
+                    return false;
+                },
+                [targetRef, relativeFieldPath, initialValue](const Ref<EditorOperation>& operation)
+                {
+                    if (Ref<Object> target = targetRef.Lock())
+                    {
+                        Ptr<FieldType> field;
+                        void* instance = nullptr;
+                        bool success = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
+                            field, instance);
+                        if (!success || !field->IsObjectField())
+                        {
+                            return false;
+                        }
+
+                        if (field->IsStrongRefCounted())
+                        {
+                            field->SetFieldValue<Ref<Object>>(instance, initialValue.Lock());
+                        }
+                        else if (field->IsWeakRefCounted())
+                        {
+                            field->SetFieldValue<WeakRef<Object>>(instance, initialValue);
+                        }
+                        else
+                        {
+                            field->SetFieldValue<Object*>(instance, initialValue.Get());
+                        }
+
+                        if (!operation->IsEditorGui())
+                        {
+                            target->OnFieldChanged(relativeFieldPath);
+                        }
+                        else
+                        {
+                            target->OnFieldEdited(relativeFieldPath);
+                        }
 
                         return true;
                     }

@@ -22,7 +22,15 @@ namespace CE::Editor
 
     protected: // - Internal -
 
+        FUNCTION()
+        void OnButtonClicked(FButton* button, Vec2 mousePos);
+
+        void SelectAsset(AssetData* assetData);
+
         void UpdateValue() override;
+
+        Ref<FLabel> valueLabel;
+        Ref<FLabel> pathLabel;
 
     public: // - Fusion Properties - 
 

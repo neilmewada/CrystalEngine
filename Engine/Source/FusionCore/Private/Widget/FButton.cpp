@@ -100,6 +100,8 @@ namespace CE
                     {
                         OnClick();
                         m_OnClicked();
+
+                        m_OnButtonClicked(this, mouseEvent->mousePosition);
                     }
                 }
                 event->Consume(this);

@@ -67,6 +67,10 @@
 #include "Fusion/Widget/Editor/EditorViewport.h"
 #include "Fusion/Widget/Editor/EditorWindow.h"
 
+#include "Fusion/Widget/AssetSelectionPopup/AssetSelectionListViewModel.h"
+#include "Fusion/Widget/AssetSelectionPopup/AssetSelectionListView.h"
+#include "Fusion/Widget/AssetSelectionPopup/AssetSelectionPopup.h"
+
 #include "Fusion/Widget/ComponentTreeView/ComponentTreeItem.h"
 #include "Fusion/Widget/ComponentTreeView/ComponentTreeViewRow.h"
 #include "Fusion/Widget/ComponentTreeView/ComponentTreeView.h"

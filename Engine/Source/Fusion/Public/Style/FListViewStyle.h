@@ -21,6 +21,9 @@ namespace CE
     public:
 
         FIELD()
+        FBrush background = Color::RGBA(26, 26, 26);
+
+        FIELD()
         FBrush itemBackground = Color::RGBA(26, 26, 26);
 
         FIELD()

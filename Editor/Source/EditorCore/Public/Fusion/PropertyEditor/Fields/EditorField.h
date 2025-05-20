@@ -80,6 +80,8 @@ namespace CE::Editor
         Array<WeakRef<Object>> targets;
         CE::Name relativeFieldPath;
 
+        TypeId fieldDeclId;
+
     public: // - Fusion Properties - 
 
         FUSION_PROPERTY(WeakRef<EditorHistory>, History);

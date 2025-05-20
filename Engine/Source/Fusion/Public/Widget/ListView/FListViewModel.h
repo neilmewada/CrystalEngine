@@ -3,6 +3,7 @@
 namespace CE
 {
     class FListViewRow;
+    class FListView;
 
     CLASS(Abstract)
     class FUSION_API FListViewModel : public FDataModel
@@ -22,6 +23,13 @@ namespace CE
 
         virtual SubClass<FListViewRow> GetRowWidgetClass();
 
+        virtual void OnListViewAssigned() {}
+
+    protected:
+
+        WeakRef<FListView> listView = nullptr;
+
+        friend class FListView;
     };
     
 } // namespace CE

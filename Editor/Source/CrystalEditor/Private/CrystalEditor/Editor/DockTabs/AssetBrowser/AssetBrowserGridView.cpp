@@ -6,7 +6,7 @@ namespace CE::Editor
 
     AssetBrowserGridView::AssetBrowserGridView()
     {
-
+        contextMenu = CreateDefaultSubobject<EditorMenuPopup>("ContextMenu");
     }
 
     void AssetBrowserGridView::Construct()
@@ -153,7 +153,8 @@ namespace CE::Editor
         if (selectedItems.IsEmpty())
             return;
 
-        Ref<EditorMenuPopup> contextMenu = CreateObject<EditorMenuPopup>(this, "ContextMenu");
+        //Ref<EditorMenuPopup> contextMenu = CreateObject<EditorMenuPopup>(this, "ContextMenu");
+        contextMenu->QueueDestroyAllItems();
 
         contextMenu->MinWidth(MinContextMenuWidth);
         contextMenu->AutoClose(true);
@@ -198,7 +199,8 @@ namespace CE::Editor
 
     Ref<EditorMenuPopup> AssetBrowserGridView::BuildNoSelectionContextMenu()
     {
-        Ref<EditorMenuPopup> contextMenu = CreateObject<EditorMenuPopup>(this, "ContextMenu");
+        //Ref<EditorMenuPopup> contextMenu = CreateObject<EditorMenuPopup>(this, "ContextMenu");
+        contextMenu->QueueDestroyAllItems();
 
         contextMenu->AutoClose(true);
         contextMenu->MinWidth(MinContextMenuWidth);

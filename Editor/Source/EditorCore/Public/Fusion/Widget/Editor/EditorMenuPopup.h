@@ -14,6 +14,8 @@ namespace CE::Editor
 
         EditorMenuPopup();
 
+        void OnBeginDestroy() override;
+
     public: // - Fusion Properties - 
 
 

@@ -24,6 +24,10 @@ namespace CE
 
         FListView& listView = widget.As<FListView>();
 
+        listView
+            .Background(background)
+        ;
+
         for (int i = 0; i < listView.GetVisibleRowCount(); ++i)
         {
             FListViewRow* row = listView.GetVisibleRow(i);

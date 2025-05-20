@@ -32,6 +32,8 @@ namespace CE
         FUSION_PROPERTY(bool, BlockInteraction);
         FUSION_PROPERTY(bool, AutoClose);
 
+        FUSION_EVENT(ScriptEvent<void(FPopup*)>, OnClosed);
+
     private:
 
         Vec2 initialPos;

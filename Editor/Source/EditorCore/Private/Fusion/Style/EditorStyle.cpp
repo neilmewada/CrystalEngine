@@ -327,6 +327,9 @@ namespace CE::Editor
 		GetDefaultWidget<EditorMenuPopup>()
 			.Style(menuPopup->GetName());
 
+    	GetDefaultWidget<AssetSelectionPopup>()
+    		.Style(menuPopup->GetName());
+
 		if (!menuBar)
 		{
 			menuBar = CreateObject<FMenuBarStyle>(this, "MenuBar");
@@ -495,6 +498,8 @@ namespace CE::Editor
     	}
 
     	GetDefaultWidget<FListView>()
+    		.Style(listView->GetName());
+    	GetDefaultWidget<AssetSelectionListView>()
     		.Style(listView->GetName());
 
 		if (!detailsRow)

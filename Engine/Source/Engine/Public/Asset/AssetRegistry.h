@@ -74,6 +74,8 @@ namespace CE
 
 		Array<AssetData*> GetPrimaryAssetsInSubPath(const Name& parentPath);
 
+		const Array<AssetData*>& GetAllAssetsOfType(TypeId typeId);
+
 		Array<String> GetSubDirectoriesAtPath(const Name& path);
 		PathTreeNode* GetDirectoryNode(const Name& path);
 		

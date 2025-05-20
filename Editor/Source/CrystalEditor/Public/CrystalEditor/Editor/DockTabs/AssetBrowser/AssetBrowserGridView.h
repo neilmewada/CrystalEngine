@@ -62,6 +62,7 @@ namespace CE::Editor
         CE::Name currentPath;
         CE::Name folderToRename;
 
+        Ref<EditorMenuPopup> contextMenu;
 
     public: // - Fusion Properties - 
 

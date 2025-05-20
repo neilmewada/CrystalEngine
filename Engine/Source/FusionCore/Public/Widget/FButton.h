@@ -63,6 +63,8 @@ namespace CE
         FUSION_EVENT(FVoidEvent, OnClicked);
         FUSION_EVENT(FVoidEvent, OnDoubleClicked);
 
+        FUSION_EVENT(ScriptEvent<void(FButton*, Vec2)>, OnButtonClicked);
+
         FUSION_PROPERTY(SystemCursor, Cursor);
 
         Self& DropDownMenu(FMenuPopup& dropDownMenu);

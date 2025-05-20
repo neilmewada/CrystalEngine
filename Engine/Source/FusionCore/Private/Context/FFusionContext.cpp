@@ -57,9 +57,13 @@ namespace CE
 				popup->CalculateIntrinsicSize();
 
 				Vec2 size = popup->initialSize;
-				if (size.x <= 0 || size.y <= 0)
+				if (size.x <= 0)
 				{
-					size = popup->intrinsicSize;
+					size.x = popup->intrinsicSize.x;
+				}
+				if (size.y <= 0)
+				{
+					size.y = popup->intrinsicSize.y;
 				}
 
 				popup->computedPosition = popup->initialPos;
@@ -277,9 +281,9 @@ namespace CE
 
 		MarkLayoutDirty();
 
-		popup->ApplyStyle();
-
 		GetRootContext()->SetFocusWidget(popup);
+
+		popup->ApplyStyleRecursively();
 	}
 
 	void FFusionContext::PushNativePopup(FPopup* popup, Vec2 globalPosition, Vec2 size)
@@ -368,6 +372,11 @@ namespace CE
 	void FFusionContext::SetFocusWidget(FWidget* focusWidget)
 	{
 		widgetToFocus = focusWidget;
+
+		if (IsNativeContext() && !IsRootContext())
+		{
+			FusionApplication::Get()->GetRootContext()->SetFocusWidget(focusWidget);
+		}
 	}
 
 	bool FFusionContext::IsPopupWindow() const

@@ -14,6 +14,8 @@ namespace CE
 		// Bundle::name field value.
 		Name bundleName{};
 
+		Name bundlePath{};
+
 		// Uuid of the bundle that contains this asset.
 		Uuid bundleUuid{};
 

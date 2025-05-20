@@ -24,7 +24,7 @@ namespace CE
 
 		AssetData* GetPrimaryAssetDataAtPath(const Name& path);
 		Array<AssetData*> GetAssetsDataAtPath(const Name& path);
-
+		
 		Ref<Asset> LoadAssetAtPath(const Name& path);
 
 		RHI::Texture* LoadTextureAtPath(const Name& path) override;
