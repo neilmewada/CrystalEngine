@@ -30,6 +30,10 @@ namespace CE::Editor
 
         bool IsCurrentDirectoryReadOnly() const;
 
+        Array<CE::Name> GetSelectedAssetPaths();
+
+        void BrowseToAsset(const CE::Name& path);
+
     protected: // - Internal -
 
         FUNCTION()

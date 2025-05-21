@@ -51,6 +51,8 @@ namespace CE::Editor
 
         Array<AssetBrowserItem*> GetSelectedItems();
 
+        void SelectItem(const CE::Name& fullPath);
+
         // Will redraw the items
         void OnUpdate();
 
@@ -61,6 +63,8 @@ namespace CE::Editor
         Array<AssetBrowserItem*> items;
         CE::Name currentPath;
         CE::Name folderToRename;
+
+        CE::Name itemToSelect;
 
         Ref<EditorMenuPopup> contextMenu;
 

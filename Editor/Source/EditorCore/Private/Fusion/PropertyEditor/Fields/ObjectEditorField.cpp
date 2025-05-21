@@ -17,6 +17,10 @@ namespace CE::Editor
 
         FBrush assetCircle = FBrush("/Editor/Assets/Icons/DoubleCircle", Color::RGBHex(0xd9d9d9));
 
+        FBrush useAsset = FBrush("/Editor/Assets/Icons/SelectFile");
+        FBrush showAsset = FBrush("/Editor/Assets/Icons/FolderSearch");
+        FBrush crossIcon = FBrush("/Editor/Assets/Icons/Cross");
+
         Child(
             FNew(FHorizontalStack)
             .Gap(10)
@@ -25,66 +29,97 @@ namespace CE::Editor
             .VAlign(VAlign::Center)
             .HAlign(HAlign::Left)
             (
-                FNew(FButton)
-                .OnButtonClicked(FUNCTION_BINDING(this, OnButtonClicked))
-                .CornerRadius(cornerRadius)
-                .Height(height)
-                .VAlign(VAlign::Center)
-                .HAlign(HAlign::Left)
-                .Style("Button.ObjectEditorField")
-                .Padding(Vec4(1, 1, 1, 1))
+                FNew(FHorizontalStack)
+                .Gap(5)
+                .ContentVAlign(VAlign::Fill)
+                .VAlign(VAlign::Fill)
+                .HAlign(HAlign::Fill)
                 (
-                    FNew(FHorizontalStack)
-                    .Gap(5)
-                    .ContentVAlign(VAlign::Fill)
-                    .VAlign(VAlign::Fill)
-                    .HAlign(HAlign::Fill)
+                    FNew(FStyledWidget) // Thumbnail
+                    .Background(Color::Black())
+                    .CornerRadius(Vec4(1, 1, 1, 1) * cornerRadius)
+                    .Width(height)
+                    .Height(height)
+                    .Margin(Vec4(0, 0, 7.5f, 0)),
+
+                    FNew(FVerticalStack)
+                    .Gap(2)
+                    .ClipChildren(false)
+                    .HAlign(HAlign::Left)
+                    .VAlign(VAlign::Top)
+                    .Width(140)
+                    .Margin(Vec4(0, 0, 5, 0))
                     (
-                        FNew(FStyledWidget)
-                        .Background(Color::Black())
-                        .CornerRadius(Vec4(1, 0, 0, 1) * cornerRadius)
-                        .Width(height)
-                        .Height(height)
-                        .Margin(Vec4(0, 0, 7.5f, 0)),
-
-                        FNew(FVerticalStack)
-                        .Gap(2)
-                        .ClipChildren(true)
-                        .HAlign(HAlign::Left)
-                        .VAlign(VAlign::Center)
-                        .Width(92)
+                        FNew(FButton)
+                        .OnButtonClicked(FUNCTION_BINDING(this, OnButtonClicked))
+                        .CornerRadius(Vec4(1, 1, 1, 1) * cornerRadius)
+                        .HAlign(HAlign::Fill)
+                        .Padding(Vec4(1, 1, 1, 1) * 4.0f)
+                        .Style("Button.ObjectEditorField")
                         (
-                            FAssignNew(FLabel, valueLabel)
-                            .Text("[None]")
-                            .WordWrap(FWordWrap::NoWrap)
-                            .HAlign(HAlign::Left),
+                            FNew(FHorizontalStack)
+                            .HAlign(HAlign::Fill)
+                            .VAlign(VAlign::Fill)
+                            (
+                                FAssignNew(FLabel, valueLabel)
+                                .Text("[None]")
+                                .WordWrap(FWordWrap::NoWrap)
+                                .FontSize(10)
+                                .HAlign(HAlign::Left)
+                                .FillRatio(1.0f),
 
-                            FAssignNew(FLabel, pathLabel)
-                            .Text("")
-                            .FontSize(8)
-                            .Foreground(Color::White().WithAlpha(0.5f))
-                            .Enabled(false)
+                                FNew(FImage)
+                                .Background(assetCircle)
+                                .Width(10)
+                                .Height(10)
+                                .VAlign(VAlign::Center)
+                            )
                         ),
 
-                        FNew(FImage)
-                        .Background(assetCircle)
-                        .Width(10)
-                        .Height(10)
-                        .VAlign(VAlign::Center)
-                        .Margin(Vec4(0, 0, 10, 0))
-                    )
-                ),
+                        FNew(FWidget)
+                        .FillRatio(1.0f),
 
-                FNew(FImageButton)
-                .Image(FBrush("/Engine/Resources/Icons/CrossIcon"))
-                .OnClicked([this]
-                {
-                    SelectAsset(nullptr);
-                })
-                .Width(12)
-                .Height(12)
-                .Padding(Vec4(1, 1, 1, 1) * 2.5f)
-                .Style("Button.Icon")
+                        FNew(FHorizontalStack)
+                        .Gap(7.0f)
+                        .HAlign(HAlign::Left)
+                        (
+                            FNew(FImageButton)
+                            .Image(useAsset)
+                            .OnClicked([this]
+                            {
+                                UseSelectedAsset();
+                            })
+                            .Width(16)
+                            .Height(16)
+                            .Padding(Vec4(1, 1, 1, 1) * 2.5f)
+                            .VAlign(VAlign::Center)
+                            .Style("Button.Icon"),
+
+                            FNew(FImageButton)
+                            .Image(showAsset)
+                            .OnClicked([this]
+                            {
+                                BrowseToAsset();
+                            })
+                            .Width(16)
+                            .Height(16)
+                            .Padding(Vec4(1, 1, 1, 1) * 2.5f)
+                            .VAlign(VAlign::Center)
+                            .Style("Button.Icon"),
+
+                            FNew(FImageButton)
+                            .Image(crossIcon)
+                            .OnClicked([this]
+                            {
+                                SelectAsset(nullptr);
+                            })
+                            .Width(16)
+                            .Height(16)
+                            .Padding(Vec4(1, 1, 1, 1) * 2.5f)
+                            .Style("Button.Icon")
+                        )
+                    )
+                )
             )
         );
     }
@@ -130,6 +165,39 @@ namespace CE::Editor
         });
 
         popup->StartEditingSearchBox();
+    }
+
+    void ObjectEditorField::UseSelectedAsset()
+    {
+        if (Ref<ObjectEditor> objectEditor = m_ObjectEditorOwner.Lock())
+        {
+            Array<CE::Name> assetPaths = objectEditor->FetchSelectedAssetPaths();
+
+            for (const CE::Name& assetPath : assetPaths)
+            {
+                AssetData* assetData = AssetRegistry::Get()->GetPrimaryAssetByPath(assetPath);
+                if (!assetData)
+                    continue;
+
+                ClassType* assetClass = ClassType::FindClass(assetData->assetClassTypeName);
+                if (!assetClass)
+                    continue;
+
+                if (assetClass->IsSubclassOf(fieldDeclId))
+                {
+                    SelectAsset(assetData);
+                    break;
+                }
+            }
+        }
+    }
+
+    void ObjectEditorField::BrowseToAsset()
+    {
+        if (Ref<ObjectEditor> objectEditor = m_ObjectEditorOwner.Lock())
+        {
+            objectEditor->BrowseToAssetInAssetBrowser(curObjectFullPath);
+        }
     }
 
     void ObjectEditorField::SelectAsset(AssetData* assetData)
@@ -240,22 +308,20 @@ namespace CE::Editor
         if (value == nullptr)
         {
             valueLabel->Text("[None]");
-            pathLabel->Enabled(false);
+            curObjectFullPath = nullptr;
         }
         else
         {
-            pathLabel->Enabled(true);
-
             Ref<Bundle> bundle = value->GetBundle();
             if (bundle && !bundle->IsTransient())
             {
                 valueLabel->Text(bundle->GetName().GetString());
-                pathLabel->Text(bundle->GetBundlePath().GetString());
+
+                curObjectFullPath = bundle->GetBundlePath();
             }
             else
             {
                 valueLabel->Text(value->GetName().GetString());
-                pathLabel->Text(value->GetPathInBundle().GetString());
             }
         }
     }

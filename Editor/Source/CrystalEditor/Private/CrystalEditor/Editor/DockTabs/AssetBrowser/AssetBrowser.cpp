@@ -332,6 +332,35 @@ namespace CE::Editor
         return !currentPath.GetString().StartsWith("/Game/Assets");
     }
 
+    Array<CE::Name> AssetBrowser::GetSelectedAssetPaths()
+    {
+        Array<CE::Name> selectedAssetPaths;
+
+        Array<AssetBrowserItem*> selectedItems = gridView->GetSelectedItems();
+        for (AssetBrowserItem* selectedItem : selectedItems)
+        {
+            selectedAssetPaths.Add(selectedItem->GetFullPath());
+        }
+
+        return selectedAssetPaths;
+    }
+
+    void AssetBrowser::BrowseToAsset(const CE::Name& path)
+    {
+        CE::Name parentPath = IO::Path(path.GetString()).GetParentPath().GetString().Replace({ '\\' }, '/');
+
+        if (currentPath == parentPath)
+        {
+            gridView->SelectItem(path);
+        }
+        else
+        {
+            gridView->itemToSelect = path;
+
+            SetCurrentPath(parentPath);
+        }
+    }
+
     void AssetBrowser::CreateNewEmptyDirectory()
     {
         AssetRegistry* registry = AssetRegistry::Get();

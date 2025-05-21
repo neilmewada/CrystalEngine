@@ -128,6 +128,40 @@ namespace CE::Editor
         }
     }
 
+    Array<CE::Name> ObjectEditor::FetchSelectedAssetPaths()
+    {
+        Ref<FWidget> parent = GetParent();
+
+        while (parent != nullptr)
+        {
+            if (parent->IsOfType<EditorBase>())
+            {
+                auto editorBase = (EditorBase*)parent.Get();
+                return editorBase->GetSelectedAssetPaths();
+            }
+
+            parent = parent->GetParent();
+        }
+
+        return {};
+    }
+
+    void ObjectEditor::BrowseToAssetInAssetBrowser(const CE::Name& fullPath)
+    {
+        Ref<FWidget> parent = GetParent();
+
+        while (parent != nullptr)
+        {
+            if (parent->IsOfType<EditorBase>())
+            {
+                auto editorBase = (EditorBase*)parent.Get();
+                editorBase->BrowseToAsset(fullPath);
+            }
+
+            parent = parent->GetParent();
+        }
+    }
+
     void ObjectEditor::CreateGUI()
     {
         // Default ObjectEditor doesn't support multi-object editing yet.

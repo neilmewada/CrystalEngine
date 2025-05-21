@@ -43,6 +43,10 @@ namespace CE::Editor
 
         Ref<EditorHistory> GetEditorHistory() const { return history.Lock(); }
 
+        Array<CE::Name> FetchSelectedAssetPaths();
+
+        void BrowseToAssetInAssetBrowser(const CE::Name& fullPath);
+
     protected:
 
         virtual void CreateGUI();

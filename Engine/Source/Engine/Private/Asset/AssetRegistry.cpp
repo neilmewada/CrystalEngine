@@ -467,6 +467,14 @@ namespace CE
 			cachedDirectoryTree.RemovePath(path);
 			cachedPathTree.RemovePath(path);
 		}
+
+		for (IAssetRegistryListener* listener : listeners)
+		{
+			if (listener != nullptr)
+			{
+				listener->OnAssetPathTreeUpdated(cachedPathTree);
+			}
+		}
 	}
 
 	void AssetRegistry::InitializeCache()
@@ -791,7 +799,7 @@ namespace CE
 			assetManager->UnloadAsset(bundle);
 		}
 
-		cachedPathTree.RemovePath(bundlePath);
+		//cachedPathTree.RemovePath(bundlePath);
 		cachedAssetsByPath.Remove(bundlePath);
 		cachedPrimaryAssetByPath.Remove(bundlePath);
 
@@ -800,7 +808,7 @@ namespace CE
 			if (listener != nullptr)
 			{
 				listener->OnAssetDeleted(bundlePath);
-				listener->OnAssetPathTreeUpdated(cachedPathTree);
+				//listener->OnAssetPathTreeUpdated(cachedPathTree);
 			}
 		}
 	}

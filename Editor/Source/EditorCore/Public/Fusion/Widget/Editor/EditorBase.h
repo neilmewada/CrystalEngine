@@ -36,6 +36,10 @@ namespace CE::Editor
 
         virtual Ref<Object> GetTargetObject() const { return nullptr; }
 
+        virtual Array<CE::Name> GetSelectedAssetPaths() { return {}; }
+
+        virtual void BrowseToAsset(const CE::Name& path) {}
+
         void SetAssetDirty(bool dirty);
 
     protected: // - Internal -

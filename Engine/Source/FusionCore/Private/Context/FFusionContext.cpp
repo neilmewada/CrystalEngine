@@ -526,6 +526,9 @@ namespace CE
 
 		for (int i = localPopupStack.GetSize() - 1; i >= 0; --i)
 		{
+			if (i > localPopupStack.GetSize())
+				continue;
+
 			exposedEvent.Reset();
 			exposedEvent.sender = owningWidget.Get();
 

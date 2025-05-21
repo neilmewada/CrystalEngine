@@ -54,6 +54,18 @@ namespace CE::Editor
         return selection;
     }
 
+    void AssetBrowserGridView::SelectItem(const CE::Name& fullPath)
+    {
+        for (AssetBrowserItem* item : items)
+        {
+            if (item->GetFullPath() == fullPath)
+            {
+                item->Select();
+                return;
+            }
+        }
+    }
+
     void AssetBrowserGridView::OnUpdate()
     {
         QueueDestroyAllChildren();
@@ -64,6 +76,7 @@ namespace CE::Editor
         if (currentDirectory != nullptr)
         {
             AssetBrowserItem* itemToRename = nullptr;
+            AssetBrowserItem* selectedItem = nullptr;
 
             for (int i = 0; i < currentDirectory->children.GetSize(); i++)
             {
@@ -115,6 +128,12 @@ namespace CE::Editor
                 {
                     itemToRename = item;
                 }
+
+                if (itemToSelect.IsValid() && node->GetFullPath() == itemToSelect.GetString())
+                {
+                    selectedItem = item;
+                    itemToSelect = nullptr;
+                }
             }
 
             if (itemToRename != nullptr)
@@ -123,6 +142,11 @@ namespace CE::Editor
                 StartRenaming();
 
                 folderToRename = {};
+            }
+
+            if (selectedItem != nullptr)
+            {
+                selectedItem->Select();
             }
         }
     }

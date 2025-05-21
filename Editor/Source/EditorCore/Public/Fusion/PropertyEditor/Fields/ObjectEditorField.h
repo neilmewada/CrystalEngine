@@ -2,6 +2,7 @@
 
 namespace CE::Editor
 {
+
     CLASS()
     class EDITORCORE_API ObjectEditorField : public EditorField
     {
@@ -25,17 +26,22 @@ namespace CE::Editor
         FUNCTION()
         void OnButtonClicked(FButton* button, Vec2 mousePos);
 
+        void UseSelectedAsset();
+
+        void BrowseToAsset();
+
         void SelectAsset(AssetData* assetData);
 
         void UpdateValue() override;
 
         Ref<FLabel> valueLabel;
-        Ref<FLabel> pathLabel;
 
         WeakRef<Object> curValue;
+        CE::Name curObjectFullPath;
 
     public: // - Fusion Properties - 
 
+        FUSION_PROPERTY(WeakRef<class ObjectEditor>, ObjectEditorOwner);
 
         FUSION_WIDGET;
     };

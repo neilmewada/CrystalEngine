@@ -45,6 +45,7 @@
 #include "Fusion/Style/EditorStyle.h"
 
 #include "Fusion/PropertyEditor/DetailsRow.h"
+
 #include "Fusion/PropertyEditor/Fields/EditorField.h"
 #include "Fusion/PropertyEditor/Fields/EnumEditorField.h"
 #include "Fusion/PropertyEditor/Fields/TextEditorField.h"
@@ -53,10 +54,10 @@
 #include "Fusion/PropertyEditor/Fields/VectorEditorField.h"
 #include "Fusion/PropertyEditor/Fields/ColorEditorField.h"
 #include "Fusion/PropertyEditor/Fields/ColorComponentField.h"
-#include "Fusion/PropertyEditor/Fields/ObjectEditorField.h"
-
 #include "Fusion/PropertyEditor/ObjectEditor.h"
 #include "Fusion/PropertyEditor/ObjectEditorRegistry.h"
+#include "Fusion/PropertyEditor/Fields/ObjectEditorField.h"
+
 #include "Fusion/PropertyEditor/PropertyEditor.h"
 #include "Fusion/PropertyEditor/ArrayPropertyEditor.h"
 #include "Fusion/PropertyEditor/PropertyEditorRegistry.h"

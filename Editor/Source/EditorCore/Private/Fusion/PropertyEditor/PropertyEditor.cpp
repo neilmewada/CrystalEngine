@@ -477,8 +477,10 @@ namespace CE::Editor
         else if (field->IsObjectField())
         {
             // TODO: Object reference editor, check if it is asset or scene-object reference
+
             right->AddChild(
                 FNew(ObjectEditorField)
+                .ObjectEditorOwner(objectEditor)
                 .Assign(editorField)
                 .BindField(target, relativeFieldPath)
                 .History(objectEditor->GetEditorHistory())

@@ -521,13 +521,11 @@ namespace CE::Editor
     		Add("Button.ObjectEditorField", objectEditorField);
     	}
 
-    	objectEditorField->background = Color::RGBA(28, 28, 28);
-    	objectEditorField->hoveredBackground = Color::RGBA(64, 64, 64);
-    	objectEditorField->pressedBackground = highlightColor;
+    	objectEditorField->background = objectEditorField->hoveredBackground = objectEditorField->pressedBackground = Color::RGBA(28, 28, 28);
     	objectEditorField->cornerRadius = Vec4(5, 5, 5, 5);
-    	objectEditorField->contentMoveY = 0;
     	objectEditorField->borderColor = Color::RGBA(60, 60, 60);
     	objectEditorField->hoveredBorderColor = Color::RGBA(74, 74, 74);
+    	objectEditorField->pressedBorderColor = highlightColor;
     	objectEditorField->borderWidth = 1.0f;
     }
 

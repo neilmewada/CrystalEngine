@@ -220,6 +220,16 @@ namespace CE::Editor
         return editor;
     }
 
+    Array<CE::Name> MaterialEditor::GetSelectedAssetPaths()
+    {
+        return assetBrowserTab->GetSelectedAssetPaths();
+    }
+
+    void MaterialEditor::BrowseToAsset(const CE::Name& path)
+    {
+        assetBrowserTab->BrowseToAsset(path);
+    }
+
     void MaterialEditor::SaveMaterialToDisk()
     {
         if (!targetMaterial)

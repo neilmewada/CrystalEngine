@@ -28,6 +28,10 @@ namespace CE::Editor
 
         Ref<Object> GetTargetObject() const override { return targetMaterial; }
 
+        Array<CE::Name> GetSelectedAssetPaths() override;
+
+        void BrowseToAsset(const CE::Name& path) override;
+
     private: // - Internal -
 
         FUNCTION()

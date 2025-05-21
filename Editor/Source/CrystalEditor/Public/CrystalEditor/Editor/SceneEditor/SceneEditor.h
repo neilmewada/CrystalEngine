@@ -20,6 +20,10 @@ namespace CE::Editor
 
         bool CanEdit(Ref<Object> targetObject) const override;
 
+        Array<CE::Name> GetSelectedAssetPaths() override;
+
+        void BrowseToAsset(const CE::Name& path) override;
+
     protected:
 
         SceneEditor();

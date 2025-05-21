@@ -12,6 +12,16 @@ namespace CE::Editor
         return targetObject.IsValid() && targetObject->IsOfType<CE::Scene>();
     }
 
+    Array<CE::Name> SceneEditor::GetSelectedAssetPaths()
+    {
+        return assetBrowser->GetSelectedAssetPaths();
+    }
+
+    void SceneEditor::BrowseToAsset(const CE::Name& path)
+    {
+        assetBrowser->BrowseToAsset(path);
+    }
+
     SceneEditor::SceneEditor()
     {
 
