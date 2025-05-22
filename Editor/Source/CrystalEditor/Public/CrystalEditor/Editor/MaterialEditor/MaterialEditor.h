@@ -32,10 +32,9 @@ namespace CE::Editor
 
         void BrowseToAsset(const CE::Name& path) override;
 
-    private: // - Internal -
+        void SaveChanges() override;
 
-        FUNCTION()
-        void SaveMaterialToDisk();
+    private: // - Internal -
 
         void SetMaterial(Ref<CE::Material> material);
 

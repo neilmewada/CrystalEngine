@@ -57,7 +57,7 @@ namespace CE::Editor
 
         toolBar->Content(
             EditorToolBar::NewImageButton("/Editor/Assets/Icons/Save")
-            .OnClicked(FUNCTION_BINDING(this, SaveMaterialToDisk))
+            .OnClicked(FUNCTION_BINDING(this, SaveChanges))
         );
 
         detailsTab->SetOwnerEditor(this);
@@ -230,8 +230,10 @@ namespace CE::Editor
         assetBrowserTab->BrowseToAsset(path);
     }
 
-    void MaterialEditor::SaveMaterialToDisk()
+    void MaterialEditor::SaveChanges()
     {
+        Super::SaveChanges();
+
         if (!targetMaterial)
             return;
 

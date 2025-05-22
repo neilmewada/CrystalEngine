@@ -53,6 +53,12 @@ namespace CE::Editor
                         
                         event->Consume(this);
                     }
+                    else if (keyEvent->key == KeyCode::S)
+                    {
+                        SaveChanges();
+
+                        event->Consume(this);
+                    }
                 }
             }
         }

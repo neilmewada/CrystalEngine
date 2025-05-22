@@ -42,6 +42,9 @@ namespace CE::Editor
 
         void SetAssetDirty(bool dirty);
 
+        FUNCTION()
+        virtual void SaveChanges() {}
+
     protected: // - Internal -
 
         Ref<EditorHistory> history = nullptr;
