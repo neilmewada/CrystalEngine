@@ -8,7 +8,7 @@ namespace CE::Editor
     class AssetBrowserGridViewModel;
 
 
-    CLASS()
+    CLASS(Prefs = Editor)
     class CRYSTALEDITOR_API AssetBrowser : public EditorMinorDockTab, public IAssetRegistryListener
     {
         CE_CLASS(AssetBrowser, EditorMinorDockTab)
@@ -45,6 +45,9 @@ namespace CE::Editor
         FUNCTION()
         void OnAddButtonClicked();
 
+        FUNCTION()
+        void OnImportButtonClicked();
+
         void UpdateBreadCrumbs();
 
         void UpdateAssetGridView();
@@ -74,6 +77,7 @@ namespace CE::Editor
 
         Ref<FHorizontalStack> searchBarStack;
         Ref<FButton> addButton;
+        Ref<FButton> importButton;
 
         Ref<AssetBrowserGridViewModel> gridViewModel = nullptr;
         Ref<AssetBrowserGridView> gridView;
@@ -85,6 +89,9 @@ namespace CE::Editor
         Ref<FHorizontalStack> breadCrumbsContainer = nullptr;
 
         Array<Ref<FSelectableButton>> selectables;
+
+        FIELD(Prefs)
+        CE::Name defaultAssetImportPath;
 
         FUSION_WIDGET;
         friend class AssetBrowserGridView;

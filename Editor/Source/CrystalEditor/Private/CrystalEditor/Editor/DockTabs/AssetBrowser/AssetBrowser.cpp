@@ -65,6 +65,26 @@ namespace CE::Editor
                         .Padding(Vec4(1, 1, 1, 1) * 3)
                         .Style("Button"),
 
+                        FAssignNew(FButton, importButton)
+                        .OnClicked(FUNCTION_BINDING(this, OnImportButtonClicked))
+                        .Child(
+                            FNew(FHorizontalStack)
+                            .ContentVAlign(VAlign::Center)
+                            .Gap(5)
+                            .HAlign(HAlign::Center)
+                            (
+                                FNew(FImage)
+                                .Background(FBrush("/Editor/Assets/Icons/Import"))
+                                .Width(14)
+                                .Height(14),
+
+                                FNew(FLabel)
+                                .Text("Import")
+                                .FontSize(9)
+                            )
+                        )
+                        .Style("Button.Icon"),
+
                         FAssignNew(FButton, addButton)
                         .OnClicked(FUNCTION_BINDING(this, OnAddButtonClicked))
                         .Child(
@@ -263,6 +283,34 @@ namespace CE::Editor
         Vec2 popupPos = addButton->GetGlobalPosition() + Vec2(0, addButton->GetComputedSize().y);
 
         GetContext()->PushLocalPopup(contextMenu.Get(), popupPos, Vec2(), addButton->GetComputedSize());
+    }
+
+    void AssetBrowser::OnImportButtonClicked()
+    {
+        if (!currentPath.IsValid())
+            return;
+        if (!currentPath.GetString().StartsWith("/Game/Assets"))
+            return;
+
+        Array<EditorPlatformBase::FileType> fileTypes;
+
+        AssetDefinitionRegistry* registry = GetAssetDefinitionRegistry();
+        for (int i = 0; i < registry->GetAssetDefinitionsCount(); ++i)
+        {
+            AssetDefinition* assetDef = registry->GetAssetDefinition(i);
+            fileTypes.Add({
+                .desc = assetDef->GetTypeDisplayName(),
+                .extensions = assetDef->GetSourceExtensions()
+            });
+        }
+
+        IO::Path selectedFile = EditorPlatform::ShowFileSelectionDialog(defaultAssetImportPath.GetString(), fileTypes);
+
+        if (selectedFile.Exists())
+        {
+            defaultAssetImportPath = selectedFile.GetParentPath().GetString();
+            CE_LOG(Info, All, "Selected file: {}", selectedFile.GetString());
+        }
     }
 
     void AssetBrowser::UpdateBreadCrumbs()

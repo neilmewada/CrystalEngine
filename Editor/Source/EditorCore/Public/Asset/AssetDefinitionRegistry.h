@@ -16,6 +16,10 @@ namespace CE::Editor
 		AssetDefinition* FindAssetDefinition(const String& sourceExtension);
 
         AssetDefinition* FindAssetDefinition(const SubClass<Asset>& assetClass);
+
+        int GetAssetDefinitionsCount() { return assetDefinitions.GetSize(); }
+
+        AssetDefinition* GetAssetDefinition(int index) { return assetDefinitions[index]; }
         
     protected:
         
