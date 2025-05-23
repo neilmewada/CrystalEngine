@@ -56,12 +56,17 @@ namespace CE::Editor
 
     void AssetBrowserGridView::SelectItem(const CE::Name& fullPath)
     {
+        CE::Name lastComponent = fullPath.GetLastComponent();
+
         for (AssetBrowserItem* item : items)
         {
-            if (item->GetFullPath() == fullPath)
+            if (item->GetItemName() == lastComponent)
             {
                 item->Select();
-                return;
+            }
+            else
+            {
+                item->Deselect();
             }
         }
     }
@@ -244,8 +249,19 @@ namespace CE::Editor
 	            }
             }),
 
+            NewMenuItem()
+            .Text("Import Asset")
+            .Icon(FBrush("/Editor/Assets/Icons/Import"))
+            .OnClick([this]
+            {
+                if (auto owner = m_Owner.Lock())
+                {
+                    owner->OnImportButtonClicked();
+                }
+            }),
+
             FNew(FMenuItemSeparator)
-            .Title("BASIC ASSETS"),
+            .Title("NEW"),
 
             NewMenuItem()
             .Text("Material")

@@ -65,26 +65,6 @@ namespace CE::Editor
                         .Padding(Vec4(1, 1, 1, 1) * 3)
                         .Style("Button"),
 
-                        FAssignNew(FButton, importButton)
-                        .OnClicked(FUNCTION_BINDING(this, OnImportButtonClicked))
-                        .Child(
-                            FNew(FHorizontalStack)
-                            .ContentVAlign(VAlign::Center)
-                            .Gap(5)
-                            .HAlign(HAlign::Center)
-                            (
-                                FNew(FImage)
-                                .Background(FBrush("/Editor/Assets/Icons/Import"))
-                                .Width(14)
-                                .Height(14),
-
-                                FNew(FLabel)
-                                .Text("Import")
-                                .FontSize(9)
-                            )
-                        )
-                        .Style("Button.Icon"),
-
                         FAssignNew(FButton, addButton)
                         .OnClicked(FUNCTION_BINDING(this, OnAddButtonClicked))
                         .Child(
@@ -294,15 +274,23 @@ namespace CE::Editor
 
         Array<EditorPlatformBase::FileType> fileTypes;
 
+        Array<String> allExtensions;
+
         AssetDefinitionRegistry* registry = GetAssetDefinitionRegistry();
         for (int i = 0; i < registry->GetAssetDefinitionsCount(); ++i)
         {
             AssetDefinition* assetDef = registry->GetAssetDefinition(i);
+            allExtensions.AddRange(assetDef->GetSourceExtensions());
             fileTypes.Add({
                 .desc = assetDef->GetTypeDisplayName(),
                 .extensions = assetDef->GetSourceExtensions()
             });
         }
+
+        fileTypes.InsertAt(0, {
+            .desc = "All Files",
+            .extensions = allExtensions
+        });
 
         IO::Path selectedFile = EditorPlatform::ShowFileSelectionDialog(defaultAssetImportPath.GetString(), fileTypes);
 
@@ -363,6 +351,15 @@ namespace CE::Editor
 
     void AssetBrowser::UpdateAssetGridView()
     {
+        if (currentPath.GetString().StartsWith("/Game/Assets"))
+        {
+            addButton->SetInteractionEnabled(true);
+        }
+        else
+        {
+            addButton->SetInteractionEnabled(false);
+        }
+
         gridView->SetCurrentDirectory(currentPath);
 
         gridView->OnUpdate();

@@ -26,7 +26,9 @@ namespace CE::Editor
 
         void StartEditing();
 
-        CE::Name GetFullPath() const { return fullPath; }
+        const CE::Name& GetFullPath() const { return fullPath; }
+
+        const CE::Name& GetItemName() const { return itemName; }
 
         bool IsDirectory() const { return isDirectory; }
 

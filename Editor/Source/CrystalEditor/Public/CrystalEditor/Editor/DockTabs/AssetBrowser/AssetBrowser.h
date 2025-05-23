@@ -77,7 +77,6 @@ namespace CE::Editor
 
         Ref<FHorizontalStack> searchBarStack;
         Ref<FButton> addButton;
-        Ref<FButton> importButton;
 
         Ref<AssetBrowserGridViewModel> gridViewModel = nullptr;
         Ref<AssetBrowserGridView> gridView;
