@@ -492,6 +492,9 @@ namespace CE::Editor
 
     void PropertyEditor::UpdateTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath)
     {
+        if (!editorField)
+            return;
+
         Ref<Object> target;
 
         for (const auto& object : targets)
@@ -510,7 +513,7 @@ namespace CE::Editor
         bool foundField = target->GetClass()->FindFieldInstanceRelative(relativeFieldPath, target,
             field, outObject, outInstance);
 
-        if (!foundField)
+        if (foundField)
         {
             editorField->targets = targets;
             editorField->relativeFieldPath = relativeFieldPath;
