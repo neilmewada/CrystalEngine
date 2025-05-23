@@ -125,6 +125,20 @@ namespace CE
 
         Ref<Bundle> bundle = nullptr;
 
+        if (loadArgs.loadTemporary)
+        {
+            Internal::ObjectCreateParams params{ Bundle::Type() };
+            params.name = bundleName;
+            params.uuid = bundleUuid;
+            params.templateObject = nullptr;
+            params.objectFlags = OF_NoFlags;
+            params.outer = outer.Get();
+
+            bundle = (Bundle*)Internal::CreateObjectInternal(params);
+            bundle->isFullyLoaded = false;
+            bundle->isLoadedFromDisk = true;
+        }
+        else
         {
             LockGuard lock{ bundleRegistryMutex };
 
@@ -307,7 +321,7 @@ namespace CE
 
         if (loadArgs.destroyOutdatedObjects)
         {
-	        // TODO: Implement this logic later
+	        // TODO: Test this logic
             // Destroy objects that are no longer present in the bundle
 
             Array<Ref<Object>> objectsToDelete;
@@ -368,7 +382,8 @@ namespace CE
 
             if (object.IsNull())
             {
-                const auto& schema = schemaTable[serializedObjectsByUuid[objectUuid].schemaIndex];
+                int schemaIndex = serializedObjectsByUuid[objectUuid].schemaIndex;
+                const auto& schema = schemaTable[schemaIndex];
 
                 ClassType* clazz = ClassType::FindClass(schema.fullTypeName);
                 if (clazz != nullptr)
@@ -400,8 +415,6 @@ namespace CE
 
             u64 serializedDataSize = 0;
             *stream >> serializedDataSize;
-
-            const auto& schema = schemaTable[serializedObject.schemaIndex];
 
             ObjectSerializer deserializer{ this, object.Get(), serializedObject.schemaIndex };
 

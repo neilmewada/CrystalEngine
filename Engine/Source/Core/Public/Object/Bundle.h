@@ -39,6 +39,10 @@ namespace CE
 
     struct LoadBundleArgs
     {
+        //! @brief Loads the bundle as a "temporary" one. Useful for when loading a duplicate of a bundle when
+        //! importing an Asset which will then be destroyed immediately after the import.
+        bool loadTemporary = false;
+
         bool loadFully = true;
 
         //! @brief If the bundle should forcefully be deserialized even if it is already fully loaded.
