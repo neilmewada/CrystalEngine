@@ -273,15 +273,16 @@ namespace CE::Editor
 		Ref<Bundle> bundle = nullptr;
     	Ref<Object> transient = CreateObject<Object>(nullptr, "Transient", OF_Transient);
 
-    	LoadBundleArgs args{
-    		.loadFully = true
-    	};
-
     	rootNode.Clear();
 
 		if (productPath.Exists())
 		{
-			//AssetManager::Get()->LoadAssetAtPath()
+			LoadBundleArgs args{
+				.loadFully = true,
+				.forceReload = false,
+				.destroyOutdatedObjects = true
+			};
+
 			bundle = Bundle::LoadBundleAbsolute(transient, productPath, args);
 
 			if (bundle == nullptr)
@@ -318,8 +319,8 @@ namespace CE::Editor
 
 		if (!isGameAsset)
 		{
-			// Non-game assets (i.e. Non-user assets) must have a fixed UUID based on their path.
-			// Because they are generated locally on user's PC when the engine is built.
+			// Non-game assets (i.e., Non-user assets) must have a fixed UUID based on their path.
+			// Because they are generated locally on each user's PC when the engine is built.
 			// So we need to make sure that anyone who builds the engine has the same UUID for engine & editor assets.
 
 			HashMap<Name, int> objectPathNameCounter{};
@@ -360,7 +361,13 @@ namespace CE::Editor
 		}
 
 		auto saveResult = Bundle::SaveToDisk(bundle, nullptr, productPath);
-		bundle->BeginDestroy();
+
+    	// If this job created the bundle
+    	if (bundle->GetOuter() == transient)
+    	{
+    		bundle->BeginDestroy();
+    		bundle = nullptr;
+    	}
 
 		if (saveResult != BundleSaveResult::Success)
 		{

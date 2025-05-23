@@ -86,6 +86,8 @@ namespace CE
 		}
 		else
 		{
+			loadedAssetsMutex.Unlock();
+
 			LoadBundleArgs args{
 				.loadFully = true,
 				.forceReload = false
@@ -95,9 +97,10 @@ namespace CE
 
 			if (bundle == nullptr)
 			{
-				loadedAssetsMutex.Unlock();
 				return {};
 			}
+
+			loadedAssetsMutex.Lock();
 			loadedAssetsByPath[path] = bundle;
 			loadedAssetsByUuid[bundle->GetUuid()] = bundle;
 			loadedAssetsMutex.Unlock();

@@ -109,11 +109,6 @@ namespace CE
         String bundleName = "";
         *stream >> bundleName;
 
-        if (bundleName == "albedo")
-        {
-            String::IsAlphabet('a');
-        }
-
         u32 numBundleDependencies = 0;
         *stream >> numBundleDependencies;
         Array<Uuid> externalBundleUuids;
@@ -1402,6 +1397,12 @@ namespace CE
 
         Ref<Bundle> referencedBundle = nullptr;
 
+        if (bundleUuid == bundle->GetUuid())
+        {
+            // If the referenced object is in the same bundle as current object
+            referencedBundle = bundle;
+        }
+        else
         {
             LockGuard lock{ Bundle::bundleRegistryMutex };
 
