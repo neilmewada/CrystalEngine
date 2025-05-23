@@ -157,33 +157,33 @@ namespace CE::IO
             return os;
         }
 
-        inline static bool CreateDirectories(IO::Path path)
+        inline static bool CreateDirectories(const Path& path)
         {
             return fs::create_directories(path.impl);
         }
 
-        inline static void Copy(IO::Path from, IO::Path to)
+        inline static void Copy(const Path& from, const Path& to)
         {
             fs::copy(from.impl, to.impl, fs::copy_options::recursive);
         }
         
-        inline static bool Remove(IO::Path path)
+        inline static bool Remove(const Path& path)
         {
             return fs::remove(path.impl);
         }
         
-        inline static u32 RemoveRecursively(IO::Path path)
+        inline static u32 RemoveRecursively(const Path& path)
         {
             return fs::remove_all(path.impl);
         }
 
-        inline static void Rename(const IO::Path& from, const IO::Path& to)
+        inline static void Rename(const Path& from, const Path& to)
         {
             fs::rename(from.impl, to.impl);
         }
 
-        void IterateChildren(std::function<void(const IO::Path& path)> func);
-        void RecursivelyIterateChildren(std::function<void(const IO::Path& path)> func);
+        void IterateChildren(std::function<void(const Path& path)> func);
+        void RecursivelyIterateChildren(std::function<void(const Path& path)> func);
 
         auto begin() { return impl.begin(); }
         auto end() { return impl.end(); }

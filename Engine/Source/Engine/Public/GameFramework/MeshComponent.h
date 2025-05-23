@@ -11,7 +11,7 @@ namespace CE
     public:
 
         //! @brief Materials per sub-mesh.
-        FIELD()
+        FIELD(EditAnywhere)
         Array<Ref<MaterialInterface>> materials{};
     };
 

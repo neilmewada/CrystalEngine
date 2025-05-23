@@ -3,7 +3,7 @@
 namespace CE
 {
     CLASS()
-    class EDITORCORE_API AssetProcessor : public Object
+    class EDITORENGINE_API AssetProcessor : public Object
     {
         CE_CLASS(AssetProcessor, Object)
     protected:
@@ -24,13 +24,18 @@ namespace CE
 
         void Initialize();
 
-        void RunOnce();
+        void RunAll();
 
     protected:
 
         bool inProgress = false;
 
         IO::Path scanPath;
+        IO::Path tempPath;
+
+        Array<IO::Path> allSourceAssetPaths{};
+        Array<IO::Path> allProductAssetPaths{};
+
         bool validScanPath = false;
 
     };

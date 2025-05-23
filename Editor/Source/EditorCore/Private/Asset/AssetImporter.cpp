@@ -281,6 +281,7 @@ namespace CE::Editor
 
 		if (productPath.Exists())
 		{
+			//AssetManager::Get()->LoadAssetAtPath()
 			bundle = Bundle::LoadBundleAbsolute(transient, productPath, args);
 
 			if (bundle == nullptr)

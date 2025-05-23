@@ -1,55 +1,39 @@
 #include "CrystalEditor.h"
 
-namespace CE
+namespace CE::Editor
 {
-    class CrystalEditorModule : public CE::Module
-    {
-    public:
-        virtual void StartupModule() override
-        {
-			onClassReg = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(MemberDelegate(&CrystalEditorModule::OnClassRegistered, this));
-			onClassDereg = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(MemberDelegate(&CrystalEditorModule::OnClassDeregistered, this));
+	static CrystalEditorModule* instance = nullptr;
 
-        	AssetEditorRegistry::Get()->RegisterEditor(CE::Scene::StaticClass(), SceneEditor::StaticClass());
-        	AssetEditorRegistry::Get()->RegisterEditor(CE::Material::StaticClass(), MaterialEditor::StaticClass());
-        	AssetEditorRegistry::Get()->RegisterEditor(CE::ProjectSettings::StaticClass(), ProjectSettingsEditor::StaticClass());
-        }
+	CrystalEditorModule* CrystalEditorModule::Get()
+	{
+		return instance;
+	}
 
-        virtual void ShutdownModule() override
-        {
-        	AssetEditorRegistry::Get()->DeregisterEditor(CE::Scene::StaticClass());
-        	AssetEditorRegistry::Get()->DeregisterEditor(CE::Material::StaticClass());
-        	AssetEditorRegistry::Get()->DeregisterEditor(CE::ProjectSettings::StaticClass());
+	void CrystalEditorModule::StartupModule()
+	{
+		instance = this;
 
-			CoreObjectDelegates::onClassRegistered.RemoveDelegateInstance(onClassReg);
-			CoreObjectDelegates::onClassDeregistered.RemoveDelegateInstance(onClassDereg);
-        }
+		AssetEditorRegistry::Get()->RegisterEditor(CE::Scene::StaticClass(), SceneEditor::StaticClass());
+		AssetEditorRegistry::Get()->RegisterEditor(CE::Material::StaticClass(), MaterialEditor::StaticClass());
+		AssetEditorRegistry::Get()->RegisterEditor(CE::ProjectSettings::StaticClass(), ProjectSettingsEditor::StaticClass());
 
-        virtual void RegisterTypes() override
-        {
+		assetProcessor = CreateObject<AssetProcessor>(GetTransient(MODULE_NAME), "AssetProcessor");
+	}
 
-        }
+	void CrystalEditorModule::ShutdownModule()
+	{
+		instance = nullptr;
 
-		void OnClassRegistered(ClassType* classType)
-		{
-			if (classType == nullptr)
-				return;
+		assetProcessor->BeginDestroy();
+		assetProcessor = nullptr;
 
+		AssetEditorRegistry::Get()->DeregisterEditor(CE::Scene::StaticClass());
+		AssetEditorRegistry::Get()->DeregisterEditor(CE::Material::StaticClass());
+		AssetEditorRegistry::Get()->DeregisterEditor(CE::ProjectSettings::StaticClass());
+	}
 
-		}
-
-		void OnClassDeregistered(ClassType* classType)
-		{
-			if (classType == nullptr)
-				return;
-
-		}
-
-		DelegateHandle onClassReg = 0;
-		DelegateHandle onClassDereg = 0;
-    };
 }
 
 #include "CrystalEditor.private.h"
 
-CE_IMPLEMENT_MODULE(CrystalEditor, CE::CrystalEditorModule)
+CE_IMPLEMENT_MODULE(CrystalEditor, CE::Editor::CrystalEditorModule)

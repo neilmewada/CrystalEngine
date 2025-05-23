@@ -73,3 +73,23 @@
 // - Crystal Editor Window -
 
 #include "CrystalEditor/CrystalEditorWindow.h"
+
+namespace CE::Editor
+{
+    class CrystalEditorModule : public CE::Module
+    {
+    public:
+
+        static CrystalEditorModule* Get();
+
+        void StartupModule() override;
+
+        void ShutdownModule() override;
+
+        Ref<AssetProcessor> GetAssetProcessor() const { return assetProcessor; }
+
+    private:
+        Ref<AssetProcessor> assetProcessor;
+
+    };
+}

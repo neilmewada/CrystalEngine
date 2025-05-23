@@ -24,6 +24,8 @@ namespace CE
 
 		AssetData* GetPrimaryAssetDataAtPath(const Name& path);
 		Array<AssetData*> GetAssetsDataAtPath(const Name& path);
+
+		Ref<Bundle> LoadAssetBundleAtPath(const Name& path);
 		
 		Ref<Asset> LoadAssetAtPath(const Name& path);
 

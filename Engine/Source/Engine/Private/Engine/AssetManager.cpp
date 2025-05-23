@@ -72,6 +72,40 @@ namespace CE
 		return assetRegistry->GetAssetsByPath(path);
 	}
 
+	Ref<Bundle> AssetManager::LoadAssetBundleAtPath(const Name& path)
+	{
+		ZoneScoped;
+
+		Ref<Bundle> bundle = nullptr;
+
+		loadedAssetsMutex.Lock();
+		if (loadedAssetsByPath.KeyExists(path) && loadedAssetsByPath[path] != nullptr)
+		{
+			bundle = loadedAssetsByPath[path];
+			loadedAssetsMutex.Unlock();
+		}
+		else
+		{
+			LoadBundleArgs args{
+				.loadFully = true,
+				.forceReload = false
+			};
+
+			bundle = Bundle::LoadBundle(this, path, args);
+
+			if (bundle == nullptr)
+			{
+				loadedAssetsMutex.Unlock();
+				return {};
+			}
+			loadedAssetsByPath[path] = bundle;
+			loadedAssetsByUuid[bundle->GetUuid()] = bundle;
+			loadedAssetsMutex.Unlock();
+		}
+
+		return bundle;
+	}
+
 	Array<Ref<Asset>> AssetManager::LoadAssetsAtPath(const Name& path, SubClass<Asset> classType)
 	{
 		ZoneScoped;
