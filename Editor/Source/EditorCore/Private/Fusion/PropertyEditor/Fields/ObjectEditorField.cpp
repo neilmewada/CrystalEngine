@@ -267,7 +267,7 @@ namespace CE::Editor
             }
         }
 
-        curValue = initialValue;
+        curValue = asset;
     }
 
     void ObjectEditorField::UpdateValue()

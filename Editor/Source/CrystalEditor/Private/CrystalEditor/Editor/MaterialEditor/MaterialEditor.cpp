@@ -160,6 +160,8 @@ namespace CE::Editor
         if (!materialBundle || materialBundle->GetUuid() != bundleUuid)
             return;
 
+        viewportTab->QueueDestroy();
+
         QueueDestroy();
         materialBundle = nullptr;
     }

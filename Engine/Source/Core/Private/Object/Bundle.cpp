@@ -35,6 +35,7 @@ namespace CE
     {
 	    Super::OnBeginDestroy();
 
+        if (!HasAnyObjectFlags(OF_TemporaryBundleInstance)) // If NOT a temporary bundle instance
 	    {
 		    LockGuard lock{ bundleRegistryMutex };
 	    	loadedBundlesByUuid.Remove(GetUuid());
