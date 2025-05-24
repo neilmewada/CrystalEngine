@@ -297,7 +297,21 @@ namespace CE::Editor
         if (selectedFile.Exists())
         {
             defaultAssetImportPath = selectedFile.GetParentPath().GetString();
-            CE_LOG(Info, All, "Selected file: {}", selectedFile.GetString());
+
+            IO::Path importedSourceAssetPath;
+
+            if (currentPath == "/")
+            {
+                importedSourceAssetPath = gProjectPath / selectedFile.GetFileName();
+            }
+            else // Ex: currentPath == "/Game/Assets"
+            {
+                importedSourceAssetPath = gProjectPath / currentPath.GetString().GetSubstring(1) / selectedFile.GetFileName();
+            }
+
+            IO::Path::Copy(selectedFile, importedSourceAssetPath);
+
+            ReimportAsset(importedSourceAssetPath);
         }
     }
 
@@ -404,6 +418,16 @@ namespace CE::Editor
 
             SetCurrentPath(parentPath);
         }
+    }
+
+    void AssetBrowser::ImportExternalAsset(const IO::Path& absolutePath)
+    {
+
+    }
+
+    void AssetBrowser::ReimportAsset(const IO::Path& absoluteSourcePath)
+    {
+
     }
 
     void AssetBrowser::CreateNewEmptyDirectory()

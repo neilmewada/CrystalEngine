@@ -80,13 +80,17 @@ namespace CE
 		std::recursive_mutex mut{};
 	};
 
-	class SharedRecursiveMutex
+	class CORE_API SharedRecursiveMutex
     {
     public:
 
         SharedRecursiveMutex() :
             m_mtx{}, m_exclusive_thread_id{}, m_exclusive_count{ 0 }, m_shared_locks{}
         {}
+
+	    void lock() { Lock(); }
+	    void unlock() { Unlock(); }
+	    bool try_lock() { return TryLock(); }
 
         void Lock();
         bool TryLock();

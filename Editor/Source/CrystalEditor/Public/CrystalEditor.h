@@ -76,7 +76,7 @@
 
 namespace CE::Editor
 {
-    class CrystalEditorModule : public CE::Module
+    class CRYSTALEDITOR_API CrystalEditorModule : public CE::Module
     {
     public:
 

@@ -33,8 +33,6 @@ namespace CE::Editor
         model = CreateObject<AssetSelectionListViewModel>(this, "Model");
 
         constexpr f32 gap = 6;
-        //container->Gap(gap);
-        //container->Padding(Vec4(1, 1, 1, 1) * gap);
 
         Content(
             FNew(FMenuItemSeparator)
@@ -145,7 +143,7 @@ namespace CE::Editor
     {
         if (event->IsKeyEvent())
         {
-            FKeyEvent* keyEvent = static_cast<FKeyEvent*>(event);
+            auto keyEvent = static_cast<FKeyEvent*>(event);
 
             if (event->type == FEventType::KeyPress && keyEvent->key == KeyCode::Escape)
             {

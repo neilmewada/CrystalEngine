@@ -24,14 +24,19 @@ namespace CE
 
         void Initialize();
 
+        void Shutdown();
+
         void RunAll();
 
     protected:
 
         bool inProgress = false;
 
+        IO::Path inputRoot;
         IO::Path scanPath;
         IO::Path tempPath;
+
+        Array<IO::Path> includePaths;
 
         Array<IO::Path> allSourceAssetPaths{};
         Array<IO::Path> allProductAssetPaths{};

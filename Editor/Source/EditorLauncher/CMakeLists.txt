@@ -28,6 +28,7 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
             Config 
             EngineAssets 
             EditorAssets
+            EngineShaders
     RUNTIME_DEPENDENCIES
 
 )

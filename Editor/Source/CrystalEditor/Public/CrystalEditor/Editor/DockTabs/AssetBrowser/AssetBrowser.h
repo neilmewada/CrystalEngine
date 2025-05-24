@@ -34,7 +34,11 @@ namespace CE::Editor
 
         void BrowseToAsset(const CE::Name& path);
 
+        void ImportExternalAsset(const IO::Path& absolutePath);
+
     protected: // - Internal -
+
+        void ReimportAsset(const IO::Path& absoluteSourcePath);
 
         FUNCTION()
         void OnDirectorySelectionChanged(FItemSelectionModel* selectionModel);

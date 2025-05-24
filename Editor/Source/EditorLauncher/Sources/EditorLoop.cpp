@@ -191,6 +191,9 @@ void EditorLoop::PostInit()
 
 	gEngine->PostInitialize();
 
+	Ref<AssetProcessor> assetProcessor = CrystalEditorModule::Get()->GetAssetProcessor();
+	assetProcessor->Initialize();
+
 	AssetManager* assetManager = AssetManager::Get();
 
 	Ref<CE::Shader> standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
@@ -330,6 +333,9 @@ void EditorLoop::PreShutdown()
 
 	fApp->Shutdown();
 	fApp->BeginDestroy();
+
+	Ref<AssetProcessor> assetProcessor = CrystalEditorModule::Get()->GetAssetProcessor();
+	assetProcessor->Shutdown();
 
 	gEngine->PreShutdown();
 
