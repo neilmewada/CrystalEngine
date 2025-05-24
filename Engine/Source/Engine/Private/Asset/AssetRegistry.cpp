@@ -120,6 +120,7 @@ namespace CE
 	void AssetRegistry::OnAssetImported(const IO::Path& bundleAbsolutePath, const Name& sourcePath)
 	{
 		LoadBundleArgs args{
+			.loadTemporary = true,
 			.loadFully = false,
 			.forceReload = false,
 			.destroyOutdatedObjects = false
@@ -174,7 +175,7 @@ namespace CE
 			newEntry = true;
 		}
 
-		String sourceAssetRelativePath = "";
+		String sourceAssetRelativePath = sourcePath.GetString();
 		Bundle::ObjectData primaryObjectData = load->GetPrimaryObjectData();
 
 		Name primaryName = primaryObjectData.name;
@@ -187,9 +188,7 @@ namespace CE
 		assetData->assetUuid = primaryObjectData.uuid;
 		
 #if PAL_TRAIT_BUILD_EDITOR
-		// Source asset path relative to project assets directory
-		// TODO: Add source asset path
-		//sourceAssetRelativePath = load->GetPrimarySourceAssetRelativePath();
+		// Source asset path relative in project
 		assetData->sourceAssetPath = sourceAssetRelativePath;
 #endif
 		

@@ -278,6 +278,7 @@ namespace CE::Editor
 		if (productPath.Exists())
 		{
 			LoadBundleArgs args{
+				.loadTemporary = true,
 				.loadFully = true,
 				.forceReload = false,
 				.destroyOutdatedObjects = true

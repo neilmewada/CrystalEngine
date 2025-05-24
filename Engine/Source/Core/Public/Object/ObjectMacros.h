@@ -18,7 +18,9 @@ namespace CE
 		// Internal flag!
 		OF_InsideConstructor = BIT(5),
 		// Internal flag!
-		OF_PendingDestroy = BIT(6)
+		OF_PendingDestroy = BIT(6),
+		// Internal flag!
+		OF_TemporaryBundleInstance = BIT(7),
 	};
 	ENUM_CLASS_FLAGS(ObjectFlags);
 

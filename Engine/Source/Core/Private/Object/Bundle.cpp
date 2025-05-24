@@ -19,6 +19,7 @@ namespace CE
     {
         Super::OnAfterConstruct();
 
+        if (!HasAnyObjectFlags(OF_TemporaryBundleInstance)) // If NOT a temporary bundle instance
 	    {
 		    LockGuard lock{ bundleRegistryMutex };
         	loadedBundlesByUuid[GetUuid()] = this;

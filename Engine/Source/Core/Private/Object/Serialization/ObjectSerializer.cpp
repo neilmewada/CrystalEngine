@@ -131,7 +131,7 @@ namespace CE
             params.name = bundleName;
             params.uuid = bundleUuid;
             params.templateObject = nullptr;
-            params.objectFlags = OF_NoFlags;
+            params.objectFlags = OF_TemporaryBundleInstance;
             params.outer = outer.Get();
 
             bundle = (Bundle*)Internal::CreateObjectInternal(params);
