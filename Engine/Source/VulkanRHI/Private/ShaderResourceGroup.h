@@ -132,7 +132,6 @@ namespace CE::Vulkan
 		bool needsRecompile = true;
 
 		VulkanDevice* device = nullptr;
-		ShaderResourceManager* srgManager = nullptr;
 		DescriptorPool* pool = nullptr;
 		VkDescriptorPool allocPool = nullptr;
 

@@ -32,7 +32,7 @@ function(ce_add_shaders NAME)
 
     add_custom_target(${NAME}
         DEPENDS ${DEST_SHADERBIN_FILES}
-        SOURCES ${ce_add_shaders_SOURCES}
+        #SOURCES ${ce_add_shaders_SOURCES}
         VERBATIM
     )
 

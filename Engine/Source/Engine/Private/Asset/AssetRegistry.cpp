@@ -31,7 +31,7 @@ namespace CE
 
 	void AssetRegistry::Shutdown()
 	{
-		
+		Bundle::PopBundleResolver(this);
 	}
 
 	AssetRegistry* AssetRegistry::Get()
@@ -103,7 +103,7 @@ namespace CE
 		AssetData* assetData = cachedPrimaryAssetByBundleUuid[bundleUuid];
 		if (assetData == nullptr)
 			return Name();
-		return assetData->bundleName;
+		return assetData->bundlePath;
 	}
 
 	void AssetRegistry::AddRegistryListener(IAssetRegistryListener* listener)
@@ -480,6 +480,8 @@ namespace CE
 	{
 		if (cacheInitialized)
 			return;
+
+		Bundle::PushBundleResolver(this);
 
 		// Clear the path tree
 		cachedPathTree.RemoveAll();

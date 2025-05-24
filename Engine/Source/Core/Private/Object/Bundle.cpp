@@ -371,7 +371,7 @@ namespace CE
 
             if (loadedObjectsByUuid.KeyExists(objectUuid))
             {
-                if (Ref<Object> object = loadedObjectsByUuid[objectUuid].Lock())
+                if (Ref<Object> object = loadedObjectsByUuid[objectUuid].Get())
                 {
                     return object;
                 }
@@ -414,7 +414,7 @@ namespace CE
 
             for (const auto& [_, objectRef] : loadedObjectsByUuid)
             {
-                if (Ref<Object> object = objectRef.Lock())
+                if (Ref<Object> object = objectRef.Get())
                 {
                     if (object->GetPathInBundle(this) == pathInBundle)
                     {
@@ -453,7 +453,7 @@ namespace CE
 
             for (const auto& [_, objectRef] : loadedObjectsByUuid)
             {
-	            if (Ref<Object> object = objectRef.Lock())
+	            if (Ref<Object> object = objectRef.Get())
 	            {
 		            if (object->GetClass() == objectClass)
 		            {

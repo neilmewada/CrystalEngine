@@ -104,7 +104,12 @@ namespace CE::Editor
                             FNew(FMenuPopup)
                             .Content(
                                 FNew(FMenuItem)
-                                .Text("Option 1"),
+                                .Text("Option 1")
+                                .OnClick([this]
+                                {
+                                	Ref<CE::Texture2D> texture = AssetManager::Get()->LoadAssetAtPath<CE::Texture2D>("/Game/Assets/Textures/fancy_scaled_gold_albedo");
+                                    String::IsAlphabet('a');
+                                }),
 
                                 FNew(FMenuItem)
                                 .Text("Option 2")

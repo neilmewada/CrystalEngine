@@ -258,7 +258,7 @@ namespace CE::Vulkan
     {
 		this->srgType = srgLayout.srgType;
 		this->srgLayout = srgLayout;
-		this->srgManager = device->GetShaderResourceManager();
+		auto srgManager = device->GetShaderResourceManager();
 		pool = device->GetDescriptorPool();
 		setNumber = srgManager->GetDescriptorSetNumber(srgType);
 
@@ -344,7 +344,11 @@ namespace CE::Vulkan
 		vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, VULKAN_CPU_ALLOCATOR);
 		setLayout = nullptr;
 
-		srgManager->OnSRGDestroyed(this);
+		if (ShaderResourceManager* srgManager = device->GetShaderResourceManager())
+		{
+			srgManager->OnSRGDestroyed(this);
+		}
+		
 		QueueDestroy();
 	}
 
@@ -364,7 +368,6 @@ namespace CE::Vulkan
 	ShaderResourceGroup::ShaderResourceGroup(VulkanDevice* device)
 		: device(device)
 	{
-		this->srgManager = device->GetShaderResourceManager();
 		pool = device->GetDescriptorPool();
 	}
 
@@ -927,6 +930,10 @@ namespace CE::Vulkan
 
 	void ShaderResourceGroup::QueueDestroy()
 	{
+		auto srgManager = device->GetShaderResourceManager();
+		if (!srgManager)
+			return;
+
 		for (int i = 0; i < descriptorSets.GetSize(); i++)
 		{
 			srgManager->QueueDestroy(descriptorSets[i]);

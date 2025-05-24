@@ -377,7 +377,7 @@ namespace CE
 
             if (loadedObjectsByUuid.KeyExists(objectUuid))
             {
-                object = loadedObjectsByUuid[objectUuid].Lock();
+                object = loadedObjectsByUuid[objectUuid].Get();
             }
 
             if (object.IsNull())
@@ -849,6 +849,11 @@ namespace CE
         if (field != nullptr)
         {
             fieldTypeId = field->GetTypeId();
+
+            if (field->GetName() == "texture" && field->IsWeakRefCounted() && target != nullptr)
+            {
+                String::IsAlphabet('a');
+            }
         }
 
         u64 unsignedInteger = 0;
@@ -1431,11 +1436,12 @@ namespace CE
         }
 
         LoadBundleArgs loadArgs{
-            .loadFully = false,
+            .loadFully = true,
             .forceReload = false,
             .destroyOutdatedObjects = true
         };
 
+        // TODO: Why are we adding the new object to this bundle's parent?
         Ref<Object> outer = bundle->GetOuter().Lock();
 
         referencedBundle = Bundle::LoadBundle(outer, bundleUuid, loadArgs);
@@ -1459,6 +1465,13 @@ namespace CE
 
         if (field->IsObjectField())
         {
+            if (field->GetName() == "texture" && field->IsWeakRefCounted())
+            {
+                Ref<Object> obj = field->GetFieldValue<WeakRef<Object>>(instance).Lock();
+
+                String::IsAlphabet('a');
+            }
+
             Object* object = nullptr;
 	        if (field->IsStrongRefCounted())
 	        {

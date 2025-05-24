@@ -15,6 +15,8 @@ namespace CE::Vulkan
 		int i = 0;
 		combinedSRGs.Resize(srgCount);
 
+		auto srgManager = device->GetShaderResourceManager();
+
 		for (int j = 0; j < RHI::Limits::MaxSwapChainImageCount; j++)
 		{
 			for (int i = 0; i < srgCount; i++)
@@ -71,8 +73,10 @@ namespace CE::Vulkan
 
     MergedShaderResourceGroup::~MergedShaderResourceGroup()
     {
-		// Remove this SRG from SRGManager
-		srgManager->RemoveMergedSRG(this);
+	    if (ShaderResourceManager* srgManager = device->GetShaderResourceManager())
+		{
+			srgManager->RemoveMergedSRG(this);
+		}
     }
 
 } // namespace CE::Vulkan
