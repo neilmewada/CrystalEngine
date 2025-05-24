@@ -4,7 +4,7 @@ namespace CE::Editor
 {
 
     CLASS()
-    class EDITORCORE_API ObjectEditorField : public EditorField
+    class EDITORCORE_API ObjectEditorField : public EditorField, IAssetRegistryListener
     {
         CE_CLASS(ObjectEditorField, EditorField)
     protected:
@@ -12,6 +12,16 @@ namespace CE::Editor
         ObjectEditorField();
 
         void Construct() override;
+
+        void OnBind() override;
+
+        void OnBeginDestroy() override;
+
+        void OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName) override;
+
+        void OnAssetDeleted(const CE::Name& bundlePath) override;
+
+        void OnDirectoryRenamed(const CE::Name& oldPath, const CE::Name& newPath) override;
 
     public: // - Public API -
 
@@ -35,6 +45,9 @@ namespace CE::Editor
         void UpdateValue() override;
 
         Ref<FLabel> valueLabel;
+
+
+        bool registered = false;
 
         WeakRef<Object> curValue;
         CE::Name curObjectFullPath;

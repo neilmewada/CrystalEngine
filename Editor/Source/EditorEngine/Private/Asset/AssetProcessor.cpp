@@ -93,6 +93,10 @@ namespace CE
             DateTime lastWriteTime = path.GetLastWriteTime();
 
             IO::Path relativePath = IO::Path::GetRelative(path, inputRoot);
+            String relativePathStr = relativePath.GetString().Replace({ '\\' }, '/');
+            if (relativePathStr.NotEmpty() && relativePathStr[0] != '/')
+                relativePathStr.InsertAt('/', 0);
+
             IO::Path stampFilePath = tempPath / relativePath.ReplaceExtension(".stamp");
 
             if (!stampFilePath.GetParentPath().Exists())
@@ -101,6 +105,13 @@ namespace CE
             }
 
             IO::Path productPath = path.ReplaceExtension(".casset");
+
+            AssetData* productAssetData = AssetRegistry::Get()->GetAssetBySourcePath(relativePathStr);
+
+            if (productAssetData != nullptr)
+            {
+                productPath = Bundle::GetAbsoluteBundlePath(productAssetData->bundlePath);
+            }
 
             if (!stampFilePath.Exists() || !productPath.Exists())
             {
@@ -331,7 +342,6 @@ namespace CE
 		importers.Clear();
 
 		int failCounter = 0;
-		CE_ASSERT(assetImportResults.GetSize() == assetDefinitionVersions.GetSize(), "Invalid number of asset import results!");
 
 		// Update time stamps
 		{

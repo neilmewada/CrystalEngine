@@ -26,6 +26,11 @@ namespace CE::Editor
 			objectName = nullptr;
 			children.Clear();
 		}
+
+		bool IsValid() const
+		{
+			return uuid.IsValid() && objectName.IsValid() && objectType != nullptr;
+		}
 	};
 
     CLASS(Abstract, Config = Editor)

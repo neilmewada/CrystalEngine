@@ -37,15 +37,22 @@ namespace CE::Editor
                     .VAlign(VAlign::Center)
                 ),
 
-                FAssignNew(FLabel, titleLabel)
-                .Text("Asset")
-                .FontSize(9)
-                .WordWrap(FWordWrap::Normal)
-                .Foreground(Color::White())
-                .HAlign(HAlign::Left)
+                FAssignNew(FCompoundWidget, titleLabelParent)
+                .ClipChildren(true)
+                .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Bottom)
-                .Margin(Vec4(2.5f, 0, 2.5f, 0))
-                .Height(20),
+                .Height(20)
+                (
+                    FAssignNew(FLabel, titleLabel)
+                    .Text("Asset")
+                    .FontSize(9)
+                    .WordWrap(FWordWrap::Normal)
+                    .Foreground(Color::White())
+                    .HAlign(HAlign::Left)
+                    .VAlign(VAlign::Bottom)
+                    .Margin(Vec4(2.5f, 0, 2.5f, 0))
+                    .Height(20)
+                ),
 
                 FAssignNew(FTextInput, titleInput)
                 .Text("Asset")
@@ -185,8 +192,7 @@ namespace CE::Editor
         .Text(titleLabel->Text())
         .Enabled(true);
 
-        (*titleLabel)
-        .Enabled(false);
+        titleLabelParent->Enabled(false);
 
         titleInput->StartEditing(true);
         titleInput->Focus();
@@ -199,7 +205,7 @@ namespace CE::Editor
 
     void AssetBrowserItem::OnTextEditingFinished(FTextInput*)
     {
-        titleLabel->Enabled(true);
+        titleLabelParent->Enabled(true);
         titleInput->Enabled(false);
 
         Ref<AssetBrowserGridView> gridView = m_Owner.Lock();

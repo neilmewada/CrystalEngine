@@ -38,6 +38,7 @@ namespace CE::Editor
 
     protected: // - Internal -
 
+        Ref<FCompoundWidget> titleLabelParent;
         Ref<FLabel> titleLabel;
         Ref<FTextInput> titleInput;
         Ref<FLabel> subtitleLabel;

@@ -24,6 +24,8 @@ namespace CE
 
 		virtual void OnAssetRenamed(Uuid bundleUuid, const Name& oldName, const Name& newName) {}
 
+		virtual void OnDirectoryRenamed(const Name& oldPath, const Name& newPath) {}
+
 		virtual void OnAssetPathTreeUpdated(PathTree& pathTree) {}
 
 	};
@@ -118,7 +120,8 @@ namespace CE
 		PathTree cachedPathTree{};
 
 		b8 cacheInitialized = false;
-        
+
+		Mutex sourceChangesMutex{};
         Array<SourceAssetChange> sourceChanges{};
 
 		static AssetRegistry* singleton;
@@ -132,8 +135,6 @@ namespace CE
 #endif
 		IO::FileWatcher fileWatcher{};
 		IO::WatchID fileWatchID = 0;
-		
-		Mutex mutex{};
 
 		Array<IAssetRegistryListener*> listeners;
 
@@ -143,6 +144,7 @@ namespace CE
 
 		// - Caches -
 
+		SharedRecursiveMutex cacheMutex;
 		HashMap<Uuid, AssetData*> cachedPrimaryAssetByBundleUuid{};
 		HashMap<Name, AssetData*> cachedPrimaryAssetByPath{};
 		HashMap<Name, Array<AssetData*>> cachedAssetsByPath{};

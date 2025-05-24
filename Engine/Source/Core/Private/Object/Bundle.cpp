@@ -207,6 +207,10 @@ namespace CE
         for (int i = bundleResolvers.GetSize() - 1; i >= 0; --i)
         {
             Name bundlePath = bundleResolvers[i]->ResolveBundlePath(bundleUuid);
+            if (!bundlePath.IsValid())
+            {
+	            continue;
+            }
 
             Ref<Bundle> bundle = LoadBundle(outer, bundlePath, loadArgs);
             if (bundle.IsValid())

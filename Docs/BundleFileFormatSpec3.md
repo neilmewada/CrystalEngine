@@ -2,7 +2,7 @@
 
 The `Bundle` class is used by the engine to store & load assets & serialized objects. It stores the data in a binary file with `.casset` extension.
 
-This document describes the file format specification of `.casset` files. The current format version is 3.0.
+This document describes the file format specification of `.casset` files. The current format version is 3.1.
 
 # Format Specification
 
@@ -19,7 +19,7 @@ This document describes the file format specification of `.casset` files. The cu
 | +00 | 8B | `00 42 55 4e 44 4c 45 00` | Magic Number: `. B U N D L E .` |
 | +08 | 4B | `00 00 00 00` | Header checksum |
 | +0C | 4B | 3 | Major Version (u32) |
-| +10 | 4B | 0 | Minor Version (u32) |
+| +10 | 4B | 1 | Minor Version (u32) |
 | +14 | 4B | 0 | Patch Version (u32) (Unused) |
 | +1C | 8B | `00 00 00 00 00 00 00 00` | [Schema Table](#schema-table) start offset (from start of file) |
 | +24 | 8B | `00 00 00 00 00 00 00 00` | [Serialized Data](#serialized-data) start offset (from start of file) |
@@ -30,6 +30,7 @@ This document describes the file format specification of `.casset` files. The cu
 | - | - | *bundle dependency list (repeat Uuid)* | - |
 | +xx | 16B | 128 bit Uuid | n-th Bundle dependency (Uuid). |
 | +10 | 1B | `00/01` | Is cooked? |
+| +11 | \0 | `/Path/To/Source/Asset.png` | Relative path to the source asset (v3.1) |
 | - | - | *newly added header fields go here* | - |
 | - | - | *schema table goes here* | - |
 | - | - | *serialized data goes here* | - |

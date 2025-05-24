@@ -119,6 +119,8 @@ namespace CE
 
         ObjectData GetPrimaryObjectData();
 
+        const Name& GetSourceAssetPath() const { return sourceAssetRelativePath; }
+
         void DestroyAllSubObjects();
 
         bool IsFullyLoaded() const { return isFullyLoaded; }
@@ -183,6 +185,8 @@ namespace CE
         IO::Path absoluteBundlePath{};
         Name bundlePath{};
         Stream* readerStream = nullptr;
+
+        Name sourceAssetRelativePath{};
 
         u32 majorVersion = 0;
         u32 minorVersion = 0;

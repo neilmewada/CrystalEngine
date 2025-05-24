@@ -58,15 +58,20 @@ namespace CE::Editor
                         .Style("Button.ObjectEditorField")
                         (
                             FNew(FHorizontalStack)
+                            .Gap(2.5f)
                             .HAlign(HAlign::Fill)
                             .VAlign(VAlign::Fill)
                             (
-                                FAssignNew(FLabel, valueLabel)
-                                .Text("[None]")
-                                .WordWrap(FWordWrap::NoWrap)
-                                .FontSize(10)
-                                .HAlign(HAlign::Left)
-                                .FillRatio(1.0f),
+                                FNew(FCompoundWidget)
+                                .ClipChildren(true)
+                                .FillRatio(1.0f)
+                                (
+                                    FAssignNew(FLabel, valueLabel)
+                                    .Text("[None]")
+                                    .WordWrap(FWordWrap::NoWrap)
+                                    .FontSize(10)
+                                    .HAlign(HAlign::Fill)
+                                ),
 
                                 FNew(FImage)
                                 .Background(assetCircle)
@@ -122,6 +127,73 @@ namespace CE::Editor
                 )
             )
         );
+    }
+
+    void ObjectEditorField::OnBind()
+    {
+        Super::OnBind();
+
+        if (!registered)
+        {
+            registered = true;
+
+            AssetRegistry::Get()->AddRegistryListener(this);
+        }
+    }
+
+    void ObjectEditorField::OnBeginDestroy()
+    {
+        Super::OnBeginDestroy();
+
+        if (registered)
+        {
+            registered = false;
+
+            AssetRegistry::Get()->RemoveRegistryListener(this);
+        }
+    }
+
+    void ObjectEditorField::OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName)
+    {
+        if (Ref<Object> object = curValue.Lock())
+        {
+            if (Ref<Bundle> bundle = object->GetBundle())
+            {
+                if (bundle->GetUuid() == bundleUuid)
+                {
+                    UpdateValue();
+                }
+            }
+        }
+    }
+
+    void ObjectEditorField::OnAssetDeleted(const CE::Name& bundlePath)
+    {
+        if (Ref<Object> object = curValue.Lock())
+        {
+            if (Ref<Bundle> bundle = object->GetBundle())
+            {
+                if (bundle->GetBundlePath() == bundlePath)
+                {
+                    UpdateValue();
+                }
+            }
+        }
+    }
+
+    void ObjectEditorField::OnDirectoryRenamed(const CE::Name& oldPath, const CE::Name& newPath)
+    {
+        if (Ref<Object> object = curValue.Lock())
+        {
+            if (Ref<Bundle> bundle = object->GetBundle())
+            {
+                String bundlePath = bundle->GetBundlePath().GetCString();
+                if (bundlePath.Contains(newPath.GetString()))
+                {
+                    UpdateValue();
+                }
+            }
+        }
     }
 
     bool ObjectEditorField::CanBind(FieldType* field)

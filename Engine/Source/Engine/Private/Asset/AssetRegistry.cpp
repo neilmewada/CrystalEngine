@@ -46,16 +46,22 @@ namespace CE
 
 	AssetData* AssetRegistry::GetPrimaryAssetByPath(const Name& path)
 	{
+		LockGuard guard{ cacheMutex };
+
 		return cachedPrimaryAssetByPath[path];
 	}
 
 	Array<AssetData*> AssetRegistry::GetAssetsByPath(const Name& path)
 	{
+		LockGuard guard{ cacheMutex };
+
 		return cachedAssetsByPath[path];
 	}
 
 	AssetData* AssetRegistry::GetAssetBySourcePath(const Name& sourcePath)
 	{
+		LockGuard guard{ cacheMutex };
+
 		if (cachedAssetBySourcePath.KeyExists(sourcePath))
 			return cachedAssetBySourcePath[sourcePath];
 		return nullptr;
@@ -63,11 +69,15 @@ namespace CE
 
 	Array<AssetData*> AssetRegistry::GetPrimaryAssetsInSubPath(const Name& parentPath)
 	{
+		LockGuard guard{ cacheMutex };
+
 		return cachedPrimaryAssetsByParentPath[parentPath];
 	}
 
 	const Array<AssetData*>& AssetRegistry::GetAllAssetsOfType(TypeId typeId)
 	{
+		LockGuard guard{ cacheMutex };
+
 		static Array<AssetData*> empty;
 		if (!cachedAssetsByType.KeyExists(typeId))
 			return empty;
@@ -77,6 +87,8 @@ namespace CE
 
 	Array<String> AssetRegistry::GetSubDirectoriesAtPath(const Name& path)
 	{
+		LockGuard guard{ cacheMutex };
+
 		Array<String> result{};
 
 		auto directoryNode = cachedDirectoryTree.GetNode(path);
@@ -93,11 +105,15 @@ namespace CE
 
 	PathTreeNode* AssetRegistry::GetDirectoryNode(const Name& path)
 	{
+		LockGuard guard{ cacheMutex };
+
 		return cachedDirectoryTree.GetNode(path);
 	}
 
 	Name AssetRegistry::ResolveBundlePath(const Uuid& bundleUuid)
 	{
+		LockGuard guard{ cacheMutex };
+
 		if (!cachedPrimaryAssetByBundleUuid.KeyExists(bundleUuid))
 			return Name();
 		AssetData* assetData = cachedPrimaryAssetByBundleUuid[bundleUuid];
@@ -119,6 +135,8 @@ namespace CE
 
 	void AssetRegistry::OnAssetImported(const IO::Path& bundleAbsolutePath, const Name& sourcePath)
 	{
+		LockGuard guard{ cacheMutex };
+
 		LoadBundleArgs args{
 			.loadTemporary = true,
 			.loadFully = false,
@@ -214,6 +232,8 @@ namespace CE
 
 	void AssetRegistry::OnDirectoryCreated(const IO::Path& absolutePath)
 	{
+		LockGuard guard{ cacheMutex };
+
 		auto projectAssetsPath = gProjectPath / "Game/Assets";
 		String relativePathStr = "";
 
@@ -252,12 +272,16 @@ namespace CE
 
 	void AssetRegistry::OnDirectoryRenamed(const Name& originalPath, const Name& newName)
 	{
+		LockGuard guard{ cacheMutex };
+
 		PathTreeNode* pathNode = cachedPathTree.GetNode(originalPath);
+		Name newFullPath{};
+
 		if (pathNode != nullptr)
 		{
 			Name oldFullPath = pathNode->GetFullPath();
 			pathNode->name = newName;
-			Name newFullPath = pathNode->GetFullPath();
+			newFullPath = pathNode->GetFullPath();
 
 			if (pathNode->parent != nullptr)
 			{
@@ -273,9 +297,11 @@ namespace CE
 				}
 				else if (node->nodeType == PathTreeNodeType::Asset)
 				{
+					Uuid bundleUuid = {};
 					if (cachedPrimaryAssetByPath.KeyExists(curOldPath))
 					{
 						cachedPrimaryAssetByPath[curNewPath] = cachedPrimaryAssetByPath[curOldPath];
+						bundleUuid = cachedPrimaryAssetByPath[curNewPath]->bundleUuid;
 						cachedPrimaryAssetByPath.Remove(curOldPath);
 					}
 					if (cachedAssetsByPath.KeyExists(curOldPath))
@@ -285,14 +311,31 @@ namespace CE
 					}
 
 					AssetManager* assetManager = AssetManager::Get();
-					LockGuard lock{ assetManager->loadedAssetsMutex };
 
-					if (assetManager->loadedAssetsByPath.KeyExists(curOldPath))
 					{
-						assetManager->loadedAssetsByPath[curNewPath] = assetManager->loadedAssetsByPath[curOldPath];
-						assetManager->loadedAssetsByPath.Remove(curOldPath);
+						LockGuard lock{ assetManager->loadedAssetsMutex };
 
-						assetManager->loadedAssetsByPath[curNewPath]->absoluteBundlePath = Bundle::GetAbsoluteBundlePath(curNewPath);
+						if (assetManager->loadedAssetsByPath.KeyExists(curOldPath))
+						{
+							assetManager->loadedAssetsByPath[curNewPath] = assetManager->loadedAssetsByPath[curOldPath];
+							assetManager->loadedAssetsByPath.Remove(curOldPath);
+
+							assetManager->loadedAssetsByPath[curNewPath]->absoluteBundlePath = Bundle::GetAbsoluteBundlePath(curNewPath);
+							assetManager->loadedAssetsByPath[curNewPath]->bundlePath = curNewPath;
+						}
+					}
+
+					{
+						LockGuard guard{ Bundle::bundleRegistryMutex };
+
+						if (Bundle::loadedBundlesByUuid.KeyExists(bundleUuid))
+						{
+							if (Ref<Bundle> loadedBundle = Bundle::loadedBundlesByUuid[bundleUuid].Lock())
+							{
+								loadedBundle->absoluteBundlePath = Bundle::GetAbsoluteBundlePath(curNewPath);
+								loadedBundle->bundlePath = curNewPath;
+							}
+						}
 					}
 				}
 
@@ -302,6 +345,21 @@ namespace CE
 						curOldPath.GetString() + "/" + child->name.GetString());
 				}
 			};
+
+			IO::Path projectPath = gProjectPath;
+
+			IO::Path stampDirectory = gProjectPath / ("Temp/AssetCache" + oldFullPath.GetString());
+			if (stampDirectory.Exists())
+			{
+				IO::Path newStampDirectory = gProjectPath / ("Temp/AssetCache" + newFullPath.GetString());
+				if (newStampDirectory.Exists())
+				{
+					IO::Path::RemoveRecursively(newStampDirectory);
+				}
+
+				IO::Path::Rename(stampDirectory, newStampDirectory);
+			}
+
 
 			visitor(pathNode, newFullPath, oldFullPath);
 		}
@@ -321,6 +379,10 @@ namespace CE
 		{
 			if (listener != nullptr)
 			{
+				if (newFullPath.IsValid())
+				{
+					listener->OnDirectoryRenamed(originalPath, newFullPath);
+				}
 				listener->OnAssetPathTreeUpdated(cachedPathTree);
 			}
 		}
@@ -328,6 +390,8 @@ namespace CE
 
 	void AssetRegistry::OnDirectoryDeleted(const Name& directoryPath)
 	{
+		LockGuard guard{ cacheMutex };
+
 		PathTreeNode* pathNode = cachedPathTree.GetNode(directoryPath);
 		if (pathNode == nullptr || pathNode->nodeType != PathTreeNodeType::Directory)
 			return;
@@ -367,6 +431,8 @@ namespace CE
 
 	void AssetRegistry::OnAssetRenamed(const Name& originalPath, const IO::Path& newAbsolutePath, const Name& newName)
 	{
+		LockGuard guard{ cacheMutex };
+
 		PathTreeNode* pathNode = cachedPathTree.GetNode(originalPath);
 		if (pathNode == nullptr || pathNode->nodeType != PathTreeNodeType::Asset)
 			return;
@@ -444,6 +510,8 @@ namespace CE
 
 	void AssetRegistry::OnDirectoryAndAssetsDeleted(const Array<Name>& paths)
 	{
+		LockGuard guard{ cacheMutex };
+
 		// TODO: Special consideration when deleting assets:
 		// What if they are loaded in memory and referenced by something?
 
@@ -543,7 +611,7 @@ namespace CE
 #if PAL_TRAIT_BUILD_EDITOR
 							// Source asset path relative to project assets directory
 							// TODO: Get source asset relative path
-							//assetData->sourceAssetPath = load->GetPrimarySourceAssetRelativePath();
+							assetData->sourceAssetPath = load->sourceAssetRelativePath;
 #endif
 							load->BeginDestroy();
 							load = nullptr;
@@ -712,6 +780,8 @@ namespace CE
 
 	void AssetRegistry::AddAssetEntry(const Name& bundleName, AssetData* assetData)
 	{
+		LockGuard guard{ cacheMutex };
+
 		if (assetData == nullptr)
 			return;
 
@@ -745,6 +815,8 @@ namespace CE
 
 	void AssetRegistry::DeleteAssetEntry(const Name& bundlePath)
 	{
+		LockGuard guard{ cacheMutex };
+
 		if (!cachedAssetsByPath.KeyExists(bundlePath))
 			return;
 
@@ -793,6 +865,15 @@ namespace CE
 			}
 		}
 
+		for (IAssetRegistryListener* listener : listeners)
+		{
+			if (listener != nullptr)
+			{
+				listener->OnAssetDeleted(bundlePath);
+				listener->OnAssetPathTreeUpdated(cachedPathTree);
+			}
+		}
+
 		if (bundle != nullptr)
 		{
 			Uuid bundleUuid = bundle->GetUuid();
@@ -803,20 +884,11 @@ namespace CE
 		//cachedPathTree.RemovePath(bundlePath);
 		cachedAssetsByPath.Remove(bundlePath);
 		cachedPrimaryAssetByPath.Remove(bundlePath);
-
-		for (IAssetRegistryListener* listener : listeners)
-		{
-			if (listener != nullptr)
-			{
-				listener->OnAssetDeleted(bundlePath);
-				//listener->OnAssetPathTreeUpdated(cachedPathTree);
-			}
-		}
 	}
 
 	void AssetRegistry::HandleFileAction(IO::WatchID watchId, IO::Path directory, const String& fileName, IO::FileAction fileAction, const String& oldFileName)
 	{
-		mutex.Lock();
+		sourceChangesMutex.Lock();
 
 		// Watch for new/modified source assets
 		IO::Path relative = IO::Path::GetRelative(directory, gProjectPath / "Game/Assets").GetString().Replace({ '\\' }, '/');
@@ -870,7 +942,7 @@ namespace CE
             }
 		}
 
-		mutex.Unlock();
+		sourceChangesMutex.Unlock();
 
 		// FIX: Added delay to prevent skipping file Modified calls
 		Thread::SleepFor(1);

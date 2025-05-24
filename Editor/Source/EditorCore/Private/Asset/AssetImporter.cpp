@@ -136,6 +136,7 @@ namespace CE::Editor
     			{
     				parentNode->children.Add({});
     			}
+
     			AssetUuidNode* node = nullptr;
     			if (parentNode != nullptr)
     			{
@@ -308,6 +309,7 @@ namespace CE::Editor
     	}
 
     	bundle->bundlePath = bundlePath;
+    	bundle->sourceAssetRelativePath = sourceAssetRelativePath;
 
 		success = ProcessAsset(bundle);
 
@@ -327,36 +329,30 @@ namespace CE::Editor
 			HashMap<Name, int> objectPathNameCounter{};
 
 			std::function<void(Object*)> visitorFunc = [&](Object* object)
+			{
+				if (!object)
+					return;
+
+				String pathInBundle = object->GetPathInBundle().GetString();
+				if (pathInBundle.NotEmpty())
+					pathInBundle = "." + pathInBundle;
+				String fullObjectPath = bundle->GetBundlePath().GetString() + pathInBundle;
+				if (objectPathNameCounter[fullObjectPath] > 0)
 				{
-					if (!object)
-						return;
+					fullObjectPath = String::Format(fullObjectPath + "_{}", objectPathNameCounter[fullObjectPath]);
+				}
 
-					if (object->IsOfType<Asset>())
-					{
-						Asset* asset = static_cast<Asset*>(object);
-						asset->GetClass()->FindField("sourceAssetRelativePath")->SetFieldValue(asset, sourceAssetRelativePath);
-					}
+				Hash128 hash = CalculateHash128(fullObjectPath.GetCString(), fullObjectPath.GetLength());
+				bundle->SetObjectUuid(object, Uuid(hash));
 
-					String pathInBundle = object->GetPathInBundle().GetString();
-					if (pathInBundle.NotEmpty())
-						pathInBundle = "." + pathInBundle;
-					String fullObjectPath = bundle->GetBundlePath().GetString() + pathInBundle;
-					if (objectPathNameCounter[fullObjectPath] > 0)
-					{
-						fullObjectPath = String::Format(fullObjectPath + "_{}", objectPathNameCounter[fullObjectPath]);
-					}
+				objectPathNameCounter[fullObjectPath]++;
 
-					Hash128 hash = CalculateHash128(fullObjectPath.GetCString(), fullObjectPath.GetLength());
-					bundle->SetObjectUuid(object, Uuid(hash));
-
-					objectPathNameCounter[fullObjectPath]++;
-
-					for (int i = 0; i < object->GetSubObjectCount(); ++i)
-					{
-						Object* subObject = object->GetSubObject(i);
-						visitorFunc(subObject);
-					}
-				};
+				for (int i = 0; i < object->GetSubObjectCount(); ++i)
+				{
+					Object* subObject = object->GetSubObject(i);
+					visitorFunc(subObject);
+				}
+			};
 
 			visitorFunc(bundle.Get());
 		}

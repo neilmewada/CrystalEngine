@@ -123,6 +123,13 @@ namespace CE
         u8 isCooked = 0;
         *stream >> isCooked;
 
+        String sourceAssetRelativePath = "";
+
+        if (majorVersion == BundleVersions::SourceAssetPathMajor && minorVersion >= BundleVersions::SourceAssetPathMinor)
+        {
+            *stream >> sourceAssetRelativePath;
+        }
+
         Ref<Bundle> bundle = nullptr;
 
         if (loadArgs.loadTemporary)
@@ -189,6 +196,8 @@ namespace CE
         bundle->minorVersion = minorVersion;
 
         bundle->dependencies = externalBundleUuids;
+
+        bundle->sourceAssetRelativePath = sourceAssetRelativePath;
 
         stream->Seek(schemaTableStartOffset);
 
@@ -521,6 +530,14 @@ namespace CE
 
         u8 isCooked = 0;
         *stream << isCooked;
+
+        if (bundle->sourceAssetRelativePath.IsValid())
+        {
+            String::IsAlphabet('a');
+        }
+
+        // Added in v3.1 spec
+        *stream << bundle->sourceAssetRelativePath.GetString();
 
         // - Schema Table -
 
