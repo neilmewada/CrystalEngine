@@ -152,5 +152,25 @@ namespace CE
 		return split.GetLast();
 	}
 
+	String Name::GetParentPath() const
+	{
+		String value = GetString();
+		int lastSlashIndex = -1;
+
+		for (int i = 0; i < value.GetLength() - 1; ++i)
+		{
+			if (value[i] == '/')
+			{
+				lastSlashIndex = i;
+			}
+		}
+
+		if (lastSlashIndex > 0)
+		{
+			return value.GetSubstring(0, lastSlashIndex);
+		}
+
+		return "";
+	}
 } // namespace CE
 

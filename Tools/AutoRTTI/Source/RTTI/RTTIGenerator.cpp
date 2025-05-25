@@ -125,8 +125,12 @@ namespace CE
 		// Remove unnecessary headers from outputPath
 		for (const auto& path : filesToRemove)
 		{
+			if (path.GetExtension() != ".stamp")
+			{
+				anyHeaderModified = true;
+			}
+
 			IO::Path::Remove(path);
-			anyHeaderModified = true;
 		}
 		filesToRemove.Clear();
 

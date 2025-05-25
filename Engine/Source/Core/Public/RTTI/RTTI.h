@@ -186,7 +186,7 @@ namespace CE
 		//String GetLocalAttributeValue(const String& key) const;
         //bool HasLocalAttribute(const String& key) const;
 
-        virtual const Attribute& GetAttribute(const Name& key);
+        virtual Attribute& GetAttribute(const Name& key);
         virtual bool HasAttribute(const Name& key);
         
 		virtual bool IsClass() const { return false; }

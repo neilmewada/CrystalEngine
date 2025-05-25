@@ -610,8 +610,10 @@ namespace CE
 							assetData->assetUuid = primaryObjectData.uuid;
 #if PAL_TRAIT_BUILD_EDITOR
 							// Source asset path relative to project assets directory
-							// TODO: Get source asset relative path
-							assetData->sourceAssetPath = load->sourceAssetRelativePath;
+							if (load->sourceAssetRelativePath.IsValid())
+							{
+								assetData->sourceAssetPath = load->GetBundlePath().GetParentPath() + "/" + load->sourceAssetRelativePath.GetString();
+							}
 #endif
 							load->BeginDestroy();
 							load = nullptr;

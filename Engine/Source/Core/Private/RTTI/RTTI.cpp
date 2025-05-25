@@ -239,7 +239,7 @@ namespace CE
         return attributes;
     }
 
-    const Attribute& TypeInfo::GetAttribute(const Name& key)
+    Attribute& TypeInfo::GetAttribute(const Name& key)
     {
         static Attribute empty{};
         

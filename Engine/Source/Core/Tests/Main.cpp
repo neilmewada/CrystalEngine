@@ -481,6 +481,9 @@ TEST(Containers, Name)
     EXPECT_EQ(Name("::CE::Object::").GetString(), "CE::Object");
     EXPECT_FALSE(Name("::").IsValid());
 
+	Name testPath = "/Game/Assets/Textures/Wood_Floor/Wood_Floor_Albedo";
+	EXPECT_EQ(testPath.GetParentPath(), "/Game/Assets/Textures/Wood_Floor");
+
     TEST_END;
 }
 

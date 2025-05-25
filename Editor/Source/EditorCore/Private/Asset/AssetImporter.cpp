@@ -221,9 +221,8 @@ namespace CE::Editor
 
 		if (IO::Path::IsSubDirectory(sourcePath, gProjectPath / "Game/Assets"))
 		{
-			sourceAssetRelativePath = IO::Path::GetRelative(sourcePath, gProjectPath).GetString().Replace({ '\\' }, '/');
-			if (!sourceAssetRelativePath.StartsWith("/"))
-				sourceAssetRelativePath = "/" + sourceAssetRelativePath;
+			sourceAssetRelativePath = IO::Path::GetRelative(sourcePath, productPath.GetParentPath()).GetString().Replace({ '\\' }, '/');
+			//sourceAssetRelativePath = IO::Path::GetRelative(sourcePath, gProjectPath).GetString().Replace({ '\\' }, '/');
 		}
 
 		String assetName = productPath.GetFileName().RemoveExtension().GetString();

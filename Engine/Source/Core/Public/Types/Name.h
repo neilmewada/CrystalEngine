@@ -78,6 +78,8 @@ namespace CE
         
         String GetLastComponent() const;
 
+        String GetParentPath() const;
+
     private:
         SIZE_T hashValue;
 #if CE_NAME_DEBUG

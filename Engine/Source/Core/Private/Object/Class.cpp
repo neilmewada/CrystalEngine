@@ -75,7 +75,7 @@ namespace CE
         return cachedAttributes.IsMap() && cachedAttributes.HasKey(key);
     }
 
-    const Attribute& StructType::GetAttribute(const CE::Name& key)
+    Attribute& StructType::GetAttribute(const CE::Name& key)
     {
         if (!attributesCached)
         {
