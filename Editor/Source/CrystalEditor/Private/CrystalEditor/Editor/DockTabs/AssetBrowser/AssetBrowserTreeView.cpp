@@ -38,7 +38,7 @@ namespace CE::Editor
             .IconWidth(14)
             .IconHeight(14)
             .ContentPadding(Vec4(1.5f, 2, 1.5f, 2) * 2)
-            .FontSize(11)
+            .FontSize(10)
             .Padding(Vec4())
         );
 
