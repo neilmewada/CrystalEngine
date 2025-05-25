@@ -46,6 +46,11 @@ namespace CE
         }
     }
 
+    void AssetSelectionListViewModel::OnDirectoryRenamed(const Name& oldPath, const Name& newPath)
+    {
+        UpdateDataList();
+    }
+
     void AssetSelectionListViewModel::OnAssetPathTreeUpdated(PathTree& pathTree)
     {
         UpdateDataList();

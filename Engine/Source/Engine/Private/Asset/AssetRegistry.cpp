@@ -304,9 +304,24 @@ namespace CE
 						bundleUuid = cachedPrimaryAssetByPath[curNewPath]->bundleUuid;
 						cachedPrimaryAssetByPath.Remove(curOldPath);
 					}
+
 					if (cachedAssetsByPath.KeyExists(curOldPath))
 					{
 						cachedAssetsByPath[curNewPath] = cachedAssetsByPath[curOldPath];
+						const auto& assetDatas = cachedAssetsByPath[curNewPath];
+
+						for (AssetData* assetData : assetDatas)
+						{
+							assetData->bundlePath = curNewPath;
+
+							if (assetData->sourceAssetPath.IsValid())
+							{
+								Name newSourcePath = curNewPath.GetParentPath() + "/" + assetData->sourceAssetPath.GetLastComponent();
+								assetData->sourceAssetPath = newSourcePath;
+								String::IsAlphabet('a');
+							}
+						}
+
 						cachedAssetsByPath.Remove(curOldPath);
 					}
 

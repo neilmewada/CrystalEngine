@@ -20,6 +20,8 @@ namespace CE
 
     public:
 
+        void OnDirectoryRenamed(const Name& oldPath, const Name& newPath) override;
+
         void OnAssetPathTreeUpdated(PathTree& pathTree) override;
 
         int GetRowCount() override;
