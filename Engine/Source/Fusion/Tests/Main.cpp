@@ -159,7 +159,7 @@ static void TestEnd(bool gui)
 	ModuleManager::Get().UnloadModule("Core");
 }
 
-TEST(Fusion, TreeView)
+TEST(Fusion, MainTest)
 {
 	TEST_BEGIN_GUI;
 	using namespace WidgetTests;
@@ -207,28 +207,39 @@ TEST(Fusion, TreeView)
 		}
 
 		{
-			auto windowCloseBtn = CreateObject<FCustomButtonStyle>(rootStyle, "WindowWindowClose");
-			rootStyle->Add("Button.WindowClose", windowCloseBtn);
+			auto toolWindow = CreateObject<FToolWindowStyle>(rootStyle, "ToolWindow");
+			rootStyle->Add(toolWindow);
 
-			windowCloseBtn->background = Color::Clear();
-			windowCloseBtn->hoveredBackground = Color::RGBA(161, 57, 57);
-			windowCloseBtn->hoveredBackground = Color::RGBA(196, 43, 28);
-			windowCloseBtn->pressedBackground = Color::RGBA(178, 43, 30);
-			windowCloseBtn->borderColor = Color::Clear();
-			windowCloseBtn->borderWidth = 0.0f;
-			windowCloseBtn->cornerRadius = Vec4();
-			windowCloseBtn->contentMoveY = 0;
+			GetDefaultWidget<FToolWindow>()
+				.Style(rootStyle, "ToolWindow");
+		}
 
-			auto windowControlBtn = CreateObject<FCustomButtonStyle>(rootStyle, "WindowControlButton");
-			rootStyle->Add("Button.WindowControl", windowControlBtn);
+		{
+			FWindowControlButtonStyle* windowCloseButton = nullptr;
+			FWindowControlButtonStyle* windowControlButton = nullptr;
 
-			windowControlBtn->background = Color::Clear();
-			windowControlBtn->hoveredBackground = Color::RGBA(58, 58, 58);
-			windowControlBtn->pressedBackground = Color::RGBA(48, 48, 48);
-			windowControlBtn->borderColor = Color::Clear();
-			windowControlBtn->borderWidth = 0.0f;
-			windowControlBtn->cornerRadius = Vec4();
-			windowControlBtn->contentMoveY = 0;
+			windowCloseButton = CreateObject<FWindowControlButtonStyle>(rootStyle, "Button_WindowClose");
+			rootStyle->Add("Button.WindowClose", windowCloseButton);
+
+			windowCloseButton->background = Color::Clear();
+			windowCloseButton->hoveredBackground = Color::RGBA(161, 57, 57);
+			windowCloseButton->hoveredBackground = Color::RGBA(196, 43, 28);
+			windowCloseButton->pressedBackground = Color::RGBA(178, 43, 30);
+			windowCloseButton->borderColor = Color::Clear();
+			windowCloseButton->borderWidth = 0.0f;
+			windowCloseButton->cornerRadius = Vec4();
+			windowCloseButton->contentMoveY = 0;
+
+			windowControlButton = CreateObject<FWindowControlButtonStyle>(rootStyle, "Button_WindowControl");
+			rootStyle->Add("Button.WindowControl", windowControlButton);
+
+			windowControlButton->background = Color::Clear();
+			windowControlButton->hoveredBackground = Color::RGBA(58, 58, 58);
+			windowControlButton->pressedBackground = Color::RGBA(48, 48, 48);
+			windowControlButton->borderColor = Color::Clear();
+			windowControlButton->borderWidth = 0.0f;
+			windowControlButton->cornerRadius = Vec4();
+			windowControlButton->contentMoveY = 0;
 		}
 
 		{
@@ -374,8 +385,8 @@ TEST(Fusion, TreeView)
 	FNativeContext* nativeContext = FNativeContext::Create(mainWindow, "TestWindow", rootContext);
 	rootContext->AddChildContext(nativeContext);
 
-	RenderingTestWidget* mainWidget;
-	FAssignNewOwned(RenderingTestWidget, mainWidget, nativeContext);
+	FusionTestWindow* mainWidget;
+	FAssignNewOwned(FusionTestWindow, mainWidget, nativeContext);
 
 	nativeContext->SetOwningWidget(mainWidget);
 
@@ -390,9 +401,9 @@ TEST(Fusion, TreeView)
 
 	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
 
-	if (mainWidget->comboBox)
+	//if (mainWidget->comboBox)
 	{
-		mainWidget->comboBox->ApplyStyle();
+		//mainWidget->comboBox->ApplyStyle();
 	}
 
 	mainWindow->Show();

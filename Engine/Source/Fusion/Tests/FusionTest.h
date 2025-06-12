@@ -54,44 +54,14 @@ namespace WidgetTests
 	};
 
 	CLASS()
-	class RenderingTestWidget : public FWindow, public ApplicationMessageHandler
+	class FusionTestWindow : public FToolWindow
 	{
-		CE_CLASS(RenderingTestWidget, FWindow)
+		CE_CLASS(FusionTestWindow, FToolWindow)
 	public:
-
-		RenderingTestWidget() = default;
 
 		void Construct() override;
 
-		FTreeViewRow& GenerateTreeViewRow();
-
-		FListViewRow& GenerateListViewRow();
-
-		void OnBeginDestroy() override;
-
-		void OnWindowRestored(PlatformWindow* window) override;
-		void OnWindowMaximized(PlatformWindow* window) override;
-		void OnWindowExposed(PlatformWindow* window) override;
-
-		void OnPaint(FPainter* painter) override;
-
-		FSplitBox* splitBox = nullptr;
-		FStackBox* rootBox = nullptr;
-		FButton* button = nullptr;
-		FTextInput* textInput = nullptr;
-		FComboBox* comboBox = nullptr;
-		FLabel* buttonLabel = nullptr;
-		FStyledWidget* subWidget = nullptr;
-		FPopup* btnPopup = nullptr;
-		FPopup* nativePopup = nullptr;
-		FImage* maximizeIcon = nullptr;
-		FStyledWidget* borderWidget = nullptr;
-		FTextInput* modelTextInput = nullptr;
-		FVerticalStack* windowContent = nullptr;
-		class TreeViewModel* treeViewModel = nullptr;
-		class ListViewModel* listViewModel = nullptr;
-
-		int hitCounter = 0;
+	private:
 
 		FUSION_WIDGET;
 	};
