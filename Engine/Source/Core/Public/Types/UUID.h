@@ -22,6 +22,8 @@ namespace CE
 
         static Uuid Random();
 
+        static Uuid New();
+
         static Uuid Null();
         static Uuid Zero();
 

@@ -225,6 +225,12 @@ namespace WidgetTests
 
         Title("Fusion Test");
 
+        Content(
+            FNew(FDockspace)
+            .HAlign(HAlign::Fill)
+            .VAlign(VAlign::Fill)
+            .FillRatio(1.0f)
+        );
     }
 
 }

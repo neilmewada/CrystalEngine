@@ -121,10 +121,13 @@ namespace CE
 #include "Widget/Tab/FTabItem.h"
 #include "Widget/Tab/FTabView.h"
 
-#include "Widget/Docking/FDockspace.h"
-
 #include "Window/FTitleBar.h"
 #include "Window/FWindow.h"
 #include "Window/FGameWindow.h"
 #include "Widget/FViewport.h"
 
+
+#include "Widget/Docking/FDockspace.h"
+#include "Widget/Docking/FDockWindow.h"
+#include "Widget/Docking/FDockTabItem.h"
+#include "Widget/Docking/FDockTabWell.h"

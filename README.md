@@ -49,7 +49,7 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 
 The engine is divided into different layers as shown below, and each layer can have multiple modules. Left side is for standalone build and right side is for editor builds.
 
-<img src="./Screenshots/LayerArchitecture.jpg" height="500"/>
+![](./Screenshots/LayerArchitecture.jpg)
 
 ### Core layer
 All modules inside the core layer are at the low level of the engine.
@@ -88,11 +88,11 @@ Contains all the editor modules.
 
 ### Color Picker
 
-<img src="./Screenshots/ColorPicker_Fusion.png" height="500" width="auto"/>
+![](./Screenshots/ColorPicker_Fusion.png)
 
 ### Project browser window:
 
-<img src="./Screenshots/ProjectBrowser.png" height="600" width="auto">
+![](./Screenshots/ProjectBrowser.png)
 
 --- 
 ### Credits
