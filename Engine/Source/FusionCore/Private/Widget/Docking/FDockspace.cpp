@@ -43,9 +43,14 @@ namespace CE
         tabWell->owner = this;
     }
 
-    void FDockspace::SetActiveTabIndex(int index)
+    void FDockspace::SetActiveTab(Ref<FDockTabItem> tabItem)
     {
-        activeTabIndex = index;
+        if (tabWell->GetTabIndex(tabItem) == -1)
+        {
+            tabItem = tabWell->GetTabItem(0);
+        }
+
+        selectedTab = tabItem;
 
         UpdateTabs();
 
@@ -57,6 +62,8 @@ namespace CE
         tabWell->UpdateTabWell();
 
         container->RemoveAllChildren();
+
+        int activeTabIndex = tabWell->GetTabIndex(selectedTab);
         container->AddChild(tabbedDockWindows[activeTabIndex].Get());
         tabbedDockWindows[activeTabIndex]->FillRatio(1.0f);
     }
@@ -71,7 +78,7 @@ namespace CE
 
         if (tabbedDockWindows.GetSize() == 1)
         {
-            SetActiveTabIndex(0);
+            SetActiveTab(tabWell->GetTabItem(0));
         }
     }
 }

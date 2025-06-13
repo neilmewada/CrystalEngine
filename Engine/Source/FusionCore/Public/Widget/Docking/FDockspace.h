@@ -53,9 +53,7 @@ namespace CE
 
         Ref<FDockTabWell> GetDockTabWell() const { return tabWell; }
 
-        int GetActiveTabIndex() const { return activeTabIndex; }
-
-        void SetActiveTabIndex(int index);
+        void SetActiveTab(Ref<FDockTabItem> tabItem);
 
         void UpdateTabs();
 
@@ -72,7 +70,8 @@ namespace CE
         Ref<FDockspaceSplitView> container;
 
         Array<Ref<FDockWindow>> tabbedDockWindows;
-        int activeTabIndex = 0;
+
+        Ref<FDockTabItem> selectedTab;
 
         FDockId dockId;
 

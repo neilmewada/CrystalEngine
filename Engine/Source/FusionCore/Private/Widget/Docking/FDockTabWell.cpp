@@ -44,7 +44,7 @@ namespace CE
                 }
 
                 tabItem->owner = this;
-                tabItem->isActive = (i == dockspace->activeTabIndex);
+                tabItem->isActive = (tabItem == dockspace->selectedTab);
 
                 tabItem->Title(dockWindow->Title());
 
@@ -60,16 +60,21 @@ namespace CE
         }
     }
 
+    int FDockTabWell::GetTabIndex(Ref<FDockTabItem> tabItem)
+    {
+        return tabItems.IndexOf(tabItem);
+    }
+
+    Ref<FDockTabItem> FDockTabWell::GetTabItem(int index)
+    {
+        return tabItems[index];
+    }
+
     void FDockTabWell::SetActiveTab(Ref<FDockTabItem> tabItem)
     {
-        int index = tabItems.IndexOf(tabItem);
-
-        if (index < 0)
-            return;
-
         if (Ref<FDockspace> dockspace = owner.Lock())
         {
-            dockspace->SetActiveTabIndex(index);
+            dockspace->SetActiveTab(tabItem);
         }
     }
 

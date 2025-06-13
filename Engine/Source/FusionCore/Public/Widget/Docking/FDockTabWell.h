@@ -16,6 +16,10 @@ namespace CE
 
         void UpdateTabWell();
 
+        int GetTabIndex(Ref<FDockTabItem> tabItem);
+
+        Ref<FDockTabItem> GetTabItem(int index);
+
         Ref<FDockspace> GetDockspace() { return owner.Lock(); }
 
         void SetActiveTab(Ref<FDockTabItem> tabItem);
