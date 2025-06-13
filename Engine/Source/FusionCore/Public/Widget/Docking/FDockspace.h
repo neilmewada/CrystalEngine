@@ -5,6 +5,7 @@ namespace CE
     class FDockTabWell;
     class FDockTabItem;
     class FDockWindow;
+    class FDockspaceSplitView;
 
     using FDockId = Uuid;
 
@@ -53,12 +54,16 @@ namespace CE
     protected: // - Internal -
 
         Ref<FDockTabWell> tabWell;
+        Ref<FDockspaceSplitView> container;
 
         FDockId dockId;
 
     public: // - Fusion Properties - 
 
         FUSION_PROPERTY(bool, AllowDocking);
+        FUSION_PROPERTY(bool, AllowSplitting);
+
+        FUSION_PROPERTY(FDockTypeMask, DockspaceType);
 
         FUSION_WIDGET;
     };

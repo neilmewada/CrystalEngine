@@ -17,6 +17,8 @@ namespace CE
     FDockspace::FDockspace()
     {
         m_AllowDocking = true;
+        m_AllowSplitting = false;
+        m_DockspaceType = FDockTypeMask::Minor;
     }
 
     void FDockspace::Construct()
@@ -30,6 +32,12 @@ namespace CE
             .ContentHAlign(HAlign::Fill)
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
+            (
+                FAssignNew(FDockTabWell, tabWell),
+
+                FAssignNew(FDockspaceSplitView, container)
+                .FillRatio(1.0f)
+            )
         );
     }
     

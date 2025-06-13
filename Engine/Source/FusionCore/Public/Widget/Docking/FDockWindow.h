@@ -18,8 +18,8 @@ namespace CE
     protected: // - Internal -
 
 
-    public: // - Fusion Properties - 
-
+    public: // - Fusion Properties -
+        
 
         FUSION_WIDGET;
     };

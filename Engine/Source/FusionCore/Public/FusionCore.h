@@ -128,6 +128,7 @@ namespace CE
 
 
 #include "Widget/Docking/FDockspace.h"
+#include "Widget/Docking/FDockspaceSplitView.h"
 #include "Widget/Docking/FDockWindow.h"
 #include "Widget/Docking/FDockTabItem.h"
 #include "Widget/Docking/FDockTabWell.h"
