@@ -18,7 +18,7 @@ namespace CE
 
         bool SupportsMouseEvents() const override { return true; }
 
-        bool SupportsDragEvents() const override { return true; }
+        bool SupportsDragEvents() const override;
 
         bool IsActive() const { return isActive; }
         bool IsHovered() const { return isHovered; }

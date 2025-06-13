@@ -62,11 +62,24 @@ namespace CE
             }
             else if (event->type == FEventType::DragEnd)
             {
-
+                
             }
         }
 
         Super::HandleEvent(event);
+    }
+
+    bool FDockTabItem::SupportsDragEvents() const
+    {
+        if (Ref<FDockTabWell> tabWell = owner.Lock())
+        {
+            if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
+            {
+
+            }
+        }
+
+        return false;
     }
 
     void FDockTabItem::SetActiveTab()
