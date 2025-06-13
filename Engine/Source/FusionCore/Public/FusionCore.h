@@ -84,6 +84,8 @@ namespace CE
 #include "Style/FCheckboxStyle.h"
 #include "Style/FStyledWidgetStyle.h"
 #include "Style/FScrollBoxStyle.h"
+#include "Style/FDockTabWellStyle.h"
+#include "Style/FDockspaceStyle.h"
 #include "Style/FStyleSet.h"
 #include "Style/FStyleManager.h"
 

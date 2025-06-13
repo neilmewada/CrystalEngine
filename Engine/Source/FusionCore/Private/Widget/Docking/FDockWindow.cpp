@@ -24,7 +24,7 @@ namespace CE
         {
             if (Ref<FDockspace> dockspace = ownerDockspace.Lock())
             {
-                dockspace->UpdateTabWell();
+                dockspace->UpdateTabs();
             }
         }
     }

@@ -43,9 +43,22 @@ namespace CE
         tabWell->owner = this;
     }
 
-    void FDockspace::UpdateTabWell()
+    void FDockspace::SetActiveTabIndex(int index)
+    {
+        activeTabIndex = index;
+
+        UpdateTabs();
+
+        ApplyStyle();
+    }
+
+    void FDockspace::UpdateTabs()
     {
         tabWell->UpdateTabWell();
+
+        container->RemoveAllChildren();
+        container->AddChild(tabbedDockWindows[activeTabIndex].Get());
+        tabbedDockWindows[activeTabIndex]->FillRatio(1.0f);
     }
 
     void FDockspace::AddDockWindow(Ref<FDockWindow> dockWindow)
@@ -54,8 +67,12 @@ namespace CE
             return;
 
         tabbedDockWindows.Add(dockWindow);
-
         tabWell->UpdateTabWell();
+
+        if (tabbedDockWindows.GetSize() == 1)
+        {
+            SetActiveTabIndex(0);
+        }
     }
 }
 

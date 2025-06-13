@@ -51,7 +51,13 @@ namespace CE
 
         FDockId GetDockId() const { return dockId; }
 
-        void UpdateTabWell();
+        Ref<FDockTabWell> GetDockTabWell() const { return tabWell; }
+
+        int GetActiveTabIndex() const { return activeTabIndex; }
+
+        void SetActiveTabIndex(int index);
+
+        void UpdateTabs();
 
         void AddDockWindow(Ref<FDockWindow> dockWindow);
 
@@ -66,6 +72,7 @@ namespace CE
         Ref<FDockspaceSplitView> container;
 
         Array<Ref<FDockWindow>> tabbedDockWindows;
+        int activeTabIndex = 0;
 
         FDockId dockId;
 
@@ -78,6 +85,7 @@ namespace CE
 
         FUSION_WIDGET;
         friend class FDockTabWell;
+        friend class FDockspaceStyle;
     };
     
 }

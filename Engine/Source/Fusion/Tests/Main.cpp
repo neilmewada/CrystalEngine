@@ -378,6 +378,19 @@ TEST(Fusion, MainTest)
 			GetDefaultWidget<FListView>()
 				.Style(rootStyle, listView->GetName());
 		}
+
+		{
+			auto dockspaceStyle = CreateObject<FDockspaceStyle>(rootStyle, "Dockspace");
+			dockspaceStyle->tabWellStyle = CreateObject<FDockTabWellStyle>(rootStyle, "DockTabWell");
+			rootStyle->Add(dockspaceStyle);
+			rootStyle->Add(dockspaceStyle->tabWellStyle.Get());
+
+			GetDefaultWidget<FDockspace>()
+				.Style(rootStyle, dockspaceStyle->GetName());
+
+			GetDefaultWidget<FDockTabWell>()
+				.Style(rootStyle, dockspaceStyle->tabWellStyle->GetName());
+		}
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();

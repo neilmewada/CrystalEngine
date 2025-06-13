@@ -16,17 +16,26 @@ namespace CE
 
         void UpdateTabWell();
 
+        Ref<FDockspace> GetDockspace() { return owner.Lock(); }
+
+        void SetActiveTab(Ref<FDockTabItem> tabItem);
+
+        void ApplyStyle() override;
+
     protected: // - Internal -
 
         WeakRef<FDockspace> owner;
 
         Ref<FHorizontalStack> container;
 
+        Array<Ref<FDockTabItem>> tabItems;
+
     public: // - Fusion Properties - 
 
 
         FUSION_WIDGET;
         friend class FDockspace;
+        friend class FDockTabWellStyle;
     };
     
 }

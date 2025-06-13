@@ -23,6 +23,8 @@ namespace CE
 
     void FDockTabWell::UpdateTabWell()
     {
+        tabItems.Clear();
+
         if (Ref<FDockspace> dockspace = owner.Lock())
         {
             for (int i = 0; i < dockspace->tabbedDockWindows.GetSize(); ++i)
@@ -41,7 +43,12 @@ namespace CE
                     );
                 }
 
+                tabItem->owner = this;
+                tabItem->isActive = (i == dockspace->activeTabIndex);
+
                 tabItem->Title(dockWindow->Title());
+
+                tabItems.Add(tabItem);
             }
 
             // Remove extra tab items
@@ -50,6 +57,29 @@ namespace CE
                 FWidget* lastChild = container->GetChild(dockspace->tabbedDockWindows.GetSize()).Get();
                 container->RemoveChild(lastChild);
             }
+        }
+    }
+
+    void FDockTabWell::SetActiveTab(Ref<FDockTabItem> tabItem)
+    {
+        int index = tabItems.IndexOf(tabItem);
+
+        if (index < 0)
+            return;
+
+        if (Ref<FDockspace> dockspace = owner.Lock())
+        {
+            dockspace->SetActiveTabIndex(index);
+        }
+    }
+
+    void FDockTabWell::ApplyStyle()
+    {
+        Super::ApplyStyle();
+
+        if (Ref<FDockspace> dockspace = owner.Lock())
+        {
+            dockspace->ApplyStyle();
         }
     }
 }

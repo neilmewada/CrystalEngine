@@ -225,6 +225,8 @@ namespace WidgetTests
 
         Title("Fusion Test");
 
+        ContentPadding(Vec4());
+
         Content(
             FAssignNew(FDockspace, dockspace)
             .HAlign(HAlign::Fill)
