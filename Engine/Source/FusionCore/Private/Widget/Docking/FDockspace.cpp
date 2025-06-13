@@ -39,7 +39,23 @@ namespace CE
                 .FillRatio(1.0f)
             )
         );
+
+        tabWell->owner = this;
     }
-    
+
+    void FDockspace::UpdateTabWell()
+    {
+        tabWell->UpdateTabWell();
+    }
+
+    void FDockspace::AddDockWindow(Ref<FDockWindow> dockWindow)
+    {
+        if (tabbedDockWindows.Exists(dockWindow))
+            return;
+
+        tabbedDockWindows.Add(dockWindow);
+
+        tabWell->UpdateTabWell();
+    }
 }
 

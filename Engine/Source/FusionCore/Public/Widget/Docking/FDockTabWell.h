@@ -3,9 +3,9 @@
 namespace CE
 {
     CLASS()
-    class FUSIONCORE_API FDockTabWell : public FWidget
+    class FUSIONCORE_API FDockTabWell : public FStyledWidget
     {
-        CE_CLASS(FDockTabWell, FWidget)
+        CE_CLASS(FDockTabWell, FStyledWidget)
     protected:
 
         FDockTabWell();
@@ -14,14 +14,19 @@ namespace CE
 
     public: // - Public API -
 
+        void UpdateTabWell();
 
     protected: // - Internal -
 
+        WeakRef<FDockspace> owner;
+
+        Ref<FHorizontalStack> container;
 
     public: // - Fusion Properties - 
 
 
         FUSION_WIDGET;
+        friend class FDockspace;
     };
     
 }

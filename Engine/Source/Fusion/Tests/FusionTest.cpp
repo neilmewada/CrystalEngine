@@ -226,10 +226,32 @@ namespace WidgetTests
         Title("Fusion Test");
 
         Content(
-            FNew(FDockspace)
+            FAssignNew(FDockspace, dockspace)
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
             .FillRatio(1.0f)
+        );
+
+        dockspace->AddDockWindow(
+            FNew(FDockWindow)
+            .Title("Dock 1")
+            .Child(
+                FNew(FLabel)
+                .FontSize(18)
+                .Text("This is first window")
+            )
+            .As<FDockWindow>()
+        );
+
+        dockspace->AddDockWindow(
+            FNew(FDockWindow)
+            .Title("Dock 2")
+            .Child(
+                FNew(FLabel)
+                .FontSize(18)
+                .Text("This is second window")
+            )
+            .As<FDockWindow>()
         );
     }
 

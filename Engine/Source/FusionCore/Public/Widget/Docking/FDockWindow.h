@@ -17,9 +17,13 @@ namespace CE
 
     protected: // - Internal -
 
+        void OnFusionPropertyModified(const CE::Name& propertyName) override;
+
+        WeakRef<FDockspace> ownerDockspace;
 
     public: // - Fusion Properties -
-        
+
+        FUSION_PROPERTY(String, Title);
 
         FUSION_WIDGET;
     };

@@ -10,7 +10,7 @@ namespace CE
     using FDockId = Uuid;
 
     ENUM(Flags)
-    enum class FDockTypeMask
+    enum class FDockTypeMask : u8
     {
         None = 0,
         Major = BIT(0),
@@ -51,10 +51,21 @@ namespace CE
 
         FDockId GetDockId() const { return dockId; }
 
+        void UpdateTabWell();
+
+        void AddDockWindow(Ref<FDockWindow> dockWindow);
+
+        void AddDockWindow(FDockWindow& dockWindow)
+        {
+            AddDockWindow(&dockWindow);
+        }
+
     protected: // - Internal -
 
         Ref<FDockTabWell> tabWell;
         Ref<FDockspaceSplitView> container;
+
+        Array<Ref<FDockWindow>> tabbedDockWindows;
 
         FDockId dockId;
 
@@ -66,6 +77,7 @@ namespace CE
         FUSION_PROPERTY(FDockTypeMask, DockspaceType);
 
         FUSION_WIDGET;
+        friend class FDockTabWell;
     };
     
 }
