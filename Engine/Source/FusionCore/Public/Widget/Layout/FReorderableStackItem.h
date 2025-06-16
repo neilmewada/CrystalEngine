@@ -18,6 +18,8 @@ namespace CE
 
         void OnAttachedToParent(FWidget* parent) override;
 
+        void OnPostComputeLayout() override;
+
     public: // - Public API -
 
         bool SupportsMouseEvents() const override { return true; }
@@ -29,6 +31,9 @@ namespace CE
         WeakRef<FReorderableStack> ownerStack;
 
         f32 startMousePosX = 0;
+        f32 lastMousePosX = 0;
+        f32 dragStartPosX = 0;
+        bool dragging = false;
 
     public: // - Fusion Properties - 
 

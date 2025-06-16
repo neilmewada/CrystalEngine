@@ -26,6 +26,35 @@ namespace CE
 
     }
 
+    void FDockTabWell::OnItemsRearranged()
+    {
+        Super::OnItemsRearranged();
+
+        if (Ref<FDockspace> dockspace = owner.Lock())
+        {
+            Array<Ref<FDockWindow>> allWindows = dockspace->tabbedDockWindows;
+
+            for (int i = 0; i < allWindows.GetSize(); ++i)
+            {
+                Ref<FDockWindow> dockWindow = allWindows[i];
+
+                int index = children.IndexOf(dockWindow->item);
+                if (index >= 0)
+                {
+                    dockspace->tabbedDockWindows[index] = dockWindow;
+                }
+            }
+
+            for (int i = 0; i < children.GetSize(); ++i)
+            {
+                if (Ref<FDockTabItem> item = CastTo<FDockTabItem>(children[i].Lock()))
+                {
+                    tabItems.Add(item);
+                }
+            }
+        }
+    }
+
     void FDockTabWell::UpdateTabWell()
     {
         tabItems.Clear();
@@ -50,6 +79,8 @@ namespace CE
 
                 tabItem->owner = this;
                 tabItem->isActive = (tabItem == dockspace->selectedTab);
+
+                dockWindow->item = tabItem;
 
                 tabItem->Title(dockWindow->Title());
 

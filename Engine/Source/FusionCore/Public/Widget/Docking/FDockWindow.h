@@ -20,12 +20,14 @@ namespace CE
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
         WeakRef<FDockspace> ownerDockspace;
+        Ref<FDockTabItem> item;
 
     public: // - Fusion Properties -
 
         FUSION_PROPERTY(String, Title);
 
         FUSION_WIDGET;
+        friend class FDockTabWell;
     };
     
 }

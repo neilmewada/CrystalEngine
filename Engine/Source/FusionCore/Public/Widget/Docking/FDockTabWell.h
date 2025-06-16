@@ -14,6 +14,8 @@ namespace CE
 
         void OnPaint(FPainter* painter) override;
 
+        void OnItemsRearranged() override;
+
     public: // - Public API -
 
         void UpdateTabWell();

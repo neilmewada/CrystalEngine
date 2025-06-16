@@ -161,6 +161,16 @@ namespace CE
 			return (TClass*)instance;
 		}
 
+    	template<typename TClass> requires TIsBaseClassOf<CE::Object, TClass>::Value
+		static Ref<TClass> CastTo(Ref<Object> instance)
+		{
+			if (instance == nullptr || !instance->IsOfType<TClass>())
+			{
+				return nullptr;
+			}
+			return (TClass*)instance.Get();
+		}
+
         virtual u64 ComputeMemoryFootprint();
 
 		Name GetPathInBundle();

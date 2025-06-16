@@ -28,6 +28,8 @@ namespace CE
 
         void OnActiveItemDragged(FDragEvent* dragEvent);
 
+        virtual void OnItemsRearranged() {}
+
         Ref<FReorderableStackItem> activeItem;
 
     public: // - Fusion Properties - 
