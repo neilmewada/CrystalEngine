@@ -47,11 +47,12 @@ namespace CE
                 Vec2 finalPos = GetComputedPosition() + Vec2(dragEvent->mousePosition.x - startMousePosX, 0);
                 finalPos.x = Math::Clamp(finalPos.x, 0.0f, GetParent()->GetComputedSize().width - GetComputedSize().width);
                 Vec2 thisSize = GetComputedSize();
-                f32 thisCenter = finalPos.x + thisSize.x / 2;
+                f32 thisCenter = finalPos.x;
 
                 if (Ref<FReorderableStack> owner = ownerStack.Lock())
                 {
                     owner->activeItem = this;
+                    int thisIndex = owner->children.IndexOf(this);
 
                     for (int i = 0; i < owner->children.GetSize(); ++i)
                     {
@@ -66,6 +67,17 @@ namespace CE
 
                             if (thisCenter >= childPos.x && thisCenter <= childPos.x + childSize.x)
                             {
+                                if (thisCenter < childCenter && thisIndex > i)
+                                {
+                                    owner->RemoveChild(this);
+                                    owner->InsertChild(i, this);
+                                    break;
+                                }
+
+                                if (thisCenter > childCenter && thisIndex < i)
+                                {
+
+                                }
                                 // TODO
                             }
                         }
