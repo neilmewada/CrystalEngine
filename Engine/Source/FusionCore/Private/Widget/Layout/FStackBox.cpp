@@ -19,11 +19,6 @@ namespace CE
 	{
 		ZoneScoped;
 
-		if (GetName() == "DebugStackBox")
-		{
-			String::IsAlphabet('a');
-		}
-
 		if (children.IsEmpty())
 		{
 			Super::CalculateIntrinsicSize();
@@ -84,11 +79,6 @@ namespace CE
 	void FStackBox::PlaceSubWidgets()
 	{
 		ZoneScoped;
-
-		if (GetName() == "DebugStackBox")
-		{
-			String::IsAlphabet('a');
-		}
 
 		Super::PlaceSubWidgets();
 
@@ -275,12 +265,10 @@ namespace CE
 					break;
 				case HAlign::Center:
 					child->computedSize.width = Math::Min(childIntrinsicSize.width, availableSize.width);
-					//child->computedPosition.x = curPos.x + (availableSize.width - childIntrinsicSize.width) * 0.5f;
 					child->computedPosition.x = curPos.x + child->m_Margin.left + (availableSize.width - child->computedSize.width) * 0.5f;
 					break;
 				case HAlign::Right:
 					child->computedSize.width = Math::Min(childIntrinsicSize.width, availableSize.width);
-					//child->computedPosition.x = curPos.x + (availableSize.width - childIntrinsicSize.width);
 					child->computedPosition.x = curPos.x + child->m_Margin.left + (availableSize.width - child->computedSize.width);
 					break;
 				}
@@ -290,7 +278,6 @@ namespace CE
 					child->computedSize.height = child->Margin().top + child->Margin().bottom +
 						child->Padding().top + child->Padding().bottom + child->MinHeight() +
 						remainingSize * child->m_FillRatio / totalFillRatio;
-					//child->computedSize.height = childIntrinsicSize.height + remainingSize * child->m_FillRatio / totalFillRatio;
 				}
 				else
 				{

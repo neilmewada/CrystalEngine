@@ -3,9 +3,9 @@
 namespace CE
 {
     CLASS()
-    class FUSIONCORE_API FDockTabItem : public FStyledWidget
+    class FUSIONCORE_API FDockTabItem : public FReorderableStackItem
     {
-        CE_CLASS(FDockTabItem, FStyledWidget)
+        CE_CLASS(FDockTabItem, FReorderableStackItem)
     protected:
 
         FDockTabItem();
@@ -31,6 +31,7 @@ namespace CE
 
         Ref<FLabel> tabTitle;
         WeakRef<FDockTabWell> owner;
+        f32 startMousePosX = 0;
 
         bool isActive = false;
         bool isHovered = false;

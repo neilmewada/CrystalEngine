@@ -64,6 +64,8 @@ namespace CE
             AddDockWindow(&dockWindow);
         }
 
+        bool CanDetach(Ref<FDockTabItem> dockTabItem);
+
     protected: // - Internal -
 
         Ref<FDockTabWell> tabWell;

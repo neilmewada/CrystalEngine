@@ -3,14 +3,16 @@
 namespace CE
 {
     CLASS()
-    class FUSIONCORE_API FDockTabWell : public FStyledWidget
+    class FUSIONCORE_API FDockTabWell : public FReorderableStack
     {
-        CE_CLASS(FDockTabWell, FStyledWidget)
+        CE_CLASS(FDockTabWell, FReorderableStack)
     protected:
 
         FDockTabWell();
 
         void Construct() override;
+
+        void OnPaint(FPainter* painter) override;
 
     public: // - Public API -
 
@@ -30,16 +32,14 @@ namespace CE
 
         WeakRef<FDockspace> owner;
 
-        Ref<FHorizontalStack> container;
-
         Array<Ref<FDockTabItem>> tabItems;
 
-    public: // - Fusion Properties - 
-
+    public: // - Fusion Properties -
 
         FUSION_WIDGET;
         friend class FDockspace;
         friend class FDockTabWellStyle;
+        friend class FDockTabItem;
     };
     
 }

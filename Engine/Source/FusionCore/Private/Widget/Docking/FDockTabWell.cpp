@@ -12,13 +12,18 @@ namespace CE
     {
         Super::Construct();
 
-        Child(
-            FAssignNew(FHorizontalStack, container)
-            .ContentHAlign(HAlign::Left)
-            .ContentVAlign(VAlign::Center)
-            .HAlign(HAlign::Fill)
-            .VAlign(VAlign::Fill)
-        );
+        (*this)
+        .ContentHAlign(HAlign::Left)
+        .ContentVAlign(VAlign::Center)
+        .HAlign(HAlign::Fill)
+        .VAlign(VAlign::Fill)
+        ;
+    }
+
+    void FDockTabWell::OnPaint(FPainter* painter)
+    {
+        Super::OnPaint(painter);
+
     }
 
     void FDockTabWell::UpdateTabWell()
@@ -32,13 +37,13 @@ namespace CE
                 Ref<FDockWindow> dockWindow = dockspace->tabbedDockWindows[i];
                 Ref<FDockTabItem> tabItem;
 
-                if (i < container->GetChildCount())
+                if (i < GetChildCount())
                 {
-                    tabItem = CastTo<FDockTabItem>(container->GetChild(i).Get());
+                    tabItem = CastTo<FDockTabItem>(GetChild(i).Get());
                 }
                 else
                 {
-                    container->AddChild(
+                    AddChild(
                         FAssignNew(FDockTabItem, tabItem)
                     );
                 }
@@ -52,10 +57,10 @@ namespace CE
             }
 
             // Remove extra tab items
-            while (dockspace->tabbedDockWindows.GetSize() < container->GetChildCount())
+            while (dockspace->tabbedDockWindows.GetSize() < GetChildCount())
             {
-                FWidget* lastChild = container->GetChild(dockspace->tabbedDockWindows.GetSize()).Get();
-                container->RemoveChild(lastChild);
+                FWidget* lastChild = GetChild(dockspace->tabbedDockWindows.GetSize()).Get();
+                RemoveChild(lastChild);
             }
         }
     }

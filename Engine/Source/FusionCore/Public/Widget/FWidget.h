@@ -114,6 +114,8 @@ namespace CE
 
         virtual FWidget* HitTest(Vec2 localMousePos);
 
+        FWidget* SelfHitTest(Vec2 localMousePos);
+
         virtual bool ChildExistsRecursive(FWidget* child) { return this == child; }
 
         virtual bool ParentExistsRecursive(FWidget* parent);

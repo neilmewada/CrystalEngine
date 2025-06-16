@@ -129,6 +129,23 @@ namespace CE
         return rect.Contains(localMousePos) ? this : nullptr;
     }
 
+    FWidget* FWidget::SelfHitTest(Vec2 localMousePos)
+    {
+        ZoneScoped;
+
+        if (!Enabled())
+            return nullptr;
+
+        Vec2 rectPos = computedPosition + m_Translation;
+        Vec2 rectSize = computedSize;
+
+        localMousePos = mouseTransform * Vec4(localMousePos.x, localMousePos.y, 0, 1);
+
+        Rect rect = Rect::FromSize(rectPos, rectSize);
+
+        return rect.Contains(localMousePos) ? this : nullptr;
+    }
+
     bool FWidget::ParentExistsRecursive(FWidget* parent)
     {
         ZoneScoped;

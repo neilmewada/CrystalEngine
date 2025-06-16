@@ -26,43 +26,26 @@ namespace CE
 
     void FDockTabItem::HandleEvent(FEvent* event)
     {
-        if (event->IsMouseEvent())
+        if (Ref<FDockTabWell> tabWell = owner.Lock())
         {
-            FMouseEvent* mouseEvent = (FMouseEvent*)event;
+            if (event->IsMouseEvent())
+            {
+                FMouseEvent* mouseEvent = (FMouseEvent*)event;
 
-            if (event->type == FEventType::MouseEnter)
-            {
-                isHovered = true;
-                ApplyStyle();
-            }
-            else if (event->type == FEventType::MouseLeave)
-            {
-                isHovered = false;
-                ApplyStyle();
-            }
-            else if (event->type == FEventType::MousePress)
-            {
-                SetActiveTab();
-            }
-        }
-
-        if (event->IsDragEvent())
-        {
-            FDragEvent* dragEvent = (FDragEvent*)event;
-
-            if (event->type == FEventType::DragBegin)
-            {
-                dragEvent->draggedWidget = this;
-                dragEvent->Consume(this);
-            }
-            else if (event->type == FEventType::DragMove)
-            {
-                dragEvent->draggedWidget = this;
-                dragEvent->Consume(this);
-            }
-            else if (event->type == FEventType::DragEnd)
-            {
-                
+                if (event->type == FEventType::MouseEnter)
+                {
+                    isHovered = true;
+                    ApplyStyle();
+                }
+                else if (event->type == FEventType::MouseLeave)
+                {
+                    isHovered = false;
+                    ApplyStyle();
+                }
+                else if (event->type == FEventType::MousePress)
+                {
+                    SetActiveTab();
+                }
             }
         }
 
@@ -71,15 +54,7 @@ namespace CE
 
     bool FDockTabItem::SupportsDragEvents() const
     {
-        if (Ref<FDockTabWell> tabWell = owner.Lock())
-        {
-            if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
-            {
-
-            }
-        }
-
-        return false;
+        return true;
     }
 
     void FDockTabItem::SetActiveTab()

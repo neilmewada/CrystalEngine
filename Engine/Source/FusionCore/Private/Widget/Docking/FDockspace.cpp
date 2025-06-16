@@ -81,5 +81,17 @@ namespace CE
             SetActiveTab(tabWell->GetTabItem(0));
         }
     }
+
+    bool FDockspace::CanDetach(Ref<FDockTabItem> dockTabItem)
+    {
+        if (tabbedDockWindows.GetSize() <= 1)
+            return false;
+
+        int index = tabWell->GetTabIndex(dockTabItem);
+        if (index < 0)
+            return false;
+
+        return true;
+    }
 }
 
