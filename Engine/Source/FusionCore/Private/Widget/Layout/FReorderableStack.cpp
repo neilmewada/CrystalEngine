@@ -428,7 +428,7 @@ namespace CE
         return thisHitTest;
     }
 
-    void FReorderableStack::OnActiveItemDragged(bool dragEnd)
+    void FReorderableStack::OnActiveItemDragged(FDragEvent* dragEvent)
     {
 
     }

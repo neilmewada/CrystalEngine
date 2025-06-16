@@ -26,7 +26,7 @@ namespace CE
 
     protected: // - Internal -
 
-        void OnActiveItemDragged(bool dragEnd);
+        void OnActiveItemDragged(FDragEvent* dragEvent);
 
         Ref<FReorderableStackItem> activeItem;
 

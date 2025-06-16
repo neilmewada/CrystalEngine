@@ -46,11 +46,32 @@ namespace CE
 
                 Vec2 finalPos = GetComputedPosition() + Vec2(dragEvent->mousePosition.x - startMousePosX, 0);
                 finalPos.x = Math::Clamp(finalPos.x, 0.0f, GetParent()->GetComputedSize().width - GetComputedSize().width);
+                Vec2 thisSize = GetComputedSize();
+                f32 thisCenter = finalPos.x + thisSize.x / 2;
 
                 if (Ref<FReorderableStack> owner = ownerStack.Lock())
                 {
                     owner->activeItem = this;
-                    owner->OnActiveItemDragged(false);
+
+                    for (int i = 0; i < owner->children.GetSize(); ++i)
+                    {
+                        if (Ref<FWidget> child = owner->children[i].Lock())
+                        {
+                            if (child == this)
+                                continue;
+
+                            Vec2 childPos = child->GetComputedPosition();
+                            Vec2 childSize = child->GetComputedSize();
+                            f32 childCenter = childPos.x + childSize.x / 2;
+
+                            if (thisCenter >= childPos.x && thisCenter <= childPos.x + childSize.x)
+                            {
+                                // TODO
+                            }
+                        }
+                    }
+
+                    owner->OnActiveItemDragged(dragEvent);
                 }
 
                 Translation(finalPos - GetComputedPosition());
@@ -60,7 +81,7 @@ namespace CE
                 if (Ref<FReorderableStack> owner = ownerStack.Lock())
                 {
                     owner->activeItem = nullptr;
-                    owner->OnActiveItemDragged(true);
+                    owner->OnActiveItemDragged(dragEvent);
                 }
 
                 Translation(Vec2());
