@@ -38,7 +38,8 @@ namespace RenderingTests
     friend class FStyleManager;\
     friend class FusionRenderer;\
     friend class FPainter;\
-    friend class FScrollBox;
+    friend class FScrollBox;\
+    friend class FReorderableStack;
 
 namespace CE
 {

@@ -47,21 +47,23 @@ namespace CE
                 Vec2 finalPos = GetComputedPosition() + Vec2(dragEvent->mousePosition.x - startMousePosX, 0);
                 finalPos.x = Math::Clamp(finalPos.x, 0.0f, GetParent()->GetComputedSize().width - GetComputedSize().width);
 
-                Translation(finalPos - GetComputedPosition());
-
                 if (Ref<FReorderableStack> owner = ownerStack.Lock())
                 {
                     owner->activeItem = this;
+                    owner->OnActiveItemDragged(false);
                 }
+
+                Translation(finalPos - GetComputedPosition());
             }
             else if (event->type == FEventType::DragEnd)
             {
-                Translation(Vec2());
-
                 if (Ref<FReorderableStack> owner = ownerStack.Lock())
                 {
                     owner->activeItem = nullptr;
+                    owner->OnActiveItemDragged(true);
                 }
+
+                Translation(Vec2());
             }
         }
 

@@ -26,6 +26,8 @@ namespace CE
 
     protected: // - Internal -
 
+        void OnActiveItemDragged(bool dragEnd);
+
         Ref<FReorderableStackItem> activeItem;
 
     public: // - Fusion Properties - 
