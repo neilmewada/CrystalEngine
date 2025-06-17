@@ -32,7 +32,7 @@ namespace CE
 
         Ref<FReorderableStackItem> activeItem;
 
-    public: // - Fusion Properties - 
+    public: // - Fusion Properties -
 
         FUSION_LAYOUT_PROPERTY(FStackBoxDirection, Direction);
         FUSION_LAYOUT_PROPERTY(CE::HAlign, ContentHAlign);

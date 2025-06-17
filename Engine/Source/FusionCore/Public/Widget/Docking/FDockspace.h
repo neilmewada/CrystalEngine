@@ -66,6 +66,8 @@ namespace CE
 
         bool CanDetach(Ref<FDockTabItem> dockTabItem);
 
+        Ref<FNativeContext> DetachItem(Ref<FDockTabItem> dockTabItem);
+
     protected: // - Internal -
 
         Ref<FDockTabWell> tabWell;
@@ -74,6 +76,9 @@ namespace CE
         Array<Ref<FDockWindow>> tabbedDockWindows;
 
         Ref<FDockTabItem> selectedTab;
+
+        FIELD()
+        SubClass<FWindow> detachedWindowClass;
 
         FDockId dockId;
 

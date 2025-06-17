@@ -4,9 +4,9 @@ namespace CE
 {
 
     CLASS()
-    class FUSIONCORE_API FWindow : public FCompoundWidget
+    class FUSIONCORE_API FWindow : public FStyledWidget
     {
-        CE_CLASS(FWindow, FCompoundWidget)
+        CE_CLASS(FWindow, FStyledWidget)
     public:
 
         FWindow();

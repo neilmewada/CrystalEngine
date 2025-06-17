@@ -17,13 +17,7 @@ namespace CE
 
     void FReorderableStackItem::HandleEvent(FEvent* event)
     {
-        if (event->IsMouseEvent())
-        {
-            FMouseEvent* mouseEvent = (FMouseEvent*)event;
-
-        }
-
-        if (event->IsDragEvent())
+        if (event->IsDragEvent() && !event->isConsumed)
         {
             FDragEvent* dragEvent = (FDragEvent*)event;
             dragging = true;
@@ -33,8 +27,8 @@ namespace CE
                 dragEvent->draggedWidget = this;
                 dragEvent->Consume(this);
 
-                startMousePosX = dragEvent->mousePosition.x;
-                lastMousePosX = startMousePosX;
+                startMousePos = dragEvent->mousePosition;
+                lastMousePos = startMousePos;
 
                 dragStartPosX = GetComputedPosition().x;
 
@@ -48,8 +42,8 @@ namespace CE
                 dragEvent->draggedWidget = this;
                 dragEvent->Consume(this);
 
-                lastMousePosX = dragEvent->mousePosition.x;
-                f32 finalPosX = dragStartPosX + dragEvent->mousePosition.x - startMousePosX;
+                lastMousePos = dragEvent->mousePosition;
+                f32 finalPosX = dragStartPosX + dragEvent->mousePosition.x - startMousePos.x;
                 finalPosX = Math::Clamp(finalPosX, 0.0f, GetParent()->GetComputedSize().width - GetComputedSize().width);
                 f32 thisStart = finalPosX;
                 f32 thisEnd = thisStart + GetComputedSize().width;
@@ -57,53 +51,67 @@ namespace CE
                 if (Ref<FReorderableStack> owner = ownerStack.Lock())
                 {
                     owner->activeItem = this;
-                    int thisIndex = owner->children.IndexOf(this);
+                    bool breakOut = false;
 
-                    for (int i = 0; i < owner->children.GetSize(); ++i)
+                    f32 deltaY = dragEvent->mousePosition.y - startMousePos.y;
+
+                    if (CanBeDetached() && owner->children.GetSize() > 1 &&
+                        Math::Abs(deltaY) > GetComputedSize().height)
                     {
-                        if (Ref<FWidget> child = owner->children[i].Lock())
+                        breakOut = DetachItem();
+                    }
+
+                    if (!breakOut)
+                    {
+                        int thisIndex = owner->children.IndexOf(this);
+
+                        for (int i = 0; i < owner->children.GetSize(); ++i)
                         {
-                            if (child == this)
-                                continue;
-
-                            Vec2 childPos = child->GetComputedPosition();
-                            Vec2 childSize = child->GetComputedSize();
-                            f32 childCenter = childPos.x + childSize.x / 2;
-
-                            if (thisStart >= childPos.x && thisStart <= childPos.x + childSize.x)
+                            if (Ref<FWidget> child = owner->children[i].Lock())
                             {
-                                if (thisStart < childCenter && thisIndex > i)
-                                {
-                                    owner->RemoveChild(this);
-                                    owner->InsertChild(i, this);
+                                if (child == this)
+                                    continue;
 
-                                    owner->OnItemsRearranged();
-                                    break;
+                                Vec2 childPos = child->GetComputedPosition();
+                                Vec2 childSize = child->GetComputedSize();
+                                f32 childCenter = childPos.x + childSize.x / 2;
+
+                                if (thisStart >= childPos.x && thisStart <= childPos.x + childSize.x)
+                                {
+                                    if (thisStart < childCenter && thisIndex > i)
+                                    {
+                                        owner->RemoveChild(this);
+                                        owner->InsertChild(i, this);
+
+                                        owner->OnItemsRearranged();
+                                        break;
+                                    }
                                 }
-                            }
 
-                            if (thisEnd >= childPos.x && thisEnd <= childPos.x + childSize.x)
-                            {
-                                if (thisEnd > childCenter && thisIndex < i)
+                                if (thisEnd >= childPos.x && thisEnd <= childPos.x + childSize.x)
                                 {
-                                    owner->RemoveChild(this);
-                                    owner->InsertChild(i, this);
+                                    if (thisEnd > childCenter && thisIndex < i)
+                                    {
+                                        owner->RemoveChild(this);
+                                        owner->InsertChild(i, this);
 
-                                    owner->OnItemsRearranged();
-                                    break;
+                                        owner->OnItemsRearranged();
+                                        break;
+                                    }
                                 }
                             }
                         }
+
+                        owner->OnActiveItemDragged(dragEvent);
                     }
 
-                    owner->OnActiveItemDragged(dragEvent);
+                    Translation(Vec2(finalPosX - GetComputedPosition().x, 0));
                 }
-
-                Translation(Vec2(finalPosX - GetComputedPosition().x, 0));
             }
             else if (event->type == FEventType::DragEnd)
             {
                 dragging = false;
+                dragEvent->Consume(this);
 
                 if (Ref<FReorderableStack> owner = ownerStack.Lock())
                 {
@@ -134,7 +142,7 @@ namespace CE
 
         if (dragging)
         {
-            f32 finalPosX = dragStartPosX + lastMousePosX - startMousePosX;
+            f32 finalPosX = dragStartPosX + lastMousePos.x - startMousePos.x;
             finalPosX = Math::Clamp(finalPosX, 0.0f, GetParent()->GetComputedSize().width - GetComputedSize().width);
 
             Translation(Vec2(finalPosX - GetComputedPosition().x, 0));

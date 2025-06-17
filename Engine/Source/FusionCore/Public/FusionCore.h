@@ -128,6 +128,8 @@ namespace CE
 
 #include "Window/FTitleBar.h"
 #include "Window/FWindow.h"
+#include "Window/FWindowControlButton.h"
+#include "Window/FToolWindow.h"
 #include "Window/FGameWindow.h"
 #include "Widget/FViewport.h"
 

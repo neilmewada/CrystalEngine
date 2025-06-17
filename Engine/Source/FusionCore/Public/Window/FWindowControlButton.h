@@ -13,7 +13,7 @@ namespace CE
     ENUM_CLASS(FWindowControlType);
 
     CLASS()
-    class FUSION_API FWindowControlButton : public FButton
+    class FUSIONCORE_API FWindowControlButton : public FButton
     {
         CE_CLASS(FWindowControlButton, FButton)
     protected:

@@ -16,6 +16,10 @@ namespace CE
 
     public: // - Public API -
 
+        bool CanBeDetached() override;
+
+        bool DetachItem() override;
+
         bool SupportsMouseEvents() const override { return true; }
 
         bool SupportsDragEvents() const override;
@@ -35,6 +39,8 @@ namespace CE
 
         bool isActive = false;
         bool isHovered = false;
+        bool shouldDetach = false;
+        bool isOutside = false;
 
     public: // - Fusion Properties - 
 

@@ -19,6 +19,8 @@ namespace CE
         m_AllowDocking = true;
         m_AllowSplitting = false;
         m_DockspaceType = FDockTypeMask::Minor;
+
+        detachedWindowClass = FToolWindow::StaticClass();
     }
 
     void FDockspace::Construct()
@@ -93,5 +95,27 @@ namespace CE
 
         return true;
     }
+
+    Ref<FNativeContext> FDockspace::DetachItem(Ref<FDockTabItem> dockTabItem)
+    {
+        if (!dockTabItem)
+            return nullptr;
+
+        Ref<FWindow> detachedWindow = FusionApplication::Get()->CreateNativeWindow(dockTabItem->Title(), dockTabItem->Title(), 512, 512, detachedWindowClass,
+        {
+            .maximised = false,
+            .fullscreen = false,
+            .resizable = false,
+            .hidden = false,
+            .windowFlags = PlatformWindowFlags::Utility | PlatformWindowFlags::DestroyOnClose
+        });
+
+        PlatformWindow* nativeWindow = detachedWindow->GetPlatformWindow();
+        nativeWindow->SetBorderless(true);
+        nativeWindow->SetAlwaysOnTop(true);
+
+        return nullptr;
+    }
+
 }
 

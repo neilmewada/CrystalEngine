@@ -229,6 +229,7 @@ namespace WidgetTests
 
         Content(
             FAssignNew(FDockspace, dockspace)
+            .DockspaceType(FDockTypeMask::Major)
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
             .FillRatio(1.0f)
@@ -252,6 +253,17 @@ namespace WidgetTests
                 FNew(FLabel)
                 .FontSize(18)
                 .Text("This is second window")
+            )
+            .As<FDockWindow>()
+        );
+
+        dockspace->AddDockWindow(
+            FNew(FDockWindow)
+            .Title("Dock 3")
+            .Child(
+                FNew(FLabel)
+                .FontSize(18)
+                .Text("This is third window")
             )
             .As<FDockWindow>()
         );

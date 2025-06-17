@@ -26,12 +26,16 @@ namespace CE
 
         bool SupportsDragEvents() const override { return true; }
 
+        virtual bool CanBeDetached() { return false; }
+
+        virtual bool DetachItem() { return false; }
+
     protected: // - Internal -
 
         WeakRef<FReorderableStack> ownerStack;
 
-        f32 startMousePosX = 0;
-        f32 lastMousePosX = 0;
+        Vec2 startMousePos;
+        Vec2 lastMousePos;
         f32 dragStartPosX = 0;
         bool dragging = false;
 

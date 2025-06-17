@@ -47,9 +47,67 @@ namespace CE
                     SetActiveTab();
                 }
             }
+
+            if (event->IsDragEvent())
+            {
+                FDragEvent* dragEvent = (FDragEvent*)event;
+
+                if (dragEvent->type == FEventType::DragMove && shouldDetach)
+                {
+                    dragEvent->draggedWidget = this;
+                    dragEvent->Consume(this);
+
+                    shouldDetach = false;
+                    isOutside = true;
+                }
+                else if (dragEvent->type == FEventType::DragEnd && isOutside)
+                {
+                    dragEvent->draggedWidget = this;
+                    dragEvent->Consume(this);
+
+                    shouldDetach = false;
+                    isOutside = false;
+                }
+            }
         }
 
         Super::HandleEvent(event);
+    }
+
+    bool FDockTabItem::CanBeDetached()
+    {
+        if (Ref<FDockTabWell> tabWell = owner.Lock())
+        {
+            if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
+            {
+                return dockspace->CanDetach(this);
+            }
+        }
+
+        return false;
+    }
+
+    bool FDockTabItem::DetachItem()
+    {
+        if (!CanBeDetached())
+            return false;
+
+        shouldDetach = false;
+
+        if (Ref<FDockTabWell> tabWell = owner.Lock())
+        {
+            if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
+            {
+                if (Ref<FNativeContext> detachedWindow = dockspace->DetachItem(this))
+                {
+
+
+                    shouldDetach = true;
+                }
+            }
+        }
+
+        return shouldDetach;
     }
 
     bool FDockTabItem::SupportsDragEvents() const
