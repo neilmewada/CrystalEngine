@@ -39,10 +39,7 @@ namespace CE
             }
             else if (event->type == FEventType::DragMove)
             {
-                dragEvent->draggedWidget = this;
-                dragEvent->Consume(this);
-
-                lastMousePos = dragEvent->mousePosition;
+            	lastMousePos = dragEvent->mousePosition;
                 f32 finalPosX = dragStartPosX + dragEvent->mousePosition.x - startMousePos.x;
                 finalPosX = Math::Clamp(finalPosX, 0.0f, GetParent()->GetComputedSize().width - GetComputedSize().width);
                 f32 thisStart = finalPosX;
@@ -51,17 +48,16 @@ namespace CE
                 if (Ref<FReorderableStack> owner = ownerStack.Lock())
                 {
                     owner->activeItem = this;
-                    bool breakOut = false;
+					Ref<FReorderableStackItem> detachedItem = nullptr;
 
                     f32 deltaY = dragEvent->mousePosition.y - startMousePos.y;
 
-                    if (CanBeDetached() && owner->children.GetSize() > 1 &&
-                        Math::Abs(deltaY) > GetComputedSize().height)
+                    if (CanBeDetached() && Math::Abs(deltaY) > GetComputedSize().height)
                     {
-                        breakOut = DetachItem();
+                        detachedItem = DetachItem();
                     }
 
-                    if (!breakOut)
+                    if (detachedItem == nullptr)
                     {
                         int thisIndex = owner->children.IndexOf(this);
 
@@ -102,7 +98,15 @@ namespace CE
                             }
                         }
 
+                        dragEvent->draggedWidget = this;
+                        dragEvent->Consume(this);
+
                         owner->OnActiveItemDragged(dragEvent);
+                    }
+                    else
+                    {
+                    	dragEvent->draggedWidget = detachedItem.Get();
+                        dragEvent->Consume(this);
                     }
 
                     Translation(Vec2(finalPosX - GetComputedPosition().x, 0));

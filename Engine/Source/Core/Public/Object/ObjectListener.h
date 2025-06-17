@@ -25,7 +25,7 @@ namespace CE
 
         static void Trigger(Uuid object, const Name& fieldName);
 
-        static SharedMutex mutex;
+        static SharedRecursiveMutex mutex;
         static HashMap<Uuid, Array<IObjectUpdateListener*>> listeners;
 
         friend class Object;

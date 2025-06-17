@@ -18,6 +18,13 @@ namespace CE
 
         PlatformWindow* GetPlatformWindow();
 
+        virtual void SetWindowContent(FWidget& content);
+
+        void SetWindowContent(Ref<FWidget> content)
+        {
+            SetWindowContent(*content);
+        }
+
     protected:
 
         void OnPaint(FPainter* painter) override;

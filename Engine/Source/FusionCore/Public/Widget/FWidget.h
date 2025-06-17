@@ -25,6 +25,8 @@ namespace CE
 
         FFusionContext* GetContext();
 
+        Ref<FNativeContext> GetNativeContext();
+
         virtual void CalculateIntrinsicSize();
 
         virtual void PlaceSubWidgets();

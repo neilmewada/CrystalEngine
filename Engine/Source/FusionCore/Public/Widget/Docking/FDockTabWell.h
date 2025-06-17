@@ -24,6 +24,8 @@ namespace CE
 
         Ref<FDockTabItem> GetTabItem(int index);
 
+		void RemoveTabItem(Ref<FDockTabItem> tabItem);
+
         Ref<FDockspace> GetDockspace() { return owner.Lock(); }
 
         void SetActiveTab(Ref<FDockTabItem> tabItem);

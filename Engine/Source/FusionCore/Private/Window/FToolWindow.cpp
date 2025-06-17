@@ -24,6 +24,12 @@ namespace CE
         minimizeButton->SetInteractionEnabled(interactable);
     }
 
+    void FToolWindow::SetWindowContent(FWidget& contentWidget)
+    {
+        this->content->RemoveAllChildren();
+        this->content->AddChild(contentWidget);
+    }
+
     void FToolWindow::Construct()
     {
         Super::Construct();

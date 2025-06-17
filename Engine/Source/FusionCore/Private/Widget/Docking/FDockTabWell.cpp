@@ -106,6 +106,11 @@ namespace CE
         return tabItems[index];
     }
 
+    void FDockTabWell::RemoveTabItem(Ref<FDockTabItem> tabItem)
+    {
+        tabItems.Remove(tabItem);
+    }
+
     void FDockTabWell::SetActiveTab(Ref<FDockTabItem> tabItem)
     {
         if (Ref<FDockspace> dockspace = owner.Lock())

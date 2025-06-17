@@ -66,7 +66,7 @@ namespace CE
 
         bool CanDetach(Ref<FDockTabItem> dockTabItem);
 
-        Ref<FNativeContext> DetachItem(Ref<FDockTabItem> dockTabItem);
+        Ref<FDockTabItem> DetachItem(Ref<FDockTabItem> dockTabItem);
 
     protected: // - Internal -
 
@@ -86,6 +86,7 @@ namespace CE
 
         FUSION_PROPERTY(bool, AllowDocking);
         FUSION_PROPERTY(bool, AllowSplitting);
+        FUSION_PROPERTY(bool, DestroyWhenEmpty);
 
         FUSION_PROPERTY(FDockTypeMask, DockspaceType);
 

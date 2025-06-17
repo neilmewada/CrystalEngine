@@ -28,7 +28,7 @@ namespace CE
 
         virtual bool CanBeDetached() { return false; }
 
-        virtual bool DetachItem() { return false; }
+        virtual Ref<FReorderableStackItem> DetachItem() { return nullptr; }
 
     protected: // - Internal -
 

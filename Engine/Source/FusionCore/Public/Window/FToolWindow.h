@@ -15,6 +15,8 @@ namespace CE
         void SetMaximizeButton(bool interactable);
         void SetMinimizeButton(bool interactable);
 
+        void SetWindowContent(FWidget& content) override;
+
     protected:
 
         void Construct() override;

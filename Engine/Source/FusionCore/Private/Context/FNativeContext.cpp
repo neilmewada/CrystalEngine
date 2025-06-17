@@ -32,7 +32,7 @@ namespace CE
 			return nullptr;
 		}
 
-		FNativeContext* nativeContext = CreateObject<FNativeContext>(outer, name);
+		FNativeContext* nativeContext = CreateObject<FNativeContext>(outer, FixObjectName(name));
 		nativeContext->platformWindow = platformWindow;
 		nativeContext->windowDpi = platformWindow->GetWindowDpi();
 		nativeContext->scaleFactor = FusionApplication::Get()->GetDefaultScalingFactor();
@@ -283,7 +283,6 @@ namespace CE
 
 	f32 FNativeContext::GetScaling() const
 	{
-        //return 1.0f;
 		return (f32)windowDpi / 96.0f * scaleFactor;
 	}
 
@@ -321,7 +320,13 @@ namespace CE
 
 		Super::TickInput();
 
-		
+		if (updateWindowPos)
+		{
+			updateWindowPos = false;
+
+			platformWindow->SetWindowPosition(windowPosToSet);
+			windowPosToSet = {};
+		}
 	}
 
 	void FNativeContext::DoLayout()
@@ -604,6 +609,12 @@ namespace CE
 			return false;
 
 		return platformWindow->IsMinimized();
+	}
+
+	void FNativeContext::SetWindowPosition(Vec2i newPos)
+	{
+		windowPosToSet = newPos;
+		updateWindowPos = true;
 	}
 
 	bool FNativeContext::WindowDragHitTest(PlatformWindow* window, Vec2 position)

@@ -52,21 +52,62 @@ namespace CE
             {
                 FDragEvent* dragEvent = (FDragEvent*)event;
 
-                if (dragEvent->type == FEventType::DragMove && shouldDetach)
+                if (dragEvent->type == FEventType::DragMove && detached)
                 {
                     dragEvent->draggedWidget = this;
                     dragEvent->Consume(this);
 
-                    shouldDetach = false;
-                    isOutside = true;
+                    if (Ref<FNativeContext> nativeContext = GetNativeContext())
+                    {
+	                    if (PlatformWindow* nativeWindow = nativeContext->GetPlatformWindow())
+	                    {
+                            if (isFirstDrag)
+                            {
+                                isFirstDrag = false;
+
+                                f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+#if PLATFORM_MAC
+                                scaling = 1;
+#elif PLATFORM_LINUX
+                                scaling *= FusionApplication::Get()->GetDefaultScalingFactor();
+#endif
+
+                                Vec2 globalPos = GetGlobalPosition();
+
+                                Vec2 tabItemScreenPos = nativeContext->GlobalToScreenSpacePosition(globalPos);
+                                Vec2 tabItemScreenSize = GetComputedSize();
+
+                                nativeWindow->SetWindowPosition((tabItemScreenPos - globalPos * scaling + dragEvent->mousePosition).ToVec2i());
+                            }
+                            else
+                            {
+                                f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+#if PLATFORM_MAC
+                                scaling = 1;
+#elif PLATFORM_LINUX
+                                scaling *= FusionApplication::Get()->GetDefaultScalingFactor();
+#endif
+
+                                Vec2 newPos = nativeWindow->GetWindowPosition().ToVec2() + (dragEvent->mousePosition - dragEvent->prevMousePosition) * scaling;
+                                nativeContext->SetWindowPosition(newPos.ToVec2i());
+                            }
+	                    }
+                    }
                 }
-                else if (dragEvent->type == FEventType::DragEnd && isOutside)
+                else if (dragEvent->type == FEventType::DragEnd && detached)
                 {
                     dragEvent->draggedWidget = this;
                     dragEvent->Consume(this);
 
-                    shouldDetach = false;
-                    isOutside = false;
+                    detached = false;
+
+                    if (Ref<FNativeContext> nativeContext = GetNativeContext())
+                    {
+                        if (PlatformWindow* nativeWindow = nativeContext->GetPlatformWindow())
+                        {
+                            nativeWindow->SetOpacity(1.0f);
+                        }
+                    }
                 }
             }
         }
@@ -87,27 +128,25 @@ namespace CE
         return false;
     }
 
-    bool FDockTabItem::DetachItem()
+    Ref<FReorderableStackItem> FDockTabItem::DetachItem()
     {
         if (!CanBeDetached())
-            return false;
+            return nullptr;
 
-        shouldDetach = false;
+        detached = false;
 
         if (Ref<FDockTabWell> tabWell = owner.Lock())
         {
             if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
             {
-                if (Ref<FNativeContext> detachedWindow = dockspace->DetachItem(this))
+                if (Ref<FDockTabItem> detachedTabItem = dockspace->DetachItem(this))
                 {
-
-
-                    shouldDetach = true;
+                    return detachedTabItem;
                 }
             }
         }
 
-        return shouldDetach;
+        return nullptr;
     }
 
     bool FDockTabItem::SupportsDragEvents() const

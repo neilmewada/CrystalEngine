@@ -38,6 +38,11 @@ namespace CE
         return nativeContext->GetPlatformWindow();
     }
 
+    void FWindow::SetWindowContent(FWidget& content)
+    {
+        Child(content);
+    }
+
     void FWindow::OnPaint(FPainter* painter)
     {
         bool pushed = false;

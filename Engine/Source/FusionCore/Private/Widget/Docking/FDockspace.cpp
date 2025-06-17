@@ -19,8 +19,9 @@ namespace CE
         m_AllowDocking = true;
         m_AllowSplitting = false;
         m_DockspaceType = FDockTypeMask::Minor;
+        m_DestroyWhenEmpty = false;
 
-        detachedWindowClass = FToolWindow::StaticClass();
+        detachedWindowClass = FWindow::StaticClass();
     }
 
     void FDockspace::Construct()
@@ -65,7 +66,15 @@ namespace CE
 
         container->RemoveAllChildren();
 
+        if (tabbedDockWindows.IsEmpty())
+        {
+            GetContext()->QueueDestroy();
+	        return;
+        }
+
         int activeTabIndex = tabWell->GetTabIndex(selectedTab);
+        activeTabIndex = Math::Clamp<int>(activeTabIndex, 0, tabbedDockWindows.GetSize() - 1);
+
         container->AddChild(tabbedDockWindows[activeTabIndex].Get());
         tabbedDockWindows[activeTabIndex]->FillRatio(1.0f);
     }
@@ -86,7 +95,7 @@ namespace CE
 
     bool FDockspace::CanDetach(Ref<FDockTabItem> dockTabItem)
     {
-        if (tabbedDockWindows.GetSize() <= 1)
+        if (!m_DestroyWhenEmpty && tabbedDockWindows.GetSize() <= 1)
             return false;
 
         int index = tabWell->GetTabIndex(dockTabItem);
@@ -96,25 +105,64 @@ namespace CE
         return true;
     }
 
-    Ref<FNativeContext> FDockspace::DetachItem(Ref<FDockTabItem> dockTabItem)
+    Ref<FDockTabItem> FDockspace::DetachItem(Ref<FDockTabItem> dockTabItem)
     {
         if (!dockTabItem)
             return nullptr;
 
-        Ref<FWindow> detachedWindow = FusionApplication::Get()->CreateNativeWindow(dockTabItem->Title(), dockTabItem->Title(), 512, 512, detachedWindowClass,
+        int index = tabWell->GetTabIndex(dockTabItem);
+        if (index < 0 || index >= tabbedDockWindows.GetSize())
+            return nullptr;
+
+        Ref<FDockWindow> dockWindow = tabbedDockWindows[index];
+        if (!dockWindow)
+            return nullptr;
+
+        if (selectedTab == dockTabItem)
+        {
+            selectedTab = nullptr;
+		}
+
+		tabWell->RemoveTabItem(dockTabItem);
+		tabbedDockWindows.RemoveAt(index);
+
+        UpdateTabs();
+
+        Ref<FWindow> detachedWindow = FusionApplication::Get()->CreateNativeWindow(dockTabItem->Title(), dockTabItem->Title(), 
+            512, 512, 
+            detachedWindowClass,
         {
             .maximised = false,
             .fullscreen = false,
             .resizable = false,
             .hidden = false,
-            .windowFlags = PlatformWindowFlags::Utility | PlatformWindowFlags::DestroyOnClose
+            .windowFlags = PlatformWindowFlags::DestroyOnClose
         });
 
         PlatformWindow* nativeWindow = detachedWindow->GetPlatformWindow();
         nativeWindow->SetBorderless(true);
         nativeWindow->SetAlwaysOnTop(true);
+        nativeWindow->SetOpacity(0.4f);
 
-        return nullptr;
+        Ref<FDockspace> newDockspace = nullptr;
+
+        detachedWindow->SetWindowContent(
+            FAssignNew(FDockspace, newDockspace)
+            .DockspaceType(DockspaceType())
+            .DestroyWhenEmpty(true)
+            .HAlign(HAlign::Fill)
+            .VAlign(VAlign::Fill)
+            .FillRatio(1.0f)
+        );
+
+        newDockspace->AddDockWindow(dockWindow);
+
+        Ref<FDockTabItem> newTabItem = newDockspace->GetDockTabWell()->GetTabItem(0);
+        newTabItem->detached = true;
+
+        FusionApplication::Get()->GetRootContext()->SetFocusWidget(newTabItem.Get());
+
+        return newTabItem;
     }
 
 }

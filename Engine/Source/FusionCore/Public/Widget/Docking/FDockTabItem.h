@@ -18,7 +18,7 @@ namespace CE
 
         bool CanBeDetached() override;
 
-        bool DetachItem() override;
+        Ref<FReorderableStackItem> DetachItem() override;
 
         bool SupportsMouseEvents() const override { return true; }
 
@@ -39,8 +39,8 @@ namespace CE
 
         bool isActive = false;
         bool isHovered = false;
-        bool shouldDetach = false;
-        bool isOutside = false;
+        bool detached = false;
+        bool isFirstDrag = true;
 
     public: // - Fusion Properties - 
 
@@ -48,6 +48,7 @@ namespace CE
 
         FUSION_WIDGET;
         friend class FDockTabWell;
+        friend class FDockspace;
     };
     
 }

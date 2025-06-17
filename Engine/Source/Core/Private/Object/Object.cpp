@@ -7,7 +7,7 @@ namespace CE
 	static HashSet<Ref<Object>> gRootObjects{};
 	static SharedMutex gRootObjectsMutex{};
 
-	SharedMutex ObjectListener::mutex{};
+	SharedRecursiveMutex ObjectListener::mutex{};
 	HashMap<Uuid, Array<IObjectUpdateListener*>> ObjectListener::listeners{};
 
 	void ObjectListener::AddListener(Uuid target, IObjectUpdateListener* listener)

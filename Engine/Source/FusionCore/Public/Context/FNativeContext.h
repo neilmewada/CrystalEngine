@@ -69,6 +69,8 @@ namespace CE
 		bool IsMaximized();
 		bool IsMinimized();
 
+		void SetWindowPosition(Vec2i newPos);
+
 	protected:
 
 		bool WindowDragHitTest(PlatformWindow* window, Vec2 position);
@@ -101,6 +103,8 @@ namespace CE
 		Array<ImageScopeAttachmentDescriptor> shaderReadOnlyAttachmentDependencies;
 		Array<ImageScopeAttachmentDescriptor> shaderWriteAttachmentDependencies;
 
+		Vec2i windowPosToSet;
+		bool updateWindowPos = false;
 		
 		FusionRenderer2* renderer2 = nullptr;
 		FPainter* painter = nullptr;

@@ -28,6 +28,23 @@ namespace CE
         return context;
     }
 
+    Ref<FNativeContext> FWidget::GetNativeContext()
+    {
+        FFusionContext* context = GetContext();
+        if (!context)
+            return nullptr;
+
+        while (context != nullptr)
+        {
+            if (context->IsOfType<FNativeContext>())
+                return CastTo<FNativeContext>(context);
+
+            context = context->GetParentContext();
+        }
+
+        return nullptr;
+    }
+
     void FWidget::OnPaint(FPainter* painter)
     {
         ZoneScoped;
