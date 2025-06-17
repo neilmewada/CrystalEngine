@@ -246,8 +246,8 @@ namespace CE
                     rowWidget->treeView = treeView;
                     rowWidget->isHovered = false;
 
-                    auto ctx = GetContext();
-                    rowWidget->SetContextRecursively(ctx);
+                    Ref<FFusionContext> ctx = GetContext();
+                    rowWidget->SetContextRecursively(ctx.Get());
                     rowWidget->ApplyStyleRecursively();
 
                     childIndex++;

@@ -483,7 +483,7 @@ namespace CE
 
     void FTextInputLabel::RecalculateCharacterOffsets()
     {
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (!context)
             return;
 

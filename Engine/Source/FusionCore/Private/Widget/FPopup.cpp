@@ -26,7 +26,7 @@ namespace CE
         if (!isShown)
             return;
 
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (context)
         {
             context->ClosePopup(this);
@@ -78,7 +78,7 @@ namespace CE
         else if (event->type == FEventType::NativeWindowExposed && m_AutoClose)
         {
             FNativeEvent* nativeEvent = static_cast<FNativeEvent*>(event);
-            FFusionContext* context = GetContext();
+            Ref<FFusionContext> context = GetContext();
 
             if ((isNativePopup && context != nullptr && context->ParentContextExistsRecursive(nativeEvent->nativeContext))||
                 (!isNativePopup && context == nativeEvent->nativeContext))

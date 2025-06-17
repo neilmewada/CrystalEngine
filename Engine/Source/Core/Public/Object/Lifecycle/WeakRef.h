@@ -218,7 +218,7 @@ namespace CE
                 return nullptr;
             }
             object = control->GetObject();
-            if (object == nullptr)
+            if (object == nullptr || control->IsDestroyed())
             {
                 return nullptr;
             }
@@ -235,7 +235,7 @@ namespace CE
 
             object = control->GetObject();
 
-            return object == nullptr;
+            return object == nullptr || control->IsDestroyed();
         }
 
         bool IsValid() const
@@ -256,7 +256,7 @@ namespace CE
                 throw NullPointerException("Reference is NULL!");
             }
             object = control->GetObject();
-            if (object == nullptr)
+            if (object == nullptr || control->IsDestroyed())
             {
                 throw NullPointerException("Object is destroyed!");
             }
@@ -271,7 +271,7 @@ namespace CE
                 throw NullPointerException("Reference is NULL!");
             }
             object = control->GetObject();
-            if (object == nullptr)
+            if (object == nullptr || control->IsDestroyed())
             {
                 throw NullPointerException("Object is destroyed!");
             }

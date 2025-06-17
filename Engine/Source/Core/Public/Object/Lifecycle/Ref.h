@@ -180,7 +180,7 @@ namespace CE
                 return nullptr;
             }
             object = control->GetObject();
-            if (object == nullptr)
+            if (object == nullptr || control->IsDestroyed())
             {
                 return nullptr;
             }
@@ -195,7 +195,7 @@ namespace CE
                 throw NullPointerException("Reference is NULL!");
             }
             object = control->GetObject();
-            if (object == nullptr)
+            if (object == nullptr || control->IsDestroyed())
             {
                 throw NullPointerException("Object is destroyed!");
             }
@@ -210,7 +210,7 @@ namespace CE
                 throw NullPointerException("Reference is NULL!");
             }
             object = control->GetObject();
-            if (object == nullptr)
+            if (object == nullptr || control->IsDestroyed())
             {
                 throw NullPointerException("Object is destroyed!");
             }
@@ -227,7 +227,7 @@ namespace CE
 
             object = control->GetObject();
 
-            return object == nullptr;
+            return object == nullptr || control->IsDestroyed();
         }
 
         //! @brief Returns true if the pointer is neither a nullptr nor a destroyed object. 

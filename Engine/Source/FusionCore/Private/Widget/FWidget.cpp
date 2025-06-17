@@ -19,18 +19,18 @@ namespace CE
         
     }
 
-    FFusionContext* FWidget::GetContext()
+    Ref<FFusionContext> FWidget::GetContext()
     {
         if (!context && parent)
         {
             context = parent->GetContext();
         }
-        return context;
+        return context.Lock();
     }
 
     Ref<FNativeContext> FWidget::GetNativeContext()
     {
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (!context)
             return nullptr;
 
@@ -213,7 +213,7 @@ namespace CE
     {
         ZoneScoped;
 
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (context)
         {
             context->SetFocusWidget(this);
@@ -224,7 +224,7 @@ namespace CE
     {
         ZoneScoped;
 
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (IsFocused() && context)
         {
             context->SetFocusWidget(parent.Get());
@@ -465,7 +465,7 @@ namespace CE
 
     void FWidget::MarkLayoutDirty()
     {
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (context)
         {
             context->MarkLayoutDirty();
@@ -474,7 +474,7 @@ namespace CE
 
     void FWidget::MarkDirty()
     {
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (context)
         {
             context->MarkDirty();
@@ -537,7 +537,7 @@ namespace CE
         m_Style = nullptr;
         this->styleKey = styleKey;
 
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (!context)
             return *this;
 

@@ -10,7 +10,7 @@ namespace CE
 
     void FLabel::CalculateIntrinsicSize()
     {
-		FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (!context)
         {
             Super::CalculateIntrinsicSize();

@@ -23,7 +23,7 @@ namespace CE
 
         // - Public API -
 
-        FFusionContext* GetContext();
+        Ref<FFusionContext> GetContext();
 
         Ref<FNativeContext> GetNativeContext();
 
@@ -214,7 +214,7 @@ namespace CE
     private:  // - Fields -
 
         FIELD()
-        FFusionContext* context = nullptr;
+        WeakRef<FFusionContext> context = nullptr;
 
         FIELD()
         WeakRef<FWidget> parent = nullptr;

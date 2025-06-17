@@ -87,7 +87,7 @@ namespace CE
                                 .ControlType(FWindowControlType::Minimize)
                                 .OnClicked([this]
                                     {
-                                        static_cast<FNativeContext*>(GetContext())->Minimize();
+                                        CastTo<FNativeContext>(GetContext())->Minimize();
                                     })
                                 .Name("WindowMinimizeButton")
                                 .Style("Button.WindowControl"),
@@ -96,7 +96,7 @@ namespace CE
                                 .ControlType(FWindowControlType::Maximize)
                                 .OnClicked([this]
                                     {
-                                        FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
+                                        Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext());
                                         if (nativeContext->IsMaximized())
                                         {
                                             nativeContext->Restore();

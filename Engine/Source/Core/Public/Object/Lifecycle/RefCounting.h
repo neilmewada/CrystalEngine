@@ -34,6 +34,8 @@ namespace CE
 
 			Object* GetObject();
 
+			bool IsDestroyed();
+
 		private:
 
 			~RefCountControl();

@@ -309,7 +309,7 @@ namespace CE
 
 		if (popup->isNativePopup)
 		{
-			FFusionContext* popupContext = popup->GetContext();
+			Ref<FFusionContext> popupContext = popup->GetContext();
 			if (popupContext)
 			{
 				popupContext->QueueDestroy();

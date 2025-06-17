@@ -74,6 +74,13 @@ namespace CE::Internal
 		return retVal;
 	}
 
+	bool RefCountControl::IsDestroyed()
+	{
+		LockGuard guard{ lock };
+
+		return objectState == Destroyed;
+	}
+
 	RefCountControl::~RefCountControl()
 	{
 
