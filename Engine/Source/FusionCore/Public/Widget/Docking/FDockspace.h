@@ -53,7 +53,12 @@ namespace CE
 
         Ref<FDockTabWell> GetDockTabWell() const { return tabWell; }
 
+        Ref<FDockTabItem> GetDockTabItem(int index);
+
         void SetActiveTab(Ref<FDockTabItem> tabItem);
+        void SetActiveTab(int index);
+
+        int GetDockedWindowIndex(Ref<FDockWindow> dockedWindow);
 
         void UpdateTabs();
 
@@ -68,6 +73,14 @@ namespace CE
 
         Ref<FDockTabItem> DetachItem(Ref<FDockTabItem> dockTabItem);
 
+        bool RemoveDockItem(Ref<FDockTabItem> dockTabItem);
+
+		Ref<FDockWindow> GetTabbedDockWindow(int index) { return tabbedDockWindows[index]; }
+
+        Ref<FDockWindow> GetTabbedDockWindow(Ref<FDockTabItem> dockTabItem);
+
+        SubClass<FWindow> GetDetachedWindowClass() const { return detachedWindowClass; }
+
     protected: // - Internal -
 
         Ref<FDockTabWell> tabWell;
@@ -79,6 +92,9 @@ namespace CE
 
         FIELD()
         SubClass<FWindow> detachedWindowClass;
+
+        FIELD()
+        Vec2i originalWindowSize;
 
         FDockId dockId;
 
@@ -93,6 +109,7 @@ namespace CE
         FUSION_WIDGET;
         friend class FDockTabWell;
         friend class FDockspaceStyle;
+        friend class FDockTabItem;
     };
     
 }

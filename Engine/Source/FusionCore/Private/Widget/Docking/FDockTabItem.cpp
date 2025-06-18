@@ -5,7 +5,7 @@ namespace CE
 
     FDockTabItem::FDockTabItem()
     {
-
+        m_Detachable = true;
     }
 
     void FDockTabItem::Construct()
@@ -52,46 +52,66 @@ namespace CE
             {
                 FDragEvent* dragEvent = (FDragEvent*)event;
 
-                if (dragEvent->type == FEventType::DragMove && detached)
+                if (dragEvent->type == FEventType::DragMove && joined)
+                {
+                    startMousePos = dragEvent->mousePosition;
+                    lastMousePos = startMousePos;
+
+                    dragStartPosX = GetComputedPosition().x;
+
+                    if (Ref<FFusionContext> context = GetContext())
+                    {
+                        dragStartPosX += dragEvent->mousePosition.x - GetGlobalPosition().x - GetComputedSize().width / 2.0f;
+                    }
+
+                    if (Ref<FReorderableStack> owner = ownerStack.Lock())
+                    {
+                        owner->SetActiveItem(this);
+                    }
+
+                    joined = false;
+                }
+                else if (dragEvent->type == FEventType::DragMove && detached)
                 {
                     dragEvent->draggedWidget = this;
                     dragEvent->Consume(this);
 
                     if (Ref<FNativeContext> nativeContext = GetNativeContext())
                     {
-	                    if (PlatformWindow* nativeWindow = nativeContext->GetPlatformWindow())
-	                    {
-                            if (isFirstDrag)
+                        Vec2 windowPos = nativeContext->GlobalToScreenSpacePosition(dragEvent->mousePosition) - Vec2(30, 20);
+                        nativeContext->SetWindowPosition(windowPos.ToVec2i());
+                    }
+
+                    Ref<FDockspace> thisDockspace = tabWell->GetDockspace();
+
+                    if (thisDockspace && dragEvent->dropTarget && dragEvent->dropTarget->IsOfType<FDockTabWell>() && dragEvent->dropTarget != tabWell)
+                    {
+                        Ref<FDockTabWell> dropTabWell = CastTo<FDockTabWell>(dragEvent->dropTarget);
+                        Ref<FDockspace> dropDockspace = dropTabWell->GetDockspace();
+
+                        int index = tabWell->GetTabIndex(this);
+
+                        if (dropDockspace && index >= 0)
+                        {
+	                        if (Ref<FDockWindow> dockWindow = thisDockspace->GetTabbedDockWindow(index))
                             {
-                                isFirstDrag = false;
+                            	thisDockspace->RemoveDockItem(this);
+                                dropDockspace->AddDockWindow(dockWindow);
 
-                                f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
-#if PLATFORM_MAC
-                                scaling = 1;
-#elif PLATFORM_LINUX
-                                scaling *= FusionApplication::Get()->GetDefaultScalingFactor();
-#endif
+                                int tabIndex = dropDockspace->GetDockedWindowIndex(dockWindow);
 
-                                Vec2 globalPos = GetGlobalPosition();
+	                            if (Ref<FDockTabItem> newTabItem = dropDockspace->GetDockTabItem(tabIndex))
+                                {
+                                    dropDockspace->SetActiveTab(newTabItem);
 
-                                Vec2 tabItemScreenPos = nativeContext->GlobalToScreenSpacePosition(globalPos);
-                                Vec2 tabItemScreenSize = GetComputedSize();
+                                    newTabItem->joined = true;
 
-                                nativeWindow->SetWindowPosition((tabItemScreenPos - globalPos * scaling + dragEvent->mousePosition).ToVec2i());
+                                    dragEvent->draggedWidget = newTabItem.Get();
+
+                                    newTabItem->Focus();
+                                }
                             }
-                            else
-                            {
-                                f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
-#if PLATFORM_MAC
-                                scaling = 1;
-#elif PLATFORM_LINUX
-                                scaling *= FusionApplication::Get()->GetDefaultScalingFactor();
-#endif
-
-                                Vec2 newPos = nativeWindow->GetWindowPosition().ToVec2() + (dragEvent->mousePosition - dragEvent->prevMousePosition) * scaling;
-                                nativeContext->SetWindowPosition(newPos.ToVec2i());
-                            }
-	                    }
+                        }
                     }
                 }
                 else if (dragEvent->type == FEventType::DragEnd && detached)
@@ -101,11 +121,64 @@ namespace CE
 
                     detached = false;
 
-                    if (Ref<FNativeContext> nativeContext = GetNativeContext())
+                    if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
                     {
-                        if (PlatformWindow* nativeWindow = nativeContext->GetPlatformWindow())
+                        if (Ref<FNativeContext> nativeContext = GetNativeContext())
                         {
-                            nativeWindow->SetOpacity(1.0f);
+                            nativeContext->SetGhosted(false);
+
+                            if (PlatformWindow* nativeWindow = nativeContext->GetPlatformWindow())
+                            {
+                            	if (Ref<FDockWindow> thisDockWindow = dockspace->GetTabbedDockWindow(this))
+                                {
+                                    // TODO: Dragging stopped
+
+                                    dockspace->RemoveDockItem(this);
+
+                                    Ref<FWindow> newWindow = FusionApplication::Get()->CreateNativeWindow(Title(), Title(),
+                                        dockspace->originalWindowSize.width,
+                                        dockspace->originalWindowSize.height,
+                                        dockspace->GetDetachedWindowClass(),
+                                        {
+                                            .maximised = false,
+                                            .fullscreen = false,
+                                            .resizable = true,
+                                            .hidden = false,
+											.openCentered = false,
+											.openPos = nativeWindow->GetWindowPosition(),
+                                            .windowFlags = PlatformWindowFlags::DestroyOnClose
+                                        });
+                            		
+                                    Ref<FDockspace> newDockspace = nullptr;
+
+                                    newWindow->SetWindowContent(
+                                        FAssignNew(FDockspace, newDockspace)
+                                        .DockspaceType(dockspace->DockspaceType())
+                                        .DestroyWhenEmpty(true)
+                                        .HAlign(HAlign::Fill)
+                                        .VAlign(VAlign::Fill)
+                                        .FillRatio(1.0f)
+                                    );
+
+                                    if (newWindow->IsOfType<FToolWindow>())
+                                    {
+                                        Ref<FToolWindow> toolWindow = CastTo<FToolWindow>(newWindow);
+                                        toolWindow->ContentPadding(Vec4());
+                                        toolWindow->Title(Title());
+                                    }
+
+                                    newDockspace->originalWindowSize = dockspace->originalWindowSize;
+
+                                    newDockspace->AddDockWindow(thisDockWindow);
+
+                                    PlatformWindow* newNativeWindow = newWindow->GetPlatformWindow();
+                                    newNativeWindow->SetBorderless(true);
+                                    newNativeWindow->SetWindowPosition(nativeWindow->GetWindowPosition());
+
+                                    //nativeWindow->SetOpacity(1.0f);
+                                    //nativeWindow->SetAlwaysOnTop(false);
+                                }
+                            }
                         }
                     }
                 }
@@ -117,6 +190,9 @@ namespace CE
 
     bool FDockTabItem::CanBeDetached()
     {
+        if (!m_Detachable)
+            return false;
+
         if (Ref<FDockTabWell> tabWell = owner.Lock())
         {
             if (Ref<FDockspace> dockspace = tabWell->GetDockspace())

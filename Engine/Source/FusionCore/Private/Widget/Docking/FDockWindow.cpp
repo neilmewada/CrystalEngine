@@ -18,7 +18,7 @@ namespace CE
     {
         Super::OnFusionPropertyModified(propertyName);
 
-        thread_local CE::Name titleProperty = "Title";
+        thread_local static CE::Name titleProperty = "Title";
 
         if (propertyName == titleProperty)
         {

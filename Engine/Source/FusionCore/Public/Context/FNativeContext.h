@@ -71,6 +71,9 @@ namespace CE
 
 		void SetWindowPosition(Vec2i newPos);
 
+		//! @brief Returns the window size in Fusion units. This does not directly equal to the native window size because of DPI scaling.
+		Vec2i GetWindowSize();
+
 	protected:
 
 		bool WindowDragHitTest(PlatformWindow* window, Vec2 position);

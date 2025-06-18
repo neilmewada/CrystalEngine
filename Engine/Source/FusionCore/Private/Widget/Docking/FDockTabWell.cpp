@@ -45,6 +45,8 @@ namespace CE
                 }
             }
 
+            tabItems.Clear();
+
             for (int i = 0; i < children.GetSize(); ++i)
             {
                 if (Ref<FDockTabItem> item = CastTo<FDockTabItem>(children[i].Lock()))
@@ -108,6 +110,11 @@ namespace CE
 
     void FDockTabWell::RemoveTabItem(Ref<FDockTabItem> tabItem)
     {
+        if (activeItem == tabItem)
+        {
+            SetActiveItem(nullptr);
+		}
+
         tabItems.Remove(tabItem);
     }
 

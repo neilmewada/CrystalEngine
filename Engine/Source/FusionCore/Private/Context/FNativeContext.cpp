@@ -617,6 +617,18 @@ namespace CE
 		updateWindowPos = true;
 	}
 
+	Vec2i FNativeContext::GetWindowSize()
+	{
+		f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+#if PLATFORM_MAC
+		scaling = 1;
+#elif PLATFORM_LINUX
+		scaling *= FusionApplication::Get()->defaultScalingFactor;
+#endif
+		
+		return (platformWindow->GetWindowSize() / scaling).ToVec2i();
+	}
+
 	bool FNativeContext::WindowDragHitTest(PlatformWindow* window, Vec2 position)
 	{
 		if (!window->IsBorderless() || IsPopupWindow())

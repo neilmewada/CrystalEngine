@@ -40,11 +40,15 @@ namespace CE
         bool isActive = false;
         bool isHovered = false;
         bool detached = false;
-        bool isFirstDrag = true;
+
+    	bool joined = false;
+        f32 joinPosOffset = 0;
 
     public: // - Fusion Properties - 
 
         FUSION_PROPERTY_WRAPPER2(Text, tabTitle, Title);
+
+        FUSION_PROPERTY(bool, Detachable);
 
         FUSION_WIDGET;
         friend class FDockTabWell;

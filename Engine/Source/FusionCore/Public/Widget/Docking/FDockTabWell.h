@@ -18,9 +18,13 @@ namespace CE
 
     public: // - Public API -
 
+		bool SupportsDropTarget() const override { return true; }
+
         void UpdateTabWell();
 
         int GetTabIndex(Ref<FDockTabItem> tabItem);
+
+		int GetTabCount() const { return tabItems.GetSize(); }
 
         Ref<FDockTabItem> GetTabItem(int index);
 

@@ -159,6 +159,13 @@ namespace CE
         }
     }
 
+    void FusionApplication::DispatchOnMainThread(const Delegate<void()>& execute)
+    {
+		LockGuard guard{ mainThreadDispatcherLock };
+
+        mainThreadDispatcher.Add(execute);
+    }
+
     CMImage FusionApplication::LoadImageAsset(const Name& assetPath)
     {
         if (!assetPath.IsValid() || !assetLoader)
@@ -221,9 +228,18 @@ namespace CE
     {
         ZoneScoped;
 
-        if (Thread::GetCurrentThreadId() != gMainThreadId)
         {
-            String::IsAlphabet('a');
+            mainThreadDispatcherLock.Lock();
+
+            auto dispatchQueue = mainThreadDispatcher;
+            mainThreadDispatcher.Clear();
+
+            mainThreadDispatcherLock.Unlock();
+
+        	for (const auto& execute : dispatchQueue)
+            {
+                execute.InvokeIfValid();
+            }
         }
 
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
@@ -282,8 +298,8 @@ namespace CE
     }
 
     Ref<FWindow> FusionApplication::CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height, 
-        const SubClass<FWindow>& windowClass, 
-        const PlatformWindowInfo& info)
+                                                       const SubClass<FWindow>& windowClass, 
+                                                       const PlatformWindowInfo& info)
     {
         if (windowClass == nullptr || !windowClass->CanBeInstantiated())
             return nullptr;

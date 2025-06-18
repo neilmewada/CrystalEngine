@@ -54,6 +54,8 @@ namespace CE
         bool hidden = false;
         // -1 means automatic, 0 means first display.
         int displayIndex = -1;
+        bool openCentered = true;
+        Vec2i openPos = Vec2i();
         PlatformWindowFlags windowFlags = PlatformWindowFlags::DestroyOnClose;
     };
 

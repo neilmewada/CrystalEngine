@@ -215,6 +215,9 @@ namespace CE
         FIELD()
         FWidget* draggedWidget = nullptr;
 
+		FIELD()
+		Ref<FWidget> dropTarget = nullptr;
+
     };
 
     STRUCT()

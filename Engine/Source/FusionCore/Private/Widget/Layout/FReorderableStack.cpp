@@ -428,6 +428,11 @@ namespace CE
         return thisHitTest;
     }
 
+    void FReorderableStack::SetActiveItem(Ref<FReorderableStackItem> item)
+    {
+		activeItem = item;
+    }
+
     void FReorderableStack::OnActiveItemDragged(FDragEvent* dragEvent)
     {
 

@@ -42,9 +42,7 @@ namespace CE
 
         virtual void OnWidgetDestroyed(FWidget* widget);
 
-        Vec2 GetAvailableSize() const { return availableSize; }
-
-        void SetAvailableSize(Vec2 value) { availableSize = value; }
+        Vec2 GetAvailableSize() const { return availableSize * availableSizeMultiplier; }
 
         virtual f32 GetScaling() const { return 1.0f; }
 
@@ -78,6 +76,10 @@ namespace CE
         void SetDefaultStyleSet(FStyleSet* styleSet);
 
         bool ShouldClearScreen() const { return clearScreen; }
+
+		bool IsGhosted() const { return ghosted; }
+
+		void SetGhosted(bool ghosted) { this->ghosted = ghosted; }
 
         void SetClearScreen(bool set);
 
@@ -141,6 +143,7 @@ namespace CE
         FIELD()
         f32 scaleFactor = 1.0f;
 
+        bool ghosted = false;
         bool layoutDirty = true;
         bool dirty = true;
         bool isDestroyed = false;
@@ -150,6 +153,7 @@ namespace CE
         WeakRef<FWidget> widgetToFocus = nullptr;
 
         Vec2 availableSize{};
+		Vec2 availableSizeMultiplier = Vec2(1.0f, 1.0f);
 
         Matrix4x4 projectionMatrix = Matrix4x4::Identity();
         RPI::PerViewConstants viewConstants{};
@@ -159,7 +163,7 @@ namespace CE
         KeyModifier keyModifierStates{};
         BitSet<128> keyPressStates{};
 
-        WeakRef<FWidget> draggedWidget = nullptr;
+        Ref<FWidget> draggedWidget = nullptr;
         WeakRef<FWidget> prevHoveredWidget = nullptr;
         StaticArray<WeakRef<FWidget>, 6> widgetsPressedPerMouseButton{};
 

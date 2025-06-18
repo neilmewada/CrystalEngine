@@ -130,6 +130,8 @@ namespace CE
 
     	virtual bool SupportsDragEvents() const { return false; }
 
+		virtual bool SupportsDropTarget() const { return false; }
+
         virtual bool SupportsFocusEvents() const { return false; }
 
         virtual bool SupportsKeyboardFocus() const { return SupportsFocusEvents() && SupportsKeyboardEvents(); }

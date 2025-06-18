@@ -243,6 +243,7 @@ namespace WidgetTests
                 .FontSize(18)
                 .Text("This is first window")
             )
+            .Name("Dock1")
             .As<FDockWindow>()
         );
 
@@ -254,6 +255,7 @@ namespace WidgetTests
                 .FontSize(18)
                 .Text("This is second window")
             )
+            .Name("Dock2")
             .As<FDockWindow>()
         );
 
@@ -265,6 +267,7 @@ namespace WidgetTests
                 .FontSize(18)
                 .Text("This is third window")
             )
+            .Name("Dock3")
             .As<FDockWindow>()
         );
     }

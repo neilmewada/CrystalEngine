@@ -64,6 +64,8 @@ namespace CE
         SystemCursor GetCursor();
         void PopCursor();
 
+        void DispatchOnMainThread(const Delegate<void(void)>& execute);
+
         CMImage LoadImageAsset(const Name& assetPath);
         int LoadImageResource(const IO::Path& resourcePath, const Name& imageName);
 
@@ -131,6 +133,9 @@ namespace CE
 
         int curImageIndex = 0;
         bool isExposed = false;
+
+        SharedMutex mainThreadDispatcherLock;
+        Array<Delegate<void(void)>> mainThreadDispatcher;
 
         FIELD()
         Ref<FRootContext> rootContext = nullptr;

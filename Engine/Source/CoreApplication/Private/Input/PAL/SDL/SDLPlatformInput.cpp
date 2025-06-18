@@ -47,6 +47,9 @@ namespace CE
             return;
 
         auto app = PlatformApplication::Get();
+        if (app == nullptr || app->GetMainWindow() == nullptr)
+			return;
+
         InputManager& input = InputManager::Get();
         SDL_Window* window = (SDL_Window*)app->GetMainWindow()->GetUnderlyingHandle();
 

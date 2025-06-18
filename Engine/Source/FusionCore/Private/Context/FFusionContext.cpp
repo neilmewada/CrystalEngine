@@ -48,7 +48,7 @@ namespace CE
 			owningWidget->CalculateIntrinsicSize();
 
 			owningWidget->computedPosition = Vec2();
-			owningWidget->computedSize = availableSize;
+			owningWidget->computedSize = availableSize * availableSizeMultiplier;
 			
 			owningWidget->PlaceSubWidgets();
 
@@ -80,7 +80,7 @@ namespace CE
 					}
 					if (popupRect.max.x > availableSize.x)
 					{
-						popup->computedPosition.x -= popupRect.max.x - availableSize.x;
+						popup->computedPosition.x -= popupRect.max.x - availableSize.x * availableSizeMultiplier.x;
 					}
 					popup->initialPos = popup->computedPosition;
 
@@ -405,13 +405,15 @@ namespace CE
 
 	FWidget* FFusionContext::HitTest(Vec2 mousePosition)
 	{
-		FWidget* hoveredWidget;
+		FWidget* hoveredWidget = nullptr;
 
 		Vec2 screenPos = GlobalToScreenSpacePosition(mousePosition);
 
 		for (int i = childContexts.GetSize() - 1; i >= 0; --i)
 		{
 			FFusionContext* context = childContexts[i].Get();
+			if (context->ghosted)
+				continue;
 
 			if (context->IsNativeContext())
 			{

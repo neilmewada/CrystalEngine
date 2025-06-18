@@ -24,6 +24,9 @@ namespace CE
 
         FWidget* HitTest(Vec2 localMousePos) override;
 
+        // For internal use only!
+		void SetActiveItem(Ref<FReorderableStackItem> item);
+
     protected: // - Internal -
 
         void OnActiveItemDragged(FDragEvent* dragEvent);
