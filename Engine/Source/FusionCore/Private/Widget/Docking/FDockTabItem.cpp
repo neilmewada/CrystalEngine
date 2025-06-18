@@ -174,9 +174,6 @@ namespace CE
                                     PlatformWindow* newNativeWindow = newWindow->GetPlatformWindow();
                                     newNativeWindow->SetBorderless(true);
                                     newNativeWindow->SetWindowPosition(nativeWindow->GetWindowPosition());
-
-                                    //nativeWindow->SetOpacity(1.0f);
-                                    //nativeWindow->SetAlwaysOnTop(false);
                                 }
                             }
                         }
