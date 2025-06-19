@@ -5,7 +5,7 @@ namespace CE
 
     FDockspaceWindow::FDockspaceWindow()
     {
-        dockspaceClass = FDockspace::StaticClass();
+        m_DockspaceClass = FDockspace::StaticClass();
     }
 
     void FDockspaceWindow::Construct()
@@ -22,12 +22,11 @@ namespace CE
             .VAlign(VAlign::Fill)
             .Name("RootStyle")
             (
-                FAssignNewDynamic(FDockspace, dockspace, dockspaceClass)
+                FAssignNewDynamic(FDockspace, dockspace, m_DockspaceClass)
                 .DockspaceType(FDockTypeMask::Major)
                 .AllowDocking(true)
                 .DestroyWhenEmpty(false)
                 .AllowSplitting(true)
-                .DetachedWindowClass(Self::StaticClass())
                 .OnWindowSetup([](Ref<FWindow> newWindow, Ref<FDockTabItem> tabItem)
                     {
                         if (newWindow->IsOfType<FToolWindow>())

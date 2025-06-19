@@ -722,8 +722,15 @@ namespace CE
         for (int i = 0; i < superTypeIds.GetSize(); i++)
         {
             auto type = GetTypeInfo(superTypeIds[i]);
+            if (type == nullptr)
+            {
+                superTypesCached = false;
+            }
+
             if (type == nullptr || !type->IsClass())
-                continue;
+            {
+	            continue;
+            }
 
 			superClasses.Add((ClassType*)type);
         }

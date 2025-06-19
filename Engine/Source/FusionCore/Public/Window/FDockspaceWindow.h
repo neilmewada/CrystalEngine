@@ -36,8 +36,7 @@ namespace CE
 
     public: // - Fusion Properties - 
 
-        FIELD()
-        SubClass<FDockspace> dockspaceClass;
+        FUSION_PROPERTY(SubClass<FDockspace>, DockspaceClass);
 
         FUSION_PROPERTY_WRAPPER(DockspaceType, dockspace);
 

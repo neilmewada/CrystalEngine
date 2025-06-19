@@ -21,7 +21,7 @@ namespace CE
         m_DockspaceType = FDockTypeMask::Minor;
         m_DestroyWhenEmpty = false;
 
-        m_DetachedWindowClass = FToolWindow::StaticClass();
+        detachedDockspaceWindowClass = FDockspaceWindow::StaticClass();
     }
 
     void FDockspace::Construct()
@@ -209,7 +209,7 @@ namespace CE
         );
 
         tempDockspace->m_OnCreateDockspace = m_OnCreateDockspace;
-        tempDockspace->m_DetachedWindowClass = m_DetachedWindowClass;
+        tempDockspace->detachedDockspaceWindowClass = detachedDockspaceWindowClass;
         tempDockspace->m_OnWindowSetup = m_OnWindowSetup;
 
         tempDockspace->originalWindowSize = nativeWindow->GetWindowSize();

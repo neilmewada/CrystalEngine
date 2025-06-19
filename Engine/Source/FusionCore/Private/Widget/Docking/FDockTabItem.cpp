@@ -139,6 +139,7 @@ namespace CE
                                 Ref<FDockspaceWindow> newWindow = FusionApplication::Get()->CreateNativeWindow<FDockspaceWindow>(Title(), Title(),
                                     dockspace->originalWindowSize.width,
                                     dockspace->originalWindowSize.height,
+                                    dockspace->detachedDockspaceWindowClass,
                                     {
                                         .maximised = false,
                                         .fullscreen = false,

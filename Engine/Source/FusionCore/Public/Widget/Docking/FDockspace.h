@@ -5,6 +5,7 @@ namespace CE
     class FDockTabWell;
     class FDockTabItem;
     class FDockWindow;
+    class FDockspaceWindow;
     class FDockspaceSplitView;
 
     using FDockId = Uuid;
@@ -99,6 +100,9 @@ namespace CE
 
         FDockId dockId;
 
+        FIELD()
+        SubClass<FDockspaceWindow> detachedDockspaceWindowClass;
+
     public: // - Fusion Properties - 
 
         FUSION_PROPERTY(bool, AllowDocking);
@@ -110,8 +114,6 @@ namespace CE
         FUSION_PROPERTY_WRAPPER2(Margin, tabWell, TabWellMargin);
 
         FUSION_PROPERTY(FDockTypeMask, DockspaceType);
-
-        FUSION_PROPERTY(SubClass<FWindow>, DetachedWindowClass);
 
         FUSION_PROPERTY(Delegate<FDockspace&()>, OnCreateDockspace);
         FUSION_PROPERTY(Delegate<void(Ref<FWindow>, Ref<FDockTabItem>)>, OnWindowSetup);

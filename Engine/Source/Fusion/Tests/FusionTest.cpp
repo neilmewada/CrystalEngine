@@ -1,7 +1,6 @@
 #include "FusionTest.h"
 
 
-
 namespace WidgetTests
 {
 
@@ -219,11 +218,14 @@ namespace WidgetTests
 
 #pragma endregion
 
+	FusionTestWindow::FusionTestWindow()
+	{
+        m_DockspaceClass = MajorDockspace::StaticClass();
+	}
+
     void FusionTestWindow::Construct()
     {
         Super::Construct();
-
-        dockspace->GetTabWell()->Padding(Vec4(1, 1.25f, 0, 0) * 15);
 
         for (int i = 1; i <= 4; i++)
         {
