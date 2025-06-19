@@ -16,6 +16,10 @@ namespace WidgetTests
 
 	MajorDockspace::MajorDockspace()
 	{
+		m_DockspaceType = FDockTypeMask::Major;
+		m_AllowDocking = true;
+		m_AllowSplitting = true;
+
 		detachedDockspaceWindowClass = MajorDockspaceWindow::StaticClass();
 	}
 

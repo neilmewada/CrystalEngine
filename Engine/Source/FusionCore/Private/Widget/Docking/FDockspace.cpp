@@ -176,7 +176,7 @@ namespace CE
         Vec2i screenMousePos = InputManager::GetGlobalMousePosition();
 
         Ref<FWindow> detachedWindow = FusionApplication::Get()->CreateNativeWindow(dockTabItem->Title(), dockTabItem->Title(), 
-            512, 512, 
+            500, 400, 
             FWindow::StaticClass(),
         {
             .maximised = false,
