@@ -21,7 +21,7 @@ namespace CE
         m_DockspaceType = FDockTypeMask::Minor;
         m_DestroyWhenEmpty = false;
 
-        detachedWindowClass = FToolWindow::StaticClass();
+        m_DetachedWindowClass = FToolWindow::StaticClass();
     }
 
     void FDockspace::Construct()
@@ -123,6 +123,8 @@ namespace CE
 
     bool FDockspace::CanDetach(Ref<FDockTabItem> dockTabItem)
     {
+        if (!m_AllowDocking)
+            return false;
         if (!m_DestroyWhenEmpty && tabbedDockWindows.GetSize() <= 1)
             return false;
 
@@ -181,30 +183,33 @@ namespace CE
         nativeWindow->SetAlwaysOnTop(true);
         nativeWindow->SetOpacity(0.4f);
 
-        Ref<FDockspace> newDockspace = nullptr;
+        Ref<FDockspace> tempDockspace = nullptr;
 
         detachedWindow->SetWindowContent(
-            FAssignNew(FDockspace, newDockspace)
+            FAssignNew(FDockspace, tempDockspace)
             .DockspaceType(DockspaceType())
             .DestroyWhenEmpty(true)
             .AllowDocking(true)
-            .AllowSplitting(false)
+            .AllowSplitting(m_AllowSplitting)
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
             .FillRatio(1.0f)
         );
 
-        newDockspace->detachedWindowClass = detachedWindowClass;
-        newDockspace->originalWindowSize = nativeWindow->GetWindowSize();
+        tempDockspace->m_OnCreateDockspace = m_OnCreateDockspace;
+        tempDockspace->m_DetachedWindowClass = m_DetachedWindowClass;
+        tempDockspace->m_OnWindowSetup = m_OnWindowSetup;
+
+        tempDockspace->originalWindowSize = nativeWindow->GetWindowSize();
 
         if (Ref<FNativeContext> nativeContext = GetNativeContext())
         {
-            newDockspace->originalWindowSize = nativeContext->GetWindowSize();
+            tempDockspace->originalWindowSize = nativeContext->GetWindowSize();
         }
 
-        newDockspace->AddDockWindow(dockWindow);
+        tempDockspace->AddDockWindow(dockWindow);
 
-        Ref<FDockTabItem> newTabItem = newDockspace->GetDockTabWell()->GetTabItem(0);
+        Ref<FDockTabItem> newTabItem = tempDockspace->GetDockTabWell()->GetTabItem(0);
         newTabItem->detached = true;
 
         FusionApplication::Get()->GetRootContext()->SetFocusWidget(newTabItem.Get());

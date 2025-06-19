@@ -132,12 +132,14 @@ namespace CE
 	                            PlatformWindow* nativeWindow = nativeContext->GetPlatformWindow();
 	                            Vec2i originalPos = nativeWindow != nullptr ? nativeWindow->GetWindowPosition() : Vec2i();
 
+                                auto onCreateDockspace = dockspace->OnCreateDockspace();
+
                                 dockspace->RemoveDockItem(this);
 
                                 Ref<FWindow> newWindow = FusionApplication::Get()->CreateNativeWindow(Title(), Title(),
                                     dockspace->originalWindowSize.width,
                                     dockspace->originalWindowSize.height,
-                                    dockspace->GetDetachedWindowClass(),
+                                    dockspace->m_DetachedWindowClass,
                                     {
                                         .maximised = false,
                                         .fullscreen = false,
@@ -152,20 +154,36 @@ namespace CE
 
                                 Ref<FDockspace> newDockspace = nullptr;
 
-                                newWindow->SetWindowContent(
-                                    FAssignNew(FDockspace, newDockspace)
-                                    .DockspaceType(dockspace->DockspaceType())
+                                if (onCreateDockspace.IsValid())
+                                {
+                                    newDockspace = &onCreateDockspace();
+
+                                    (*newDockspace)
                                     .DestroyWhenEmpty(true)
                                     .HAlign(HAlign::Fill)
                                     .VAlign(VAlign::Fill)
-                                    .FillRatio(1.0f)
-                                );
+                                    .FillRatio(1.0f);
 
-                                if (newWindow->IsOfType<FToolWindow>())
+                                    newWindow->SetWindowContent(newDockspace);
+                                }
+                                else
                                 {
-                                    Ref<FToolWindow> toolWindow = CastTo<FToolWindow>(newWindow);
-                                    toolWindow->ContentPadding(Vec4());
-                                    toolWindow->Title(Title());
+                                    newWindow->SetWindowContent(
+                                        FAssignNew(FDockspace, newDockspace)
+                                        .DockspaceType(dockspace->DockspaceType())
+                                        .DestroyWhenEmpty(true)
+                                        .HAlign(HAlign::Fill)
+                                        .VAlign(VAlign::Fill)
+                                        .FillRatio(1.0f)
+                                    );
+                                }
+
+                                newDockspace->m_OnCreateDockspace = onCreateDockspace;
+                                newDockspace->m_OnWindowSetup = dockspace->m_OnWindowSetup;
+
+                                if (newDockspace->m_OnWindowSetup.IsValid())
+                                {
+                                    newDockspace->m_OnWindowSetup.Invoke(newWindow, this);
                                 }
 
                                 newDockspace->originalWindowSize = dockspace->originalWindowSize;

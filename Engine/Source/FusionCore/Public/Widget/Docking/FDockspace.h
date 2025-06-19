@@ -79,8 +79,6 @@ namespace CE
 
         Ref<FDockWindow> GetTabbedDockWindow(Ref<FDockTabItem> dockTabItem);
 
-        SubClass<FWindow> GetDetachedWindowClass() const { return detachedWindowClass; }
-
     protected: // - Internal -
 
         Ref<FDockTabWell> tabWell;
@@ -89,9 +87,6 @@ namespace CE
         Array<Ref<FDockWindow>> tabbedDockWindows;
 
         Ref<FDockTabItem> selectedTab;
-
-        FIELD()
-        SubClass<FWindow> detachedWindowClass;
 
         FIELD()
         Vec2i originalWindowSize;
@@ -105,6 +100,11 @@ namespace CE
         FUSION_PROPERTY(bool, DestroyWhenEmpty);
 
         FUSION_PROPERTY(FDockTypeMask, DockspaceType);
+
+        FUSION_PROPERTY(SubClass<FWindow>, DetachedWindowClass);
+
+        FUSION_PROPERTY(Delegate<FDockspace&()>, OnCreateDockspace);
+        FUSION_PROPERTY(Delegate<void(Ref<FWindow>, Ref<FDockTabItem>)>, OnWindowSetup);
 
         FUSION_WIDGET;
         friend class FDockTabWell;

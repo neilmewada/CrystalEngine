@@ -22,6 +22,12 @@ namespace CE
 	class EnumType;
 	class Object;
 
+	template<typename T>
+	class Ref;
+
+	template<typename T>
+	class WeakRef;
+
 	// **********************************************************
 	// Variant
 
@@ -157,7 +163,7 @@ namespace CE
 		}
 
 		template<typename RefType> requires TIsBaseClassOf<Object, std::remove_cvref_t<RefType>>::Value
-		Variant(RefType& ref) : Variant((RefType*)& ref)
+		Variant(RefType& ref) : Variant((RefType*)&ref)
 		{
 			
 		}
@@ -289,7 +295,7 @@ namespace CE
 
 			if (CanCastObject(TYPEID(T)))
 			{
-				
+
 			}
 			else if (valueTypeId != GetTypeId<T>())
 			{

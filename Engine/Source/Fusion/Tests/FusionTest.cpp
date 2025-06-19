@@ -229,7 +229,17 @@ namespace WidgetTests
 
         Content(
             FAssignNew(FDockspace, dockspace)
+            .DetachedWindowClass(FToolWindow::StaticClass())
             .DockspaceType(FDockTypeMask::Major)
+            .OnWindowSetup([](Ref<FWindow> newWindow, Ref<FDockTabItem> tabItem)
+            {
+                if (newWindow->IsOfType<FToolWindow>())
+                {
+                    Ref<FToolWindow> toolWindow = CastTo<FToolWindow>(newWindow);
+                    toolWindow->ContentPadding(Vec4());
+                    toolWindow->Title(tabItem->Title());
+                }
+            })
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
             .FillRatio(1.0f)
@@ -268,6 +278,18 @@ namespace WidgetTests
                 .Text("This is third window")
             )
             .Name("Dock3")
+            .As<FDockWindow>()
+        );
+
+        dockspace->AddDockWindow(
+            FNew(FDockWindow)
+            .Title("Dock 4")
+            .Child(
+                FNew(FLabel)
+                .FontSize(18)
+                .Text("This is fourth window")
+            )
+            .Name("Dock4")
             .As<FDockWindow>()
         );
     }

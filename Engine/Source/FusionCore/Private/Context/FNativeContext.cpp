@@ -297,7 +297,7 @@ namespace CE
 
 			if (renderer2)
 			{
-				renderer2->multisampling.sampleCount = sampleCount;
+				renderer2->multisampling.sampleCount = (u16)sampleCount;
 			}
 
 			FusionApplication::Get()->RequestFrameGraphUpdate();
