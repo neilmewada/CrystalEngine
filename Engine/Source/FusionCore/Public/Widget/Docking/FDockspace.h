@@ -105,7 +105,7 @@ namespace CE
         FUSION_PROPERTY(bool, AllowSplitting);
         FUSION_PROPERTY(bool, DestroyWhenEmpty);
 
-        Self& TabWellBackgroundWidget(FWidget& widget);
+        Self& TabWellOverlayWidget(FWidget& widget);
 
         FUSION_PROPERTY_WRAPPER2(Margin, tabWell, TabWellMargin);
 

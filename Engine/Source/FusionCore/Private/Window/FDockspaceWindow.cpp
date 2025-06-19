@@ -37,11 +37,47 @@ namespace CE
                             toolWindow->Title(tabItem->Title());
                         }
                     })
-                .TabWellBackgroundWidget(
-                    FAssignNew(FTitleBar, titleBar)
-                    .Background(FBrush(Color::RGBA(26, 26, 26)))
-                    .Height(35)
-                    .HAlign(HAlign::Fill)
+                .TabWellOverlayWidget(
+                    FNew(FHorizontalStack)
+                    .HAlign(HAlign::Right)
+                    .VAlign(VAlign::Fill)
+                    (
+                        FAssignNew(FWindowControlButton, minimizeButton)
+                        .ControlType(FWindowControlType::Minimize)
+                        .OnClicked([this]
+                            {
+                                CastTo<FNativeContext>(GetContext())->Minimize();
+                            })
+                        .Name("WindowMinimizeButton")
+                        .Style("Button.WindowControl"),
+
+                        FAssignNew(FWindowControlButton, maximizeButton)
+                        .ControlType(FWindowControlType::Maximize)
+                        .OnClicked([this]
+                            {
+                                Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext());
+                                if (nativeContext->IsMaximized())
+                                {
+                                    nativeContext->Restore();
+                                }
+                                else
+                                {
+                                    nativeContext->Maximize();
+                                }
+                            })
+                        .Name("WindowMaximizeButton")
+                        .Style("Button.WindowControl"),
+
+                        FAssignNew(FWindowControlButton, closeButton)
+                        .ControlType(FWindowControlType::Close)
+                        .OnClicked([this]
+                            {
+                                //OnClickClose();
+                                GetContext()->QueueDestroy();
+                            })
+                        .Name("WindowCloseButton")
+                        .Style("Button.WindowClose")
+                    )
                 )
                 .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Fill)
@@ -49,48 +85,7 @@ namespace CE
             ) // End of Child()
         );
 
-        dockspace->GetTabWellParent()->AddChild(
-            FNew(FHorizontalStack)
-            .HAlign(HAlign::Fill)
-            .VAlign(VAlign::Fill)
-            (
-                FAssignNew(FWindowControlButton, minimizeButton)
-                .ControlType(FWindowControlType::Minimize)
-                .OnClicked([this]
-                    {
-                        CastTo<FNativeContext>(GetContext())->Minimize();
-                    })
-                .Name("WindowMinimizeButton")
-                .Style("Button.WindowControl"),
-
-                FAssignNew(FWindowControlButton, maximizeButton)
-                .ControlType(FWindowControlType::Maximize)
-                .OnClicked([this]
-                    {
-                        Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext());
-                        if (nativeContext->IsMaximized())
-                        {
-                            nativeContext->Restore();
-                        }
-                        else
-                        {
-                            nativeContext->Maximize();
-                        }
-                    })
-                .Name("WindowMaximizeButton")
-                .Style("Button.WindowControl"),
-
-                FAssignNew(FWindowControlButton, closeButton)
-                .ControlType(FWindowControlType::Close)
-                .OnClicked([this]
-                    {
-                        //OnClickClose();
-                        GetContext()->QueueDestroy();
-                    })
-                .Name("WindowCloseButton")
-                .Style("Button.WindowClose")
-            )
-        );
+        dockspace->GetTabWell()->WindowDragHitTest(true);
     }
     
 }

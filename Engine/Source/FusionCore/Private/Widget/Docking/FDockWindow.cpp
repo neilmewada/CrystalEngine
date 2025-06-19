@@ -6,6 +6,7 @@ namespace CE
     FDockWindow::FDockWindow()
     {
         m_Title = "Untitled";
+        m_AllowedDockspaces = FDockspaceFilter().WithDockTypeMask(FDockTypeMask::Major);
     }
 
     void FDockWindow::Construct()

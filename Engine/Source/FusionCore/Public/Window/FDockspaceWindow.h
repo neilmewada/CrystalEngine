@@ -14,6 +14,7 @@ namespace CE
 
     public: // - Public API -
 
+        Ref<FDockspace> GetDockspace() const { return dockspace; }
 
     protected: // - Internal -
 

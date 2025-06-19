@@ -223,75 +223,22 @@ namespace WidgetTests
     {
         Super::Construct();
 
-        Title("Fusion Test");
+        dockspace->GetTabWell()->Padding(Vec4(1, 1.25f, 0, 0) * 15);
 
-        ContentPadding(Vec4());
-
-        Content(
-            FAssignNew(FDockspace, dockspace)
-            .DetachedWindowClass(FToolWindow::StaticClass())
-            .DockspaceType(FDockTypeMask::Major)
-            .OnWindowSetup([](Ref<FWindow> newWindow, Ref<FDockTabItem> tabItem)
-            {
-                if (newWindow->IsOfType<FToolWindow>())
-                {
-                    Ref<FToolWindow> toolWindow = CastTo<FToolWindow>(newWindow);
-                    toolWindow->ContentPadding(Vec4());
-                    toolWindow->Title(tabItem->Title());
-                }
-            })
-            .HAlign(HAlign::Fill)
-            .VAlign(VAlign::Fill)
-            .FillRatio(1.0f)
-        );
-
-        dockspace->AddDockWindow(
-            FNew(FDockWindow)
-            .Title("Dock 1")
-            .Child(
-                FNew(FLabel)
-                .FontSize(18)
-                .Text("This is first window")
-            )
-            .Name("Dock1")
-            .As<FDockWindow>()
-        );
-
-        dockspace->AddDockWindow(
-            FNew(FDockWindow)
-            .Title("Dock 2")
-            .Child(
-                FNew(FLabel)
-                .FontSize(18)
-                .Text("This is second window")
-            )
-            .Name("Dock2")
-            .As<FDockWindow>()
-        );
-
-        dockspace->AddDockWindow(
-            FNew(FDockWindow)
-            .Title("Dock 3")
-            .Child(
-                FNew(FLabel)
-                .FontSize(18)
-                .Text("This is third window")
-            )
-            .Name("Dock3")
-            .As<FDockWindow>()
-        );
-
-        dockspace->AddDockWindow(
-            FNew(FDockWindow)
-            .Title("Dock 4")
-            .Child(
-                FNew(FLabel)
-                .FontSize(18)
-                .Text("This is fourth window")
-            )
-            .Name("Dock4")
-            .As<FDockWindow>()
-        );
+        for (int i = 1; i <= 4; i++)
+        {
+            dockspace->AddDockWindow(
+                FNew(FDockWindow)
+                .Title(String::Format("Dock {}", i))
+                .Child(
+                    FNew(FLabel)
+                    .FontSize(18)
+                    .Text(String::Format("This is {} window", i))
+                )
+                .Name(String::Format("Dock{}", i))
+                .As<FDockWindow>()
+            );
+        }
     }
 
 }

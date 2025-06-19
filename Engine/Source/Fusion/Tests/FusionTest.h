@@ -54,16 +54,14 @@ namespace WidgetTests
 	};
 
 	CLASS()
-	class FusionTestWindow : public FToolWindow
+	class FusionTestWindow : public FDockspaceWindow
 	{
-		CE_CLASS(FusionTestWindow, FToolWindow)
+		CE_CLASS(FusionTestWindow, FDockspaceWindow)
 	public:
 
 		void Construct() override;
 
 	private:
-
-		Ref<FDockspace> dockspace;
 
 		FUSION_WIDGET;
 	};

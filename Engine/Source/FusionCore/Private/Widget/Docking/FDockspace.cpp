@@ -45,6 +45,8 @@ namespace CE
                     .FillRatio(1.0f)
                     (
                         FAssignNew(FDockTabWell, tabWell)
+                        .HAlign(HAlign::Fill)
+                        .VAlign(VAlign::Fill)
                     )
                 ),
 
@@ -273,14 +275,9 @@ namespace CE
     }
 
 
-    FDockspace& FDockspace::TabWellBackgroundWidget(FWidget& widget)
+    FDockspace& FDockspace::TabWellOverlayWidget(FWidget& widget)
     {
-        while (tabWellOverlay->GetChildCount() > 1)
-        {
-            tabWellOverlay->RemoveChildAt(0);
-        }
-
-        tabWellOverlay->InsertChild(0, &widget);
+        tabWellOverlay->AddChild(widget);
 
         return *this;
     }

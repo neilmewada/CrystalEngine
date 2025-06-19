@@ -26,6 +26,8 @@ namespace CE
 
         FUSION_PROPERTY(String, Title);
 
+        FUSION_PROPERTY(FDockspaceFilter, AllowedDockspaces);
+
         FUSION_WIDGET;
         friend class FDockTabWell;
     };

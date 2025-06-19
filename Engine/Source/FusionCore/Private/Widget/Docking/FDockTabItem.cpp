@@ -136,10 +136,9 @@ namespace CE
 
                                 dockspace->RemoveDockItem(this);
 
-                                Ref<FWindow> newWindow = FusionApplication::Get()->CreateNativeWindow(Title(), Title(),
+                                Ref<FDockspaceWindow> newWindow = FusionApplication::Get()->CreateNativeWindow<FDockspaceWindow>(Title(), Title(),
                                     dockspace->originalWindowSize.width,
                                     dockspace->originalWindowSize.height,
-                                    dockspace->m_DetachedWindowClass,
                                     {
                                         .maximised = false,
                                         .fullscreen = false,
@@ -152,31 +151,9 @@ namespace CE
 
                                 newWindow->GetContext()->SetGhosted(false);
 
-                                Ref<FDockspace> newDockspace = nullptr;
+                                Ref<FDockspace> newDockspace = newWindow->GetDockspace();
 
-                                if (onCreateDockspace.IsValid())
-                                {
-                                    newDockspace = &onCreateDockspace();
-
-                                    (*newDockspace)
-                                    .DestroyWhenEmpty(true)
-                                    .HAlign(HAlign::Fill)
-                                    .VAlign(VAlign::Fill)
-                                    .FillRatio(1.0f);
-
-                                    newWindow->SetWindowContent(newDockspace);
-                                }
-                                else
-                                {
-                                    newWindow->SetWindowContent(
-                                        FAssignNew(FDockspace, newDockspace)
-                                        .DockspaceType(dockspace->DockspaceType())
-                                        .DestroyWhenEmpty(true)
-                                        .HAlign(HAlign::Fill)
-                                        .VAlign(VAlign::Fill)
-                                        .FillRatio(1.0f)
-                                    );
-                                }
+                                newDockspace->DestroyWhenEmpty(true);
 
                                 newDockspace->m_OnCreateDockspace = onCreateDockspace;
                                 newDockspace->m_OnWindowSetup = dockspace->m_OnWindowSetup;
