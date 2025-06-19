@@ -30,6 +30,8 @@ namespace CE
 
         virtual String GetTitle() = 0;
 
+        virtual int GetZOrder() = 0;
+
         virtual void Show() = 0;
         virtual void Hide() = 0;
 

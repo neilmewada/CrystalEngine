@@ -10,6 +10,8 @@ namespace CE
 
 		static u32 GetDpiForWindow(SDLPlatformWindow* window);
 
+		static int GetWindowZOrder(SDLPlatformWindow* window);
+
 		static void SetupBorderlessWindow(SDLPlatformWindow* window, bool borderless) {}
 
 	};

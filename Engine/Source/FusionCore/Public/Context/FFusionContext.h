@@ -30,6 +30,8 @@ namespace CE
 
         virtual void TickInput();
 
+        virtual int GetZOrder();
+
         FFusionContext* GetRootContext() const;
 
         void SetProjectionMatrix(const Matrix4x4& mat) { this->projectionMatrix = mat; }
@@ -98,7 +100,7 @@ namespace CE
 
         //! @brief Performs a hit-test and returns the bottom-most widget that is under the mouse position.
         //! @param mousePosition The position of mouse in context-space coordinates. i.e. native window space coords for FNativeContext
-        virtual FWidget* HitTest(Vec2 mousePosition);
+        virtual FWidget* HitTest(Vec2 mousePosition, bool requireFocus = true);
 
         // - Rendering / FrameGraph -
 

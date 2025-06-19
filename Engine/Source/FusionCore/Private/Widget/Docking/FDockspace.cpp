@@ -215,6 +215,8 @@ namespace CE
             SetActiveTab(tabWell->GetTabItem(neighborIndex));
         }
 
+        detachedWindow->SetContextRecursively(detachedWindow->GetContext().Get());
+
         return newTabItem;
     }
 

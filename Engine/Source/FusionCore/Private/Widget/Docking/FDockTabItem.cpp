@@ -127,54 +127,56 @@ namespace CE
                         {
                             nativeContext->SetGhosted(false);
 
-                            if (PlatformWindow* nativeWindow = nativeContext->GetPlatformWindow())
+                            if (Ref<FDockWindow> thisDockWindow = dockspace->GetTabbedDockWindow(this))
                             {
-                            	if (Ref<FDockWindow> thisDockWindow = dockspace->GetTabbedDockWindow(this))
-                                {
-                                    // TODO: Dragging stopped
+	                            PlatformWindow* nativeWindow = nativeContext->GetPlatformWindow();
+	                            Vec2i originalPos = nativeWindow != nullptr ? nativeWindow->GetWindowPosition() : Vec2i();
 
-                                    dockspace->RemoveDockItem(this);
+                                dockspace->RemoveDockItem(this);
 
-                                    Ref<FWindow> newWindow = FusionApplication::Get()->CreateNativeWindow(Title(), Title(),
-                                        dockspace->originalWindowSize.width,
-                                        dockspace->originalWindowSize.height,
-                                        dockspace->GetDetachedWindowClass(),
-                                        {
-                                            .maximised = false,
-                                            .fullscreen = false,
-                                            .resizable = true,
-                                            .hidden = false,
-											.openCentered = false,
-											.openPos = nativeWindow->GetWindowPosition(),
-                                            .windowFlags = PlatformWindowFlags::DestroyOnClose
-                                        });
-                            		
-                                    Ref<FDockspace> newDockspace = nullptr;
-
-                                    newWindow->SetWindowContent(
-                                        FAssignNew(FDockspace, newDockspace)
-                                        .DockspaceType(dockspace->DockspaceType())
-                                        .DestroyWhenEmpty(true)
-                                        .HAlign(HAlign::Fill)
-                                        .VAlign(VAlign::Fill)
-                                        .FillRatio(1.0f)
-                                    );
-
-                                    if (newWindow->IsOfType<FToolWindow>())
+                                Ref<FWindow> newWindow = FusionApplication::Get()->CreateNativeWindow(Title(), Title(),
+                                    dockspace->originalWindowSize.width,
+                                    dockspace->originalWindowSize.height,
+                                    dockspace->GetDetachedWindowClass(),
                                     {
-                                        Ref<FToolWindow> toolWindow = CastTo<FToolWindow>(newWindow);
-                                        toolWindow->ContentPadding(Vec4());
-                                        toolWindow->Title(Title());
-                                    }
+                                        .maximised = false,
+                                        .fullscreen = false,
+                                        .resizable = true,
+                                        .hidden = false,
+                                        .openCentered = nativeWindow != nullptr,
+                                        .openPos = originalPos,
+                                        .windowFlags = PlatformWindowFlags::DestroyOnClose
+                                    });
 
-                                    newDockspace->originalWindowSize = dockspace->originalWindowSize;
+                                newWindow->GetContext()->SetGhosted(false);
 
-                                    newDockspace->AddDockWindow(thisDockWindow);
+                                Ref<FDockspace> newDockspace = nullptr;
 
-                                    PlatformWindow* newNativeWindow = newWindow->GetPlatformWindow();
-                                    newNativeWindow->SetBorderless(true);
-                                    newNativeWindow->SetWindowPosition(nativeWindow->GetWindowPosition());
+                                newWindow->SetWindowContent(
+                                    FAssignNew(FDockspace, newDockspace)
+                                    .DockspaceType(dockspace->DockspaceType())
+                                    .DestroyWhenEmpty(true)
+                                    .HAlign(HAlign::Fill)
+                                    .VAlign(VAlign::Fill)
+                                    .FillRatio(1.0f)
+                                );
+
+                                if (newWindow->IsOfType<FToolWindow>())
+                                {
+                                    Ref<FToolWindow> toolWindow = CastTo<FToolWindow>(newWindow);
+                                    toolWindow->ContentPadding(Vec4());
+                                    toolWindow->Title(Title());
                                 }
+
+                                newDockspace->originalWindowSize = dockspace->originalWindowSize;
+
+                                newDockspace->AddDockWindow(thisDockWindow);
+
+                                PlatformWindow* newNativeWindow = newWindow->GetPlatformWindow();
+                                newNativeWindow->SetBorderless(true);
+                                newNativeWindow->SetWindowPosition(originalPos);
+
+                                newWindow->SetContextRecursively(newWindow->GetContext().Get());
                             }
                         }
                     }

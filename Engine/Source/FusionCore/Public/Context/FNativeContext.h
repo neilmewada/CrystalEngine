@@ -33,6 +33,8 @@ namespace CE
 		int GetMultisamplingCount() const { return sampleCount; }
 		void SetMultisamplingCount(int msaa);
 
+		int GetZOrder() override;
+
 		bool IsFocused() const override;
 
 		bool IsShown() const override;

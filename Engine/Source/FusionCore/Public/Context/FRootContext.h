@@ -14,7 +14,7 @@ namespace CE
 
         void TickInput() override;
 
-        void TickNativeContextInput(FNativeContext* nativeContext);
+        void TickNativeContextInput(Ref<FNativeContext> nativeContext);
 
     private:
 

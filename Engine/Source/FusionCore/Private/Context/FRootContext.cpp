@@ -27,12 +27,11 @@ namespace CE
 			if (!childContext->IsOfType<FNativeContext>())
 				continue;
 
-			TickNativeContextInput(static_cast<FNativeContext*>(childContext.Get()));
+			TickNativeContextInput(CastTo<FNativeContext>(childContext));
         }
-
     }
 
-	void FRootContext::TickNativeContextInput(FNativeContext* nativeContext)
+	void FRootContext::TickNativeContextInput(Ref<FNativeContext> nativeContext)
 	{
 		ZoneScoped;
 
@@ -101,7 +100,12 @@ namespace CE
 
 		Ref<FWidget> hoveredWidget = nativeContext->HitTest(mousePos);
 
-		Ref<FWidget> dropTarget = hoveredWidget;
+		Ref<FWidget> dropTarget = nullptr;
+
+		if (draggedWidget != nullptr)
+		{
+			dropTarget = nativeContext->HitTest(mousePos, false);
+		}
 
 		while (dropTarget != nullptr && !dropTarget->SupportsDropTarget())
 		{

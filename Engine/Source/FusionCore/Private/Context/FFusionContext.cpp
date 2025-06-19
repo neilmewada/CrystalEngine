@@ -107,6 +107,11 @@ namespace CE
 
 	}
 
+	int FFusionContext::GetZOrder()
+	{
+		return -1;
+	}
+
 	FFusionContext* FFusionContext::GetRootContext() const
 	{
 		return FusionApplication::Get()->rootContext.Get();
@@ -403,22 +408,28 @@ namespace CE
 		return pos;
 	}
 
-	FWidget* FFusionContext::HitTest(Vec2 mousePosition)
+	FWidget* FFusionContext::HitTest(Vec2 mousePosition, bool requireFocus)
 	{
-		FWidget* hoveredWidget = nullptr;
+		FWidget* hoveredWidget;
 
 		Vec2 screenPos = GlobalToScreenSpacePosition(mousePosition);
 
-		for (int i = childContexts.GetSize() - 1; i >= 0; --i)
-		{
-			FFusionContext* context = childContexts[i].Get();
-			if (context->ghosted)
-				continue;
+		Array<Ref<FFusionContext>> contexts = childContexts;
 
-			if (context->IsNativeContext())
+		if (!requireFocus)
+		{
+			contexts.Sort([&](Ref<FFusionContext> lhs, Ref<FFusionContext> rhs)
+				{
+					return lhs->GetZOrder() < rhs->GetZOrder();
+				});
+		}
+
+		for (int i = contexts.GetSize() - 1; i >= 0; --i)
+		{
+			Ref<FFusionContext> context = contexts[i];
+			if (context->IsGhosted())
 			{
-				FNativeContext* nativeContext = static_cast<FNativeContext*>(context);
-				
+				continue;
 			}
 
 			hoveredWidget = context->HitTest(context->ScreenToGlobalSpacePosition(screenPos));
@@ -432,8 +443,10 @@ namespace CE
 				}
 			}
 
-			if (!context->IsFocused())
+			if (requireFocus && !context->IsFocused())
+			{
 				continue;
+			}
 
 			if (hoveredWidget)
 			{

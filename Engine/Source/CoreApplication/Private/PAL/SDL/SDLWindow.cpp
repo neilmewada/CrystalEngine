@@ -358,6 +358,11 @@ namespace CE
 		return SDL_GetWindowTitle(handle);
 	}
 
+	int SDLPlatformWindow::GetZOrder()
+	{
+		return PlatformWindowMisc::GetWindowZOrder(this);
+	}
+
 	u32 SDLPlatformWindow::GetWindowDpi()
 	{
 		return PlatformWindowMisc::GetDpiForWindow(this);

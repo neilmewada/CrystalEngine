@@ -304,6 +304,11 @@ namespace CE
 		}
 	}
 
+	int FNativeContext::GetZOrder()
+	{
+		return platformWindow->GetZOrder();
+	}
+
 	bool FNativeContext::IsFocused() const
 	{
 		return platformWindow->IsFocused();
