@@ -122,6 +122,14 @@ namespace CE
         }
     }
 
+    void FContainerWidget::RemoveChildAt(int index)
+    {
+        if (index < 0 || index >= children.GetSize())
+        {
+            RemoveChild(children[index].Get());
+        }
+    }
+
     void FContainerWidget::MoveChildToIndex(FWidget* child, int index)
     {
         int curIndex = children.IndexOf(child);

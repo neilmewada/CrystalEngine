@@ -133,9 +133,10 @@ namespace CE
 #include "Window/FGameWindow.h"
 #include "Widget/FViewport.h"
 
-
+#include "Widget/Docking/FDockTabWell.h"
 #include "Widget/Docking/FDockspace.h"
 #include "Widget/Docking/FDockspaceSplitView.h"
 #include "Widget/Docking/FDockWindow.h"
 #include "Widget/Docking/FDockTabItem.h"
-#include "Widget/Docking/FDockTabWell.h"
+
+#include "Window/FDockspaceWindow.h"

@@ -79,9 +79,15 @@ namespace CE
 
         Ref<FDockWindow> GetTabbedDockWindow(Ref<FDockTabItem> dockTabItem);
 
+        Ref<FHorizontalStack> GetTabWellParent() { return tabWellParent; }
+
+        Ref<FDockTabWell> GetTabWell() { return tabWell; }
+
     protected: // - Internal -
 
-        Ref<FDockTabWell> tabWell;
+        Ref<FHorizontalStack> tabWellParent;
+        Ref<FOverlayStack> tabWellOverlay;
+    	Ref<FDockTabWell> tabWell;
         Ref<FDockspaceSplitView> container;
 
         Array<Ref<FDockWindow>> tabbedDockWindows;
@@ -98,6 +104,10 @@ namespace CE
         FUSION_PROPERTY(bool, AllowDocking);
         FUSION_PROPERTY(bool, AllowSplitting);
         FUSION_PROPERTY(bool, DestroyWhenEmpty);
+
+        Self& TabWellBackgroundWidget(FWidget& widget);
+
+        FUSION_PROPERTY_WRAPPER2(Margin, tabWell, TabWellMargin);
 
         FUSION_PROPERTY(FDockTypeMask, DockspaceType);
 

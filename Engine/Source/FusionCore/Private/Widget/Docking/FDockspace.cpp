@@ -36,7 +36,17 @@ namespace CE
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
             (
-                FAssignNew(FDockTabWell, tabWell),
+                FAssignNew(FHorizontalStack, tabWellParent)
+                .ContentVAlign(VAlign::Fill)
+                (
+                    FAssignNew(FOverlayStack, tabWellOverlay)
+                    .ContentHAlign(HAlign::Left)
+                    .ContentVAlign(VAlign::Fill)
+                    .FillRatio(1.0f)
+                    (
+                        FAssignNew(FDockTabWell, tabWell)
+                    )
+                ),
 
                 FAssignNew(FDockspaceSplitView, container)
                 .FillRatio(1.0f)
@@ -262,6 +272,18 @@ namespace CE
         return nullptr;
     }
 
+
+    FDockspace& FDockspace::TabWellBackgroundWidget(FWidget& widget)
+    {
+        while (tabWellOverlay->GetChildCount() > 1)
+        {
+            tabWellOverlay->RemoveChildAt(0);
+        }
+
+        tabWellOverlay->InsertChild(0, &widget);
+
+        return *this;
+    }
 
 }
 

@@ -2,6 +2,9 @@
 
 namespace CE
 {
+    class FDockTabItem;
+    class FDockspace;
+
     CLASS()
     class FUSIONCORE_API FDockTabWell : public FReorderableStack
     {
