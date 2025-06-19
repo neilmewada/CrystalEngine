@@ -82,6 +82,11 @@ namespace CE
                 tabItem->owner = this;
                 tabItem->isActive = (tabItem == dockspace->selectedTab);
 
+                if (!tabItem->isActive)
+                {
+                    tabItem->Translation(Vec2());
+                }
+
                 dockWindow->item = tabItem;
 
                 tabItem->Title(dockWindow->Title());

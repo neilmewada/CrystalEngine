@@ -150,8 +150,6 @@ namespace CE
 			}
 		}
 
-		//remainingSize = Math::Max(remainingSize, 0.0f);
-
 		f32 contentAlignmentRatio = 0.0f;
 
 		if (m_Direction == FStackBoxDirection::Horizontal)
