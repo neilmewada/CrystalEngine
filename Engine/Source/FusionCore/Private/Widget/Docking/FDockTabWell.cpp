@@ -81,6 +81,7 @@ namespace CE
 
                 tabItem->owner = this;
                 tabItem->isActive = (tabItem == dockspace->selectedTab);
+                tabItem->canBeDetached = dockWindow->CanBeUndocked();
 
                 if (!tabItem->isActive)
                 {

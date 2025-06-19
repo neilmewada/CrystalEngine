@@ -414,11 +414,6 @@ TEST(Fusion, MainTest)
 
 	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
 
-	//if (mainWidget->comboBox)
-	{
-		//mainWidget->comboBox->ApplyStyle();
-	}
-
 	mainWindow->Show();
 
 	int frameCounter = 0;

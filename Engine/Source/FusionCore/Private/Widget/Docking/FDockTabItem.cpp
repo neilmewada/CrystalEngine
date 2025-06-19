@@ -5,7 +5,7 @@ namespace CE
 
     FDockTabItem::FDockTabItem()
     {
-        m_Detachable = true;
+        
     }
 
     void FDockTabItem::Construct()
@@ -188,7 +188,7 @@ namespace CE
 
     bool FDockTabItem::CanBeDetached()
     {
-        if (!m_Detachable)
+        if (!canBeDetached)
             return false;
 
         if (Ref<FDockTabWell> tabWell = owner.Lock())

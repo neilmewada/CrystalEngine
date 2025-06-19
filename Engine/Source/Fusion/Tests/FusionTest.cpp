@@ -233,14 +233,32 @@ namespace WidgetTests
 
             dockspace->AddDockWindow(
                 FNew(FDockWindow)
+                .CanBeUndocked(i != 1)
                 .AllowedDockspaces(FDockspaceFilter().WithDockTypeMask(FDockTypeMask::Major))
-                .Title(String::Format("Dock {}", i))
+                .Title(String::Format("Major {}", i))
                 .Child(
-                    FAssignNew(MinorDockspace, minorDockspace)
+                    FNew(FVerticalStack)
+                    .ContentHAlign(HAlign::Fill)
+                    .ContentVAlign(VAlign::Top)
                     .HAlign(HAlign::Fill)
                     .VAlign(VAlign::Fill)
+                    (
+                        FNew(FStyledWidget)
+                        .Background(Color::RGBA(36, 36, 36))
+                        .HAlign(HAlign::Fill)
+                        .Height(40),
+
+                        FNew(FStyledWidget)
+                        .Background(Color::RGBA(26, 26, 26))
+                        .HAlign(HAlign::Fill)
+                        .Height(1.5f),
+
+                        FAssignNew(MinorDockspace, minorDockspace)
+                        .HAlign(HAlign::Fill)
+                        .FillRatio(1.0f)
+                    )
                 )
-                .Name(String::Format("Dock{}", i))
+                .Name(String::Format("Major{}", i))
                 .As<FDockWindow>()
             );
 
@@ -253,6 +271,7 @@ namespace WidgetTests
                     .Child(
                         FNew(FLabel)
                         .Text(String::Format("This is {} minor window in {} major window", j, i))
+                        .FontSize(16)
                         .HAlign(HAlign::Fill)
                         .VAlign(VAlign::Fill)
                     )

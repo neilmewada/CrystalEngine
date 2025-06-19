@@ -7,6 +7,7 @@ namespace CE
     {
         m_Title = "Untitled";
         m_AllowedDockspaces = FDockspaceFilter().WithDockTypeMask(FDockTypeMask::Major);
+        m_CanBeUndocked = true;
     }
 
     void FDockWindow::Construct()

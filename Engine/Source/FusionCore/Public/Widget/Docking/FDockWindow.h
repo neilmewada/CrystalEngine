@@ -26,6 +26,7 @@ namespace CE
 
         FUSION_PROPERTY(String, Title);
 
+        FUSION_PROPERTY(bool, CanBeUndocked);
         FUSION_PROPERTY(FDockspaceFilter, AllowedDockspaces);
 
         FUSION_WIDGET;
