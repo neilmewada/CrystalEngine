@@ -3,6 +3,9 @@
 
 namespace WidgetTests
 {
+	// ------------------------------------------------
+	// - Major Dockspace
+
 	MajorDockspaceWindow::MajorDockspaceWindow()
 	{
 		m_DockspaceClass = MajorDockspace::StaticClass();
@@ -18,7 +21,7 @@ namespace WidgetTests
 	{
 		m_DockspaceType = FDockTypeMask::Major;
 		m_AllowDocking = true;
-		m_AllowSplitting = true;
+		m_AllowSplitting = false;
 
 		detachedDockspaceWindowClass = MajorDockspaceWindow::StaticClass();
 	}
@@ -32,4 +35,32 @@ namespace WidgetTests
 		Style("Dockspace");
 	}
 
+	// ------------------------------------------------
+	// - Minor Dockspace
+
+	MinorDockspaceWindow::MinorDockspaceWindow()
+	{
+		m_DockspaceClass = MinorDockspace::StaticClass();
+	}
+
+	void MinorDockspaceWindow::Construct()
+	{
+		Super::Construct();
+
+	}
+
+	MinorDockspace::MinorDockspace()
+	{
+		m_DockspaceType = FDockTypeMask::Minor;
+		m_AllowDocking = true;
+		m_AllowSplitting = true;
+
+		detachedDockspaceWindowClass = MinorDockspaceWindow::StaticClass();
+	}
+
+	void MinorDockspace::Construct()
+	{
+		Super::Construct();
+
+	}
 }

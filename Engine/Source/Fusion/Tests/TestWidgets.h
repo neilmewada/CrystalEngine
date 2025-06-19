@@ -27,6 +27,31 @@ namespace WidgetTests
         void Construct() override;
         
     };
+
+
+    CLASS()
+    class MinorDockspaceWindow : public FDockspaceWindow
+    {
+        CE_CLASS(MinorDockspaceWindow, FDockspaceWindow)
+    public:
+
+        MinorDockspaceWindow();
+
+        void Construct() override;
+
+    };
+
+    CLASS()
+    class MinorDockspace : public FDockspace
+    {
+        CE_CLASS(MinorDockspace, FDockspace)
+    public:
+
+        MinorDockspace();
+
+        void Construct() override;
+
+    };
     
 } // namespace WidgetTests
 
