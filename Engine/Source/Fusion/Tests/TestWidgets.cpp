@@ -62,5 +62,6 @@ namespace WidgetTests
 	{
 		Super::Construct();
 
+		Style("Dockspace");
 	}
 }

@@ -164,9 +164,9 @@ namespace CE
 		}
 	}
 
-	bool FFusionContext::ParentContextExistsRecursive(FFusionContext* parent) const
+	bool FFusionContext::ParentContextExistsRecursive(Ref<FFusionContext> parent) const
 	{
-		if (parent == parentContext)
+		if (parent == parentContext.Get())
 			return true;
 
 		if (!parentContext)

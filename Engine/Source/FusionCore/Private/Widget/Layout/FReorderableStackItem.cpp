@@ -41,7 +41,12 @@ namespace CE
             {
             	lastMousePos = dragEvent->mousePosition;
                 f32 finalPosX = dragStartPosX + dragEvent->mousePosition.x - startMousePos.x;
-                finalPosX = Math::Clamp(finalPosX, 0.0f, GetParent()->GetComputedSize().width - GetComputedSize().width);
+
+                if (Ref<FWidget> parentWidget = GetParent())
+                {
+                    finalPosX = Math::Clamp(finalPosX, 0.0f, parentWidget->GetComputedSize().width - GetComputedSize().width);
+                }
+
                 f32 thisStart = finalPosX;
                 f32 thisEnd = thisStart + GetComputedSize().width;
 

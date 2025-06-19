@@ -70,6 +70,8 @@ namespace CE
             AddDockWindow(&dockWindow);
         }
 
+        bool CanBeDocked(Ref<FDockWindow> dockWindow);
+
         bool CanDetach(Ref<FDockTabItem> dockTabItem);
 
         Ref<FDockTabItem> DetachItem(Ref<FDockTabItem> dockTabItem);

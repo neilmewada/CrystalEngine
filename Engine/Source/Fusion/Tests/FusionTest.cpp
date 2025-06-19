@@ -227,19 +227,39 @@ namespace WidgetTests
     {
         Super::Construct();
 
-        for (int i = 1; i <= 4; i++)
+        for (int i = 1; i <= 3; i++)
         {
+            Ref<MinorDockspace> minorDockspace;
+
             dockspace->AddDockWindow(
                 FNew(FDockWindow)
+                .AllowedDockspaces(FDockspaceFilter().WithDockTypeMask(FDockTypeMask::Major))
                 .Title(String::Format("Dock {}", i))
                 .Child(
-                    FNew(FLabel)
-                    .FontSize(18)
-                    .Text(String::Format("This is {} window", i))
+                    FAssignNew(MinorDockspace, minorDockspace)
+                    .HAlign(HAlign::Fill)
+                    .VAlign(VAlign::Fill)
                 )
                 .Name(String::Format("Dock{}", i))
                 .As<FDockWindow>()
             );
+
+            for (int j = 1; j <= 3; j++)
+            {
+                minorDockspace->AddDockWindow(
+					FNew(FDockWindow)
+                    .AllowedDockspaces(FDockspaceFilter().WithDockTypeMask(FDockTypeMask::All))
+                    .Title(String::Format("Minor {} ({})", j, i))
+                    .Child(
+                        FNew(FLabel)
+                        .Text(String::Format("This is {} minor window in {} major window", j, i))
+                        .HAlign(HAlign::Fill)
+                        .VAlign(VAlign::Fill)
+                    )
+                    .Name(String::Format("Minor{}_{}", j, i))
+                    .As<FDockWindow>()
+                );
+            }
         }
     }
 

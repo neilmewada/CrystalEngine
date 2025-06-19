@@ -121,7 +121,7 @@ namespace CE
 
     void FDockspace::AddDockWindow(Ref<FDockWindow> dockWindow)
     {
-        if (tabbedDockWindows.Exists(dockWindow))
+        if (!CanBeDocked(dockWindow) || tabbedDockWindows.Exists(dockWindow))
             return;
 
         tabbedDockWindows.Add(dockWindow);
@@ -131,6 +131,14 @@ namespace CE
         {
             SetActiveTab(tabWell->GetTabItem(0));
         }
+    }
+
+    bool FDockspace::CanBeDocked(Ref<FDockWindow> dockWindow)
+    {
+        if (!dockWindow)
+            return false;
+
+        return (dockWindow->AllowedDockspaces().allowedDockTypes & m_DockspaceType) != 0;
     }
 
     bool FDockspace::CanDetach(Ref<FDockTabItem> dockTabItem)

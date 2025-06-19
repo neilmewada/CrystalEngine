@@ -95,20 +95,23 @@ namespace CE
                         {
 	                        if (Ref<FDockWindow> dockWindow = thisDockspace->GetTabbedDockWindow(index))
                             {
-                            	thisDockspace->RemoveDockItem(this);
-                                dropDockspace->AddDockWindow(dockWindow);
-
-                                int tabIndex = dropDockspace->GetDockedWindowIndex(dockWindow);
-
-	                            if (Ref<FDockTabItem> newTabItem = dropDockspace->GetDockTabItem(tabIndex))
+                                if (dropDockspace->CanBeDocked(dockWindow))
                                 {
-                                    dropDockspace->SetActiveTab(newTabItem);
+                                    thisDockspace->RemoveDockItem(this);
+                                    dropDockspace->AddDockWindow(dockWindow);
 
-                                    newTabItem->joined = true;
+                                    int tabIndex = dropDockspace->GetDockedWindowIndex(dockWindow);
 
-                                    dragEvent->draggedWidget = newTabItem.Get();
+                                    if (Ref<FDockTabItem> newTabItem = dropDockspace->GetDockTabItem(tabIndex))
+                                    {
+                                        dropDockspace->SetActiveTab(newTabItem);
 
-                                    newTabItem->Focus();
+                                        newTabItem->joined = true;
+
+                                        dragEvent->draggedWidget = newTabItem.Get();
+
+                                        newTabItem->Focus();
+                                    }
                                 }
                             }
                         }

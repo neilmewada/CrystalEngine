@@ -50,9 +50,9 @@ namespace CE
 
         bool IsLayoutDirty() const { return layoutDirty; }
 
-        FFusionContext* GetParentContext() const { return parentContext; }
+        Ref<FFusionContext> GetParentContext() const { return parentContext.Lock(); }
 
-        bool ParentContextExistsRecursive(FFusionContext* parent) const;
+        bool ParentContextExistsRecursive(Ref<FFusionContext> parent) const;
 
         virtual bool IsFocused() const;
         virtual bool IsShown() const;
@@ -126,7 +126,7 @@ namespace CE
         Array<Ref<FFusionContext>> childContexts{};
 
         FIELD()
-        FFusionContext* parentContext = nullptr;
+        WeakRef<FFusionContext> parentContext = nullptr;
 
         //! @brief Widget can be owned by a FusionContext directly, or by a native window!
         FIELD()

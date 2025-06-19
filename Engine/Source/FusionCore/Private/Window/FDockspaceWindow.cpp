@@ -23,10 +23,7 @@ namespace CE
             .Name("RootStyle")
             (
                 FAssignNewDynamic(FDockspace, dockspace, m_DockspaceClass)
-                .DockspaceType(FDockTypeMask::Major)
-                .AllowDocking(true)
                 .DestroyWhenEmpty(false)
-                .AllowSplitting(true)
                 .OnWindowSetup([](Ref<FWindow> newWindow, Ref<FDockTabItem> tabItem)
                     {
                         if (newWindow->IsOfType<FToolWindow>())

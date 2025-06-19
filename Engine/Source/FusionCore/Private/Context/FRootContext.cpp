@@ -139,7 +139,7 @@ namespace CE
 				event.sender = hoveredWidgetStack.Top().Get();
 				event.Reset();
 
-				if (event.sender->SupportsMouseEvents() && event.sender->GetContext() != nullptr)
+				if (event.sender.IsValid() && event.sender->SupportsMouseEvents() && event.sender->GetContext() != nullptr)
 				{
 					if (event.sender->GetContext() != nativeContext)
 					{
@@ -277,10 +277,13 @@ namespace CE
 					dragEvent.sender = hoveredWidgetStack.Top().Get();
 				dragEvent.draggedWidget = draggedWidget.Get();
 
-				if (draggedWidget->GetContext() != nativeContext)
+				if (Ref<FFusionContext> draggedWidgetContext = draggedWidget->GetContext())
 				{
-					dragEvent.mousePosition = draggedWidget->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
-					dragEvent.prevMousePosition = draggedWidget->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+					if (draggedWidgetContext != nativeContext)
+					{
+						dragEvent.mousePosition = draggedWidgetContext->ScreenToGlobalSpacePosition(screenMousePos);
+						dragEvent.prevMousePosition = draggedWidgetContext->ScreenToGlobalSpacePosition(prevScreenMousePos);
+					}
 				}
 
 				bool isValid = draggedWidget.IsValid();

@@ -39,7 +39,7 @@ namespace CE
 
             if (focusEvent->LostFocus() && AutoClose())
             {
-                FWidget* focusedWidget = focusEvent->focusedWidget;
+                Ref<FWidget> focusedWidget = focusEvent->focusedWidget;
 
                 if (focusedWidget != nullptr)
                 {
@@ -58,7 +58,7 @@ namespace CE
                         while (parentPopup)
                         {
                             // Do not close the parent popup if we are focused on that one now.
-                            if (parentPopup.Get() == focusedWidget)
+                            if (parentPopup == focusedWidget)
                                 break;
 
                             if (!focusedWidget->FocusParentExistsRecursive(parentPopup.Get()))
