@@ -93,7 +93,7 @@ namespace CE::Editor
     {
         if (Ref<FusionImageAtlasWindow> lock = instance.Lock())
         {
-            FNativeContext* nativeContext = static_cast<FNativeContext*>(lock->GetContext());
+            Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(lock->GetContext());
             PlatformWindow* window = nativeContext->GetPlatformWindow();
             window->Show();
             return lock;

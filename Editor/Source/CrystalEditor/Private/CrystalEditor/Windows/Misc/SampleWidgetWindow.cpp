@@ -214,7 +214,7 @@ namespace CE::Editor
     {
         if (instance != nullptr)
         {
-            FNativeContext* nativeContext = static_cast<FNativeContext*>(instance->GetContext());
+            Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(instance->GetContext());
             PlatformWindow* window = nativeContext->GetPlatformWindow();
             window->SetAlwaysOnTop(true);
             window->Show();
@@ -234,7 +234,7 @@ namespace CE::Editor
             600, 625, 
             Self::StaticClass(), info);
 
-        PlatformWindow* platformWindow = static_cast<FNativeContext*>(sampleWindow->GetContext())->GetPlatformWindow();
+        PlatformWindow* platformWindow = CastTo<FNativeContext>(sampleWindow->GetContext())->GetPlatformWindow();
         platformWindow->SetAlwaysOnTop(true);
 
         platformWindow->Show();

@@ -506,7 +506,7 @@ namespace CE::Editor
         {
             lock->history = history;
 
-            FNativeContext* nativeContext = static_cast<FNativeContext*>(lock->GetContext());
+            Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(lock->GetContext());
             PlatformWindow* window = nativeContext->GetPlatformWindow();
             window->SetAlwaysOnTop(true);
             window->Show();
@@ -528,7 +528,7 @@ namespace CE::Editor
 
         colorPickerTool->history = history;
 
-        PlatformWindow* platformWindow = static_cast<FNativeContext*>(colorPickerTool->GetContext())->GetPlatformWindow();
+        PlatformWindow* platformWindow = CastTo<FNativeContext>(colorPickerTool->GetContext())->GetPlatformWindow();
         platformWindow->SetAlwaysOnTop(true);
 
         platformWindow->Show();

@@ -413,7 +413,7 @@ namespace CE
 
 				for (FGameWindow* renderViewport : renderViewports)
 				{
-					FNativeContext* nativeContext = static_cast<FNativeContext*>(renderViewport->GetContext());
+					Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(renderViewport->GetContext());
 					if (!nativeContext)
 						continue;
 					//if (!renderViewport->IsEnabledInHierarchy())
@@ -434,7 +434,7 @@ namespace CE
 
 					previouslyVisibleViewports.Add(renderViewport->GetUuid());
 
-					FNativeContext* nativeContext = static_cast<FNativeContext*>(renderViewport->GetContext());
+					Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(renderViewport->GetContext());
 					PlatformWindow* platformWindow = nativeContext->GetPlatformWindow();
 					if (platformWindow && (platformWindow->IsHidden() || platformWindow->IsMinimized()))
 					{
