@@ -35,6 +35,8 @@ namespace CE
 
 		int GetZOrder() override;
 
+		void SetContextFocus() override;
+
 		bool IsFocused() const override;
 
 		bool IsShown() const override;

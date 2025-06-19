@@ -254,7 +254,7 @@ namespace CE
         PlatformWindowMisc::SetupBorderlessWindow(this, borderless);
 	}
 
-	void SDLPlatformWindow::SetInputFocus()
+	void SDLPlatformWindow::RaiseWindow()
 	{
 		SDL_RaiseWindow(handle);
 		//SDL_SetWindowInputFocus(handle);

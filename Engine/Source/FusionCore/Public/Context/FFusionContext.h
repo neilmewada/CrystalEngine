@@ -57,6 +57,8 @@ namespace CE
         virtual bool IsFocused() const;
         virtual bool IsShown() const;
 
+        virtual void SetContextFocus();
+
         bool IsRootContext() const;
 
         void MarkLayoutDirty();

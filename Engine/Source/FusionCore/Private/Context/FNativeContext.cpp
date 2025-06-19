@@ -309,6 +309,11 @@ namespace CE
 		return platformWindow->GetZOrder();
 	}
 
+	void FNativeContext::SetContextFocus()
+	{
+		platformWindow->RaiseWindow();
+	}
+
 	bool FNativeContext::IsFocused() const
 	{
 		return platformWindow->IsFocused();

@@ -135,11 +135,6 @@ namespace CE
 
     Ref<FDockTabItem> FDockspace::DetachItem(Ref<FDockTabItem> dockTabItem)
     {
-        if (tabbedDockWindows.GetSize() > 1)
-        {
-            String::IsAlphabet('a');
-        }
-
         if (!dockTabItem)
             return nullptr;
 
@@ -164,6 +159,8 @@ namespace CE
         int neighborIndex = index - 1;
         neighborIndex = Math::Clamp<int>(neighborIndex, 0, tabbedDockWindows.GetSize() - 1);
 
+        Vec2i screenMousePos = InputManager::GetGlobalMousePosition();
+
         Ref<FWindow> detachedWindow = FusionApplication::Get()->CreateNativeWindow(dockTabItem->Title(), dockTabItem->Title(), 
             512, 512, 
             FWindow::StaticClass(),
@@ -172,6 +169,8 @@ namespace CE
             .fullscreen = false,
             .resizable = false,
             .hidden = false,
+            .openCentered = false,
+            .openPos = screenMousePos,
             .windowFlags = PlatformWindowFlags::DestroyOnClose
         });
 

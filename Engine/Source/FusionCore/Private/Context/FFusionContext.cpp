@@ -109,7 +109,7 @@ namespace CE
 
 	int FFusionContext::GetZOrder()
 	{
-		return -1;
+		return NumericLimits<int>::Max();
 	}
 
 	FFusionContext* FFusionContext::GetRootContext() const
@@ -198,6 +198,11 @@ namespace CE
 			return true;
 
 		return true;
+	}
+
+	void FFusionContext::SetContextFocus()
+	{
+
 	}
 
 	bool FFusionContext::IsRootContext() const
@@ -391,6 +396,8 @@ namespace CE
 		{
 			FusionApplication::Get()->GetRootContext()->SetFocusWidget(focusWidget);
 		}
+
+		SetContextFocus();
 	}
 
 	bool FFusionContext::IsPopupWindow() const
@@ -420,8 +427,42 @@ namespace CE
 		{
 			contexts.Sort([&](Ref<FFusionContext> lhs, Ref<FFusionContext> rhs)
 				{
-					return lhs->GetZOrder() < rhs->GetZOrder();
+					return lhs->GetZOrder() > rhs->GetZOrder();
 				});
+
+			int minZOrder = NumericLimits<int>::Max();
+
+			for (Ref<FFusionContext> context : contexts)
+			{
+				if (context->IsGhosted())
+					continue;
+				minZOrder = Math::Min(minZOrder, context->GetZOrder());
+			}
+
+			if (minZOrder == NumericLimits<int>::Max() || GetZOrder() < minZOrder)
+			{
+				Rect windowRect = Rect::FromSize(Vec2(), GetAvailableSize());
+				if (windowRect.Contains(mousePosition))
+				{
+					for (int i = localPopupStack.GetSize() - 1; i >= 0; --i)
+					{
+						hoveredWidget = localPopupStack[i]->HitTest(mousePosition);
+						if (hoveredWidget || localPopupStack[i]->m_BlockInteraction)
+						{
+							return hoveredWidget;
+						}
+					}
+
+					if (owningWidget)
+					{
+						hoveredWidget = owningWidget->HitTest(mousePosition);
+						if (hoveredWidget)
+						{
+							return hoveredWidget;
+						}
+					}
+				}
+			}
 		}
 
 		for (int i = contexts.GetSize() - 1; i >= 0; --i)
@@ -454,16 +495,18 @@ namespace CE
 			}
 		}
 
-		Rect windowRect = Rect::FromSize(Vec2(), GetAvailableSize());
-		if (!windowRect.Contains(mousePosition))
-			return nullptr;
-
-		for (int i = localPopupStack.GetSize() - 1; i >= 0; --i)
 		{
-			hoveredWidget = localPopupStack[i]->HitTest(mousePosition);
-			if (hoveredWidget || localPopupStack[i]->m_BlockInteraction)
+			Rect windowRect = Rect::FromSize(Vec2(), GetAvailableSize());
+			if (!windowRect.Contains(mousePosition))
+				return nullptr;
+
+			for (int i = localPopupStack.GetSize() - 1; i >= 0; --i)
 			{
-				return hoveredWidget;
+				hoveredWidget = localPopupStack[i]->HitTest(mousePosition);
+				if (hoveredWidget || localPopupStack[i]->m_BlockInteraction)
+				{
+					return hoveredWidget;
+				}
 			}
 		}
 

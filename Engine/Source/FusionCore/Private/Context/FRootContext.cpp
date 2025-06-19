@@ -105,6 +105,11 @@ namespace CE
 		if (draggedWidget != nullptr)
 		{
 			dropTarget = nativeContext->HitTest(mousePos, false);
+
+			if (dropTarget)
+			{
+				dropTarget->Focus();
+			}
 		}
 
 		while (dropTarget != nullptr && !dropTarget->SupportsDropTarget())

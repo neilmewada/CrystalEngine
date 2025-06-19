@@ -56,7 +56,7 @@ namespace CE
         virtual void SetAlwaysOnTop(bool alwaysOnTop) = 0;
 		virtual void SetResizable(bool resizable) = 0;
         virtual void SetBorderless(bool borderless) = 0;
-        virtual void SetInputFocus() = 0;
+        virtual void RaiseWindow() = 0;
 
         virtual bool IsBorderless() = 0;
         virtual bool IsMinimized() = 0;

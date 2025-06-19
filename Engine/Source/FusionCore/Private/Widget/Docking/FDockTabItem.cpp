@@ -143,7 +143,7 @@ namespace CE
                                         .fullscreen = false,
                                         .resizable = true,
                                         .hidden = false,
-                                        .openCentered = nativeWindow != nullptr,
+                                        .openCentered = nativeWindow == nullptr,
                                         .openPos = originalPos,
                                         .windowFlags = PlatformWindowFlags::DestroyOnClose
                                     });

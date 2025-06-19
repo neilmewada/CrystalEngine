@@ -45,7 +45,7 @@ namespace CE
 
 		virtual void SetResizable(bool resizable) override;
         virtual void SetBorderless(bool borderless) override;
-        virtual void SetInputFocus() override;
+        virtual void RaiseWindow() override;
 
         virtual bool IsBorderless() override;
         virtual bool IsMinimized() override;
