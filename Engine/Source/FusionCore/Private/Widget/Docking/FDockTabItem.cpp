@@ -110,40 +110,47 @@ namespace CE
 
                                         newTabItem->Focus();
 
-                                        if (Ref<FDockspace> guideDockspaceLock = guideDockspace.Lock())
+                                        if (Ref<FDockspaceSplitView> guideDockspaceLock = guideDockspaceSplitView.Lock())
                                         {
                                             guideDockspaceLock->SetGuideVisible(false);
-                                            guideDockspace = nullptr;
+                                            guideDockspaceSplitView = nullptr;
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    else if (thisDockspace && dragEvent->dropTarget && dragEvent->dropTarget->IsOfType<FDockspace>())
+                    else if (thisDockspace && dragEvent->dropTarget && dragEvent->dropTarget->IsOfType<FDockspaceSplitView>())
                     {
-                        Ref<FDockspace> dropDockspace = CastTo<FDockspace>(dragEvent->dropTarget);
-
-                        int index = tabWell->GetTabIndex(this);
-
-                        if (dropDockspace && index >= 0)
+                        Ref<FDockspaceSplitView> dropDockspaceSplitView = CastTo<FDockspaceSplitView>(dragEvent->dropTarget);
+                        if (Ref<FDockspace> dropDockspace = dropDockspaceSplitView->GetDockspace())
                         {
-                            if (Ref<FDockWindow> dockWindow = thisDockspace->GetTabbedDockWindow(index))
+                            int index = tabWell->GetTabIndex(this);
+
+                            if (dropDockspaceSplitView && index >= 0)
                             {
-                                if (guideDockspace != dropDockspace && dropDockspace->AllowSplitting() && dropDockspace->CanBeDocked(dockWindow))
+                                if (Ref<FDockWindow> dockWindow = thisDockspace->GetTabbedDockWindow(index))
                                 {
-                                    dropDockspace->SetGuideVisible(true);
-                                    guideDockspace = dropDockspace;
+                                    if (guideDockspaceSplitView != dropDockspaceSplitView && dropDockspace->AllowSplitting() && dropDockspace->CanBeDocked(dockWindow))
+                                    {
+                                        if (guideDockspaceSplitView)
+                                        {
+                                            guideDockspaceSplitView->SetGuideVisible(false);
+                                        }
+
+                                        dropDockspaceSplitView->SetGuideVisible(true);
+                                        guideDockspaceSplitView = dropDockspaceSplitView;
+                                    }
                                 }
                             }
                         }
                     }
                     else if (dragEvent->dropTarget == nullptr || !dragEvent->dropTarget->IsOfType<FDockingHint>())
                     {
-                        if (Ref<FDockspace> guideDockspaceLock = guideDockspace.Lock())
+                        if (Ref<FDockspaceSplitView> guideDockspaceSplitViewLock = guideDockspaceSplitView.Lock())
                         {
-                            guideDockspaceLock->SetGuideVisible(false);
-                            guideDockspace = nullptr;
+                            guideDockspaceSplitViewLock->SetGuideVisible(false);
+                            guideDockspaceSplitViewLock = nullptr;
                         }
                     }
                 }
@@ -154,13 +161,31 @@ namespace CE
 
                     detached = false;
 
-                    if (Ref<FDockspace> guideDockspaceLock = guideDockspace.Lock())
+                    Ref<FDockspaceSplitView> splitInDockspaceView = nullptr;
+                    FDockingHintPosition splitPosition = FDockingHintPosition::Center;
+
+                    if (Ref<FDockspaceSplitView> guideDockspaceSplitViewLock = guideDockspaceSplitView.Lock())
                     {
-                        guideDockspaceLock->SetGuideVisible(false);
-                        guideDockspace = nullptr;
+                        if (guideDockspaceSplitViewLock->IsDockingPreviewEnabled())
+                        {
+                            splitInDockspaceView = guideDockspaceSplitViewLock;
+                            splitPosition = guideDockspaceSplitViewLock->GetDockingPreviewHintPosition();
+                        }
+                        guideDockspaceSplitViewLock->SetGuideVisible(false);
+                        guideDockspaceSplitView = nullptr;
                     }
 
-                    if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
+                    if (splitInDockspaceView)
+                    {
+                        if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
+                        {
+                            if (Ref<FNativeContext> nativeContext = GetNativeContext())
+                            {
+                                // TODO
+                            }
+                        }
+                    }
+                    else if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
                     {
                         if (Ref<FNativeContext> nativeContext = GetNativeContext())
                         {
@@ -172,7 +197,7 @@ namespace CE
 	                            Vec2i originalPos = nativeWindow != nullptr ? nativeWindow->GetWindowPosition() : Vec2i();
 
                                 auto onCreateDockspace = dockspace->OnCreateDockspace();
-
+                                
                                 dockspace->RemoveDockItem(this);
 
                                 Ref<FDockspaceWindow> newWindow = FusionApplication::Get()->CreateNativeWindow<FDockspaceWindow>(Title(), Title(),

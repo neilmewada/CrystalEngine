@@ -39,7 +39,7 @@ namespace CE
         WeakRef<FDockTabWell> owner;
         f32 startMousePosX = 0;
 
-        WeakRef<FDockspace> guideDockspace;
+        WeakRef<FDockspaceSplitView> guideDockspaceSplitView;
 
         bool isActive = false;
         bool isHovered = false;

@@ -2,6 +2,7 @@
 
 namespace CE
 {
+    class FDockspaceSplitView;
 
     CLASS()
     class FUSIONCORE_API FDockingGuide : public FStyledWidget
@@ -15,14 +16,14 @@ namespace CE
 
     public: // - Public API -
 
-        Ref<FDockspace> GetDockspace() { return ownerDockspace.Lock(); }
+        Ref<FDockspaceSplitView> GetDockspaceSplitView() { return ownerDockspaceSplitView.Lock(); }
 
         void OnDockingHintActivated(Ref<FDockingHint> dockingHint);
         void OnDockingHintDeactivated(Ref<FDockingHint> dockingHint);
 
     protected: // - Internal -
 
-        WeakRef<FDockspace> ownerDockspace;
+        WeakRef<FDockspaceSplitView> ownerDockspaceSplitView;
 
     public: // - Fusion Properties - 
 
@@ -31,6 +32,7 @@ namespace CE
         friend class FDockspace;
         friend class FDockTabItem;
         friend class FDockingHint;
+        friend class FDockspaceSplitView;
     };
     
 }

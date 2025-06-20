@@ -3,6 +3,7 @@
 namespace CE
 {
     class FDockingGuide;
+    class FDockspaceSplitView;
 
     ENUM()
     enum class FDockingHintPosition
@@ -43,7 +44,7 @@ namespace CE
         bool isHovered = false;
 
         WeakRef<FDockingGuide> ownerGuide;
-        WeakRef<FDockspace> hintDockspace;
+        WeakRef<FDockspaceSplitView> hintDockspaceSplit;
 
         FDockingHintPosition hintPosition = FDockingHintPosition::Center;
 

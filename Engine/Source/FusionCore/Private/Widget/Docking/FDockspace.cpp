@@ -31,47 +31,29 @@ namespace CE
         dockId = FDockId::New();
 
         Child(
-            FNew(FOverlayStack)
+            FNew(FVerticalStack)
+            .ContentHAlign(HAlign::Fill)
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
             (
-                FNew(FVerticalStack)
-                .ContentHAlign(HAlign::Fill)
-                .HAlign(HAlign::Fill)
-                .VAlign(VAlign::Fill)
+                FAssignNew(FHorizontalStack, tabWellParent)
+                .ContentVAlign(VAlign::Fill)
                 (
-                    FAssignNew(FHorizontalStack, tabWellParent)
+                    FAssignNew(FOverlayStack, tabWellOverlay)
+                    .ContentHAlign(HAlign::Left)
                     .ContentVAlign(VAlign::Fill)
-                    (
-                        FAssignNew(FOverlayStack, tabWellOverlay)
-                        .ContentHAlign(HAlign::Left)
-                        .ContentVAlign(VAlign::Fill)
-                        .FillRatio(1.0f)
-                        (
-                            FAssignNew(FDockTabWell, tabWell)
-                            .HAlign(HAlign::Fill)
-                            .VAlign(VAlign::Fill)
-                            )
-                        ),
-
-                    FAssignNew(FDockspaceSplitView, container)
                     .FillRatio(1.0f)
-                ),
+                    (
+                        FAssignNew(FDockTabWell, tabWell)
+                        .HAlign(HAlign::Fill)
+                        .VAlign(VAlign::Fill)
+                        )
+                    ),
 
-                FAssignNew(FStyledWidget, dockingPreviewWidget)
-                .OnPaintContentOverlay(FUNCTION_BINDING(this, OnPaintDockingPreview))
-                .IgnoreHitTest(true)
-                .HAlign(HAlign::Fill)
-                .VAlign(VAlign::Fill),
-
-                FAssignNew(FDockingGuide, dockingGuide)
-                .HAlign(HAlign::Center)
-                .VAlign(VAlign::Center)
-                .Enabled(false)
+                FAssignNew(FDockspaceSplitView, container)
+                .FillRatio(1.0f)
             )
         );
-
-        dockingGuide->ownerDockspace = this;
 
         tabWell->owner = this;
     }
@@ -127,7 +109,9 @@ namespace CE
     {
         tabWell->UpdateTabWell();
 
-        container->RemoveAllChildren();
+    	// TODO: Handle multiple split docks
+
+        container->RemoveAllContent();
 
         if (tabbedDockWindows.IsEmpty())
         {
@@ -141,7 +125,7 @@ namespace CE
         int activeTabIndex = tabWell->GetTabIndex(selectedTab);
         activeTabIndex = Math::Clamp<int>(activeTabIndex, 0, tabbedDockWindows.GetSize() - 1);
 
-        container->AddChild(tabbedDockWindows[activeTabIndex].Get());
+        container->SetSingleDockWindow(tabbedDockWindows[activeTabIndex].Get());
         tabbedDockWindows[activeTabIndex]->FillRatio(1.0f);
     }
 
@@ -308,63 +292,6 @@ namespace CE
         return nullptr;
     }
 
-    void FDockspace::SetDockingPreviewEnabled(bool enabled, FDockingHintPosition position)
-    {
-        if (!m_AllowSplitting)
-            enabled = false;
-
-        dockingPreviewEnabled = enabled;
-        dockingPreviewPosition = position;
-    }
-
-    void FDockspace::OnPaintDockingPreview(FPainter* painter)
-    {
-        if (dockingPreviewEnabled)
-        {
-            FBrush background = FBrush(Color::RGBHex(0x93B8DF).WithAlpha(0.5f));
-            Color borderColor = Color::RGBHex(0x5397DB);
-
-            painter->SetBrush(background);
-            painter->SetPen(FPen(borderColor, 1));
-
-            Vec2 pos;
-            Vec2 size;
-            
-            switch (dockingPreviewPosition)
-            {
-            case FDockingHintPosition::Center:
-                pos = dockingPreviewWidget->GetComputedPosition();
-                size = dockingPreviewWidget->GetComputedSize();
-                break;
-            case FDockingHintPosition::Left:
-                pos = dockingPreviewWidget->GetComputedPosition();
-                size = dockingPreviewWidget->GetComputedSize() * Vec2(0.5f, 1);
-                break;
-            case FDockingHintPosition::Top:
-                pos = dockingPreviewWidget->GetComputedPosition();
-                size = dockingPreviewWidget->GetComputedSize() * Vec2(1, 0.5f);
-                break;
-            case FDockingHintPosition::Right:
-                pos = dockingPreviewWidget->GetComputedPosition() + dockingPreviewWidget->GetComputedSize() * Vec2(0.5f, 0);
-                size = dockingPreviewWidget->GetComputedSize() * Vec2(0.5f, 1);
-                break;
-            case FDockingHintPosition::Bottom:
-                pos = dockingPreviewWidget->GetComputedPosition() + dockingPreviewWidget->GetComputedSize() * Vec2(0, 0.5f);
-                size = dockingPreviewWidget->GetComputedSize() * Vec2(1, 0.5f);
-                break;
-            }
-
-            painter->DrawRect(Rect::FromSize(pos, size));
-        }
-    }
-
-    void FDockspace::SetGuideVisible(bool visible)
-    {
-        if (!m_AllowSplitting)
-            visible = false;
-
-        dockingGuide->Enabled(visible);
-    }
 
     FDockspace& FDockspace::TabWellOverlayWidget(FWidget& widget)
     {

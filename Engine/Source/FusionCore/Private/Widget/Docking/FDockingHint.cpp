@@ -74,12 +74,15 @@ namespace CE
 
                 if (Ref<FDockingGuide> guide = GetOwnerGuide())
                 {
-	                if (Ref<FDockspace> dockspace = guide->GetDockspace())
+	                if (Ref<FDockspaceSplitView> dockspaceSplit = guide->GetDockspaceSplitView())
 	                {
-                        if (dockspace->AllowSplitting())
+                        if (Ref<FDockspace> dockspace = dockspaceSplit->GetDockspace())
                         {
-                            hintDockspace = dockspace;
-                            dockspace->SetDockingPreviewEnabled(true, hintPosition);
+                            if (dockspace->AllowSplitting())
+                            {
+                                hintDockspaceSplit = dockspaceSplit;
+                                dockspaceSplit->SetDockingPreviewEnabled(true, hintPosition);
+                            }
                         }
 	                }
                 }
@@ -89,10 +92,10 @@ namespace CE
                 Background(Color::RGBA(90, 90, 90));
                 isHovered = false;
 
-                if (Ref<FDockspace> dockspace = hintDockspace.Lock())
+                if (Ref<FDockspaceSplitView> dockspaceSplit = hintDockspaceSplit.Lock())
                 {
-                    dockspace->SetDockingPreviewEnabled(false, hintPosition);
-                    hintDockspace = nullptr;
+                    dockspaceSplit->SetDockingPreviewEnabled(false, hintPosition);
+                    hintDockspaceSplit = nullptr;
                 }
             }
         }
