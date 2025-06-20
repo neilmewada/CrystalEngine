@@ -250,6 +250,7 @@ namespace CE
 
         FUSION_LAYOUT_PROPERTY(bool, Enabled);
         FUSION_LAYOUT_PROPERTY(bool, WindowDragHitTest);
+        FUSION_LAYOUT_PROPERTY(bool, IgnoreHitTest);
         FUSION_LAYOUT_PROPERTY(bool, Visible);
 
         FUSION_LAYOUT_PROPERTY(f32, MinWidth);

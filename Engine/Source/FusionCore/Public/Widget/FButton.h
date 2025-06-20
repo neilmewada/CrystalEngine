@@ -33,8 +33,6 @@ namespace CE
 
         void HandleEvent(FEvent* event) override;
 
-        void OnPaintContentOverlay(FPainter* painter) override;
-
         bool SupportsMouseEvents() const override { return true; }
 
         bool SupportsKeyboardEvents() const override { return true; }

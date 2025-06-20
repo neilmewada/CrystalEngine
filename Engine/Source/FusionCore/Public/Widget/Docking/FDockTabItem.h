@@ -26,6 +26,8 @@ namespace CE
 
         bool IsActive() const { return isActive; }
         bool IsHovered() const { return isHovered; }
+        bool IsDetached() const { return detached; }
+        bool IsJoined() const { return joined; }
 
         void SetActiveTab();
 
@@ -36,6 +38,8 @@ namespace CE
         Ref<FLabel> tabTitle;
         WeakRef<FDockTabWell> owner;
         f32 startMousePosX = 0;
+
+        WeakRef<FDockspace> guideDockspace;
 
         bool isActive = false;
         bool isHovered = false;

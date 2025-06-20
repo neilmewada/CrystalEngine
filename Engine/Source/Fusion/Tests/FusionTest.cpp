@@ -251,7 +251,7 @@ namespace WidgetTests
                         FNew(FStyledWidget)
                         .Background(Color::RGBA(26, 26, 26))
                         .HAlign(HAlign::Fill)
-                        .Height(1.5f),
+                        .Height(1.0f),
 
                         FAssignNew(MinorDockspace, minorDockspace)
                         .HAlign(HAlign::Fill)

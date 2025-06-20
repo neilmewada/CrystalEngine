@@ -115,12 +115,6 @@ namespace CE
 	    Super::HandleEvent(event);
     }
 
-    void FButton::OnPaintContentOverlay(FPainter* painter)
-    {
-	    Super::OnPaintContentOverlay(painter);
-
-    }
-
     void FButton::SetState(FButtonState newState)
     {
         if (buttonState == newState)

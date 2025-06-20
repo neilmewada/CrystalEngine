@@ -30,9 +30,7 @@ namespace CE
         {
             if (event->IsMouseEvent())
             {
-                FMouseEvent* mouseEvent = (FMouseEvent*)event;
-
-                if (event->type == FEventType::MouseEnter)
+            	if (event->type == FEventType::MouseEnter)
                 {
                     isHovered = true;
                     ApplyStyle();
@@ -111,9 +109,41 @@ namespace CE
                                         dragEvent->draggedWidget = newTabItem.Get();
 
                                         newTabItem->Focus();
+
+                                        if (Ref<FDockspace> guideDockspaceLock = guideDockspace.Lock())
+                                        {
+                                            guideDockspaceLock->SetGuideVisible(false);
+                                            guideDockspace = nullptr;
+                                        }
                                     }
                                 }
                             }
+                        }
+                    }
+                    else if (thisDockspace && dragEvent->dropTarget && dragEvent->dropTarget->IsOfType<FDockspace>())
+                    {
+                        Ref<FDockspace> dropDockspace = CastTo<FDockspace>(dragEvent->dropTarget);
+
+                        int index = tabWell->GetTabIndex(this);
+
+                        if (dropDockspace && index >= 0)
+                        {
+                            if (Ref<FDockWindow> dockWindow = thisDockspace->GetTabbedDockWindow(index))
+                            {
+                                if (guideDockspace != dropDockspace && dropDockspace->AllowSplitting() && dropDockspace->CanBeDocked(dockWindow))
+                                {
+                                    dropDockspace->SetGuideVisible(true);
+                                    guideDockspace = dropDockspace;
+                                }
+                            }
+                        }
+                    }
+                    else if (dragEvent->dropTarget == nullptr || !dragEvent->dropTarget->IsOfType<FDockingHint>())
+                    {
+                        if (Ref<FDockspace> guideDockspaceLock = guideDockspace.Lock())
+                        {
+                            guideDockspaceLock->SetGuideVisible(false);
+                            guideDockspace = nullptr;
                         }
                     }
                 }
@@ -123,6 +153,12 @@ namespace CE
                     dragEvent->Consume(this);
 
                     detached = false;
+
+                    if (Ref<FDockspace> guideDockspaceLock = guideDockspace.Lock())
+                    {
+                        guideDockspaceLock->SetGuideVisible(false);
+                        guideDockspace = nullptr;
+                    }
 
                     if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
                     {

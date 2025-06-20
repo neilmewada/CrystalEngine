@@ -47,6 +47,7 @@ namespace WidgetTests
 	{
 		Super::Construct();
 
+		
 	}
 
 	MinorDockspace::MinorDockspace()

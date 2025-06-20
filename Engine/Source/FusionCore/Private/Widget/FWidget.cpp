@@ -133,7 +133,7 @@ namespace CE
     {
         ZoneScoped;
 
-        if (!Enabled())
+        if (!Enabled() || m_IgnoreHitTest)
             return nullptr;
 
         Vec2 rectPos = computedPosition + m_Translation;
@@ -150,7 +150,7 @@ namespace CE
     {
         ZoneScoped;
 
-        if (!Enabled())
+        if (!Enabled() || m_IgnoreHitTest)
             return nullptr;
 
         Vec2 rectPos = computedPosition + m_Translation;

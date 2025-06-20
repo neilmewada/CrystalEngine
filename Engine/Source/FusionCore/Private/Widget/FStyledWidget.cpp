@@ -69,7 +69,7 @@ namespace CE
         // Paint child widgets
 	    Super::OnPaint(painter);
 
-        OnPaintContentOverlay(painter);
+        m_OnPaintContentOverlay.Broadcast(painter);
 
         if (m_ClipShape.GetShapeType() != FShapeType::None)
         {

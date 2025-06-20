@@ -87,6 +87,7 @@ namespace CE
 #include "Style/FScrollBoxStyle.h"
 #include "Style/FDockTabWellStyle.h"
 #include "Style/FDockspaceStyle.h"
+#include "Style/FDockingGuideStyle.h"
 #include "Style/FStyleSet.h"
 #include "Style/FStyleManager.h"
 
@@ -134,6 +135,8 @@ namespace CE
 #include "Widget/FViewport.h"
 
 #include "Widget/Docking/FDockTabWell.h"
+#include "Widget/Docking/FDockingHint.h"
+#include "Widget/Docking/FDockingGuide.h"
 #include "Widget/Docking/FDockspace.h"
 #include "Widget/Docking/FDockspaceSplitView.h"
 #include "Widget/Docking/FDockWindow.h"

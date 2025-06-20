@@ -168,6 +168,8 @@ namespace CE
         BitSet<128> keyPressStates{};
 
         Ref<FWidget> draggedWidget = nullptr;
+        Ref<FWidget> curDropTarget = nullptr;
+
         WeakRef<FWidget> prevHoveredWidget = nullptr;
         StaticArray<WeakRef<FWidget>, 6> widgetsPressedPerMouseButton{};
 

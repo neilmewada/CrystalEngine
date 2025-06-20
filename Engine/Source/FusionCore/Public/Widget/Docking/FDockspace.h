@@ -48,7 +48,11 @@ namespace CE
 
         void Construct() override;
 
+        void HandleEvent(FEvent* event) override;
+
     public: // - Public API -
+
+        bool SupportsDropTarget() const override { return true; }
 
         FDockId GetDockId() const { return dockId; }
 
@@ -86,16 +90,28 @@ namespace CE
 
         Ref<FDockTabWell> GetTabWell() { return tabWell; }
 
+        void SetDockingPreviewEnabled(bool enabled, FDockingHintPosition position);
+
     protected: // - Internal -
+
+        FUNCTION()
+        void OnPaintDockingPreview(FPainter* painter);
+
+        void SetGuideVisible(bool visible);
 
         Ref<FHorizontalStack> tabWellParent;
         Ref<FOverlayStack> tabWellOverlay;
     	Ref<FDockTabWell> tabWell;
         Ref<FDockspaceSplitView> container;
+        Ref<FStyledWidget> dockingPreviewWidget;
 
         Array<Ref<FDockWindow>> tabbedDockWindows;
 
         Ref<FDockTabItem> selectedTab;
+
+        Ref<FDockingGuide> dockingGuide;
+
+        WeakRef<FDockTabItem> curDraggedItem;
 
         FIELD()
         Vec2i originalWindowSize;
@@ -104,6 +120,9 @@ namespace CE
 
         FIELD()
         SubClass<FDockspaceWindow> detachedDockspaceWindowClass;
+
+        bool dockingPreviewEnabled = false;
+        FDockingHintPosition dockingPreviewPosition = FDockingHintPosition::Center;
 
     public: // - Fusion Properties - 
 
