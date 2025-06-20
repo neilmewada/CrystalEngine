@@ -47,8 +47,8 @@ namespace CE
                         FAssignNew(FDockTabWell, tabWell)
                         .HAlign(HAlign::Fill)
                         .VAlign(VAlign::Fill)
-                        )
-                    ),
+                    )
+                ),
 
                 FAssignNew(FDockspaceSplitView, container)
                 .FillRatio(1.0f)
