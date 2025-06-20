@@ -30,7 +30,7 @@ namespace WidgetTests
 	{
 		Super::Construct();
 
-		GetTabWell()->Padding(Vec4(1, 1.25f, 0, 0) * 15);
+		container->GetTabWell()->Padding(Vec4(1, 1.25f, 0, 0) * 15);
 
 		Style("Dockspace");
 	}
@@ -63,6 +63,6 @@ namespace WidgetTests
 	{
 		Super::Construct();
 
-		Style("Dockspace");
+		Style("MinorDockspace");
 	}
 }

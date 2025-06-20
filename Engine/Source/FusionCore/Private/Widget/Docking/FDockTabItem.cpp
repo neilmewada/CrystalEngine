@@ -85,24 +85,24 @@ namespace CE
                     if (thisDockspace && dragEvent->dropTarget && dragEvent->dropTarget->IsOfType<FDockTabWell>() && dragEvent->dropTarget != tabWell)
                     {
                         Ref<FDockTabWell> dropTabWell = CastTo<FDockTabWell>(dragEvent->dropTarget);
-                        Ref<FDockspace> dropDockspace = dropTabWell->GetDockspace();
+                        Ref<FDockspaceSplitView> dropDockspaceSplitView = dropTabWell->GetDockspaceSplitView();
 
                         int index = tabWell->GetTabIndex(this);
 
-                        if (dropDockspace && index >= 0)
+                        if (dropDockspaceSplitView && index >= 0)
                         {
-	                        if (Ref<FDockWindow> dockWindow = thisDockspace->GetTabbedDockWindow(index))
+	                        if (Ref<FDockWindow> dockWindow = thisDockspace->GetRootSplit()->GetTabbedDockWindow(index))
                             {
-                                if (dropDockspace->CanBeDocked(dockWindow))
+                                if (dropDockspaceSplitView->CanBeDocked(dockWindow))
                                 {
-                                    thisDockspace->RemoveDockItem(this);
-                                    dropDockspace->AddDockWindow(dockWindow);
+                                    thisDockspace->GetRootSplit()->RemoveDockItem(this);
+                                    dropDockspaceSplitView->AddDockWindow(dockWindow);
 
-                                    int tabIndex = dropDockspace->GetDockedWindowIndex(dockWindow);
+                                    int tabIndex = dropDockspaceSplitView->GetDockedWindowIndex(dockWindow);
 
-                                    if (Ref<FDockTabItem> newTabItem = dropDockspace->GetDockTabItem(tabIndex))
+                                    if (Ref<FDockTabItem> newTabItem = dropDockspaceSplitView->GetDockTabItem(tabIndex))
                                     {
-                                        dropDockspace->SetActiveTab(newTabItem);
+                                        dropDockspaceSplitView->SetActiveTab(newTabItem);
 
                                         newTabItem->joined = true;
 
@@ -127,9 +127,9 @@ namespace CE
                         {
                             int index = tabWell->GetTabIndex(this);
 
-                            if (dropDockspaceSplitView && index >= 0)
+                            if (index >= 0)
                             {
-                                if (Ref<FDockWindow> dockWindow = thisDockspace->GetTabbedDockWindow(index))
+                                if (Ref<FDockWindow> dockWindow = thisDockspace->GetRootSplit()->GetTabbedDockWindow(index))
                                 {
                                     if (guideDockspaceSplitView != dropDockspaceSplitView && dropDockspace->AllowSplitting() && dropDockspace->CanBeDocked(dockWindow))
                                     {
@@ -150,7 +150,7 @@ namespace CE
                         if (Ref<FDockspaceSplitView> guideDockspaceSplitViewLock = guideDockspaceSplitView.Lock())
                         {
                             guideDockspaceSplitViewLock->SetGuideVisible(false);
-                            guideDockspaceSplitViewLock = nullptr;
+                            guideDockspaceSplitView = nullptr;
                         }
                     }
                 }
@@ -191,14 +191,14 @@ namespace CE
                         {
                             nativeContext->SetGhosted(false);
 
-                            if (Ref<FDockWindow> thisDockWindow = dockspace->GetTabbedDockWindow(this))
+                            if (Ref<FDockWindow> thisDockWindow = dockspace->GetRootSplit()->GetTabbedDockWindow(this))
                             {
 	                            PlatformWindow* nativeWindow = nativeContext->GetPlatformWindow();
 	                            Vec2i originalPos = nativeWindow != nullptr ? nativeWindow->GetWindowPosition() : Vec2i();
 
                                 auto onCreateDockspace = dockspace->OnCreateDockspace();
                                 
-                                dockspace->RemoveDockItem(this);
+                                dockspace->GetRootSplit()->RemoveDockItem(this);
 
                                 Ref<FDockspaceWindow> newWindow = FusionApplication::Get()->CreateNativeWindow<FDockspaceWindow>(Title(), Title(),
                                     dockspace->originalWindowSize.width,
@@ -274,7 +274,7 @@ namespace CE
         {
             if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
             {
-                if (Ref<FDockTabItem> detachedTabItem = dockspace->DetachItem(this))
+                if (Ref<FDockTabItem> detachedTabItem = dockspace->GetRootSplit()->DetachItem(this))
                 {
                     return detachedTabItem;
                 }

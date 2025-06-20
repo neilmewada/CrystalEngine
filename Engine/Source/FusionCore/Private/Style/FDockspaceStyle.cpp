@@ -20,14 +20,20 @@ namespace CE
 
     void FDockspaceStyle::MakeStyle(FWidget& widget)
     {
+        Super::MakeStyle(widget);
+
         FDockspace& dockspace = static_cast<FDockspace&>(widget);
 
-        if (tabWellStyle && dockspace.GetDockTabWell()->IsOfType(tabWellStyle->GetWidgetClass()))
+        if (tabWellStyle)
         {
-            tabWellStyle->MakeStyle(*dockspace.GetDockTabWell());
+            dockspace.IterateTabWellsRecursively([&](FDockTabWell& tabWell)
+                {
+					if (tabWell.IsOfType(tabWellStyle->GetWidgetClass()))
+                    {
+	                    tabWellStyle->MakeStyle(tabWell);
+                    }
+                });
         }
-
-        Super::MakeStyle(widget);
     }
 
 } // namespace CE

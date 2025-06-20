@@ -81,7 +81,7 @@ namespace CE
             ) // End of Child()
         );
 
-        dockspace->GetTabWell()->WindowDragHitTest(true);
+        dockspace->SetTabWellWindowHitTest(true);
     }
     
 }

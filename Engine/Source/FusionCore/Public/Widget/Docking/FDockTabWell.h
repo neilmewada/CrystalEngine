@@ -4,6 +4,7 @@ namespace CE
 {
     class FDockTabItem;
     class FDockspace;
+    class FDockspaceSplitView;
 
     CLASS()
     class FUSIONCORE_API FDockTabWell : public FReorderableStack
@@ -33,7 +34,9 @@ namespace CE
 
 		void RemoveTabItem(Ref<FDockTabItem> tabItem);
 
-        Ref<FDockspace> GetDockspace() { return owner.Lock(); }
+        Ref<FDockspace> GetDockspace();
+
+        Ref<FDockspaceSplitView> GetDockspaceSplitView();
 
         void SetActiveTab(Ref<FDockTabItem> tabItem);
 
@@ -41,7 +44,8 @@ namespace CE
 
     protected: // - Internal -
 
-        WeakRef<FDockspace> owner;
+        WeakRef<FDockspaceSplitView> owner;
+        WeakRef<FDockspace> ownerDockspace;
 
         Array<Ref<FDockTabItem>> tabItems;
 
@@ -51,6 +55,7 @@ namespace CE
         friend class FDockspace;
         friend class FDockTabWellStyle;
         friend class FDockTabItem;
+        friend class FDockspaceSplitView;
     };
     
 }

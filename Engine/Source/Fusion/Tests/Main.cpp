@@ -391,6 +391,13 @@ TEST(Fusion, MainTest)
 			GetDefaultWidget<FDockTabWell>()
 				.Style(rootStyle, dockspaceStyle->tabWellStyle->GetName());
 		}
+
+		{
+			auto dockspaceStyle = CreateObject<FDockspaceStyle>(rootStyle, "MinorDockspace");
+			dockspaceStyle->tabWellStyle = CreateObject<FDockTabWellStyle>(rootStyle, "MinorDockTabWell");
+			rootStyle->Add(dockspaceStyle);
+			rootStyle->Add(dockspaceStyle->tabWellStyle.Get());
+		}
 	}
 
 	PlatformWindow* mainWindow = PlatformApplication::Get()->GetMainWindow();

@@ -259,6 +259,8 @@ namespace WidgetTests
                     )
                 )
                 .Name(String::Format("Major{}", i))
+                .HAlign(HAlign::Fill)
+                .VAlign(VAlign::Fill)
                 .As<FDockWindow>()
             );
 
@@ -276,6 +278,8 @@ namespace WidgetTests
                         .VAlign(VAlign::Fill)
                     )
                     .Name(String::Format("Minor{}_{}", j, i))
+                    .HAlign(HAlign::Fill)
+                    .VAlign(VAlign::Fill)
                     .As<FDockWindow>()
                 );
             }

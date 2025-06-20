@@ -55,6 +55,7 @@ namespace CE
 
         FUSION_WIDGET;
         friend class FDockTabWell;
+        friend class FDockspaceSplitView;
         friend class FDockspace;
     };
     

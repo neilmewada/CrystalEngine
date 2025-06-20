@@ -30,9 +30,9 @@ namespace CE
     {
         Super::OnItemsRearranged();
 
-        if (Ref<FDockspace> dockspace = owner.Lock())
+        if (Ref<FDockspaceSplitView> dockspaceSplitView = owner.Lock())
         {
-            Array<Ref<FDockWindow>> allWindows = dockspace->tabbedDockWindows;
+            Array<Ref<FDockWindow>> allWindows = dockspaceSplitView->tabbedDockWindows;
 
             for (int i = 0; i < allWindows.GetSize(); ++i)
             {
@@ -41,7 +41,7 @@ namespace CE
                 int index = children.IndexOf(dockWindow->item);
                 if (index >= 0)
                 {
-                    dockspace->tabbedDockWindows[index] = dockWindow;
+                    dockspaceSplitView->tabbedDockWindows[index] = dockWindow;
                 }
             }
 
@@ -61,11 +61,11 @@ namespace CE
     {
         tabItems.Clear();
 
-        if (Ref<FDockspace> dockspace = owner.Lock())
+        if (Ref<FDockspaceSplitView> dockspaceSplitView = owner.Lock())
         {
-            for (int i = 0; i < dockspace->tabbedDockWindows.GetSize(); ++i)
+            for (int i = 0; i < dockspaceSplitView->tabbedDockWindows.GetSize(); ++i)
             {
-                Ref<FDockWindow> dockWindow = dockspace->tabbedDockWindows[i];
+                Ref<FDockWindow> dockWindow = dockspaceSplitView->tabbedDockWindows[i];
                 Ref<FDockTabItem> tabItem;
 
                 if (i < GetChildCount())
@@ -80,7 +80,7 @@ namespace CE
                 }
 
                 tabItem->owner = this;
-                tabItem->isActive = (tabItem == dockspace->selectedTab);
+                tabItem->isActive = (tabItem == dockspaceSplitView->selectedTab);
                 tabItem->canBeDetached = dockWindow->CanBeUndocked();
 
                 if (!tabItem->isActive)
@@ -96,9 +96,9 @@ namespace CE
             }
 
             // Remove extra tab items
-            while (dockspace->tabbedDockWindows.GetSize() < GetChildCount())
+            while (dockspaceSplitView->tabbedDockWindows.GetSize() < GetChildCount())
             {
-                FWidget* lastChild = GetChild(dockspace->tabbedDockWindows.GetSize()).Get();
+                FWidget* lastChild = GetChild(dockspaceSplitView->tabbedDockWindows.GetSize()).Get();
                 RemoveChild(lastChild);
             }
         }
@@ -124,11 +124,32 @@ namespace CE
         tabItems.Remove(tabItem);
     }
 
+    Ref<FDockspace> FDockTabWell::GetDockspace()
+    {
+        if (Ref<FDockspace> dockspace = ownerDockspace.Lock())
+        {
+            return dockspace;
+        }
+
+        if (Ref<FDockspaceSplitView> splitView = owner.Lock())
+        {
+            ownerDockspace = splitView->GetDockspace();
+            return ownerDockspace.Lock();
+        }
+
+		return nullptr;
+    }
+
+    Ref<FDockspaceSplitView> FDockTabWell::GetDockspaceSplitView()
+    {
+        return owner.Lock();
+    }
+
     void FDockTabWell::SetActiveTab(Ref<FDockTabItem> tabItem)
     {
-        if (Ref<FDockspace> dockspace = owner.Lock())
+        if (Ref<FDockspaceSplitView> dockspaceSplitView = GetDockspaceSplitView())
         {
-            dockspace->SetActiveTab(tabItem);
+            dockspaceSplitView->SetActiveTab(tabItem);
         }
     }
 
@@ -136,9 +157,9 @@ namespace CE
     {
         Super::ApplyStyle();
 
-        if (Ref<FDockspace> dockspace = owner.Lock())
+        if (Ref<FDockspaceSplitView> dockspaceSplitView = GetDockspaceSplitView())
         {
-            dockspace->ApplyStyle();
+            dockspaceSplitView->ApplyStyle();
         }
     }
 }

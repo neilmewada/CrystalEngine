@@ -13,31 +13,306 @@ namespace CE
         Super::Construct();
 
         Child(
-            FNew(FOverlayStack)
+            FNew(FVerticalStack)
+            .ContentHAlign(HAlign::Fill)
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
             (
-                FAssignNew(FSplitBox, splitBox),
+                FAssignNew(FHorizontalStack, tabWellParent)
+                .ContentVAlign(VAlign::Fill)
+                (
+                    FAssignNew(FOverlayStack, tabWellOverlay)
+                    .ContentHAlign(HAlign::Left)
+                    .ContentVAlign(VAlign::Fill)
+                    .FillRatio(1.0f)
+                    (
+                        FAssignNew(FDockTabWell, tabWell)
+                        .HAlign(HAlign::Fill)
+                        .VAlign(VAlign::Fill)
+                    )
+                ),
 
-                FNew(FStyledWidget)
-                .OnPaintContentOverlay(FUNCTION_BINDING(this, OnPaintDockingPreview))
-                .IgnoreHitTest(true)
+                FNew(FOverlayStack)
                 .HAlign(HAlign::Fill)
-                .VAlign(VAlign::Fill),
+                .FillRatio(1.0f)
+                (
+                    FAssignNew(FSplitBox, splitBox)
+                    .HAlign(HAlign::Fill)
+                    .VAlign(VAlign::Fill),
 
-                FAssignNew(FDockingGuide, dockingGuide)
-                .HAlign(HAlign::Center)
-                .VAlign(VAlign::Center)
-                .Enabled(false)
+                    FAssignNew(FStyledWidget, previewWidget)
+                    .OnPaintContentOverlay(FUNCTION_BINDING(this, OnPaintDockingPreview))
+                    .IgnoreHitTest(true)
+                    .HAlign(HAlign::Fill)
+                    .VAlign(VAlign::Fill),
+
+                    FAssignNew(FDockingGuide, dockingGuide)
+                    .HAlign(HAlign::Center)
+                    .VAlign(VAlign::Center)
+                    .Enabled(false)
+                )
             )
         );
 
+        tabWell->owner = this;
         dockingGuide->ownerDockspaceSplitView = this;
     }
 
     void FDockspaceSplitView::OnPaint(FPainter* painter)
     {
         Super::OnPaint(painter);
+    }
+
+    Ref<FDockWindow> FDockspaceSplitView::GetTabbedDockWindow(Ref<FDockTabItem> dockTabItem)
+    {
+        int index = tabWell->GetTabIndex(dockTabItem);
+
+        if (index >= 0 && index < tabbedDockWindows.GetSize())
+        {
+            return tabbedDockWindows[index];
+        }
+
+        return nullptr;
+    }
+
+    Ref<FDockWindow> FDockspaceSplitView::GetTabbedDockWindow(int index)
+    {
+        if (index < 0 || index >= tabbedDockWindows.GetSize())
+            return nullptr;
+
+        return tabbedDockWindows[index];
+    }
+
+    Ref<FDockTabItem> FDockspaceSplitView::GetDockTabItem(int index)
+    {
+        if (index < 0 || index >= tabWell->GetTabCount())
+            return nullptr;
+
+        return tabWell->GetTabItem(index);
+    }
+
+    void FDockspaceSplitView::SetActiveTab(Ref<FDockTabItem> tabItem)
+    {
+        if (tabWell->GetTabIndex(tabItem) == -1)
+        {
+            tabItem = tabWell->GetTabItem(0);
+        }
+
+        selectedTab = tabItem;
+
+        UpdateTabs();
+
+        ApplyStyle();
+    }
+
+    void FDockspaceSplitView::SetActiveTab(int index)
+    {
+        if (index < 0 || index >= tabbedDockWindows.GetSize())
+            return;
+
+        Ref<FDockTabItem> tabItem = tabWell->GetTabItem(index);
+        if (!tabItem)
+            return;
+
+        SetActiveTab(tabItem);
+    }
+
+    bool FDockspaceSplitView::CanBeDocked(Ref<FDockWindow> dockWindow)
+    {
+        if (Ref<FDockspace> dockspace = GetDockspace())
+        {
+            return dockspace->CanBeDocked(dockWindow);
+        }
+
+        return false;
+    }
+
+    bool FDockspaceSplitView::CanDetach(Ref<FDockTabItem> dockTabItem)
+    {
+        if (Ref<FDockspace> dockspace = GetDockspace())
+        {
+            if (!dockspace->AllowDocking())
+                return false;
+            if (!dockspace->DestroyWhenEmpty() && tabbedDockWindows.GetSize() <= 1)
+                return false;
+
+            int index = tabWell->GetTabIndex(dockTabItem);
+            if (index < 0)
+                return false;
+
+            return true;
+		}
+
+        return false;
+    }
+
+    void FDockspaceSplitView::AddDockWindow(Ref<FDockWindow> dockWindow)
+    {
+        if (!CanBeDocked(dockWindow) || tabbedDockWindows.Exists(dockWindow))
+            return;
+
+        tabbedDockWindows.Add(dockWindow);
+        tabWell->UpdateTabWell();
+
+        if (tabbedDockWindows.GetSize() == 1)
+        {
+            SetActiveTab(tabWell->GetTabItem(0));
+        }
+    }
+
+    int FDockspaceSplitView::GetDockedWindowIndex(Ref<FDockWindow> dockedWindow)
+    {
+        return tabbedDockWindows.IndexOf(dockedWindow);
+    }
+
+    void FDockspaceSplitView::UpdateTabs()
+    {
+        tabWell->UpdateTabWell();
+
+        // TODO: Handle multiple split docks
+
+        RemoveAllContent();
+
+        if (tabbedDockWindows.IsEmpty())
+        {
+            if (Ref<FDockspace> dockspace = GetDockspace())
+            {
+                if (dockspace->DestroyWhenEmpty() && dockspace->GetRootSplit() == this)
+                {
+                    if (Ref<FFusionContext> context = GetContext())
+                    {
+                        context->QueueDestroy(); // Destroy the entire window! Be cautious with this!
+                    }
+                }
+            }
+            return;
+        }
+
+        int activeTabIndex = tabWell->GetTabIndex(selectedTab);
+        activeTabIndex = Math::Clamp<int>(activeTabIndex, 0, tabbedDockWindows.GetSize() - 1);
+
+        SetSingleDockWindow(tabbedDockWindows[activeTabIndex].Get());
+        tabbedDockWindows[activeTabIndex]->FillRatio(1.0f);
+    }
+
+    Ref<FDockTabItem> FDockspaceSplitView::DetachItem(Ref<FDockTabItem> dockTabItem)
+    {
+        if (!dockTabItem)
+            return nullptr;
+
+        if (Ref<FDockspace> dockspace = GetDockspace())
+        {
+            int index = tabWell->GetTabIndex(dockTabItem);
+            if (index < 0 || index >= tabbedDockWindows.GetSize())
+                return nullptr;
+
+            Ref<FDockWindow> dockWindow = tabbedDockWindows[index];
+            if (!dockWindow)
+                return nullptr;
+
+            if (selectedTab == dockTabItem)
+            {
+                selectedTab = nullptr;
+            }
+
+            tabWell->RemoveTabItem(dockTabItem);
+            tabbedDockWindows.RemoveAt(index);
+
+            UpdateTabs();
+
+            int neighborIndex = index - 1;
+            neighborIndex = Math::Clamp<int>(neighborIndex, 0, tabbedDockWindows.GetSize() - 1);
+
+            Vec2i screenMousePos = InputManager::GetGlobalMousePosition();
+
+            Ref<FWindow> detachedWindow = FusionApplication::Get()->CreateNativeWindow(dockTabItem->Title(), dockTabItem->Title(),
+                500, 400,
+                FWindow::StaticClass(),
+                {
+                    .maximised = false,
+                    .fullscreen = false,
+                    .resizable = false,
+                    .hidden = false,
+                    .openCentered = false,
+                    .openPos = screenMousePos,
+                    .windowFlags = PlatformWindowFlags::DestroyOnClose
+                });
+
+            detachedWindow->GetContext()->SetGhosted(true);
+
+            PlatformWindow* nativeWindow = detachedWindow->GetPlatformWindow();
+            nativeWindow->SetBorderless(true);
+            nativeWindow->SetAlwaysOnTop(true);
+            nativeWindow->SetOpacity(0.4f);
+
+            Ref<FDockspace> tempDockspace = nullptr;
+
+            detachedWindow->SetWindowContent(
+                FAssignNew(FDockspace, tempDockspace)
+                .DockspaceType(dockspace->DockspaceType())
+                .DestroyWhenEmpty(true)
+                .AllowDocking(true)
+                .AllowSplitting(dockspace->AllowSplitting())
+                .HAlign(HAlign::Fill)
+                .VAlign(VAlign::Fill)
+                .FillRatio(1.0f)
+            );
+
+            tempDockspace->m_OnCreateDockspace = dockspace->m_OnCreateDockspace;
+            tempDockspace->detachedDockspaceWindowClass = dockspace->detachedDockspaceWindowClass;
+            tempDockspace->m_OnWindowSetup = dockspace->m_OnWindowSetup;
+
+            tempDockspace->originalWindowSize = nativeWindow->GetWindowSize();
+
+            if (Ref<FNativeContext> nativeContext = GetNativeContext())
+            {
+                tempDockspace->originalWindowSize = nativeContext->GetWindowSize();
+            }
+
+            tempDockspace->AddDockWindow(dockWindow);
+
+            Ref<FDockTabItem> newTabItem = tempDockspace->GetRootSplit()->GetTabWell()->GetTabItem(0);
+            newTabItem->detached = true;
+
+            FusionApplication::Get()->GetRootContext()->SetFocusWidget(newTabItem.Get());
+
+            if (selectedTab == nullptr && neighborIndex < tabWell->GetTabCount() && neighborIndex >= 0)
+            {
+                SetActiveTab(tabWell->GetTabItem(neighborIndex));
+            }
+
+            detachedWindow->SetContextRecursively(detachedWindow->GetContext().Get());
+
+            return newTabItem;
+        }
+
+        return nullptr;
+    }
+
+    bool FDockspaceSplitView::RemoveDockItem(Ref<FDockTabItem> dockTabItem)
+    {
+        if (!dockTabItem)
+            return false;
+
+        int index = tabWell->GetTabIndex(dockTabItem);
+        if (index < 0 || index >= tabbedDockWindows.GetSize())
+            return false;
+
+        Ref<FDockWindow> dockWindow = tabbedDockWindows[index];
+        if (!dockWindow)
+            return false;
+
+        if (selectedTab == dockTabItem)
+        {
+            selectedTab = nullptr;
+        }
+
+        tabWell->RemoveTabItem(dockTabItem);
+        tabbedDockWindows.RemoveAt(index);
+
+        UpdateTabs();
+
+        return true;
     }
 
     void FDockspaceSplitView::OnPaintDockingPreview(FPainter* painter)
@@ -56,32 +331,38 @@ namespace CE
             switch (dockingPreviewPosition)
             {
             case FDockingHintPosition::Center:
-                pos = GetComputedPosition();
-                size = GetComputedSize();
+                size = previewWidget->GetComputedSize();
                 break;
             case FDockingHintPosition::Left:
-                pos = GetComputedPosition();
-                size = GetComputedSize() * Vec2(0.5f, 1);
+                size = previewWidget->GetComputedSize() * Vec2(0.5f, 1);
                 break;
             case FDockingHintPosition::Top:
-                pos = GetComputedPosition();
-                size = GetComputedSize() * Vec2(1, 0.5f);
+                size = previewWidget->GetComputedSize() * Vec2(1, 0.5f);
                 break;
             case FDockingHintPosition::Right:
-                pos = GetComputedPosition() + GetComputedSize() * Vec2(0.5f, 0);
-                size = GetComputedSize() * Vec2(0.5f, 1);
+                pos = previewWidget->GetComputedSize() * Vec2(0.5f, 0);
+                size = previewWidget->GetComputedSize() * Vec2(0.5f, 1);
                 break;
             case FDockingHintPosition::Bottom:
-                pos = GetComputedPosition() + GetComputedSize() * Vec2(0, 0.5f);
-                size = GetComputedSize() * Vec2(1, 0.5f);
+                pos = previewWidget->GetComputedSize() * Vec2(0, 0.5f);
+                size = previewWidget->GetComputedSize() * Vec2(1, 0.5f);
                 break;
             }
-
-            pos -= GetComputedPosition();
 
             painter->DrawRect(Rect::FromSize(pos, size));
         }
     }
+
+    void FDockspaceSplitView::ApplyStyle()
+    {
+        Super::ApplyStyle();
+
+        if (Ref<FDockspace> dockspace = GetDockspace())
+        {
+            dockspace->ApplyStyle();
+        }
+    }
+
 
     void FDockspaceSplitView::SetDockingPreviewEnabled(bool enabled, FDockingHintPosition position)
     {
