@@ -88,14 +88,23 @@ namespace CE
                         Ref<FDockspaceSplitView> dropDockspaceSplitView = dropTabWell->GetDockspaceSplitView();
 
                         int index = tabWell->GetTabIndex(this);
+						Ref<FFusionContext> thisContext = GetContext();
 
-                        if (dropDockspaceSplitView && index >= 0)
+                        if (thisContext && dropDockspaceSplitView && index >= 0)
                         {
 	                        if (Ref<FDockWindow> dockWindow = thisDockspace->GetRootSplit()->GetTabbedDockWindow(index))
                             {
-                                if (dropDockspaceSplitView->CanBeDocked(dockWindow))
+                                Ref<FFusionContext> dropContext = dropDockspaceSplitView->GetContext();
+
+                                if (dropContext && dropDockspaceSplitView->CanBeDocked(dockWindow))
                                 {
                                     thisDockspace->GetRootSplit()->RemoveDockItem(this);
+
+                                    Vec2 screenSpacePos = thisContext->GlobalToScreenSpacePosition(dragEvent->mousePosition);
+									Vec2 dropContextSpacePos = dropContext->ScreenToGlobalSpacePosition(screenSpacePos);
+
+                                    //CE_LOG(Info, All, "Drop Pos: {}", dropContextSpacePos);
+
                                     dropDockspaceSplitView->AddDockWindow(dockWindow);
 
                                     int tabIndex = dropDockspaceSplitView->GetDockedWindowIndex(dockWindow);
@@ -217,8 +226,6 @@ namespace CE
                                         }
                                         else
                                         {
-                                            // TODO
-
                                             splitInDockspaceView->AddDockWindowSplit(splitPosition, thisDockWindow);
 
                                             if (Ref<FDockspaceSplitView> guideDockspaceLock = guideDockspaceSplitView.Lock())

@@ -20,10 +20,11 @@ namespace CE
         if (event->IsDragEvent() && !event->isConsumed)
         {
             FDragEvent* dragEvent = (FDragEvent*)event;
-            dragging = true;
 
             if (event->type == FEventType::DragBegin)
             {
+                dragging = true;
+
                 dragEvent->draggedWidget = this;
                 dragEvent->Consume(this);
 
@@ -39,6 +40,8 @@ namespace CE
             }
             else if (event->type == FEventType::DragMove)
             {
+                dragging = true;
+
             	lastMousePos = dragEvent->mousePosition;
                 f32 finalPosX = dragStartPosX + dragEvent->mousePosition.x - startMousePos.x;
 
@@ -103,6 +106,8 @@ namespace CE
                             }
                         }
 
+                        Translation(Vec2(finalPosX - GetComputedPosition().x, 0));
+
                         dragEvent->draggedWidget = this;
                         dragEvent->Consume(this);
 
@@ -110,14 +115,20 @@ namespace CE
                     }
                     else
                     {
+                        Translation(Vec2(finalPosX - GetComputedPosition().x, 0));
+
                     	dragEvent->draggedWidget = detachedItem.Get();
                         dragEvent->Consume(this);
                     }
-
-                    Translation(Vec2(finalPosX - GetComputedPosition().x, 0));
                 }
             }
-            else if (event->type == FEventType::DragEnd)
+        }
+
+        if (event->IsDragEvent())
+        {
+            FDragEvent* dragEvent = (FDragEvent*)event;
+
+            if (event->type == FEventType::DragEnd)
             {
                 dragging = false;
                 dragEvent->Consume(this);

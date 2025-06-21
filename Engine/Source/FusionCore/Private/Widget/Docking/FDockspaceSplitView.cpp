@@ -354,6 +354,8 @@ namespace CE
             if (index < 0 || index >= tabbedDockWindows.GetSize())
                 return nullptr;
 
+            Vec2 availSize = GetContext()->GetAvailableSize();
+
             Ref<FDockWindow> dockWindow = tabbedDockWindows[index];
             if (!dockWindow)
                 return nullptr;
@@ -387,6 +389,7 @@ namespace CE
                 });
 
             detachedWindow->GetContext()->SetGhosted(true);
+            detachedWindow->GetContext()->SetGhostedAvailableSize(availSize);
 
             PlatformWindow* nativeWindow = detachedWindow->GetPlatformWindow();
             nativeWindow->SetBorderless(true);

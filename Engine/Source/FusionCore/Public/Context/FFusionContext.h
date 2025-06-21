@@ -44,7 +44,7 @@ namespace CE
 
         virtual void OnWidgetDestroyed(FWidget* widget);
 
-        Vec2 GetAvailableSize() const { return availableSize * availableSizeMultiplier; }
+        Vec2 GetAvailableSize() const;
 
         virtual f32 GetScaling() const { return 1.0f; }
 
@@ -84,6 +84,8 @@ namespace CE
 		bool IsGhosted() const { return ghosted; }
 
 		void SetGhosted(bool ghosted) { this->ghosted = ghosted; }
+
+        void SetGhostedAvailableSize(Vec2 size) { this->ghostedAvailableSize = size; }
 
         void SetClearScreen(bool set);
 
@@ -158,6 +160,8 @@ namespace CE
 
         Vec2 availableSize{};
 		Vec2 availableSizeMultiplier = Vec2(1.0f, 1.0f);
+
+        Vec2 ghostedAvailableSize{};
 
         Matrix4x4 projectionMatrix = Matrix4x4::Identity();
         RPI::PerViewConstants viewConstants{};

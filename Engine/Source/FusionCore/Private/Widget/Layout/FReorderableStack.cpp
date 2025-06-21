@@ -305,6 +305,11 @@ namespace CE
         if (children.IsEmpty() || !Enabled())
             return;
 
+		if (activeItem && !children.Exists(activeItem))
+		{
+			activeItem = nullptr;
+		}
+
         if (m_ClipChildren)
         {
             Vec3 invScale = Vec3(1 / m_Scale.x, 1 / m_Scale.y, 1);
@@ -433,7 +438,13 @@ namespace CE
 
     void FReorderableStack::OnActiveItemDragged(FDragEvent* dragEvent)
     {
-
+		for (int i = children.GetSize() - 1; i >= 0; --i)
+		{
+			if (children[i] != activeItem)
+			{
+				children[i]->Translation(Vec2());
+			}
+		}
     }
 }
 

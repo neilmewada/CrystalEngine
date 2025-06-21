@@ -47,8 +47,10 @@ namespace CE
 
 			owningWidget->CalculateIntrinsicSize();
 
+			Vec2 availSize = GetAvailableSize();
+
 			owningWidget->computedPosition = Vec2();
-			owningWidget->computedSize = availableSize * availableSizeMultiplier;
+			owningWidget->computedSize = availSize;
 			
 			owningWidget->PlaceSubWidgets();
 
@@ -74,13 +76,13 @@ namespace CE
 				if (!popup->positionFound)
 				{
 					Rect popupRect = Rect::FromSize(popup->computedPosition, popup->computedSize);
-					if (popupRect.max.y > availableSize.y) // Popup outside bottom
+					if (popupRect.max.y > availSize.y) // Popup outside bottom
 					{
 						popup->computedPosition.y -= popup->computedSize.y + popup->controlSize.y;
 					}
-					if (popupRect.max.x > availableSize.x)
+					if (popupRect.max.x > availSize.x)
 					{
-						popup->computedPosition.x -= popupRect.max.x - availableSize.x * availableSizeMultiplier.x;
+						popup->computedPosition.x -= popupRect.max.x - availSize.x * availableSizeMultiplier.x;
 					}
 					popup->initialPos = popup->computedPosition;
 
@@ -162,6 +164,15 @@ namespace CE
 		{
 			widgetToFocus = nullptr;
 		}
+	}
+
+	Vec2 FFusionContext::GetAvailableSize() const
+	{
+		if (IsGhosted())
+		{
+			return ghostedAvailableSize * availableSizeMultiplier;
+		}
+		return availableSize * availableSizeMultiplier;
 	}
 
 	bool FFusionContext::ParentContextExistsRecursive(Ref<FFusionContext> parent) const
