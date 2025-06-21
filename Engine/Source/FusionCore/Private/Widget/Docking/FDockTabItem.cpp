@@ -105,7 +105,7 @@ namespace CE
 
 									Vec2 localDropPos = dropTabWell->GetGlobalTransform() * Vec4(dropContextSpacePos.x, dropContextSpacePos.y, 0.0f, 1.0f);
 
-                                    CE_LOG(Info, All, "Drop Pos: {}", localDropPos);
+                                    //CE_LOG(Info, All, "Drop Pos: {}", localDropPos);
 
                                     dropDockspaceSplitView->AddDockWindow(dockWindow);
 

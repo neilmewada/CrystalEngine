@@ -236,6 +236,7 @@ namespace WidgetTests
                 .CanBeUndocked(i != 1)
                 .AllowedDockspaces(FDockspaceFilter().WithDockTypeMask(FDockTypeMask::Major))
                 .Title(String::Format("Major {}", i))
+                .Background(Color::RGBA(26, 26, 26))
                 .Child(
                     FNew(FVerticalStack)
                     .ContentHAlign(HAlign::Fill)
@@ -270,6 +271,7 @@ namespace WidgetTests
 					FNew(FDockWindow)
                     .AllowedDockspaces(FDockspaceFilter().WithDockTypeMask(FDockTypeMask::All))
                     .Title(String::Format("Minor {} ({})", j, i))
+                    .Background(Color::RGBA(36, 36, 36))
                     .Child(
                         FNew(FLabel)
                         .Text(String::Format("This is {} minor window in {} major window", j, i))

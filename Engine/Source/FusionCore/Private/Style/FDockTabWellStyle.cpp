@@ -5,7 +5,7 @@ namespace CE
 
     FDockTabWellStyle::FDockTabWellStyle()
     {
-
+        background = FBrush();
     }
 
     FDockTabWellStyle::~FDockTabWellStyle()

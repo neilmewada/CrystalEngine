@@ -381,6 +381,8 @@ TEST(Fusion, MainTest)
 
 		{
 			auto dockspaceStyle = CreateObject<FDockspaceStyle>(rootStyle, "Dockspace");
+			dockspaceStyle->background = Color::RGBA(26, 26, 26);
+
 			dockspaceStyle->tabWellStyle = CreateObject<FDockTabWellStyle>(rootStyle, "DockTabWell");
 			rootStyle->Add(dockspaceStyle);
 			rootStyle->Add(dockspaceStyle->tabWellStyle.Get());
@@ -394,7 +396,10 @@ TEST(Fusion, MainTest)
 
 		{
 			auto dockspaceStyle = CreateObject<FDockspaceStyle>(rootStyle, "MinorDockspace");
+			dockspaceStyle->background = Color::RGBA(26, 26, 26);
+
 			dockspaceStyle->tabWellStyle = CreateObject<FDockTabWellStyle>(rootStyle, "MinorDockTabWell");
+
 			rootStyle->Add(dockspaceStyle);
 			rootStyle->Add(dockspaceStyle->tabWellStyle.Get());
 		}

@@ -38,7 +38,9 @@ namespace CE
                     ),
 
                     FAssignNew(FSplitBox, splitBox)
-                    .SplitterBackground(Color::RGBHex(0x1a1a1a))
+                    .SplitterBackground(Color::Clear())
+                    .SplitterSize(7.5f)
+                    .SplitterDrawRatio(0.5f)
                     .HAlign(HAlign::Fill)
                     .FillRatio(1.0f)
                 ),
