@@ -438,13 +438,7 @@ namespace CE
 
     void FReorderableStack::OnActiveItemDragged(FDragEvent* dragEvent)
     {
-		for (int i = children.GetSize() - 1; i >= 0; --i)
-		{
-			if (children[i] != activeItem)
-			{
-				children[i]->Translation(Vec2());
-			}
-		}
+		
     }
 }
 

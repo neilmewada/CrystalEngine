@@ -103,7 +103,9 @@ namespace CE
                                     Vec2 screenSpacePos = thisContext->GlobalToScreenSpacePosition(dragEvent->mousePosition);
 									Vec2 dropContextSpacePos = dropContext->ScreenToGlobalSpacePosition(screenSpacePos);
 
-                                    //CE_LOG(Info, All, "Drop Pos: {}", dropContextSpacePos);
+									Vec2 localDropPos = dropTabWell->GetGlobalTransform() * Vec4(dropContextSpacePos.x, dropContextSpacePos.y, 0.0f, 1.0f);
+
+                                    CE_LOG(Info, All, "Drop Pos: {}", localDropPos);
 
                                     dropDockspaceSplitView->AddDockWindow(dockWindow);
 
