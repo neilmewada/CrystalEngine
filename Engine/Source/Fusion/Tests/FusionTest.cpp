@@ -264,7 +264,7 @@ namespace WidgetTests
                 .As<FDockWindow>()
             );
 
-            for (int j = 1; j <= 3; j++)
+            for (int j = 1; j <= 5; j++)
             {
                 minorDockspace->AddDockWindow(
 					FNew(FDockWindow)

@@ -131,7 +131,8 @@ namespace CE
                             {
                                 if (Ref<FDockWindow> dockWindow = thisDockspace->GetRootSplit()->GetTabbedDockWindow(index))
                                 {
-                                    if (guideDockspaceSplitView != dropDockspaceSplitView && dropDockspace->AllowSplitting() && dropDockspace->CanBeDocked(dockWindow))
+                                    if (guideDockspaceSplitView != dropDockspaceSplitView && dropDockspace->AllowSplitting() && 
+                                        dropDockspaceSplitView->CanBeDocked(dockWindow) && dropDockspaceSplitView->CanBeSplit(dockWindow))
                                     {
                                         if (guideDockspaceSplitView)
                                         {
@@ -154,7 +155,7 @@ namespace CE
                         }
                     }
                 }
-                else if (dragEvent->type == FEventType::DragEnd && detached)
+                else if (dragEvent->type == FEventType::DragEnd && detached) // Detached items are always temporary, i.e. they have only 1 root split view and 1 child FDockWindow
                 {
                     dragEvent->draggedWidget = this;
                     dragEvent->Consume(this);
@@ -181,7 +182,53 @@ namespace CE
                         {
                             if (Ref<FNativeContext> nativeContext = GetNativeContext())
                             {
-                                // TODO
+                                if (Ref<FDockWindow> thisDockWindow = dockspace->GetRootSplit()->GetTabbedDockWindow(this))
+                                {
+                                    nativeContext->SetGhosted(false);
+
+                                    if (splitInDockspaceView->CanBeSplit(thisDockWindow))
+                                    {
+                                        Ref<FDockTabWell> dropTabWell = splitInDockspaceView->GetTabWell();
+
+                                        dockspace->GetRootSplit()->RemoveDockItem(this);
+
+                                        if (splitPosition == FDockingHintPosition::Center)
+                                        {
+                                            splitInDockspaceView->AddDockWindow(thisDockWindow);
+
+                                            int tabIndex = splitInDockspaceView->GetDockedWindowIndex(thisDockWindow);
+
+                                            if (Ref<FDockTabItem> newTabItem = splitInDockspaceView->GetDockTabItem(tabIndex))
+                                            {
+                                                splitInDockspaceView->SetActiveTab(newTabItem);
+
+                                                newTabItem->joined = true;
+
+                                                dragEvent->draggedWidget = newTabItem.Get();
+
+                                                newTabItem->Focus();
+
+                                                if (Ref<FDockspaceSplitView> guideDockspaceLock = guideDockspaceSplitView.Lock())
+                                                {
+                                                    guideDockspaceLock->SetGuideVisible(false);
+                                                    guideDockspaceSplitView = nullptr;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            // TODO
+
+                                            splitInDockspaceView->AddDockWindowSplit(splitPosition, thisDockWindow);
+
+                                            if (Ref<FDockspaceSplitView> guideDockspaceLock = guideDockspaceSplitView.Lock())
+                                            {
+                                                guideDockspaceLock->SetGuideVisible(false);
+                                                guideDockspaceSplitView = nullptr;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -254,9 +301,9 @@ namespace CE
 
         if (Ref<FDockTabWell> tabWell = owner.Lock())
         {
-            if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
+            if (Ref<FDockspaceSplitView> dockspaceSplitView = tabWell->GetDockspaceSplitView())
             {
-                return dockspace->CanDetach(this);
+                return dockspaceSplitView->CanDetach(this);
             }
         }
 
@@ -272,6 +319,14 @@ namespace CE
 
         if (Ref<FDockTabWell> tabWell = owner.Lock())
         {
+            if (Ref<FDockspaceSplitView> dockspaceSplitView = tabWell->GetDockspaceSplitView())
+            {
+	            if (Ref<FDockTabItem> detachedTabItem = dockspaceSplitView->DetachItem(this))
+	            {
+					return detachedTabItem;
+	            }
+            }
+
             if (Ref<FDockspace> dockspace = tabWell->GetDockspace())
             {
                 if (Ref<FDockTabItem> detachedTabItem = dockspace->GetRootSplit()->DetachItem(this))

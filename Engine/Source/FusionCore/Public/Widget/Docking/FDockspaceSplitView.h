@@ -21,7 +21,7 @@ namespace CE
 
         void ApplyStyle() override;
 
-        bool SupportsDropTarget() const override { return true; }
+        bool SupportsDropTarget() const override;
 
         void SetDockingPreviewEnabled(bool enabled, FDockingHintPosition position);
 
@@ -47,16 +47,17 @@ namespace CE
 
     	Ref<FDockWindow> GetTabbedDockWindow(int index);
 
-        Ref<FDockTabWell> GetDockTabWell() const { return tabWell; }
-
         Ref<FDockTabItem> GetDockTabItem(int index);
 
         void SetActiveTab(Ref<FDockTabItem> tabItem);
         void SetActiveTab(int index);
 
         bool CanBeDocked(Ref<FDockWindow> dockWindow);
+        bool CanBeSplit(Ref<FDockWindow> dockWindow);
 
         bool CanDetach(Ref<FDockTabItem> dockTabItem);
+
+        void AddDockWindowSplit(FDockingHintPosition splitPosition, Ref<FDockWindow> dockWindow);
 
         void AddDockWindow(Ref<FDockWindow> dockWindow);
 
@@ -77,9 +78,13 @@ namespace CE
 
         Ref<FDockspaceSplitView> GetChildrenSplit(int index) const { return childrenSplitViews[index]; }
 
+		void RemoveChildSplitView(Ref<FDockspaceSplitView> childSplitView);
+
     protected: // - Internal -
 
         Array<Ref<FDockspaceSplitView>> childrenSplitViews;
+
+		WeakRef<FDockspaceSplitView> parentSplitView;
 
         Ref<FSplitBox> splitBox;
         Ref<FDockingGuide> dockingGuide;
@@ -92,8 +97,6 @@ namespace CE
         Ref<FStyledWidget> previewWidget;
 
         Array<Ref<FDockWindow>> tabbedDockWindows;
-
-        Ref<FDockWindow> contentWindow;
 
         WeakRef<FDockspace> ownerDockspace;
 
