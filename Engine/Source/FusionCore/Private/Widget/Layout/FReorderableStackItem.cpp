@@ -73,12 +73,19 @@ namespace CE
                         {
                             if (Ref<FWidget> child = owner->children[i].Lock())
                             {
-                                if (child == this)
+                            	if (child == this)
                                     continue;
+
+                                if (Ref<FReorderableStackItem> childItem = CastTo<FReorderableStackItem>(child))
+                                {
+                                    childItem->dragging = false;
+                                }
 
                                 Vec2 childPos = child->GetComputedPosition();
                                 Vec2 childSize = child->GetComputedSize();
                                 f32 childCenter = childPos.x + childSize.x / 2;
+
+                                child->Translation(Vec2());
 
                                 if (thisStart >= childPos.x && thisStart <= childPos.x + childSize.x)
                                 {
@@ -116,6 +123,24 @@ namespace CE
                     else
                     {
                         Translation(Vec2(finalPosX - GetComputedPosition().x, 0));
+
+                        for (int i = 0; i < owner->children.GetSize(); ++i)
+                        {
+                            if (Ref<FWidget> child = owner->children[i].Lock())
+                            {
+                                if (child == this)
+                                {
+	                                
+                                }
+
+                                if (Ref<FReorderableStackItem> childItem = CastTo<FReorderableStackItem>(child))
+                                {
+                                    childItem->dragging = false;
+                                }
+
+								child->Translation(Vec2());
+                            }
+                        }
 
                     	dragEvent->draggedWidget = detachedItem.Get();
                         dragEvent->Consume(this);
@@ -166,6 +191,10 @@ namespace CE
             finalPosX = Math::Clamp(finalPosX, 0.0f, GetParent()->GetComputedSize().width - GetComputedSize().width);
 
             Translation(Vec2(finalPosX - GetComputedPosition().x, 0));
+        }
+        else
+        {
+            Translation(Vec2());
         }
     }
 }

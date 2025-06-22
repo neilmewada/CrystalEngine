@@ -59,7 +59,7 @@ static void TestBegin(bool gui)
 #elif PLATFORM_LINUX
 		u32 w = 1024 * scaleFactor, h = 768 * scaleFactor;
 #elif PLATFORM_WINDOWS
-		u32 w = 1024, h = 768;
+		u32 w = 1400, h = 1000;
 #endif
 
 		windowWidth = w;

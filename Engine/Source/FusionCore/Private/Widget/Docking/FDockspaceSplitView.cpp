@@ -396,7 +396,7 @@ namespace CE
             PlatformWindow* nativeWindow = detachedWindow->GetPlatformWindow();
             nativeWindow->SetBorderless(true);
             nativeWindow->SetAlwaysOnTop(true);
-            nativeWindow->SetOpacity(0.4f);
+            nativeWindow->SetOpacity(0.5f);
 
             Ref<FDockspace> tempDockspace = nullptr;
 
