@@ -283,6 +283,8 @@ namespace CE
         tabWellParent->Enabled(false);
 
         UpdateTabs();
+
+        SetDockingPreviewEnabled(false, splitPosition);
     }
 
     void FDockspaceSplitView::AddDockWindow(Ref<FDockWindow> dockWindow)
@@ -297,6 +299,8 @@ namespace CE
         {
             SetActiveTab(tabWell->GetTabItem(0));
         }
+
+        SetDockingPreviewEnabled(false, FDockingHintPosition::Center);
     }
 
     int FDockspaceSplitView::GetDockedWindowIndex(Ref<FDockWindow> dockedWindow)

@@ -73,6 +73,10 @@ namespace CE
 
         void IterateTabWellsRecursively(const Delegate<void(FDockTabWell& tabWell)>& pred);
 
+        Ref<FStackBox> GetRootTabWellParent();
+
+        Ref<FDockTabWell> GetRootTabWell();
+
     protected: // - Internal -
 
         Ref<FDockspaceSplitView> container;

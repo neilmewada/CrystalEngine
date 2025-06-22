@@ -31,6 +31,7 @@ namespace CE
         FWindowControlButton* minimizeButton = nullptr;
         FWindowControlButton* maximizeButton = nullptr;
         FWindowControlButton* closeButton = nullptr;
+        Ref<FHorizontalStack> controlContainer;
 
         Ref<FDockspace> dockspace;
 

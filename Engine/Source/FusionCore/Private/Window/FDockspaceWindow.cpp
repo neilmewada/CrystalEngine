@@ -12,6 +12,8 @@ namespace CE
     {
         Super::Construct();
 
+        const bool isMac = PlatformMisc::GetCurrentPlatform() == PlatformName::Mac;
+
         Child(
             FAssignNew(FStyledWidget, borderWidget)
             .Background(FBrush(Color::RGBA(36, 36, 36)))
@@ -26,16 +28,15 @@ namespace CE
                 .DestroyWhenEmpty(false)
                 .OnWindowSetup([](Ref<FWindow> newWindow, Ref<FDockTabItem> tabItem)
                     {
-                        if (newWindow->IsOfType<FToolWindow>())
+                        if (Ref<FToolWindow> toolWindow = CastTo<FToolWindow>(newWindow))
                         {
-                            Ref<FToolWindow> toolWindow = CastTo<FToolWindow>(newWindow);
                             toolWindow->ContentPadding(Vec4());
                             toolWindow->Title(tabItem->Title());
                         }
                     })
                 .TabWellOverlayWidget(
-                    FNew(FHorizontalStack)
-                    .HAlign(HAlign::Right)
+                    FAssignNew(FHorizontalStack, controlContainer)
+                    .HAlign(isMac ? HAlign::Left : HAlign::Right)
                     .VAlign(VAlign::Fill)
                     (
                         FAssignNew(FWindowControlButton, minimizeButton)
@@ -80,6 +81,33 @@ namespace CE
                 
             ) // End of Child()
         );
+
+        Array<WeakRef<FWindowControlButton>> controlGroup = {
+            closeButton,
+            minimizeButton,
+            maximizeButton
+        };
+
+        closeButton->SetControlGroup(controlGroup);
+        minimizeButton->SetControlGroup(controlGroup);
+        maximizeButton->SetControlGroup(controlGroup);
+
+        if (isMac)
+        {
+            if (Ref<FDockTabWell> tabWell = dockspace->GetRootTabWell())
+            {
+                tabWell->Margin(Vec4(60, 0, 0, 0));
+            }
+
+            controlContainer->HAlign(HAlign::Left);
+
+            controlContainer->MoveChildToIndex(closeButton, 0);
+            controlContainer->MoveChildToIndex(minimizeButton, 1);
+            controlContainer->MoveChildToIndex(maximizeButton, 2);
+
+            closeButton->Margin(Vec4(5, 0, -1, 0));
+            minimizeButton->Margin(Vec4(0, 0, -1, 0));
+        }
 
         dockspace->SetTabWellWindowHitTest(true);
     }

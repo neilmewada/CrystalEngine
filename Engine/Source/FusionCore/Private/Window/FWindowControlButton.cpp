@@ -1,4 +1,4 @@
-#include "Fusion.h"
+#include "FusionCore.h"
 
 namespace CE
 {

@@ -108,6 +108,22 @@ namespace CE
         visitor(container);
     }
 
+    Ref<FStackBox> FDockspace::GetRootTabWellParent()
+    {
+        if (!container->IsSingular())
+            return nullptr;
+
+        return container->GetTabWellParent();
+    }
+
+    Ref<FDockTabWell> FDockspace::GetRootTabWell()
+    {
+        if (!container->IsSingular())
+            return nullptr;
+
+        return container->GetTabWell();
+    }
+
     FDockspace& FDockspace::TabWellOverlayWidget(FWidget& widget)
     {
         if (container->IsSingular())
