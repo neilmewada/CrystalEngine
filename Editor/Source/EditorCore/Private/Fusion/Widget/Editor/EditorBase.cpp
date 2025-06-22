@@ -30,7 +30,7 @@ namespace CE::Editor
             {
                 KeyModifier ctrlMod = KeyModifier::Ctrl;
 #if PLATFORM_MAC
-                ctrlMod = KeyModifier::Gui;
+                ctrlMod = KeyModifier::Cmd;
 #endif
 
                 if (EnumHasFlag(keyEvent->modifiers, ctrlMod))

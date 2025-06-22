@@ -157,6 +157,9 @@ namespace CE
         Shift = LShift | RShift,
         Alt = LAlt | RAlt,
         Gui = LGui | RGui,
+        LCmd = LGui,
+		RCmd = RGui,
+    	Cmd = Gui,
     };
     ENUM_CLASS_FLAGS(KeyModifier);
 
