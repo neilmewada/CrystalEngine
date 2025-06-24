@@ -76,10 +76,14 @@
 #include "Fusion/Widget/ComponentTreeView/ComponentTreeView.h"
 #include "Fusion/Widget/ComponentTreeView/ComponentTreeViewStyle.h"
 
-// Docking
 #include "Fusion/Docking/EditorDockspace.h"
+#include "Fusion/Docking/EditorMajorDockspace.h"
+#include "Fusion/Docking/EditorMajorDockspaceWindow.h"
+#include "Fusion/Docking/EditorMinorDockspace.h"
+#include "Fusion/Docking/EditorMinorDockspaceWindow.h"
 #include "Fusion/Docking/EditorDockTabItem.h"
 #include "Fusion/Docking/EditorDockTab.h"
+#include "Fusion/Docking/EditorDockWindow.h"
 #include "Fusion/Widget/Editor/EditorBase.h"
 
 #include "Editor/AssetEditorRegistry.h"

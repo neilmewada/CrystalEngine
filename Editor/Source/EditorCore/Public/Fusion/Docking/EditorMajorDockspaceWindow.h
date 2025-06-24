@@ -3,12 +3,12 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORCORE_API EditorMinorDockspace : public FDockspace
+    class EDITORCORE_API EditorMajorDockspaceWindow : public FDockspaceWindow
     {
-        CE_CLASS(EditorMinorDockspace, FDockspace)
+        CE_CLASS(EditorMajorDockspaceWindow, FDockspaceWindow)
     protected:
 
-        EditorMinorDockspace();
+        EditorMajorDockspaceWindow();
 
         void Construct() override;
 
@@ -26,4 +26,4 @@ namespace CE::Editor
     
 }
 
-#include "EditorMinorDockspace.rtti.h"
+#include "EditorMajorDockspaceWindow.rtti.h"
