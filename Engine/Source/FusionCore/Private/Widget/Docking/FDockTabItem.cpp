@@ -5,7 +5,7 @@ namespace CE
 
     FDockTabItem::FDockTabItem()
     {
-        
+        m_MinWidth = 150;
     }
 
     void FDockTabItem::Construct()
@@ -13,13 +13,32 @@ namespace CE
         Super::Construct();
 
         Child(
-            FNew(FHorizontalStack)
+            FAssignNew(FHorizontalStack, container)
             .ContentVAlign(VAlign::Center)
             .ContentHAlign(HAlign::Left)
             .Padding(Vec4(2, 1, 2, 1) * 7.5f)
             (
+                FAssignNew(FImage, iconImage)
+                .Width(16)
+                .Height(16)
+                .Enabled(false),
+
                 FAssignNew(FLabel, tabTitle)
                 .FontSize(11)
+                .MaxWidth(200),
+
+                FNew(FWidget)
+                .FillRatio(1.0f),
+
+                FAssignNew(FImageButton, closeButton)
+                .Image(FBrush("/Engine/Resources/Icons/CrossIcon"))
+                .OnClicked([this]
+                {
+                    CloseWindow();
+                })
+                .Width(10)
+                .Height(10)
+                .Style("CloseButton")
             )
         );
     }
@@ -28,7 +47,7 @@ namespace CE
     {
         if (Ref<FDockTabWell> tabWell = owner.Lock())
         {
-            if (event->IsMouseEvent())
+            if (event->IsMouseEvent() && event->sender == this)
             {
             	if (event->type == FEventType::MouseEnter)
                 {
@@ -98,14 +117,7 @@ namespace CE
 
                                 if (dropContext && dropDockspaceSplitView->CanBeDocked(dockWindow))
                                 {
-                                    thisDockspace->GetRootSplit()->RemoveDockItem(this);
-
-                                    Vec2 screenSpacePos = thisContext->GlobalToScreenSpacePosition(dragEvent->mousePosition);
-									Vec2 dropContextSpacePos = dropContext->ScreenToGlobalSpacePosition(screenSpacePos);
-
-									Vec2 localDropPos = dropTabWell->GetGlobalTransform() * Vec4(dropContextSpacePos.x, dropContextSpacePos.y, 0.0f, 1.0f);
-
-                                    //CE_LOG(Info, All, "Drop Pos: {}", localDropPos);
+                                    thisDockspace->GetRootSplit()->RemoveDockItemInternal(this);
 
                                     dropDockspaceSplitView->AddDockWindow(dockWindow);
 
@@ -201,7 +213,7 @@ namespace CE
                                     {
                                         Ref<FDockTabWell> dropTabWell = splitInDockspaceView->GetTabWell();
 
-                                        dockspace->GetRootSplit()->RemoveDockItem(this);
+                                        dockspace->GetRootSplit()->RemoveDockItemInternal(this);
 
                                         if (splitPosition == FDockingHintPosition::Center)
                                         {
@@ -254,7 +266,7 @@ namespace CE
 
                                 auto onCreateDockspace = dockspace->OnCreateDockspace();
                                 
-                                dockspace->GetRootSplit()->RemoveDockItem(this);
+                                dockspace->GetRootSplit()->RemoveDockItemInternal(this);
 
                                 Ref<FDockspaceWindow> newWindow = FusionApplication::Get()->CreateNativeWindow<FDockspaceWindow>(Title(), Title(),
                                     dockspace->originalWindowSize.width,
@@ -369,6 +381,23 @@ namespace CE
         {
             tabWell->ApplyStyle();
         }
+    }
+
+    bool FDockTabItem::CloseWindow()
+    {
+        if (Ref<FDockTabWell> tabWell = owner.Lock())
+        {
+            if (Ref<FDockspaceSplitView> dockspaceSplitView = tabWell->GetDockspaceSplitView())
+            {
+                bool success = dockspaceSplitView->RemoveDockItem(this);
+                if (!success)
+                    return false;
+
+                return success;
+            }
+        }
+
+		return false;
     }
 }
 

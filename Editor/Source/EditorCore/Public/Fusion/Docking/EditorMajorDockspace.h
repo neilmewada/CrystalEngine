@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORCORE_API EditorMajorDockspace : public FDockspace
+    class EDITORCORE_API EditorMajorDockspace : public EditorDockspace
     {
-        CE_CLASS(EditorMajorDockspace, FDockspace)
+        CE_CLASS(EditorMajorDockspace, EditorDockspace)
     protected:
 
         EditorMajorDockspace();

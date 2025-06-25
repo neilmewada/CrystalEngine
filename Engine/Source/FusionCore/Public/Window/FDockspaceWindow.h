@@ -18,6 +18,8 @@ namespace CE
 
     protected: // - Internal -
 
+        virtual void OnClickClose() {}
+
         FStyledWidget* borderWidget = nullptr;
         FOverlayStack* rootBox = nullptr;
         FImage* maximizeIcon = nullptr;

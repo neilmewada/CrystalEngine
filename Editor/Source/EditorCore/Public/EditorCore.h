@@ -38,7 +38,6 @@
 /// Widgets
 
 #include "Fusion/Style/EditorDockspaceStyle.h"
-#include "Fusion/Style/EditorMinorDockspaceStyle.h"
 #include "Fusion/Style/EditorDockTabStyle.h"
 #include "Fusion/Style/EditorMenuBarStyle.h"
 #include "Fusion/Style/EditorStyle.h"

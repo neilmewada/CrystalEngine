@@ -24,7 +24,7 @@ namespace CE::Editor
 
     SceneEditor::SceneEditor()
     {
-
+        m_CanBeUndocked = false;
     }
 
     void SceneEditor::LoadSandboxScene()

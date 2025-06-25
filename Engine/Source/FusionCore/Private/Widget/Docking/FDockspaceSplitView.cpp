@@ -323,8 +323,6 @@ namespace CE
         tabWellParent->Enabled(true);
         tabWell->UpdateTabWell();
 
-        // TODO: Handle multiple split docks
-
         RemoveAllContent();
 
         if (tabbedDockWindows.IsEmpty())
@@ -454,7 +452,7 @@ namespace CE
         return nullptr;
     }
 
-    bool FDockspaceSplitView::RemoveDockItem(Ref<FDockTabItem> dockTabItem)
+    bool FDockspaceSplitView::RemoveDockItemInternal(Ref<FDockTabItem> dockTabItem)
     {
         if (!dockTabItem)
             return false;
@@ -478,6 +476,53 @@ namespace CE
         UpdateTabs();
 
         return true;
+    }
+
+    bool FDockspaceSplitView::RemoveDockItem(Ref<FDockTabItem> dockTabItem)
+    {
+        if (!dockTabItem)
+            return false;
+
+        if (Ref<FDockspace> dockspace = GetDockspace())
+        {
+            int index = tabWell->GetTabIndex(dockTabItem);
+            if (index < 0 || index >= tabbedDockWindows.GetSize())
+                return false;
+
+            Ref<FDockWindow> dockWindow = tabbedDockWindows[index];
+            if (!dockWindow)
+                return false;
+
+            if (selectedTab == dockTabItem)
+            {
+                selectedTab = nullptr;
+            }
+
+            tabWell->RemoveTabItem(dockTabItem);
+            tabbedDockWindows.RemoveAt(index);
+
+            UpdateTabs();
+
+            int neighborIndex = index - 1;
+            neighborIndex = Math::Clamp<int>(neighborIndex, 0, tabbedDockWindows.GetSize() - 1);
+
+            if (selectedTab == nullptr && neighborIndex < tabWell->GetTabCount() && neighborIndex >= 0)
+            {
+                SetActiveTab(tabWell->GetTabItem(neighborIndex));
+            }
+
+            if (tabbedDockWindows.IsEmpty())
+            {
+                if (Ref<FDockspaceSplitView> parentSplit = this->parentSplitView.Lock())
+                {
+                    parentSplit->RemoveChildSplitView(this);
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     void FDockspaceSplitView::OnPaintDockingPreview(FPainter* painter)

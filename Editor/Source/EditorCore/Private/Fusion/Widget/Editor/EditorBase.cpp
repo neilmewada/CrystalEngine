@@ -119,9 +119,6 @@ namespace CE::Editor
 			Title(title);
         }
 
-        //ShowAsterisk(isAssetDirty);
-
-        //UpdateDockspaceTabWell();
     }
 }
 

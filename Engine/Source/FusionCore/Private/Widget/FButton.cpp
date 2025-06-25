@@ -93,6 +93,10 @@ namespace CE
                 }
                 event->Consume(this);
             }
+            else if (mouseEvent->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left)
+            {
+                CE_LOG(Info, All, "Clicked!");
+            }
             else if (mouseEvent->type == FEventType::MouseRelease && mouseEvent->buttons == MouseButtonMask::Left)
             {
                 if (EnumHasFlag(buttonState, FButtonState::Pressed))

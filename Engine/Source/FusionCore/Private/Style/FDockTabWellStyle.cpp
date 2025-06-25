@@ -29,7 +29,11 @@ namespace CE
 
         for (Ref<FDockTabItem> dockTabItem : dockTabWell.tabItems)
         {
+            bool canBeDetached = dockTabItem->CanBeDetached();
+
             (*dockTabItem)
+            .CloseButtonEnabled(canBeDetached)
+            .CloseButtonVisible(canBeDetached && (dockTabItem->IsHovered() || dockTabItem->IsActive()))
             .BorderColor(dockTabItem->IsActive()
                 ? tabActiveBorderColor
                 : (dockTabItem->IsHovered() ? tabHoverBorderColor : tabBorderColor))

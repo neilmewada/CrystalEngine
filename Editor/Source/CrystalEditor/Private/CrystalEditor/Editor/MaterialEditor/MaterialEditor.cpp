@@ -15,8 +15,7 @@ namespace CE::Editor
 
         Title("Material");
 
-        (*content)
-        .Child(
+        Child(
             FAssignNew(FSplitBox, rootSplitBox)
             .Direction(FSplitDirection::Horizontal)
             .HAlign(HAlign::Fill)

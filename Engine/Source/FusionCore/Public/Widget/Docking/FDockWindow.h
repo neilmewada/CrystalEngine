@@ -10,7 +10,11 @@ namespace CE
 
         FDockWindow();
 
+		virtual ~FDockWindow();
+
         void Construct() override;
+
+        void OnBeginDestroy() override;
 
     public: // - Public API -
 

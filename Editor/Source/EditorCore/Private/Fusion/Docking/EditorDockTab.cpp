@@ -36,11 +36,7 @@ namespace CE::Editor
     {
 	    if (dockspace && dockspace->IsOfType<EditorDockspace>())
 	    {
-	        ((EditorDockspace*)dockspace)->UpdateTabWell();
-	    }
-	    else if (dockspace && dockspace->IsOfType<EditorMinorDockspace>())
-	    {
-	        ((EditorMinorDockspace*)dockspace)->UpdateTabWell();
+	        ((EditorDockspace*)dockspace)->UpdateTabs();
 	    }
     }
 

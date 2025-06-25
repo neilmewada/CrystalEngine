@@ -2,6 +2,8 @@
 
 namespace CE
 {
+    class FDockWindow;
+
     CLASS()
     class FUSIONCORE_API FDockTabItem : public FReorderableStackItem
     {
@@ -33,13 +35,24 @@ namespace CE
 
         void ApplyStyle() override;
 
+        bool CloseWindow();
+
+		Ref<FDockWindow> GetDockWindow() const { return dockWindow.Lock(); }
+
     protected: // - Internal -
 
+        Ref<FImage> iconImage;
         Ref<FLabel> tabTitle;
+        Ref<FImageButton> closeButton;
+
         WeakRef<FDockTabWell> owner;
         f32 startMousePosX = 0;
 
+        Ref<FHorizontalStack> container;
+
         WeakRef<FDockspaceSplitView> guideDockspaceSplitView;
+
+		WeakRef<FDockWindow> dockWindow;
 
         bool isActive = false;
         bool isHovered = false;
@@ -52,6 +65,9 @@ namespace CE
     public: // - Fusion Properties - 
 
         FUSION_PROPERTY_WRAPPER2(Text, tabTitle, Title);
+
+        FUSION_PROPERTY_WRAPPER2(Enabled, closeButton, CloseButtonEnabled);
+        FUSION_PROPERTY_WRAPPER2(Visible, closeButton, CloseButtonVisible);
 
         FUSION_WIDGET;
         friend class FDockTabWell;

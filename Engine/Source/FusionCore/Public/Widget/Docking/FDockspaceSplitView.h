@@ -72,7 +72,9 @@ namespace CE
 
         Ref<FDockTabItem> DetachItem(Ref<FDockTabItem> dockTabItem);
 
-        bool RemoveDockItem(Ref<FDockTabItem> dockTabItem);
+        bool RemoveDockItemInternal(Ref<FDockTabItem> dockTabItem);
+
+    	bool RemoveDockItem(Ref<FDockTabItem> dockTabItem);
 
         int GetChildrenSplitCount() const { return childrenSplitViews.GetSize(); }
 

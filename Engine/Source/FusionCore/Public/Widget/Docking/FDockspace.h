@@ -1,4 +1,5 @@
 #pragma once
+#include "FDockTabItem.h"
 
 namespace CE
 {
@@ -100,6 +101,8 @@ namespace CE
         Self& TabWellOverlayWidget(FWidget& widget);
 
         FUSION_PROPERTY(FDockTypeMask, DockspaceType);
+
+        FUSION_PROPERTY(ScriptDelegate<void(FDockTabItem&)>, OnCreateTabItem);
 
         FUSION_PROPERTY(Delegate<FDockspace&()>, OnCreateDockspace);
         FUSION_PROPERTY(Delegate<void(Ref<FWindow>, Ref<FDockTabItem>)>, OnWindowSetup);

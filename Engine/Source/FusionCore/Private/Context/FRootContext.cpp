@@ -511,6 +511,8 @@ namespace CE
 							event.prevMousePosition = event.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
 						}
 
+						event.Reset();
+
 						event.sender->HandleEvent(&event);
 					}
 				}

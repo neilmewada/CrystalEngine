@@ -10,8 +10,6 @@ namespace CE::Editor
 
         // - Public API -
 
-        bool CanBeClosed() const override { return false; }
-
         ClassType* GetTargetObjectType() const override;
 
         bool AllowMultipleInstances() const override { return false; }

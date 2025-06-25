@@ -5,7 +5,7 @@ namespace CE::Editor
 
     EditorDockWindow::EditorDockWindow()
     {
-
+        m_AllowedDockspaces = FDockspaceFilter().WithDockTypeMask(FDockTypeMask::All);
     }
 
     void EditorDockWindow::Construct()

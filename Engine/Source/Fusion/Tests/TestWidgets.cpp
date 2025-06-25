@@ -33,6 +33,11 @@ namespace WidgetTests
 		container->GetTabWell()->Padding(Vec4(1, 1.25f, 0, 0) * 15);
 
 		Style("Dockspace");
+
+		OnCreateTabItem([](FDockTabItem& tabItem)
+			{
+				tabItem.MinWidth(150);
+			});
 	}
 
 	// ------------------------------------------------
@@ -64,5 +69,10 @@ namespace WidgetTests
 		Super::Construct();
 
 		Style("MinorDockspace");
+
+		OnCreateTabItem([](FDockTabItem& tabItem)
+			{
+				tabItem.MinWidth(120);
+			});
 	}
 }

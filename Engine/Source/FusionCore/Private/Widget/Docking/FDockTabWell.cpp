@@ -30,7 +30,7 @@ namespace CE
     {
         Super::OnItemsRearranged();
 
-        if (Ref<FDockspaceSplitView> dockspaceSplitView = owner.Lock())
+        if (Ref<FDockspaceSplitView> dockspaceSplitView = GetDockspaceSplitView())
         {
             Array<Ref<FDockWindow>> allWindows = dockspaceSplitView->tabbedDockWindows;
 
@@ -61,7 +61,7 @@ namespace CE
     {
         tabItems.Clear();
 
-        if (Ref<FDockspaceSplitView> dockspaceSplitView = owner.Lock())
+        if (Ref<FDockspaceSplitView> dockspaceSplitView = GetDockspaceSplitView())
         {
             for (int i = 0; i < dockspaceSplitView->tabbedDockWindows.GetSize(); ++i)
             {
@@ -77,6 +77,14 @@ namespace CE
                     AddChild(
                         FAssignNew(FDockTabItem, tabItem)
                     );
+
+                    if (Ref<FDockspace> dockspace = dockspaceSplitView->GetDockspace())
+                    {
+                        if (dockspace->m_OnCreateTabItem.IsBound())
+                        {
+                            dockspace->m_OnCreateTabItem.Invoke(*tabItem);
+                        }
+                    }
                 }
 
                 tabItem->owner = this;
@@ -89,6 +97,7 @@ namespace CE
                 }
 
                 dockWindow->item = tabItem;
+				tabItem->dockWindow = dockWindow;
 
                 tabItem->Title(dockWindow->Title());
 

@@ -43,7 +43,10 @@ namespace CE
                         .ControlType(FWindowControlType::Minimize)
                         .OnClicked([this]
                             {
-                                CastTo<FNativeContext>(GetContext())->Minimize();
+								if (Ref<FNativeContext> nativeContext = GetNativeContext())
+								{
+                                    nativeContext->Minimize();
+								}
                             })
                         .Name("WindowMinimizeButton")
                         .Style("Button.WindowControl"),
@@ -52,14 +55,16 @@ namespace CE
                         .ControlType(FWindowControlType::Maximize)
                         .OnClicked([this]
                             {
-                                Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext());
-                                if (nativeContext->IsMaximized())
+                                if (Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext()))
                                 {
-                                    nativeContext->Restore();
-                                }
-                                else
-                                {
-                                    nativeContext->Maximize();
+                                    if (nativeContext->IsMaximized())
+                                    {
+                                        nativeContext->Restore();
+                                    }
+                                    else
+                                    {
+                                        nativeContext->Maximize();
+                                    }
                                 }
                             })
                         .Name("WindowMaximizeButton")
@@ -69,7 +74,7 @@ namespace CE
                         .ControlType(FWindowControlType::Close)
                         .OnClicked([this]
                             {
-                                //OnClickClose();
+                                OnClickClose();
                                 GetContext()->QueueDestroy();
                             })
                         .Name("WindowCloseButton")

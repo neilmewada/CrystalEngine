@@ -11,7 +11,11 @@ namespace CE::Editor
     void EditorMinorDockspace::Construct()
     {
         Super::Construct();
-        
+
+        OnCreateTabItem([](FDockTabItem& tabItem)
+            {
+                tabItem.MinWidth(120);
+            });
     }
     
 }

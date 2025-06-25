@@ -10,10 +10,21 @@ namespace CE
         m_CanBeUndocked = true;
     }
 
+    FDockWindow::~FDockWindow()
+    {
+
+    }
+
     void FDockWindow::Construct()
     {
         Super::Construct();
         
+    }
+
+    void FDockWindow::OnBeginDestroy()
+    {
+	    Super::OnBeginDestroy();
+
     }
 
     void FDockWindow::OnFusionPropertyModified(const CE::Name& propertyName)
