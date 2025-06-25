@@ -83,6 +83,8 @@
 #include "Fusion/Docking/EditorDockTabItem.h"
 #include "Fusion/Docking/EditorDockTab.h"
 #include "Fusion/Docking/EditorDockWindow.h"
+#include "Fusion/Docking/EditorMinorDockWindow.h"
+#include "Fusion/Docking/EditorMajorDockWindow.h"
 #include "Fusion/Widget/Editor/EditorBase.h"
 
 #include "Editor/AssetEditorRegistry.h"
