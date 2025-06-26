@@ -28,6 +28,7 @@ namespace CE
                 .MaxWidth(200),
 
                 FNew(FWidget)
+                .MinWidth(20)
                 .FillRatio(1.0f),
 
                 FAssignNew(FImageButton, closeButton)
@@ -38,7 +39,7 @@ namespace CE
                 })
                 .Width(10)
                 .Height(10)
-                .Style("CloseButton")
+                .Style("Button.CloseTab")
             )
         );
     }

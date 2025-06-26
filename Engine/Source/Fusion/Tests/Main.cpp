@@ -372,8 +372,8 @@ TEST(Fusion, MainTest)
 		}
 
 		{
-			auto closeButton = CreateObject<FImageButtonStyle>(rootStyle, "CloseButton");
-			rootStyle->Add(closeButton);
+			auto closeButton = CreateObject<FImageButtonStyle>(rootStyle, "Button_CloseTab");
+			rootStyle->Add("Button.CloseTab", closeButton);
 
 			closeButton->tintColor = Color::RGBA(120, 120, 120);
 			closeButton->hoverTintColor = Color::RGBA(180, 180, 180);

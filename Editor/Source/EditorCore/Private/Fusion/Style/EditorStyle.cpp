@@ -420,34 +420,25 @@ namespace CE::Editor
 		GetDefaultWidget<EditorDockspace>()
 			.Style(editorDockspace->GetName());
 
-		if (!editorMinorDockspace)
+		if (!editorMajorDockWindow)
 		{
-			editorMinorDockspace = CreateObject<EditorMinorDockspaceStyle>(this, "EditorMinorDockspace");
-			Add(editorMinorDockspace);
+			editorMajorDockWindow = CreateObject<FStyledWidgetStyle>(this, "EditorMajorDockWindow");
+			editorMajorDockWindow->background = Color::RGBA(26, 26, 26);
+			Add(editorMajorDockWindow);
 		}
 
-		GetDefaultWidget<EditorMinorDockspace>()
-			.Style(editorMinorDockspace->GetName());
+		GetDefaultWidget<EditorMajorDockWindow>()
+			.Style(editorMajorDockWindow->GetName());
 
-		if (!editorDockTab)
+		if (!editorMinorDockWindow)
 		{
-			editorDockTab = CreateObject<EditorDockTabStyle>(this, "EditorDockTab");
-			Add(editorDockTab);
+			editorMinorDockWindow = CreateObject<FStyledWidgetStyle>(this, "EditorMinorDockWindow");
+			editorMinorDockWindow->background = Color::RGBA(36, 36, 36);
+			Add(editorMinorDockWindow);
 		}
 
-		editorDockTab->background = Color::RGBA(26, 26, 26);
-
-		GetDefaultWidget<EditorDockTab>()
-			.Style(editorDockTab->GetName());
-
-		if (!editorMinorDockTab)
-		{
-			editorMinorDockTab = CreateObject<EditorDockTabStyle>(this, "EditorMinorDockTab");
-			Add(editorMinorDockTab);
-		}
-
-		GetDefaultWidget<EditorMinorDockTab>()
-			.Style(editorMinorDockTab->GetName());
+		GetDefaultWidget<EditorMinorDockWindow>()
+			.Style(editorMinorDockWindow->GetName());
 
 		if (!editorToolBar)
 		{

@@ -12,7 +12,7 @@ namespace CE::Editor
     {
         Super::Construct();
 
-        
+        Style("EditorDockspace");
     }
 
     void EditorDockspace::OnBeginDestroy()

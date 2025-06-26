@@ -12,11 +12,9 @@ namespace CE::Editor
     {
         Super::Construct();
 
-        Style("EditorMinorDockTab");
-
         (*this)
         .Title("Assets")
-        .Content(
+        .Child(
             FNew(FSplitBox)
             .SplitterBackground(Color::RGBA(26, 26, 26))
             .SplitterHoverBackground(Color::RGBA(128, 128, 128))

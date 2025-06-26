@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS(Abstract)
-    class EDITORCORE_API EditorBase : public EditorDockWindow, IAssetRegistryListener
+    class EDITORCORE_API EditorBase : public EditorMajorDockWindow, IAssetRegistryListener
     {
-        CE_CLASS(EditorBase, EditorDockWindow)
+        CE_CLASS(EditorBase, EditorMajorDockWindow)
     protected:
 
         EditorBase();

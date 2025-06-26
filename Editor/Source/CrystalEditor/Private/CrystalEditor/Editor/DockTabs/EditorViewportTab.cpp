@@ -14,7 +14,7 @@ namespace CE::Editor
 
         (*this)
 			.Title("Viewport")
-            .Content(
+            .Child(
                 FAssignNew(EditorViewport, viewport)
                 .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Fill)

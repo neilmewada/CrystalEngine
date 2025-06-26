@@ -39,6 +39,16 @@ namespace CE
 
     };
 
+    STRUCT()
+    struct FUSIONCORE_API FDockBuilder
+    {
+        CE_STRUCT(FDockBuilder)
+    public:
+
+
+
+    };
+
     CLASS()
     class FUSIONCORE_API FDockspace : public FStyledWidget
     {

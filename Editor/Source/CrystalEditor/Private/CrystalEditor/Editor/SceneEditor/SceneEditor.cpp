@@ -304,77 +304,28 @@ namespace CE::Editor
 
     void SceneEditor::ConstructDockspaces()
     {
-        (*content)
-        .Child(
-            FAssignNew(FSplitBox, rootSplitBox)
-            .Direction(FSplitDirection::Horizontal)
-            .HAlign(HAlign::Fill)
-            .VAlign(VAlign::Fill)
-            (
-                FNew(FSplitBox)
-                .Direction(FSplitDirection::Vertical)
-                .VAlign(VAlign::Fill)
-                .FillRatio(0.75f)
-                (
-                    FAssignNew(EditorMinorDockspace, center)
-                    .DockTabs(
-                        FAssignNew(EditorViewportTab, viewportTab)
+		// TODO: Implement dockspaces properly
 
-                    )
-                    .HAlign(HAlign::Fill)
-                    .FillRatio(0.6f),
+        minorDockspace->AddDockWindow(
+            FAssignNew(EditorViewportTab, viewportTab)
+        );
 
-                    FAssignNew(EditorMinorDockspace, bottom)
-                    .DockTabs(
-                        FAssignNew(AssetBrowser, assetBrowser),
+        auto rootSplit = minorDockspace->GetRootSplit();
 
-                        FNew(EditorMinorDockTab)
-                        .Title("Logs")
-                        .Content(
-                            FNew(FVerticalStack)
-                            (
-                                FNew(FTextButton)
-                                .Text("Print Fusion Memory FootPrint")
-                                .OnClicked([]
-                                {
-                                    u64 footprint = FusionApplication::Get()->ComputeMemoryFootprint();
-                                    CE_LOG(Info, All, "Memory Footprint: {} KB", footprint / 1024);
-                                })
-                            )
-                        )
+        viewportTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Right,
+            FAssignNew(SceneOutlinerTab, sceneOutlinerTab),
+            0.35f
+        );
 
-                    )
-                    .HAlign(HAlign::Fill)
-                    .FillRatio(0.4f)
-                ),
+        sceneOutlinerTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Bottom,
+			FAssignNew(DetailsTab, detailsTab),
+            0.65f
+        );
 
-                FNew(FSplitBox)
-                .Direction(FSplitDirection::Vertical)
-                .VAlign(VAlign::Fill)
-                .FillRatio(0.25f)
-                (
-                    FAssignNew(EditorMinorDockspace, rightTop)
-                    .DockTabs(
-                        FAssignNew(SceneOutlinerTab, sceneOutlinerTab)
-
-                    )
-                    .HAlign(HAlign::Fill)
-                    .FillRatio(0.3f),
-
-                    FAssignNew(EditorMinorDockspace, rightBottom)
-                    .DockTabs(
-                        FAssignNew(DetailsTab, detailsTab),
-
-                        FNew(EditorMinorDockTab)
-                        .Title("History")
-
-                    )
-                    .HAlign(HAlign::Fill)
-                    .FillRatio(0.7f)
-                )
-            )
-        )
-    	.Padding(Vec4(0, 5, 0, 0));
+        viewportTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Bottom,
+			FAssignNew(AssetBrowser, assetBrowser),
+            0.4f
+        );
 
         detailsTab->SetOwnerEditor(this);
         sceneOutlinerTab->SetOwnerEditor(this);

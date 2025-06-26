@@ -14,7 +14,7 @@ namespace CE::Editor
 
         (*this)
 		.Title("Details")
-		.Content(
+		.Child(
             FNew(FOverlayStack)
             .VAlign(VAlign::Fill)
             .HAlign(HAlign::Fill)
@@ -69,9 +69,7 @@ namespace CE::Editor
 
                 )
             )
-        )
-		.Style("EditorMinorDockTab")
-        ;
+        );
 
         
         SetSelectedActor(nullptr);

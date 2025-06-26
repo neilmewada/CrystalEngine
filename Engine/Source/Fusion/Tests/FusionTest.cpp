@@ -265,25 +265,32 @@ namespace WidgetTests
                 .As<FDockWindow>()
             );
 
-            for (int j = 1; j <= 5; j++)
+            if (i == 3)
             {
-                minorDockspace->AddDockWindow(
-					FNew(FDockWindow)
-                    .AllowedDockspaces(FDockspaceFilter().WithDockTypeMask(FDockTypeMask::All))
-                    .Title(String::Format("Minor {} ({})", j, i))
-                    .Background(Color::RGBA(36, 36, 36))
-                    .Child(
-                        FNew(FLabel)
-                        .Text(String::Format("This is {} minor window in {} major window", j, i))
-                        .FontSize(16)
+                
+            }
+            else
+            {
+                for (int j = 1; j <= 5; j++)
+                {
+                    minorDockspace->AddDockWindow(
+                        FNew(FDockWindow)
+                        .AllowedDockspaces(FDockspaceFilter().WithDockTypeMask(FDockTypeMask::All))
+                        .Title(String::Format("Minor {} ({})", j, i))
+                        .Background(Color::RGBA(36, 36, 36))
+                        .Child(
+                            FNew(FLabel)
+                            .Text(String::Format("This is {} minor window in {} major window", j, i))
+                            .FontSize(16)
+                            .HAlign(HAlign::Fill)
+                            .VAlign(VAlign::Fill)
+                        )
+                        .Name(String::Format("Minor{}_{}", j, i))
                         .HAlign(HAlign::Fill)
                         .VAlign(VAlign::Fill)
-                    )
-                    .Name(String::Format("Minor{}_{}", j, i))
-                    .HAlign(HAlign::Fill)
-                    .VAlign(VAlign::Fill)
-                    .As<FDockWindow>()
-                );
+                        .As<FDockWindow>()
+                    );
+                }
             }
         }
     }

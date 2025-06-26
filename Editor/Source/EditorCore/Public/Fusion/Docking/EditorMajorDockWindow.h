@@ -2,6 +2,11 @@
 
 namespace CE::Editor
 {
+    class EditorToolBar;
+    class EditorMenuBar;
+    class EditorMinorDockspace;
+
+
     CLASS()
     class EDITORCORE_API EditorMajorDockWindow : public EditorDockWindow
     {
@@ -17,9 +22,14 @@ namespace CE::Editor
 
     protected: // - Internal -
 
+        Ref<EditorToolBar> toolBar;
+		Ref<EditorMenuBar> menuBar;
+        Ref<EditorMinorDockspace> minorDockspace;
 
     public: // - Fusion Properties - 
 
+        FUSION_PROPERTY_WRAPPER2(Enabled, toolBar, ToolBarEnabled);
+        FUSION_PROPERTY_WRAPPER2(Enabled, menuBar, MenuBarEnabled);
 
         FUSION_WIDGET;
     };

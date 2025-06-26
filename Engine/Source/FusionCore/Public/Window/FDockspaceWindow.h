@@ -21,15 +21,15 @@ namespace CE
         virtual void OnClickClose() {}
 
         FStyledWidget* borderWidget = nullptr;
-        FOverlayStack* rootBox = nullptr;
-        FImage* maximizeIcon = nullptr;
-        FImage* minimizeIcon = nullptr;
-        Ref<FTitleBar> titleBar;
-        FHorizontalStack* titleBarContainer = nullptr;
-        FStyledWidget* projectLabelParent = nullptr;
-        FLabel* projectLabel = nullptr;
+        //FOverlayStack* rootBox = nullptr;
+        //FImage* maximizeIcon = nullptr;
+        //FImage* minimizeIcon = nullptr;
+        //Ref<FTitleBar> titleBar;
+        //FHorizontalStack* titleBarContainer = nullptr;
+        //FStyledWidget* projectLabelParent = nullptr;
+        //FLabel* projectLabel = nullptr;
 
-        FImage* logo = nullptr;
+        //FImage* logo = nullptr;
         FWindowControlButton* minimizeButton = nullptr;
         FWindowControlButton* maximizeButton = nullptr;
         FWindowControlButton* closeButton = nullptr;

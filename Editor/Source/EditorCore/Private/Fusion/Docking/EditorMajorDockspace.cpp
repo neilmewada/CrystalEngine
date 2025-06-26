@@ -7,6 +7,7 @@ namespace CE::Editor
     {
 		detachedDockspaceWindowClass = EditorMajorDockspaceWindow::StaticClass();
 
+        m_DockspaceType = FDockTypeMask::Major;
     }
 
     void EditorMajorDockspace::Construct()

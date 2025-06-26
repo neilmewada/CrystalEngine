@@ -18,7 +18,7 @@ namespace CE::Editor
         
         (*this)
 			.Title("Scene Outliner")
-			.Content(
+			.Child(
                 FAssignNew(SceneTreeView, treeView)
                 .Header(
                     FNew(FTreeViewHeader)
@@ -36,7 +36,6 @@ namespace CE::Editor
                 .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Fill)
             )
-			.Style("EditorMinorDockTab")
     	;
 
         if (scene)

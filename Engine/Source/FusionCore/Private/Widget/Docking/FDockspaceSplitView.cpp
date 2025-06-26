@@ -39,8 +39,8 @@ namespace CE
 
                     FAssignNew(FSplitBox, splitBox)
                     .SplitterBackground(Color::Clear())
-                    .SplitterSize(7.5f)
-                    .SplitterDrawRatio(0.5f)
+                    .SplitterSize(7.0f)
+                    .SplitterDrawRatio(1.0f)
                     .HAlign(HAlign::Fill)
                     .FillRatio(1.0f)
                 ),
@@ -85,6 +85,11 @@ namespace CE
             return nullptr;
 
         return tabbedDockWindows[index];
+    }
+
+    int FDockspaceSplitView::GetTabbedDockWindowCount()
+    {
+        return tabbedDockWindows.GetSize();
     }
 
     Ref<FDockTabItem> FDockspaceSplitView::GetDockTabItem(int index)
@@ -200,12 +205,14 @@ namespace CE
 		}
     }
 
-    void FDockspaceSplitView::AddDockWindowSplit(FDockingHintPosition splitPosition, Ref<FDockWindow> dockWindow)
+    void FDockspaceSplitView::AddDockWindowSplit(FDockingHintPosition splitPosition, Ref<FDockWindow> dockWindow, f32 splitRatio)
     {
         if (!IsSingular() || splitBox->GetChildCount() != 1)
             return;
         if (splitPosition != FDockingHintPosition::Center && !CanBeSplit(dockWindow))
 			return;
+
+		splitRatio = Math::Clamp(splitRatio, 0.05f, 0.95f);
 
         if (splitPosition == FDockingHintPosition::Center)
         {
@@ -221,12 +228,12 @@ namespace CE
 
         splitBox->AddChild(
             FAssignNew(FDockspaceSplitView, split1)
-            .FillRatio(0.5f)
+            .FillRatio(1.0f - splitRatio)
         );
 
         splitBox->AddChild(
             FAssignNew(FDockspaceSplitView, split2)
-            .FillRatio(0.5f)
+            .FillRatio(splitRatio)
         );
 
         childrenSplitViews.AddRange({ split1, split2 });
@@ -287,6 +294,11 @@ namespace CE
         SetDockingPreviewEnabled(false, splitPosition);
     }
 
+    void FDockspaceSplitView::AddDockWindowSplit(FDockingHintPosition splitPosition, FDockWindow& dockWindow, f32 splitRatio)
+    {
+        AddDockWindowSplit(splitPosition, &dockWindow, splitRatio);
+    }
+
     void FDockspaceSplitView::AddDockWindow(Ref<FDockWindow> dockWindow)
     {
         if (!CanBeDocked(dockWindow) || tabbedDockWindows.Exists(dockWindow))
@@ -294,6 +306,8 @@ namespace CE
 
         tabbedDockWindows.Add(dockWindow);
         tabWell->UpdateTabWell();
+
+        dockWindow->ownerDockspaceSplitView = this;
 
         if (tabbedDockWindows.GetSize() == 1)
         {

@@ -6,6 +6,8 @@ namespace CE::Editor
     EditorMinorDockspace::EditorMinorDockspace()
     {
 		detachedDockspaceWindowClass = EditorMinorDockspaceWindow::StaticClass();
+
+		m_AllowSplitting = true;
     }
 
     void EditorMinorDockspace::Construct()

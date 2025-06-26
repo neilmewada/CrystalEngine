@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS()
-    class CRYSTALEDITOR_API SceneOutlinerTab : public EditorDockWindow, ISceneCallbacks
+    class CRYSTALEDITOR_API SceneOutlinerTab : public EditorMinorDockWindow, ISceneCallbacks
     {
-        CE_CLASS(SceneOutlinerTab, EditorMinorDockTab)
+        CE_CLASS(SceneOutlinerTab, EditorMinorDockWindow)
     protected:
 
         SceneOutlinerTab();

@@ -38,7 +38,6 @@
 /// Widgets
 
 #include "Fusion/Style/EditorDockspaceStyle.h"
-#include "Fusion/Style/EditorDockTabStyle.h"
 #include "Fusion/Style/EditorMenuBarStyle.h"
 #include "Fusion/Style/EditorStyle.h"
 
@@ -80,8 +79,6 @@
 #include "Fusion/Docking/EditorMajorDockspaceWindow.h"
 #include "Fusion/Docking/EditorMinorDockspace.h"
 #include "Fusion/Docking/EditorMinorDockspaceWindow.h"
-#include "Fusion/Docking/EditorDockTabItem.h"
-#include "Fusion/Docking/EditorDockTab.h"
 #include "Fusion/Docking/EditorDockWindow.h"
 #include "Fusion/Docking/EditorMinorDockWindow.h"
 #include "Fusion/Docking/EditorMajorDockWindow.h"

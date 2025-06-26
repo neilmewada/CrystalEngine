@@ -51,13 +51,10 @@ namespace CE::Editor
         EditorMinorDockspace* center = nullptr;
         EditorMinorDockspace* bottom = nullptr;
 
-        EditorViewportTab* viewportTab = nullptr;
-
-        SceneOutlinerTab* sceneOutlinerTab = nullptr;
-
+        Ref<EditorViewportTab> viewportTab = nullptr;
+        Ref<SceneOutlinerTab> sceneOutlinerTab = nullptr;
         Ref<AssetBrowser> assetBrowser;
-
-        DetailsTab* detailsTab = nullptr;
+        Ref<DetailsTab> detailsTab = nullptr;
 
         // Sandbox
         Ref<CE::Scene> sandboxScene = nullptr;

@@ -31,6 +31,11 @@ namespace CE
         {
             bool canBeDetached = dockTabItem->CanBeDetached();
 
+            if (dockTabItem->IsHovered())
+            {
+                String::IsAlphabet('a');
+            }
+
             (*dockTabItem)
             .CloseButtonEnabled(canBeDetached)
             .CloseButtonVisible(canBeDetached && (dockTabItem->IsHovered() || dockTabItem->IsActive()))

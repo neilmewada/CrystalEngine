@@ -38,17 +38,22 @@ namespace CE::Editor
         instance = this;
 
         Ref<SceneEditor> sceneEditor = nullptr;
-        FAssignNew(SceneEditor, sceneEditor);
-        AddDockTab(sceneEditor.Get());
+
+        FAssignNew(SceneEditor, sceneEditor)
+		.HAlign(HAlign::Fill)
+		.VAlign(VAlign::Fill);
+
+		dockspace->AddDockWindow(sceneEditor);
+        //AddDockTab(sceneEditor.Get());
 
         Ref<ProjectSettings> projectSettings = GetSettings<ProjectSettings>();
 
-        projectLabelParent->Enabled(true);
-        projectLabel->Text(projectSettings->projectName);
+        //projectLabelParent->Enabled(true);
+        //projectLabel->Text(projectSettings->projectName);
 
 	    if (PlatformMisc::GetCurrentPlatform() == PlatformName::Mac)
 	    {
-	        logo->Enabled(false);
+	        //logo->Enabled(false);
 	    }
 
         Style("EditorDockspace");

@@ -45,7 +45,8 @@ namespace CE
 
         Ref<FDockWindow> GetTabbedDockWindow(Ref<FDockTabItem> dockTabItem);
 
-    	Ref<FDockWindow> GetTabbedDockWindow(int index);
+        Ref<FDockWindow> GetTabbedDockWindow(int index);
+        int GetTabbedDockWindowCount();
 
         Ref<FDockTabItem> GetDockTabItem(int index);
 
@@ -57,7 +58,8 @@ namespace CE
 
         bool CanDetach(Ref<FDockTabItem> dockTabItem);
 
-        void AddDockWindowSplit(FDockingHintPosition splitPosition, Ref<FDockWindow> dockWindow);
+        void AddDockWindowSplit(FDockingHintPosition splitPosition, Ref<FDockWindow> dockWindow, f32 splitRatio = 0.5f);
+        void AddDockWindowSplit(FDockingHintPosition splitPosition, FDockWindow& dockWindow, f32 splitRatio = 0.5f);
 
         void AddDockWindow(Ref<FDockWindow> dockWindow);
 

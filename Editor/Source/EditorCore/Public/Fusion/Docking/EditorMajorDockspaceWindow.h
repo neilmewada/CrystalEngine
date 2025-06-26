@@ -2,6 +2,8 @@
 
 namespace CE::Editor
 {
+    class EditorBase;
+
     CLASS()
     class EDITORCORE_API EditorMajorDockspaceWindow : public FDockspaceWindow
     {
@@ -14,6 +16,11 @@ namespace CE::Editor
 
     public: // - Public API -
 
+        bool OpenEditor(Ref<Object> targetObject);
+
+        bool OpenEditor(const CE::Name& assetPath);
+
+        bool SelectActiveEditor(Ref<EditorBase> editor);
 
     protected: // - Internal -
 

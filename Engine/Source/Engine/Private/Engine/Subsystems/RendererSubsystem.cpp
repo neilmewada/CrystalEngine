@@ -434,7 +434,12 @@ namespace CE
 
 					previouslyVisibleViewports.Add(renderViewport->GetUuid());
 
-					Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(renderViewport->GetContext());
+					Ref<FNativeContext> nativeContext = renderViewport->GetNativeContext();
+					if (!nativeContext)
+					{
+						continue;
+					}
+
 					PlatformWindow* platformWindow = nativeContext->GetPlatformWindow();
 					if (platformWindow && (platformWindow->IsHidden() || platformWindow->IsMinimized()))
 					{
