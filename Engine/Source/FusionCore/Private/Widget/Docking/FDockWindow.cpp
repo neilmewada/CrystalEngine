@@ -35,7 +35,11 @@ namespace CE
 
         if (propertyName == titleProperty)
         {
-            if (Ref<FDockspace> dockspace = ownerDockspace.Lock())
+            if (Ref<FDockspaceSplitView> dockspaceSplitView = ownerDockspaceSplitView.Lock())
+            {
+				dockspaceSplitView->UpdateTabs();
+            }
+            else if (Ref<FDockspace> dockspace = ownerDockspace.Lock())
             {
                 dockspace->UpdateTabs();
             }

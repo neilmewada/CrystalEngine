@@ -22,6 +22,8 @@ namespace CE::Editor
 
         void OnAssetPathTreeUpdated(PathTree& pathTree) override;
 
+        void AddTestScene();
+
     public: // - Public API -
 
         void SetCurrentPath(const CE::Name& path);

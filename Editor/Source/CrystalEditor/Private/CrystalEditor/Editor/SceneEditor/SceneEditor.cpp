@@ -264,7 +264,6 @@ namespace CE::Editor
         ConstructDockspaces();
 
         LoadSandboxScene();
-
     }
 
     void SceneEditor::OnBeginDestroy()

@@ -105,7 +105,7 @@ namespace CE::Editor
                                 .Text("Option 1")
                                 .OnClick([this]
                                 {
-                                    
+                                    AddTestScene();
                                 }),
 
                                 FNew(FMenuItem)
@@ -175,6 +175,100 @@ namespace CE::Editor
         treeView->OnModelUpdate();
 
         UpdateAssetGridView();
+    }
+
+    void AssetBrowser::AddTestScene()
+    {
+        Ref<AssetManager> assetManager = gEngine->GetAssetManager();
+
+        Ref<CE::Scene> viewportScene = CreateObject<CE::Scene>(this, "Scene");
+
+        Ref<TextureCube> skybox = assetManager->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_day");
+
+        Ref<CE::Shader> standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+        Ref<CE::Shader> skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
+
+        viewportScene->SetSkyboxCubeMap(skybox.Get());
+
+        CE::Material* aluminumMaterial = CreateObject<CE::Material>(viewportScene.Get(), "AluminumMaterial");
+        aluminumMaterial->SetShader(standardShader.Get());
+        {
+            Ref<CE::Texture> albedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/albedo");
+            Ref<CE::Texture> normalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/normal");
+            Ref<CE::Texture> metallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/metallic");
+            Ref<CE::Texture> roughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/roughness");
+
+            aluminumMaterial->SetProperty("_AlbedoTex", albedoTex);
+            aluminumMaterial->SetProperty("_NormalTex", normalTex);
+            aluminumMaterial->SetProperty("_MetallicTex", metallicTex);
+            aluminumMaterial->SetProperty("_RoughnessTex", roughnessTex);
+            aluminumMaterial->ApplyProperties();
+        }
+
+        Ref<StaticMesh> sphereMesh = CreateObject<StaticMesh>(viewportScene.Get(), "Mat_SphereMesh");
+        {
+            RPI::ModelAsset* sphereModel = CreateObject<RPI::ModelAsset>(sphereMesh.Get(), "Mat_SphereModel");
+            RPI::ModelLodAsset* sphereLodAsset = RPI::ModelLodAsset::CreateSphereAsset(sphereModel);
+            sphereModel->AddModelLod(sphereLodAsset);
+
+            sphereMesh->SetModelAsset(sphereModel);
+        }
+
+        Ref<StaticMeshActor> sphereActor = CreateObject<StaticMeshActor>(viewportScene.Get(), "Mat_SphereMesh");
+        viewportScene->AddActor(sphereActor.Get());
+        {
+            auto sphereMeshComponent = sphereActor->GetMeshComponent();
+            sphereMeshComponent->SetStaticMesh(sphereMesh);
+            sphereMeshComponent->SetLocalPosition(Vec3(0, 0, 1.5f));
+            sphereMeshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
+            sphereMeshComponent->SetMaterial(aluminumMaterial, 0, 0);
+        }
+
+        Ref<CameraActor> camera = CreateObject<CameraActor>(viewportScene.Get(), "Mat_Camera");
+        camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 0));
+        viewportScene->AddActor(camera.Get());
+
+        Ref<StaticMeshActor> skyboxActor = CreateObject<StaticMeshActor>(viewportScene.Get(), "Mat_SkyboxActor");
+        viewportScene->AddActor(skyboxActor.Get());
+        {
+            StaticMeshComponent* skyboxMeshComponent = skyboxActor->GetMeshComponent();
+            skyboxMeshComponent->SetStaticMesh(sphereMesh);
+
+            skyboxMeshComponent->SetLocalPosition(Vec3(0, 0, 0));
+            skyboxMeshComponent->SetLocalScale(Vec3(1, 1, 1) * 1000);
+
+            {
+                Ref<CE::Material> skyboxMaterial = CreateObject<CE::Material>(skyboxMeshComponent, "Mat_Material");
+                skyboxMaterial->SetShader(skyboxShader.Get());
+                skyboxMeshComponent->SetMaterial(skyboxMaterial.Get(), 0, 0);
+
+                skyboxMaterial->SetProperty("_CubeMap", skybox.Get());
+                skyboxMaterial->ApplyProperties();
+            }
+        }
+
+        OffscreenSceneData offscreenData{};
+        offscreenData.scene = viewportScene;
+
+        offscreenData.onRenderFinish += [](Ref<CE::Scene> scene)
+            {
+                CE_LOG(Info, All, "Offscreen scene rendered!");
+            };
+
+        for (int i = 0; i < offscreenData.outputImages.GetSize(); ++i)
+        {
+            RHI::TextureDescriptor desc{};
+            desc.width = desc.height = 128;
+            desc.depth = 1;
+            desc.format = RHI::Format::B8G8R8A8_UNORM;
+            desc.name = "Offscreen Scene";
+            desc.dimension = Dimension::Dim2D;
+            desc.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
+            
+            offscreenData.outputImages[i] = RHI::gDynamicRHI->CreateTexture(desc);
+        }
+
+        gEngine->EnqueueOffscreenScene(offscreenData);
     }
 
     void AssetBrowser::OnDirectorySelectionChanged(FItemSelectionModel* selectionModel)

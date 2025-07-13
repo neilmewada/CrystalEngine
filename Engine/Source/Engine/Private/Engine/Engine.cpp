@@ -186,6 +186,13 @@ namespace CE
 		sceneSubsystem->AddScene(scene);
 	}
 
+	void Engine::EnqueueOffscreenScene(const OffscreenSceneData& outputData)
+	{
+		SceneSubsystem* sceneSubsystem = GetSubsystem<SceneSubsystem>();
+
+		sceneSubsystem->EnqueueOffscreenScene(outputData);
+	}
+
 	CE::Scene* Engine::GetActiveScene()
 	{
 		SceneSubsystem* sceneSubsystem = GetSubsystem<SceneSubsystem>();

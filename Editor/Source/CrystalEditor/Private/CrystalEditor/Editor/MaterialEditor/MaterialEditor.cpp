@@ -148,6 +148,7 @@ namespace CE::Editor
         // For debugging only
         viewportScene->GetRpiScene()->SetName("MaterialScene");
 
+		// Always need to add the scene and its corresponding viewport to the engine
         gEngine->AddScene(viewportScene.Get());
         gEditor->AddRenderViewport(viewportTab->GetViewport());
     }
@@ -156,16 +157,13 @@ namespace CE::Editor
     {
         Super::OnBeginDestroy();
 
-        if (viewportScene)
-        {
-            //viewportScene->BeginDestroy();
-        }
     }
 
     void MaterialEditor::OnAssetUnloaded(Uuid bundleUuid)
     {
         if (targetMaterial == nullptr)
             return;
+
         Ref<Bundle> materialBundle = targetMaterial->GetBundle();
 
         if (!materialBundle || materialBundle->GetUuid() != bundleUuid)
@@ -317,11 +315,11 @@ namespace CE::Editor
             title = bundle->GetName().GetString();
         }
 
-        Title(title);
-
         sphereMeshComponent->SetMaterial(material.Get(), 0, 0);
 
         detailsTab->SetupEditor(material);
+
+        Title(title);
     }
 }
 

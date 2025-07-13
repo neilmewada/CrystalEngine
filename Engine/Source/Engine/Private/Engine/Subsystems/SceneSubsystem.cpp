@@ -87,6 +87,16 @@ namespace CE
     	otherScenes.Add(scene);
 	}
 
+	void SceneSubsystem::EnqueueOffscreenScene(const OffscreenSceneData& outputData)
+	{
+		if (!outputData.scene.IsValid())
+			return;
+
+		oneTimeScenes.Add(outputData);
+
+		renderer->RebuildFrameGraph();
+	}
+
 	void SceneSubsystem::AddCallbacks(ISceneSubsystemCallbacks* callbacks)
 	{
 		callbackHandlers.Add(callbacks);

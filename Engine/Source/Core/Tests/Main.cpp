@@ -563,6 +563,16 @@ TEST(Containers, Variant)
 	}
 	testObject->BeginDestroy(); testObject = nullptr;
 
+	// Ref
+	{
+		Ref<Object> test = CreateObject<Object>(nullptr, "TestObj");
+
+		Variant variant = test;
+		Ref<Object> testVal = variant.GetValue<Ref<Object>>();
+
+		EXPECT_EQ(testVal, test);
+	}
+
 	// Struct
 	{
 		VariantStruct testStruct{};

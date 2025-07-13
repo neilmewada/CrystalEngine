@@ -74,6 +74,8 @@ namespace CE
 		FIELD()
 		SceneSubsystem* sceneSubsystem = nullptr;
 
+		Array<OffscreenSceneData> offscreenScenes;
+
 		HashMap<ClassType*, SubClass<RPI::FeatureProcessor>> componentClassToFeatureProcessorClass{};
 		HashMap<u64, Vec2i> windowSizesById;
 		
@@ -89,6 +91,7 @@ namespace CE
 
 		RHI::DrawListContext drawList{};
 
+		bool temporaryScenesPresent = false;
 		bool rebuildFrameGraph = true;
 		bool recompileFrameGraph = true;
 

@@ -162,6 +162,12 @@ namespace CE
 			isArray = true;
 		}
 
+		template<typename TObject> requires TIsBaseClassOf<Object, TObject>::Value
+		Variant(Ref<TObject> value) : valueTypeId(TYPEID(TObject)), PtrValue(value.Get())
+		{
+			isPointer = true;
+		}
+
 		template<typename RefType> requires TIsBaseClassOf<Object, std::remove_cvref_t<RefType>>::Value
 		Variant(RefType& ref) : Variant((RefType*)&ref)
 		{
@@ -288,10 +294,20 @@ namespace CE
 		}
 
 		template<typename TType>
-		const TType& GetValue() const
+		TType GetValue() const
 		{
 			typedef std::remove_cvref_t<TType> T;
 			constexpr bool IsRefType = std::is_reference_v<TType>;
+
+			if constexpr (TIsRef<T>::Value)
+			{
+				if (!CanCastObject(TYPEID(T)))
+				{
+					throw VariantCastException(String::Format("Failed to cast Variant to the return type"));
+				}
+
+				return (typename TIsRef<T>::Type*)PtrValue;
+			}
 
 			if (CanCastObject(TYPEID(T)))
 			{

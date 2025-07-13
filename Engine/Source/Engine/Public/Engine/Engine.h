@@ -54,6 +54,8 @@ namespace CE
 
 		void AddScene(CE::Scene* scene);
 
+		void EnqueueOffscreenScene(const OffscreenSceneData& outputData);
+
 		CE::Scene* GetActiveScene();
 
 		void AddRenderViewport(FGameWindow* viewport);

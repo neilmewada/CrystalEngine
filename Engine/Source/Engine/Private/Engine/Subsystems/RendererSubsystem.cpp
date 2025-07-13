@@ -182,14 +182,22 @@ namespace CE
 			return;
 		}
 
-		//CE::Scene* scene = sceneSubsystem->GetActiveScene();
-		//RPI::Scene* rpiScene = scene->GetRpiScene();
-		constexpr bool isSceneWindowActive = false;
-
 		if (rebuildFrameGraph || recompileFrameGraph)
 		{
 			RebuildFrameGraph();
 			return;
+		}
+
+		for (int i = offscreenScenes.GetSize() - 1; i >= 0; --i)
+		{
+			offscreenScenes[i].frameCounter++;
+
+			if (offscreenScenes[i].frameCounter > RHI::Limits::MaxSwapChainImageCount)
+			{
+				offscreenScenes[i].onRenderFinish.Broadcast(offscreenScenes[i].scene);
+
+				offscreenScenes.RemoveAt(i);
+			}
 		}
 
 		int imageIndex = scheduler->BeginExecution();
@@ -373,8 +381,6 @@ namespace CE
 
 						if (passDrawTag.IsValid() && viewTag.IsValid() && scopeId.IsValid())
 						{
-							// TODO: Fix this for multi-scene setups. Currently it grabs ALL of the draw items based on a tag.
-							// Which means it'll grab DrawItems from multiple scenes and potentially override previous ones!
 							DrawList& viewportDrawList = renderViewport->GetDrawListContext().GetDrawListForTag(passDrawTag);
 							scheduler->SetScopeDrawList(scopeId, &viewportDrawList);
 						}
@@ -383,6 +389,12 @@ namespace CE
 		}
 
 		scheduler->EndExecution();
+
+		if (temporaryScenesPresent)
+		{
+			temporaryScenesPresent = false;
+			RebuildFrameGraph();
+		}
 	}
 
 	void RendererSubsystem::BuildFrameGraph()
@@ -487,6 +499,7 @@ namespace CE
 							}
 							else
 							{
+								// This is important!
 								passAttachment->attachmentId = String::Format("{}_{}", passAttachment->name, rpiPipeline->uuid);
 							}
 						}
@@ -495,6 +508,47 @@ namespace CE
 						rpiPipeline->ImportScopeProducers(scheduler);
 					}
 				}
+
+				for (auto& sceneData : sceneSubsystem->oneTimeScenes)
+				{
+					Ref<CE::Scene> scene = sceneData.scene;
+					RPI::Scene* rpiScene = scene->GetRpiScene();
+					if (!rpiScene)
+						continue;
+
+					sceneData.frameCounter = 0;
+
+					for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
+					{
+						renderPipeline->ConstructPipeline();
+
+						RPI::RenderPipeline* rpiPipeline = renderPipeline->GetRpiRenderPipeline();
+						const auto& attachments = rpiPipeline->attachments;
+
+						for (RPI::PassAttachment* passAttachment : attachments)
+						{
+							if (passAttachment->lifetime == RHI::AttachmentLifetimeType::External && passAttachment->name == "PipelineOutput")
+							{
+								passAttachment->attachmentId = String::Format("Scene_{}", scene->GetUuid());
+
+								attachmentDatabase.EmplaceFrameAttachment(passAttachment->attachmentId, sceneData.outputImages);
+							}
+							else
+							{
+								passAttachment->attachmentId = String::Format("{}_{}", passAttachment->name, rpiPipeline->uuid);
+							}
+						}
+
+						// Emplace all attachments and then add scopes from the pipeline
+						rpiPipeline->ImportScopeProducers(scheduler);
+					}
+
+					temporaryScenesPresent = true;
+					rebuildFrameGraph = false;
+				}
+
+				offscreenScenes.AddRange(sceneSubsystem->oneTimeScenes);
+				sceneSubsystem->oneTimeScenes.Clear();
 
 				// Enqueue Scopes from Fusion
 				app->EnqueueScopes();
