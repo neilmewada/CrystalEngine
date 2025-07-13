@@ -21,6 +21,8 @@ namespace CE
 
         virtual void Tick();
 
+        bool IsDirty() const { return isDirty; }
+
         void MarkDirty() { isDirty = true; }
 
         void SetMainViewTag(const Name& viewTag) { mainViewTag = viewTag; }
@@ -44,6 +46,9 @@ namespace CE
         CameraComponent* targetCamera = nullptr;
 
     public:
+
+        FIELD(EditAnywhere)
+        Color clearColor = Color::Black();
 
         FIELD(EditAnywhere, Category = "Anti-Aliasing")
         MSAA msaa = MSAA2;

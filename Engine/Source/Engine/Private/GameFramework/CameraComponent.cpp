@@ -46,6 +46,13 @@ namespace CE
         }
     }
 
+    void CameraComponent::OnFieldChanged(const Name& fieldName)
+    {
+	    Super::OnFieldChanged(fieldName);
+
+        
+    }
+
     void CameraComponent::Tick(f32 delta)
     {
 	    Super::Tick(delta);

@@ -156,6 +156,7 @@ namespace CE
 		friend class RendererSubsystem;
 		friend class GameViewportSubsystem;
 		friend class SceneSubsystem;
+		friend class SceneRenderer;
 	};
     
 } // namespace CE

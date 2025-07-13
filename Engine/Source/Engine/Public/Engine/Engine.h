@@ -54,7 +54,7 @@ namespace CE
 
 		void AddScene(CE::Scene* scene);
 
-		void EnqueueOffscreenScene(const OffscreenSceneData& outputData);
+		void EnqueueSceneRenderer(Ref<SceneRenderer> sceneRenderer);
 
 		CE::Scene* GetActiveScene();
 

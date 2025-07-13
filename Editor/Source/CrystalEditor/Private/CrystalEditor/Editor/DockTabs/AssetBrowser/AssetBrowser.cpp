@@ -181,7 +181,7 @@ namespace CE::Editor
     {
         Ref<AssetManager> assetManager = gEngine->GetAssetManager();
 
-        Ref<CE::Scene> viewportScene = CreateObject<CE::Scene>(this, "Scene");
+        Ref<CE::Scene> viewportScene = CreateObject<CE::Scene>(this, "OffscreenScene");
 
         Ref<TextureCube> skybox = assetManager->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_day");
 
@@ -226,36 +226,19 @@ namespace CE::Editor
 
         Ref<CameraActor> camera = CreateObject<CameraActor>(viewportScene.Get(), "Mat_Camera");
         camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 0));
-        viewportScene->AddActor(camera.Get());
+    	camera->GetCameraComponent()->GetRenderPipeline()->clearColor = Color::RGBA(0, 0, 0, 0);
+        camera->GetCameraComponent()->GetRenderPipeline()->MarkDirty();
+    	viewportScene->AddActor(camera.Get());
 
-        Ref<StaticMeshActor> skyboxActor = CreateObject<StaticMeshActor>(viewportScene.Get(), "Mat_SkyboxActor");
-        viewportScene->AddActor(skyboxActor.Get());
-        {
-            StaticMeshComponent* skyboxMeshComponent = skyboxActor->GetMeshComponent();
-            skyboxMeshComponent->SetStaticMesh(sphereMesh);
+        Ref<SceneRenderer> sceneRenderer = CreateObject<SceneRenderer>(this, "SceneRenderer");
+        sceneRenderer->SetScene(viewportScene);
 
-            skyboxMeshComponent->SetLocalPosition(Vec3(0, 0, 0));
-            skyboxMeshComponent->SetLocalScale(Vec3(1, 1, 1) * 1000);
-
-            {
-                Ref<CE::Material> skyboxMaterial = CreateObject<CE::Material>(skyboxMeshComponent, "Mat_Material");
-                skyboxMaterial->SetShader(skyboxShader.Get());
-                skyboxMeshComponent->SetMaterial(skyboxMaterial.Get(), 0, 0);
-
-                skyboxMaterial->SetProperty("_CubeMap", skybox.Get());
-                skyboxMaterial->ApplyProperties();
-            }
-        }
-
-        OffscreenSceneData offscreenData{};
-        offscreenData.scene = viewportScene;
-
-        offscreenData.onRenderFinish += [](Ref<CE::Scene> scene)
+        /*offscreenData.onRenderFinish += [](Ref<CE::Scene> scene)
             {
                 CE_LOG(Info, All, "Offscreen scene rendered!");
-            };
+            };*/
 
-        for (int i = 0; i < offscreenData.outputImages.GetSize(); ++i)
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; ++i)
         {
             RHI::TextureDescriptor desc{};
             desc.width = desc.height = 128;
@@ -264,11 +247,11 @@ namespace CE::Editor
             desc.name = "Offscreen Scene";
             desc.dimension = Dimension::Dim2D;
             desc.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
-            
-            offscreenData.outputImages[i] = RHI::gDynamicRHI->CreateTexture(desc);
+
+            sceneRenderer->SetOutputImage(i, RHI::gDynamicRHI->CreateTexture(desc));
         }
 
-        gEngine->EnqueueOffscreenScene(offscreenData);
+        gEngine->EnqueueSceneRenderer(sceneRenderer);
     }
 
     void AssetBrowser::OnDirectorySelectionChanged(FItemSelectionModel* selectionModel)

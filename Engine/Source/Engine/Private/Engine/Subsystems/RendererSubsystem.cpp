@@ -147,13 +147,13 @@ namespace CE
 
 		Super::Tick(delta);
 
-		FusionApplication* app = FusionApplication::TryGet();
+		FusionApplication* fusion = FusionApplication::TryGet();
 
 		int submittedImageIndex = -1;
 
-		if (app)
+		if (fusion)
 		{
-			app->Tick();
+			fusion->Tick();
 		}
 
 		if (IsEngineRequestingExit())
@@ -186,18 +186,6 @@ namespace CE
 		{
 			RebuildFrameGraph();
 			return;
-		}
-
-		for (int i = offscreenScenes.GetSize() - 1; i >= 0; --i)
-		{
-			offscreenScenes[i].frameCounter++;
-
-			if (offscreenScenes[i].frameCounter > RHI::Limits::MaxSwapChainImageCount)
-			{
-				offscreenScenes[i].onRenderFinish.Broadcast(offscreenScenes[i].scene);
-
-				offscreenScenes.RemoveAt(i);
-			}
 		}
 
 		int imageIndex = scheduler->BeginExecution();
@@ -256,9 +244,9 @@ namespace CE
 
 		// - Setup draw list mask
 
-		if (app)
+		if (fusion)
 		{
-			app->UpdateDrawListMask(drawListMask);
+			fusion->UpdateDrawListMask(drawListMask);
 		}
 
 		for (FGameWindow* renderViewport : renderViewports)
@@ -292,6 +280,38 @@ namespace CE
 			}
 		}
 
+		for (auto sceneRenderer : sceneSubsystem->sceneRenderers)
+		{
+			sceneRenderer->GetDrawListContext().Shutdown();
+
+			Ref<CE::Scene> scene = sceneRenderer->GetScene();
+			if (!scene.IsValid())
+				continue;
+
+			RPI::Scene* rpiScene = scene->GetRpiScene();
+			if (!rpiScene)
+				continue;
+
+			for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
+			{
+				RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
+				if (!renderPipeline)
+					continue;
+
+				renderPipeline->GetPassTree()->IterateRecursively([&](RPI::Pass* pass)
+					{
+						if (!pass)
+							return;
+
+						if (pass->GetDrawListTag().IsValid())
+						{
+							sceneRenderer->GetDrawListMask().Set(pass->GetDrawListTag());
+							drawListMask.Set(pass->GetDrawListTag());
+						}
+					});
+			}
+		}
+
 		// - Enqueue additional draw packets
 
 		for (int i = 0; i < drawListMask.GetSize(); ++i)
@@ -304,9 +324,9 @@ namespace CE
 
 		drawList.Init(drawListMask);
 
-		if (app)
+		if (fusion)
 		{
-			app->EnqueueDrawPackets(drawList, curImageIndex);
+			fusion->EnqueueDrawPackets(drawList, curImageIndex);
 		}
 
 		for (FGameWindow* renderViewport : renderViewports)
@@ -332,7 +352,6 @@ namespace CE
 						for (int i = 0; i < viewDrawList.GetDrawItemCount(); ++i)
 						{
 							renderViewport->GetDrawListContext().AddDrawItem(viewDrawList.GetDrawItem(i), drawListTag);
-							//drawList.AddDrawItem(viewDrawList.GetDrawItem(i), drawListTag);
 						}
 					}
 
@@ -346,13 +365,50 @@ namespace CE
 			renderViewport->GetDrawListContext().Finalize();
 		}
 
+		for (auto sceneRenderer : sceneSubsystem->sceneRenderers)
+		{
+			Ref<CE::Scene> scene = sceneRenderer->GetScene();
+			if (!scene.IsValid())
+				continue;
+
+			RPI::Scene* rpiScene = scene->GetRpiScene();
+			if (!rpiScene)
+				continue;
+
+			sceneRenderer->GetDrawListContext().Init(sceneRenderer->GetDrawListMask());
+
+			for (const auto& [viewTag, views] : rpiScene->GetViews())
+			{
+				for (RPI::View* view : views.views)
+				{
+					view->GetDrawListContext()->Finalize();
+
+					for (const auto& drawListTag : drawListTags)
+					{
+						RHI::DrawList& viewDrawList = view->GetDrawList(drawListTag);
+						for (int i = 0; i < viewDrawList.GetDrawItemCount(); ++i)
+						{
+							sceneRenderer->GetDrawListContext().AddDrawItem(viewDrawList.GetDrawItem(i), drawListTag);
+						}
+					}
+
+					if (viewTag == "DirectionalLightShadow")
+					{
+						break; // Only 1 view allowed for Directional Light Shadows
+					}
+				}
+			}
+
+			sceneRenderer->GetDrawListContext().Finalize();
+		}
+
 		drawList.Finalize();
 
-		// - Set scope draw lists
+		// - Give scope draw lists to the Scheduler
     
-		if (app) // FWidget Scopes & DrawLists
+		if (fusion) // FWidget Scopes & DrawLists
 		{
-			app->FlushDrawPackets(drawList, curImageIndex);
+			fusion->FlushDrawPackets(drawList, curImageIndex);
 		}
 
 		for (FGameWindow* renderViewport : renderViewports)
@@ -382,6 +438,40 @@ namespace CE
 						if (passDrawTag.IsValid() && viewTag.IsValid() && scopeId.IsValid())
 						{
 							DrawList& viewportDrawList = renderViewport->GetDrawListContext().GetDrawListForTag(passDrawTag);
+							scheduler->SetScopeDrawList(scopeId, &viewportDrawList);
+						}
+					});
+			}
+		}
+
+		for (auto sceneRenderer : sceneSubsystem->sceneRenderers)
+		{
+			Ref<CE::Scene> scene = sceneRenderer->GetScene();
+			if (!scene.IsValid())
+				continue;
+
+			RPI::Scene* rpiScene = scene->GetRpiScene();
+			if (!rpiScene)
+				continue;
+
+			for (int i = 0; i < rpiScene->GetRenderPipelineCount(); ++i)
+			{
+				RPI::RenderPipeline* renderPipeline = rpiScene->GetRenderPipeline(i);
+				if (!renderPipeline)
+					continue;
+
+				renderPipeline->GetPassTree()->IterateRecursively([&](RPI::Pass* pass)
+					{
+						if (!pass)
+							return;
+
+						RPI::SceneViewTag viewTag = pass->GetViewTag();
+						RHI::DrawListTag passDrawTag = pass->GetDrawListTag();
+						RHI::ScopeId scopeId = pass->GetScopeId();
+
+						if (passDrawTag.IsValid() && viewTag.IsValid() && scopeId.IsValid())
+						{
+							DrawList& viewportDrawList = sceneRenderer->GetDrawListContext().GetDrawListForTag(passDrawTag);
 							scheduler->SetScopeDrawList(scopeId, &viewportDrawList);
 						}
 					});
@@ -509,18 +599,19 @@ namespace CE
 					}
 				}
 
-				for (auto& sceneData : sceneSubsystem->oneTimeScenes)
+				for (auto sceneRenderer : sceneSubsystem->sceneRenderers)
 				{
-					Ref<CE::Scene> scene = sceneData.scene;
+					Ref<CE::Scene> scene = sceneRenderer->GetScene();
 					RPI::Scene* rpiScene = scene->GetRpiScene();
 					if (!rpiScene)
 						continue;
 
-					sceneData.frameCounter = 0;
-
 					for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
 					{
-						renderPipeline->ConstructPipeline();
+						if (renderPipeline->IsDirty()) // Wait until the render pipeline is fully compiled!
+						{
+							continue;
+						}
 
 						RPI::RenderPipeline* rpiPipeline = renderPipeline->GetRpiRenderPipeline();
 						const auto& attachments = rpiPipeline->attachments;
@@ -531,7 +622,7 @@ namespace CE
 							{
 								passAttachment->attachmentId = String::Format("Scene_{}", scene->GetUuid());
 
-								attachmentDatabase.EmplaceFrameAttachment(passAttachment->attachmentId, sceneData.outputImages);
+								attachmentDatabase.EmplaceFrameAttachment(passAttachment->attachmentId, sceneRenderer->GetOutputImages());
 							}
 							else
 							{
@@ -543,12 +634,11 @@ namespace CE
 						rpiPipeline->ImportScopeProducers(scheduler);
 					}
 
-					temporaryScenesPresent = true;
-					rebuildFrameGraph = false;
+					//temporaryScenesPresent = true;
 				}
 
-				offscreenScenes.AddRange(sceneSubsystem->oneTimeScenes);
-				sceneSubsystem->oneTimeScenes.Clear();
+				//offscreenScenes.AddRange(sceneSubsystem->oneTimeScenes);
+				//sceneSubsystem->oneTimeScenes.Clear();
 
 				// Enqueue Scopes from Fusion
 				app->EnqueueScopes();

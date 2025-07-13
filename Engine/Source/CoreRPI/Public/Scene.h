@@ -83,6 +83,11 @@ namespace CE::RPI
 
 		void SetName(const Name& name) { this->name = name; }
 
+		// For internal use only!
+		void SetPrimaryViewportSize(Vec2i size) { primaryViewportSize = size; }
+
+		Vec2i GetPrimaryViewportSize() const { return primaryViewportSize; }
+
 	private:
 
 		bool needsLookupTableRebuild = true;
@@ -116,6 +121,8 @@ namespace CE::RPI
 
 		/// @brief A hash map of all views owned by this scene accessed by their respective tags.
 		SceneViewsByTag viewsByTag{};
+
+		Vec2i primaryViewportSize;
 
 		friend class MeshDrawPacket;
 

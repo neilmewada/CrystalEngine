@@ -41,6 +41,7 @@ namespace CE::Editor
 // Engine
 #include "Engine/Subsystem.h"
 #include "Engine/EngineSubsystem.h"
+#include "Engine/Subsystems/SceneRenderer.h"
 #include "Engine/Subsystems/SceneSubsystem.h"
 #include "Engine/Subsystems/RendererSubsystem.h"
 #include "Engine/GameInstanceSubsystem.h"

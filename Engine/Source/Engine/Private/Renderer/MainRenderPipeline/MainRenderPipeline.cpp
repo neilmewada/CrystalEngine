@@ -148,6 +148,8 @@ namespace CE
     	skyboxPass->SetViewTag(mainViewTag);
         skyboxPass->SetDrawListTag(GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag::Skybox));
 	    {
+            skyboxPass->FindSlot("ColorOutput")->loadStoreAction.clearValue = clearColor.ToVec4();
+
             RPI::PassAttachmentBinding colorOutputBinding{};
             colorOutputBinding.slotType = RPI::PassSlotType::Output;
             colorOutputBinding.attachment = colorMsaa;

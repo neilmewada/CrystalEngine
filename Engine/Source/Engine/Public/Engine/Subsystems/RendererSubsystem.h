@@ -74,8 +74,6 @@ namespace CE
 		FIELD()
 		SceneSubsystem* sceneSubsystem = nullptr;
 
-		Array<OffscreenSceneData> offscreenScenes;
-
 		HashMap<ClassType*, SubClass<RPI::FeatureProcessor>> componentClassToFeatureProcessorClass{};
 		HashMap<u64, Vec2i> windowSizesById;
 		

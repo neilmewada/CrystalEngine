@@ -105,6 +105,8 @@ namespace CE
             currentSize = Vec2i(512, 512);
         }
 
+        scene->SetPrimaryViewportSize(currentSize);
+
 		bool isFirstTime = true;
 
         for (int i = 0; i < frames.GetSize(); ++i)

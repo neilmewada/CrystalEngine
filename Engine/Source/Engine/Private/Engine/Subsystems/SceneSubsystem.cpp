@@ -55,6 +55,14 @@ namespace CE
 				return otherScene;
 		}
 
+		for (auto sceneRenderer : sceneRenderers)
+		{
+			if (sceneRenderer->GetScene() != nullptr && sceneRenderer->GetScene()->GetRpiScene() == scene)
+			{
+				return sceneRenderer->GetScene().Get();
+			}
+		}
+
 		return nullptr;
 	}
 
@@ -87,12 +95,12 @@ namespace CE
     	otherScenes.Add(scene);
 	}
 
-	void SceneSubsystem::EnqueueOffscreenScene(const OffscreenSceneData& outputData)
+	void SceneSubsystem::EnqueueSceneRenderer(Ref<SceneRenderer> sceneRenderer)
 	{
-		if (!outputData.scene.IsValid())
+		if (!sceneRenderer.IsValid())
 			return;
 
-		oneTimeScenes.Add(outputData);
+		sceneRenderers.Add(sceneRenderer);
 
 		renderer->RebuildFrameGraph();
 	}
@@ -128,11 +136,21 @@ namespace CE
 		{
 			otherScene->Tick(deltaTime);
 		}
+
+		for (auto sceneRenderer : sceneRenderers)
+		{
+			if (Ref<CE::Scene> scene = sceneRenderer->GetScene())
+			{
+				scene->Tick(deltaTime);
+			}
+		}
 	}
 
 	void SceneSubsystem::OnSceneDestroyed(CE::Scene* scene)
 	{
 		otherScenes.Remove(scene);
+
+		sceneRenderers.RemoveAll([&](const Ref<SceneRenderer>& sceneRenderer) { return sceneRenderer.IsValid() && sceneRenderer->GetScene() == scene; });
 
 		if (scene == activeScene)
 		{

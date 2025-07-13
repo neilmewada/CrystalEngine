@@ -38,6 +38,8 @@ namespace CE
     	
     protected:
 
+		void OnFieldChanged(const Name& fieldName) override;
+
 		void Tick(f32 delta) override;
 
 		void TickCamera();
@@ -50,9 +52,6 @@ namespace CE
 
     	FIELD()
     	CameraType cameraType = CameraType::MainCamera;
-
-		FIELD(EditAnywhere, Category = "Camera")
-		Color clearColor = Color::RGBA(36, 85, 163);
 
 		FIELD(EditAnywhere, Category = "Camera")
 		CameraProjection projection = CameraProjection::Perspective;
@@ -80,7 +79,6 @@ namespace CE
 	public: // - Accessors -
 
 		CE_PROPERTY(CameraType, cameraType);
-		CE_PROPERTY(ClearColor, clearColor);
 		CE_PROPERTY(Projection, projection);
 		CE_PROPERTY(NearPlane, nearPlane);
 		CE_PROPERTY(FarPlane, farPlane);

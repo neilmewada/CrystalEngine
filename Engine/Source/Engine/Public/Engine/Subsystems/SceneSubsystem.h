@@ -7,16 +7,6 @@ namespace CE
 	class Scene;
 	class RendererSubsystem;
 
-	struct OffscreenSceneData
-	{
-		Ref<CE::Scene> scene = nullptr;
-		StaticArray<RHI::Texture*, RHI::Limits::MaxSwapChainImageCount> outputImages;
-		ScriptEvent<void(Ref<CE::Scene>)> onRenderFinish;
-
-		// For internal use only!
-		int frameCounter = -1;
-	};
-
     CLASS()
 	class ENGINE_API SceneSubsystem : public EngineSubsystem
 	{
@@ -34,7 +24,7 @@ namespace CE
 
     	void AddScene(CE::Scene* scene);
 
-		void EnqueueOffscreenScene(const OffscreenSceneData& outputData);
+		void EnqueueSceneRenderer(Ref<SceneRenderer> sceneRenderer);
 
 		void AddCallbacks(ISceneSubsystemCallbacks* callbacks);
 		void RemoveCallbacks(ISceneSubsystemCallbacks* callbacks);
@@ -57,7 +47,7 @@ namespace CE
 		Array<CE::Scene*> otherScenes{};
 
 		FIELD()
-		Array<OffscreenSceneData> oneTimeScenes{};
+		Array<Ref<SceneRenderer>> sceneRenderers;
 
     private:
 
