@@ -18,11 +18,17 @@
 #include "Asset/AssetDefinitionRegistry.h"
 #include "Asset/AssetImporter.h"
 
+// Thumbnails
+#include "Asset/Thumbnail/AssetThumbnailGen.h"
+#include "Asset/Thumbnail/TextureAssetThumbnailGen.h"
+#include "Asset/Thumbnail/MaterialAssetThumbnailGen.h"
+
 // Assets
 #include "Asset/ShaderAssetDefinition.h"
 #include "Asset/ShaderAssetImporter.h"
 #include "Asset/ComputeShaderAssetDefinition.h"
 #include "Asset/ComputeShaderAssetImporter.h"
+#include "Asset/MaterialAssetDefinition.h"
 #include "Asset/TextureAssetDefinition.h"
 #include "Asset/TextureAssetImporter.h"
 #include "Asset/StaticMeshDefinition.h"

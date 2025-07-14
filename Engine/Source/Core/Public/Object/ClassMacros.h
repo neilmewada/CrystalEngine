@@ -3,6 +3,16 @@
 
 #define __CE_SUPER_LIST(...) CE_EXPAND(CE_CONCATENATE(__CE_SUPER_LIST_,CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
 
+// - Generated body macros -
+
+#define __CE_GENERATED_BODY_IMPL_1(Name)
+#define __CE_GENERATED_BODY_IMPL_0(Name) CE_EXPAND(CE_CONCATENATE(__CE_GENERATED_BODY_, Name))
+
+#define __CE_GENERATED_BODY_2(Name) CE_EXPAND(CE_ARG_COUNT(__CE_HAS_GENERATED_BODY_##Name))
+
+#define CE_GENERATED_BODY(Name) CE_EXPAND(CE_CONCATENATE(__CE_GENERATED_BODY_IMPL_, __CE_GENERATED_BODY_2(Name)))(Name)
+
+// - Field and Function macros -
 
 #define CE_FIELD_LIST(x) x
 #define CE_FIELD(FieldName, ...)\
@@ -187,13 +197,13 @@ CE::String MERGE_NAMESPACE(Namespace, Class)::StaticModule()\
 
 #define __CE_RTTI_SUPERCLASS(...) CE_MACRO_EXPAND(CE_CONCATENATE(__CE_RTTI_SUPERCLASS_, CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
 
-
 #define CE_CLASS(Class, ...)\
 public:\
 	template<typename T>\
 	friend struct CE::Internal::TypeInfoImpl;\
     typedef Class Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
+	CE_GENERATED_BODY(Class)\
     static CE::ClassType* Type();\
 	inline static CE::ClassType* StaticType() { return Self::Type(); }\
 	inline static CE::ClassType* StaticClass() { return Self::Type(); }\

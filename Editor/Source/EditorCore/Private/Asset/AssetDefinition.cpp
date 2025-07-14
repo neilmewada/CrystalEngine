@@ -23,4 +23,8 @@ namespace CE::Editor
         return GetAssetClass()->GetName().GetLastComponent();
     }
 
+    SubClass<AssetThumbnailGen> AssetDefinition::GetThumbnailGeneratorClass()
+    {
+        return nullptr;
+    }
 } // namespace CE::Editor

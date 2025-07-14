@@ -83,6 +83,8 @@ namespace CE
 			if (!fullName.IsEmpty()) fullName += "::";
 			fullName += classInfo.name.GetString();
 
+			outStream << "#undef __CE_HAS_GENERATED_BODY_" << classInfo.name.GetString() << "\n";
+
 			outStream << "CE_RTTI_CLASS(" << apiName << ", " << classInfo.nameSpace.GetCString() << ", " << classInfo.name.GetCString() << ",\n";
 
 			outStream << "\tCE_SUPER(";

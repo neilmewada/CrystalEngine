@@ -58,21 +58,10 @@ namespace CE
 			actor->Tick(delta);
 		}
 
-		const auto& viewports = rendererSubsystem->GetAllViewports();
-
 		for (CameraComponent* camera : cameras)
 		{
 			if (!camera->IsEnabledInHierarchy())
 				continue;
-
-			for (FGameWindow* viewport : viewports)
-			{
-				if (viewport->GetScene() == rpiScene)
-				{
-					//camera->windowSize = viewport->GetComputedSize().ToVec2i();
-					break;
-				}
-			}
 
 			camera->windowSize = rpiScene->GetPrimaryViewportSize();
 
