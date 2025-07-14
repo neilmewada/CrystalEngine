@@ -70,6 +70,9 @@ namespace CE
 	private:
 
 		// - Fields -
+
+		Array<Ref<SceneRenderer>> sceneRenderers;
+		Array<Ref<SceneRenderer>> awaitingSceneRenderers;
 		
 		FIELD()
 		SceneSubsystem* sceneSubsystem = nullptr;

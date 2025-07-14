@@ -280,7 +280,7 @@ namespace CE
 			}
 		}
 
-		for (auto sceneRenderer : sceneSubsystem->sceneRenderers)
+		for (auto sceneRenderer : sceneRenderers)
 		{
 			sceneRenderer->GetDrawListContext().Shutdown();
 
@@ -365,7 +365,7 @@ namespace CE
 			renderViewport->GetDrawListContext().Finalize();
 		}
 
-		for (auto sceneRenderer : sceneSubsystem->sceneRenderers)
+		for (auto sceneRenderer : sceneRenderers)
 		{
 			Ref<CE::Scene> scene = sceneRenderer->GetScene();
 			if (!scene.IsValid())
@@ -444,7 +444,7 @@ namespace CE
 			}
 		}
 
-		for (auto sceneRenderer : sceneSubsystem->sceneRenderers)
+		for (auto sceneRenderer : sceneRenderers)
 		{
 			Ref<CE::Scene> scene = sceneRenderer->GetScene();
 			if (!scene.IsValid())
@@ -479,6 +479,27 @@ namespace CE
 		}
 
 		scheduler->EndExecution();
+
+		for (int i = sceneRenderers.GetSize() - 1; i >= 0; --i)
+		{
+			if (sceneRenderers[i]->IsOneShot())
+			{
+				awaitingSceneRenderers.Add(sceneRenderers[i]);
+				sceneRenderers.RemoveAt(i);
+				RebuildFrameGraph();
+			}
+		}
+
+		for (int i = awaitingSceneRenderers.GetSize() - 1; i >= 0; --i)
+		{
+			awaitingSceneRenderers[i]->frameCounter++;
+
+			if (awaitingSceneRenderers[i]->frameCounter > RHI::Limits::MaxSwapChainImageCount)
+			{
+				awaitingSceneRenderers[i]->onRenderFinished.Broadcast(awaitingSceneRenderers[i]);
+				awaitingSceneRenderers.RemoveAt(i);
+			}
+		}
 
 		if (temporaryScenesPresent)
 		{
@@ -599,18 +620,22 @@ namespace CE
 					}
 				}
 
-				for (auto sceneRenderer : sceneSubsystem->sceneRenderers)
+				for (int i = sceneSubsystem->sceneRenderers.GetSize() - 1; i >= 0; i--)
 				{
+					auto sceneRenderer = sceneSubsystem->sceneRenderers[i];
+
 					Ref<CE::Scene> scene = sceneRenderer->GetScene();
 					RPI::Scene* rpiScene = scene->GetRpiScene();
 					if (!rpiScene)
 						continue;
+					bool pipelineDirty = false;
 
 					for (CE::RenderPipeline* renderPipeline : scene->renderPipelines)
 					{
 						if (renderPipeline->IsDirty()) // Wait until the render pipeline is fully compiled!
 						{
-							continue;
+							pipelineDirty = true;
+							break;
 						}
 
 						RPI::RenderPipeline* rpiPipeline = renderPipeline->GetRpiRenderPipeline();
@@ -634,11 +659,18 @@ namespace CE
 						rpiPipeline->ImportScopeProducers(scheduler);
 					}
 
-					//temporaryScenesPresent = true;
-				}
+					if (!pipelineDirty)
+					{
+						sceneRenderers.Add(sceneRenderer);
+					}
 
-				//offscreenScenes.AddRange(sceneSubsystem->oneTimeScenes);
-				//sceneSubsystem->oneTimeScenes.Clear();
+					if (!pipelineDirty && sceneRenderer->IsOneShot())
+					{
+						sceneSubsystem->sceneRenderers.RemoveAt(i);
+
+						temporaryScenesPresent = true;
+					}
+				}
 
 				// Enqueue Scopes from Fusion
 				app->EnqueueScopes();

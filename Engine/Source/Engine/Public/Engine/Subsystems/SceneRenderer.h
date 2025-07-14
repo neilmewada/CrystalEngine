@@ -30,16 +30,26 @@ namespace CE
 
         RHI::DrawListMask& GetDrawListMask() { return drawListMask; }
 
+        void SetOneShot(bool set) { isOneShot = set; }
+
+        bool IsOneShot() const { return isOneShot; }
+
     private:
 
         Ref<CE::Scene> targetScene;
         StaticArray<RHI::Texture*, RHI::Limits::MaxSwapChainImageCount> outputImages;
+        bool isOneShot = false;
+        int frameCounter = 0;
 
         RHI::DrawListContext drawList{};
         RHI::DrawListMask drawListMask{};
 
     public:
 
+        ScriptEvent<void(Ref<CE::SceneRenderer>)> onRenderFinished;
+
+        friend class RendererSubsystem;
+        friend class SceneSubsystem;
     };
     
 } // namespace CE
