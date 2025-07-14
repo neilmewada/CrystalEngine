@@ -160,8 +160,6 @@ namespace CE::RPI
 
 			const auto& shaderReflection = variant->GetShaderReflection();
 
-			RHI::ShaderResourceGroup* perDrawSrg = nullptr;
-
 			RHI::DrawPacketBuilder::DrawItemRequest drawItem{};
 			drawItem.drawFilterMask = RHI::DrawFilterMask::ALL;
 			drawItem.drawItemTag = drawListTag;
@@ -170,7 +168,7 @@ namespace CE::RPI
 			if (variant->HasSrgLayout(RHI::SRGType::PerDraw))
 			{
 				const RHI::ShaderResourceGroupLayout& drawSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerDraw);
-				perDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(drawSrgLayout);
+				RHI::ShaderResourceGroup* perDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(drawSrgLayout);
 				perDrawSrgs.Add(perDrawSrg);
 				drawItem.uniqueShaderResourceGroups.Add(perDrawSrg);
 			}

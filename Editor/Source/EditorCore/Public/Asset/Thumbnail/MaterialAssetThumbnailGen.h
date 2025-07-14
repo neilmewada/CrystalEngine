@@ -14,6 +14,11 @@ namespace CE::Editor
 
         virtual ~MaterialAssetThumbnailGen();
 
+        bool StartProcessing() override;
+
+    private:
+
+        Array<Ref<CE::MaterialInterface>> materialAssets;
     };
     
 } // namespace CE

@@ -2,7 +2,7 @@
 
 namespace CE::Editor
 {
-    CLASS(Abstract)
+    CLASS(Abstract, Config = Editor)
     class EDITORCORE_API AssetThumbnailGen : public Object
     {
         CE_CLASS(AssetThumbnailGen, Object)
@@ -14,11 +14,22 @@ namespace CE::Editor
 
         virtual ~AssetThumbnailGen();
 
-        virtual void PrepareJobs(const Array<Name>& assetPaths);
+        virtual bool StartProcessing() = 0;
+
+        u32 GetThumbnailResolution() const { return thumbnailResolution; }
 
     protected:
 
         void OnFinish();
+
+        Array<Name> assetPaths;
+
+        FIELD(Config)
+        u32 thumbnailResolution = 128;
+
+    public:
+
+        ScriptEvent<void(Ref<AssetThumbnailGen>)> onFinishEvent;
 
     };
     

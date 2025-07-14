@@ -13,14 +13,9 @@ namespace CE::Editor
         
     }
 
-    void AssetThumbnailGen::PrepareJobs(const Array<Name>& assetPaths)
-    {
-
-    }
-
     void AssetThumbnailGen::OnFinish()
     {
-
+        onFinishEvent.Broadcast(this);
     }
 } // namespace CE
 
