@@ -24,6 +24,8 @@ namespace CE::Editor
 
         void AddTestScene();
 
+        void CreateTestThumbnail();
+
     public: // - Public API -
 
         void SetCurrentPath(const CE::Name& path);
@@ -98,6 +100,8 @@ namespace CE::Editor
 
         FIELD(Prefs)
         CE::Name defaultAssetImportPath;
+
+		Ref<TextureAssetThumbnailGen> textureAssetThumbnailGen = nullptr;
 
         FUSION_WIDGET;
         friend class AssetBrowserGridView;

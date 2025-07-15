@@ -16,6 +16,11 @@ namespace CE::Editor
 
         virtual bool StartProcessing() = 0;
 
+        void SetAssetPaths(const Array<Name>& paths) 
+        { 
+            assetPaths = paths; 
+		}
+
         u32 GetThumbnailResolution() const { return thumbnailResolution; }
 
     protected:

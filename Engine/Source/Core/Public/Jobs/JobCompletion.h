@@ -37,9 +37,9 @@ namespace CE
 
 		void Finish() override
 		{
-			waitSemaphore.release();
-
 			onFinish.InvokeIfValid();
+
+			waitSemaphore.release();
 		}
 
 		std::binary_semaphore waitSemaphore{ 0 };

@@ -124,7 +124,7 @@ namespace CE::Editor
                     RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
                     RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue, CommandListType::Direct);
                     RHI::Fence* fence = RHI::gDynamicRHI->CreateFence();
-
+                    
                     cmdList->Begin();
                     {
                         RHI::ResourceBarrierDescriptor barrier{};
@@ -202,7 +202,7 @@ namespace CE::Editor
                     void* data;
                     stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &data);
                     {
-	                    // TODO:
+	                    // TODO: This is temporary
 
                         CMImage image = CMImage::LoadRawImageFromMemory((unsigned char*)data, thumbnailResolution, thumbnailResolution, 
                             CMImageFormat::RGBA8, CMImageSourceFormat::None, 

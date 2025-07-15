@@ -110,6 +110,10 @@ namespace CE::Editor
 
                                 FNew(FMenuItem)
                                 .Text("Option 2")
+                                .OnClick([this]
+                                {
+                                    CreateTestThumbnail();
+                                })
                             )
                             .BlockInteraction(false)
                             .AutoClose(true)
@@ -322,6 +326,24 @@ namespace CE::Editor
         }
 
         gEngine->EnqueueSceneRenderer(sceneRenderer);
+    }
+
+    void AssetBrowser::CreateTestThumbnail()
+    {
+        if (!textureAssetThumbnailGen)
+        {
+            textureAssetThumbnailGen = CreateObject<TextureAssetThumbnailGen>(this, "TextureThumbnailGenerator");
+        }
+
+        textureAssetThumbnailGen->SetAssetPaths({ "/Engine/Assets/Textures/RustedIron/albedo" });
+        
+        textureAssetThumbnailGen->onFinishEvent += [this](Ref<AssetThumbnailGen> gen)
+        {
+            CE_LOG(Info, All, "Texture thumbnail generation finished!");
+            textureAssetThumbnailGen = nullptr;
+		};
+
+        textureAssetThumbnailGen->StartProcessing();
     }
 
     void AssetBrowser::OnDirectorySelectionChanged(FItemSelectionModel* selectionModel)

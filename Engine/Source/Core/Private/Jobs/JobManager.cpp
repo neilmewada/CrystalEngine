@@ -424,9 +424,7 @@ namespace CE
 
 	int JobManager::GetNumThreads()
 	{
-		auto size = workerThreads.GetSize();
-		workerThreads;
-		return size;
+		return workerThreads.GetSize();
 	}
 
 	void JobManager::DeactivateWorkers()
