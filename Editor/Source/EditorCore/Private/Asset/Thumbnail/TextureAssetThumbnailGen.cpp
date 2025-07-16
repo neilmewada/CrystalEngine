@@ -13,6 +13,11 @@ namespace CE::Editor
         
     }
 
+    bool TextureAssetThumbnailGen::IsValidForAssetType(SubClass<Asset> assetClass)
+    {
+        return assetClass->IsSubclassOf<CE::Texture2D>();
+    }
+
     bool TextureAssetThumbnailGen::StartProcessing()
     {
         AssetManager* assetManager = gEngine->GetAssetManager();
@@ -39,9 +44,14 @@ namespace CE::Editor
 
         jobCompletion.Reset(true);
 
-        jobCompletion.onFinish = [this]
+		WeakRef<Self> self = this;
+
+        jobCompletion.onFinish = [self]
             {
-                OnFinish();
+                if (auto selfLock = self.Lock())
+                {
+                    self->OnFinish();
+                }
             };
 
         for (int i = 0; i < textureAssets.GetSize(); i++)
@@ -51,12 +61,21 @@ namespace CE::Editor
             if (texture == nullptr || texture->GetRpiTexture() == nullptr)
                 continue;
 
+			// We only support Texture2D for now
+            if (!texture->IsOfType<Texture2D>())
+				continue;
+
             u32 thumbnailResolution = this->thumbnailResolution;
 
-            Job* job = new JobFunction([texture, blitShader, thumbnailResolution, assetPath](Job*)
+			Name thumbnailPath = GetThumbnailPath(assetPath);
+
+            Job* job = new JobFunction([texture, blitShader, thumbnailResolution, assetPath, thumbnailPath](Job*)
                 {
                     RPI::Texture* rpiTexture = texture->GetRpiTexture();
                     RHI::Texture* rhiTexture = rpiTexture->GetRhiTexture();
+
+					////////////////////////////////////////////////////////
+					// - Resources -
 
                     RHI::SamplerDescriptor samplerDesc{};
                     samplerDesc.borderColor = SamplerBorderColor::FloatTransparentBlack;
@@ -65,9 +84,6 @@ namespace CE::Editor
                     samplerDesc.samplerFilterMode = FilterMode::Linear;
 
                     RHI::Sampler* sampler = RPISystem::Get().FindOrCreateSampler(samplerDesc);
-
-					////////////////////////////////////////////////////////
-					// - Resources -
 
                     RHI::TextureDescriptor outTextureDesc{};
                     outTextureDesc.width = thumbnailResolution;
@@ -195,26 +211,18 @@ namespace CE::Editor
                         cmdList->ResourceBarrier(1, &barrier);
                     }
                     cmdList->End();
-
+                    
                     queue->Execute(1, &cmdList, fence);
                     fence->WaitForFence();
 
                     void* data;
                     stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &data);
                     {
-	                    // TODO: This is temporary
-
                         CMImage image = CMImage::LoadRawImageFromMemory((unsigned char*)data, thumbnailResolution, thumbnailResolution, 
                             CMImageFormat::RGBA8, CMImageSourceFormat::None, 
                             8, 8 * 4);
 
-                        IO::Path path = gProjectPath / ("Temp/ThumbnailCache" + assetPath.GetString() + ".thumb");
-                        if (!path.GetParentPath().Exists())
-                        {
-                            IO::Path::CreateDirectories(path.GetParentPath());
-                        }
-
-                        image.EncodeToPNG(path);
+                        SaveThumbnailToDisk(image, assetPath);
                     }
                     stagingBuffer->Unmap();
 
@@ -234,6 +242,8 @@ namespace CE::Editor
             job->SetDependent(&jobCompletion);
         }
 
+        started = true;
+
         for (Job* job : jobs)
         {
             job->Start();
@@ -242,6 +252,11 @@ namespace CE::Editor
         jobCompletion.Start();
 
         return true;
+    }
+
+    bool TextureAssetThumbnailGen::IsProcessing()
+    {
+        return started && !jobCompletion.IsFinished();
     }
 
 } // namespace CE

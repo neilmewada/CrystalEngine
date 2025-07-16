@@ -105,7 +105,7 @@ namespace CE
         }
         else if (bundleNameStr.StartsWith("/Temp/") || bundleNameStr == "/Temp")
         {
-            return gProjectPath / (bundleNameStr.GetSubstring(1) + ".temp");
+            return gProjectPath / bundleNameStr.GetSubstring(1);
         }
 
         if (bundleNameStr[0] != '/')

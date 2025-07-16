@@ -25,6 +25,7 @@ namespace CE::Editor
 	protected:
 
 		Ref<AssetProcessor> assetProcessor;
+		Ref<ThumbnailSystem> thumbnailSystem;
 	};
     
 } // namespace CE::Editor

@@ -30,6 +30,9 @@ namespace CE
 
 		CMImage GetCMImage();
 
+		static Ref<CE::Texture2D> Create(Ref<Object> outer, const String& name, const CMImage& sourceImage, 
+			TextureAddressMode addressModeU = TextureAddressMode::ClampToBorder, TextureAddressMode addressModeV = TextureAddressMode::ClampToBorder);
+
 	protected:
 
 		FIELD()

@@ -16,6 +16,8 @@ namespace CE::Editor
 
         bool StartProcessing() override;
 
+        bool IsValidForAssetType(SubClass<Asset> assetClass) override;
+
     private:
 
         Array<Ref<CE::MaterialInterface>> materialAssets;

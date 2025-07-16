@@ -17,21 +17,29 @@ namespace CE::Editor
 		Super::PostInitialize();
 
 		assetProcessor = CreateObject<AssetProcessor>(this, "AssetProcessor");
+		thumbnailSystem = CreateObject<ThumbnailSystem>(this, "ThumbnailSystem");
+
+		thumbnailSystem->Initialize();
 	}
 
 	void EditorEngine::PreShutdown()
 	{
-		Super::PreShutdown();
+		thumbnailSystem->Shutdown();
+		thumbnailSystem->BeginDestroy();
+		thumbnailSystem = nullptr;
 
 		assetProcessor->TerminateAllJobs();
 		assetProcessor->BeginDestroy();
 		assetProcessor = nullptr;
+
+		Super::PreShutdown();
 	}
 
 	void EditorEngine::Tick(f32 deltaTime)
 	{
 		Super::Tick(deltaTime);
 
+		thumbnailSystem->Tick(deltaTime);
 	}
 
 

@@ -128,5 +128,50 @@ namespace CE
 		return result;
 	}
 
+	Ref<CE::Texture2D> Texture2D::Create(Ref<Object> outer, const String& name, const CMImage& sourceImage,
+		TextureAddressMode addressModeU, TextureAddressMode addressModeV)
+	{
+		Ref<CE::Texture2D> texture = CreateObject<CE::Texture2D>(outer.Get(), FixObjectName(name));
+		texture->source.LoadData(sourceImage.GetDataPtr(), sourceImage.GetDataSize());
+
+		texture->width = sourceImage.GetWidth();
+		texture->height = sourceImage.GetHeight();
+		texture->dimension = TextureDimension::Tex2D;
+		texture->arrayCount = 1;
+		texture->mipLevels = 1;
+		texture->addressModeU = addressModeU;
+		texture->addressModeV = addressModeV;
+		texture->filter = RHI::FilterMode::Linear;
+		texture->pixelFormat = ToTextureFormat(sourceImage.GetFormat());
+
+		texture->compressionQuality = TextureCompressionQuality::Default;
+
+		switch (sourceImage.GetFormat())
+		{
+		case CMImageFormat::BC1:
+			texture->sourceCompressionFormat = TextureSourceCompressionFormat::BC1;
+			break;
+		case CMImageFormat::BC3:
+			texture->sourceCompressionFormat = TextureSourceCompressionFormat::BC3;
+			break;
+		case CMImageFormat::BC4:
+			texture->sourceCompressionFormat = TextureSourceCompressionFormat::BC4;
+			break;
+		case CMImageFormat::BC5:
+			texture->sourceCompressionFormat = TextureSourceCompressionFormat::BC5;
+			break;
+		case CMImageFormat::BC6H:
+			texture->sourceCompressionFormat = TextureSourceCompressionFormat::BC6H;
+			break;
+		case CMImageFormat::BC7:
+			texture->sourceCompressionFormat = TextureSourceCompressionFormat::BC7;
+			break;
+		default:
+			texture->sourceCompressionFormat = TextureSourceCompressionFormat::None;
+			break;
+		}
+
+		return texture;
+	}
 } // namespace CE
 

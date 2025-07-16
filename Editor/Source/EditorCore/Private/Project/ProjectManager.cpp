@@ -47,6 +47,7 @@ namespace CE::Editor
             return false;
 
         CrystalProject project{};
+		project.engineVersion = "";
         JsonFieldDeserializer deserializer = JsonFieldDeserializer(CrystalProject::Type(), &project);
         
         FileStream stream = FileStream(projectFilePath);
@@ -100,10 +101,6 @@ namespace CE::Editor
             return false;
 
 		projectFile += extension;
-
-		// Set global project path
-		//gProjectPath = projectFolder;
-		//gProjectName = projectName;
         
         CrystalProject project{};
         project.engineVersion = CE_ENGINE_VERSION_STRING_SHORT;

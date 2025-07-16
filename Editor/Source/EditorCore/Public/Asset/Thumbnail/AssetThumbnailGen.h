@@ -16,12 +16,21 @@ namespace CE::Editor
 
         virtual bool StartProcessing() = 0;
 
+        virtual bool IsValidForAssetType(SubClass<Asset> assetClass) = 0;
+
+		//! @brief Returns true if the thumbnail generation is currently processing.
+        virtual bool IsProcessing() { return false; }
+
         void SetAssetPaths(const Array<Name>& paths) 
         { 
             assetPaths = paths; 
 		}
 
         u32 GetThumbnailResolution() const { return thumbnailResolution; }
+
+        static Name GetThumbnailPath(Name assetPath);
+
+        static bool SaveThumbnailToDisk(const CMImage& rawImage, const Name& assetPath);
 
     protected:
 

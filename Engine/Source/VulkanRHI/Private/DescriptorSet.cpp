@@ -43,7 +43,8 @@ namespace CE::Vulkan
 
     DescriptorSet::~DescriptorSet()
     {
-		vkFreeDescriptorSets(device->GetHandle(), descriptorPool, 1, &descriptorSet);
+		pool->Free({ descriptorSet });
+		//vkFreeDescriptorSets(device->GetHandle(), descriptorPool, 1, &descriptorSet);
 		descriptorSet = nullptr;
     }
 

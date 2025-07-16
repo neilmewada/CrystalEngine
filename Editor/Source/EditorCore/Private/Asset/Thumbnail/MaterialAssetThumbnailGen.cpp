@@ -25,5 +25,11 @@ namespace CE::Editor
 
         return true;
     }
+
+    bool MaterialAssetThumbnailGen::IsValidForAssetType(SubClass<Asset> assetClass)
+    {
+        return assetClass->IsSubclassOf<CE::MaterialInterface>();
+    }
+
 } // namespace CE
 

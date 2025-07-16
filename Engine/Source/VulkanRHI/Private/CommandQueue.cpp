@@ -43,7 +43,8 @@ namespace CE::Vulkan
 		submitInfo.commandBufferCount = info.commandBuffers.GetSize();
 		submitInfo.pCommandBuffers = info.commandBuffers.GetData();
 
-		submissionMutex.Lock();
+		LockGuard guard{ submissionMutex };
+
 		if (fence != nullptr)
 		{
 			auto submitFence = ((Vulkan::Fence*)fence)->GetHandle();
@@ -53,7 +54,6 @@ namespace CE::Vulkan
 		{
 			vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
 		}
-		submissionMutex.Unlock();
 		
 		return true;
 	}
@@ -109,9 +109,9 @@ namespace CE::Vulkan
 			vkSubmits.Add(submitInfo);
 		}
 
-		submissionMutex.Lock();
+		LockGuard guard{ submissionMutex };
+
 		vkQueueSubmit(queue, count, vkSubmits.GetData(), fence);
-		submissionMutex.Unlock();
 
 		return true;
 	}

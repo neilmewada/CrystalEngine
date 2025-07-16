@@ -23,7 +23,8 @@ namespace CE::Vulkan
         void Increment(u32 size);
         
     private:
-        
+
+		SharedMutex vkPoolMutex{};
         VulkanDevice* device = nullptr;
         List<VkDescriptorPool> descriptorPools{};
         

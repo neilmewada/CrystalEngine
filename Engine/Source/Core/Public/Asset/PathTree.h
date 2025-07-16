@@ -70,6 +70,22 @@ namespace CE
 		PathTreeNode* AddPath(const Name& path, void* userData = nullptr, u32 userDataSize = 0);
 		PathTreeNode* AddPath(const Name& path, PathTreeNodeType nodeType, void* userData = nullptr, u32 userDataSize = 0);
 
+		template<class TFunc>
+		void IterateNodesRecursively(const TFunc& func, PathTreeNode* parent = nullptr)
+		{
+			if (!rootNode)
+				return;
+
+			if (parent == nullptr)
+				parent = rootNode;
+
+			for (PathTreeNode* child : parent->children)
+			{
+				func(child);
+				IterateNodesRecursively(func, child);
+			}
+		}
+
 		bool RemovePath(const Name& path);
 
 		void RemoveAll();

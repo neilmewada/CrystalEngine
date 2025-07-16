@@ -983,7 +983,7 @@ namespace CE
 					}
 				}
 			}
-			else if (field->IsObjectField()) // Deep copy object fields
+			else if (field->IsObjectField()) // Deep copy or shallow copy object fields
 			{
 				Object* objectToCopy = nullptr;
 

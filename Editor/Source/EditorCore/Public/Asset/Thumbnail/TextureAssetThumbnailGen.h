@@ -14,6 +14,10 @@ namespace CE::Editor
 
         virtual ~TextureAssetThumbnailGen();
 
+        bool IsValidForAssetType(SubClass<Asset> assetClass) override;
+
+        bool IsProcessing() override;
+
         bool StartProcessing() override;
 
     private:
@@ -21,6 +25,7 @@ namespace CE::Editor
         Array<Ref<CE::Texture>> textureAssets;
         Ref<CE::Shader> blitShaderAsset;
 
+        bool started = false;
         JobCompletion jobCompletion = JobCompletion();
 
     };

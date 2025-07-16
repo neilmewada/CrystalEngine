@@ -987,6 +987,8 @@ namespace CE::Vulkan
 				presentInfo.waitSemaphoreCount = 1;
 				presentInfo.pWaitSemaphores = &signallingScope->signalSemaphores[currentSubmissionIndex][0];
 
+				LockGuard guard{ presentQueue->GetMutex() };
+
 				result = vkQueuePresentKHR(presentQueue->GetHandle(), &presentInfo);
 			}
 		}

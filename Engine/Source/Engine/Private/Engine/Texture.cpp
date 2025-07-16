@@ -52,6 +52,55 @@ namespace CE
 		return RHI::Format::Undefined;
 	}
 
+	CE::TextureFormat ToTextureFormat(CMImageFormat format)
+	{
+		switch (format)
+		{
+
+		case CMImageFormat::R8:
+			return TextureFormat::R8;
+		case CMImageFormat::RG8:
+			return TextureFormat::RG8;
+		case CMImageFormat::RGB8:
+			return TextureFormat::RGB8;
+		case CMImageFormat::RGBA8:
+			return TextureFormat::RGBA8;
+		case CMImageFormat::R32:
+			return TextureFormat::RFloat;
+		case CMImageFormat::RG32:
+			return TextureFormat::RGFloat;
+		case CMImageFormat::RGBA32:
+			return TextureFormat::RGBAFloat;
+		case CMImageFormat::R16:
+			return TextureFormat::R16;
+		case CMImageFormat::RG16:
+			return TextureFormat::RG16;
+
+		case CMImageFormat::RGB565:
+			return TextureFormat::RGB565;
+		case CMImageFormat::BC1:
+			return TextureFormat::BC1;
+		case CMImageFormat::BC3:
+			return TextureFormat::BC3;
+		case CMImageFormat::BC4:
+			return TextureFormat::BC4;
+		case CMImageFormat::BC5:
+			return TextureFormat::BC5;
+		case CMImageFormat::BC6H:
+			return TextureFormat::BC6H;
+		case CMImageFormat::BC7:
+			return TextureFormat::BC7;
+
+		case CMImageFormat::Undefined:
+		case CMImageFormat::RGB32:
+		case CMImageFormat::RGB16:
+		case CMImageFormat::RGBA16:
+			return TextureFormat::None;
+		}
+
+		return TextureFormat::None;
+	}
+
 	ENGINE_API bool TextureSourceCompressionFormatIsBCn(TextureSourceCompressionFormat sourceCompressionFormat)
 	{
 		switch (sourceCompressionFormat)

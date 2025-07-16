@@ -51,6 +51,8 @@ namespace CE::Vulkan
 
         bool Submit(u32 count, VkSubmitInfo* submitInfos, VkFence fence);
 
+		SharedMutex& GetMutex() { return submissionMutex; }
+
     private:
 
         struct SubmitBatch

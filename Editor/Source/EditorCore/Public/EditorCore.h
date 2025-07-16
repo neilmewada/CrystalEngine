@@ -19,6 +19,7 @@
 #include "Asset/AssetImporter.h"
 
 // Thumbnails
+#include "Asset/Thumbnail/ThumbnailSystem.h"
 #include "Asset/Thumbnail/AssetThumbnailGen.h"
 #include "Asset/Thumbnail/TextureAssetThumbnailGen.h"
 #include "Asset/Thumbnail/MaterialAssetThumbnailGen.h"
