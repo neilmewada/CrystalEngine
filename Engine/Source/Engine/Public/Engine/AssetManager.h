@@ -29,8 +29,6 @@ namespace CE
 		
 		Ref<Asset> LoadAssetAtPath(const Name& path);
 
-		RHI::Texture* LoadTextureAtPath(const Name& path) override;
-
 		CMImage LoadImageAssetAtPath(const Name& path) override;
 
 		Array<Ref<Asset>> LoadAssetsAtPath(const Name& path, SubClass<Asset> classType = Asset::StaticType());
@@ -65,12 +63,20 @@ namespace CE
 
 	protected:
 
+		// - Fusion Functions -
+		RHI::Texture* LoadTextureAtPath(const Name& path) override;
+		FusionRawImageData LoadRawTextureAtPath(const Name& path) override;
+
 		FIELD()
 		AssetRegistry* assetRegistry = nullptr;
 
 		SharedMutex loadedAssetsMutex{};
 		HashMap<Name, Ref<Bundle>> loadedAssetsByPath{};
 		HashMap<Uuid, WeakRef<Bundle>> loadedAssetsByUuid{};
+
+		HashMap<Name, Ref<Bundle>> loadedTempBundlesByPath{};
+		HashMap<Name, RHI::TextureView*> loadedImageViewsByPath{};
+		HashMap<Name, RHI::ShaderResourceGroup*> loadedImageSrgsByPath{};
 
 		friend class Engine;
 		friend class AssetRegistry;

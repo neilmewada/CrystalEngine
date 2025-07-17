@@ -16,11 +16,16 @@ namespace CE::Editor
 
         bool StartProcessing() override;
 
+        bool IsProcessing() override;
+
         bool IsValidForAssetType(SubClass<Asset> assetClass) override;
 
     private:
 
-        Array<Ref<CE::MaterialInterface>> materialAssets;
+        void OnJobFinished(Ref<SceneRenderer> sceneRenderer);
+
+        int totalJobs = 0;
+        Array<Ref<SceneRenderer>> sceneRenderers;
     };
     
 } // namespace CE

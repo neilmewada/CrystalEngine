@@ -5,7 +5,7 @@ namespace CE::Editor
 	class AssetImporter;
 
     CLASS()
-	class EDITORENGINE_API EditorAssetManager : public AssetManager, IAssetRegistryListener
+	class EDITORENGINE_API EditorAssetManager : public AssetManager, public IAssetRegistryListener, public IThumbnailSystemListener
 	{
 		CE_CLASS(EditorAssetManager, AssetManager)
 	public:
@@ -33,6 +33,8 @@ namespace CE::Editor
 		void OnDirectoryAndAssetsDeleted(const Array<Name>& paths);
 
 	protected:
+
+		void OnThumbnailsUpdated(const Array<Name>& assetPaths) override;
 
 		Array<IO::Path> sourceAssetsToImport{};
 		Array<Name> recentlyProcessedBundleNames{};

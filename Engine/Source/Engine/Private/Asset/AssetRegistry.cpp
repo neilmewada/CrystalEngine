@@ -219,8 +219,6 @@ namespace CE
 			AddAssetEntry(relativePathStr, assetData);
 		}
 
-		Name bundleName = assetData->bundleName;
-
 		load->BeginDestroy();
 		load = nullptr;
 
@@ -228,7 +226,19 @@ namespace CE
 		{
 			if (listener != nullptr)
 			{
-				listener->OnAssetImported(bundleName, sourcePath);
+				listener->OnAssetImported(assetData->bundlePath, sourcePath);
+				listener->OnAssetPathTreeUpdated(cachedPathTree);
+			}
+		}
+	}
+
+	void AssetRegistry::OnAssetUpdated(const Name& bundlePath)
+	{
+		for (IAssetRegistryListener* listener : listeners)
+		{
+			if (listener != nullptr)
+			{
+				listener->OnAssetImported(bundlePath, {});
 				listener->OnAssetPathTreeUpdated(cachedPathTree);
 			}
 		}
@@ -529,7 +539,7 @@ namespace CE
 		{
 			if (listener != nullptr)
 			{
-				listener->OnAssetRenamed(bundleUuid, oldName, newName);
+				listener->OnAssetRenamed(bundleUuid, oldName, newName, newPath);
 				listener->OnAssetPathTreeUpdated(cachedPathTree);
 			}
 		}

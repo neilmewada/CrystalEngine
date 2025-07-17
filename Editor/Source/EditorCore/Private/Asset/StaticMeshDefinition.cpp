@@ -21,4 +21,10 @@ namespace CE::Editor
     {
         return CE::StaticMesh::StaticClass();
     }
+
+    Color StaticMeshAssetDefinition::GetColorTag()
+    {
+        return Color(0.2f, 0.8f, 1.0f, 1.0f);
+    }
+
 } // namespace CE::Editor

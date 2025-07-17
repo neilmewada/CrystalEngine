@@ -14,11 +14,24 @@ namespace CE
     class FGameWindow;
     class FWindow;
 
+    struct FusionRawImageData
+    {
+		RHI::TextureView* textureView = nullptr;
+		RHI::ShaderResourceGroup* textureSrg = nullptr;
+
+        bool IsValid() const
+        {
+            return textureView != nullptr && textureSrg != nullptr;
+		}
+    };
+
     struct IFusionAssetLoader
     {
         virtual ~IFusionAssetLoader() = default;
 
         virtual RHI::Texture* LoadTextureAtPath(const Name& path) = 0;
+
+        virtual FusionRawImageData LoadRawTextureAtPath(const Name& path) = 0;
 
         virtual CMImage LoadImageAssetAtPath(const Name& path) = 0;
 
@@ -68,6 +81,7 @@ namespace CE
 
         CMImage LoadImageAsset(const Name& assetPath);
         int LoadImageResource(const IO::Path& resourcePath, const Name& imageName);
+        FusionRawImageData LoadRawTextureAtPath(const Name& path);
 
         int FindOrCreateSampler(const RHI::SamplerDescriptor& samplerDesc);
 

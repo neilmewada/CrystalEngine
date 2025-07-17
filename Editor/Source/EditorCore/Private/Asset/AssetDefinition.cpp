@@ -27,4 +27,9 @@ namespace CE::Editor
     {
         return nullptr;
     }
+
+    Color AssetDefinition::GetColorTag()
+    {
+        return Color(0.7f, 0.7f, 0.7f, 1.0f);
+    }
 } // namespace CE::Editor

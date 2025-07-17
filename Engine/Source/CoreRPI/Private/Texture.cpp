@@ -24,6 +24,17 @@ namespace CE::RPI
 
         texture = RHI::gDynamicRHI->CreateTexture(desc.texture);
 
+		RHI::TextureViewDescriptor viewDesc{};
+		viewDesc.arrayLayerCount = desc.texture.arrayLayers;
+		viewDesc.mipLevelCount = desc.texture.mipLevels;
+        viewDesc.baseMipLevel = 0;
+		viewDesc.baseArrayLayer = 0;
+		viewDesc.dimension = desc.texture.dimension;
+		viewDesc.format = desc.texture.format;
+		viewDesc.texture = texture;
+
+		//textureView = RHI::gDynamicRHI->CreateTextureView(viewDesc);
+
         samplerState = RPISystem::Get().FindOrCreateSampler(desc.samplerDesc);
 
         if (desc.source == nullptr)

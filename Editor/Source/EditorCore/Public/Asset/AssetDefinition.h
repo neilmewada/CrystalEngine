@@ -29,6 +29,8 @@ namespace CE::Editor
     	virtual String GetTypeDisplayName();
 
         virtual SubClass<AssetThumbnailGen> GetThumbnailGeneratorClass();
+
+        virtual Color GetColorTag();
         
     protected:
         

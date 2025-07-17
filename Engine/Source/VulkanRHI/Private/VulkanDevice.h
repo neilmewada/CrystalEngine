@@ -58,7 +58,6 @@ namespace CE::Vulkan
         int SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
 
 		VkCommandPool AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, RHI::CommandListType type, u32 queueFamilyIndex);
-		void FreeCommandBuffers(VkCommandPool pool, u32 count, VkCommandBuffer* buffers);
 
         // - Getters -
 

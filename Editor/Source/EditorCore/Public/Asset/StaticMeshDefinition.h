@@ -16,6 +16,7 @@ namespace CE::Editor
 
 		virtual SubClassType<Asset> GetAssetClass() override;
 
+		Color GetColorTag() override;
 	};
     
 } // namespace CE::Editor

@@ -12,6 +12,11 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        if (Ref<ThumbnailSystem> thumbnailSystem = ThumbnailSystem::Get())
+        {
+            thumbnailSystem->AddThumbnailListener(this);
+        }
+
         (*this)
         .Title("Assets")
         .Child(
@@ -139,6 +144,23 @@ namespace CE::Editor
                         .HAlign(HAlign::Fill)
                         .VAlign(VAlign::Top)
                         .Padding(Vec4(1, 1, 0.5f, 1) * 10.0f)
+                    ),
+
+                    FNew(FStyledWidget)
+                    .Background(Color::RGBA(26, 26, 26))
+                    .HAlign(HAlign::Fill)
+                    .Height(0.5f),
+
+                    FNew(FHorizontalStack)
+                    .ContentHAlign(HAlign::Left)
+                    .ContentVAlign(VAlign::Center)
+                    .Padding(Vec4(3, 1, 3, 1) * 2.5f)
+                    .HAlign(HAlign::Fill)
+                    .Height(30)
+                    (
+                        FAssignNew(FLabel, statusBarLabel)
+                        .Text("")
+                        .FontSize(10)
                     )
                 )
             )
@@ -167,8 +189,12 @@ namespace CE::Editor
     {
         Super::OnBeginDestroy();
 
-        AssetRegistry* registry = AssetRegistry::Get();
-        if (registry)
+		if (Ref<ThumbnailSystem> thumbnailSystem = ThumbnailSystem::Get())
+		{
+			thumbnailSystem->RemoveThumbnailListener(this);
+		}
+
+        if (AssetRegistry* registry = AssetRegistry::Get())
         {
             registry->RemoveRegistryListener(this);
         }
@@ -179,6 +205,11 @@ namespace CE::Editor
         treeView->OnModelUpdate();
 
         UpdateAssetGridView();
+    }
+
+    void AssetBrowser::OnThumbnailsUpdated(const Array<CE::Name>& assetPaths)
+    {
+        gridView->OnUpdate();
     }
 
     void AssetBrowser::AddTestScene()
@@ -366,6 +397,8 @@ namespace CE::Editor
                 currentPath = "/";
                 UpdateAssetGridView();
             }
+
+            OnItemSelectionUpdated();
             return;
         }
 
@@ -383,7 +416,8 @@ namespace CE::Editor
                 UpdateAssetGridView();
             }
 
-            break;
+            OnItemSelectionUpdated();
+            return;
         }
     }
 
@@ -538,6 +572,8 @@ namespace CE::Editor
         gridView->OnUpdate();
 
         UpdateBreadCrumbs();
+
+        OnItemSelectionUpdated();
     }
 
     bool AssetBrowser::IsCurrentDirectoryReadOnly() const
@@ -576,6 +612,33 @@ namespace CE::Editor
             gridView->itemToSelect = path;
 
             SetCurrentPath(parentPath);
+        }
+
+        OnItemSelectionUpdated();
+    }
+
+    void AssetBrowser::OnItemSelectionUpdated()
+    {
+        int count = gridView->GetSelectedItemCount();
+        if (count == 0)
+        {
+	        if (currentPath == "/")
+	        {
+                statusBarLabel->Text("");
+                return;
+	        }
+
+            statusBarLabel->Text(currentPath.GetLastComponent());
+        }
+        else if (count == 1)
+        {
+	        Array<AssetBrowserItem*> selectedItems = gridView->GetSelectedItems();
+            AssetBrowserItem* item = selectedItems[0];
+            statusBarLabel->Text(item->GetItemName().GetString());
+        }
+        else
+        {
+			statusBarLabel->Text(String::Format("{} items selected", count));
         }
     }
 
@@ -834,6 +897,7 @@ namespace CE::Editor
         if (node == registry->GetCachedPathTree().GetRootNode())
         {
             treeView->SelectionModel()->ClearSelection();
+            OnItemSelectionUpdated();
             return;
         }
 
@@ -843,6 +907,8 @@ namespace CE::Editor
 
         treeView->SelectionModel()->Select(index);
         treeView->ExpandRow(treeViewModel->GetParent(index), true);
+
+        OnItemSelectionUpdated();
     }
 
     void AssetBrowser::OpenAsset(const CE::Name& path)

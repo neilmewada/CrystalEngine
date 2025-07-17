@@ -95,7 +95,7 @@ namespace CE
             }
             else if (mouseEvent->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left)
             {
-                CE_LOG(Info, All, "Clicked!");
+                
             }
             else if (mouseEvent->type == FEventType::MouseRelease && mouseEvent->buttons == MouseButtonMask::Left)
             {

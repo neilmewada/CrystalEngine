@@ -807,11 +807,15 @@ namespace CE
         m_Padding = Vec4(7.5f, 5, 7.5f, 5);
     }
 
-    void FTextInput::StartEditing(bool selectAll)
+    void FTextInput::StartEditing(bool selectAll, bool cursorAtEnd)
     {
         if (!IsEditing())
         {
             inputLabel->cursorPos = 0;
+            if (cursorAtEnd)
+            {
+                inputLabel->cursorPos = inputLabel->Text().GetLength();
+			}
             inputLabel->StartEditing();
 
             if (selectAll)

@@ -152,4 +152,9 @@ namespace CE
         return result;
     }
 
+    bool DateTime::operator<(const DateTime& rhs) const
+    {
+        return std::mktime(const_cast<std::tm*>(&timeInfo)) < std::mktime(const_cast<std::tm*>(&rhs.timeInfo));
+    }
+
 } // namespace CE

@@ -35,12 +35,31 @@ namespace CE::Editor
                 .VAlign(VAlign::Fill)
                 .HAlign(HAlign::Fill)
                 (
-                    FNew(FStyledWidget) // Thumbnail
-                    .Background(Color::Black())
-                    .CornerRadius(Vec4(1, 1, 1, 1) * cornerRadius)
+                    FNew(FOverlayStack)
+                    .ContentHAlign(HAlign::Center)
+                    .ContentVAlign(VAlign::Center)
                     .Width(height)
                     .Height(height)
-                    .Margin(Vec4(0, 0, 7.5f, 0)),
+                    .Margin(Vec4(0, 0, 7.5f, 0))
+                    (
+                        FNew(FStyledWidget)
+                        .Background(Color::Black())
+                        .CornerRadius(Vec4(1, 1, 1, 1) * cornerRadius)
+                        .Width(height)
+                        .Height(height),
+
+                        FAssignNew(FImage, thumbnail)
+                        .Background(Color::Cyan())
+                        .Width(38)
+                        .Height(38),
+
+                        FAssignNew(FStyledWidget, colorTag)
+                        .Background(Color::Clear())
+                        .CornerRadius(Vec4(0, 0, 1, 1) * 2.0f)
+                        .Height(2.0f)
+                        .VAlign(VAlign::Bottom)
+                        .HAlign(HAlign::Fill)
+                    ),
 
                     FNew(FVerticalStack)
                     .Gap(2)
@@ -138,6 +157,18 @@ namespace CE::Editor
             registered = true;
 
             AssetRegistry::Get()->AddRegistryListener(this);
+			ThumbnailSystem::Get()->AddThumbnailListener(this);
+        }
+
+        TypeInfo* typeInfo = GetTypeInfo(fieldDeclId);
+        if (!typeInfo || !typeInfo->IsClass())
+            return;
+
+		ClassType* classType = (ClassType*)typeInfo;
+
+        if (AssetDefinition* assetDef = AssetDefinitionRegistry::Get()->FindAssetDefinition(classType))
+        {
+			colorTag->Background(assetDef->GetColorTag());
         }
     }
 
@@ -150,10 +181,11 @@ namespace CE::Editor
             registered = false;
 
             AssetRegistry::Get()->RemoveRegistryListener(this);
+			ThumbnailSystem::Get()->RemoveThumbnailListener(this);
         }
     }
 
-    void ObjectEditorField::OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName)
+    void ObjectEditorField::OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName, const CE::Name& newPath)
     {
         if (Ref<Object> object = curValue.Lock())
         {
@@ -196,6 +228,11 @@ namespace CE::Editor
         }
     }
 
+    void ObjectEditorField::OnThumbnailsUpdated(const Array<CE::Name>& assetPaths)
+    {
+	    
+    }
+
     bool ObjectEditorField::CanBind(FieldType* field)
     {
         TypeInfo* fieldDeclType = field->GetDeclarationType();
@@ -230,7 +267,7 @@ namespace CE::Editor
         {
             popup->QueueDestroy();
         });
-
+        
         popup->OnAssetSelected([this] (AssetData* assetData)
         {
             SelectAsset(assetData);
@@ -377,6 +414,8 @@ namespace CE::Editor
 
         curValue = value;
 
+        thumbnail->Background(Color::Clear());
+
         if (value == nullptr)
         {
             valueLabel->Text("[None]");
@@ -384,10 +423,27 @@ namespace CE::Editor
         }
         else
         {
-            Ref<Bundle> bundle = value->GetBundle();
+        	Ref<Bundle> bundle = value->GetBundle();
             if (bundle && !bundle->IsTransient())
             {
                 valueLabel->Text(bundle->GetName().GetString());
+
+            	CE::Name bundlePath = bundle->GetBundlePath();
+				CE::Name thumbnailPath = ThumbnailSystem::GetThumbnailPath(bundlePath);
+				IO::Path thumbnailAbsolutePath = Bundle::GetAbsoluteBundlePath(thumbnailPath);
+                if (thumbnailAbsolutePath.Exists())
+                {
+                    FBrush thumbnailBrush = FBrush(thumbnailPath);
+                    thumbnail->Background(thumbnailBrush);
+                }
+                else
+                {
+                    ClassType* assetClass = value->GetClass();
+                    if (AssetDefinition* assetDef = AssetDefinitionRegistry::Get()->FindAssetDefinition(assetClass))
+                    {
+                        thumbnail->Background(FBrush(assetDef->GetIconPath()));
+                    }
+				}
 
                 curObjectFullPath = bundle->GetBundlePath();
             }

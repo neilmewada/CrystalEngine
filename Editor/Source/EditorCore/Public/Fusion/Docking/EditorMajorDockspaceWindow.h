@@ -16,7 +16,7 @@ namespace CE::Editor
 
     public: // - Public API -
 
-        bool OpenEditor(Ref<Object> targetObject);
+        bool OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle = nullptr);
 
         bool OpenEditor(const CE::Name& assetPath);
 

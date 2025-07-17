@@ -50,6 +50,29 @@ namespace CE
 			loadedAssetsByPath.Clear();
 		}
 
+		{
+			for (auto [path, srg] : loadedImageSrgsByPath)
+			{
+				RHI::gDynamicRHI->DestroyShaderResourceGroup(srg);
+			}
+			loadedImageSrgsByPath.Clear();
+
+			for (auto [path, textureView] : loadedImageViewsByPath)
+			{
+				RHI::gDynamicRHI->DestroyTextureView(textureView);
+			}
+			loadedImageViewsByPath.Clear();
+
+			for (auto [path, bundle] : loadedTempBundlesByPath)
+			{
+				if (bundle.IsValid())
+				{
+					bundle->BeginDestroy();
+				}
+			}
+			loadedTempBundlesByPath.Clear();
+		}
+
 		assetRegistry->Shutdown();
 	}
 
@@ -214,7 +237,7 @@ namespace CE
 			return nullptr;
 		
 		Ref<Bundle> bundle = nullptr;
-
+		
 		{
 			LockGuard lock{ loadedAssetsMutex };
 			
@@ -237,7 +260,6 @@ namespace CE
 				}
 				loadedAssetsByPath[path] = bundle;
 				loadedAssetsByUuid[bundle->GetUuid()] = bundle;
-			
 			}
 		}
 		
@@ -264,6 +286,97 @@ namespace CE
 			return nullptr;
 
 		return rpiTexture->GetRhiTexture();
+	}
+
+	FusionRawImageData AssetManager::LoadRawTextureAtPath(const Name& path)
+	{
+		if (FusionApplication::TryGet() == nullptr)
+			return {};
+
+		if (!path.GetString().StartsWith("/Temp"))
+			return {};
+
+		if (loadedImageViewsByPath.KeyExists(path))
+		{
+			if (RHI::TextureView* view = loadedImageViewsByPath[path])
+			{
+				return { view, loadedImageSrgsByPath[path] };
+			}
+		}
+		
+		Ref<Bundle> textureBundle = nullptr;
+
+		if (loadedTempBundlesByPath.KeyExists(path) && loadedTempBundlesByPath[path] != nullptr)
+		{
+			textureBundle = loadedTempBundlesByPath[path];
+		}
+		else
+		{
+			LoadBundleArgs args{
+				.loadTemporary = true,
+				.loadFully = true,
+				.forceReload = false,
+				.destroyOutdatedObjects = false
+			};
+
+			textureBundle = Bundle::LoadBundle(this, path, args);
+			if (textureBundle == nullptr)
+				return {};
+			loadedTempBundlesByPath[path] = textureBundle;
+		}
+
+		if (!textureBundle)
+			return {};
+
+		Ref<CE::Texture2D> texture = textureBundle->LoadObject<CE::Texture2D>();
+		if (!texture)
+			return {};
+
+		RPI::Texture* rpiTexture = texture->GetRpiTexture();
+		if (!rpiTexture)
+			return {};
+
+		RHI::Texture* rhiTexture = rpiTexture->GetRhiTexture();
+		if (!rhiTexture)
+			return {};
+
+		RHI::TextureViewDescriptor viewDesc{};
+		viewDesc.texture = rhiTexture;
+		viewDesc.format = rhiTexture->GetFormat();
+		viewDesc.dimension = Dimension::Dim2DArray;
+		viewDesc.baseArrayLayer = 0;
+		viewDesc.arrayLayerCount = 1;
+		viewDesc.baseMipLevel = 0;
+		viewDesc.mipLevelCount = 1;
+
+		RHI::TextureView* textureView = RHI::gDynamicRHI->CreateTextureView(viewDesc);
+		if (!textureView)
+			return {};
+
+		RHI::ShaderResourceGroupLayout textureSrgLayout = FusionApplication::Get()->GetFusionShader2()->GetDefaultVariant()->GetSrgLayout(SRGType::PerDraw);
+		RHI::ShaderResourceGroup* textureSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(textureSrgLayout);
+		if (!textureSrg)
+		{
+			RHI::gDynamicRHI->DestroyTextureView(textureView);
+			return {};
+		}
+
+		RHI::SamplerDescriptor samplerDesc{};
+		samplerDesc.addressModeU = SamplerAddressMode::ClampToBorder;
+		samplerDesc.addressModeV = SamplerAddressMode::ClampToBorder;
+		samplerDesc.addressModeW = SamplerAddressMode::ClampToBorder;
+		samplerDesc.borderColor = SamplerBorderColor::FloatTransparentBlack;
+		samplerDesc.enableAnisotropy = false;
+		samplerDesc.samplerFilterMode = FilterMode::Linear;
+
+		textureSrg->Bind("_Texture", textureView);
+		textureSrg->Bind("_TextureSampler", RPISystem::Get().FindOrCreateSampler(samplerDesc));
+		textureSrg->FlushBindings();
+
+		loadedImageViewsByPath[path] = textureView;
+		loadedImageSrgsByPath[path] = textureSrg;
+
+		return { textureView, textureSrg };
 	}
 
 	CMImage AssetManager::LoadImageAssetAtPath(const Name& path)

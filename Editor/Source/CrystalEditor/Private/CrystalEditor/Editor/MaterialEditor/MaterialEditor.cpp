@@ -222,18 +222,21 @@ namespace CE::Editor
         return targetObject.IsValid() && targetObject->IsOfType<CE::Material>();
     }
 
-    bool MaterialEditor::OpenEditor(Ref<Object> targetObject)
+    bool MaterialEditor::OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle)
     {
         if (!targetObject)
             return false;
         if (!targetObject->IsOfType<CE::Material>())
             return false;
 
+		Super::OpenEditor(targetObject, bundle);
+
         Ref<CE::Material> material = (Ref<CE::Material>)targetObject;
         if (this->targetMaterial == material)
             return true;
 
         this->targetMaterial = material;
+		this->bundle = bundle;
         SetMaterial(material);
 
         return true;
@@ -281,27 +284,6 @@ namespace CE::Editor
     void MaterialEditor::SaveChanges()
     {
         Super::SaveChanges();
-
-        if (!targetMaterial)
-            return;
-
-        Ref<Bundle> bundle = targetMaterial->GetBundle();
-        if (!bundle)
-            return;
-
-        if (bundle->IsTransient())
-            return;
-
-        BundleSaveResult result = Bundle::SaveToDisk(bundle);
-
-        if (result != BundleSaveResult::Success)
-        {
-            CE_LOG(Error, All, "Failed to save material to disk! Error in Bundle::SaveToDisk(); ErrorCode: {}", (int)result);
-        }
-        else
-        {
-            SetAssetDirty(false);
-        }
     }
 
     void MaterialEditor::SetMaterial(Ref<CE::Material> material)

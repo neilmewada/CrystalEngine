@@ -2,6 +2,13 @@
 
 namespace CE
 {
+	struct IThumbnailSystemListener
+	{
+		virtual ~IThumbnailSystemListener() = default;
+
+		virtual void OnThumbnailsUpdated(const Array<Name>& assetPaths) {}
+	};
+
     CLASS()
     class EDITORCORE_API ThumbnailSystem : public Object, IAssetRegistryListener
     {
@@ -11,6 +18,12 @@ namespace CE
         ThumbnailSystem();
 
         void OnBeforeDestroy() override;
+
+        void OnAssetImported(const Name& bundlePath, const Name& sourcePath) override;
+
+        void OnAssetRenamed(Uuid bundleUuid, const Name& oldName, const Name& newName, const Name& newPath) override;
+
+        void MarkAssetDirty(const Name& bundlePath);
         
     public:
 
@@ -23,6 +36,11 @@ namespace CE
 
         void Tick(f32 deltaTime);
 
+        void AddThumbnailListener(IThumbnailSystemListener* listener);
+		void RemoveThumbnailListener(IThumbnailSystemListener* listener);
+
+		static Name GetThumbnailPath(Name assetPath);
+
     private:
 
         void OnThumbnailFinished(Ref<AssetThumbnailGen> thumbnailGen);
@@ -31,6 +49,8 @@ namespace CE
         HashMap<TypeId, Array<Name>> dirtyAssetsByThumbnailGenClass;
 
 		Array<Ref<AssetThumbnailGen>> thumbnailGenerators;
+
+        Array<IThumbnailSystemListener*> thumbnailListeners;
     };
     
 } // namespace CE

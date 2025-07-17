@@ -20,6 +20,8 @@ namespace CE::Editor
 
 		SubClass<AssetThumbnailGen> GetThumbnailGeneratorClass() override;
 
+		Color GetColorTag() override;
+
 	};
 
 } // namespace CE::Editor

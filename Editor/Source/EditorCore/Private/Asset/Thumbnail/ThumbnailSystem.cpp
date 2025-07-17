@@ -22,6 +22,43 @@ namespace CE
         }
     }
 
+    void ThumbnailSystem::OnAssetImported(const Name& bundlePath, const Name& sourcePath)
+    {
+        MarkAssetDirty(bundlePath);
+    }
+
+    void ThumbnailSystem::OnAssetRenamed(Uuid bundleUuid, const Name& oldName, const Name& newName, const Name& newPath)
+    {
+        MarkAssetDirty(newPath);
+    }
+
+    void ThumbnailSystem::MarkAssetDirty(const Name& bundlePath)
+    {
+        AssetData* assetData = AssetManager::Get()->GetPrimaryAssetDataAtPath(bundlePath);
+        if (!assetData)
+            return;
+
+        SubClass<Asset> clazz = ClassType::FindClass(assetData->assetClassTypeName);
+        if (!clazz)
+            return;
+
+        Ref<AssetDefinition> assetDef = AssetDefinitionRegistry::Get()->FindAssetDefinition(clazz);
+        if (!assetDef)
+            return;
+
+        SubClass<AssetThumbnailGen> thumbnailGenClass = assetDef->GetThumbnailGeneratorClass();
+        if (!thumbnailGenClass)
+            return;
+
+        AssetThumbnailGen* defaultInstance = (AssetThumbnailGen*)thumbnailGenClass->GetDefaultInstance();
+        if (!defaultInstance->IsValidForAssetType(clazz))
+            return;
+
+        Name assetPath = assetData->bundlePath;
+
+        dirtyAssetsByThumbnailGenClass[thumbnailGenClass->GetTypeId()].Add(assetPath);
+    }
+
     ThumbnailSystem::~ThumbnailSystem()
     {
         
@@ -117,15 +154,41 @@ namespace CE
         dirtyAssetsByThumbnailGenClass.Clear();
     }
 
+    void ThumbnailSystem::AddThumbnailListener(IThumbnailSystemListener* listener)
+    {
+        if (!listener)
+            return;
+
+        if (!thumbnailListeners.Exists(listener))
+        {
+            thumbnailListeners.Add(listener);
+		}
+    }
+
+    void ThumbnailSystem::RemoveThumbnailListener(IThumbnailSystemListener* listener)
+    {
+        thumbnailListeners.Remove(listener);
+    }
+
+    Name ThumbnailSystem::GetThumbnailPath(Name assetPath)
+    {
+        return "/Temp/ThumbnailCache" + assetPath.GetString();
+    }
+
     void ThumbnailSystem::OnThumbnailFinished(Ref<AssetThumbnailGen> thumbnailGen)
     {
         if (!thumbnailGen)
 			return;
 
+        const Array<Name>& assetPaths = thumbnailGen->GetAssetPaths();
+
+        for (IThumbnailSystemListener* thumbnailListener : thumbnailListeners)
+        {
+			thumbnailListener->OnThumbnailsUpdated(assetPaths);
+        }
+
         thumbnailGenerators.Remove(thumbnailGen);
         thumbnailGen->BeginDestroy();
-
-        CE_LOG(Info, All, "Finished Processing: {}", thumbnailGen->GetClass()->GetName());
     }
 } // namespace CE
 

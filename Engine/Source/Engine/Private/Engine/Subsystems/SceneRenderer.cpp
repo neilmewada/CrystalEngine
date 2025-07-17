@@ -17,7 +17,7 @@ namespace CE
     {
         this->targetScene = scene;
 
-        if (outputImages[0] != nullptr)
+        if (this->targetScene && outputImages[0] != nullptr)
         {
             targetScene->GetRpiScene()->SetPrimaryViewportSize(Vec2i(outputImages[0]->GetWidth(), outputImages[0]->GetHeight()));
         }

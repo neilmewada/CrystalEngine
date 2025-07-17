@@ -22,6 +22,11 @@ namespace CE::Editor
         {
             item->Deselect();
         }
+
+        if (Ref<AssetBrowser> assetBrowser = m_Owner.Lock())
+        {
+            assetBrowser->OnItemSelectionUpdated();
+        }
     }
 
     void AssetBrowserGridView::SelectAll()
@@ -30,12 +35,16 @@ namespace CE::Editor
         {
             item->Select();
         }
+
+        if (Ref<AssetBrowser> assetBrowser = m_Owner.Lock())
+        {
+            assetBrowser->OnItemSelectionUpdated();
+        }
     }
 
     void AssetBrowserGridView::SetCurrentDirectory(const CE::Name& directory)
     {
         this->currentPath = directory;
-
     }
 
     int AssetBrowserGridView::GetSelectedItemCount()
@@ -103,6 +112,13 @@ namespace CE::Editor
                 AddChild(
                     FAssignNew(AssetBrowserItem, item)
                     .Owner(this)
+                    .OnSelect([this](FSelectableButton* button)
+                    {
+	                    if (Ref<AssetBrowser> assetBrowser = m_Owner.Lock())
+                        {
+                            assetBrowser->OnItemSelectionUpdated();
+						}
+                    })
                     .OnDoubleClick([this](FSelectableButton* button)
                     {
                         if (auto registry = AssetRegistry::Get())

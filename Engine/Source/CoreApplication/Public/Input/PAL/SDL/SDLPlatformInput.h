@@ -2,6 +2,8 @@
 
 #include "Input/PAL/Common/PlatformInput.h"
 
+#include <chrono>
+
 namespace CE
 {
 
@@ -21,6 +23,9 @@ namespace CE
 
     private:
 
+        std::chrono::time_point<std::chrono::high_resolution_clock> startTime = std::chrono::high_resolution_clock::now();
+        u64 curTime = 0;
+
         u64 windowId = 0;
         Vec2i globalMousePosition{};
         Vec2i mousePosition{};
@@ -32,7 +37,7 @@ namespace CE
         Array<u64> focusLostWindows{};
 
         HashMap<KeyCode, bool> keyStates{};
-        HashMap<KeyCode, bool> keyStatesDelayed{};
+        HashMap<KeyCode, Internal::KeyStateDelayed> keyStatesDelayed{};
         HashMap<MouseButton, int> mouseButtonStates{};
 
         // Per-Tick changes

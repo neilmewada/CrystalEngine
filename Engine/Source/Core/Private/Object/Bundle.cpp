@@ -270,7 +270,7 @@ namespace CE
     {
         if (!absolutePath.Exists())
         {
-            CE_LOG(Error, All, "Bundle::LoadFromDisk(): Bundle doesn't exist at path {}", absolutePath);
+            //CE_LOG(Error, All, "Bundle::LoadFromDisk(): Bundle doesn't exist at path {}", absolutePath);
             outResult = BundleLoadResult::BundleNotFound;
             return nullptr;
         }

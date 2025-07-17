@@ -67,9 +67,7 @@ namespace CE::Editor
 
             u32 thumbnailResolution = this->thumbnailResolution;
 
-			Name thumbnailPath = GetThumbnailPath(assetPath);
-
-            Job* job = new JobFunction([texture, blitShader, thumbnailResolution, assetPath, thumbnailPath](Job*)
+            Job* job = new JobFunction([texture, blitShader, thumbnailResolution, assetPath](Job*)
                 {
                     RPI::Texture* rpiTexture = texture->GetRpiTexture();
                     RHI::Texture* rhiTexture = rpiTexture->GetRhiTexture();
@@ -134,7 +132,7 @@ namespace CE::Editor
                     Array<RHI::VertexBufferView> fullscreenQuad = RPISystem::Get().GetFullScreenQuad();
                     RHI::DrawLinearArguments fullscreenQuadArgs = RPISystem::Get().GetFullScreenQuadDrawArgs();
 
-                    /////////////////////////////////////////////
+                    /////////////////////////////////////////////////////
 					// - Command List Submission -
 
                     RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
@@ -215,16 +213,43 @@ namespace CE::Editor
                     queue->Execute(1, &cmdList, fence);
                     fence->WaitForFence();
 
+                    /////////////////////////////////////////////////////
+					// - Save thumbnail to disk -
+
                     void* data;
                     stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &data);
                     {
-                        CMImage image = CMImage::LoadRawImageFromMemory((unsigned char*)data, thumbnailResolution, thumbnailResolution, 
+                        CMImage image = CMImage::LoadRawImageFromMemory((unsigned char*)data, outTextureDesc.width, outTextureDesc.width,
                             CMImageFormat::RGBA8, CMImageSourceFormat::None, 
                             8, 8 * 4);
 
-                        SaveThumbnailToDisk(image, assetPath);
+                        CMImageEncoder encoder{};
+
+                        u64 size = encoder.GetCompressedSizeRequirement(image, CMImageSourceFormat::BC7);
+                        if (size == 0)
+                        {
+                            SaveThumbnailToDisk(image, assetPath);
+                        }
+                        else
+                        {
+	                        u8* compressedData = new u8[size];
+                            if (encoder.EncodeToBCn(image, compressedData, CMImageSourceFormat::BC7))
+                            {
+                                CMImage compressedImage = CMImage::LoadRawImageFromMemory(compressedData, outTextureDesc.width, outTextureDesc.width,
+                                    CMImageFormat::BC7, CMImageSourceFormat::None, 8 / 4, 8);
+                                SaveThumbnailToDisk(compressedImage, assetPath);
+                            }
+                            else
+                            {
+                                SaveThumbnailToDisk(image, assetPath);
+                            }
+							delete[] compressedData;
+                        }
                     }
                     stagingBuffer->Unmap();
+
+                    /////////////////////////////////////////////////////
+					// - Cleanup resources -
 
                     delete blitMaterial;
                     RHI::gDynamicRHI->DestroyTexture(outTexture);

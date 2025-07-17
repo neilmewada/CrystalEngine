@@ -73,12 +73,19 @@ namespace CE::Editor
         AssetRegistry::Get()->RemoveRegistryListener(this);
     }
 
-    void EditorBase::OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName)
+    void EditorBase::OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName, const CE::Name& newPath)
     {
         if (this->bundleUuid == bundleUuid)
         {
             Title(newName.GetString());
         }
+    }
+
+    bool EditorBase::OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle)
+    {
+		this->bundle = bundle;
+
+        return true;
     }
 
     void EditorBase::OnEditorOpened(Ref<Object> targetObject)
@@ -120,5 +127,28 @@ namespace CE::Editor
         }
 
     }
+
+    void EditorBase::SaveChanges()
+    {
+        if (!bundle)
+            return;
+
+        if (bundle->IsTransient())
+            return;
+
+        BundleSaveResult result = Bundle::SaveToDisk(bundle);
+
+        if (result != BundleSaveResult::Success)
+        {
+            CE_LOG(Error, All, "Failed to save material to disk! Error in Bundle::SaveToDisk(); ErrorCode: {}", (int)result);
+        }
+        else
+        {
+            SetAssetDirty(false);
+
+			AssetRegistry::Get()->OnAssetUpdated(bundle->GetBundlePath());
+        }
+    }
+
 }
 

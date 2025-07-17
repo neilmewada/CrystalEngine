@@ -192,6 +192,11 @@ namespace CE
         return 0;
     }
 
+    FusionRawImageData FusionApplication::LoadRawTextureAtPath(const Name& path)
+    {
+        return assetLoader->LoadRawTextureAtPath(path);
+    }
+
     int FusionApplication::FindOrCreateSampler(const RHI::SamplerDescriptor& samplerDesc)
     {
         ZoneScoped;
@@ -374,11 +379,6 @@ namespace CE
 
     void FusionApplication::QueueDestroy(Object* object)
     {
-        if (Thread::GetCurrentThreadId() != gMainThreadId)
-        {
-            String::IsAlphabet('a');
-        }
-
         destructionQueue.Add({ .object = object, .frameCounter = 0 });
     }
 

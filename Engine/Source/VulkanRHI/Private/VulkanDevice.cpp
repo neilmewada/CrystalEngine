@@ -894,7 +894,19 @@ namespace CE::Vulkan
 			return -1;
 		}
 
-		auto commandBuffer = BeginSingleUseCommandBuffer();
+		VkCommandBuffer commandBuffer = nullptr;
+		VkCommandPool commandPool = commandAllocator->Allocate(1, &commandBuffer, VK_COMMAND_BUFFER_LEVEL_PRIMARY, primaryGraphicsQueue->GetFamilyIndex());
+
+		defer(&)
+		{
+			commandAllocator->Free(commandPool, 1, &commandBuffer);
+		};
+
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+		vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
 		vkCmdPipelineBarrier(
 			commandBuffer,
@@ -905,10 +917,28 @@ namespace CE::Vulkan
 			1, &barrier
 		);
 
-		EndSingleUseCommandBuffer(commandBuffer);
-		int familyIndex = SubmitAndWaitSingleUseCommandBuffer(commandBuffer);
+		vkEndCommandBuffer(commandBuffer);
 
-		return familyIndex;
+		VkFenceCreateInfo fenceCI{};
+		fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+		VkFence fence = nullptr;
+		vkCreateFence(device, &fenceCI, VULKAN_CPU_ALLOCATOR, &fence);
+
+		defer(&)
+		{
+			vkDestroyFence(device, fence, VULKAN_CPU_ALLOCATOR);
+		};
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &commandBuffer;
+
+		primaryGraphicsQueue->Submit(1, &submitInfo, fence);
+		vkWaitForFences(device, 1, &fence, VK_TRUE, NumericLimits<u64>::Max());
+
+		return primaryGraphicsQueue->GetFamilyIndex();
 	}
 
 	VkCommandBuffer VulkanDevice::BeginSingleUseCommandBuffer()
@@ -949,7 +979,11 @@ namespace CE::Vulkan
 
         //vkQueueSubmit(primaryGraphicsQueue->GetHandle(), 1, &submitInfo, VK_NULL_HANDLE);
 		primaryGraphicsQueue->Submit(1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(primaryGraphicsQueue->GetHandle());
+
+		{
+			LockGuard guard{ primaryGraphicsQueue->GetMutex() };
+        	vkQueueWaitIdle(primaryGraphicsQueue->GetHandle());
+		}
 
         vkFreeCommandBuffers(device, gfxCommandPool, 1, &commandBuffer);
 
@@ -961,11 +995,6 @@ namespace CE::Vulkan
 		return commandAllocator->Allocate(count, outBuffers, 
 			type == RHI::CommandListType::Indirect ? VK_COMMAND_BUFFER_LEVEL_SECONDARY : VK_COMMAND_BUFFER_LEVEL_PRIMARY,
 			queueFamilyIndex);
-	}
-
-	void VulkanDevice::FreeCommandBuffers(VkCommandPool pool, u32 count, VkCommandBuffer* buffers)
-	{
-
 	}
 
 	Array<RHI::CommandQueue*> VulkanDevice::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)

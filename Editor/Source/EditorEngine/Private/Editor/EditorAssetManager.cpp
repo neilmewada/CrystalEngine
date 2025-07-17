@@ -65,4 +65,30 @@ namespace CE::Editor
     {
 		assetRegistry->OnDirectoryAndAssetsDeleted(paths);
     }
+
+    void EditorAssetManager::OnThumbnailsUpdated(const Array<Name>& assetPaths)
+    {
+		for (const auto& assetPath : assetPaths)
+		{
+			Name thumbnailPath = ThumbnailSystem::GetThumbnailPath(assetPath);
+
+			if (loadedImageViewsByPath.KeyExists(thumbnailPath))
+			{
+				if (RHI::TextureView* view = loadedImageViewsByPath[thumbnailPath])
+				{
+					RPISystem::Get().QueueDestroy(view);
+					loadedImageViewsByPath.Remove(thumbnailPath);
+
+					delete loadedImageSrgsByPath[thumbnailPath];
+					loadedImageSrgsByPath.Remove(thumbnailPath);
+
+					if (Ref<Bundle> bundle = loadedTempBundlesByPath[thumbnailPath])
+					{
+						bundle->BeginDestroy();
+						loadedTempBundlesByPath.Remove(thumbnailPath);
+					}
+				}
+			}
+		}
+    }
 } // namespace CE::Editor

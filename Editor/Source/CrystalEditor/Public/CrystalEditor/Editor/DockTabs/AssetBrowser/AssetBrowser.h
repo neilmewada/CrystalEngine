@@ -9,7 +9,7 @@ namespace CE::Editor
 
 
     CLASS(Prefs = Editor)
-    class CRYSTALEDITOR_API AssetBrowser : public EditorMinorDockWindow, public IAssetRegistryListener
+    class CRYSTALEDITOR_API AssetBrowser : public EditorMinorDockWindow, public IAssetRegistryListener, public IThumbnailSystemListener
     {
         CE_CLASS(AssetBrowser, EditorMinorDockWindow)
     protected:
@@ -21,6 +21,8 @@ namespace CE::Editor
         void OnBeginDestroy() override;
 
         void OnAssetPathTreeUpdated(PathTree& pathTree) override;
+
+        void OnThumbnailsUpdated(const Array<CE::Name>& assetPaths) override;
 
         void AddTestScene();
 
@@ -41,6 +43,8 @@ namespace CE::Editor
     protected: // - Internal -
 
         void ImportSourceAssets(const Array<IO::Path>& sourceAssetPaths);
+
+        void OnItemSelectionUpdated();
 
         FUNCTION()
         void OnScrollBoxHandleEvent(FEvent* event);
@@ -86,6 +90,7 @@ namespace CE::Editor
 
         Ref<FHorizontalStack> searchBarStack;
         Ref<FButton> addButton;
+        Ref<FLabel> statusBarLabel;
 
         Ref<AssetBrowserGridViewModel> gridViewModel = nullptr;
         Ref<AssetBrowserGridView> gridView;

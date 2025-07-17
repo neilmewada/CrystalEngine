@@ -81,6 +81,19 @@ namespace CE::RHI
 		return 0;
 	}
 
+	u32 GetBitDepthForFormat(RHI::Format format)
+	{
+		for (int i = 0; i < COUNTOF(formatEntries); i++)
+		{
+			if (formatEntries[i].format == format)
+			{
+				return formatEntries[i].bitsPerPixel / formatEntries[i].numChannels;
+			}
+		}
+
+		return 0;
+	}
+
 	CORERHI_API u32 GetNumChannelsForFormat(RHI::Format format)
 	{
 		for (int i = 0; i < COUNTOF(formatEntries); i++)

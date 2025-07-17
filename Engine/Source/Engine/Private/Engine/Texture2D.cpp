@@ -123,7 +123,7 @@ namespace CE
 		RHI::Format rhiFormat = ToRHIFormat(GetPixelFormat());
 		
 		CMImage result = CMImage::LoadRawImageFromMemory(source.GetDataPtr(), width, height, GetCMPixelFormat(), 
-			CMImageSourceFormat::None, 8, GetBitsPerPixelForFormat(rhiFormat));
+			CMImageSourceFormat::None, GetBitDepthForFormat(rhiFormat), GetBitsPerPixelForFormat(rhiFormat));
 
 		return result;
 	}

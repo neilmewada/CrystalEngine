@@ -36,6 +36,7 @@ namespace CE::Editor
 
         constexpr auto splashImage = "/Editor/Assets/UI/Splash";
         constexpr auto gridImage = "/Engine/Resources/Icons/TransparentPattern";
+        constexpr auto thumbnailImage = "/Temp/ThumbnailCache/Game/Assets/Textures/albedo";
 
         instance = this;
 
@@ -226,7 +227,7 @@ namespace CE::Editor
             .fullscreen = false,
             .resizable = false,
             .hidden = true,
-            .windowFlags = PlatformWindowFlags::Utility | PlatformWindowFlags::DestroyOnClose | PlatformWindowFlags::SkipTaskbar
+            .windowFlags = PlatformWindowFlags::Utility | PlatformWindowFlags::DestroyOnClose
         };
 
         Ref<SampleWidgetWindow> sampleWindow = (Ref<SampleWidgetWindow>)FusionApplication::Get()->CreateNativeWindow(
@@ -235,7 +236,6 @@ namespace CE::Editor
             Self::StaticClass(), info);
 
         PlatformWindow* platformWindow = CastTo<FNativeContext>(sampleWindow->GetContext())->GetPlatformWindow();
-        platformWindow->SetAlwaysOnTop(true);
 
         platformWindow->Show();
         return sampleWindow.Get();

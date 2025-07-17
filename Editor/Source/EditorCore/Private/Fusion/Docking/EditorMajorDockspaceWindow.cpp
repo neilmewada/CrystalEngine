@@ -14,7 +14,7 @@ namespace CE::Editor
         
     }
 
-    bool EditorMajorDockspaceWindow::OpenEditor(Ref<Object> targetObject)
+    bool EditorMajorDockspaceWindow::OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle)
     {
         if (!targetObject)
             return false;
@@ -68,13 +68,13 @@ namespace CE::Editor
             }
         }
 
-        bool success = false;
+        bool success;
 
         if (existingEditorIndex != -1)
         {
 			rootSplit->SetActiveTab(existingEditorIndex);
 
-            success = existingEditor->OpenEditor(targetObject);
+            success = existingEditor->OpenEditor(targetObject, bundle);
         }
         else
         {
@@ -85,7 +85,7 @@ namespace CE::Editor
             rootSplit->AddDockWindow(editor);
 			rootSplit->SetActiveTab(rootSplit->GetTabbedDockWindowCount() - 1);
 
-            success = editor->OpenEditor(targetObject);
+            success = editor->OpenEditor(targetObject, bundle);
         }
 
         if (success)
@@ -107,7 +107,10 @@ namespace CE::Editor
             return false;
 
         Ref<Asset> asset = AssetManager::Get()->LoadAssetAtPath(assetPath);
-        return OpenEditor(asset);
+        if (!asset)
+			return false;
+
+        return OpenEditor(asset, asset->GetBundle());
     }
 
     bool EditorMajorDockspaceWindow::SelectActiveEditor(Ref<EditorBase> targetEditor)

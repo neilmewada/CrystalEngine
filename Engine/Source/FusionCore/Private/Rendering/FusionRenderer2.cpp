@@ -1802,7 +1802,7 @@ namespace CE
     {
         ZoneScoped;
 
-        // TODO: Add support for more than 65,536 vertices
+        // TODO: Add support for single item more than 65,536 vertices
 
         u32 curVertexCount = vertexArray.GetCount();
 
@@ -1940,6 +1940,7 @@ namespace CE
 
         u32 color;
         FDrawType drawType = DRAW_Geometry;
+        bool usesTextureSrgOverride = false;
 
         if (currentBrush.GetBrushStyle() == FBrushStyle::Image && minMaxPos != nullptr)
         {
@@ -1964,13 +1965,13 @@ namespace CE
 
             String imageName = currentBrush.GetImageName().GetString();
 
-            auto image = app->GetImageAtlas()->FindImage(currentBrush.GetImageName());
+            FImageAtlas::ImageItem image = app->GetImageAtlas()->FindImage(currentBrush.GetImageName());
             if (!image.IsValid())
             {
-                CMImage imageAsset = app->LoadImageAsset(currentBrush.GetImageName());
+	            CMImage imageAsset = app->LoadImageAsset(currentBrush.GetImageName());
                 if (imageAsset.IsValid())
                 {
-                    image = app->GetImageAtlas()->AddImage(currentBrush.GetImageName(), imageAsset);
+                	image = app->GetImageAtlas()->AddImage(currentBrush.GetImageName(), imageAsset);
                 }
             }
 
@@ -1992,6 +1993,27 @@ namespace CE
                             image = { .layerIndex = layerIndex, .uvMin = Vec2(0, 0), .uvMax = Vec2(1, 1), .width = fontAtlas->GetAtlasSize(), .height = fontAtlas->GetAtlasSize() };
                         }
                     }
+                }
+            }
+
+            if (!image.IsValid() && currentBrush.GetImageName().GetString().StartsWith("/Temp"))
+            {
+                auto [textureView, textureSrgOverride] = app->LoadRawTextureAtPath(currentBrush.GetImageName());
+                if (textureView && textureSrgOverride && textureView->GetTexture())
+                {
+					RHI::Texture* rhiTexture = textureView->GetTexture();
+
+                    AddDrawCmd();
+
+                    drawCmdList.Last().textureSrgOverride = textureSrgOverride;
+
+                    image.layerIndex = 0;
+					image.width = rhiTexture->GetWidth();
+					image.height = rhiTexture->GetHeight();
+					image.uvMin = Vec2(0, 0);
+					image.uvMax = Vec2(1, 1);
+
+                    usesTextureSrgOverride = true;
                 }
             }
 
@@ -2314,6 +2336,11 @@ namespace CE
 
             vertexCurrentIdx += vertexCount;
             drawCmdList.Last().numIndices += indexCount;
+        }
+
+        if (usesTextureSrgOverride)
+        {
+            AddDrawCmd();
         }
     }
 

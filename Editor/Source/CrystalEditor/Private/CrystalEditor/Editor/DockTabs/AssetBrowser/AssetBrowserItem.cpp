@@ -163,13 +163,25 @@ namespace CE::Editor
             Array<String> split;
             assetData->assetClassTypeName.GetString().Split({ "::", "." }, split);
 
-            ClassType* assetClass = ClassType::FindClass(assetData->assetClassTypeName);
-            if (assetClass != nullptr)
+            CE::Name thumbnailPath = ThumbnailSystem::GetThumbnailPath(assetData->bundlePath);
+			IO::Path thumbnailAbsolutePath = Bundle::GetAbsoluteBundlePath(thumbnailPath);
+            if (thumbnailAbsolutePath.Exists())
             {
-                AssetDefinition* assetDef = GetAssetDefinitionRegistry()->FindAssetDefinition(assetClass);
-                if (assetDef)
+                FBrush thumbnail = FBrush(thumbnailPath);
+                icon->Background(thumbnail);
+                icon->Width(56);
+				icon->Height(56);
+            }
+            else
+            {
+                ClassType* assetClass = ClassType::FindClass(assetData->assetClassTypeName);
+                if (assetClass != nullptr)
                 {
-                    icon->Background(FBrush(assetDef->GetIconPath()));
+                    AssetDefinition* assetDef = GetAssetDefinitionRegistry()->FindAssetDefinition(assetClass);
+                    if (assetDef)
+                    {
+                        icon->Background(FBrush(assetDef->GetIconPath()));
+                    }
                 }
             }
 
@@ -194,7 +206,7 @@ namespace CE::Editor
 
         titleLabelParent->Enabled(false);
 
-        titleInput->StartEditing(true);
+        titleInput->StartEditing(true, true);
         titleInput->Focus();
     }
 
