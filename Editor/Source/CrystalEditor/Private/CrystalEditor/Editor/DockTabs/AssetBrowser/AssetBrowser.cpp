@@ -469,7 +469,14 @@ namespace CE::Editor
         {
 	        Array<AssetBrowserItem*> selectedItems = gridView->GetSelectedItems();
             AssetBrowserItem* item = selectedItems[0];
-            statusBarLabel->Text(item->GetItemName().GetString());
+            if (item->IsDirectory())
+            {
+                statusBarLabel->Text(item->GetItemName().GetString());
+            }
+            else
+            {
+                statusBarLabel->Text(String::Format("{} [{}]", item->GetItemName(), item->GetSubtitleText()));
+            }
         }
         else
         {

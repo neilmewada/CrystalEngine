@@ -135,6 +135,7 @@ namespace CE
             if (nativeContext->GetPlatformWindow() == window)
             {
                 borderWidget->Padding(Vec4(1, 1, 1, 1) * 6.0f);
+                maximizeButton->SetMaximizedState(window->IsMaximized());
 			}
 		}
     }
@@ -146,6 +147,7 @@ namespace CE
             if (nativeContext->GetPlatformWindow() == window)
             {
                 borderWidget->Padding(Vec4(1, 1, 1, 1) * 2.0f);
+                maximizeButton->SetMaximizedState(window->IsMaximized());
             }
         }
     }

@@ -27,7 +27,7 @@ namespace CE::Editor
                 FAssignNew(FStyledWidget, iconBg)
                 .Background(Color::Black())
                 .BackgroundShape(FRoundedRectangle(5, 5, 0, 0))
-                .Height(70)
+                .Height(68)
                 (
                     FAssignNew(FStyledWidget, icon)
                     .Background(FBrush("/Editor/Assets/Icons/Folder_Large"))
@@ -36,6 +36,10 @@ namespace CE::Editor
                     .HAlign(HAlign::Center)
                     .VAlign(VAlign::Center)
                 ),
+
+                FAssignNew(FStyledWidget, colorTag)
+                .Background(Color::Cyan())
+                .Height(2.5f),
 
                 FAssignNew(FCompoundWidget, titleLabelParent)
                 .ClipChildren(true)
@@ -150,6 +154,7 @@ namespace CE::Editor
         titleLabel->HAlign(isDirectory ? HAlign::Center : HAlign::Left);
         titleLabel->Margin(isDirectory ? Vec4() : Vec4(2.5f, 0, 2.5f, 0));
 
+        colorTag->Visible(!isDirectory);
         iconBg->Background(isDirectory ? Color::Clear() : Color::Black());
         subtitleLabel->Visible(!isDirectory);
         auto assetData = (AssetData*)node->userData;
@@ -165,23 +170,27 @@ namespace CE::Editor
 
             CE::Name thumbnailPath = ThumbnailSystem::GetThumbnailPath(assetData->bundlePath);
 			IO::Path thumbnailAbsolutePath = Bundle::GetAbsoluteBundlePath(thumbnailPath);
+            bool thumbnailFound = false;
             if (thumbnailAbsolutePath.Exists())
             {
+				thumbnailFound = true;
                 FBrush thumbnail = FBrush(thumbnailPath);
                 icon->Background(thumbnail);
                 icon->Width(56);
 				icon->Height(56);
             }
-            else
+
+            ClassType* assetClass = ClassType::FindClass(assetData->assetClassTypeName);
+            if (assetClass != nullptr)
             {
-                ClassType* assetClass = ClassType::FindClass(assetData->assetClassTypeName);
-                if (assetClass != nullptr)
+                AssetDefinition* assetDef = GetAssetDefinitionRegistry()->FindAssetDefinition(assetClass);
+                if (assetDef)
                 {
-                    AssetDefinition* assetDef = GetAssetDefinitionRegistry()->FindAssetDefinition(assetClass);
-                    if (assetDef)
+                    if (!thumbnailFound)
                     {
-                        icon->Background(FBrush(assetDef->GetIconPath()));
+	                    icon->Background(FBrush(assetDef->GetIconPath()));
                     }
+                    colorTag->Background(assetDef->GetColorTag());
                 }
             }
 
