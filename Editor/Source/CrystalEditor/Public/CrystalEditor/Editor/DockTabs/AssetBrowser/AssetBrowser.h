@@ -24,10 +24,6 @@ namespace CE::Editor
 
         void OnThumbnailsUpdated(const Array<CE::Name>& assetPaths) override;
 
-        void AddTestScene();
-
-        void CreateTestThumbnail();
-
     public: // - Public API -
 
         void SetCurrentPath(const CE::Name& path);

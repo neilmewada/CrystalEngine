@@ -110,14 +110,14 @@ namespace CE::Editor
                                 .Text("Option 1")
                                 .OnClick([this]
                                 {
-                                    AddTestScene();
+
                                 }),
 
                                 FNew(FMenuItem)
                                 .Text("Option 2")
                                 .OnClick([this]
                                 {
-                                    CreateTestThumbnail();
+
                                 })
                             )
                             .BlockInteraction(false)
@@ -210,171 +210,6 @@ namespace CE::Editor
     void AssetBrowser::OnThumbnailsUpdated(const Array<CE::Name>& assetPaths)
     {
         gridView->OnUpdate();
-    }
-
-    void AssetBrowser::AddTestScene()
-    {
-        Ref<AssetManager> assetManager = gEngine->GetAssetManager();
-
-        Ref<CE::Scene> viewportScene = CreateObject<CE::Scene>(this, "OffscreenScene");
-
-        Ref<TextureCube> skybox = assetManager->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_day");
-
-        Ref<CE::Shader> standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
-        Ref<CE::Shader> skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
-
-        viewportScene->SetSkyboxCubeMap(skybox.Get());
-
-        CE::Material* aluminumMaterial = CreateObject<CE::Material>(viewportScene.Get(), "AluminumMaterial");
-        aluminumMaterial->SetShader(standardShader.Get());
-        {
-            Ref<CE::Texture> albedoTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/albedo");
-            Ref<CE::Texture> normalTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/normal");
-            Ref<CE::Texture> metallicTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/metallic");
-            Ref<CE::Texture> roughnessTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/Aluminum/roughness");
-
-            aluminumMaterial->SetProperty("_AlbedoTex", albedoTex);
-            aluminumMaterial->SetProperty("_NormalTex", normalTex);
-            aluminumMaterial->SetProperty("_MetallicTex", metallicTex);
-            aluminumMaterial->SetProperty("_RoughnessTex", roughnessTex);
-            aluminumMaterial->ApplyProperties();
-        }
-
-        Ref<StaticMesh> sphereMesh = CreateObject<StaticMesh>(viewportScene.Get(), "Mat_SphereMesh");
-        {
-            RPI::ModelAsset* sphereModel = CreateObject<RPI::ModelAsset>(sphereMesh.Get(), "Mat_SphereModel");
-            RPI::ModelLodAsset* sphereLodAsset = RPI::ModelLodAsset::CreateSphereAsset(sphereModel);
-            sphereModel->AddModelLod(sphereLodAsset);
-
-            sphereMesh->SetModelAsset(sphereModel);
-        }
-
-        Ref<StaticMeshActor> sphereActor = CreateObject<StaticMeshActor>(viewportScene.Get(), "Mat_SphereMesh");
-        viewportScene->AddActor(sphereActor.Get());
-        {
-            auto sphereMeshComponent = sphereActor->GetMeshComponent();
-            sphereMeshComponent->SetStaticMesh(sphereMesh);
-            sphereMeshComponent->SetLocalPosition(Vec3(0, 0, 1.5f));
-            sphereMeshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
-            sphereMeshComponent->SetMaterial(aluminumMaterial, 0, 0);
-        }
-
-        Ref<CameraActor> camera = CreateObject<CameraActor>(viewportScene.Get(), "Mat_Camera");
-        camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 0));
-    	camera->GetCameraComponent()->GetRenderPipeline()->clearColor = Color::RGBA(0, 0, 0, 0);
-        camera->GetCameraComponent()->GetRenderPipeline()->MarkDirty();
-    	viewportScene->AddActor(camera.Get());
-
-        Ref<SceneRenderer> sceneRenderer = CreateObject<SceneRenderer>(this, "SceneRenderer");
-        sceneRenderer->SetScene(viewportScene);
-        sceneRenderer->SetOneShot(true);
-
-        constexpr u32 ThumbnailSize = 128;
-
-        sceneRenderer->onRenderFinished += [](Ref<SceneRenderer> sceneRenderer)
-            {
-                CE_LOG(Info, All, "Offscreen scene rendered!");
-				
-                RHI::BufferDescriptor bufferDescriptor{};
-                bufferDescriptor.name = "Staging Buffer";
-                bufferDescriptor.defaultHeapType = MemoryHeapType::ReadBack;
-                bufferDescriptor.bindFlags = BufferBindFlags::StagingBuffer;
-                bufferDescriptor.bufferSize = ThumbnailSize * ThumbnailSize * 4;
-
-                RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDescriptor);
-
-                RHI::Texture* image = sceneRenderer->GetOutputImage(0);
-
-                RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
-                RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue, CommandListType::Direct);
-                RHI::Fence* fence = RHI::gDynamicRHI->CreateFence();
-
-                cmdList->Begin();
-                {
-                    RHI::ResourceBarrierDescriptor barrier{};
-                    barrier.subresourceRange = RHI::SubresourceRange::All();
-                    barrier.resource = image;
-                    barrier.fromState = ResourceState::ColorOutput;
-                    barrier.toState = ResourceState::CopySource;
-                    cmdList->ResourceBarrier(1, &barrier);
-
-                    barrier.resource = stagingBuffer;
-                    barrier.fromState = ResourceState::Undefined;
-                    barrier.toState = ResourceState::CopyDestination;
-                    cmdList->ResourceBarrier(1, &barrier);
-
-                    RHI::TextureToBufferCopy copyRegion;
-                    copyRegion.srcTexture = image;
-                    copyRegion.baseArrayLayer = 0;
-                    copyRegion.layerCount = 1;
-                    copyRegion.mipSlice = 0;
-                    copyRegion.dstBuffer = stagingBuffer;
-                    copyRegion.bufferOffset = 0;
-
-                    cmdList->CopyTextureRegion(copyRegion);
-
-                    barrier.resource = image;
-                    barrier.fromState = ResourceState::CopySource;
-                    barrier.toState = ResourceState::ColorOutput;
-                    cmdList->ResourceBarrier(1, &barrier);
-
-                }
-                cmdList->End();
-
-                queue->Execute(1, &cmdList, fence);
-                fence->WaitForFence();
-
-                RHI::gDynamicRHI->DestroyFence(fence);
-                RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
-
-                void* data;
-                stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &data);
-                {
-                    IO::Path outFile = PlatformDirectories::GetLaunchDir() / "Temp/TestImage.png";
-                    CMImage rawImage = CMImage::LoadRawImageFromMemory((unsigned char*)data, ThumbnailSize, ThumbnailSize, CMImageFormat::RGBA8, CMImageSourceFormat::None, 8, 8 * 4);
-                    bool success = rawImage.EncodeToPNG(outFile);
-                    CE_LOG(Info, All, "Encode PNG Result: {}", success);
-                }
-                stagingBuffer->Unmap();
-
-                RHI::gDynamicRHI->DestroyBuffer(stagingBuffer);
-            };
-
-        RHI::TextureDescriptor desc{};
-        desc.width = desc.height = ThumbnailSize;
-        desc.depth = 1;
-        desc.format = RHI::Format::R8G8B8A8_UNORM;
-        desc.name = "Offscreen Scene";
-        desc.dimension = Dimension::Dim2D;
-        desc.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
-        desc.sampleCount = 1;
-
-        RHI::Texture* image = RHI::gDynamicRHI->CreateTexture(desc);
-
-        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; ++i)
-        {
-            sceneRenderer->SetOutputImage(i, image);
-        }
-
-        gEngine->EnqueueSceneRenderer(sceneRenderer);
-    }
-
-    void AssetBrowser::CreateTestThumbnail()
-    {
-        if (!textureAssetThumbnailGen)
-        {
-            textureAssetThumbnailGen = CreateObject<TextureAssetThumbnailGen>(this, "TextureThumbnailGenerator");
-        }
-
-        textureAssetThumbnailGen->SetAssetPaths({ "/Engine/Assets/Textures/RustedIron/albedo" });
-        
-        textureAssetThumbnailGen->onFinishEvent += [this](Ref<AssetThumbnailGen> gen)
-        {
-            CE_LOG(Info, All, "Texture thumbnail generation finished!");
-            textureAssetThumbnailGen = nullptr;
-		};
-
-        textureAssetThumbnailGen->StartProcessing();
     }
 
     void AssetBrowser::OnDirectorySelectionChanged(FItemSelectionModel* selectionModel)

@@ -219,4 +219,24 @@ namespace CE::Editor
 		return retVal;
 	}
 
+	bool WindowsEditorPlatform::OpenPathInFileExplorer(const IO::Path& path)
+	{
+		if (!path.Exists())
+			return false;
+
+		std::wstring widePath = ToWString(path.GetString().Replace({ '/' }, '\\'));
+
+		if (path.IsDirectory())
+		{
+			ShellExecuteW(nullptr, L"open", widePath.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+		}
+		else
+		{
+			std::wstring param = L"/select,\"" + widePath + L"\"";
+			ShellExecuteW(nullptr, L"open", L"explorer.exe", param.c_str(), nullptr, SW_SHOWNORMAL);
+		}
+
+		return true;
+	}
+
 } // namespace CE::Editor

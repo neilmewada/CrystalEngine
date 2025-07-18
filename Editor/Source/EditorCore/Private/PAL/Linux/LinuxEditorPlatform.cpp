@@ -46,5 +46,24 @@ namespace CE::Editor
     {
         return PlatformDirectories::GetLaunchDir() / GetEditorExecutableName();
     }
+
+    bool LinuxEditorPlatform::OpenPathInFileExplorer(const IO::Path& path)
+    {
+        if (!path.Exists())
+            return false;
+
+        std::string pathStr = path.GetString();
+
+        // Escape quotes in path
+        std::string escapedPath = "\"";
+        escapedPath += pathStr;
+        escapedPath += "\"";
+
+        std::string command = "xdg-open " + escapedPath;
+
+        int result = std::system(command.c_str());
+        return result == 0;
+    }
+
 } // namespace CE::Editor
 

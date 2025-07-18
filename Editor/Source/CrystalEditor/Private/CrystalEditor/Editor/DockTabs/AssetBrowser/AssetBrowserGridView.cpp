@@ -206,7 +206,6 @@ namespace CE::Editor
         if (selectedItems.IsEmpty())
             return;
 
-        //Ref<EditorMenuPopup> contextMenu = CreateObject<EditorMenuPopup>(this, "ContextMenu");
         contextMenu->QueueDestroyAllItems();
 
         contextMenu->MinWidth(MinContextMenuWidth);
@@ -296,6 +295,17 @@ namespace CE::Editor
                 {
                     owner->CreateNewAsset<CE::Material>();
                 }
+            }),
+
+            FNew(FMenuItemSeparator)
+            .Title("MISC"),
+
+			NewMenuItem()
+            .Text("Open in " + PlatformMisc::GetSystemFileExplorerDisplayName())
+            .Icon(FBrush("/Editor/Assets/Icons/OpenFolder"))
+            .OnClick([this]
+            {
+                EditorPlatform::OpenPathInFileExplorer(Bundle::GetAbsoluteDirectoryPath(currentPath));
             })
         );
 
@@ -312,6 +322,8 @@ namespace CE::Editor
         bool canBeModified = true;
         bool homogenousTypes = true;
         PathTreeNodeType itemType = (PathTreeNodeType)-1;
+        CE::Name fullPath = selectedItems[0]->GetFullPath();
+		IO::Path absolutePath = Bundle::GetAbsoluteBundlePath(fullPath);
 
         for (AssetBrowserItem* item : selectedItems)
         {
@@ -364,6 +376,20 @@ namespace CE::Editor
                 .OnClick(FUNCTION_BINDING(this, DeleteSelectedItems))
             );
         }
+
+        contextMenu
+        .Content(
+            FNew(FMenuItemSeparator)
+            .Title("MISC"),
+
+            NewMenuItem()
+            .Text("Open in " + PlatformMisc::GetSystemFileExplorerDisplayName())
+            .Icon(FBrush("/Editor/Assets/Icons/OpenFolder"))
+            .OnClick([this, absolutePath]
+            {
+                EditorPlatform::OpenPathInFileExplorer(absolutePath);
+            })
+        );
 
         return true;
     }

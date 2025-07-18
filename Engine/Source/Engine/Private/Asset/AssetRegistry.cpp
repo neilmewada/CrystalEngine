@@ -132,7 +132,6 @@ namespace CE
 		listeners.Remove(listener);
 	}
 
-
 	void AssetRegistry::OnAssetImported(const IO::Path& bundleAbsolutePath, const Name& sourcePath)
 	{
 		LockGuard guard{ cacheMutex };
@@ -484,7 +483,8 @@ namespace CE
 			if (assetManager->loadedAssetsByPath.KeyExists(originalPath))
 			{
 				bundleLoaded = true;
-				assetManager->loadedAssetsByPath[newPath] = assetManager->loadedAssetsByPath[originalPath];
+				Ref<Bundle> oldBundle = assetManager->loadedAssetsByPath[originalPath];
+				assetManager->loadedAssetsByPath[newPath] = oldBundle;
 				assetManager->loadedAssetsByPath.Remove(originalPath);
 
 				bundle = assetManager->loadedAssetsByPath[newPath];
