@@ -24,6 +24,8 @@ namespace CE
         }
 
         static String GetOSVersionString();
+
+        static String GetSystemFileExplorerDisplayName();
     };
 
     typedef MacMisc PlatformMisc;

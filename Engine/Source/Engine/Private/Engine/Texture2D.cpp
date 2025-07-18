@@ -34,9 +34,13 @@ namespace CE
 				{
 				case TextureSourceCompressionFormat::BC1:
 					desc.texture.format = RHI::Format::BC1_RGB_UNORM;
+					if (colorSpace == TextureColorSpace::SRGB)
+						desc.texture.format = RHI::Format::BC1_RGB_SRGB;
 					break;
 				case TextureSourceCompressionFormat::BC3:
 					desc.texture.format = RHI::Format::BC3_UNORM;
+					if (colorSpace == TextureColorSpace::SRGB)
+						desc.texture.format = RHI::Format::BC3_SRGB;
 					break;
 				case TextureSourceCompressionFormat::BC4:
 					desc.texture.format = RHI::Format::BC4_UNORM;
@@ -49,12 +53,14 @@ namespace CE
 					break;
 				case TextureSourceCompressionFormat::BC7:
 					desc.texture.format = RHI::Format::BC7_UNORM;
+					if (colorSpace == TextureColorSpace::SRGB)
+						desc.texture.format = RHI::Format::BC7_SRGB;
 					break;
 				}
 			}
 			else
 			{
-				desc.texture.format = ToRHIFormat(pixelFormat);
+				desc.texture.format = ToRHIFormat(pixelFormat, colorSpace == TextureColorSpace::SRGB);
 			}
 			
 			desc.source = &source;

@@ -41,6 +41,10 @@ namespace CE
 		FIELD()
 		u32 arrayCount = 1;
 
+	public:
+
+		CE_PROPERTY(ColorSpace, colorSpace);
+
 #if PAL_TRAIT_BUILD_EDITOR
 		friend class CE::Editor::TextureAssetImportJob;
 		friend class CE::Editor::FontAssetImportJob;

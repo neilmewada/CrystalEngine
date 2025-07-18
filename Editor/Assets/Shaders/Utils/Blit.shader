@@ -55,7 +55,8 @@ Shader "Utils/Blit"
 
             float4 FragMain(PSInput input) : SV_Target
             {
-                return _InputTexture.Sample(_InputSampler, input.uv);
+                float4 color = _InputTexture.Sample(_InputSampler, input.uv);
+                return color;
             }
 
             #endif

@@ -25,6 +25,7 @@ namespace CE::Editor
 
 		Ref<Bundle> thumbnailAsset = CreateObject<Bundle>(nullptr, objectName, OF_NoFlags);
         Ref<CE::Texture2D> thumbnailTexture = Texture2D::Create(thumbnailAsset, "Thumbnail", rawImage);
+        thumbnailTexture->SetColorSpace(TextureColorSpace::None);
 
         BundleSaveResult result = Bundle::SaveToDisk(thumbnailAsset, nullptr, thumbnailPath);
 
