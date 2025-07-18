@@ -230,7 +230,7 @@ namespace CE::Editor
 
     void ObjectEditorField::OnThumbnailsUpdated(const Array<CE::Name>& assetPaths)
     {
-	    
+        UpdateValue();
     }
 
     bool ObjectEditorField::CanBind(FieldType* field)
