@@ -28,8 +28,8 @@ PSInput VertMain(VSInput input)
 
 #if FRAGMENT
 
-Texture2D<float> _FontGlyph : SRG_PerMaterial(t0);
-SamplerState _FontGlyphSampler : SRG_PerMaterial(s1);
+Texture2D<float> _FontAtlas : SRG_PerMaterial(t0);
+SamplerState _FontAtlasSampler : SRG_PerMaterial(s1);
 
 inline uint GetPixelState(float2 uv, float w, float h)
 {
@@ -45,7 +45,7 @@ inline uint GetPixelState(float2 uv, float w, float h)
         for (float y = -spread; y <= spread; y++)
         {
             float2 localUV = uv + float2(float(x) / w, float(y) / h);
-            value += _FontGlyph.Sample(_FontGlyphSampler, localUV).r;
+            value += _FontAtlas.Sample(_FontAtlasSampler, localUV).r;
             value /= count;
         }
     }
@@ -56,7 +56,7 @@ inline uint GetPixelState(float2 uv, float w, float h)
 float4 FragMain(PSInput input) : SV_TARGET
 {
     uint w; uint h;
-    _FontGlyph.GetDimensions(w, h);
+    _FontAtlas.GetDimensions(w, h);
 
     const int spread = 7;
     const float stepSize = 0.1;

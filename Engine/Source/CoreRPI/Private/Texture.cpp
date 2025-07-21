@@ -128,13 +128,13 @@ namespace CE::RPI
         UploadData(data, dataSize);
     }
 
-    Texture::Texture(const Array<CMImage>& sourceImageMips, const RHI::SamplerDescriptor& samplerDesc)
+    Texture::Texture(const Name& imageName, const Array<CMImage>& sourceImageMips, const RHI::SamplerDescriptor& samplerDesc)
     {
         if (sourceImageMips.IsEmpty())
             return;
 
         RHI::TextureDescriptor desc{};
-        desc.name = "CMImage";
+        desc.name = imageName;
         desc.bindFlags = RHI::TextureBindFlags::ShaderRead;
         desc.mipLevels = sourceImageMips.GetSize();
         desc.arrayLayers = 1;

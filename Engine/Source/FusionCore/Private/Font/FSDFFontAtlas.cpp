@@ -13,24 +13,74 @@ namespace CE
 
     FSDFFontAtlas::FSDFFontAtlas()
     {
-
+        padding = 32;
     }
 
     void FSDFFontAtlas::Init(const FSDFFontAtlasInitInfo& initInfo)
     {
         ZoneScoped;
 
-        if (atlasImageMips.NotEmpty())
+        if (atlasImageLayers.NotEmpty())
             return;
 
 		sdfGlyphShader = initInfo.sdfGlyphShader;
 
+        RHI::ShaderResourceGroupLayout perMaterialLayout = sdfGlyphShader->GetDefaultVariant()->GetSrgLayout(SRGType::PerMaterial);
+		sdfSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perMaterialLayout);
+
+        f32 unitsPerEM = regular->units_per_EM;
+        f32 scaleFactor = 1.0f / unitsPerEM; // 1.0f is used as a font size here
+
+        metrics.ascender = regular->ascender * scaleFactor;
+        metrics.descender = regular->descender * scaleFactor;
+        metrics.lineGap = (regular->height - (regular->ascender - regular->descender)) * scaleFactor;
+        metrics.lineHeight = (regular->ascender - regular->descender + metrics.lineGap) * scaleFactor;
+
         Ptr<FAtlasImage> atlas = new FAtlasImage;
         atlas->ptr = new u8[FontAtlasSize * FontAtlasSize];
         memset(atlas->ptr, 0, FontAtlasSize * FontAtlasSize);
-        atlas->resolution = FontAtlasSize;
+        atlas->atlasSize = FontAtlasSize;
 
-        atlasImageMips.Add(atlas);
+        atlasImageLayers.Add(atlas);
+
+        RHI::RenderTargetLayout rtLayout{};
+        rtLayout.attachmentLayouts.Add({
+            .attachmentId = "ColorOutput",
+            .attachmentUsage = ScopeAttachmentUsage::Color,
+            .format = Format::R8_UNORM,
+            .multisampleState = { .sampleCount = 1, .quality = 1 },
+            .loadAction = AttachmentLoadAction::Clear,
+            .storeAction = AttachmentStoreAction::Store,
+            .loadActionStencil = AttachmentLoadAction::DontCare,
+            .storeActionStencil = AttachmentStoreAction::DontCare
+        });
+
+		sdfRenderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+
+        for (int i = 0; i < flushRequiredPerImage.GetSize(); ++i)
+        {
+			flushRequiredPerImage[i] = true;
+        }
+
+        AddGlyphs(initInfo.characterSet);
+    }
+
+    void FSDFFontAtlas::OnBeginDestroy()
+    {
+        Super::OnBeginDestroy();
+
+        if (RHI::gDynamicRHI == nullptr)
+			return;
+        if (IsDefaultInstance())
+            return;
+
+		delete atlasTexture; atlasTexture = nullptr;
+
+		RHI::gDynamicRHI->DestroyShaderResourceGroup(sdfSrg);
+		sdfSrg = nullptr;
+
+		RHI::gDynamicRHI->DestroyRenderTarget(sdfRenderTarget);
+        sdfRenderTarget = nullptr;
     }
 
     void FSDFFontAtlas::Flush(u32 imageIndex)
@@ -46,7 +96,118 @@ namespace CE
 
             delete atlasTexture; atlasTexture = nullptr;
 
+            Array<CMImage> images;
+            images.Reserve(atlasImageLayers.GetSize());
 
+            for (FAtlasImage* atlasImageLayer : atlasImageLayers)
+            {
+                CMImage image = CMImage::LoadRawImageFromMemory(atlasImageLayer->ptr, atlasImageLayer->atlasSize, atlasImageLayer->atlasSize,
+                    CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
+                images.Add(image);
+            }
+
+            RPI::Texture* sourceImage = new RPI::Texture("SDF Source Atlas", images, SamplerDescriptor{
+                .addressModeU = SamplerAddressMode::ClampToBorder,
+                .addressModeV = SamplerAddressMode::ClampToBorder,
+                .addressModeW = SamplerAddressMode::ClampToBorder,
+                .samplerFilterMode = FilterMode::Linear,
+                .borderColor = SamplerBorderColor::FloatTransparentBlack,
+                .enableAnisotropy = false, .maxAnisotropy = 0 });
+
+			RPI::TextureDescriptor outputDesc{};
+			outputDesc.texture.arrayLayers = atlasImageLayers.GetSize();
+            outputDesc.texture.mipLevels = 1;
+			outputDesc.texture.width = atlasImageLayers[0]->atlasSize;
+			outputDesc.texture.height = atlasImageLayers[0]->atlasSize;
+            outputDesc.texture.depth = 1;
+			outputDesc.texture.format = Format::R8_UNORM;
+            outputDesc.texture.defaultHeapType = MemoryHeapType::Default;
+            outputDesc.texture.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
+            outputDesc.texture.dimension = Dimension::Dim2D;
+            outputDesc.texture.sampleCount = 1;
+			outputDesc.texture.name = "SDF Font Atlas";
+
+			outputDesc.samplerDesc.addressModeU = outputDesc.samplerDesc.addressModeV = outputDesc.samplerDesc.addressModeW = SamplerAddressMode::ClampToBorder;
+			outputDesc.samplerDesc.borderColor = SamplerBorderColor::FloatTransparentBlack;
+			outputDesc.samplerDesc.enableAnisotropy = false;
+			outputDesc.samplerDesc.samplerFilterMode = FilterMode::Linear;
+
+            atlasTexture = new RPI::Texture(outputDesc);
+
+			RHI::Fence* fence = RHI::gDynamicRHI->CreateFence();
+
+            sdfSrg->Bind("_FontAtlas", sourceImage->GetRhiTexture());
+			sdfSrg->Bind("_FontAtlasSampler", sourceImage->GetSamplerState());
+			sdfSrg->FlushBindings();
+
+            RHI::RenderTargetBuffer* frameBuffer = RHI::gDynamicRHI->CreateRenderTargetBuffer(sdfRenderTarget, { atlasTexture->GetRhiTexture() });
+
+            RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+            RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
+
+            const auto& fullScreenQuad = RPISystem::Get().GetFullScreenQuad();
+            DrawLinearArguments fullScreenQuadArgs = RPISystem::Get().GetFullScreenQuadDrawArgs();
+
+            cmdList->Begin();
+            {
+                RHI::ResourceBarrierDescriptor barrier{};
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+
+                barrier.resource = atlasTexture->GetRhiTexture();
+				barrier.fromState = ResourceState::Undefined;
+				barrier.toState = ResourceState::ColorOutput;
+                cmdList->ResourceBarrier(1, &barrier);
+
+				AttachmentClearValue clear{};
+				clear.clearValue = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+                cmdList->BeginRenderTarget(sdfRenderTarget, frameBuffer, &clear);
+				{
+                    RHI::ViewportState viewport{};
+                    viewport.x = viewport.y = 0;
+                    viewport.width = atlasTexture->GetWidth();
+                    viewport.height = atlasTexture->GetHeight();
+                    viewport.minDepth = 0.0f; viewport.maxDepth = 1.0f;
+                    cmdList->SetViewports(1, &viewport);
+
+                    RHI::ScissorState scissor{};
+                    scissor.x = scissor.y = 0;
+                    scissor.width = viewport.width;
+                    scissor.height = viewport.height;
+                    cmdList->SetScissors(1, &scissor);
+
+                    GraphicsPipelineVariant pipelineVariant{
+                        .sampleState = { .sampleCount = 1, .quality = 1 },
+                        .colorFormats = { RHI::Format::R8_UNORM },
+						.depthStencilFormat = RHI::Format::Undefined,
+					};
+                    RHI::PipelineState* pipeline = sdfGlyphShader->GetDefaultVariant()->GetPipeline(pipelineVariant);
+
+					cmdList->BindPipelineState(pipeline);
+
+                	cmdList->SetShaderResourceGroup(sdfSrg);
+                    cmdList->CommitShaderResources();
+
+                    cmdList->BindVertexBuffers(0, fullScreenQuad.GetSize(), fullScreenQuad.GetData());
+
+                    cmdList->DrawLinear(fullScreenQuadArgs);
+				}
+                cmdList->EndRenderTarget();
+
+                barrier.resource = atlasTexture->GetRhiTexture();
+                barrier.fromState = ResourceState::ColorOutput;
+                barrier.toState = ResourceState::FragmentShaderResource;
+                cmdList->ResourceBarrier(1, &barrier);
+            }
+            cmdList->End();
+
+            queue->Execute(1, &cmdList, fence);
+            fence->WaitForFence();
+
+            RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
+
+            RHI::gDynamicRHI->DestroyFence(fence);
+			delete frameBuffer; frameBuffer = nullptr;
+			//delete sourceImage; sourceImage = nullptr;
         }
 
 		flushRequiredPerImage[imageIndex] = false;
@@ -85,20 +246,158 @@ namespace CE
         f32 scaling = PlatformApplication::Get()->GetSystemDpiScaling();
 
         FT_Set_Char_Size(face, 0, SDFFontSize << 6, dpi, dpi);
+        
+        FAtlasImage* atlasMip = atlasImageLayers[currentMip];
 
         for (int i = 0; i < charSet.GetSize(); ++i)
         {
             FT_ULong charCode = charSet[i];
             char c = charCode;
 
-            
-        }
+            if (atlasMip->glyphsByCharCode.KeyExists(charCode))
+            {
+                continue;
+            }
 
-        for (int i = 0; i < flushRequiredPerImage.GetSize(); ++i)
-        {
-			flushRequiredPerImage[i] = true;
+            FT_Error error = FT_Load_Char(face, charCode, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_NORMAL);
+            if (error != 0)
+            {
+                continue;
+            }
+
+            FT_Bitmap* bmp = &face->glyph->bitmap;
+
+            FFontGlyphInfo glyph{};
+
+            glyph.charCode = charCode;
+
+            int width = bmp->width;
+            int height = bmp->rows;
+
+            int xOffset = face->glyph->bitmap_left;
+            int yOffset = face->glyph->bitmap_top;
+            int advance = face->glyph->advance.x >> 6;
+
+            int posX, posY;
+            int atlasSize = atlasMip->atlasSize;
+
+            bool foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + 1, height + 1), padding, posX, posY);
+            if (!foundEmptySpot)
+            {
+                currentMip++;
+                atlasSize = FontAtlasSize / (SIZE_T)Math::Pow(2, currentMip);
+
+                atlasMip = new FAtlasImage;
+                atlasMip->ptr = new u8[atlasSize * atlasSize];
+                memset(atlasMip->ptr, 0, atlasSize * atlasSize);
+                atlasMip->atlasSize = (u32)atlasSize;
+
+                atlasImageLayers.Add(atlasMip);
+
+                foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + 1, height + 1), padding, posX, posY);
+            }
+
+            if (!foundEmptySpot)
+            {
+                return;
+            }
+
+            glyph.atlasSize = atlasSize;
+
+            glyph.x0 = posX;
+            glyph.y0 = posY;
+            glyph.x1 = posX + width;
+            glyph.y1 = posY + height;
+
+            glyph.xOffset = xOffset;
+            glyph.yOffset = yOffset;
+            glyph.advance = advance;
+            glyph.fontSize = SDFFontSize;
+            // TODO: index
+            glyph.index = 0;//glyphDataList.GetCount();
+
+            glyph.scalingFactor = 1.0f;
+
+            Vec2 uvMin = Vec2((f32)glyph.x0 / (f32)atlasSize, (f32)glyph.y0 / (f32)atlasSize);
+            Vec2 uvMax = Vec2((f32)glyph.x1 / (f32)atlasSize, (f32)glyph.y1 / (f32)atlasSize);
+
+            if (!nonDisplayCharacters.Exists(charCode))
+            {
+                atlasUpdateRequired = true;
+
+                for (int row = 0; row < bmp->rows; ++row)
+                {
+                    for (int col = 0; col < bmp->width; ++col)
+                    {
+                        int x = posX + col;
+                        int y = posY + row;
+                        atlasMip->ptr[y * atlasSize + x] = bmp->buffer[row * bmp->pitch + col];
+                    }
+                }
+            }
+
+			atlasMip->glyphsByCharCode[charCode] = glyph;
+
+            for (int j = 0; j < flushRequiredPerImage.GetSize(); ++j)
+            {
+                flushRequiredPerImage[j] = true;
+            }
         }
     }
 
+    bool FSDFFontAtlas::FAtlasImage::TryInsertGlyphRect(Vec2i glyphSize, int padding, int& outX, int& outY)
+    {
+        ZoneScoped;
+
+        int bestRowIndex = -1;
+        int bestRowHeight = INT_MAX;
+
+        if (rows.IsEmpty())
+        {
+            rows.Add({ .x = glyphSize.width + padding / 2, .y = padding / 2, .height = glyphSize.height + padding / 2 });
+            outX = padding / 2;
+            outY = padding / 2;
+            return true;
+        }
+
+        for (int i = 0; i < rows.GetSize(); ++i)
+        {
+            int x = rows[i].x;
+            int y = rows[i].y;
+
+            // Check if the glyph fits at this position
+            if (x + glyphSize.width + padding / 2 <= atlasSize && y + glyphSize.height + padding / 2 <= atlasSize)
+            {
+                if (rows[i].height >= glyphSize.height + padding / 2 && rows[i].height + padding / 2 < bestRowHeight)
+                {
+                    bestRowHeight = rows[i].height + padding / 2;
+                    bestRowIndex = i;
+                }
+            }
+        }
+
+        if (bestRowIndex == -1)
+        {
+            RowSegment lastRow = rows.Top();
+            if (lastRow.y + lastRow.height + glyphSize.height + padding / 2 > atlasSize)
+            {
+                return false;
+            }
+
+            rows.Add({ .x = glyphSize.width + padding / 2, .y = lastRow.y + lastRow.height + padding / 2, .height = glyphSize.height + padding / 2 });
+
+            outX = padding / 2;
+            outY = rows.Top().y;
+
+            return true;
+        }
+
+        outX = rows[bestRowIndex].x + padding / 2;
+        outY = rows[bestRowIndex].y;
+
+        rows[bestRowIndex].x += glyphSize.width + padding / 2;
+
+        return true;
+    }
 } // namespace CE
 

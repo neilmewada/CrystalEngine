@@ -28,6 +28,8 @@ namespace CE
 
 	private:
 
+		void OnBeginDestroy() override;
+
         void AddGlyphs(const Array<u32>& characterSet, bool isBold = false, bool isItalic = false);
 
         using CharCode = u32;
@@ -39,12 +41,6 @@ namespace CE
             int height;
         };
 
-        struct GlyphData
-        {
-			RHI::TextureView* view = nullptr;
-			RHI::RenderTargetBuffer* frameBuffer = nullptr;
-        };
-
         struct FAtlasImage : IntrusiveBase
         {
             virtual ~FAtlasImage()
@@ -53,23 +49,45 @@ namespace CE
             }
 
             u8* ptr = nullptr;
-            u32 resolution = 0;
+            u32 atlasSize = 0;
             Array<RowSegment> rows;
 
             HashMap<CharCode, FFontGlyphInfo> glyphsByCharCode;
+
+            bool TryInsertGlyphRect(Vec2i glyphSize, int padding, int& outX, int& outY);
         };
 
+        struct alignas(16) FGlyphData
+        {
+            Vec4 atlasUV;
+            u32 layerIndex = 0;
+        };
 
-        Array<Ptr<FAtlasImage>> atlasImageMips;
+        FIELD()
+        int padding = 16;
+
+        using FGlyphDataList = StableDynamicArray<FGlyphData, 256, false>;
+
+        FGlyphDataList glyphDataList;
+        RPI::DynamicStructuredBuffer<FGlyphData> glyphBuffer;
+
+        Array<Ptr<FAtlasImage>> atlasImageLayers;
         int currentMip = 0;
+
+        HashMap<CharCode, int> arrayLayerByCharCode;
 
         RPI::Shader* sdfGlyphShader = nullptr;
 
         StaticArray<bool, RHI::Limits::MaxSwapChainImageCount> flushRequiredPerImage;
-        bool atlasUpdateRequired = false;
+        bool atlasUpdateRequired = true;
 
         RPI::Texture* atlasTexture = nullptr;
         RHI::ShaderResourceGroup* fontSrg2 = nullptr;
+
+		RHI::RenderTarget* sdfRenderTarget = nullptr;
+		RHI::ShaderResourceGroup* sdfSrg = nullptr;
+
+        FFontMetrics metrics{};
 
         FT_Library ft = nullptr;
         FT_Face regular = nullptr; u8* regularData = nullptr;

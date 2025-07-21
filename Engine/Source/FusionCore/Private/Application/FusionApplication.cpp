@@ -639,13 +639,13 @@ namespace CE
         variantDesc.moduleDesc[1].name = "FragMain";
 
         RHI::SRGVariableDescriptor fontGlyph{};
-        fontGlyph.name = "_FontGlyph";
+        fontGlyph.name = "_FontAtlas";
         fontGlyph.bindingSlot = (u32)fragmentReflection["separate_images"][0]["binding"].GetNumberValue();
         fontGlyph.shaderStages = ShaderStage::Fragment;
         fontGlyph.type = ShaderResourceType::Texture2D;
 
 		RHI::SRGVariableDescriptor fontGlyphSampler{};
-		fontGlyphSampler.name = "_FontGlyphSampler";
+		fontGlyphSampler.name = "_FontAtlasSampler";
 		fontGlyphSampler.bindingSlot = (u32)fragmentReflection["separate_samplers"][0]["binding"].GetNumberValue();
 		fontGlyphSampler.shaderStages = ShaderStage::Fragment;
 		fontGlyphSampler.type = ShaderResourceType::SamplerState;

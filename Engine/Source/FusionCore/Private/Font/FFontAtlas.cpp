@@ -75,7 +75,7 @@ namespace CE
         fontSampler.samplerFilterMode = RHI::FilterMode::Linear;
         //fontSampler.samplerFilterMode = FilterMode::Nearest;
 
-        atlasTexture = new RPI::Texture(images, fontSampler);
+        atlasTexture = new RPI::Texture("Atlas Texture", images, fontSampler);
 
         RPI::Shader* fusionShader = FusionApplication::Get()->GetFusionShader();
         RPI::Shader* fusionShader2 = FusionApplication::Get()->GetFusionShader2();
@@ -204,7 +204,7 @@ namespace CE
             fontSampler.enableAnisotropy = false;
             fontSampler.samplerFilterMode = RHI::FilterMode::Cubic;
 
-            atlasTexture = new RPI::Texture(images, fontSampler);
+            atlasTexture = new RPI::Texture("Atlas Texture", images, fontSampler);
 
             fontSrg2->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
             fontSrg2->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
@@ -306,7 +306,7 @@ namespace CE
             int posX, posY;
             int atlasSize = atlasMip->atlasSize;
 
-            bool foundEmptySpot = atlasMip->FindInsertionPoint(Vec2i(width + 1, height + 1), posX, posY);
+            bool foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + 1, height + 1), posX, posY);
             if (!foundEmptySpot)
             {
                 currentMip++;
@@ -323,7 +323,7 @@ namespace CE
                 pages.Add(String::Format("Page {}", pages.GetSize()));
                 SetPages(pages);
                 
-                foundEmptySpot = atlasMip->FindInsertionPoint(Vec2i(width + 1, height + 1), posX, posY);
+                foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + 1, height + 1), posX, posY);
             }
 
             if (!foundEmptySpot)
@@ -383,7 +383,7 @@ namespace CE
         }
     }
 
-    bool FFontAtlas::FAtlasImage::FindInsertionPoint(Vec2i glyphSize, int& outX, int& outY)
+    bool FFontAtlas::FAtlasImage::TryInsertGlyphRect(Vec2i glyphSize, int& outX, int& outY)
     {
         ZoneScoped;
 

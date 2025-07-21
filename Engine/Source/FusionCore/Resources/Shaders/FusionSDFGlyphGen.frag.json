@@ -22,7 +22,7 @@
     "separate_images" : [
         {
             "type" : "texture2D",
-            "name" : "_FontGlyph",
+            "name" : "_FontAtlas",
             "set" : 4,
             "binding" : 0
         }
@@ -30,7 +30,7 @@
     "separate_samplers" : [
         {
             "type" : "sampler",
-            "name" : "_FontGlyphSampler",
+            "name" : "_FontAtlasSampler",
             "set" : 4,
             "binding" : 1
         }
