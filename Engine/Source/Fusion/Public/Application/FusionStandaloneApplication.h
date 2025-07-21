@@ -47,6 +47,10 @@ namespace CE
 
 			FusionInitInfo initInfo = {};
 			initInfo.assetLoader = nullptr;
+			initInfo.rebuildFrameGraphMethod = [this]
+				{
+					RebuildFrameGraph();
+				};
 			fApp->Initialize(initInfo);
 
 			JobManagerDesc desc{};

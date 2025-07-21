@@ -9,6 +9,8 @@ namespace CE::Vulkan
 
 	class FrameBuffer : public RHI::RenderTargetBuffer
 	{
+		CE_NO_COPY(FrameBuffer);
+		CE_NO_MOVE(FrameBuffer);
 	public:
 
 		FrameBuffer(VulkanDevice* device, Scope* scope, u32 imageIndex);

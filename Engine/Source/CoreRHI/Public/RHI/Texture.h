@@ -63,6 +63,20 @@ namespace CE::RHI
 
 		virtual u32 GetBitsPerPixel() = 0;
 
+		static u64 CalculateTotalTextureSize(u32 width, u32 height, u32 bitsPerPixel, u32 arrayCount = 1, u32 mipLevelCount = 1)
+		{
+			u64 size = 0;
+
+			for (int mip = 0; mip < mipLevelCount; mip++)
+			{
+				u32 power = (u32)pow(2, mip);
+				u64 curSize = width / power * height / power * bitsPerPixel / 8 * arrayCount;
+				size += curSize;
+			}
+
+			return size;
+		}
+
 	protected:
 
 		Name name{};

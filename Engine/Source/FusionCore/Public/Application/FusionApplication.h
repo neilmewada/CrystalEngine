@@ -40,6 +40,7 @@ namespace CE
     struct FusionInitInfo
     {
         IFusionAssetLoader* assetLoader = nullptr;
+        ScriptDelegate<void(void)> rebuildFrameGraphMethod;
     };
 
     CLASS(Config = Engine)
@@ -93,6 +94,8 @@ namespace CE
 
         void RequestFrameGraphUpdate();
 
+        void RebuildFrameGraph();
+
         RPI::Shader* GetFusionShader() const { return fusionShader; }
         RPI::Shader* GetFusionShader2() const { return fusionShader2; }
 
@@ -137,8 +140,6 @@ namespace CE
 
         ScriptEvent<void(FGameWindow*)> onRenderViewportDestroyed;
 
-        ScriptEvent<void(void)> onFrameGraphUpdateRequested;
-
     protected:
 
         void OnWindowRestored(PlatformWindow* window) override;
@@ -164,6 +165,8 @@ namespace CE
 
         SharedMutex mainThreadDispatcherLock;
         Array<Delegate<void(void)>> mainThreadDispatcher;
+
+        ScriptDelegate<void(void)> rebuildFrameGraphMethod;
 
         FIELD()
         Ref<FRootContext> rootContext = nullptr;

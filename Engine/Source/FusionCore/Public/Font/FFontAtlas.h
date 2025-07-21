@@ -121,7 +121,6 @@ namespace CE
         bool atlasUpdateRequired = false;
 
         RPI::Texture* atlasTexture = nullptr;
-        //RHI::ShaderResourceGroup* fontSrg = nullptr;
         RHI::ShaderResourceGroup* fontSrg2 = nullptr;
 
         FFontMetrics metrics{};

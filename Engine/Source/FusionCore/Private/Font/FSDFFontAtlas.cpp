@@ -24,7 +24,13 @@ namespace CE
             return;
 
 		sdfGlyphShader = initInfo.sdfGlyphShader;
-        
+
+        Ptr<FAtlasImage> atlas = new FAtlasImage;
+        atlas->ptr = new u8[FontAtlasSize * FontAtlasSize];
+        memset(atlas->ptr, 0, FontAtlasSize * FontAtlasSize);
+        atlas->resolution = FontAtlasSize;
+
+        atlasImageMips.Add(atlas);
     }
 
     void FSDFFontAtlas::Flush(u32 imageIndex)
@@ -34,7 +40,16 @@ namespace CE
         if (!flushRequiredPerImage[imageIndex])
             return;
 
+        if (atlasUpdateRequired)
+        {
+            atlasUpdateRequired = false;
 
+            delete atlasTexture; atlasTexture = nullptr;
+
+
+        }
+
+		flushRequiredPerImage[imageIndex] = false;
     }
 
     void FSDFFontAtlas::AddGlyphs(const Array<u32>& charSet, bool isBold, bool isItalic)
@@ -77,6 +92,11 @@ namespace CE
             char c = charCode;
 
             
+        }
+
+        for (int i = 0; i < flushRequiredPerImage.GetSize(); ++i)
+        {
+			flushRequiredPerImage[i] = true;
         }
     }
 

@@ -56,6 +56,7 @@ namespace CE
     void FusionApplication::Initialize(const FusionInitInfo& initInfo)
     {
         assetLoader = initInfo.assetLoader;
+        rebuildFrameGraphMethod = initInfo.rebuildFrameGraphMethod;
         systemDpi = PlatformApplication::Get()->GetSystemDpi();
 
         PlatformApplication::Get()->AddMessageHandler(this);
@@ -379,7 +380,15 @@ namespace CE
 
     void FusionApplication::RequestFrameGraphUpdate()
     {
-        onFrameGraphUpdateRequested.Broadcast();
+        RebuildFrameGraph();
+    }
+
+    void FusionApplication::RebuildFrameGraph()
+    {
+        if (rebuildFrameGraphMethod.IsBound())
+        {
+	        rebuildFrameGraphMethod.Invoke();
+        }
     }
 
     // - Application Callbacks -

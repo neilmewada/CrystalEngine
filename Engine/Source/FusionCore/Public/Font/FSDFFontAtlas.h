@@ -33,9 +33,16 @@ namespace CE
         using CharCode = u32;
         using FontSize = u32;
 
-        struct RowSegment {
+        struct RowSegment
+    	{
             int x, y;
             int height;
+        };
+
+        struct GlyphData
+        {
+			RHI::TextureView* view = nullptr;
+			RHI::RenderTargetBuffer* frameBuffer = nullptr;
         };
 
         struct FAtlasImage : IntrusiveBase
@@ -46,7 +53,7 @@ namespace CE
             }
 
             u8* ptr = nullptr;
-            u32 atlasSize = 0;
+            u32 resolution = 0;
             Array<RowSegment> rows;
 
             HashMap<CharCode, FFontGlyphInfo> glyphsByCharCode;
@@ -54,10 +61,15 @@ namespace CE
 
 
         Array<Ptr<FAtlasImage>> atlasImageMips;
+        int currentMip = 0;
 
         RPI::Shader* sdfGlyphShader = nullptr;
 
         StaticArray<bool, RHI::Limits::MaxSwapChainImageCount> flushRequiredPerImage;
+        bool atlasUpdateRequired = false;
+
+        RPI::Texture* atlasTexture = nullptr;
+        RHI::ShaderResourceGroup* fontSrg2 = nullptr;
 
         FT_Library ft = nullptr;
         FT_Face regular = nullptr; u8* regularData = nullptr;

@@ -109,7 +109,7 @@ namespace CE
 
 			FusionInitInfo initInfo{};
 			initInfo.assetLoader = gEngine->GetAssetManager();
-
+			initInfo.rebuildFrameGraphMethod = FUNCTION_BINDING(this, RebuildFrameGraph);
 			FusionApplication::Get()->Initialize(initInfo);
 
 			//activeScene->mainRenderViewport = primaryViewport;
