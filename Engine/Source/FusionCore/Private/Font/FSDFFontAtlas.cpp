@@ -10,6 +10,7 @@
 
 namespace CE
 {
+    constexpr int SDFSpread = 5;
 
     FSDFFontAtlas::FSDFFontAtlas()
     {
@@ -163,7 +164,7 @@ namespace CE
 			RHI::Fence* fence = RHI::gDynamicRHI->CreateFence();
 
             sdfGenMaterial->SetPropertyValue("_FontAtlas", sourceImage);
-            sdfGenMaterial->SetPropertyValue("_Spread", 7);
+            sdfGenMaterial->SetPropertyValue("_Spread", SDFSpread);
             sdfGenMaterial->FlushProperties();
 
             RHI::RenderTargetBuffer* frameBuffer = RHI::gDynamicRHI->CreateRenderTargetBuffer(sdfRenderTarget, { atlasTexture->GetRhiTexture() });
@@ -300,7 +301,7 @@ namespace CE
 			delete frameBuffer; frameBuffer = nullptr;
             delete sourceStaging; sourceStaging = nullptr;
             delete outputStaging; outputStaging = nullptr;
-			//delete sourceImage; sourceImage = nullptr;
+			delete sourceImage; sourceImage = nullptr;
 
             tempSaved = true;
         }

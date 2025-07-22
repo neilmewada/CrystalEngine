@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_57" : {
+        "_55" : {
             "name" : "type._MaterialData",
             "members" : [
                 {
@@ -49,7 +49,7 @@
     ],
     "ubos" : [
         {
-            "type" : "_57",
+            "type" : "_55",
             "name" : "type._MaterialData",
             "block_size" : 4,
             "set" : 4,

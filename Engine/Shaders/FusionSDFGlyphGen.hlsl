@@ -38,24 +38,8 @@ cbuffer _MaterialData : SRG_PerMaterial(b2)
 
 inline uint GetPixelState(float2 uv, float w, float h)
 {
-    // Sample multiple pixels to get pixel state to smooth out corners
-    // Set spread to 0 to disable multiple samples for performance improvement
-    const int spread = 1;
-    float count = spread * 2 + 1;
-
-    float value = 0.0;
-
-    for (float x = -spread; x <= spread; x++)
-    {
-        for (float y = -spread; y <= spread; y++)
-        {
-            float2 localUV = uv + float2(float(x) / w, float(y) / h);
-            value += _FontAtlas.Sample(_FontAtlasSampler, localUV).r;
-            value /= count;
-        }
-    }
-
-    return value > 0.25 ? 1 : 0;
+    float sample = _FontAtlas.Sample(_FontAtlasSampler, uv).r;
+    return sample > 0.1 ? 1 : 0;
 }
 
 float4 FragMain(PSInput input) : SV_TARGET
