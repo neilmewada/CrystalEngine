@@ -148,10 +148,19 @@ float4 RenderSDFText(float4 color, float2 uv, float2 itemSize, uint bold, float4
     float numerator = max(itemSize.x, itemSize.y) * 0.5;
     float denominator = max(origSize.x, origSize.y) * 0.5;
 
-    const float screenPxRange = numerator / denominator * 3.0; // * 3.0
+    const float pxRange = 15.0;
+
+    float2 unitRange = float2(pxRange, pxRange) / float2(w, h);
+    float2 screenTexSize = float2(1.0, 1.0) / fwidth(uv);
+
+    const float threshold = bold == 0 ? 0.46 : 0.35;
+
+    float screenPxRange = numerator / denominator * pxRange;
+    screenPxRange = max(0.5 * dot(unitRange, screenTexSize), 1.0);
+
     float sdf = _FontAtlas.Sample(_FontAtlasSampler, uv).r;
-    float screenPxDistance = screenPxRange * (sdf - 0.5);
-    float opacity = clamp(screenPxDistance + 0.5, 0.0, 1.0);
+    float screenPxDistance = screenPxRange * (sdf - threshold);
+    float opacity = clamp(screenPxDistance + threshold, 0.0, 1.0);
     return lerp(float4(color.rgb, 0), color, opacity);
 }
 

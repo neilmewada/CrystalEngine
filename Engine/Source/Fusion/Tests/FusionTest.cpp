@@ -85,31 +85,27 @@ namespace WidgetTests
     {
 	    Super::OnPaint(painter);
 
-        painter->SetFontSize(20);
+        String text = "quick fox jumped over";
 
-        String text = "quick fox last";
+        FixedArray<u32, 6> fontSizes = { 30, 24, 16, 13, 10, 7 };
 
-        Vec2 pos = Vec2(50, 250);
-        painter->DrawSDFText(text, pos);
+        Vec2 topLeft = Vec2(25, 200);
+        for (int i = 0; i < fontSizes.GetSize(); i++)
+        {
+            painter->SetFontSize(fontSizes[i]);
+            painter->DrawText(text, topLeft);
 
-        Vec2 normalPos = Vec2(250, 250);
-        painter->DrawText(text, normalPos);
+            topLeft.y += fontSizes[i] * 2;
+        }
 
-        painter->SetFontSize(10);
+        Vec2 topRight = Vec2(450, 200);
+        for (int i = 0; i < fontSizes.GetSize(); i++)
+        {
+            painter->SetFontSize(fontSizes[i]);
+            painter->DrawSDFText(text, topRight);
 
-        pos = Vec2(50, 280);
-        painter->DrawSDFText(text, pos);
-
-        normalPos = Vec2(250, 280);
-        painter->DrawText(text, normalPos);
-
-        painter->SetFontSize(8);
-
-        pos = Vec2(50, 300);
-        painter->DrawSDFText(text, pos);
-
-        normalPos = Vec2(250, 300);
-        painter->DrawText(text, normalPos);
+            topRight.y += fontSizes[i] * 2;
+        }
     }
 
 }
