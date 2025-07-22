@@ -85,7 +85,7 @@ namespace WidgetTests
     {
 	    Super::OnPaint(painter);
 
-        String text = "quick fox jumped over";
+        String text = "quick fox jumped over last";
 
         FixedArray<u32, 8> fontSizes = { 30, 24, 16, 13, 10, 7, 7, 7 };
 
@@ -98,7 +98,7 @@ namespace WidgetTests
             topLeft.y += fontSizes[i] * 2;
         }
 
-        Vec2 topRight = Vec2(450, 200);
+        Vec2 topRight = Vec2(550, 200);
         for (int i = 0; i < fontSizes.GetSize(); i++)
         {
             painter->SetFontSize(fontSizes[i]);
