@@ -148,7 +148,7 @@ float4 RenderSDFText(float4 color, float2 uv, float2 itemSize, uint bold, float4
     float numerator = max(itemSize.x, itemSize.y) * 0.5;
     float denominator = max(origSize.x, origSize.y) * 0.5;
 
-    const float pxRange = 11.0;
+    const float pxRange = 7.0;
 
     float2 unitRange = float2(pxRange, pxRange) / float2(w, h);
     float2 screenTexSize = float2(1.0, 1.0) / fwidth(uv);

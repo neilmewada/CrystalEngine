@@ -197,7 +197,7 @@ namespace CE
 
 	Vec2 FPainter::DrawText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
 	{
-		return renderer2->DrawText(text, pos, size, wordWrap);
+		return renderer2->DrawSDFText(text, pos, size, wordWrap);
 	}
 
 	Vec2 FPainter::DrawSDFText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)

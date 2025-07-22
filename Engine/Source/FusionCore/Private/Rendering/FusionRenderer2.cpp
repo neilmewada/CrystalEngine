@@ -1725,7 +1725,7 @@ namespace CE
 
             f32 atlasSize = glyph.atlasSize;
 
-            const f32 uvPadding = 2.5f / fontAtlas->GetAtlasSize();
+            f32 uvPadding = 2.5f / fontAtlas->GetAtlasSize();
 
             Vec2 uvMin = Vec2((f32)glyph.x0 / atlasSize, (f32)glyph.y0 / atlasSize) - Vec2(uvPadding, uvPadding);
             Vec2 uvMax = Vec2((f32)glyph.x1 / atlasSize, (f32)glyph.y1 / atlasSize) + Vec2(uvPadding, uvPadding);

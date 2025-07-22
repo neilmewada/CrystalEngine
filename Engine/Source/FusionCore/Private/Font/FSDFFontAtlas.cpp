@@ -10,7 +10,7 @@
 
 namespace CE
 {
-    constexpr int SDFSpread = 5;
+    constexpr int SDFSpread = 9;
 
     FSDFFontAtlas::FSDFFontAtlas()
     {
