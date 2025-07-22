@@ -87,7 +87,7 @@ namespace WidgetTests
 
         String text = "quick fox jumped over";
 
-        FixedArray<u32, 6> fontSizes = { 30, 24, 16, 13, 10, 7 };
+        FixedArray<u32, 8> fontSizes = { 30, 24, 16, 13, 10, 7, 7, 7 };
 
         Vec2 topLeft = Vec2(25, 200);
         for (int i = 0; i < fontSizes.GetSize(); i++)
