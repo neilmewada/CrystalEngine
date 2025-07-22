@@ -274,6 +274,14 @@ namespace CE
         return fontAtlases[fontName];
     }
 
+    Ref<FSDFFontAtlas> FFontManager::FindSDFFont(const Name& fontName)
+    {
+        if (!sdfFontAtlases.KeyExists(fontName))
+            return nullptr;
+
+        return sdfFontAtlases[fontName];
+    }
+
     void FFontManager::Flush(u32 imageIndex)
     {
         ZoneScoped;

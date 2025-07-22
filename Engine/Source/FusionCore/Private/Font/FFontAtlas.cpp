@@ -77,7 +77,6 @@ namespace CE
 
         atlasTexture = new RPI::Texture("Atlas Texture", images, fontSampler);
 
-        RPI::Shader* fusionShader = FusionApplication::Get()->GetFusionShader();
         RPI::Shader* fusionShader2 = FusionApplication::Get()->GetFusionShader2();
 
         fontSrg2 = RHI::gDynamicRHI->CreateShaderResourceGroup(fusionShader2->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerMaterial));

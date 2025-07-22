@@ -1126,6 +1126,29 @@ namespace CE
         return finalSize;
     }
 
+    Vec2 FusionRenderer2::DrawSDFText(const String& text, Vec2 textPos, Vec2 size, FWordWrap wordWrap)
+    {
+        thread_local Array<Rect> quads{};
+        const bool isFixedSize = !Math::ApproxEquals(size.x, 0.0f) && !Math::ApproxEquals(size.y, 0.0f);
+
+        if (isFixedSize && IsRectClipped(Rect::FromSize(textPos, size)))
+        {
+            return Vec2();
+        }
+
+        quads.Reserve(text.GetLength());
+
+        Vec2 finalSize = CalculateTextQuads(quads, text, currentFont, size.width, wordWrap);
+
+        if (!isFixedSize && IsRectClipped(Rect::FromSize(textPos, finalSize)))
+        {
+            return Vec2();
+        }
+
+        DrawSDFTextInternal(quads.GetData(), text.GetData(), text.GetLength(), currentFont, textPos);
+        return finalSize;
+    }
+
     void FusionRenderer2::DrawViewport(const Rect& rect, FViewport* viewport)
     {
         AddDrawCmd();
@@ -1570,6 +1593,13 @@ namespace CE
         Color penColor = currentPen.GetColor();
         penColor.a *= opacityStack.Last();
 
+        if (!drawCmdList.IsEmpty() && drawCmdList.Last().fontSrg != fontAtlas->GetFontSrg2())
+        {
+            AddDrawCmd();
+
+            drawCmdList.Last().fontSrg = fontAtlas->GetFontSrg2();
+        }
+
         u32 color = penColor.ToU32();
 
 	    for (int i = 0; i < length; ++i)
@@ -1627,6 +1657,117 @@ namespace CE
 
             drawCmdList.Last().numIndices += 6;
 	    }
+    }
+
+    void FusionRenderer2::DrawSDFTextInternal(const Rect* quads, char* text, int length, const FFont& font,
+	    Vec2 textPos)
+    {
+        thread_local HashSet<char> ignoreCharacters = { ' ', '\n', '\r', '\t', '\0' };
+
+        Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
+
+        Name fontFamily = font.GetFamily();
+        f32 fontSize = font.GetFontSize();
+
+        if (fontSize <= 0)
+            fontSize = fontManager->GetDefaultFontSize();
+        if (!fontFamily.IsValid())
+            fontFamily = fontManager->GetDefaultFontFamily();
+
+        fontSize = Math::Max<f32>(fontSize, MinFontSize);
+
+        Ref<FSDFFontAtlas> fontAtlas = fontManager->FindSDFFont(fontFamily);
+        if (fontAtlas == nullptr)
+            return;
+
+        Color penColor = currentPen.GetColor();
+        penColor.a *= opacityStack.Last();
+
+        u32 color = penColor.ToU32();
+
+        const f32 dpi = PlatformApplication::Get()->GetSystemDpi();
+        const f32 fontDpiScaling = dpi / 72.0f;
+        const f32 systemDpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
+        const f32 metricsScaling = fontDpiScaling / systemDpiScaling;
+
+        if (!drawCmdList.IsEmpty() && drawCmdList.Last().fontSrg != fontAtlas->GetFontSrg2())
+        {
+            AddDrawCmd();
+
+            drawCmdList.Last().fontSrg = fontAtlas->GetFontSrg2();
+        }
+
+        for (int i = 0; i < length; ++i)
+        {
+            char c = text[i];
+            Rect quad = quads[i];
+
+            if (ignoreCharacters.Exists(c))
+            {
+                continue;
+            }
+
+            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+            if (glyph.charCode == 0)
+            {
+                continue;
+            }
+
+            Vec2 offset = Vec2();
+            if (coordinateSpaceStack.Last().isTranslationOnly)
+            {
+                offset = coordinateSpaceStack.Last().translation;
+            }
+
+            quad = quad.Translate(textPos + offset);
+
+            PrimReserve(4, 6);
+
+            f32 atlasSize = glyph.atlasSize;
+
+            const f32 uvPadding = 2.5f / fontAtlas->GetAtlasSize();
+
+            Vec2 uvMin = Vec2((f32)glyph.x0 / atlasSize, (f32)glyph.y0 / atlasSize) - Vec2(uvPadding, uvPadding);
+            Vec2 uvMax = Vec2((f32)glyph.x1 / atlasSize, (f32)glyph.y1 / atlasSize) + Vec2(uvPadding, uvPadding);
+
+            Vec2 topLeft = quad.min;
+            Vec2 topRight = Vec2(quad.max.x, quad.min.y);
+            Vec2 bottomRight = Vec2(quad.max.x, quad.max.y);
+            Vec2 bottomLeft = Vec2(quad.min.x, quad.max.y);
+
+            Vec2 topLeftUV = uvMin;
+            Vec2 topRightUV = Vec2(uvMax.x, uvMin.y);
+            Vec2 bottomRightUV = uvMax;
+            Vec2 bottomLeftUV = Vec2(uvMin.x, uvMax.y);
+
+            FDrawData drawData;
+            drawData.uvMin = uvMin;
+            drawData.uvMax = uvMax;
+            drawData.rectSize = quad.GetSize() * fontDpiScaling * FusionApplication::Get()->GetDefaultScalingFactor() * 4;
+
+            drawDataArray.Insert(drawData);
+
+            FDrawIndex idx = vertexCurrentIdx;
+            indexWritePtr[0] = idx; indexWritePtr[1] = (idx + 1); indexWritePtr[2] = (idx + 2);
+            indexWritePtr[3] = idx; indexWritePtr[4] = (idx + 2); indexWritePtr[5] = (idx + 3);
+
+            for (int i = 0; i <= 3; ++i)
+            {
+                vertexWritePtr[i].index = drawDataArray.GetCount() - 1;
+                vertexWritePtr[i].drawType = DRAW_SDFText;
+            }
+
+            vertexWritePtr[0].position = topLeft; vertexWritePtr[0].color = color; vertexWritePtr[0].uv = topLeftUV;
+            vertexWritePtr[1].position = topRight; vertexWritePtr[1].color = color; vertexWritePtr[1].uv = topRightUV;
+            vertexWritePtr[2].position = bottomRight; vertexWritePtr[2].color = color; vertexWritePtr[2].uv = bottomRightUV;
+            vertexWritePtr[3].position = bottomLeft; vertexWritePtr[3].color = color; vertexWritePtr[3].uv = bottomLeftUV;
+            vertexWritePtr += 4;
+            vertexCurrentIdx += 4;
+            indexWritePtr += 6;
+
+            drawCmdList.Last().numIndices += 6;
+            drawCmdList.Last().fontSrg = fontAtlas->GetFontSrg2();
+        }
     }
 
     int FusionRenderer2::CalculateNumCircleSegments(float radius) const

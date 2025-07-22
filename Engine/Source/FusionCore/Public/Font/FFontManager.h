@@ -28,6 +28,7 @@ namespace CE
 		bool DeregisterFont(const Name& fontName);
 
 		FFontAtlas* FindFont(const Name& fontName);
+		Ref<FSDFFontAtlas> FindSDFFont(const Name& fontName);
 
 		template<typename Func>
 		void IterateFontAtlases(const Func& func)

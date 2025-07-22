@@ -119,6 +119,7 @@ namespace CE
         bool StrokeCircle(const Vec2& center, f32 radius, bool antiAliased = true);
 
         Vec2 DrawText(const String& text, Vec2 textPos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+        Vec2 DrawSDFText(const String& text, Vec2 textPos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 
         void DrawViewport(const Rect& rect, FViewport* viewport);
 
@@ -132,6 +133,7 @@ namespace CE
         {
             DRAW_Geometry = 0,
             DRAW_Text,
+            DRAW_SDFText,
             DRAW_TextureNoTile,
             DRAW_TextureTileX,
             DRAW_TextureTileY,
@@ -146,6 +148,7 @@ namespace CE
         // - Internal Draw API -
 
         void DrawTextInternal(const Rect* quads, char* text, int length, const FFont& font, Vec2 textPos);
+        void DrawSDFTextInternal(const Rect* quads, char* text, int length, const FFont& font, Vec2 textPos);
 
         int CalculateNumCircleSegments(float radius) const;
 

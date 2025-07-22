@@ -26,6 +26,12 @@ namespace CE
         //! @brief Flushes all the changes to GPU
         void Flush(u32 imageIndex);
 
+        FFontGlyphInfo FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic);
+
+        RHI::ShaderResourceGroup* GetFontSrg2() const { return fontSrg2; }
+
+        u32 GetAtlasSize() const;
+
 	private:
 
 		void OnBeginDestroy() override;
@@ -72,7 +78,8 @@ namespace CE
         RPI::DynamicStructuredBuffer<FGlyphData> glyphBuffer;
 
         Array<Ptr<FAtlasImage>> atlasImageLayers;
-        int currentMip = 0;
+        int currentLayer = 0;
+        bool tempSaved = false;
 
         HashMap<CharCode, int> arrayLayerByCharCode;
 
@@ -96,6 +103,7 @@ namespace CE
         FT_Face boldItalic = nullptr; u8* boldItalicData = nullptr;
 
         friend class FFontManager;
+        friend class FusionRenderer2;
     };
     
 } // namespace CE

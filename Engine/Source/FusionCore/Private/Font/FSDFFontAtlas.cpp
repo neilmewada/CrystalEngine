@@ -26,7 +26,6 @@ namespace CE
 		sdfGlyphShader = initInfo.sdfGlyphShader;
 
         RHI::ShaderResourceGroupLayout perMaterialLayout = sdfGlyphShader->GetDefaultVariant()->GetSrgLayout(SRGType::PerMaterial);
-		sdfSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perMaterialLayout);
 
         sdfGenMaterial = new RPI::Material(sdfGlyphShader);
 
@@ -64,7 +63,16 @@ namespace CE
 			flushRequiredPerImage[i] = true;
         }
 
+        RPI::Shader* fusionShader2 = FusionApplication::Get()->GetFusionShader2();
+
+        fontSrg2 = RHI::gDynamicRHI->CreateShaderResourceGroup(fusionShader2->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerMaterial));
+
         AddGlyphs(initInfo.characterSet);
+    }
+
+    u32 FSDFFontAtlas::GetAtlasSize() const
+    {
+        return FontAtlasSize;
     }
 
     void FSDFFontAtlas::OnBeginDestroy()
@@ -114,6 +122,20 @@ namespace CE
                 .borderColor = SamplerBorderColor::FloatTransparentBlack,
                 .enableAnisotropy = false, .maxAnisotropy = 0 });
 
+            RHI::BufferDescriptor stagingBufferDesc{};
+            stagingBufferDesc.bindFlags = BufferBindFlags::StagingBuffer;
+            stagingBufferDesc.bufferSize = RHI::Texture::CalculateTotalTextureSize(atlasImageLayers[0]->atlasSize, atlasImageLayers[0]->atlasSize, 8);
+            stagingBufferDesc.defaultHeapType = MemoryHeapType::ReadBack;
+            stagingBufferDesc.structureByteStride = stagingBufferDesc.bufferSize;
+
+            RHI::Buffer* sourceStaging = nullptr;
+            RHI::Buffer* outputStaging = nullptr;
+            if (!tempSaved)
+            {
+                sourceStaging = RHI::gDynamicRHI->CreateBuffer(stagingBufferDesc);
+                outputStaging = RHI::gDynamicRHI->CreateBuffer(stagingBufferDesc);
+            }
+
 			RPI::TextureDescriptor outputDesc{};
 			outputDesc.texture.arrayLayers = atlasImageLayers.GetSize();
             outputDesc.texture.mipLevels = 1;
@@ -133,6 +155,10 @@ namespace CE
 			outputDesc.samplerDesc.samplerFilterMode = FilterMode::Linear;
 
             atlasTexture = new RPI::Texture(outputDesc);
+
+            fontSrg2->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
+            fontSrg2->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
+            fontSrg2->FlushBindings();
 
 			RHI::Fence* fence = RHI::gDynamicRHI->CreateFence();
 
@@ -194,8 +220,49 @@ namespace CE
 				}
                 cmdList->EndRenderTarget();
 
+                barrier.resource = sourceImage->GetRhiTexture();
+                barrier.fromState = ResourceState::FragmentShaderResource;
+                barrier.toState = ResourceState::CopySource;
+                cmdList->ResourceBarrier(1, &barrier);
+
                 barrier.resource = atlasTexture->GetRhiTexture();
                 barrier.fromState = ResourceState::ColorOutput;
+                barrier.toState = ResourceState::CopySource;
+                cmdList->ResourceBarrier(1, &barrier);
+
+                if (!tempSaved)
+                {
+	                RHI::TextureToBufferCopy copy{};
+                    copy.srcTexture = sourceImage->GetRhiTexture();
+                    copy.mipSlice = 0;
+                    copy.baseArrayLayer = 0;
+                    copy.layerCount = 1;
+                    copy.dstBuffer = sourceStaging;
+                    copy.bufferOffset = 0;
+
+                    cmdList->CopyTextureRegion(copy);
+                }
+
+                if (!tempSaved)
+                {
+                    RHI::TextureToBufferCopy copy{};
+                    copy.srcTexture = atlasTexture->GetRhiTexture();
+                    copy.mipSlice = 0;
+                    copy.baseArrayLayer = 0;
+                    copy.layerCount = 1;
+                    copy.dstBuffer = outputStaging;
+                    copy.bufferOffset = 0;
+
+                    cmdList->CopyTextureRegion(copy);
+                }
+
+                barrier.resource = sourceImage->GetRhiTexture();
+                barrier.fromState = ResourceState::CopySource;
+                barrier.toState = ResourceState::FragmentShaderResource;
+                cmdList->ResourceBarrier(1, &barrier);
+
+                barrier.resource = atlasTexture->GetRhiTexture();
+                barrier.fromState = ResourceState::CopySource;
                 barrier.toState = ResourceState::FragmentShaderResource;
                 cmdList->ResourceBarrier(1, &barrier);
             }
@@ -204,14 +271,79 @@ namespace CE
             queue->Execute(1, &cmdList, fence);
             fence->WaitForFence();
 
+            if (!tempSaved)
+            {
+                void* data;
+
+                sourceStaging->Map(0, sourceStaging->GetBufferSize(), &data);
+                {
+                    CMImage rawImage = CMImage::LoadRawImageFromMemory((unsigned char*)data, atlasTexture->GetWidth(), atlasTexture->GetHeight(), 
+                        CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
+
+                    rawImage.EncodeToPNG(EngineDirectories::GetEngineInstallDirectory() / "Temp/Source.png");
+                }
+                sourceStaging->Unmap();
+
+                outputStaging->Map(0, outputStaging->GetBufferSize(), &data);
+                {
+                    CMImage rawImage = CMImage::LoadRawImageFromMemory((unsigned char*)data, atlasTexture->GetWidth(), atlasTexture->GetHeight(),
+                        CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
+
+                    rawImage.EncodeToPNG(EngineDirectories::GetEngineInstallDirectory() / "Temp/SDF.png");
+                }
+                outputStaging->Unmap();
+            }
+
             RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
 
             RHI::gDynamicRHI->DestroyFence(fence);
 			delete frameBuffer; frameBuffer = nullptr;
+            delete sourceStaging; sourceStaging = nullptr;
+            delete outputStaging; outputStaging = nullptr;
 			//delete sourceImage; sourceImage = nullptr;
+
+            tempSaved = true;
         }
 
 		flushRequiredPerImage[imageIndex] = false;
+    }
+
+    FFontGlyphInfo FSDFFontAtlas::FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic)
+    {
+        ZoneScoped;
+        char __text[2] = { (char)charCode, 0 };
+        ZoneText(__text, 1);
+
+        if (!arrayLayerByCharCode.KeyExists(charCode))
+        {
+            static Array<u32> charSet{};
+            charSet.Resize(1);
+            charSet[0] = charCode;
+            AddGlyphs(charSet, isBold, isItalic);
+        }
+
+        if (!arrayLayerByCharCode.KeyExists(charCode))
+        {
+            return {};
+        }
+
+        int layerIndex = arrayLayerByCharCode[charCode];
+        Ptr<FAtlasImage> atlasMip = atlasImageLayers[layerIndex];
+
+        if (!atlasMip->glyphsByCharCode.KeyExists(charCode))
+        {
+            static Array<u32> charSet{};
+            charSet.Resize(1);
+            charSet[0] = charCode;
+            AddGlyphs(charSet, isBold, isItalic);
+        }
+
+        if (!atlasMip->glyphsByCharCode.KeyExists(charCode))
+        {
+            return {};
+        }
+
+        return atlasMip->glyphsByCharCode[charCode];
     }
 
     void FSDFFontAtlas::AddGlyphs(const Array<u32>& charSet, bool isBold, bool isItalic)
@@ -248,7 +380,7 @@ namespace CE
 
         FT_Set_Char_Size(face, 0, SDFFontSize << 6, dpi, dpi);
         
-        FAtlasImage* atlasMip = atlasImageLayers[currentMip];
+        FAtlasImage* atlasMip = atlasImageLayers[currentLayer];
 
         for (int i = 0; i < charSet.GetSize(); ++i)
         {
@@ -285,8 +417,8 @@ namespace CE
             bool foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + 1, height + 1), padding, posX, posY);
             if (!foundEmptySpot)
             {
-                currentMip++;
-                atlasSize = FontAtlasSize / (SIZE_T)Math::Pow(2, currentMip);
+                currentLayer++;
+                atlasSize = FontAtlasSize / (SIZE_T)Math::Pow(2, currentLayer);
 
                 atlasMip = new FAtlasImage;
                 atlasMip->ptr = new u8[atlasSize * atlasSize];
@@ -302,6 +434,8 @@ namespace CE
             {
                 return;
             }
+
+            arrayLayerByCharCode[charCode] = currentLayer;
 
             glyph.atlasSize = atlasSize;
 

@@ -19,6 +19,10 @@ namespace CE
         void SetBrush(const FBrush& brush);
         void SetFont(const FFont& font);
 
+        void SetFontSize(u32 fontSize);
+
+        FFont GetFont();
+
         const FFont& GetCurrentFont();
 
         void PushOpacity(f32 opacity);
@@ -61,6 +65,7 @@ namespace CE
         bool DrawLine(const Vec2& startPos, const Vec2& endPos);
 
         Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+        Vec2 DrawSDFText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 
         bool IsCulled(Vec2 pos, Vec2 quadSize);
 

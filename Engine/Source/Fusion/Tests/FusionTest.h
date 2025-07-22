@@ -20,6 +20,8 @@ namespace WidgetTests
 
 		void Construct() override;
 
+		void OnPaint(FPainter* painter) override;
+
 	private:
 
 		FUSION_WIDGET;
