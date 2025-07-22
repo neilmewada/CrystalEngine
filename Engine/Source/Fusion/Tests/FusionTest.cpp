@@ -87,27 +87,29 @@ namespace WidgetTests
 
         painter->SetFontSize(20);
 
+        String text = "quick fox last";
+
         Vec2 pos = Vec2(50, 250);
-        painter->DrawSDFText("Hello World", pos);
+        painter->DrawSDFText(text, pos);
 
         Vec2 normalPos = Vec2(250, 250);
-        painter->DrawText("Hello World", normalPos);
+        painter->DrawText(text, normalPos);
 
         painter->SetFontSize(10);
 
         pos = Vec2(50, 280);
-        painter->DrawSDFText("Hello World", pos);
+        painter->DrawSDFText(text, pos);
 
         normalPos = Vec2(250, 280);
-        painter->DrawText("Hello World", normalPos);
+        painter->DrawText(text, normalPos);
 
         painter->SetFontSize(8);
 
         pos = Vec2(50, 300);
-        painter->DrawSDFText("Hello World", pos);
+        painter->DrawSDFText(text, pos);
 
         normalPos = Vec2(250, 300);
-        painter->DrawText("Hello World", normalPos);
+        painter->DrawText(text, normalPos);
     }
 
 }

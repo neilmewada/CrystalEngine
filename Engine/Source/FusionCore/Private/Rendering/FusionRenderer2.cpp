@@ -1743,7 +1743,7 @@ namespace CE
             FDrawData drawData;
             drawData.uvMin = uvMin;
             drawData.uvMax = uvMax;
-            drawData.rectSize = quad.GetSize() * fontDpiScaling * FusionApplication::Get()->GetDefaultScalingFactor() * 4;
+            drawData.rectSize = quad.GetSize() * fontDpiScaling * FusionApplication::Get()->GetDefaultScalingFactor() * 2.5f;
 
             drawDataArray.Insert(drawData);
 
