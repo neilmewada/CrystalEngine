@@ -85,7 +85,7 @@ namespace CE
         RHI::ShaderResourceGroup* fontSrg2 = nullptr;
 
 		RHI::RenderTarget* sdfRenderTarget = nullptr;
-		RHI::ShaderResourceGroup* sdfSrg = nullptr;
+        RPI::Material* sdfGenMaterial = nullptr;
 
         FFontMetrics metrics{};
 

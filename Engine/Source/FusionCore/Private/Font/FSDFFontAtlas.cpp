@@ -13,7 +13,7 @@ namespace CE
 
     FSDFFontAtlas::FSDFFontAtlas()
     {
-        padding = 32;
+        padding = 48;
     }
 
     void FSDFFontAtlas::Init(const FSDFFontAtlasInitInfo& initInfo)
@@ -27,6 +27,8 @@ namespace CE
 
         RHI::ShaderResourceGroupLayout perMaterialLayout = sdfGlyphShader->GetDefaultVariant()->GetSrgLayout(SRGType::PerMaterial);
 		sdfSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perMaterialLayout);
+
+        sdfGenMaterial = new RPI::Material(sdfGlyphShader);
 
         f32 unitsPerEM = regular->units_per_EM;
         f32 scaleFactor = 1.0f / unitsPerEM; // 1.0f is used as a font size here
@@ -75,9 +77,7 @@ namespace CE
             return;
 
 		delete atlasTexture; atlasTexture = nullptr;
-
-		RHI::gDynamicRHI->DestroyShaderResourceGroup(sdfSrg);
-		sdfSrg = nullptr;
+    	delete sdfGenMaterial; sdfGenMaterial = nullptr;
 
 		RHI::gDynamicRHI->DestroyRenderTarget(sdfRenderTarget);
         sdfRenderTarget = nullptr;
@@ -136,9 +136,9 @@ namespace CE
 
 			RHI::Fence* fence = RHI::gDynamicRHI->CreateFence();
 
-            sdfSrg->Bind("_FontAtlas", sourceImage->GetRhiTexture());
-			sdfSrg->Bind("_FontAtlasSampler", sourceImage->GetSamplerState());
-			sdfSrg->FlushBindings();
+            sdfGenMaterial->SetPropertyValue("_FontAtlas", sourceImage);
+            sdfGenMaterial->SetPropertyValue("_Spread", 7);
+            sdfGenMaterial->FlushProperties();
 
             RHI::RenderTargetBuffer* frameBuffer = RHI::gDynamicRHI->CreateRenderTargetBuffer(sdfRenderTarget, { atlasTexture->GetRhiTexture() });
 
@@ -180,11 +180,12 @@ namespace CE
                         .colorFormats = { RHI::Format::R8_UNORM },
 						.depthStencilFormat = RHI::Format::Undefined,
 					};
-                    RHI::PipelineState* pipeline = sdfGlyphShader->GetDefaultVariant()->GetPipeline(pipelineVariant);
-
+                    
+                    RHI::PipelineState* pipeline = sdfGenMaterial->GetCurrentShader()->GetDefaultVariant()->GetPipeline(pipelineVariant);
+                    
 					cmdList->BindPipelineState(pipeline);
 
-                	cmdList->SetShaderResourceGroup(sdfSrg);
+                	cmdList->SetShaderResourceGroup(sdfGenMaterial->GetShaderResourceGroup());
                     cmdList->CommitShaderResources();
 
                     cmdList->BindVertexBuffers(0, fullScreenQuad.GetSize(), fullScreenQuad.GetData());

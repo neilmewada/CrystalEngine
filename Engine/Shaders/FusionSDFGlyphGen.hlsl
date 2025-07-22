@@ -4,7 +4,7 @@
 
 struct VSInput
 {
-    float2 position : POSITION;
+    float4 position : POSITION;
     float2 uv : TEXCOORD0;
 };
 
@@ -19,7 +19,7 @@ struct PSInput
 PSInput VertMain(VSInput input)
 {
     PSInput o;
-    o.position = float4(input.position, 0.0, 1.0);
+    o.position = float4(input.position.xy, 0.0, 1.0);
     o.uv = input.uv;
     return o;
 }
@@ -30,6 +30,11 @@ PSInput VertMain(VSInput input)
 
 Texture2D<float> _FontAtlas : SRG_PerMaterial(t0);
 SamplerState _FontAtlasSampler : SRG_PerMaterial(s1);
+
+cbuffer _MaterialData : SRG_PerMaterial(b2)
+{
+    int _Spread;
+};
 
 inline uint GetPixelState(float2 uv, float w, float h)
 {
@@ -58,7 +63,7 @@ float4 FragMain(PSInput input) : SV_TARGET
     uint w; uint h;
     _FontAtlas.GetDimensions(w, h);
 
-    const int spread = 7;
+    const int spread = _Spread; // 7;
     const float stepSize = 0.1;
     uint basePixelState = GetPixelState(input.uv, w, h);
     float maxPossibleSqrDistance = spread * spread + spread * spread;

@@ -5,6 +5,18 @@
             "mode" : "frag"
         }
     ],
+    "types" : {
+        "_57" : {
+            "name" : "type._MaterialData",
+            "members" : [
+                {
+                    "name" : "_Spread",
+                    "type" : "int",
+                    "offset" : 0
+                }
+            ]
+        }
+    },
     "inputs" : [
         {
             "type" : "vec2",
@@ -33,6 +45,15 @@
             "name" : "_FontAtlasSampler",
             "set" : 4,
             "binding" : 1
+        }
+    ],
+    "ubos" : [
+        {
+            "type" : "_57",
+            "name" : "type._MaterialData",
+            "block_size" : 4,
+            "set" : 4,
+            "binding" : 2
         }
     ]
 }

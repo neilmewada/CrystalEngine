@@ -650,12 +650,27 @@ namespace CE
 		fontGlyphSampler.shaderStages = ShaderStage::Fragment;
 		fontGlyphSampler.type = ShaderResourceType::SamplerState;
 
+        RHI::SRGVariableDescriptor cbuffer{};
+        cbuffer.name = "_MaterialData";
+        cbuffer.bindingSlot = (u32)fragmentReflection["ubos"][0]["binding"].GetNumberValue();
+        {
+            RHI::ShaderStructMember member{};
+            member.name = "_Spread";
+            member.dataType = ShaderStructMemberType::Int;
+            cbuffer.structMembers.Add(member);
+        }
+        cbuffer.shaderStages = ShaderStage::Fragment;
+        cbuffer.type = ShaderResourceType::ConstantBuffer;
+
         variantDesc.reflectionInfo.FindOrAdd(SRGType::PerMaterial)
             .TryAdd(fontGlyph)
-            .TryAdd(fontGlyphSampler);
+            .TryAdd(fontGlyphSampler)
+    		.TryAdd(cbuffer);
+
+        variantDesc.interleaveVertexData = false;
 
         variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
-        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float4);
 
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");
         variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
