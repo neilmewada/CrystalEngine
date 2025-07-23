@@ -415,6 +415,8 @@ namespace CE
             int posX, posY;
             int atlasSize = atlasMip->atlasSize;
 
+            constexpr int glyphPadding = 4;
+
             bool foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + 1, height + 1), padding, posX, posY);
             if (!foundEmptySpot)
             {

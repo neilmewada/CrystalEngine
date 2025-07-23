@@ -53,10 +53,15 @@ namespace CE
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
         Vec2 CalculateCharacterOffsets(Array<Vec2>& outOffsets, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+        Vec2 CalculateSDFCharacterOffsets(Array<Vec2>& outOffsets, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+
         Vec2 CalculateTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+        Vec2 CalculateSDFTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+
         void CalculateUnderlinePositions(Array<Rect>& outLines, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
 
         FFontMetrics GetFontMetrics(const FFont& font);
+        FFontMetrics GetSDFFontMetrics(const FFont& font);
 
         u64 ComputeMemoryFootprint() override;
 

@@ -1,5 +1,7 @@
 #include "FusionCore.h"
 
+#define USE_SDF 1
+
 namespace CE
 {
 
@@ -99,24 +101,40 @@ namespace CE
 	Vec2 FPainter::CalculateTextSize(const String& text, const FFont& font, f32 width, FWordWrap wordWrap)
 	{
 		thread_local Array<Rect> quads{};
+#if USE_SDF
+		return renderer2->CalculateSDFTextQuads(quads, text, font, width, wordWrap);
+#else
 		return renderer2->CalculateTextQuads(quads, text, font, width, wordWrap);
+#endif
 	}
 
 	Vec2 FPainter::CalculateCharacterOffsets(Array<Vec2>& outOffsets, const String& text,
 		const FFont& font, f32 width, FWordWrap wordWrap)
 	{
+#if USE_SDF
+		return renderer2->CalculateSDFCharacterOffsets(outOffsets, text, font, width, wordWrap);
+#else
 		return renderer2->CalculateCharacterOffsets(outOffsets, text, font, width, wordWrap);
+#endif
 	}
 
 	Vec2 FPainter::CalculateTextQuads(Array<Rect>& outRects, const String& text, const FFont& font, f32 width,
 		FWordWrap wordWrap)
 	{
+#if USE_SDF
+		return renderer2->CalculateSDFTextQuads(outRects, text, font, width, wordWrap);
+#else
 		return renderer2->CalculateTextQuads(outRects, text, font, width, wordWrap);
+#endif
 	}
 
 	FFontMetrics FPainter::GetFontMetrics(const FFont& font)
 	{
+#if USE_SDF
+		return renderer2->GetSDFFontMetrics(font);
+#else
 		return renderer2->GetFontMetrics(font);
+#endif
 	}
 
 	bool FPainter::DrawShape(const Rect& rect, const FShape& shape)
@@ -197,7 +215,11 @@ namespace CE
 
 	Vec2 FPainter::DrawText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
 	{
+#if USE_SDF
 		return renderer2->DrawSDFText(text, pos, size, wordWrap);
+#else
+		return renderer2->DrawText(text, pos, size, wordWrap);
+#endif
 	}
 
 	Vec2 FPainter::DrawSDFText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)

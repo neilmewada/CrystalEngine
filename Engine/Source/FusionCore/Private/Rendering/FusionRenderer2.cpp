@@ -366,6 +366,27 @@ namespace CE
         return fontAtlas->GetMetrics();
     }
 
+    FFontMetrics FusionRenderer2::GetSDFFontMetrics(const FFont& font)
+    {
+        ZoneScoped;
+
+        Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
+
+        Name fontFamily = currentFont.GetFamily();
+        int fontSize = currentFont.GetFontSize();
+
+        if (fontSize <= 0)
+            fontSize = 12;
+        if (!fontFamily.IsValid())
+            fontFamily = fontManager->GetDefaultFontFamily();
+
+        Ref<FSDFFontAtlas> fontAtlas = fontManager->FindSDFFont(fontFamily);
+        if (fontAtlas == nullptr)
+            return {};
+
+        return fontAtlas->GetMetrics();
+    }
+
     u64 FusionRenderer2::ComputeMemoryFootprint()
     {
 	    u64 footprint = Object::ComputeMemoryFootprint();
@@ -1138,7 +1159,7 @@ namespace CE
 
         quads.Reserve(text.GetLength());
 
-        Vec2 finalSize = CalculateTextQuads(quads, text, currentFont, size.width, wordWrap);
+        Vec2 finalSize = CalculateSDFTextQuads(quads, text, currentFont, size.width, wordWrap);
 
         if (!isFixedSize && IsRectClipped(Rect::FromSize(textPos, finalSize)))
         {
@@ -1339,8 +1360,134 @@ namespace CE
         return finalSize;
     }
 
+    Vec2 FusionRenderer2::CalculateSDFTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font, f32 width, FWordWrap wordWrap)
+    {
+        ZoneScoped;
+
+        Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
+
+        Name fontFamily = font.GetFamily();
+        f32 fontSize = font.GetFontSize();
+
+        if (fontSize <= 0)
+            fontSize = fontManager->GetDefaultFontSize();
+        if (!fontFamily.IsValid())
+            fontFamily = fontManager->GetDefaultFontFamily();
+
+        fontSize = Math::Max(fontSize, MinFontSize);
+
+        const bool isFixedWidth = width > 0.1f;
+
+        Ref<FSDFFontAtlas> fontAtlas = fontManager->FindSDFFont(fontFamily);
+        if (fontAtlas == nullptr)
+            return Vec2();
+
+        const f32 dpi = PlatformApplication::Get()->GetSystemDpi();
+        const f32 fontDpiScaling = dpi / 72.0f;
+        const f32 systemDpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
+        const f32 metricsScaling = fontDpiScaling / systemDpiScaling;
+#if PLATFORM_MAC
+        fontSize *= FusionApplication::Get()->GetDefaultScalingFactor();
+#endif
+
+        const FFontMetrics& metrics = fontAtlas->GetMetrics();
+
+        const float startY = metrics.ascender * (f32)fontSize * metricsScaling;
+        constexpr float startX = 0;
+
+        float maxX = startX;
+        float maxY = startY;
+
+        Vec3 curPos = Vec3(startX, startY, 0);
+
+        int totalCharacters = 0;
+        int breakCharIdx = -1;
+        int idx = 0;
+
+        outQuads.Resize(text.GetLength());
+        int numQuads = outQuads.GetSize();
+
+        for (int i = 0; i < text.GetLength(); ++i)
+        {
+            char c = text[i];
+
+            if (c == ' ' || c == '-' || c == '\\' || c == '/')
+            {
+                breakCharIdx = i;
+            }
+
+            if (c == '\n')
+            {
+                breakCharIdx = -1;
+                curPos.x = startX;
+                curPos.y += metrics.lineHeight * (f32)fontSize * metricsScaling;
+                outQuads[i] = Rect();
+                continue;
+            }
+
+            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+
+            const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+            const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+            const float glyphAdvance = (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+
+            if (isFixedWidth && (curPos.x + glyphAdvance > width + 0.1f) && wordWrap != FWordWrap::NoWrap)
+            {
+                curPos.x = startX;
+                curPos.y += metrics.lineHeight * (f32)fontSize * metricsScaling;
+
+                // Go through previous characters and bring them to this new-line
+                if (breakCharIdx >= 0)
+                {
+                    for (int j = breakCharIdx + 1; j < i; j++)
+                    {
+                        char prevChar = text[j];
+                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+                        f32 atlasFontSize = prevGlyph.fontSize;
+
+                        outQuads[j] = Rect::FromSize(
+                            curPos.x + (f32)prevGlyph.xOffset * (f32)fontSize / (f32)prevGlyph.fontSize / systemDpiScaling,
+                            curPos.y - (f32)prevGlyph.yOffset * (f32)fontSize / (f32)prevGlyph.fontSize / systemDpiScaling,
+                            (f32)prevGlyph.GetWidth() * (f32)fontSize / (f32)prevGlyph.fontSize / systemDpiScaling,
+                            (f32)prevGlyph.GetHeight() * (f32)fontSize / (f32)prevGlyph.fontSize / systemDpiScaling);
+
+                        curPos.x += (f32)prevGlyph.advance * fontSize / atlasFontSize / systemDpiScaling;
+                    }
+                    breakCharIdx = -1;
+
+                    curPos.x += (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+                }
+                else if (wordWrap == FWordWrap::BreakWord)
+                {
+                    breakCharIdx = -1;
+                    curPos.x = startX;
+                    curPos.y += metrics.lineHeight * fontSize * metricsScaling;
+                }
+            }
+
+            // Apply glyph offsets
+            outQuads[i] = Rect::FromSize(
+                curPos.x + (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling,
+                curPos.y - (f32)glyph.yOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling,
+                glyphWidth, glyphHeight);
+
+            curPos.x += glyphAdvance;
+
+            maxX = Math::Max(curPos.x, maxX);
+            maxY = Math::Max(curPos.y + metrics.lineHeight * (f32)fontSize * metricsScaling, maxY);
+
+            totalCharacters++;
+        }
+
+        Vec2 finalSize = Vec2(maxX - startX, maxY - startY);
+        if (isFixedWidth)
+            finalSize.width = width;
+
+        return finalSize;
+    }
+
     void FusionRenderer2::CalculateUnderlinePositions(Array<Rect>& outLines, const String& text, const FFont& font, f32 width,
-	    FWordWrap wordWrap)
+                                                      FWordWrap wordWrap)
     {
         ZoneScoped;
 
@@ -1549,6 +1696,126 @@ namespace CE
             outOffsets[i] = Vec2(
                 curPos.x + (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling,
                 curPos.x + (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling + 
+                (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling);
+
+            curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+
+            maxX = Math::Max(curPos.x, maxX);
+            maxY = Math::Max(curPos.y + metrics.lineHeight * (f32)fontSize * metricsScaling, maxY);
+
+            totalCharacters++;
+        }
+
+        Vec2 finalSize = Vec2(maxX - startX, maxY - startY);
+        if (isFixedWidth)
+            finalSize.width = width;
+
+        return finalSize;
+    }
+
+    Vec2 FusionRenderer2::CalculateSDFCharacterOffsets(Array<Vec2>& outOffsets, const String& text, const FFont& font,
+	    f32 width, FWordWrap wordWrap)
+    {
+        ZoneScoped;
+
+        Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
+
+        Name fontFamily = font.GetFamily();
+        f32 fontSize = font.GetFontSize();
+
+        if (fontSize <= 0)
+            fontSize = fontManager->GetDefaultFontSize();
+        if (!fontFamily.IsValid())
+            fontFamily = fontManager->GetDefaultFontFamily();
+
+        fontSize = Math::Max<f32>(fontSize, MinFontSize);
+
+        const bool isFixedWidth = width > 0.1f;
+
+        Ref<FSDFFontAtlas> fontAtlas = fontManager->FindSDFFont(fontFamily);
+        if (fontAtlas == nullptr)
+            return Vec2();
+
+        const f32 dpi = PlatformApplication::Get()->GetSystemDpi();
+        const f32 fontDpiScaling = dpi / 72.0f;
+        const f32 systemDpiScaling = PlatformApplication::Get()->GetSystemDpiScaling();
+        const f32 metricsScaling = fontDpiScaling / systemDpiScaling;
+#if PLATFORM_MAC
+        fontSize *= FusionApplication::Get()->GetDefaultScalingFactor();
+#endif
+
+        const FFontMetrics& metrics = fontAtlas->GetMetrics();
+
+        const float startY = metrics.ascender * (f32)fontSize * metricsScaling;
+        constexpr float startX = 0;
+
+        float maxX = startX;
+        float maxY = startY;
+
+        Vec3 curPos = Vec3(startX, startY, 0);
+
+        int totalCharacters = 0;
+        int breakCharIdx = -1;
+        int idx = 0;
+
+        outOffsets.Resize(text.GetLength());
+
+        for (int i = 0; i < text.GetLength(); ++i)
+        {
+            char c = text[i];
+
+            if (c == ' ' || c == '-' || c == '\\' || c == '/')
+            {
+                breakCharIdx = i;
+            }
+
+            if (c == '\n')
+            {
+                breakCharIdx = -1;
+                curPos.x = startX;
+                curPos.y += metrics.lineHeight * (f32)fontSize * metricsScaling;
+                outOffsets[i] = Vec2();
+                continue;
+            }
+
+            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+
+            const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+            const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+            const float glyphAdvance = (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
+
+            if (isFixedWidth && (curPos.x + glyphAdvance > width) && wordWrap != FWordWrap::NoWrap)
+            {
+                curPos.x = startX;
+                curPos.y += metrics.lineHeight * (f32)fontSize * metricsScaling;
+
+                // Go through previous characters and bring them to this new-line
+                if (breakCharIdx >= 0)
+                {
+                    for (int j = breakCharIdx + 1; j < i; j++)
+                    {
+                        char prevChar = text[j];
+                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+                        f32 atlasFontSize = prevGlyph.fontSize;
+
+                        outOffsets[j] = Vec2(curPos.x, curPos.x + (f32)prevGlyph.advance * fontSize / atlasFontSize / systemDpiScaling);
+
+                        curPos.x += (f32)prevGlyph.advance * fontSize / atlasFontSize / systemDpiScaling;
+                    }
+                    breakCharIdx = -1;
+                }
+                else if (wordWrap == FWordWrap::BreakWord)
+                {
+                    breakCharIdx = -1;
+                    curPos.x = startX;
+                    curPos.y += metrics.lineHeight * fontSize * metricsScaling;
+                }
+            }
+
+            // Apply glyph offsets
+            outOffsets[i] = Vec2(
+                curPos.x + (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling,
+                curPos.x + (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling +
                 (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling);
 
             curPos.x += (f32)glyph.advance * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;

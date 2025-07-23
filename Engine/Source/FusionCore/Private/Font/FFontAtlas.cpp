@@ -107,13 +107,15 @@ namespace CE
 
 		    for (int i = 0; i < gFontSizes.GetSize(); ++i)
 		    {
-		    	if (gFontSizes[i] == fontSize || 
+		    	if (gFontSizes[i] >= fontSize || 
 					(i == 0 && fontSize <= gFontSizes[i]) || 
 					(i == gFontSizes.GetSize() - 1 && fontSize >= gFontSizes[i]))
 		    	{
 		    		fontSizeInAtlas = gFontSizes[i];
 		    		break;
 		    	}
+
+                continue;
 
                 // This was modified for Windows OS
 		    	if (gFontSizes[i] < fontSize && fontSize < gFontSizes[i + 1])
@@ -305,7 +307,9 @@ namespace CE
             int posX, posY;
             int atlasSize = atlasMip->atlasSize;
 
-            bool foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + 1, height + 1), posX, posY);
+            constexpr int glyphPadding = 4;
+
+            bool foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + glyphPadding, height + glyphPadding), posX, posY);
             if (!foundEmptySpot)
             {
                 currentMip++;
@@ -322,7 +326,7 @@ namespace CE
                 pages.Add(String::Format("Page {}", pages.GetSize()));
                 SetPages(pages);
                 
-                foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + 1, height + 1), posX, posY);
+                foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + glyphPadding, height + glyphPadding), posX, posY);
             }
 
             if (!foundEmptySpot)
@@ -330,14 +334,17 @@ namespace CE
 	            return;
             }
 
+            posX += glyphPadding / 2;
+            posY += glyphPadding / 2;
+
             if (foundEmptySpot)
             {
                 glyph.atlasSize = atlasSize;
 
-                glyph.x0 = posX;
-                glyph.y0 = posY;
-                glyph.x1 = posX + width;
-                glyph.y1 = posY + height;
+                glyph.x0 = posX - glyphPadding / 2;
+                glyph.y0 = posY - glyphPadding / 2;
+                glyph.x1 = posX + width + glyphPadding / 2;
+                glyph.y1 = posY + height + glyphPadding / 2;
 
                 glyph.xOffset = xOffset;
                 glyph.yOffset = yOffset;

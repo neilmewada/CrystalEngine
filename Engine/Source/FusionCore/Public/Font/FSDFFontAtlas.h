@@ -23,6 +23,8 @@ namespace CE
 
         void Init(const FSDFFontAtlasInitInfo& initInfo);
 
+        const FFontMetrics& GetMetrics() const { return metrics; }
+
         //! @brief Flushes all the changes to GPU
         void Flush(u32 imageIndex);
 
