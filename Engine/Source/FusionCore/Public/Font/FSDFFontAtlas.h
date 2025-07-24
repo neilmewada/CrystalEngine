@@ -86,7 +86,12 @@ namespace CE
 
         Array<Ptr<FAtlasImage>> atlasImageLayers;
         int currentLayer = 0;
-        bool tempSaved = false;
+        bool workSubmitted = false;
+
+        // - Submission Objects -
+        RHI::CommandList* cmdList = nullptr;
+        RHI::RenderTargetBuffer* frameBuffer = nullptr;
+        RPI::Texture* sourceImage = nullptr;
 
         HashMap<CharCode, int> arrayLayerByCharCode;
 
@@ -95,6 +100,7 @@ namespace CE
         StaticArray<bool, RHI::Limits::MaxSwapChainImageCount> flushRequiredPerImage;
         bool atlasUpdateRequired = true;
 
+        RPI::Texture* oldAtlasTexture = nullptr;
         RPI::Texture* atlasTexture = nullptr;
         RHI::ShaderResourceGroup* fontSrg2 = nullptr;
 
