@@ -50,7 +50,6 @@ namespace CE::Editor
         grid.SetBrushTiling(FBrushTiling::TileXY);
         grid.SetBrushSize(Vec2(16, 16));
 
-
         (*this)
             .Title("Fusion Samples")
             .MinimizeEnabled(false)

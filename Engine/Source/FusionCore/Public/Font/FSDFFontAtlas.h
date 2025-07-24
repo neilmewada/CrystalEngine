@@ -36,6 +36,8 @@ namespace CE
 
 	private:
 
+        void UpdateAtlas(bool wait);
+
 		void OnBeginDestroy() override;
 
         void AddGlyphs(const Array<u32>& characterSet, bool isBold = false, bool isItalic = false);
@@ -53,6 +55,7 @@ namespace CE
         {
             virtual ~FAtlasImage()
             {
+                delete sourceTexture; sourceTexture = nullptr;
                 delete ptr; ptr = nullptr;
             }
 
@@ -61,6 +64,8 @@ namespace CE
             Array<RowSegment> rows;
 
             HashMap<CharCode, FFontGlyphInfo> glyphsByCharCode;
+
+            RPI::Texture* sourceTexture = nullptr;
 
             bool TryInsertGlyphRect(Vec2i glyphSize, int padding, int& outX, int& outY);
         };
@@ -95,6 +100,7 @@ namespace CE
 
 		RHI::RenderTarget* sdfRenderTarget = nullptr;
         RPI::Material* sdfGenMaterial = nullptr;
+        RHI::Fence* fence = nullptr;
 
         FFontMetrics metrics{};
 

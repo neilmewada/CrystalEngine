@@ -65,11 +65,35 @@ namespace WidgetTests
                         .Title(String::Format("Minor {} ({})", j, i))
                         .Background(Color::RGBA(36, 36, 36))
                         .Child(
-                            FNew(FLabel)
-                            .Text(String::Format("This is {} minor window in {} major window", j, i))
-                            .FontSize(16)
+                            FNew(FVerticalStack)
                             .HAlign(HAlign::Fill)
-                            .VAlign(VAlign::Fill)
+                            .VAlign(VAlign::Top)
+                            (
+                                FNew(FLabel)
+                                .Text(String::Format("This is {} minor window in {} major window", j, i))
+                                .FontSize(16)
+                                .HAlign(HAlign::Fill)
+                                .VAlign(VAlign::Fill),
+
+                                FNew(FTextButton)
+                                .Text(Flipped() ? "SDF, PNG" : "PNG, SDF")
+                                .OnButtonClicked([this](FButton* button, Vec2)
+                                {
+	                                Flipped(!Flipped());
+                                    ((FTextButton*)button)->Text(Flipped() ? "SDF, PNG" : "PNG, SDF");
+                                }),
+
+                                FNew(FVerticalStack)
+                                .ContentVAlign(VAlign::Top)
+                                .Margin(Vec4(0, 150, 0, 0))
+                                .Scale(Vec2(1, 1) * 15)
+                                (
+                                    FAssignNew(FLabel, label)
+                                    .FontSize(8)
+                                    .Text("Hello World!")
+                                    .HAlign(HAlign::Center)
+                                )
+                            )
                         )
                         .Name(String::Format("Minor{}_{}", j, i))
                         .HAlign(HAlign::Fill)
@@ -85,15 +109,25 @@ namespace WidgetTests
     {
 	    Super::OnPaint(painter);
 
+        return;
+
         String text = "quick fox jumped over last";
 
         FixedArray<u32, 8> fontSizes = { 30, 24, 16, 13, 10, 7, 7, 7 };
+
+        auto func1 = &FPainter::DrawText;
+        auto func2 = &FPainter::DrawSDFText;
+
+        if (m_Flipped)
+        {
+            std::swap(func1, func2);
+        }
 
         Vec2 topLeft = Vec2(25, 200);
         for (int i = 0; i < fontSizes.GetSize(); i++)
         {
             painter->SetFontSize(fontSizes[i]);
-            painter->DrawText(text, topLeft);
+            (painter->*func1)(text, topLeft, Vec2(), FWordWrap::Normal);
 
             topLeft.y += fontSizes[i] * 2;
         }
@@ -102,7 +136,7 @@ namespace WidgetTests
         for (int i = 0; i < fontSizes.GetSize(); i++)
         {
             painter->SetFontSize(fontSizes[i]);
-            painter->DrawSDFText(text, topRight);
+            (painter->*func2)(text, topRight, Vec2(), FWordWrap::Normal);
 
             topRight.y += fontSizes[i] * 2;
         }

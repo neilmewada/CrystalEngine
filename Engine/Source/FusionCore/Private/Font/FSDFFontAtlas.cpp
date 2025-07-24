@@ -66,7 +66,8 @@ namespace CE
 
         RPI::Shader* fusionShader2 = FusionApplication::Get()->GetFusionShader2();
 
-        fontSrg2 = RHI::gDynamicRHI->CreateShaderResourceGroup(fusionShader2->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerMaterial));
+        const RHI::ShaderResourceGroupLayout& materialSrgLayout = fusionShader2->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerMaterial);
+        fontSrg2 = RHI::gDynamicRHI->CreateShaderResourceGroup(materialSrgLayout);
 
         AddGlyphs(initInfo.characterSet);
     }
@@ -88,8 +89,209 @@ namespace CE
 		delete atlasTexture; atlasTexture = nullptr;
     	delete sdfGenMaterial; sdfGenMaterial = nullptr;
 
-		RHI::gDynamicRHI->DestroyRenderTarget(sdfRenderTarget);
-        sdfRenderTarget = nullptr;
+        RHI::gDynamicRHI->DestroyFence(fence); fence = nullptr;
+        RHI::gDynamicRHI->DestroyRenderTarget(sdfRenderTarget); sdfRenderTarget = nullptr;
+    }
+
+    void FSDFFontAtlas::UpdateAtlas(bool wait)
+    {
+        atlasUpdateRequired = false;
+
+        Array<CMImage> images;
+        images.Reserve(atlasImageLayers.GetSize());
+
+        for (FAtlasImage* atlasImageLayer : atlasImageLayers)
+        {
+            CMImage image = CMImage::LoadRawImageFromMemory(atlasImageLayer->ptr, atlasImageLayer->atlasSize, atlasImageLayer->atlasSize,
+                CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
+            images.Add(image);
+        }
+
+        RPI::Texture* sourceImage = new RPI::Texture("SDF Source Atlas", images, SamplerDescriptor{
+                .addressModeU = SamplerAddressMode::ClampToBorder,
+                .addressModeV = SamplerAddressMode::ClampToBorder,
+                .addressModeW = SamplerAddressMode::ClampToBorder,
+                .samplerFilterMode = FilterMode::Linear,
+                .borderColor = SamplerBorderColor::FloatTransparentBlack,
+                .enableAnisotropy = false, .maxAnisotropy = 0 });
+
+        RHI::BufferDescriptor stagingBufferDesc{};
+        stagingBufferDesc.bindFlags = BufferBindFlags::StagingBuffer;
+        stagingBufferDesc.bufferSize = RHI::Texture::CalculateTotalTextureSize(atlasImageLayers[0]->atlasSize, atlasImageLayers[0]->atlasSize, 8);
+        stagingBufferDesc.defaultHeapType = MemoryHeapType::ReadBack;
+        stagingBufferDesc.structureByteStride = stagingBufferDesc.bufferSize;
+
+        RHI::Buffer* sourceStaging = nullptr;
+        RHI::Buffer* outputStaging = nullptr;
+        if (!tempSaved)
+        {
+            sourceStaging = RHI::gDynamicRHI->CreateBuffer(stagingBufferDesc);
+            outputStaging = RHI::gDynamicRHI->CreateBuffer(stagingBufferDesc);
+        }
+
+        RPI::TextureDescriptor outputDesc{};
+        outputDesc.texture.arrayLayers = atlasImageLayers.GetSize();
+        outputDesc.texture.mipLevels = 1;
+        outputDesc.texture.width = atlasImageLayers[0]->atlasSize;
+        outputDesc.texture.height = atlasImageLayers[0]->atlasSize;
+        outputDesc.texture.depth = 1;
+        outputDesc.texture.format = Format::R8_UNORM;
+        outputDesc.texture.defaultHeapType = MemoryHeapType::Default;
+        outputDesc.texture.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
+        outputDesc.texture.dimension = Dimension::Dim2D;
+        outputDesc.texture.sampleCount = 1;
+        outputDesc.texture.name = "SDF Font Atlas";
+
+        outputDesc.samplerDesc.addressModeU = outputDesc.samplerDesc.addressModeV = outputDesc.samplerDesc.addressModeW = SamplerAddressMode::ClampToBorder;
+        outputDesc.samplerDesc.borderColor = SamplerBorderColor::FloatTransparentBlack;
+        outputDesc.samplerDesc.enableAnisotropy = false;
+        outputDesc.samplerDesc.samplerFilterMode = FilterMode::Linear;
+
+        atlasTexture = new RPI::Texture(outputDesc);
+
+        fontSrg2->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
+        fontSrg2->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());
+        fontSrg2->FlushBindings();
+
+        sdfGenMaterial->SetPropertyValue("_FontAtlas", sourceImage);
+        sdfGenMaterial->SetPropertyValue("_Spread", SDFSpread);
+        sdfGenMaterial->FlushProperties();
+
+        RHI::RenderTargetBuffer* frameBuffer = RHI::gDynamicRHI->CreateRenderTargetBuffer(sdfRenderTarget, { atlasTexture->GetRhiTexture() });
+
+        RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+        RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
+
+        const auto& fullScreenQuad = RPISystem::Get().GetFullScreenQuad();
+        DrawLinearArguments fullScreenQuadArgs = RPISystem::Get().GetFullScreenQuadDrawArgs();
+
+        cmdList->Begin();
+        {
+            RHI::ResourceBarrierDescriptor barrier{};
+            barrier.subresourceRange = RHI::SubresourceRange::All();
+
+            barrier.resource = atlasTexture->GetRhiTexture();
+            barrier.fromState = ResourceState::Undefined;
+            barrier.toState = ResourceState::ColorOutput;
+            cmdList->ResourceBarrier(1, &barrier);
+
+            AttachmentClearValue clear{};
+            clear.clearValue = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+            cmdList->BeginRenderTarget(sdfRenderTarget, frameBuffer, &clear);
+            {
+                RHI::ViewportState viewport{};
+                viewport.x = viewport.y = 0;
+                viewport.width = atlasTexture->GetWidth();
+                viewport.height = atlasTexture->GetHeight();
+                viewport.minDepth = 0.0f; viewport.maxDepth = 1.0f;
+                cmdList->SetViewports(1, &viewport);
+
+                RHI::ScissorState scissor{};
+                scissor.x = scissor.y = 0;
+                scissor.width = viewport.width;
+                scissor.height = viewport.height;
+                cmdList->SetScissors(1, &scissor);
+
+                GraphicsPipelineVariant pipelineVariant{
+                    .sampleState = {.sampleCount = 1, .quality = 1 },
+                    .colorFormats = { RHI::Format::R8_UNORM },
+                    .depthStencilFormat = RHI::Format::Undefined,
+                };
+
+                RHI::PipelineState* pipeline = sdfGenMaterial->GetCurrentShader()->GetDefaultVariant()->GetPipeline(pipelineVariant);
+
+                cmdList->BindPipelineState(pipeline);
+
+                cmdList->SetShaderResourceGroup(sdfGenMaterial->GetShaderResourceGroup());
+                cmdList->CommitShaderResources();
+
+                cmdList->BindVertexBuffers(0, fullScreenQuad.GetSize(), fullScreenQuad.GetData());
+
+                cmdList->DrawLinear(fullScreenQuadArgs);
+            }
+            cmdList->EndRenderTarget();
+
+            barrier.resource = sourceImage->GetRhiTexture();
+            barrier.fromState = ResourceState::FragmentShaderResource;
+            barrier.toState = ResourceState::CopySource;
+            cmdList->ResourceBarrier(1, &barrier);
+
+            barrier.resource = atlasTexture->GetRhiTexture();
+            barrier.fromState = ResourceState::ColorOutput;
+            barrier.toState = ResourceState::CopySource;
+            cmdList->ResourceBarrier(1, &barrier);
+
+            if (!tempSaved)
+            {
+                RHI::TextureToBufferCopy copy{};
+                copy.srcTexture = sourceImage->GetRhiTexture();
+                copy.mipSlice = 0;
+                copy.baseArrayLayer = 0;
+                copy.layerCount = 1;
+                copy.dstBuffer = sourceStaging;
+                copy.bufferOffset = 0;
+
+                cmdList->CopyTextureRegion(copy);
+            }
+
+            if (!tempSaved)
+            {
+                RHI::TextureToBufferCopy copy{};
+                copy.srcTexture = atlasTexture->GetRhiTexture();
+                copy.mipSlice = 0;
+                copy.baseArrayLayer = 0;
+                copy.layerCount = 1;
+                copy.dstBuffer = outputStaging;
+                copy.bufferOffset = 0;
+
+                cmdList->CopyTextureRegion(copy);
+            }
+
+            barrier.resource = sourceImage->GetRhiTexture();
+            barrier.fromState = ResourceState::CopySource;
+            barrier.toState = ResourceState::FragmentShaderResource;
+            cmdList->ResourceBarrier(1, &barrier);
+
+            barrier.resource = atlasTexture->GetRhiTexture();
+            barrier.fromState = ResourceState::CopySource;
+            barrier.toState = ResourceState::FragmentShaderResource;
+            cmdList->ResourceBarrier(1, &barrier);
+        }
+        cmdList->End();
+
+        queue->Execute(1, &cmdList, fence);
+
+        if (!tempSaved)
+        {
+            void* data;
+
+            sourceStaging->Map(0, sourceStaging->GetBufferSize(), &data);
+            {
+                CMImage rawImage = CMImage::LoadRawImageFromMemory((unsigned char*)data, atlasTexture->GetWidth(), atlasTexture->GetHeight(),
+                    CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
+
+                rawImage.EncodeToPNG(EngineDirectories::GetEngineInstallDirectory() / "Temp/Source.png");
+            }
+            sourceStaging->Unmap();
+
+            outputStaging->Map(0, outputStaging->GetBufferSize(), &data);
+            {
+                CMImage rawImage = CMImage::LoadRawImageFromMemory((unsigned char*)data, atlasTexture->GetWidth(), atlasTexture->GetHeight(),
+                    CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
+
+                rawImage.EncodeToPNG(EngineDirectories::GetEngineInstallDirectory() / "Temp/SDF.png");
+            }
+            outputStaging->Unmap();
+        }
+
+        RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
+
+        delete frameBuffer; frameBuffer = nullptr;
+        delete sourceStaging; sourceStaging = nullptr;
+        delete outputStaging; outputStaging = nullptr;
+        delete sourceImage; sourceImage = nullptr;
+
+        tempSaved = true;
     }
 
     void FSDFFontAtlas::Flush(u32 imageIndex)
@@ -417,7 +619,7 @@ namespace CE
 
             constexpr int glyphPadding = 4;
 
-            bool foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + 1, height + 1), padding, posX, posY);
+            bool foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + glyphPadding, height + glyphPadding), padding, posX, posY);
             if (!foundEmptySpot)
             {
                 currentLayer++;
@@ -430,7 +632,7 @@ namespace CE
 
                 atlasImageLayers.Add(atlasMip);
 
-                foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + 1, height + 1), padding, posX, posY);
+                foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + glyphPadding, height + glyphPadding), padding, posX, posY);
             }
 
             if (!foundEmptySpot)
@@ -438,14 +640,17 @@ namespace CE
                 return;
             }
 
+            posX += glyphPadding / 2;
+            posY += glyphPadding / 2;
+
             arrayLayerByCharCode[charCode] = currentLayer;
 
             glyph.atlasSize = atlasSize;
 
-            glyph.x0 = posX;
-            glyph.y0 = posY;
-            glyph.x1 = posX + width;
-            glyph.y1 = posY + height;
+            glyph.x0 = posX - glyphPadding / 2;
+            glyph.y0 = posY - glyphPadding / 2;
+            glyph.x1 = posX + width + glyphPadding / 2;
+            glyph.y1 = posY + height + glyphPadding / 2;
 
             glyph.xOffset = xOffset;
             glyph.yOffset = yOffset;

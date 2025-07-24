@@ -8,12 +8,6 @@
 
 #include "Fusion_Test.private.h"
 
-#define TEST_BEGIN TestBegin(false)
-#define TEST_END TestEnd(false)
-
-#define TEST_BEGIN_GUI TestBegin(true)
-#define TEST_END_GUI TestEnd(true)
-
 static CE::JobManager* gJobManager = nullptr;
 static CE::JobContext* gJobContext = nullptr;
 
@@ -23,21 +17,12 @@ using namespace WidgetTests;
 static int windowWidth = 0;
 static int windowHeight = 0;
 
-static void TestBegin(bool gui)
-{
-	CERegisterModuleTypes();
-}
-static void TestEnd(bool gui)
-{
-	CEDeregisterModuleTypes();
-}
-
 TEST(Fusion, MainTest)
 {
-	TEST_BEGIN_GUI;
 	using namespace WidgetTests;
 
 	FusionStandaloneApplication app{};
+	CERegisterModuleTypes();
 
 	PlatformWindowInfo windowInfo{};
 	windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
@@ -55,6 +40,6 @@ TEST(Fusion, MainTest)
 
 	app.Launch<FusionTestWindow>(w, h, windowInfo);
 
-	TEST_END_GUI;
+	CEDeregisterModuleTypes();
 }
 

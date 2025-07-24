@@ -16,7 +16,6 @@ namespace CE
         cursorTimer->OnTimeOut(FUNCTION_BINDING(this, OnTimeOut));
     }
 
-
     void FTextInputLabel::CalculateIntrinsicSize()
     {
 	    Super::CalculateIntrinsicSize();

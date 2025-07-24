@@ -52,12 +52,6 @@ namespace CE
 		renderer2->PopOpacity();
 	}
 
-	void FPainter::SetItemTransform(const Matrix4x4& transform)
-	{
-		// Not supported anymore!
-		//renderer->SetItemTransform(transform);
-	}
-
 	void FPainter::PushChildCoordinateSpace(const Matrix4x4& coordinateTransform)
 	{
 		renderer2->PushChildCoordinateSpace(coordinateTransform);

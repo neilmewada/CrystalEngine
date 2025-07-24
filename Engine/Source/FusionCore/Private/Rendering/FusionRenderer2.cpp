@@ -1390,6 +1390,8 @@ namespace CE
         fontSize *= FusionApplication::Get()->GetDefaultScalingFactor();
 #endif
 
+        constexpr int glyphPadding = 4;
+
         const FFontMetrics& metrics = fontAtlas->GetMetrics();
 
         const float startY = metrics.ascender * (f32)fontSize * metricsScaling;
@@ -1451,6 +1453,9 @@ namespace CE
                             (f32)prevGlyph.GetWidth() * (f32)fontSize / (f32)prevGlyph.fontSize / systemDpiScaling,
                             (f32)prevGlyph.GetHeight() * (f32)fontSize / (f32)prevGlyph.fontSize / systemDpiScaling);
 
+                        outQuads[j].min -= Vec2(1, 1) * glyphPadding * fontSize / atlasFontSize / 4;
+                        outQuads[j].max += Vec2(1, 1) * glyphPadding * fontSize / atlasFontSize / 4;
+
                         curPos.x += (f32)prevGlyph.advance * fontSize / atlasFontSize / systemDpiScaling;
                     }
                     breakCharIdx = -1;
@@ -1470,6 +1475,9 @@ namespace CE
                 curPos.x + (f32)glyph.xOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling,
                 curPos.y - (f32)glyph.yOffset * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling,
                 glyphWidth, glyphHeight);
+
+            outQuads[i].min -= Vec2(1, 1) * glyphPadding * fontSize / glyph.fontSize / 4;
+            outQuads[i].max += Vec2(1, 1) * glyphPadding * fontSize / glyph.fontSize / 4;
 
             curPos.x += glyphAdvance;
 
