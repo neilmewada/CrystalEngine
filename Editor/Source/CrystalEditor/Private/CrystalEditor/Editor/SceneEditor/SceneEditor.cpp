@@ -183,7 +183,7 @@ namespace CE::Editor
                 meshComponent->SetMaterial(woodMaterial, 0, 0);
             }
 
-            if (Ref<StaticMesh> arrowMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Editor/Assets/Models/SM_Editor_Arrow"))
+            if (Ref<StaticMesh> arrowMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Engine/Assets/Models/SM_Editor_Arrow"))
         	{
 		        StaticMeshActor* arrowActor = CreateObject<StaticMeshActor>(scene, "ArrowMesh");
             	scene->AddActor(arrowActor);
