@@ -31,6 +31,8 @@ namespace CE
 
         virtual bool IsFocused() override;
 
+        virtual bool SetMouseCapture(bool capture) override;
+
         virtual Rect GetScreenBounds(int displayIndex = 0) override;
 
         virtual void SetSystemCursor(SystemCursor cursor) override;

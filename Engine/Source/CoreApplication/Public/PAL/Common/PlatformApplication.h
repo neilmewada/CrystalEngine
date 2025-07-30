@@ -75,6 +75,8 @@ namespace CE
 
         virtual f32 GetSystemDpiScaling() = 0;
 
+		virtual bool SetMouseCapture(bool capture) = 0;
+
         virtual void AddMessageHandler(ApplicationMessageHandler* handler)
         {
             this->messageHandlers.Add(handler);

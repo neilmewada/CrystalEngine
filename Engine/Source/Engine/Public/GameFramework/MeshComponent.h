@@ -51,7 +51,7 @@ namespace CE
 	protected:
 
 		//! @brief Materials per LOD mesh
-		FIELD(EditAnywhere, Category = "Materials", ArrayEditorMode = "Static", ArrayElementName = "LOD {}")
+		FIELD(EditAnywhere, Category = "Materials", ArrayEditorMode = "Static", ArrayElementName = "LOD {}", ArrayElementTypeName = "")
         Array<LodMaterial> materialsPerLod{};
 
 

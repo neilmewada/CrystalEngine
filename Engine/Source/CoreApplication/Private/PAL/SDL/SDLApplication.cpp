@@ -50,6 +50,7 @@ namespace CE
 		{
 			CE_LOG(Critical, All, "Failed to initialize SDL Video: {}", SDL_GetError());
 		}
+
 	}
 
 	void SDLApplication::PreShutdown()
@@ -94,6 +95,11 @@ namespace CE
 		}
 
 		return false;
+	}
+
+	bool SDLApplication::SetMouseCapture(bool capture)
+	{
+		return SDL_CaptureMouse(capture ? SDL_TRUE : SDL_FALSE) == 0;
 	}
 
 	Rect SDLApplication::GetScreenBounds(int displayIndex)
