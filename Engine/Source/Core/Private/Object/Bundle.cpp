@@ -595,12 +595,13 @@ namespace CE
         dependencies.Clear();
     }
 
-    void Bundle::FetchAllSchemaTypes(Array<ClassType*>& outClasses, Array<StructType*>& outStructs)
+    void Bundle::FetchAllSchemaTypes(Array<ClassType*>& outClasses, Array<StructType*>& outStructs, Array<TypeInfo*>& opaquePodTypes)
     {
         HashSet<ClassType*> classes;
         HashSet<StructType*> structs;
+        HashSet<TypeInfo*> podTypes;
 
-        std::function<void(StructType*)> fetchInternalStructs = [&](StructType* structType)
+        std::function<void(StructType*)> fetchNestedStructs = [&](StructType* structType)
             {
                 if (structType == nullptr || structs.Exists(structType))
                     return;
@@ -615,7 +616,7 @@ namespace CE
                     {
                         Struct* childStruct = StructType::FindStruct(field->GetDeclarationTypeId());
 
-                        fetchInternalStructs(childStruct);
+                        fetchNestedStructs(childStruct);
                     }
                     else if (field->IsArrayField())
                     {
@@ -624,7 +625,15 @@ namespace CE
                         {
                             StructType* underlyingStructType = static_cast<StructType*>(underlyingType);
 
-                            fetchInternalStructs(underlyingStructType);
+                            fetchNestedStructs(underlyingStructType);
+                        }
+                    }
+                    else if (field->IsPODField() && field->HasCustomPODSerialization())
+                    {
+                        TypeInfo* podType = field->GetDeclarationType();
+                        if (!FieldTypeBytes.KeyExists(podType->GetTypeId()))
+                        {
+                            podTypes.Add(podType);
                         }
                     }
                 }
@@ -645,7 +654,7 @@ namespace CE
                     {
                         Struct* structType = StructType::FindStruct(field->GetDeclarationTypeId());
 
-                        fetchInternalStructs(structType);
+                        fetchNestedStructs(structType);
                     }
                     else if (field->IsArrayField())
                     {
@@ -654,7 +663,15 @@ namespace CE
                         {
                             StructType* structType = static_cast<StructType*>(underlyingType);
 
-                            fetchInternalStructs(structType);
+                            fetchNestedStructs(structType);
+                        }
+                    }
+                    else if (field->IsPODField() && field->HasCustomPODSerialization())
+                    {
+						TypeInfo* podType = field->GetDeclarationType();
+                        if (!FieldTypeBytes.KeyExists(podType->GetTypeId()))
+                        {
+                            podTypes.Add(podType);
                         }
                     }
                 }
@@ -688,6 +705,11 @@ namespace CE
         for (StructType* structType : structs)
         {
             outStructs.Add(structType);
+        }
+
+        for (TypeInfo* podType : podTypes)
+        {
+            opaquePodTypes.Add(podType);
         }
     }
     

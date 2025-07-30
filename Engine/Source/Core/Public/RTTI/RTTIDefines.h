@@ -25,6 +25,9 @@ namespace CE::Internal\
 		virtual bool IsPOD() const override { return true; }\
 		virtual void InitializeDefaults(void* instance) override { new(instance) Namespace::Type(); }\
 		virtual void CallDestructor(void* instance) override { CE::TTypeDestructor<Namespace::Type>::Invoke(instance); }\
+		virtual bool HasCustomPODSerialization() override { return THasSerializePODFunction<Namespace::Type>::Value && THasDeserializePODFunction<Namespace::Type>::Value; }\
+		virtual void SerializePOD(void* instance, Stream* stream) override { THasSerializePODFunction<Namespace::Type>::SerializePOD((Namespace::Type*)instance, stream); }\
+		virtual void DeserializePOD(void* instance, Stream* stream) override { THasDeserializePODFunction<Namespace::Type>::DeserializePOD((Namespace::Type*)instance, stream); }\
 		virtual void CopyConstructor(void* source, void* destination) override\
 		{\
 			*(Namespace::Type*)destination = *(Namespace::Type*)source;\
@@ -362,6 +365,31 @@ namespace CE
 		}
 	};
 
+	class Stream;
+
+	template<typename T, typename = void>
+	struct THasSerializePODFunction : TFalseType
+	{
+		static void SerializePOD(T* instance, Stream* stream) {} // Do nothing
+	};
+
+	template<typename T>
+	struct THasSerializePODFunction<T, std::void_t<decltype(std::declval<T>().SerializePOD(std::declval<Stream*>()))>> : TTrueType
+	{
+		static void SerializePOD(T* instance, Stream* stream) { return instance->SerializePOD(stream); }
+	};
+
+	template<typename T, typename = void>
+	struct THasDeserializePODFunction : TFalseType
+	{
+		static void DeserializePOD(T* instance, Stream* stream) {} // Do nothing
+	};
+
+	template<typename T>
+	struct THasDeserializePODFunction<T, std::void_t<decltype(std::declval<T>().DeserializePOD(std::declval<Stream*>()))>> : TTrueType
+	{
+		static void DeserializePOD(T* instance, Stream* stream) { return instance->DeserializePOD(stream); }
+	};
     
 } // namespace CE
 

@@ -45,6 +45,8 @@ namespace CE
 
         void SetCollisionEnabled(const PhysicsLayer& layerA, const PhysicsLayer& layerB, bool enabled);
 
+        JPH::PhysicsSystem* GetJoltPhysicsSystem();
+
     private:
 
         void RegisterBuiltinLayers();

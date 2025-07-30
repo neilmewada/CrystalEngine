@@ -199,7 +199,12 @@ namespace CE
 		/// Returns true if the type is a subclass of TypeInfo. i.e. Reflection of RTTI classes.
 		virtual bool IsTypeInfo() const { return false; }
 
+		// - POD -
+
 		virtual bool IsPOD() const { return false; }
+		virtual bool HasCustomPODSerialization() { return false; }
+		virtual void SerializePOD(void* instance, Stream* stream) {}
+		virtual void DeserializePOD(void* instance, Stream* stream) {}
 
 		virtual bool IsAssignableTo(TypeId typeId) { return false; }
 

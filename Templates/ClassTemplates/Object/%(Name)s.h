@@ -12,8 +12,6 @@ namespace CE
         
     public:
 
-        virtual ~%(Name)s();
-
     };
     
 } // namespace CE

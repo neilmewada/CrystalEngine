@@ -229,6 +229,11 @@ namespace CE
 		return const_cast<TypeInfo*>(instanceOwner);
 	}
 
+	bool FieldType::HasCustomPODSerialization()
+	{
+		return IsPODField() && GetDeclarationType()->HasCustomPODSerialization();
+	}
+
 	bool FieldType::IsPODField()
 	{
 		if (GetDeclarationType() == nullptr)

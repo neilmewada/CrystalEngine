@@ -69,6 +69,8 @@ namespace CE
         
         virtual bool IsAssignableTo(CE::TypeId typeId) override;
         virtual bool IsObject() override { return IsAssignableTo(TYPEID(Object)); }
+
+        bool HasCustomPODSerialization() override;
         
 		bool IsPODField();
         bool IsArrayField() const;

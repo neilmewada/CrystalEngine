@@ -258,5 +258,11 @@ namespace CE
 		}
     }
 
+	JPH::PhysicsSystem* PhysicsSystem::GetJoltPhysicsSystem()
+	{
+		return impl ? impl->physicsSystem : nullptr;
+	}
+
+
 } // namespace CE
 

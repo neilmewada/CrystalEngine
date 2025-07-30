@@ -7,11 +7,6 @@ namespace CE
     {
 
     }
-
-    %(Name)s::~%(Name)s()
-    {
-        
-    }
     
 } // namespace CE
 

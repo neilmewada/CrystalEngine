@@ -24,6 +24,7 @@ static void CERegisterModuleTypes()
 {
     CE_REGISTER_TYPES(
 		VariantTests::VariantStruct,
+		BundleTests::PODSample,
         BundleTests::WritingTestObj1,
 		BundleTests::WritingTestObj2,
 		BundleTests::MyTextureDescriptor,
@@ -50,6 +51,7 @@ static void CEDeregisterModuleTypes()
 {
     CE_DEREGISTER_TYPES(
 		VariantTests::VariantStruct,
+		BundleTests::PODSample,
         BundleTests::WritingTestObj1,
         BundleTests::WritingTestObj2,
 		BundleTests::MyMaterial,
@@ -3388,6 +3390,18 @@ TEST(Bundle, Basic)
 
 	IO::Path bundlePath = PlatformDirectories::GetLaunchDir() / "BasicTestBundle.casset";
 
+	// 0. Basic checks
+	{
+		EXPECT_FALSE(TYPE(CE::String)->HasCustomPODSerialization());
+    	EXPECT_TRUE(TYPE(PODSample)->HasCustomPODSerialization());
+
+		Ptr<FieldType> opaquePodField = WritingTestObj2::StaticClass()->FindField("opaquePod");
+		EXPECT_NE(opaquePodField, nullptr);
+		EXPECT_TRUE(opaquePodField->IsPODField());
+		EXPECT_TRUE(opaquePodField->GetDeclarationType()->IsPOD());
+		EXPECT_TRUE(opaquePodField->GetDeclarationType()->HasCustomPODSerialization());
+	}
+
 	// 1. Write
     {
 	    Ref<Bundle> bundle = CreateObject<Bundle>(nullptr, "BasicTestBundle");
@@ -3396,6 +3410,7 @@ TEST(Bundle, Basic)
     	EXPECT_EQ(testObject->GetOuter(), bundle);
 
 		testObject->testStruct.obj1Ptr = nullptr;
+		testObject->opaquePod.value = 1234;
 		testObject->objectArray.Add(bundle);
 		testObject->value = 123;
 		testObject->testStruct.obj1Ptr = nullptr;
@@ -3426,7 +3441,8 @@ TEST(Bundle, Basic)
     	EXPECT_EQ(testObject->GetSubObjectCount(), 0);
     	EXPECT_EQ(testObject->GetOuter(), bundle);
 
-    	EXPECT_EQ(testObject->value, 123);
+		EXPECT_EQ(testObject->value, 123);
+		EXPECT_EQ(testObject->opaquePod.value, 1234);
     	EXPECT_EQ(testObject->objectArray.GetSize(), 1);
     	EXPECT_EQ(testObject->objectArray[0], bundle);
     	EXPECT_EQ(testObject->testStruct.owner, bundle);
