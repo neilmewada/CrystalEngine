@@ -890,7 +890,7 @@ namespace CE
 		s64 value = 0;
 		if (TryParseInteger(string, value))
 		{
-			outValue = StaticCast<c8>(value);
+			outValue = static_cast<c8>(value);
 			return true;
 		}
 		return false;
@@ -901,7 +901,7 @@ namespace CE
 		s64 value = 0;
 		if (TryParseInteger(string, value))
 		{
-			outValue = StaticCast<c16>(value);
+			outValue = static_cast<c16>(value);
 			return true;
 		}
 		return false;
@@ -912,7 +912,7 @@ namespace CE
         s64 value = 0;
         if (TryParseInteger(string, value))
         {
-            outValue = StaticCast<u8>(value);
+            outValue = static_cast<u8>(value);
             return true;
         }
         return false;
@@ -923,7 +923,7 @@ namespace CE
         s64 value = 0;
         if (TryParseInteger(string, value))
         {
-            outValue = StaticCast<s8>(value);
+            outValue = static_cast<s8>(value);
             return true;
         }
         return false;
@@ -934,7 +934,7 @@ namespace CE
 		s64 value = 0;
 		if (TryParseInteger(string, value))
 		{
-			outValue = StaticCast<u16>(value);
+			outValue = static_cast<u16>(value);
 			return true;
 		}
 		return false;
@@ -945,7 +945,7 @@ namespace CE
 		s64 value = 0;
 		if (TryParseInteger(string, value))
 		{
-			outValue = StaticCast<s16>(value);
+			outValue = static_cast<s16>(value);
 			return true;
 		}
 		return false;
@@ -956,7 +956,7 @@ namespace CE
         s64 value = 0;
         if (TryParseInteger(string, value))
         {
-            outValue = StaticCast<u32>(value);
+            outValue = static_cast<u32>(value);
             return true;
         }
         return false;
@@ -967,7 +967,7 @@ namespace CE
         s64 value = 0;
         if (TryParseInteger(string, value))
         {
-            outValue = StaticCast<s32>(value);
+            outValue = static_cast<s32>(value);
             return true;
         }
         return false;
@@ -978,7 +978,7 @@ namespace CE
         s64 value = 0;
         if (TryParseInteger(string, value))
         {
-            outValue = StaticCast<u64>(value);
+            outValue = static_cast<u64>(value);
             return true;
         }
         return false;
@@ -989,7 +989,7 @@ namespace CE
         s64 value = 0;
         if (TryParseInteger(string, value))
         {
-            outValue = StaticCast<s64>(value);
+            outValue = static_cast<s64>(value);
             return true;
         }
         return false;

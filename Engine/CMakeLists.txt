@@ -22,6 +22,7 @@ add_subdirectory(Source/CoreMedia)
 add_subdirectory(Source/CoreMesh)
 add_subdirectory(Source/CoreRHI)
 add_subdirectory(Source/CoreRPI)
+add_subdirectory(Source/CorePhysics)
 add_subdirectory(Source/CoreSettings)
 
 # Core Dependencies

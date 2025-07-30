@@ -28,7 +28,7 @@ namespace CE::RPI
 	/// @brief RPISystem owns and manages all scenes.
 	class CORERPI_API RPISystem final
 	{
-		CE_NO_COPY(RPISystem)
+		CE_NO_COPY_MOVE(RPISystem)
 	public:
 
 		static RPISystem& Get();
