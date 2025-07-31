@@ -2,6 +2,15 @@
 
 namespace CE
 {
+    ENUM()
+    enum class PhysicsMotionType
+    {
+		Static = 0, // The body is static and does not move
+        Kinematic,  // The body is kinematic and can be moved by the user
+        Dynamic     // The body is dynamic and is affected by physics forces
+	};
+    ENUM_CLASS(PhysicsMotionType);
+
     STRUCT()
     struct COREPHYSICS_API PhysicsBodyInitInfo final
     {
@@ -11,11 +20,25 @@ namespace CE
 		PhysicsBodyInitInfo() = default;
 
         FIELD()
+        Name objectName;
+
+        FIELD()
 		Ref<PhysicsShape> shape = nullptr; // The shape of the physics body
 
         FIELD()
         PhysicsLayer layer = BuiltinPhysicsLayer::Static;
 
+        FIELD()
+		PhysicsMotionType motionType = PhysicsMotionType::Static; // The motion type of the physics body
+
+        FIELD()
+        Vec3 position;
+
+        FIELD()
+        Quat rotation;
+
+        FIELD()
+        Vec3 scale = Vec3(1, 1, 1);
 	};
 
     CLASS()
@@ -30,6 +53,7 @@ namespace CE
         
     public:
 
+        static Ref<PhysicsBody> Create(const PhysicsBodyInitInfo& initInfo, Ref<Object> outer = nullptr);
 
     private:
 

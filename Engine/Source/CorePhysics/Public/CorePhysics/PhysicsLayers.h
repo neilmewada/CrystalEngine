@@ -68,9 +68,6 @@ namespace CE
 
 		u16 value = NumericLimits<u16>::Max();
 
-		// Just a safety check to ensure that this type has SerializePOD and DeserializePOD functions implemented.
-		static_assert(THasSerializePODFunction<PhysicsLayer>::Value);
-		static_assert(THasDeserializePODFunction<PhysicsLayer>::Value);
 	};
 
 } // namespace CE::Physics

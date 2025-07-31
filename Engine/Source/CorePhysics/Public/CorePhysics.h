@@ -5,6 +5,7 @@
 namespace JPH
 {
 	class PhysicsSystem;
+	class Shape;
 }
 
 #include "CorePhysics/PhysicsLayers.h"

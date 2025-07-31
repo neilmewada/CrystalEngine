@@ -31,6 +31,16 @@ namespace CE
         return boxShape;
     }
 
+    JPH::Shape* BoxShape::GetJoltShape() const
+    {
+		return impl->joltShape.GetPtr(); // Return the Jolt shape instance
+    }
+
+    JPH::Shape* BoxShape::CreateJoltShape() const
+    {
+        return new JPH::BoxShape(JPH::Vec3(settings.halfExtents.x, settings.halfExtents.y, settings.halfExtents.z));
+    }
+
     void BoxShape::OnBeginDestroy()
     {
 	    Super::OnBeginDestroy();
@@ -59,6 +69,16 @@ namespace CE
         sphereShape->impl->joltShape = new JPH::SphereShape(settings.radius);
 
 		return sphereShape;
+    }
+
+    JPH::Shape* SphereShape::GetJoltShape() const
+    {
+		return impl->joltShape.GetPtr(); // Return the Jolt shape instance
+    }
+
+    JPH::Shape* SphereShape::CreateJoltShape() const
+    {
+		return new JPH::SphereShape(settings.radius);
     }
 
     void SphereShape::OnBeginDestroy()

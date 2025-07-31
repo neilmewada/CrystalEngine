@@ -22,6 +22,8 @@ namespace CE
         
     public:
 
+        virtual JPH::Shape* GetJoltShape() const = 0;
+        virtual JPH::Shape* CreateJoltShape() const = 0;
 
     };
 
@@ -49,6 +51,10 @@ namespace CE
     public:
 
         static Ref<BoxShape> Create(const BoxShapeSettings& settings, Ref<Object> outer = nullptr);
+
+        JPH::Shape* GetJoltShape() const override;
+
+        JPH::Shape* CreateJoltShape() const override;
 
     protected:
 
@@ -88,6 +94,10 @@ namespace CE
     public:
 
 		static Ref<SphereShape> Create(const SphereShapeSettings& settings, Ref<Object> outer = nullptr);
+
+        JPH::Shape* GetJoltShape() const override;
+
+        JPH::Shape* CreateJoltShape() const override;
 
 	protected:
 
