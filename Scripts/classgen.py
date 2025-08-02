@@ -45,6 +45,7 @@ def main():
     print('Output Dir: ' + str(outDir))
 
     namespaceFound = False
+    superClassFound = False
 
     templateArgs = dict()
     for tArg in args.tArgs:
@@ -57,9 +58,17 @@ def main():
                 templateArgs[name + "_API"] = tArg.split("=")[1].upper() + "_API"
             if name == "NameSpace":
                 namespaceFound = True
+            if name == "SuperClass":
+                superClassFound = True
     
     if not namespaceFound:
         templateArgs["NameSpace"] = "CE"
+        
+    if not superClassFound:
+        if templateArgs["NameSpace"].startswith("CE"):
+            templateArgs["SuperClass"] = "Object"
+        else:
+            templateArgs["SuperClass"] = "CE::Object"
     
     print("Generating from template with following args:")
     print(templateArgs)

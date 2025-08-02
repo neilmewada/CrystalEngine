@@ -45,19 +45,19 @@ namespace CE
 
         void SetCollisionEnabled(const PhysicsLayer& layerA, const PhysicsLayer& layerB, bool enabled);
 
-        JPH::PhysicsSystem* GetJoltPhysicsSystem();
+        void RegisterScene(PhysicsScene* physicsScene);
+		void DeregisterScene(PhysicsScene* physicsScene);
 
     private:
 
         void RegisterBuiltinLayers();
 
-        struct Impl;
-		Impl* impl = nullptr;
-
         FixedArray<Name, MaxPhysicsLayers> physicsLayers;
         FixedArray<bool, MaxPhysicsLayers> isPhysicsLayerStatic;
 
         HashMap<Vec2i, bool> collisionsDisabledByLayerPair;
+
+		Array<Ref<PhysicsScene>> physicsScenes;
     };
     
 } // namespace CE

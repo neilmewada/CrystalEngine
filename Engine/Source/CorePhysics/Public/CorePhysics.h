@@ -6,6 +6,17 @@ namespace JPH
 {
 	class PhysicsSystem;
 	class Shape;
+	class TempAllocator;
+	class JobSystemThreadPool;
+	class BroadPhaseLayerInterface;
+	class ObjectVsBroadPhaseLayerFilter;
+	class ObjectLayerPairFilter;
+	class Body;
+}
+
+namespace CE
+{
+	class PhysicsScene;
 }
 
 #include "CorePhysics/PhysicsLayers.h"
@@ -14,7 +25,3 @@ namespace JPH
 #include "CorePhysics/Scene/PhysicsScene.h"
 #include "CorePhysics/PhysicsSystem.h"
 
-namespace CE
-{
-    
-}

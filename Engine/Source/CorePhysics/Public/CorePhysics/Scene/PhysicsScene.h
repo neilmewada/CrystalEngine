@@ -2,6 +2,8 @@
 
 namespace CE
 {
+    class PhysicsBody;
+
     CLASS()
     class COREPHYSICS_API PhysicsScene : public Object
     {
@@ -9,11 +11,30 @@ namespace CE
     protected:
 
         PhysicsScene();
+
+        void OnAfterConstruct() override;
+
+        void OnBeginDestroy() override;
         
     public:
 
-        virtual ~PhysicsScene();
+        void Tick(f32 deltaTime);
 
+        JPH::PhysicsSystem* GetJoltPhysicsSystem() const;
+
+        void AddBody(Ref<PhysicsBody> body);
+        Ref<PhysicsBody> AddBody(const PhysicsBodyInitInfo& bodyInitInfo);
+
+        void RemoveBody(Ref<PhysicsBody> body);
+
+    private:
+
+        Array<Ref<PhysicsBody>> bodies;
+
+        struct Impl;
+        Impl* impl = nullptr;
+
+        friend class PhysicsBody;
     };
     
 } // namespace CE

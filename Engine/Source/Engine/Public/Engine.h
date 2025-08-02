@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "CorePhysics.h"
 #include "CoreRHI.h"
 #include "CoreRPI.h"
 #include "CoreShader.h"
@@ -43,6 +44,7 @@ namespace CE::Editor
 #include "Engine/EngineSubsystem.h"
 #include "Engine/Subsystems/SceneRenderer.h"
 #include "Engine/Subsystems/SceneSubsystem.h"
+#include "Engine/Subsystems/PhysicsSubsystem.h"
 #include "Engine/Subsystems/RendererSubsystem.h"
 #include "Engine/GameInstanceSubsystem.h"
 #include "Engine/GameInstance.h"

@@ -14,10 +14,15 @@ namespace CE
 	class ENGINE_API Scene : public Asset
 	{
 		CE_CLASS(Scene, Asset)
-	public:
+	protected:
 
 		Scene();
+
 		virtual ~Scene();
+
+		void OnAfterConstruct() override;
+
+	public:
         
 		virtual void OnBeginPlay();
 
@@ -39,7 +44,9 @@ namespace CE
 		bool IsEnabled() const { return isEnabled; }
 
 		void SetEnabled(bool set) { isEnabled = set; }
-    
+
+		Ref<PhysicsScene> GetPhysicsScene() { return physicsScene; }
+		
 		void IterateAllComponents(SubClass<ActorComponent> componentClass, auto callback)
 		{
 			if (componentClass == nullptr)
@@ -136,6 +143,11 @@ namespace CE
 		// - RPI -
 
 		RPI::Scene* rpiScene = nullptr;
+
+		// - Physics -
+
+		FIELD()
+		Ref<PhysicsScene> physicsScene;
 
 		// - Cache -
 

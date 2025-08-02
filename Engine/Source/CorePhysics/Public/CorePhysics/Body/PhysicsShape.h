@@ -22,7 +22,6 @@ namespace CE
         
     public:
 
-        virtual JPH::Shape* GetJoltShape() const = 0;
         virtual JPH::Shape* CreateJoltShape() const = 0;
 
     };
@@ -40,7 +39,7 @@ namespace CE
         {
 		}
 
-        FIELD()
+        FIELD(EditAnywhere)
         Vec3 halfExtents;
 	};
 
@@ -51,8 +50,6 @@ namespace CE
     public:
 
         static Ref<BoxShape> Create(const BoxShapeSettings& settings, Ref<Object> outer = nullptr);
-
-        JPH::Shape* GetJoltShape() const override;
 
         JPH::Shape* CreateJoltShape() const override;
 
@@ -65,8 +62,6 @@ namespace CE
 
     private:
 
-        struct Impl;
-		Impl* impl = nullptr;
     };
 
 	// - Sphere Shape -
@@ -83,7 +78,7 @@ namespace CE
         {
         }
 
-        FIELD()
+        FIELD(EditAnywhere)
 		float radius = 0;
 	};
 
@@ -94,8 +89,6 @@ namespace CE
     public:
 
 		static Ref<SphereShape> Create(const SphereShapeSettings& settings, Ref<Object> outer = nullptr);
-
-        JPH::Shape* GetJoltShape() const override;
 
         JPH::Shape* CreateJoltShape() const override;
 
@@ -108,10 +101,50 @@ namespace CE
 
 	private:
 
-        struct Impl;
-        Impl* impl = nullptr;
     };
-    
+
+	// - Capsule Shape -
+
+    STRUCT()
+    struct COREPHYSICS_API CapsuleShapeSettings : ShapeSettings
+    {
+        CE_STRUCT(CapsuleShapeSettings, ShapeSettings)
+    public:
+
+		CapsuleShapeSettings() = default;
+
+        CapsuleShapeSettings(float radius, float halfHeight) 
+            : radius(radius), halfHeight(halfHeight)
+        {
+		}
+
+        FIELD(EditAnywhere)
+        float radius = 1;
+
+        FIELD(EditAnywhere)
+		float halfHeight = 1; // Half the height of the capsule, so the full height is 2 * halfHeight
+    };
+
+    CLASS()
+    class COREPHYSICS_API CapsuleShape : public PhysicsShape
+    {
+        CE_CLASS(CapsuleShape, PhysicsShape)
+    public:
+
+		static Ref<CapsuleShape> Create(const CapsuleShapeSettings& settings, Ref<Object> outer = nullptr);
+
+        JPH::Shape* CreateJoltShape() const override;
+
+    protected:
+
+        void OnBeginDestroy() override;
+
+        FIELD()
+        CapsuleShapeSettings settings;
+
+
+    };
+
 } // namespace CE
 
 #include "PhysicsShape.rtti.h"

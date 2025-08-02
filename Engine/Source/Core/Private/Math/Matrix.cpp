@@ -152,6 +152,50 @@ namespace CE
 		return result;
 	}
 
+	Quat Matrix4x4::ToQuat() const
+	{
+		float trace = rows[0][0] + rows[1][1] + rows[2][2];
+		Quat q;
+
+		if (trace > 0.0f)
+		{
+			float s = std::sqrt(trace + 1.0f) * 2.0f; // S = 4 * qw
+			q.w = 0.25f * s;
+			q.x = (rows[2][1] - rows[1][2]) / s;
+			q.y = (rows[0][2] - rows[2][0]) / s;
+			q.z = (rows[1][0] - rows[0][1]) / s;
+		}
+		else
+		{
+			if (rows[0][0] > rows[1][1] && rows[0][0] > rows[2][2])
+			{
+				float s = std::sqrt(1.0f + rows[0][0] - rows[1][1] - rows[2][2]) * 2.0f;
+				q.w = (rows[2][1] - rows[1][2]) / s;
+				q.x = 0.25f * s;
+				q.y = (rows[0][1] + rows[1][0]) / s;
+				q.z = (rows[0][2] + rows[2][0]) / s;
+			}
+			else if (rows[1][1] > rows[2][2])
+			{
+				float s = std::sqrt(1.0f + rows[1][1] - rows[0][0] - rows[2][2]) * 2.0f;
+				q.w = (rows[0][2] - rows[2][0]) / s;
+				q.x = (rows[0][1] + rows[1][0]) / s;
+				q.y = 0.25f * s;
+				q.z = (rows[1][2] + rows[2][1]) / s;
+			}
+			else
+			{
+				float s = std::sqrt(1.0f + rows[2][2] - rows[0][0] - rows[1][1]) * 2.0f;
+				q.w = (rows[1][0] - rows[0][1]) / s;
+				q.x = (rows[0][2] + rows[2][0]) / s;
+				q.y = (rows[1][2] + rows[2][1]) / s;
+				q.z = 0.25f * s;
+			}
+		}
+
+		return q.GetNormalized();
+	}
+
 	void Matrix4x4::GetCofactor(const Matrix4x4& mat, Matrix4x4& cofactor, s32 p, s32 q, s32 n)
 	{
 		ZoneScoped;
@@ -176,6 +220,76 @@ namespace CE
 				}
 			}
 		}
+	}
+
+	void Matrix4x4::Decompose(Vec3& outTranslation, Quat& outRotation, Vec3& outScale) const
+	{
+		// 1. Extract translation (4th column)
+		outTranslation = Vec3(rows[0][3], rows[1][3], rows[2][3]);
+
+		// 2. Extract basis vectors (scaled axes)
+		Vec3 right = Vec3(rows[0][0], rows[0][1], rows[0][2]);
+		Vec3 up = Vec3(rows[1][0], rows[1][1], rows[1][2]);
+		Vec3 forward = Vec3(rows[2][0], rows[2][1], rows[2][2]);
+
+		// 3. Compute scale from axis lengths
+		outScale.x = right.GetMagnitude();
+		outScale.y = up.GetMagnitude();
+		outScale.z = forward.GetMagnitude();
+
+		// 4. Normalize to remove scale from rotation
+		if (outScale.x == 0 || outScale.y == 0 || outScale.z == 0)
+		{
+			outRotation = Quat(0, 0, 0, 1); // identity
+			return;
+		}
+
+		right /= outScale.x;
+		up /= outScale.y;
+		forward /= outScale.z;
+
+		// 5. Reconstruct normalized rotation matrix from Matrix4x4
+		float m00 = right.x, m01 = right.y, m02 = right.z;
+		float m10 = up.x, m11 = up.y, m12 = up.z;
+		float m20 = forward.x, m21 = forward.y, m22 = forward.z;
+
+		float trace = m00 + m11 + m22;
+		Quat q;
+
+		if (trace > 0.0f)
+		{
+			float s = std::sqrt(trace + 1.0f) * 2.0f;
+			q.w = 0.25f * s;
+			q.x = (m21 - m12) / s;
+			q.y = (m02 - m20) / s;
+			q.z = (m10 - m01) / s;
+		}
+		else if (m00 > m11 && m00 > m22)
+		{
+			float s = std::sqrt(1.0f + m00 - m11 - m22) * 2.0f;
+			q.w = (m21 - m12) / s;
+			q.x = 0.25f * s;
+			q.y = (m01 + m10) / s;
+			q.z = (m02 + m20) / s;
+		}
+		else if (m11 > m22)
+		{
+			float s = std::sqrt(1.0f + m11 - m00 - m22) * 2.0f;
+			q.w = (m02 - m20) / s;
+			q.x = (m01 + m10) / s;
+			q.y = 0.25f * s;
+			q.z = (m12 + m21) / s;
+		}
+		else
+		{
+			float s = std::sqrt(1.0f + m22 - m00 - m11) * 2.0f;
+			q.w = (m10 - m01) / s;
+			q.x = (m02 + m20) / s;
+			q.y = (m12 + m21) / s;
+			q.z = 0.25f * s;
+		}
+
+		outRotation = q.GetNormalized();
 	}
 
 	int Matrix4x4::GetDeterminant(const Matrix4x4& mat, s32 n)

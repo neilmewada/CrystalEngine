@@ -1,11 +1,11 @@
 #pragma once
 
-namespace CE
+namespace %(NameSpace)s
 {
     CLASS()
-    class %(Module_API)s %(Name)s : public Object
+    class %(Module_API)s %(Name)s : public %(SuperClass)s
     {
-        CE_CLASS(%(Name)s, Object)
+        CE_CLASS(%(Name)s, %(SuperClass)s)
     protected:
 
         %(Name)s();

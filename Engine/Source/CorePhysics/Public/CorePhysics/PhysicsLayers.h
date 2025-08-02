@@ -7,10 +7,9 @@ namespace CE
 	ENUM()
 	enum class BuiltinPhysicsLayer : u16
 	{
-		Static = 0,
-		Dynamic,
+		Default = 0,
 		Character,
-		UI
+		UI,
 	};
 	ENUM_CLASS_FLAGS(BuiltinPhysicsLayer);
 
@@ -18,14 +17,17 @@ namespace CE
 	struct COREPHYSICS_API PhysicsLayer final
 	{
 	public:
+		using ValueType = u16;
+
+		static constexpr ValueType PODVersion = 1;
 
 		constexpr PhysicsLayer() = default;
 
-		constexpr PhysicsLayer(u16 value) : value(value)
+		constexpr PhysicsLayer(ValueType value) : value(value)
 		{
 		}
 
-		constexpr PhysicsLayer(BuiltinPhysicsLayer layer) : value(static_cast<u16>(layer))
+		constexpr PhysicsLayer(BuiltinPhysicsLayer layer) : value(static_cast<ValueType>(layer))
 		{
 		}
 
@@ -41,10 +43,10 @@ namespace CE
 
 		constexpr bool IsValid() const
 		{
-			return value != NumericLimits<u16>::Max();
+			return value != NumericLimits<ValueType>::Max();
 		}
 
-		constexpr operator u16() const
+		constexpr operator ValueType() const
 		{
 			return value;
 		}
@@ -56,17 +58,20 @@ namespace CE
 
 		void SerializePOD(Stream* stream)
 		{
+			*stream << PODVersion;
 			*stream << value;
 		}
 
 		void DeserializePOD(Stream* stream)
 		{
+			ValueType version;
+			*stream >> version;
 			*stream >> value;
 		}
 
 	private:
 
-		u16 value = NumericLimits<u16>::Max();
+		ValueType value = NumericLimits<ValueType>::Max();
 
 	};
 

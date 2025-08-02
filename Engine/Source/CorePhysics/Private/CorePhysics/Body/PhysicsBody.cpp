@@ -7,8 +7,6 @@ namespace CE
         ~Impl()
         {
             joltShape = nullptr;
-
-            JPH::PhysicsSystem* physicsSystem = PhysicsSystem::Get().GetJoltPhysicsSystem();
             if (!physicsSystem)
                 return;
 
@@ -16,6 +14,7 @@ namespace CE
             bodyInterface.DestroyBody(joltBody->GetID());
         }
 
+        JPH::PhysicsSystem* physicsSystem = nullptr;
 		JPH::Ref<JPH::Shape> joltShape = nullptr; // The Jolt shape instance
         JPH::Body* joltBody = nullptr; // The Jolt body instance
 	};
@@ -29,20 +28,30 @@ namespace CE
     {
 	    Super::OnBeginDestroy();
 
+        if (Ref<PhysicsScene> scene = ownerScene.Lock())
+        {
+            scene->bodies.Remove(this);
+        }
+
 		delete impl; impl = nullptr; // Ensure the implementation is cleaned up
     }
 
     Ref<PhysicsBody> PhysicsBody::Create(const PhysicsBodyInitInfo& initInfo, Ref<Object> outer)
     {
+        if (!initInfo.ownerScene)
+        {
+            return nullptr;
+		}
+
         if (!outer)
             outer = GetTransient(MODULE_NAME);
 
 		Name objName = initInfo.objectName.IsValid() ? initInfo.objectName : "PhysicsBody";
 
-        JPH::PhysicsSystem* physicsSystem = PhysicsSystem::Get().GetJoltPhysicsSystem();
+        JPH::PhysicsSystem* physicsSystem = initInfo.ownerScene->GetJoltPhysicsSystem();
         JPH::BodyInterface& bodyInterface = physicsSystem->GetBodyInterface();
 
-        Ref<PhysicsBody> sphereShape = CreateObject<PhysicsBody>(outer.Get(), objName.GetString());
+        Ref<PhysicsBody> body = CreateObject<PhysicsBody>(outer.Get(), objName.GetString());
 
         JPH::Shape* joltShape = initInfo.shape->CreateJoltShape();
 
@@ -56,11 +65,20 @@ namespace CE
 
         joltShape->ScaleShape(JPH::Vec3Arg(initInfo.scale.x, initInfo.scale.y, initInfo.scale.z));
 
-		sphereShape->impl = new Impl();
-		sphereShape->impl->joltShape = joltShape;
-        sphereShape->impl->joltBody = bodyInterface.CreateBody(bodySettings);
+        body->ownerScene = initInfo.ownerScene;
 
-        return sphereShape;
+		body->impl = new Impl();
+		body->impl->joltShape = joltShape;
+        body->impl->joltBody = bodyInterface.CreateBody(bodySettings);
+
+        initInfo.ownerScene->AddBody(body);
+
+        return body;
+    }
+
+    JPH::Body* PhysicsBody::GetJoltBody()
+    {
+    	return impl->joltBody;
     }
 
 } // namespace CE

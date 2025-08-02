@@ -1,6 +1,6 @@
 #include "%(Module)s.h"
 
-namespace CE
+namespace %(NameSpace)s
 {
 
     %(Name)s::%(Name)s()

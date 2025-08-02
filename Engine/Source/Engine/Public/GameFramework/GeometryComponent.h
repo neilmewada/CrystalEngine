@@ -12,6 +12,23 @@ namespace CE
 
 	protected:
 
+		void OnAttachedToScene(Ref<CE::Scene> scene) override;
+
+		void UpdatePhysicsBody();
+
+	private:
+
+		FIELD()
+		Array<Ref<PhysicsBody>> collisionBodies;
+
+		FIELD(EditAnywhere, Category = "Physics")
+		bool simulatePhysics = false;
+
+		FIELD(EditAnywhere, Category = "Physics")
+		PhysicsMotionType motionType = PhysicsMotionType::Static;
+
+
+
 	};
     
 } // namespace CE

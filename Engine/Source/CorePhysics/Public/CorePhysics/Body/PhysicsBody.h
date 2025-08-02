@@ -2,6 +2,7 @@
 
 namespace CE
 {
+
     ENUM()
     enum class PhysicsMotionType
     {
@@ -23,13 +24,16 @@ namespace CE
         Name objectName;
 
         FIELD()
+		Ref<PhysicsScene> ownerScene = nullptr; // The scene that owns this physics body
+
+        FIELD()
 		Ref<PhysicsShape> shape = nullptr; // The shape of the physics body
 
         FIELD()
-        PhysicsLayer layer = BuiltinPhysicsLayer::Static;
+        PhysicsLayer layer = BuiltinPhysicsLayer::Default;
 
         FIELD()
-		PhysicsMotionType motionType = PhysicsMotionType::Static; // The motion type of the physics body
+		PhysicsMotionType motionType = PhysicsMotionType::Dynamic; // The motion type of the physics body
 
         FIELD()
         Vec3 position;
@@ -55,7 +59,13 @@ namespace CE
 
         static Ref<PhysicsBody> Create(const PhysicsBodyInitInfo& initInfo, Ref<Object> outer = nullptr);
 
+        JPH::Body* GetJoltBody();
+
+        Ref<PhysicsScene> GetOwnerScene() { return ownerScene.Lock(); }
+
     private:
+
+        WeakRef<PhysicsScene> ownerScene = nullptr;
 
         struct Impl;
 		Impl* impl = nullptr;

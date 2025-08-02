@@ -825,7 +825,7 @@ namespace CE
         return Vec2(w1 * p1.x + w2 * p2.x + w3 * p3.x, w1 * p1.y + w2 * p2.y + w3 * p3.y);
     }
 
-    static void PathBezierCubicCurveToCasteljau(FusionRenderer2* renderer,
+    void PathBezierCubicCurveToCasteljau(FusionRenderer2* renderer,
         float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float tess_tol, int level)
     {
         float dx = x4 - x1;
@@ -851,7 +851,7 @@ namespace CE
         }
     }
 
-    static void PathBezierQuadraticCurveToCasteljau(FusionRenderer2* renderer,
+    void PathBezierQuadraticCurveToCasteljau(FusionRenderer2* renderer,
         float x1, float y1, float x2, float y2, float x3, float y3, float tess_tol, int level)
     {
         float dx = x3 - x1, dy = y3 - y1;

@@ -343,11 +343,17 @@ namespace CE
 #elif PLATFORM_MAC
         return (WindowHandle)wmInfo.info.cocoa.window;
 #elif PLATFORM_LINUX
+
+#if defined(SDL_VIDEO_DRIVER_X11)
 		if (wmInfo.subsystem == SDL_SYSWM_X11)
 			return wmInfo.info.x11.window;
+#endif
+#if defined(SDL_VIDEO_DRIVER_WAYLAND)
 		if (wmInfo.subsystem == SDL_SYSWM_WAYLAND)
 			return (WindowHandle)wmInfo.info.wl.egl_window;
+#endif
 		return 0;
+
 #else
 #   error Platform specific window handle not specified for the current platform
 #endif

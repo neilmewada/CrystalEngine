@@ -33,7 +33,8 @@ namespace CE
 		bool ComponentExistsRecursive(SceneComponent* component);
 		bool ComponentExists(SceneComponent* component);
 
-		Vec3 GetPosition() const { return globalPosition; }
+		Vec3 GetPosition();
+		Quat GetRotation();
 
 		void OnBeginPlay() override;
 
@@ -54,6 +55,8 @@ namespace CE
 		SceneComponent* GetAttachedComponent(u32 index) const { return attachedComponents[index]; }
 
 		SceneComponent* GetParentComponent() const { return parentComponent; }
+
+		virtual void OnAttachedToScene(Ref<CE::Scene> scene) {}
 
     protected:
 

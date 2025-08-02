@@ -14,6 +14,8 @@ namespace CE
 
 			sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 			rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();
+
+			physicsScene = CreateObject<PhysicsScene>(this, "PhysicsScene");
 		}
 	}
 
@@ -28,6 +30,11 @@ namespace CE
 			}
 		}
 		delete rpiScene; rpiScene = nullptr;
+	}
+
+	void CE::Scene::OnAfterConstruct()
+	{
+		Super::OnAfterConstruct();
 	}
 
 	void CE::Scene::OnBeginPlay()

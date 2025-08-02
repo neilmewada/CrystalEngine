@@ -236,17 +236,16 @@ namespace CE
 				return nullptr;
 			return (TClass*)CreateDefaultSubobject(classType, name, flags | OF_DefaultSubobject);
 		}
-		
-		void LoadDefaults();
-
-        void ConfigParseStruct(const String& value, void* instance, StructType* structType);
-        
-        void ConfigParseField(const String& value, void* instance, const Ptr<FieldType>& field);
         
         virtual void OnAfterConfigLoad() {}
 
-
 	private:
+
+        void LoadDefaults();
+
+        void ConfigParseStruct(const String& value, void* instance, StructType* structType);
+
+        void ConfigParseField(const String& value, void* instance, const Ptr<FieldType>& field);
 
         void UnbindAllEvents();
 

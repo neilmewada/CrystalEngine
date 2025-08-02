@@ -10,13 +10,6 @@ namespace CE
 
 	// - Box Shape -
 
-    struct BoxShape::Impl
-    {
-        ~Impl() = default;
-
-        JPH::Ref<JPH::BoxShape> joltShape; // The Jolt shape instance
-    };
-
     Ref<BoxShape> BoxShape::Create(const BoxShapeSettings& settings, Ref<Object> outer)
     {
         if (!outer)
@@ -25,15 +18,7 @@ namespace CE
 		Ref<BoxShape> boxShape = CreateObject<BoxShape>(outer.Get(), "BoxShape");
         boxShape->settings = settings;
 
-    	boxShape->impl = new Impl();
-		boxShape->impl->joltShape = new JPH::BoxShape(JPH::Vec3(settings.halfExtents.x, settings.halfExtents.y, settings.halfExtents.z));
-
         return boxShape;
-    }
-
-    JPH::Shape* BoxShape::GetJoltShape() const
-    {
-		return impl->joltShape.GetPtr(); // Return the Jolt shape instance
     }
 
     JPH::Shape* BoxShape::CreateJoltShape() const
@@ -45,17 +30,9 @@ namespace CE
     {
 	    Super::OnBeginDestroy();
 
-        delete impl; impl = nullptr; // Ensure the implementation is cleaned up
     }
 
 	// - Sphere Shape -
-
-    struct SphereShape::Impl
-    {
-        ~Impl() = default;
-
-    	JPH::Ref<JPH::SphereShape> joltShape; // The Jolt shape instance
-	};
 
     Ref<SphereShape> SphereShape::Create(const SphereShapeSettings& settings, Ref<Object> outer)
     {
@@ -65,15 +42,7 @@ namespace CE
 		Ref<SphereShape> sphereShape = CreateObject<SphereShape>(outer.Get(), "SphereShape");
         sphereShape->settings = settings;
 
-    	sphereShape->impl = new Impl();
-        sphereShape->impl->joltShape = new JPH::SphereShape(settings.radius);
-
 		return sphereShape;
-    }
-
-    JPH::Shape* SphereShape::GetJoltShape() const
-    {
-		return impl->joltShape.GetPtr(); // Return the Jolt shape instance
     }
 
     JPH::Shape* SphereShape::CreateJoltShape() const
@@ -85,7 +54,31 @@ namespace CE
     {
 	    Super::OnBeginDestroy();
 
-		delete impl; impl = nullptr; // Ensure the implementation is cleaned up
     }
+
+	// - Capsule Shape -
+
+    Ref<CapsuleShape> CapsuleShape::Create(const CapsuleShapeSettings& settings, Ref<Object> outer)
+    {
+        if (!outer)
+            outer = GetTransient(MODULE_NAME);
+
+        Ref<CapsuleShape> capsuleShape = CreateObject<CapsuleShape>(outer.Get(), "SphereShape");
+        capsuleShape->settings = settings;
+
+        return capsuleShape;
+    }
+
+    JPH::Shape* CapsuleShape::CreateJoltShape() const
+    {
+		return new JPH::CapsuleShape(settings.halfHeight, settings.radius);
+    }
+
+    void CapsuleShape::OnBeginDestroy()
+    {
+	    Super::OnBeginDestroy();
+
+    }
+
 } // namespace CE
 

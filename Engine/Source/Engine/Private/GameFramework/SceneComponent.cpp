@@ -89,6 +89,27 @@ namespace CE
 		return attachedComponents.Exists([&](SceneComponent* comp) { return comp == component; });
 	}
 
+	Vec3 SceneComponent::GetPosition()
+	{
+		return globalPosition;
+	}
+
+	Quat SceneComponent::GetRotation()
+	{
+		if (!parentComponent)
+		{
+			return Quat::EulerDegrees(localEulerAngles);
+		}
+
+		Vec3 translation;
+		Quat parentGlobalRotation;
+		Vec3 scale;
+
+    	parentComponent->transform.Decompose(translation, parentGlobalRotation, scale);
+
+		return parentGlobalRotation * Quat::EulerDegrees(localEulerAngles);
+	}
+
 	void SceneComponent::OnSubobjectDetached(Object* subobject)
 	{
 		Super::OnSubobjectDetached(subobject);

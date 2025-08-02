@@ -38,6 +38,10 @@ TEST(CorePhysics, MainTest)
 {
 	TEST_BEGIN;
 
+	Ref<Object> transient = GetTransient("CorePhysics");
+
+	Ref<PhysicsScene> scene = CreateObject<PhysicsScene>(transient.Get(), "PhysicsScene");
+
 	int counter = 0;
 
 	while (counter < 1000)
@@ -46,6 +50,9 @@ TEST(CorePhysics, MainTest)
 
 		counter++;
 	}
+
+	scene->BeginDestroy();
+	scene = nullptr;
 
 	TEST_END;
 }
