@@ -31,6 +31,8 @@ namespace CE
 		void AddCallbacks(ISceneSubsystemCallbacks* callbacks);
 		void RemoveCallbacks(ISceneSubsystemCallbacks* callbacks);
 
+		void PlayActiveScene();
+
 	protected:
 
 		void Initialize() override;

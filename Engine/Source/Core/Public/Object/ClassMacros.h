@@ -250,6 +250,7 @@ namespace CE\
             TypeInfoImpl(const char* name, CE::Internal::IStructTypeImpl* impl, u32 size, CE::StructTypeData<Namespace::Struct> typeData, const char* attributes = "")\
 				: Type(name, impl, size, attributes), TypeData(typeData)\
             {\
+				static_assert(std::is_default_constructible_v<Namespace::Struct>, "The struct " #Namespace "::" #Struct " does not have a default constructor!");\
 				Type.AddSuper<SuperStructs>();\
 				FieldList\
 				FunctionList\

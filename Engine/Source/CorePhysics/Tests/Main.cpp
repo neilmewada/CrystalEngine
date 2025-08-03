@@ -42,17 +42,50 @@ TEST(CorePhysics, MainTest)
 
 	Ref<PhysicsScene> scene = CreateObject<PhysicsScene>(transient.Get(), "PhysicsScene");
 
-	int counter = 0;
+	BoxShapeSettings boxShapeSettings{ Vec3(10, 0.5f, 10), scene };
+	Ref<BoxShape> groundShape = BoxShape::Create(boxShapeSettings, scene);
 
-	while (counter < 1000)
+	PhysicsBodyInitInfo groundInit{};
+	groundInit.objectName = "Ground";
+	groundInit.ownerScene = scene;
+	groundInit.layer = BuiltinPhysicsLayer::Default;
+	groundInit.motionType = PhysicsMotionType::Static;
+	groundInit.position = Vec3(0, 0, 0);
+	groundInit.shape = groundShape;
+	Ref<PhysicsBody> ground = scene->AddBody(groundInit);
+
+	BoxShapeSettings cubeShapeSettings{ Vec3(1, 1, 1), scene };
+	Ref<BoxShape> cubeShape = BoxShape::Create(cubeShapeSettings, scene);
+
+	PhysicsBodyInitInfo cubeInit{};
+	cubeInit.objectName = "Cube";
+	cubeInit.ownerScene = scene;
+	cubeInit.layer = BuiltinPhysicsLayer::Default;
+	cubeInit.motionType = PhysicsMotionType::Dynamic;
+	cubeInit.position = Vec3(0, 20, 0);
+	cubeInit.shape = cubeShape;
+	Ref<PhysicsBody> cube = scene->AddBody(cubeInit);
+
+	int counter = 0;
+	static constexpr int LoopCount = 1'000;
+
+	scene->SetSimulationEnabled(true);
+
+	while (counter < LoopCount)
 	{
+		Vec3 pos = cube->GetPosition();
+
 		PhysicsSystem::Get().Tick(1 / 60.0f);
 
 		counter++;
 	}
+
+	scene->RemoveBody(cube);
+	scene->RemoveBody(ground);
 
 	scene->BeginDestroy();
 	scene = nullptr;
 
 	TEST_END;
 }
+

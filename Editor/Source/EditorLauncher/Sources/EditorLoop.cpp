@@ -97,6 +97,7 @@ void EditorLoop::LoadStartupCoreModules()
 void EditorLoop::LoadCoreModules()
 {
 	// Load other Core modules
+	ModuleManager::Get().LoadModule("CorePhysics");
 	ModuleManager::Get().LoadModule("CoreMedia");
 	ModuleManager::Get().LoadModule("CoreMesh");
 	ModuleManager::Get().LoadModule("CoreShader");
@@ -411,6 +412,7 @@ void EditorLoop::PreShutdown()
 	ModuleManager::Get().UnloadModule("CoreShader");
 	ModuleManager::Get().UnloadModule("CoreMedia");
 	ModuleManager::Get().UnloadModule("CoreMesh");
+	ModuleManager::Get().UnloadModule("CorePhysics");
 
 #if PAL_TRAIT_VULKAN_SUPPORTED
 	ModuleManager::Get().UnloadModule("VulkanRHI");

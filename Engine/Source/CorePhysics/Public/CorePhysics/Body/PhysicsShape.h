@@ -10,6 +10,23 @@ namespace CE
         ShapeSettings() = default;
 
 		virtual ~ShapeSettings() = default;
+
+        ShapeSettings(Ref<PhysicsScene> scene) : ownerScene(scene)
+        {
+        }
+
+        FIELD()
+    	WeakRef<PhysicsScene> ownerScene;
+
+        FIELD(EditAnywhere)
+        Vec3 position;
+
+        FIELD(EditAnywhere)
+        Vec3 rotation;
+
+        FIELD(EditAnywhere)
+        Vec3 scale = Vec3(1, 1, 1);
+
     };
 
     CLASS(Abstract)
@@ -35,7 +52,7 @@ namespace CE
     public:
 		BoxShapeSettings() = default;
 
-        BoxShapeSettings(const Vec3& halfExtents) : halfExtents(halfExtents)
+        BoxShapeSettings(const Vec3& halfExtents, Ref<PhysicsScene> scene) : Super(scene), halfExtents(halfExtents)
         {
 		}
 
@@ -74,7 +91,7 @@ namespace CE
 
 		SphereShapeSettings() = default;
 
-        SphereShapeSettings(float radius) : radius(radius)
+        SphereShapeSettings(float radius, Ref<PhysicsScene> scene) : Super(scene), radius(radius)
         {
         }
 
@@ -113,8 +130,7 @@ namespace CE
 
 		CapsuleShapeSettings() = default;
 
-        CapsuleShapeSettings(float radius, float halfHeight) 
-            : radius(radius), halfHeight(halfHeight)
+        CapsuleShapeSettings(float radius, float halfHeight, Ref<PhysicsScene> scene) : Super(scene), radius(radius), halfHeight(halfHeight)
         {
 		}
 
@@ -142,6 +158,89 @@ namespace CE
         FIELD()
         CapsuleShapeSettings settings;
 
+        
+    };
+
+    // - Cylinder Shape -
+
+    STRUCT()
+    struct COREPHYSICS_API CylinderShapeSettings : ShapeSettings
+    {
+        CE_STRUCT(CylinderShapeSettings, ShapeSettings)
+    public:
+
+        CylinderShapeSettings() = default;
+
+        CylinderShapeSettings(float radius, float halfHeight, Ref<PhysicsScene> scene) : Super(scene), radius(radius), halfHeight(halfHeight)
+        {
+        }
+
+        FIELD(EditAnywhere)
+        float radius = 1;
+
+        FIELD(EditAnywhere)
+		float halfHeight = 1; // Half the height of the capsule, so the full height is 2 * halfHeight
+    };
+
+    CLASS()
+    class COREPHYSICS_API CylinderShape : public PhysicsShape
+    {
+        CE_CLASS(CylinderShape, PhysicsShape)
+    public:
+
+		static Ref<CylinderShape> Create(const CylinderShapeSettings& settings, Ref<Object> outer = nullptr);
+
+        JPH::Shape* CreateJoltShape() const override;
+
+    protected:
+
+        void OnBeginDestroy() override;
+
+        FIELD()
+        CylinderShapeSettings settings;
+
+        
+    };
+
+    // - Static Compound Shape -
+
+    STRUCT()
+    struct COREPHYSICS_API StaticCompoundShapeSettings : ShapeSettings
+    {
+        CE_STRUCT(StaticCompoundShapeSettings, ShapeSettings)
+    public:
+
+        StaticCompoundShapeSettings() = default;
+
+        FIELD()
+        Array<Ref<PhysicsShape>> shapes;
+
+        FIELD()
+        Array<Vec3> shapePositions;
+
+        FIELD()
+        Array<Quat> shapeRotations;
+
+        FIELD()
+        Array<Vec3> shapeScales;
+    };
+
+    CLASS()
+    class COREPHYSICS_API StaticCompoundShape : public PhysicsShape
+    {
+        CE_CLASS(StaticCompoundShape, PhysicsShape)
+    public:
+
+        static Ref<StaticCompoundShape> Create(const StaticCompoundShapeSettings& settings, Ref<Object> outer = nullptr);
+
+        JPH::Shape* CreateJoltShape() const override;
+
+    protected:
+
+        void OnBeginDestroy() override;
+
+        FIELD()
+        StaticCompoundShapeSettings settings;
 
     };
 

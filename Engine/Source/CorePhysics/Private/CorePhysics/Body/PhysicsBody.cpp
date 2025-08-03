@@ -65,6 +65,9 @@ namespace CE
 
         joltShape->ScaleShape(JPH::Vec3Arg(initInfo.scale.x, initInfo.scale.y, initInfo.scale.z));
 
+        bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
+        bodySettings.mMassPropertiesOverride.mMass = initInfo.mass;
+
         body->ownerScene = initInfo.ownerScene;
 
 		body->impl = new Impl();
@@ -81,5 +84,16 @@ namespace CE
     	return impl->joltBody;
     }
 
+    Vec3 PhysicsBody::GetPosition()
+    {
+        JPH::Vec3 vec3 = impl->joltBody->GetPosition();
+        return Vec3(vec3.GetX(), vec3.GetY(), vec3.GetZ());
+    }
+
+    Quat PhysicsBody::GetRotation()
+    {
+        JPH::Quat quat = impl->joltBody->GetRotation();
+        return Quat(quat.GetW(), quat.GetX(), quat.GetY(), quat.GetZ());
+    }
 } // namespace CE
 

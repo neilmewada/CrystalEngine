@@ -313,6 +313,33 @@ namespace CE::Editor
         }
     }
 
+    void SceneEditor::OnClickPlay()
+    {
+        gEngine->GetSceneSubsystem()->PlayActiveScene();
+
+        playButton->Enabled(false);
+        pauseButton->Enabled(true);
+        stopButton->Enabled(true);
+    }
+
+    void SceneEditor::OnClickPause()
+    {
+        sandboxScene->GetPhysicsScene()->SetSimulationEnabled(false);
+
+        playButton->Enabled(true);
+        pauseButton->Enabled(false);
+        stopButton->Enabled(true);
+    }
+
+    void SceneEditor::OnClickStop()
+    {
+        // TODO: Restore scene to original state
+
+        playButton->Enabled(true);
+        pauseButton->Enabled(false);
+        stopButton->Enabled(false);
+    }
+
     void SceneEditor::ConstructDockspaces()
     {
 		// TODO: Implement dockspaces properly
@@ -505,7 +532,21 @@ namespace CE::Editor
 
                 EditorToolBar::NewSeparator(),
 
-                EditorToolBar::NewImageButton("/Editor/Assets/Icons/AddObject")
+                EditorToolBar::NewImageButton("/Editor/Assets/Icons/AddObject"),
+
+                EditorToolBar::NewImageButton("/Editor/Assets/Icons/Play")
+                .Assign(playButton)
+                .OnClicked(FUNCTION_BINDING(this, OnClickPlay)),
+
+                EditorToolBar::NewImageButton("/Editor/Assets/Icons/Pause")
+                .Assign(pauseButton)
+                .OnClicked(FUNCTION_BINDING(this, OnClickPause))
+                .Enabled(false),
+
+                EditorToolBar::NewImageButton("/Editor/Assets/Icons/Stop")
+                .Assign(stopButton)
+                .OnClicked(FUNCTION_BINDING(this, OnClickStop))
+                .Enabled(false)
 			);
     }
 }

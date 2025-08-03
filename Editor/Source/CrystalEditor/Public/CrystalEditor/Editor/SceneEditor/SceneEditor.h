@@ -39,6 +39,17 @@ namespace CE::Editor
         FUNCTION()
         void OnActorSelectionChanged(FItemSelectionModel* selectionModel);
 
+        // - ToolBar Controls -
+
+        FUNCTION()
+        void OnClickPlay();
+
+        FUNCTION()
+        void OnClickPause();
+
+        FUNCTION()
+        void OnClickStop();
+
         FSplitBox* rootSplitBox = nullptr;
 
     private:
@@ -56,6 +67,11 @@ namespace CE::Editor
         Ref<SceneOutlinerTab> sceneOutlinerTab = nullptr;
         Ref<AssetBrowser> assetBrowser;
         Ref<DetailsTab> detailsTab = nullptr;
+
+        // Toolbar
+        Ref<FImageButton> playButton;
+        Ref<FImageButton> pauseButton;
+        Ref<FImageButton> stopButton;
 
         // Sandbox
         Ref<CE::Scene> sandboxScene = nullptr;

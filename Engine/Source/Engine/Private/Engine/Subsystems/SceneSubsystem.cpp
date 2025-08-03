@@ -118,17 +118,18 @@ namespace CE
 		callbackHandlers.Remove(callbacks);
 	}
 
+	void SceneSubsystem::PlayActiveScene()
+	{
+		if (isPlaying || !activeScene)
+			return;
+
+		isPlaying = true;
+		activeScene->OnBeginPlay();
+	}
+
 	void SceneSubsystem::Tick(f32 deltaTime)
 	{
 		Super::Tick(deltaTime);
-
-		if (!isPlaying)
-		{
-			isPlaying = true;
-
-			if (activeScene != nullptr)
-				activeScene->OnBeginPlay();
-		}
 		
 		if (activeScene != nullptr)
 		{

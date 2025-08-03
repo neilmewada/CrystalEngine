@@ -110,6 +110,20 @@ namespace CE
 		return parentGlobalRotation * Quat::EulerDegrees(localEulerAngles);
 	}
 
+	void SceneComponent::SetPosition(Vec3 pos)
+	{
+		if (!parentComponent)
+		{
+			SetLocalPosition(pos);
+			return;
+		}
+
+		Matrix4x4 parentTransformInverse = parentComponent->transform.GetInverse();
+		Vec3 newLocalPos = parentTransformInverse * Vec4(pos.x, pos.y, pos.z, 1.0f);
+
+		SetLocalPosition(newLocalPos);
+	}
+
 	void SceneComponent::OnSubobjectDetached(Object* subobject)
 	{
 		Super::OnSubobjectDetached(subobject);

@@ -4,23 +4,6 @@ namespace CE::Editor
 {
     static constexpr const char OperationName[] = "Delete Array Element";
 
-    static HashSet<TypeId> serializableOpaqueTypes = {
-        TYPEID(u8), TYPEID(s8),
-        TYPEID(u16), TYPEID(s16),
-        TYPEID(u32), TYPEID(s32),
-        TYPEID(u64), TYPEID(s64),
-        TYPEID(f32), TYPEID(f64),
-        TYPEID(Uuid),
-        TYPEID(String), TYPEID(CE::Name),
-        TYPEID(Vec2), TYPEID(Vec2i),
-        TYPEID(Vec3), TYPEID(Vec3i),
-        TYPEID(Vec4), TYPEID(Vec4i),
-        TYPEID(Color),
-        TYPEID(ClassType), TYPEID(StructType),
-        TYPEID(EnumType),
-        TYPEID(SubClassType<>)
-    };
-
     ArrayPropertyEditor::ArrayPropertyEditor()
     {
 

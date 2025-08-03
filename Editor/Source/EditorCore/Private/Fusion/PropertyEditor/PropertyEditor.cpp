@@ -364,6 +364,11 @@ namespace CE::Editor
 
         if (fieldDeclType->IsStruct()) // - Struct Editor -
         {
+            if (fieldName == "primitives")
+            {
+                String::IsAlphabet('a');
+            }
+
             StructType* structType = (StructType*)fieldDeclType;
             String structTypeName = structType->GetName().GetString();
             if (hasStructTypeNameOverride)

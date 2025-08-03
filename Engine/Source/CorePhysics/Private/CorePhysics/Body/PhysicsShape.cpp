@@ -78,6 +78,75 @@ namespace CE
     {
 	    Super::OnBeginDestroy();
 
+        
+    }
+
+    // - Cylinder Shape -
+
+    Ref<CylinderShape> CylinderShape::Create(const CylinderShapeSettings& settings, Ref<Object> outer)
+    {
+        if (!outer)
+            outer = GetTransient(MODULE_NAME);
+
+        Ref<CylinderShape> cylinderShape = CreateObject<CylinderShape>(outer.Get(), "CylinderShape");
+        cylinderShape->settings = settings;
+
+        return cylinderShape;
+    }
+
+    JPH::Shape* CylinderShape::CreateJoltShape() const
+    {
+        return new JPH::CylinderShape(settings.halfHeight, settings.radius);
+    }
+
+    void CylinderShape::OnBeginDestroy()
+    {
+	    PhysicsShape::OnBeginDestroy();
+    }
+
+    // - Static Compound Shape -
+
+    Ref<StaticCompoundShape> StaticCompoundShape::Create(const StaticCompoundShapeSettings& settings, Ref<Object> outer)
+    {
+        if (!outer)
+            outer = GetTransient(MODULE_NAME);
+
+        Ref<StaticCompoundShape> compoundShape = CreateObject<StaticCompoundShape>(outer.Get(), "StaticCompoundShape");
+        compoundShape->settings = settings;
+
+        return compoundShape;
+    }
+
+    JPH::Shape* StaticCompoundShape::CreateJoltShape() const
+    {
+    	if (Ref<PhysicsScene> physicsScene = settings.ownerScene.Lock())
+        {
+            JPH::StaticCompoundShapeSettings compoundShapeSettings;
+
+            for (int i = 0; i < settings.shapes.GetSize(); ++i)
+            {
+                Ref<PhysicsShape> physicsShape = settings.shapes[i];
+                Vec3 pos = settings.shapePositions[i];
+                Quat rot = settings.shapeRotations[i];
+                Vec3 scale = settings.shapeScales[i];
+
+                JPH::Ref<JPH::Shape> joltShape = physicsShape->CreateJoltShape();
+                joltShape->ScaleShape(JPH::Vec3Arg(scale.x, scale.y, scale.z));
+
+                compoundShapeSettings.AddShape(JPH::Vec3Arg(pos.x, pos.y, pos.z), JPH::QuatArg(rot.x, rot.y, rot.z, rot.w), joltShape.GetPtr());
+            }
+
+            JPH::Shape::ShapeResult result;
+            return new JPH::StaticCompoundShape(compoundShapeSettings, *physicsScene->GetJoltTempAllocator(), result);
+        }
+
+        return nullptr;
+    }
+
+    void StaticCompoundShape::OnBeginDestroy()
+    {
+	    Super::OnBeginDestroy();
+
     }
 
 } // namespace CE

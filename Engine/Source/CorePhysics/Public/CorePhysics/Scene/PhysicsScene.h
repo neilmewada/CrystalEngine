@@ -22,14 +22,23 @@ namespace CE
 
         JPH::PhysicsSystem* GetJoltPhysicsSystem() const;
 
+        JPH::TempAllocator* GetJoltTempAllocator() const;
+
         void AddBody(Ref<PhysicsBody> body);
         Ref<PhysicsBody> AddBody(const PhysicsBodyInitInfo& bodyInitInfo);
 
         void RemoveBody(Ref<PhysicsBody> body);
 
+        bool IsBodyActive(Ref<PhysicsBody> body);
+
+        void SetSimulationEnabled(bool enabled);
+        bool IsSimulationEnabled() const { return simulationEnabled; }
+
     private:
 
         Array<Ref<PhysicsBody>> bodies;
+
+        bool simulationEnabled = false;
 
         struct Impl;
         Impl* impl = nullptr;

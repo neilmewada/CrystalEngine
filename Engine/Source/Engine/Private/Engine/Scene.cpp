@@ -48,6 +48,11 @@ namespace CE
 		{
 			actor->OnBeginPlay();
 		}
+
+		if (physicsScene)
+		{
+			physicsScene->SetSimulationEnabled(isPlaying);
+		}
 	}
 
 	void CE::Scene::Tick(f32 delta)
@@ -55,6 +60,11 @@ namespace CE
 		if (rpiScene)
 		{
 			rpiScene->SetName(GetName());
+		}
+
+		if (physicsScene)
+		{
+			physicsScene->SetSimulationEnabled(isPlaying);
 		}
 
 		for (Actor* actor : actors)
@@ -78,6 +88,13 @@ namespace CE
 		for (CE::RenderPipeline* renderPipeline : renderPipelines)
 		{
 			renderPipeline->Tick();
+		}
+
+		if (physicsScene)
+		{
+			physicsScene->SetSimulationEnabled(isPlaying);
+
+			physicsScene->Tick(delta);
 		}
 	}
 

@@ -36,6 +36,9 @@ namespace CE
 		PhysicsMotionType motionType = PhysicsMotionType::Dynamic; // The motion type of the physics body
 
         FIELD()
+        float mass = 1.0f;
+
+        FIELD()
         Vec3 position;
 
         FIELD()
@@ -60,6 +63,10 @@ namespace CE
         static Ref<PhysicsBody> Create(const PhysicsBodyInitInfo& initInfo, Ref<Object> outer = nullptr);
 
         JPH::Body* GetJoltBody();
+
+        Vec3 GetPosition();
+
+        Quat GetRotation();
 
         Ref<PhysicsScene> GetOwnerScene() { return ownerScene.Lock(); }
 

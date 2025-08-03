@@ -24,11 +24,13 @@ namespace CE
         
 		JPH::Factory::sInstance = new JPH::Factory();
 
-		
+		JPH::RegisterTypes();
     }
 
     void PhysicsSystem::Shutdown()
     {
+		JPH::UnregisterTypes();
+
 		for (int i = 0; i < physicsLayers.GetCapacity(); ++i)
 		{
 			physicsLayers[i] = Name();

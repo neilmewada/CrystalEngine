@@ -36,6 +36,8 @@ namespace CE
 		Vec3 GetPosition();
 		Quat GetRotation();
 
+		void SetPosition(Vec3 globalPosition);
+
 		void OnBeginPlay() override;
 
 		void Tick(f32 delta) override;
@@ -54,7 +56,7 @@ namespace CE
 
 		SceneComponent* GetAttachedComponent(u32 index) const { return attachedComponents[index]; }
 
-		SceneComponent* GetParentComponent() const { return parentComponent; }
+		SceneComponent* GetParentComponent() const { return parentComponent.Get(); }
 
 		virtual void OnAttachedToScene(Ref<CE::Scene> scene) {}
 
@@ -83,7 +85,7 @@ namespace CE
 		Array<SceneComponent*> attachedComponents{};
 
 		FIELD(ReadOnly)
-		SceneComponent* parentComponent = nullptr;
+		WeakRef<SceneComponent> parentComponent = nullptr;
 
 		FIELD(EditAnywhere, Category = "Transform", DisplayName = "Position", CategoryOrder = "-1")
 		Vec3 localPosition{};

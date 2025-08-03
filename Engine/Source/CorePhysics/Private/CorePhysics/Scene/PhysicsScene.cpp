@@ -137,7 +137,7 @@ namespace CE
 
     void PhysicsScene::Tick(f32 deltaTime)
     {
-        if (!impl || !impl->physicsSystem)
+        if (!impl || !impl->physicsSystem || !simulationEnabled)
             return;
 
         constexpr int CollisionSteps = 1;
@@ -155,8 +155,16 @@ namespace CE
         return impl->physicsSystem;
     }
 
+    JPH::TempAllocator* PhysicsScene::GetJoltTempAllocator() const
+    {
+		return impl->tempAllocator;
+    }
+
     void PhysicsScene::AddBody(Ref<PhysicsBody> body)
     {
+		if (bodies.Exists(body))
+			return;
+
         JPH::BodyInterface& bodyInterface = impl->physicsSystem->GetBodyInterface();
 
         bodyInterface.AddBody(body->GetJoltBody()->GetID(), JPH::EActivation::Activate);
@@ -167,7 +175,6 @@ namespace CE
 	Ref<PhysicsBody> PhysicsScene::AddBody(const PhysicsBodyInitInfo& bodyInitInfo)
     {
 		Ref<PhysicsBody> body = PhysicsBody::Create(bodyInitInfo, this);
-		AddBody(body);
 		return body;
     }
 
@@ -179,5 +186,15 @@ namespace CE
 
         bodies.Remove(body);
     }
+
+	bool PhysicsScene::IsBodyActive(Ref<PhysicsBody> body)
+	{
+		return impl->physicsSystem->GetBodyInterface().IsActive(body->GetJoltBody()->GetID());
+	}
+
+	void PhysicsScene::SetSimulationEnabled(bool enabled)
+	{
+		simulationEnabled = enabled;
+	}
 } // namespace CE
 
