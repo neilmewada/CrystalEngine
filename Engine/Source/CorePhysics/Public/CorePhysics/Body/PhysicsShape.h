@@ -57,7 +57,7 @@ namespace CE
 		}
 
         FIELD(EditAnywhere)
-        Vec3 halfExtents;
+        Vec3 halfExtents = Vec3(1, 1, 1) * 0.5f;
 	};
 
     CLASS()
@@ -96,7 +96,7 @@ namespace CE
         }
 
         FIELD(EditAnywhere)
-		float radius = 0;
+		float radius = 0.5f;
 	};
 
 	CLASS()
@@ -135,10 +135,10 @@ namespace CE
 		}
 
         FIELD(EditAnywhere)
-        float radius = 1;
+        float radius = 0.5f;
 
         FIELD(EditAnywhere)
-		float halfHeight = 1; // Half the height of the capsule, so the full height is 2 * halfHeight
+		float halfHeight = 0.5f; // Half the height of the capsule, so the full height is 2 * halfHeight
     };
 
     CLASS()

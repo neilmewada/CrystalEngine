@@ -26,6 +26,8 @@ namespace CE::Editor
 
         f64 GetInitialValue() const { return startValue; }
 
+        bool IsEditing();
+
     protected: // - Internal -
 
         FWidget* HitTest(Vec2 localMousePos) override;

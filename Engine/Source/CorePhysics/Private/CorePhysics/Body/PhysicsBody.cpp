@@ -24,9 +24,9 @@ namespace CE
         
     }
 
-    void PhysicsBody::OnBeginDestroy()
+    void PhysicsBody::OnBeforeDestroy()
     {
-	    Super::OnBeginDestroy();
+	    Super::OnBeforeDestroy();
 
         if (Ref<PhysicsScene> scene = ownerScene.Lock())
         {
@@ -53,7 +53,13 @@ namespace CE
 
         Ref<PhysicsBody> body = CreateObject<PhysicsBody>(outer.Get(), objName.GetString());
 
-        JPH::Shape* joltShape = initInfo.shape->CreateJoltShape();
+        JPH::Ref<JPH::Shape> joltShape = initInfo.shape->CreateJoltShape();
+
+        JPH::Shape::ShapeResult result = joltShape->ScaleShape(JPH::Vec3Arg(initInfo.scale.x, initInfo.scale.y, initInfo.scale.z));
+        if (result.IsValid())
+        {
+            joltShape = result.Get();
+        }
 
         JPH::BodyCreationSettings bodySettings(
             joltShape,
@@ -63,8 +69,6 @@ namespace CE
             (u16)initInfo.layer
 		);
 
-        joltShape->ScaleShape(JPH::Vec3Arg(initInfo.scale.x, initInfo.scale.y, initInfo.scale.z));
-
         bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
         bodySettings.mMassPropertiesOverride.mMass = initInfo.mass;
 
@@ -73,6 +77,7 @@ namespace CE
 		body->impl = new Impl();
 		body->impl->joltShape = joltShape;
         body->impl->joltBody = bodyInterface.CreateBody(bodySettings);
+        body->impl->physicsSystem = physicsSystem;
 
         initInfo.ownerScene->AddBody(body);
 
@@ -94,6 +99,23 @@ namespace CE
     {
         JPH::Quat quat = impl->joltBody->GetRotation();
         return Quat(quat.GetW(), quat.GetX(), quat.GetY(), quat.GetZ());
+    }
+
+    void PhysicsBody::SetPosition(Vec3 pos)
+    {
+        impl->physicsSystem->GetBodyInterface().SetPosition(impl->joltBody->GetID(), JPH::Vec3Arg(pos.x, pos.y, pos.z), JPH::EActivation::Activate);
+    }
+
+    void PhysicsBody::SetRotation(Quat rot)
+    {
+        impl->physicsSystem->GetBodyInterface().SetRotation(impl->joltBody->GetID(), JPH::QuatArg(rot.x, rot.y, rot.z, rot.w), JPH::EActivation::Activate);
+    }
+
+    void PhysicsBody::ClearImpl()
+    {
+        impl->joltBody = nullptr;
+        impl->joltShape = nullptr;
+        impl->physicsSystem = nullptr;
     }
 } // namespace CE
 

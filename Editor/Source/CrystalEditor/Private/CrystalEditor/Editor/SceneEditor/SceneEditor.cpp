@@ -304,7 +304,6 @@ namespace CE::Editor
 
         if (selectedActors.NotEmpty())
         {
-            // TODO: Create and set object editor
             detailsTab->SetSelectedActor(selectedActors.GetLast());
         }
         else
@@ -316,6 +315,7 @@ namespace CE::Editor
     void SceneEditor::OnClickPlay()
     {
         gEngine->GetSceneSubsystem()->PlayActiveScene();
+        sandboxScene->GetPhysicsScene()->SetSimulationEnabled(true);
 
         playButton->Enabled(false);
         pauseButton->Enabled(true);

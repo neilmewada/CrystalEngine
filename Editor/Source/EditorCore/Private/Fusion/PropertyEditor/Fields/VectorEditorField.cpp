@@ -103,44 +103,62 @@ namespace CE::Editor
         if (fieldDeclId == TYPEID(Vec2))
         {
             Vec2 value = field->GetFieldValue<Vec2>(instance);
-            fieldX->Text(String::Format("{}", value.x));
-            fieldY->Text(String::Format("{}", value.y));
+            if (!fieldX->IsEditing())
+				fieldX->Text(String::Format("{}", value.x));
+            if (!fieldY->IsEditing())
+				fieldY->Text(String::Format("{}", value.y));
         }
         else if (fieldDeclId == TYPEID(Vec2i))
         {
             Vec2i value = field->GetFieldValue<Vec2i>(instance);
-            fieldX->Text(String::Format("{}", value.x));
-            fieldY->Text(String::Format("{}", value.y));
+            if (!fieldX->IsEditing())
+				fieldX->Text(String::Format("{}", value.x));
+            if (!fieldY->IsEditing())
+        		fieldY->Text(String::Format("{}", value.y));
         }
         else if (fieldDeclId == TYPEID(Vec3))
         {
             Vec3 value = field->GetFieldValue<Vec3>(instance);
-            fieldX->Text(String::Format("{}", value.x));
-            fieldY->Text(String::Format("{}", value.y));
-            fieldZ->Text(String::Format("{}", value.z));
+            if (!fieldX->IsEditing())
+				fieldX->Text(String::Format("{}", value.x));
+            if (!fieldY->IsEditing())
+				fieldY->Text(String::Format("{}", value.y));
+            if (!fieldZ->IsEditing())
+				fieldZ->Text(String::Format("{}", value.z));
         }
         else if (fieldDeclId == TYPEID(Vec3i))
         {
             Vec3i value = field->GetFieldValue<Vec3i>(instance);
-            fieldX->Text(String::Format("{}", value.x));
-            fieldY->Text(String::Format("{}", value.y));
-            fieldZ->Text(String::Format("{}", value.z));
+            if (!fieldX->IsEditing())
+				fieldX->Text(String::Format("{}", value.x));
+            if (!fieldY->IsEditing())
+        		fieldY->Text(String::Format("{}", value.y));
+            if (!fieldZ->IsEditing())
+				fieldZ->Text(String::Format("{}", value.z));
         }
         else if (fieldDeclId == TYPEID(Vec4))
         {
             Vec4 value = field->GetFieldValue<Vec4>(instance);
-            fieldX->Text(String::Format("{}", value.x));
-            fieldY->Text(String::Format("{}", value.y));
-            fieldZ->Text(String::Format("{}", value.z));
-            fieldW->Text(String::Format("{}", value.w));
+            if (!fieldX->IsEditing())
+				fieldX->Text(String::Format("{}", value.x));
+            if (!fieldY->IsEditing())
+				fieldY->Text(String::Format("{}", value.y));
+            if (!fieldZ->IsEditing())
+				fieldZ->Text(String::Format("{}", value.z));
+            if (!fieldW->IsEditing())
+				fieldW->Text(String::Format("{}", value.w));
         }
         else if (fieldDeclId == TYPEID(Vec4i))
         {
             Vec4i value = field->GetFieldValue<Vec4i>(instance);
-            fieldX->Text(String::Format("{}", value.x));
-            fieldY->Text(String::Format("{}", value.y));
-            fieldZ->Text(String::Format("{}", value.z));
-            fieldW->Text(String::Format("{}", value.w));
+            if (!fieldX->IsEditing())
+				fieldX->Text(String::Format("{}", value.x));
+            if (!fieldY->IsEditing())
+				fieldY->Text(String::Format("{}", value.y));
+            if (!fieldZ->IsEditing())
+        		fieldZ->Text(String::Format("{}", value.z));
+            if (!fieldW->IsEditing())
+				fieldW->Text(String::Format("{}", value.w));
         }
     }
 

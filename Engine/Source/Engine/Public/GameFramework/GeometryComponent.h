@@ -22,6 +22,8 @@ namespace CE
 
 		bool HasShapes() const;
 
+		int GetNumShapes() const;
+
 	};
 
 	CLASS(Abstract)
@@ -38,11 +40,11 @@ namespace CE
 
 		void OnAttachedToScene(Ref<CE::Scene> scene) override;
 
-		void UpdatePhysicsBody();
+		void OnTransformFieldEdited(const Name& fieldName) override;
 
 		void OnBeginPlay() override;
 
-		Ref<StaticCompoundShape> CreateCompoundShape();
+		Ref<PhysicsShape> CreatePhysicsShape();
 
 	private:
 
@@ -56,13 +58,13 @@ namespace CE
 		bool simulatePhysics = false;
 
 		FIELD(EditAnywhere, Category = "Physics")
-		PhysicsMotionType motionType = PhysicsMotionType::Static;
+		bool isKinematic = false;
 
 		FIELD()
 		Array<Ref<PhysicsShape>> physicsShapes;
 
 		FIELD()
-		Ref<StaticCompoundShape> compoundShape;
+		Ref<PhysicsShape> compoundShape;
 
 		FIELD()
 		Ref<PhysicsBody> physicsBody = nullptr;

@@ -56,7 +56,7 @@ namespace CE
 
         PhysicsBody();
 
-        void OnBeginDestroy() override;
+        void OnBeforeDestroy() override;
         
     public:
 
@@ -65,8 +65,10 @@ namespace CE
         JPH::Body* GetJoltBody();
 
         Vec3 GetPosition();
-
         Quat GetRotation();
+
+        void SetPosition(Vec3 pos);
+        void SetRotation(Quat rot);
 
         Ref<PhysicsScene> GetOwnerScene() { return ownerScene.Lock(); }
 
@@ -76,6 +78,10 @@ namespace CE
 
         struct Impl;
 		Impl* impl = nullptr;
+
+        void ClearImpl();
+
+        friend class PhysicsScene;
     };
     
 } // namespace CE

@@ -84,6 +84,16 @@ namespace CE
     {
 	    ~Impl()
 	    {
+	    	JPH::BodyInterface& bodyInterface = physicsSystem->GetBodyInterface();
+		    JPH::BodyIDVector bodyIDs;
+			physicsSystem->GetBodies(bodyIDs);
+
+			for (JPH::BodyID id : bodyIDs)
+			{
+				bodyInterface.RemoveBody(id);
+				bodyInterface.DestroyBody(id);
+			}
+
 			delete physicsSystem; physicsSystem = nullptr;
 			delete tempAllocator; tempAllocator = nullptr;
 			delete jobSystem; jobSystem = nullptr;
@@ -133,6 +143,17 @@ namespace CE
 		PhysicsSystem::Get().DeregisterScene(this);
 
 		delete impl; impl = nullptr;
+    }
+
+    void PhysicsScene::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+		for (Ref<PhysicsBody> physicsBody : bodies)
+		{
+			physicsBody->ClearImpl();
+			physicsBody->BeginDestroy();
+		}
     }
 
     void PhysicsScene::Tick(f32 deltaTime)
@@ -196,5 +217,6 @@ namespace CE
 	{
 		simulationEnabled = enabled;
 	}
+
 } // namespace CE
 

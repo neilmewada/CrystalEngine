@@ -193,6 +193,11 @@ namespace CE::Editor
 	    Super::HandleEvent(event);
     }
 
+    bool NumericEditorField::IsEditing()
+    {
+        return input->IsEditing();
+    }
+
     FWidget* NumericEditorField::HitTest(Vec2 localMousePos)
     {
 	    FWidget* thisHitTest = Super::HitTest(localMousePos);

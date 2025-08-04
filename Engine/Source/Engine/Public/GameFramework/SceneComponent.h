@@ -37,6 +37,7 @@ namespace CE
 		Quat GetRotation();
 
 		void SetPosition(Vec3 globalPosition);
+		void SetRotation(Quat globalRotation);
 
 		void OnBeginPlay() override;
 
@@ -67,6 +68,8 @@ namespace CE
 		void OnFieldChanged(const Name& fieldName) override;
 
 		void OnFieldEdited(const Name& fieldName) override;
+
+		virtual void OnTransformFieldEdited(const Name& fieldName) {}
 
 		bool IsTransformUpdated() const { return transformUpdated; }
 

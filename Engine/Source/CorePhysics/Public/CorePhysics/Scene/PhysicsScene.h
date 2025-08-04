@@ -15,6 +15,8 @@ namespace CE
         void OnAfterConstruct() override;
 
         void OnBeginDestroy() override;
+
+        void OnBeforeDestroy() override;
         
     public:
 

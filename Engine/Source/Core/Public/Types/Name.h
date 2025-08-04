@@ -47,7 +47,7 @@ namespace CE
 		Name(Name&& move);
 
         template<typename T>
-        Name(const char* name, T* fieldRef) : Name(String(name))
+        Name(const char* name, const T& fieldRef) : Name(String(name))
 		{}
 
         CE_INLINE bool IsValid() const

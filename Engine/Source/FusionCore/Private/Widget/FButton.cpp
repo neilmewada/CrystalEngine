@@ -134,6 +134,21 @@ namespace CE
         }
     }
 
+    void FButton::OnFusionPropertyModified(const CE::Name& propertyName)
+    {
+	    Super::OnFusionPropertyModified(propertyName);
+
+        static const CE::Name enabledProperty = "Enabled";
+
+        if (propertyName == enabledProperty)
+        {
+            if (!Enabled())
+            {
+                SetState(FButtonState::Default);
+            }
+        }
+    }
+
     FButton::Self& FButton::DropDownMenu(FMenuPopup& dropDownMenu)
     {
         this->dropDownMenu = &dropDownMenu;

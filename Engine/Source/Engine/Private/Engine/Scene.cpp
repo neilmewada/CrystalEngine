@@ -62,11 +62,6 @@ namespace CE
 			rpiScene->SetName(GetName());
 		}
 
-		if (physicsScene)
-		{
-			physicsScene->SetSimulationEnabled(isPlaying);
-		}
-
 		for (Actor* actor : actors)
 		{
 			if (!actor->IsSelfEnabled())
@@ -92,8 +87,6 @@ namespace CE
 
 		if (physicsScene)
 		{
-			physicsScene->SetSimulationEnabled(isPlaying);
-
 			physicsScene->Tick(delta);
 		}
 	}

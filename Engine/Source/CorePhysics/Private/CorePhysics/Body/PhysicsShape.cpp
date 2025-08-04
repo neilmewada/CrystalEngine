@@ -131,13 +131,23 @@ namespace CE
                 Vec3 scale = settings.shapeScales[i];
 
                 JPH::Ref<JPH::Shape> joltShape = physicsShape->CreateJoltShape();
-                joltShape->ScaleShape(JPH::Vec3Arg(scale.x, scale.y, scale.z));
+                JPH::Shape::ShapeResult result = joltShape->ScaleShape(JPH::Vec3Arg(scale.x, scale.y, scale.z));
+                if (result.IsValid())
+                {
+                    joltShape = result.Get();
+                }
 
                 compoundShapeSettings.AddShape(JPH::Vec3Arg(pos.x, pos.y, pos.z), JPH::QuatArg(rot.x, rot.y, rot.z, rot.w), joltShape.GetPtr());
             }
 
             JPH::Shape::ShapeResult result;
-            return new JPH::StaticCompoundShape(compoundShapeSettings, *physicsScene->GetJoltTempAllocator(), result);
+            JPH::StaticCompoundShape* outShape = new JPH::StaticCompoundShape(compoundShapeSettings, *physicsScene->GetJoltTempAllocator(), result);
+            if (result.HasError())
+            {
+                delete outShape;
+                return nullptr;
+            }
+            return outShape;
         }
 
         return nullptr;

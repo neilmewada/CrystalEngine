@@ -292,6 +292,15 @@ namespace CE
 		outRotation = q.GetNormalized();
 	}
 
+	Quat Matrix4x4::GetRotation() const
+	{
+		Vec3 pos;
+		Quat rot;
+		Vec3 scale;
+		Decompose(pos, rot, scale);
+		return rot;
+	}
+
 	int Matrix4x4::GetDeterminant(const Matrix4x4& mat, s32 n)
 	{
 		ZoneScoped;

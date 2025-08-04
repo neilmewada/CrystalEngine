@@ -43,6 +43,8 @@ namespace CE
 
         void SetState(FButtonState newState);
 
+        void OnFusionPropertyModified(const CE::Name& propertyName) override;
+
         virtual void OnClick() {}
         virtual void OnDoubleClick() {}
 

@@ -112,6 +112,8 @@ namespace CE
 
 	void SceneComponent::SetPosition(Vec3 pos)
 	{
+		globalPosition = pos;
+
 		if (!parentComponent)
 		{
 			SetLocalPosition(pos);
@@ -122,6 +124,20 @@ namespace CE
 		Vec3 newLocalPos = parentTransformInverse * Vec4(pos.x, pos.y, pos.z, 1.0f);
 
 		SetLocalPosition(newLocalPos);
+	}
+
+	void SceneComponent::SetRotation(Quat worldRotation)
+	{
+		if (!parentComponent)
+		{
+			SetLocalEulerAngles(worldRotation.ToEulerDegrees());
+			return;
+		}
+
+		Quat parentGlobalRot = parentComponent->transform.GetRotation();
+		Quat localRot = parentGlobalRot.GetInversed() * worldRotation;
+
+		SetLocalEulerAngles(localRot.ToEulerDegrees());
 	}
 
 	void SceneComponent::OnSubobjectDetached(Object* subobject)
@@ -158,6 +174,8 @@ namespace CE
 
 		if (transformFields.Exists(fieldName))
 		{
+			OnTransformFieldEdited(fieldName);
+
 			SetDirty();
 		}
 	}

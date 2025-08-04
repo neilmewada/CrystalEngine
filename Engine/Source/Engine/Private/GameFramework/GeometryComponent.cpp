@@ -4,7 +4,12 @@ namespace CE
 {
 	bool CollisionPrimitives::HasShapes() const
 	{
-		return spheres.NotEmpty() || boxes.NotEmpty() || capsules.NotEmpty();
+		return GetNumShapes() > 0;
+	}
+
+	int CollisionPrimitives::GetNumShapes() const
+	{
+		return spheres.GetSize() + boxes.GetSize() + capsules.GetSize();
 	}
 
 	GeometryComponent::GeometryComponent()
@@ -20,13 +25,13 @@ namespace CE
 		{
 			if (Ref<PhysicsScene> physicsScene = scene->GetPhysicsScene())
 			{
-				if (physicsScene->IsSimulationEnabled() && physicsBody.IsValid())
+				if (simulatePhysics && physicsScene->IsSimulationEnabled() && physicsBody.IsValid())
 				{
-					// TODO: Apply positions
 					Vec3 pos = physicsBody->GetPosition();
 					Quat rot = physicsBody->GetRotation();
 
 					SetPosition(pos);
+					SetRotation(rot);
 				}
 			}
 		}
@@ -39,9 +44,15 @@ namespace CE
 		
 	}
 
-	void GeometryComponent::UpdatePhysicsBody()
+	void GeometryComponent::OnTransformFieldEdited(const Name& fieldName)
 	{
+		Super::OnTransformFieldEdited(fieldName);
 
+		if (physicsBody.IsValid())
+		{
+			// TODO: Uncomment code:
+			physicsBody->SetPosition(GetPosition());
+		}
 	}
 
 	void GeometryComponent::OnBeginPlay()
@@ -63,7 +74,7 @@ namespace CE
 					compoundShape->BeginDestroy();
 				}
 
-				compoundShape = CreateCompoundShape();
+				compoundShape = CreatePhysicsShape();
 
 				if (!compoundShape)
 				{
@@ -73,7 +84,10 @@ namespace CE
 				PhysicsBodyInitInfo bodyInfo{};
 				bodyInfo.ownerScene = physicsScene;
 				bodyInfo.layer = BuiltinPhysicsLayer::Default;
-				bodyInfo.motionType = motionType;
+				if (simulatePhysics)
+					bodyInfo.motionType = isKinematic ? PhysicsMotionType::Kinematic : PhysicsMotionType::Dynamic;
+				else
+					bodyInfo.motionType = PhysicsMotionType::Static;
 				bodyInfo.position = GetPosition();
 				bodyInfo.rotation = GetRotation();
 				bodyInfo.scale = GetLocalScale();
@@ -85,7 +99,7 @@ namespace CE
 		}
 	}
 
-	Ref<StaticCompoundShape> GeometryComponent::CreateCompoundShape()
+	Ref<PhysicsShape> GeometryComponent::CreatePhysicsShape()
 	{
 		if (!primitives.HasShapes())
 			return nullptr;
@@ -94,6 +108,28 @@ namespace CE
 		{
 			if (Ref<PhysicsScene> physicsScene = scene->GetPhysicsScene())
 			{
+				if (primitives.GetNumShapes() == 1)
+				{
+					Ref<PhysicsShape> shape = nullptr;
+
+					if (primitives.boxes.NotEmpty())
+					{
+						shape = BoxShape::Create(primitives.boxes[0], this);
+					}
+
+					if (primitives.spheres.NotEmpty())
+					{
+						shape = SphereShape::Create(primitives.spheres[0], this);
+					}
+
+					if (primitives.capsules.NotEmpty())
+					{
+						shape = CapsuleShape::Create(primitives.capsules[0], this);
+					}
+
+					return shape;
+				}
+
 				StaticCompoundShapeSettings compoundShapeSettings{};
 				compoundShapeSettings.ownerScene = physicsScene;
 
