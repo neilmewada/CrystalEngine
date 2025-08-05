@@ -284,7 +284,7 @@ namespace CE::Editor
             }),
 
             FNew(FMenuItemSeparator)
-            .Title("NEW"),
+            .Title("BASIC ASSETS"),
 
             NewMenuItem()
             .Text("Material")
@@ -297,16 +297,28 @@ namespace CE::Editor
                 }
             }),
 
+            FNew(FMenuItemSeparator)
+            .Title("ADVANCED ASSETS"),
+
             NewMenuItem()
-            .Text("Physics Material")
-            .Icon(FBrush("/Editor/Assets/Icons/Bounce"))
-            .OnClick([this]
-            {
-	            if (auto owner = m_Owner.Lock())
-	            {
-                    owner->CreateNewAsset<CE::PhysicsMaterial>();
-	            }
-            }),
+            .Text("Physics")
+            .SubMenu(
+                FNew(EditorMenuPopup)
+                .Content(
+                    NewMenuItem()
+                    .Text("Physics Material")
+                    .Icon(FBrush("/Editor/Assets/Icons/Bounce"))
+                    .OnClick([this]
+                    {
+                        if (auto owner = m_Owner.Lock())
+                        {
+                            owner->CreateNewAsset<CE::PhysicsMaterial>();
+                        }
+                    })
+                )
+                .MinWidth(MinContextMenuWidth)
+                .As<EditorMenuPopup>()
+            ),
 
             FNew(FMenuItemSeparator)
             .Title("MISC"),

@@ -309,6 +309,8 @@ namespace CE
 		popup->positionFound = false;
 		popup->controlSize = controlSize;
 
+		popup->SetContextRecursively(this);
+
 		MarkLayoutDirty();
 
 		GetRootContext()->SetFocusWidget(popup);

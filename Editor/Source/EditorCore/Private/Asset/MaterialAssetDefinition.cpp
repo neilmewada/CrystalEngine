@@ -31,7 +31,6 @@ namespace CE::Editor
 
     SubClass<AssetThumbnailGen> MaterialAssetDefinition::GetThumbnailGeneratorClass()
     {
-        //return nullptr;
         return MaterialAssetThumbnailGen::StaticClass();
     }
 
