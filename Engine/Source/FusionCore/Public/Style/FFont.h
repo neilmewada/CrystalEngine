@@ -22,7 +22,7 @@ namespace CE
         FFont()
         {}
 
-        FFont(const Name& family, int fontSize = 13, b8 isBold = false, b8 isItalic = false)
+        FFont(const Name& family, f32 fontSize = 10, b8 isBold = false, b8 isItalic = false)
     		: family(family), fontSize(fontSize), isBold(isBold), isItalic(isItalic)
         {}
 
@@ -30,9 +30,9 @@ namespace CE
 
         void SetFamily(const Name& family) { this->family = family; }
 
-        const int& GetFontSize() const { return fontSize; }
+        f32 GetFontSize() const { return fontSize; }
 
-        void SetFontSize(int fontSize) { this->fontSize = fontSize; }
+        void SetFontSize(f32 fontSize) { this->fontSize = fontSize; }
 
         const bool& IsItalic() const { return isItalic; }
 
@@ -58,7 +58,7 @@ namespace CE
         Name family = "";
 
         FIELD()
-        int fontSize = 10;
+        f32 fontSize = 10;
 
         FIELD()
         b8 isBold = false;

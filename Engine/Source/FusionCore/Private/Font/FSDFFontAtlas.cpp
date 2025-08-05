@@ -291,7 +291,7 @@ namespace CE
 		flushRequiredPerImage[imageIndex] = false;
     }
 
-    FFontGlyphInfo FSDFFontAtlas::FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic)
+    FFontGlyphInfo FSDFFontAtlas::FindOrAddGlyph(u32 charCode, bool isBold, bool isItalic)
     {
         ZoneScoped;
         char __text[2] = { (char)charCode, 0 };

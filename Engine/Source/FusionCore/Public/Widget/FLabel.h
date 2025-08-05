@@ -25,12 +25,12 @@ namespace CE
         FUSION_PROPERTY(FPen, Underline);
 
         Self& FontFamily(const CE::Name& fontFamily);
-        Self& FontSize(int fontSize);
+        Self& FontSize(f32 fontSize);
         Self& Bold(bool bold);
         Self& Italic(bool italic);
 
         const CE::Name& FontFamily();
-        const int& FontSize();
+        const f32& FontSize();
         const bool& Bold();
         const bool& Italic();
 

@@ -352,10 +352,7 @@ namespace CE
         Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
 
         Name fontFamily = currentFont.GetFamily();
-        int fontSize = currentFont.GetFontSize();
-
-        if (fontSize <= 0)
-            fontSize = 12;
+        
         if (!fontFamily.IsValid())
             fontFamily = fontManager->GetDefaultFontFamily();
 
@@ -373,10 +370,6 @@ namespace CE
         Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
 
         Name fontFamily = currentFont.GetFamily();
-        int fontSize = currentFont.GetFontSize();
-
-        if (fontSize <= 0)
-            fontSize = 12;
         if (!fontFamily.IsValid())
             fontFamily = fontManager->GetDefaultFontFamily();
 
@@ -1316,7 +1309,7 @@ namespace CE
                     for (int j = breakCharIdx + 1; j < i; j++)
                     {
                         char prevChar = text[j];
-                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, (u32)fontSize, currentFont.IsBold(), currentFont.IsItalic());
                         f32 atlasFontSize = prevGlyph.fontSize;
 
                         outQuads[j] = Rect::FromSize(
@@ -1394,7 +1387,7 @@ namespace CE
 
         const FFontMetrics& metrics = fontAtlas->GetMetrics();
 
-        const float startY = metrics.ascender * (f32)fontSize * metricsScaling;
+        const float startY = metrics.ascender * fontSize * metricsScaling;
         constexpr float startX = 0;
 
         float maxX = startX;
@@ -1427,7 +1420,7 @@ namespace CE
                 continue;
             }
 
-            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, currentFont.IsBold(), currentFont.IsItalic());
 
             const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
             const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
@@ -1444,7 +1437,7 @@ namespace CE
                     for (int j = breakCharIdx + 1; j < i; j++)
                     {
                         char prevChar = text[j];
-                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, currentFont.IsBold(), currentFont.IsItalic());
                         f32 atlasFontSize = prevGlyph.fontSize;
 
                         outQuads[j] = Rect::FromSize(
@@ -1786,7 +1779,7 @@ namespace CE
                 continue;
             }
 
-            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, currentFont.IsBold(), currentFont.IsItalic());
 
             const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
             const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
@@ -1803,7 +1796,7 @@ namespace CE
                     for (int j = breakCharIdx + 1; j < i; j++)
                     {
                         char prevChar = text[j];
-                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, currentFont.IsBold(), currentFont.IsItalic());
                         f32 atlasFontSize = prevGlyph.fontSize;
 
                         outOffsets[j] = Vec2(curPos.x, curPos.x + (f32)prevGlyph.advance * fontSize / atlasFontSize / systemDpiScaling);
@@ -1982,7 +1975,7 @@ namespace CE
                 continue;
             }
 
-            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, currentFont.IsBold(), currentFont.IsItalic());
             if (glyph.charCode == 0)
             {
                 continue;
@@ -2045,12 +2038,14 @@ namespace CE
         }
     }
 
+    // Credit: Dear ImGui
     int FusionRenderer2::CalculateNumCircleSegments(float radius) const
     {
         const int radiusIndex = (int)(radius + 0.999999f); // ceil to never reduce accuracy
         return Math::Clamp((((((int)ceilf(Math::PI / acosf(1 - Math::Min((circleSegmentMaxError), (radius)) / (radius)))) + 1) / 2) * 2), 4, 512);
     }
 
+    // Credit: Dear ImGui
     void FusionRenderer2::PathArcToFastInternal(const Vec2& center, float radius, int sampleMin, int sampleMax, int step)
     {
         if (radius < 0.5f)
@@ -2155,10 +2150,7 @@ namespace CE
         Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
 
         Name fontFamily = currentFont.GetFamily();
-        int fontSize = currentFont.GetFontSize();
-
-        if (fontSize <= 0)
-            fontSize = 12;
+        
         if (!fontFamily.IsValid())
             fontFamily = fontManager->GetDefaultFontFamily();
 

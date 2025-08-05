@@ -797,7 +797,7 @@ namespace CE
 
     void FTextInputLabel::DeselectAll()
     {
-        isSelectionActive = false;
+    	isSelectionActive = false;
         MarkDirty();
     }
 
@@ -942,7 +942,7 @@ namespace CE
 
     void FTextInput::SetHighlightedInternal(bool highlighted)
     {
-	    if (IsHighlighted() != highlighted)
+    	if (IsHighlighted() != highlighted)
 	    {
             if (highlighted)
                 state |= FTextInputState::Highlighted;

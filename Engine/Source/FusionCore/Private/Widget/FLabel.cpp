@@ -84,7 +84,7 @@ namespace CE
         return Font(copy);
     }
 
-    FLabel::Self& FLabel::FontSize(int fontSize)
+    FLabel::Self& FLabel::FontSize(f32 fontSize)
     {
         FFont copy = m_Font;
         copy.SetFontSize(fontSize);
@@ -110,7 +110,7 @@ namespace CE
         return m_Font.GetFamily();
     }
 
-    const int& FLabel::FontSize()
+    const f32& FLabel::FontSize()
     {
         return m_Font.GetFontSize();
     }

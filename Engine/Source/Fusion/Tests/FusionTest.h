@@ -24,8 +24,6 @@ namespace WidgetTests
 
 	private:
 
-		Ref<FLabel> label;
-
 	public:
 
 		FUSION_PROPERTY(bool, Flipped);

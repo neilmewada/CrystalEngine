@@ -77,10 +77,14 @@ namespace WidgetTests
 
                                 FNew(FTextButton)
                                 .Text(Flipped() ? "SDF, PNG" : "PNG, SDF")
+                                .FontSize(10)
                                 .OnButtonClicked([this](FButton* button, Vec2)
                                 {
 	                                Flipped(!Flipped());
                                     ((FTextButton*)button)->Text(Flipped() ? "SDF, PNG" : "PNG, SDF");
+
+                                    Ref<FLabel> label = (Ref<FLabel>)CastTo<FVerticalStack>(button->GetParent())->GetChild(0);
+                                    label->FontSize(label->FontSize() + 0.5f);
                                 }),
 
                                 FNew(FVerticalStack)
@@ -88,7 +92,7 @@ namespace WidgetTests
                                 .Margin(Vec4(0, 150, 0, 0))
                                 .Scale(Vec2(1, 1) * 15)
                                 (
-                                    FAssignNew(FLabel, label)
+                                    FNew(FLabel)
                                     .FontSize(8)
                                     .Text("Hello World!")
                                     .HAlign(HAlign::Center)
