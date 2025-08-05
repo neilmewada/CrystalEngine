@@ -446,7 +446,7 @@ namespace CE::Editor
                         arrayField->InsertArrayElement(instance);
                         operation->SetArrayIndex(arrayField->GetArraySize(instance) - 1);
 
-                        target->OnFieldChanged(arrayField->GetName());
+                        target->OnFieldChanged(arrayFieldPath);
 
                         return true;
                     }
@@ -475,7 +475,7 @@ namespace CE::Editor
 
                         arrayField->DeleteArrayElement(instance, index);
 
-                        target->OnFieldChanged(arrayField->GetName());
+                        target->OnFieldChanged(arrayFieldPath);
 
                         return true;
                     }
