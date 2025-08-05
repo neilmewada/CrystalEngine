@@ -1,3 +1,4 @@
+
 #include "CorePhysicsPrivate.h"
 
 namespace CE
@@ -80,6 +81,63 @@ namespace CE
 		}
 	};
 
+	class ContactListener : public JPH::ContactListener
+	{
+	public:
+
+		virtual void OnContactAdded(const JPH::Body& body1,
+			const JPH::Body& body2,
+			const JPH::ContactManifold& ioManifold,
+			JPH::ContactSettings& ioSettings) override
+		{
+			const auto& subShapeID1 = ioManifold.mSubShapeID1;
+			const auto& subShapeID2 = ioManifold.mSubShapeID2;
+
+			const auto* mat1 = static_cast<const JPH::PhysicsMaterialImpl*>(body1.GetShape()->GetMaterial(subShapeID1));
+			const auto* mat2 = static_cast<const JPH::PhysicsMaterialImpl*>(body2.GetShape()->GetMaterial(subShapeID2));
+
+			if (!mat1 || !mat2)
+				return;
+
+			float friction1 = mat1->dynamicFriction;
+			float friction2 = mat2->dynamicFriction;
+
+			// Detect if we should use static friction
+			constexpr float tangentialVelocityThreshold = 0.1f; // Like Unity’s “minimum slip speed”
+
+			// Loop over contact points (usually just 1 or 2)
+			for (const auto& contact : ioManifold.mRelativeContactPointsOn1)
+			{
+				// Get world-space contact point
+				JPH::Vec3 worldPos1 = body1.GetCenterOfMassTransform() * contact;
+				JPH::Vec3 worldPos2 = body2.GetCenterOfMassTransform() * ioManifold.mRelativeContactPointsOn2[&contact - &ioManifold.mRelativeContactPointsOn1[0]];
+
+				// Estimate contact point velocity on each body
+				JPH::Vec3 v1 = body1.GetPointVelocity(worldPos1);
+				JPH::Vec3 v2 = body2.GetPointVelocity(worldPos2);
+
+				// Tangential relative velocity
+				JPH::Vec3 relVel = v1 - v2;
+
+				// Remove the normal component (only keep lateral slip)
+				JPH::Vec3 normal = ioManifold.mWorldSpaceNormal;
+				JPH::Vec3 lateralVel = relVel - normal * relVel.Dot(normal);
+
+				if (lateralVel.Length() < tangentialVelocityThreshold)
+				{
+					// Small slip: use static friction
+					friction1 = mat1->staticFriction;
+					friction2 = mat2->staticFriction;
+				}
+
+				break; // Only sample one contact point (optimization)
+			}
+
+			ioSettings.mCombinedFriction = JPH::PhysicsMaterialImpl::Combine(friction1, friction2, mat1->frictionCombine);
+			ioSettings.mCombinedRestitution = JPH::PhysicsMaterialImpl::Combine(mat1->bounciness, mat2->bounciness, mat1->bouncinessCombine);
+		}
+	};
+
     struct PhysicsScene::Impl
     {
 	    ~Impl()
@@ -121,12 +179,14 @@ namespace CE
             return;
 
         PhysicsSystem& physicsSystem = PhysicsSystem::Get();
-
+		
 		impl = new Impl();
 		impl->tempAllocator = new JPH::TempAllocatorImpl(TempAllocatorSize);
-		impl->jobSystem = new JPH::JobSystemThreadPool(MaxPhysicsJobs, MaxPhysicsBarriers, 2);
+		impl->jobSystem = new JPH::JobSystemThreadPool(MaxPhysicsJobs, MaxPhysicsBarriers, NumPhysicsThreads);
 
         impl->physicsSystem = new JPH::PhysicsSystem();
+
+		JPH::PhysicsMaterial::sDefault = new JPH::PhysicsMaterialImpl(GetMutableDefaults<PhysicsMaterial>());
 
         impl->physicsSystem->Init(MaxPhysicsBodies, NumBodyMutexes, MaxBodyPairs, MaxContactConstraints,
             impl->broadPhaseInterface, 
@@ -164,7 +224,7 @@ namespace CE
         constexpr int CollisionSteps = 1;
 
         // Update the physics system
-        JPH::EPhysicsUpdateError error = impl->physicsSystem->Update(PhysicsSystem::FixedDeltaTime, CollisionSteps, impl->tempAllocator, impl->jobSystem);
+        JPH::EPhysicsUpdateError error = impl->physicsSystem->Update(deltaTime, CollisionSteps, impl->tempAllocator, impl->jobSystem);
         if (error != JPH::EPhysicsUpdateError::None)
         {
             CE_LOG(Error, All, "Physics Update Error: {}", (int)error);

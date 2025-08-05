@@ -111,6 +111,28 @@ namespace CE
         impl->physicsSystem->GetBodyInterface().SetRotation(impl->joltBody->GetID(), JPH::QuatArg(rot.x, rot.y, rot.z, rot.w), JPH::EActivation::Activate);
     }
 
+    Vec3 PhysicsBody::GetLinearVelocity()
+    {
+        JPH::Vec3 vec = impl->joltBody->GetLinearVelocity();
+        return Vec3(vec.GetX(), vec.GetY(), vec.GetZ());
+    }
+
+    void PhysicsBody::SetLinearVelocity(Vec3 velocity)
+    {
+        impl->joltBody->SetLinearVelocity(JPH::Vec3(velocity.x, velocity.y, velocity.z));
+    }
+
+    Vec3 PhysicsBody::GetAngularVelocity()
+    {
+        JPH::Vec3 vec = impl->joltBody->GetAngularVelocity();
+        return Vec3(vec.GetX(), vec.GetY(), vec.GetZ());
+    }
+
+    void PhysicsBody::SetAngularVelocity(Vec3 velocity)
+    {
+        impl->joltBody->SetAngularVelocity(JPH::Vec3(velocity.x, velocity.y, velocity.z));
+    }
+
     void PhysicsBody::ClearImpl()
     {
         impl->joltBody = nullptr;

@@ -15,7 +15,7 @@ namespace CE::Editor
 
     const Array<String>& MaterialAssetDefinition::GetSourceExtensions()
     {
-        thread_local Array<String> empty;
+        thread_local Array<String> empty{};
         return empty;
     }
 

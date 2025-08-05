@@ -46,6 +46,10 @@ namespace CE
 
 		Ref<PhysicsShape> CreatePhysicsShape();
 
+	public:
+
+		Ref<PhysicsBody> GetPhysicsBody() const { return physicsBody; }
+
 	private:
 
 		FIELD()

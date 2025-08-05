@@ -12,6 +12,8 @@ namespace JPH
 	class ObjectVsBroadPhaseLayerFilter;
 	class ObjectLayerPairFilter;
 	class Body;
+	class ContactListener;
+	class PhysicsMaterialImpl;
 }
 
 namespace CE
@@ -20,6 +22,7 @@ namespace CE
 }
 
 #include "CorePhysics/PhysicsLayers.h"
+#include "CorePhysics/PhysicsMaterial.h"
 #include "CorePhysics/Body/PhysicsShape.h"
 #include "CorePhysics/Body/PhysicsBody.h"
 #include "CorePhysics/Scene/PhysicsScene.h"

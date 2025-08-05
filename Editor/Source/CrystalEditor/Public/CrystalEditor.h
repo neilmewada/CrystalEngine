@@ -74,6 +74,10 @@
 #include "CrystalEditor/Editor/MaterialEditor/MaterialDetailsTab.h"
 #include "CrystalEditor/Editor/MaterialEditor/MaterialEditor.h"
 
+// - DataAsset Editor -
+
+#include "CrystalEditor/Editor/DataAssetEditor/DataAssetEditor.h"
+
 // - Crystal Editor Window -
 
 #include "CrystalEditor/CrystalEditorWindow.h"

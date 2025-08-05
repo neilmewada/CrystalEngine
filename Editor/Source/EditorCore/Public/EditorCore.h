@@ -30,6 +30,7 @@
 #include "Asset/ComputeShaderAssetDefinition.h"
 #include "Asset/ComputeShaderAssetImporter.h"
 #include "Asset/MaterialAssetDefinition.h"
+#include "Asset/PhysicsMaterialAssetDefinition.h"
 #include "Asset/TextureAssetDefinition.h"
 #include "Asset/TextureAssetImporter.h"
 #include "Asset/StaticMeshDefinition.h"

@@ -33,6 +33,6 @@ namespace CE::Editor
 
 	Color TextureAssetDefinition::GetColorTag()
 	{
-		return Color(0.2f, 1.0f, 0.3f, 1.0f);
+		return Color(1.0f, 0.9f, 0.3f, 1.0f);
 	}
 } // namespace CE::Editor

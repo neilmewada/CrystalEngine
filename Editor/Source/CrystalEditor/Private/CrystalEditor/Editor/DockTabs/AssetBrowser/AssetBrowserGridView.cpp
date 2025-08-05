@@ -297,6 +297,17 @@ namespace CE::Editor
                 }
             }),
 
+            NewMenuItem()
+            .Text("Physics Material")
+            .Icon(FBrush("/Editor/Assets/Icons/Bounce"))
+            .OnClick([this]
+            {
+	            if (auto owner = m_Owner.Lock())
+	            {
+                    owner->CreateNewAsset<CE::PhysicsMaterial>();
+	            }
+            }),
+
             FNew(FMenuItemSeparator)
             .Title("MISC"),
 

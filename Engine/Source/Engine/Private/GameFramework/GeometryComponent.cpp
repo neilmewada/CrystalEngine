@@ -2,6 +2,7 @@
 
 namespace CE
 {
+
 	bool CollisionPrimitives::HasShapes() const
 	{
 		return GetNumShapes() > 0;
@@ -29,6 +30,7 @@ namespace CE
 				{
 					Vec3 pos = physicsBody->GetPosition();
 					Quat rot = physicsBody->GetRotation();
+					Vec3 euler = rot.ToEulerDegrees();
 
 					SetPosition(pos);
 					SetRotation(rot);
@@ -50,7 +52,6 @@ namespace CE
 
 		if (physicsBody.IsValid())
 		{
-			// TODO: Uncomment code:
 			physicsBody->SetPosition(GetPosition());
 		}
 	}

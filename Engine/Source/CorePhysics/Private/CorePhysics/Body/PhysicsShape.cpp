@@ -96,7 +96,9 @@ namespace CE
 
     JPH::Shape* CylinderShape::CreateJoltShape() const
     {
-        return new JPH::CylinderShape(settings.halfHeight, settings.radius);
+        JPH::PhysicsMaterial* physicsMaterial = new JPH::PhysicsMaterial();
+
+        return new JPH::CylinderShape(settings.halfHeight, settings.radius, JPH::cDefaultConvexRadius);
     }
 
     void CylinderShape::OnBeginDestroy()

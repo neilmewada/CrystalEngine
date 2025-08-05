@@ -9,6 +9,8 @@ namespace CE
 
 	constexpr SIZE_T MaxPhysicsBarriers = 8;
 
+	constexpr SIZE_T NumPhysicsThreads = 2;
+
 	constexpr SIZE_T NumBodyMutexes = 0;
 
 	//! @brief The number of threads that will be excluded from physics. Thereby leaving them for other tasks such as rendering, asset processing, etc.

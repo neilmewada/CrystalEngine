@@ -70,6 +70,12 @@ namespace CE
         void SetPosition(Vec3 pos);
         void SetRotation(Quat rot);
 
+        Vec3 GetLinearVelocity();
+        void SetLinearVelocity(Vec3 velocity);
+
+        Vec3 GetAngularVelocity();
+        void SetAngularVelocity(Vec3 radiansPerSecond);
+
         Ref<PhysicsScene> GetOwnerScene() { return ownerScene.Lock(); }
 
     private:

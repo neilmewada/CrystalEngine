@@ -16,6 +16,7 @@ namespace CE::Editor
 		AssetEditorRegistry::Get()->RegisterEditor(CE::Scene::StaticClass(), SceneEditor::StaticClass());
 		AssetEditorRegistry::Get()->RegisterEditor(CE::Material::StaticClass(), MaterialEditor::StaticClass());
 		AssetEditorRegistry::Get()->RegisterEditor(CE::ProjectSettings::StaticClass(), ProjectSettingsEditor::StaticClass());
+		AssetEditorRegistry::Get()->RegisterEditor(CE::DataAsset::StaticClass(), DataAssetEditor::StaticClass());
 
 		assetProcessor = CreateObject<AssetProcessor>(GetTransient(MODULE_NAME), "AssetProcessor");
 	}
@@ -30,6 +31,7 @@ namespace CE::Editor
 		AssetEditorRegistry::Get()->DeregisterEditor(CE::Scene::StaticClass());
 		AssetEditorRegistry::Get()->DeregisterEditor(CE::Material::StaticClass());
 		AssetEditorRegistry::Get()->DeregisterEditor(CE::ProjectSettings::StaticClass());
+		AssetEditorRegistry::Get()->DeregisterEditor(CE::DataAsset::StaticClass());
 	}
 
 }
