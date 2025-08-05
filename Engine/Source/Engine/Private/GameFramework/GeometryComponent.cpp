@@ -128,6 +128,11 @@ namespace CE
 						shape = CapsuleShape::Create(primitives.capsules[0], this);
 					}
 
+					if (shape.IsValid())
+					{
+						shape->physicsMaterial = physicsMaterial;
+					}
+
 					return shape;
 				}
 
@@ -158,7 +163,12 @@ namespace CE
 					compoundShapeSettings.shapeScales.Add(sphere.scale);
 				}
 
-				return StaticCompoundShape::Create(compoundShapeSettings, this);
+				Ref<StaticCompoundShape> compoundShape = StaticCompoundShape::Create(compoundShapeSettings, this);
+				if (compoundShape.IsValid())
+				{
+					compoundShape->physicsMaterial = physicsMaterial;
+				}
+				return compoundShape;
 			}
 		}
 

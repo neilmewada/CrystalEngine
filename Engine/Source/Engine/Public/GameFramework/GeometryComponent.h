@@ -58,6 +58,9 @@ namespace CE
 		FIELD(EditAnywhere, Category = "Collision", StructTypeName = "")
 		CollisionPrimitives primitives;
 
+		FIELD(EditAnywhere, Category = "Collision")
+		Ref<PhysicsMaterial> physicsMaterial;
+
 		FIELD(EditAnywhere, Category = "Physics")
 		bool simulatePhysics = false;
 

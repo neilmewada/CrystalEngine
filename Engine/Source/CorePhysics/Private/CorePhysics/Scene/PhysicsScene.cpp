@@ -153,6 +153,7 @@ namespace CE
 			}
 
 			delete physicsSystem; physicsSystem = nullptr;
+			delete contactListener; contactListener = nullptr;
 			delete tempAllocator; tempAllocator = nullptr;
 			delete jobSystem; jobSystem = nullptr;
 	    }
@@ -164,6 +165,7 @@ namespace CE
 		BPLayerInterfaceImpl broadPhaseInterface;
 		ObjectVsBroadPhaseLayerFilterImpl objectVsBroadPhaseLayerFilter;
 		ObjectLayerPairFilterImpl objectVsObjectLayerFilter;
+		ContactListener* contactListener = nullptr;
     };
 
     PhysicsScene::PhysicsScene()
@@ -185,6 +187,9 @@ namespace CE
 		impl->jobSystem = new JPH::JobSystemThreadPool(MaxPhysicsJobs, MaxPhysicsBarriers, NumPhysicsThreads);
 
         impl->physicsSystem = new JPH::PhysicsSystem();
+		impl->contactListener = new CE::ContactListener();
+
+		impl->physicsSystem->SetContactListener(impl->contactListener);
 
 		JPH::PhysicsMaterial::sDefault = new JPH::PhysicsMaterialImpl(GetMutableDefaults<PhysicsMaterial>());
 

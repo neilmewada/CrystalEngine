@@ -41,6 +41,9 @@ namespace CE
 
         virtual JPH::Shape* CreateJoltShape() const = 0;
 
+        FIELD()
+        Ref<PhysicsMaterial> physicsMaterial;
+
     };
 
     // - Box Shape -

@@ -23,7 +23,8 @@ namespace CE
 
     JPH::Shape* BoxShape::CreateJoltShape() const
     {
-        return new JPH::BoxShape(JPH::Vec3(settings.halfExtents.x, settings.halfExtents.y, settings.halfExtents.z));
+        JPH::PhysicsMaterial* mat = physicsMaterial.IsValid() ? new JPH::PhysicsMaterialImpl(physicsMaterial) : nullptr;
+        return new JPH::BoxShape(JPH::Vec3(settings.halfExtents.x, settings.halfExtents.y, settings.halfExtents.z), JPH::cDefaultConvexRadius, mat);
     }
 
     void BoxShape::OnBeginDestroy()
@@ -47,7 +48,8 @@ namespace CE
 
     JPH::Shape* SphereShape::CreateJoltShape() const
     {
-		return new JPH::SphereShape(settings.radius);
+        JPH::PhysicsMaterial* mat = physicsMaterial.IsValid() ? new JPH::PhysicsMaterialImpl(physicsMaterial) : nullptr;
+		return new JPH::SphereShape(settings.radius, mat);
     }
 
     void SphereShape::OnBeginDestroy()
@@ -71,7 +73,8 @@ namespace CE
 
     JPH::Shape* CapsuleShape::CreateJoltShape() const
     {
-		return new JPH::CapsuleShape(settings.halfHeight, settings.radius);
+        JPH::PhysicsMaterial* mat = physicsMaterial.IsValid() ? new JPH::PhysicsMaterialImpl(physicsMaterial) : nullptr;
+		return new JPH::CapsuleShape(settings.halfHeight, settings.radius, mat);
     }
 
     void CapsuleShape::OnBeginDestroy()
@@ -96,9 +99,8 @@ namespace CE
 
     JPH::Shape* CylinderShape::CreateJoltShape() const
     {
-        JPH::PhysicsMaterial* physicsMaterial = new JPH::PhysicsMaterial();
-
-        return new JPH::CylinderShape(settings.halfHeight, settings.radius, JPH::cDefaultConvexRadius);
+        JPH::PhysicsMaterial* mat = physicsMaterial.IsValid() ? new JPH::PhysicsMaterialImpl(physicsMaterial) : nullptr;
+    	return new JPH::CylinderShape(settings.halfHeight, settings.radius, JPH::cDefaultConvexRadius, mat);
     }
 
     void CylinderShape::OnBeginDestroy()
@@ -131,6 +133,7 @@ namespace CE
                 Vec3 pos = settings.shapePositions[i];
                 Quat rot = settings.shapeRotations[i];
                 Vec3 scale = settings.shapeScales[i];
+                physicsShape->physicsMaterial = physicsMaterial;
 
                 JPH::Ref<JPH::Shape> joltShape = physicsShape->CreateJoltShape();
                 JPH::Shape::ShapeResult result = joltShape->ScaleShape(JPH::Vec3Arg(scale.x, scale.y, scale.z));
