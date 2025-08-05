@@ -35,4 +35,5 @@ namespace CE::Editor
 	{
 		return Color(1.0f, 0.9f, 0.3f, 1.0f);
 	}
+
 } // namespace CE::Editor

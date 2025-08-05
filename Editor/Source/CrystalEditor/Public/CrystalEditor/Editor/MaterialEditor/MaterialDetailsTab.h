@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS()
-    class CRYSTALEDITOR_API MaterialDetailsTab : public EditorMinorDockWindow
+    class CRYSTALEDITOR_API MaterialDetailsTab : public EditorDockWindow
     {
-        CE_CLASS(MaterialDetailsTab, EditorMinorDockWindow)
+        CE_CLASS(MaterialDetailsTab, EditorDockWindow)
     protected:
 
         MaterialDetailsTab();

@@ -12,6 +12,8 @@ namespace CE::Editor
     {
 	    Super::Construct();
 
+        ConstructMajorDockWindow();
+
         history = CreateObject<EditorHistory>(this, "EditorHistory");
 
         history->onTargetModified.Bind([this]

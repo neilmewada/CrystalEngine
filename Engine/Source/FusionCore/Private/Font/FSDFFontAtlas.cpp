@@ -45,6 +45,10 @@ namespace CE
 
         atlasImageLayers.Add(atlas);
 
+        Array<String> pages = GetPages();
+        pages.Add(String::Format("Page {}", pages.GetSize()));
+        SetPages(pages);
+
         RHI::RenderTargetLayout rtLayout{};
         rtLayout.attachmentLayouts.Add({
             .attachmentId = "ColorOutput",
@@ -407,6 +411,10 @@ namespace CE
                 atlasMip->atlasSize = (u32)atlasSize;
 
                 atlasImageLayers.Add(atlasMip);
+
+                Array<String> pages = GetPages();
+                pages.Add(String::Format("Page {}", pages.GetSize()));
+                SetPages(pages);
 
                 foundEmptySpot = atlasMip->TryInsertGlyphRect(Vec2i(width + glyphPadding, height + glyphPadding), padding, posX, posY);
             }

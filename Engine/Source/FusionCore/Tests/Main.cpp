@@ -262,7 +262,7 @@ static void DoRectPacking(FusionRenderer2* renderer)
 			});
 
 		renderer->SetPen(FPen(Color::White()));
-		renderer->DrawText(String::Format("Area: {}", root->usedArea), Vec2(100, 100));
+		renderer->DrawSDFText(String::Format("Area: {}", root->usedArea), Vec2(100, 100));
 	}
 	renderer->PopChildCoordinateSpace();
 }

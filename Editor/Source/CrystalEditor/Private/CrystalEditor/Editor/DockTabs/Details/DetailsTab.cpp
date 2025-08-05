@@ -12,6 +12,8 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        ConstructMinorDockWindow();
+
         (*this)
 		.Title("Details")
 		.Child(

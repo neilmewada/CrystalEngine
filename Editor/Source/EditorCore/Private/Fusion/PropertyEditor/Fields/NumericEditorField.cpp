@@ -87,7 +87,7 @@ namespace CE::Editor
 
                 event->Consume(this);
             }
-            else if (event->type == FEventType::MousePress)
+            else if (event->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left)
             {
                 event->Consume(this);
 
@@ -113,7 +113,7 @@ namespace CE::Editor
         {
             FDragEvent* drag = static_cast<FDragEvent*>(event);
 
-	        if (event->type == FEventType::DragBegin)
+	        if (event->type == FEventType::DragBegin && drag->buttons == MouseButtonMask::Left)
             {
                 if (!input->IsEditing())
                 {
@@ -139,7 +139,7 @@ namespace CE::Editor
                     drag->Consume(this);
                 }
             }
-            else if (event->type == FEventType::DragMove)
+            else if (event->type == FEventType::DragMove && drag->buttons == MouseButtonMask::Left)
             {
                 if (isDragging)
                 {

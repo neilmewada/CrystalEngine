@@ -589,7 +589,7 @@ namespace CE
 					dragEvent.sender = draggedWidget.Get();
 					dragEvent.draggedWidget = draggedWidget.Get();
 
-					if (dragEvent.sender->GetContext() != nativeContext)
+					if (dragEvent.sender->GetContext() != nativeContext && dragEvent.sender->GetContext().IsValid())
 					{
 						dragEvent.mousePosition = dragEvent.sender->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
 						dragEvent.prevMousePosition = dragEvent.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);

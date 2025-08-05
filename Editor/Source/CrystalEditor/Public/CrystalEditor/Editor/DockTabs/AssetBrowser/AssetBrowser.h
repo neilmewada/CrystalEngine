@@ -9,9 +9,9 @@ namespace CE::Editor
 
 
     CLASS(Prefs = Editor)
-    class CRYSTALEDITOR_API AssetBrowser : public EditorMinorDockWindow, public IAssetRegistryListener, public IThumbnailSystemListener
+    class CRYSTALEDITOR_API AssetBrowser : public EditorDockWindow, public IAssetRegistryListener, public IThumbnailSystemListener
     {
-        CE_CLASS(AssetBrowser, EditorMinorDockWindow)
+        CE_CLASS(AssetBrowser, EditorDockWindow)
     protected:
 
         AssetBrowser();

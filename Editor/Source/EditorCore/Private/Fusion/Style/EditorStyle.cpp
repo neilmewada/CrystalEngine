@@ -427,7 +427,7 @@ namespace CE::Editor
 			Add(editorMajorDockWindow);
 		}
 
-		GetDefaultWidget<EditorMajorDockWindow>()
+		GetDefaultWidget<EditorDockWindow>()
 			.Style(editorMajorDockWindow->GetName());
 
 		if (!editorMinorDockWindow)
@@ -437,8 +437,8 @@ namespace CE::Editor
 			Add(editorMinorDockWindow);
 		}
 
-		GetDefaultWidget<EditorMinorDockWindow>()
-			.Style(editorMinorDockWindow->GetName());
+		//GetDefaultWidget<EditorDockWindow>()
+		//	.Style(editorMinorDockWindow->GetName());
 
 		if (!editorToolBar)
 		{

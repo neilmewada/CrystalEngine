@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS()
-    class CRYSTALEDITOR_API EditorViewportTab : public EditorMinorDockWindow
+    class CRYSTALEDITOR_API EditorViewportTab : public EditorDockWindow
     {
-        CE_CLASS(EditorViewportTab, EditorMinorDockWindow)
+        CE_CLASS(EditorViewportTab, EditorDockWindow)
     public:
 
         // - Public API -

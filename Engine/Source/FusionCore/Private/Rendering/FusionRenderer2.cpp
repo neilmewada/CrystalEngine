@@ -2356,7 +2356,7 @@ namespace CE
 
         u32 color;
         FDrawType drawType = DRAW_Geometry;
-        bool usesTextureSrgOverride = false;
+        bool requiresNewDrawCmd = false;
 
         if (currentBrush.GetBrushStyle() == FBrushStyle::Image && minMaxPos != nullptr)
         {
@@ -2403,10 +2403,35 @@ namespace CE
                     int layerIndex = -1;
                     if (String::TryParse(split[1], layerIndex) && layerIndex >= 0)
                     {
-                        FFontAtlas* fontAtlas = FusionApplication::Get()->GetFontManager()->FindFont(fontName);
-                        if (fontAtlas)
+	                    if (FFontAtlas* fontAtlas = FusionApplication::Get()->GetFontManager()->FindFont(fontName))
                         {
                             image = { .layerIndex = layerIndex, .uvMin = Vec2(0, 0), .uvMax = Vec2(1, 1), .width = fontAtlas->GetAtlasSize(), .height = fontAtlas->GetAtlasSize() };
+                        }
+                    }
+                }
+            }
+
+            if (!image.IsValid() && imageName.StartsWith(FSDFFontAtlas::ImageNamePrefix))
+            {
+                drawType = DRAW_FontAtlas;
+                // Example: __FontAtlas_Roboto_0
+                imageName.Remove(0, strlen(FSDFFontAtlas::ImageNamePrefix));
+                Array<String> split = imageName.Split('_');
+                if (split.GetSize() >= 2)
+                {
+                    String fontName = split[0];
+                    int layerIndex = -1;
+                    if (String::TryParse(split[1], layerIndex) && layerIndex >= 0)
+                    {
+                        if (Ref<FSDFFontAtlas> fontAtlas = FusionApplication::Get()->GetFontManager()->FindSDFFont(fontName))
+                        {
+                            AddDrawCmd();
+
+                            drawCmdList.Last().fontSrg = fontAtlas->GetFontSrg2();
+
+                            image = { .layerIndex = layerIndex, .uvMin = Vec2(0, 0), .uvMax = Vec2(1, 1), .width = fontAtlas->GetAtlasSize(), .height = fontAtlas->GetAtlasSize() };
+
+                            requiresNewDrawCmd = true;
                         }
                     }
                 }
@@ -2429,7 +2454,7 @@ namespace CE
 					image.uvMin = Vec2(0, 0);
 					image.uvMax = Vec2(1, 1);
 
-                    usesTextureSrgOverride = true;
+                    requiresNewDrawCmd = true;
                 }
             }
 
@@ -2754,7 +2779,7 @@ namespace CE
             drawCmdList.Last().numIndices += indexCount;
         }
 
-        if (usesTextureSrgOverride)
+        if (requiresNewDrawCmd)
         {
             AddDrawCmd();
         }

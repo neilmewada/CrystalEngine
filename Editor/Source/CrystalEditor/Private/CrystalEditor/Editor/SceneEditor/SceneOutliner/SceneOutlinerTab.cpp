@@ -12,6 +12,8 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        ConstructMinorDockWindow();
+
         CE::Scene* scene = gEngine->GetActiveScene();
 
         treeViewModel = CreateObject<SceneTreeViewModel>(this, "TreeViewModel");

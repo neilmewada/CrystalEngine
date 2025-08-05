@@ -12,6 +12,8 @@ namespace CE::Editor
     {
 	    Super::Construct();
 
+        AllowedDockspaces(FDockspaceFilter().WithDockTypeMask(FDockTypeMask::All));
+
         Title("DataAsset Editor");
 
         ToolBarEnabled(true);

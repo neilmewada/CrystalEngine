@@ -15,6 +15,8 @@ namespace CE
         CE_CLASS(FSDFFontAtlas, Object)
     protected:
 
+        static constexpr const char* ImageNamePrefix = "__SDFFontAtlas_";
+
         FSDFFontAtlas();
         
     public:
@@ -33,6 +35,10 @@ namespace CE
         RHI::ShaderResourceGroup* GetFontSrg2() const { return fontSrg2; }
 
         u32 GetAtlasSize() const;
+
+        // - Model -
+
+        MODEL_PROPERTY(Array<String>, Pages);
 
 	private:
 

@@ -12,6 +12,8 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        ConstructMinorDockWindow();
+
         if (Ref<ThumbnailSystem> thumbnailSystem = ThumbnailSystem::Get())
         {
             thumbnailSystem->AddThumbnailListener(this);

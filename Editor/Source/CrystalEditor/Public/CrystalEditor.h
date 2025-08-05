@@ -33,6 +33,7 @@
 // - Debug -
 #include "CrystalEditor/Windows/Debug/FusionImageAtlasWindow.h"
 #include "CrystalEditor/Windows/Debug/FusionFontAtlasWindow.h"
+#include "CrystalEditor/Windows/Debug/FusionSDFFontAtlasWindow.h"
 
 // - Popups
 #include "CrystalEditor/Popups/AssetImportProgressPopup.h"
