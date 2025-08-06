@@ -11,6 +11,8 @@ namespace CE::Editor
 
     void MaterialEditor::Construct()
     {
+        ZoneScoped;
+
         Super::Construct();
 
         Title("Material");

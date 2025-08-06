@@ -38,6 +38,8 @@ namespace CE
 
     void FMenuItem::Construct()
     {
+        ZoneScoped;
+
 	    Super::Construct();
 
         Child(

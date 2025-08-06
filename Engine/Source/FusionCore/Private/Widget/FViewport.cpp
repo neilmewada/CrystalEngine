@@ -100,6 +100,11 @@ namespace CE
     {
         ZoneScoped;
 
+        if (GetContext() == nullptr)
+        {
+	        return;
+        }
+
         if (currentSize.x <= 0 || currentSize.y <= 0)
         {
             currentSize = Vec2i(512, 512);
@@ -194,5 +199,11 @@ namespace CE
         }
     }
 
+    void FViewport::OnSceneChanged()
+    {
+	    Super::OnSceneChanged();
+
+        RecreateFrameBuffer();
+    }
 }
 

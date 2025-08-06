@@ -10,6 +10,8 @@ namespace CE::Editor
 
     void EditorBase::Construct()
     {
+        ZoneScoped;
+
 	    Super::Construct();
 
         ConstructMajorDockWindow();
@@ -142,6 +144,8 @@ namespace CE::Editor
 
     void EditorBase::SaveChanges()
     {
+        ZoneScoped;
+
         if (!bundle)
             return;
 

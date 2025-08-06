@@ -24,6 +24,9 @@ namespace WidgetTests
 
 	private:
 
+		Ref<SceneTreeView> treeView;
+		Ref<SceneTreeViewModel> treeModel;
+
 	public:
 
 		FUSION_PROPERTY(bool, Flipped);

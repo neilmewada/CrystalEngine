@@ -3,6 +3,7 @@
 namespace CE
 {
     // TODO: Use Actor's UUID instead of a raw pointer to the actor in FModelIndex::data
+    // Raw pointer to actor can create crashes if the actor was destroyed!
 
     SceneTreeViewModel::SceneTreeViewModel()
     {
@@ -33,6 +34,33 @@ namespace CE
 
         return CreateIndex(row, column, parentActor->GetChild(row));
 
+    }
+
+    FModelIndex SceneTreeViewModel::GetParent(const FModelIndex& index)
+    {
+        Actor* actor = index.GetData().GetValue<Actor*>();
+        if (!actor)
+            return {};
+
+        if (Actor* parentActor = actor->GetParentActor())
+        {
+            int parentActorIndex = -1;
+            if (Actor* parentsParentActor = parentActor->GetParentActor())
+            {
+                parentActorIndex = parentsParentActor->GetIndexOfActor(parentActor);
+            }
+            else
+            {
+                parentActorIndex = scene->GetIndexOfActor(parentActor);
+            }
+
+            if (parentActorIndex < 0)
+                return {};
+
+            return CreateIndex(parentActorIndex, 0, parentActor);
+        }
+
+        return {};
     }
 
     FModelIndex SceneTreeViewModel::FindIndex(Actor* actor)

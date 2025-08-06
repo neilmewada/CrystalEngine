@@ -43,6 +43,10 @@ namespace CE
                     FAssignNew(FScrollBox, scrollBox)
                     .VerticalScroll(true)
                     .HorizontalScroll(false)
+                    .OnBackgroundClicked([this](FScrollBox*)
+                    {
+                        ClearSelection();
+                    })
                     .Child(
                         FAssignNew(FTreeViewContainer, container)
                         .TreeView(this)
@@ -74,6 +78,23 @@ namespace CE
         }
     }
 
+    void FTreeView::OnRowRightClicked(FTreeViewRow& row, Vec2 mousePos)
+    {
+        SelectRow(row.GetIndex(), false);
+
+        if (!m_RowContextMenuDelegate.IsBound())
+            return;
+
+        if (Ref<FFusionContext> context = GetContext())
+        {
+            Ref<FMenuPopup> popup = &m_RowContextMenuDelegate.Invoke(row);
+            if (popup.IsNull())
+                return;
+
+            context->PushLocalPopup(popup.Get(), mousePos);
+        }
+    }
+
     FTreeView::Self& FTreeView::Header(FTreeViewHeader& header)
     {
         this->header = &header;
@@ -102,5 +123,52 @@ namespace CE
         ApplyStyle();
     }
 
+    void FTreeView::DeselectRow(const FModelIndex& index)
+    {
+        m_SelectionModel->Deselect(index);
+
+        ApplyStyle();
+    }
+
+    void FTreeView::ClearSelection()
+    {
+        m_SelectionModel->ClearSelection();
+
+        ApplyStyle();
+    }
+
+    void FTreeView::SelectRow(const FModelIndex& index, bool isCtrlKey)
+    {
+        if (m_SelectionModel->selectionMode == FSelectionMode::None)
+        {
+            ClearSelection();
+            return;
+        }
+
+        if (m_SelectionModel->selectionMode == FSelectionMode::Single)
+        {
+            SelectRow(index);
+            return;
+        }
+
+        // Multi-selection mode...
+
+        if (!isCtrlKey)
+        {
+            ClearSelection();
+            SelectRow(index);
+        }
+        else
+        {
+	        if (m_SelectionModel->IsSelected(index))
+	        {
+                DeselectRow(index);
+	        }
+            else
+            {
+                SelectRow(index);
+            }
+        }
+    }
 }
 

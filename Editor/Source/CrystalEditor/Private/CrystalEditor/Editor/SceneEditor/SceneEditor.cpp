@@ -24,6 +24,8 @@ namespace CE::Editor
 
     bool SceneEditor::OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle)
     {
+        ZoneScoped;
+
     	if (!targetObject || !bundle)
             return false;
         if (!CanEdit(targetObject))
@@ -44,6 +46,8 @@ namespace CE::Editor
 
     bool SceneEditor::OpenScene(Ref<CE::Scene> scene)
     {
+        ZoneScoped;
+
         if (!scene)
             return false;
         if (!scene->GetRpiScene())
@@ -52,7 +56,6 @@ namespace CE::Editor
         if (targetScene.IsValid() && targetScene->GetOuter() == this)
         {
             targetScene->BeginDestroy();
-            targetScene = nullptr;
         }
 
         targetScene = scene;
@@ -73,6 +76,8 @@ namespace CE::Editor
 
     void SceneEditor::LoadSandboxScene()
     {
+        ZoneScoped;
+
         CE::Scene* scene = CreateObject<CE::Scene>(this, "SandboxScene");
         sandboxScene = scene;
 
@@ -305,6 +310,8 @@ namespace CE::Editor
 
     void SceneEditor::Construct()
     {
+        ZoneScoped;
+
         Super::Construct();
 
         Title("Scene Editor");
@@ -391,7 +398,7 @@ namespace CE::Editor
 
     void SceneEditor::ConstructDockspaces()
     {
-		// TODO: Implement dockspaces properly
+        ZoneScoped;
 
         minorDockspace->AddDockWindow(
             FAssignNew(EditorViewportTab, viewportTab)
@@ -425,6 +432,8 @@ namespace CE::Editor
 
     void SceneEditor::ConstructMenuBar()
     {
+        ZoneScoped;
+
         Super::ConstructMenuBar();
 
         (*menuBar)
@@ -583,6 +592,8 @@ namespace CE::Editor
 
     void SceneEditor::ConstructToolBar()
     {
+        ZoneScoped;
+
         Super::ConstructToolBar();
 
         (*toolBar)
