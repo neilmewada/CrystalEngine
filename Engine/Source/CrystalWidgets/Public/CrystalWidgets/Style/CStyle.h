@@ -166,7 +166,7 @@ namespace CE::Widgets
 	{
 		CTextDecorationLine linePosition = CTextDecorationLine::None;
 		CTextDecorationStyle lineStyle = CTextDecorationStyle::Solid;
-		Color lineColor = Color::Clear();
+		Color lineColor = Colors::Clear;
 		f32 thickness = 0;
 	};
 
@@ -516,14 +516,14 @@ namespace CE::Widgets
 		Color GetForegroundColor() const
 		{
 			if (!properties.KeyExists(CStylePropertyType::Foreground))
-				return Color::White();
+				return Colors::White;
 			return properties.Get(CStylePropertyType::Foreground).color;
 		}
 
 		Color GetBackgroundColor() const
 		{
 			if (!properties.KeyExists(CStylePropertyType::Background))
-				return Color::Clear();
+				return Colors::Clear;
 			return properties.Get(CStylePropertyType::Background).color;
 		}
 

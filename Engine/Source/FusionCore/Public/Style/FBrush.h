@@ -110,9 +110,9 @@ namespace CE
 
         FBrush(const Color& fillColor, FBrushStyle brushStyle = FBrushStyle::SolidFill);
 
-        FBrush(const Name& imageName, const Color& tintColor = Color::White());
+        FBrush(const Name& imageName, const Color& tintColor = Colors::White);
 
-        FBrush(const FGradient& gradient, const Color& tintColor = Color::White());
+        FBrush(const FGradient& gradient, const Color& tintColor = Colors::White);
 
         ~FBrush();
 

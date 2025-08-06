@@ -651,6 +651,64 @@ bool Vec4Equals(const Vec4& lhs, const Vec4& rhs)
 				Math::Abs(lhs.w - rhs.w) <= epsilon;
 }
 
+TEST(Containers, Math)
+{
+	TEST_BEGIN;
+
+	// 1. Vector
+	{
+		constexpr Vec4 vec = Vec4(1, 2, 3, 4);
+		static_assert(vec.x == 1);
+		static_assert(vec.y == 2);
+		static_assert(vec.z == 3);
+		static_assert(vec.w == 4);
+
+		constexpr Vec4 copy = vec;
+		static_assert(copy.x == 1);
+		static_assert(copy.y == 2);
+		static_assert(copy.z == 3);
+		static_assert(copy.w == 4);
+
+		constexpr Vec4 addition = Vec4(1, 2, 3, 4) + Vec4(1, 2, 3, 4);
+		static_assert(addition.x == 1*2);
+		static_assert(addition.y == 2*2);
+		static_assert(addition.z == 3*2);
+		static_assert(addition.w == 4*2);
+
+		constexpr float dot = Vec4::Dot(Vec4(1, 1, 1, 1), Vec4(1, 1, 1, 1));
+		static_assert(dot == 4);
+	}
+
+	// 2. Color
+	{
+		constexpr Color c = Color(0, 1, 0, 1);
+		static_assert(c.r == 0);
+		static_assert(c.g == 1);
+		static_assert(c.b == 0);
+		static_assert(c.a == 1);
+
+		constexpr Color copy = c;
+		static_assert(copy.r == 0);
+		static_assert(copy.g == 1);
+		static_assert(copy.b == 0);
+		static_assert(copy.a == 1);
+
+		constexpr Color c2 = Color::RGBA(0, 255, 255, 255);
+		static_assert(c2.r == 0);
+		static_assert(c2.g == 1);
+		static_assert(c2.b == 1);
+		static_assert(c2.a == 1);
+
+		constexpr Color clear = Colors::Clear;
+		static_assert(clear.r == 0);
+		static_assert(clear.g == 0);
+		static_assert(clear.b == 0);
+		static_assert(clear.a == 0);
+	}
+
+	TEST_END;
+}
+
 TEST(Containers, Matrix)
 {
     TEST_BEGIN;

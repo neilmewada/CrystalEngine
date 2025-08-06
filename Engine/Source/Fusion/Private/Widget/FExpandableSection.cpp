@@ -28,7 +28,7 @@ namespace CE
 
                     m_OnExpansionChanged.Broadcast(this);
                 })
-                .Background(Color::Green())
+                .Background(Colors::Green)
                 .ClipChildren(true)
                 .Child(
                     FNew(FHorizontalStack)
@@ -58,14 +58,14 @@ namespace CE
                 .Style(""),
 
                 FAssignNew(FStyledWidget, content)
-                .Background(Color::Red())
+                .Background(Colors::Red)
                 .Enabled(m_Expanded)
             )
         );
 
         header->ClearStyle();
-        header->Background(Color::Blue());
-        header->Border(Color::Clear(), 0);
+        header->Background(Colors::Blue);
+        header->Border(Colors::Clear, 0);
         header->CornerRadius(0);
     }
 

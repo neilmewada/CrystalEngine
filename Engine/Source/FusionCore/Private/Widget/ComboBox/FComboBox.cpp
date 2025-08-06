@@ -136,6 +136,7 @@ namespace CE
     void FComboBox::AddItem(FComboBoxItem& item)
     {
         item.comboBox = this;
+        item.FontSize(FontSize());
 
         if (m_ItemStyle)
         {
@@ -148,6 +149,7 @@ namespace CE
     void FComboBox::AddItem(const String& text)
     {
         FComboBoxItem& item = FNewOwned(FComboBoxItem, popupContent);
+
         AddItem(item);
         item.Text(text);
     }

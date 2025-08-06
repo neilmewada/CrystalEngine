@@ -35,7 +35,7 @@ namespace CE
         painter->SetBrush(FBrush());
 
         {
-            FPen solid = FPen(Color::White(), 1.5f);
+            FPen solid = FPen(Colors::White, 1.5f);
             painter->SetPen(solid);
 
             Vec2 pos = m_NormalizedColorPosition * GetComputedSize() - Vec2(1, 1) * CircleRadius;

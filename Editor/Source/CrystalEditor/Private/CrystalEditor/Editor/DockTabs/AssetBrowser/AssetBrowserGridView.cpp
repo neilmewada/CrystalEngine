@@ -3,6 +3,7 @@
 namespace CE::Editor
 {
     static constexpr f32 MinContextMenuWidth = 200;
+    static constexpr Vec4 ContextMenuPadding = Vec4(2, 10, 2, 10);
 
     AssetBrowserGridView::AssetBrowserGridView()
     {
@@ -13,7 +14,7 @@ namespace CE::Editor
     {
         Super::Construct();
 
-
+        contextMenu->ContentPadding(ContextMenuPadding);
     }
 
     void AssetBrowserGridView::DeselectAll()
@@ -195,7 +196,9 @@ namespace CE::Editor
         if (!currentPath.GetString().StartsWith("/Game/Assets"))
             return;
 
-        Ref<EditorMenuPopup> contextMenu = BuildNoSelectionContextMenu();
+        contextMenu->ClosePopup();
+
+        BuildNoSelectionContextMenu();
 
         GetContext()->PushLocalPopup(contextMenu.Get(), globalMousePos, Vec2());
     }
@@ -205,6 +208,8 @@ namespace CE::Editor
         Array<AssetBrowserItem*> selectedItems = GetSelectedItems();
         if (selectedItems.IsEmpty())
             return;
+
+        contextMenu->ClosePopup();
 
         contextMenu->QueueDestroyAllItems();
 
@@ -251,7 +256,6 @@ namespace CE::Editor
 
     Ref<EditorMenuPopup> AssetBrowserGridView::BuildNoSelectionContextMenu()
     {
-        //Ref<EditorMenuPopup> contextMenu = CreateObject<EditorMenuPopup>(this, "ContextMenu");
         contextMenu->QueueDestroyAllItems();
 
         contextMenu->AutoClose(true);
@@ -284,7 +288,18 @@ namespace CE::Editor
             }),
 
             FNew(FMenuItemSeparator)
-            .Title("BASIC ASSETS"),
+            .Title("BASIC"),
+
+            NewMenuItem()
+            .Text("Scene")
+            .Icon(FBrush("/Editor/Assets/Icons/Scene"))
+            .OnClick([this]
+            {
+                if (auto owner = m_Owner.Lock())
+                {
+                    owner->CreateNewAsset<CE::Scene>();
+                }
+            }),
 
             NewMenuItem()
             .Text("Material")
@@ -298,7 +313,7 @@ namespace CE::Editor
             }),
 
             FNew(FMenuItemSeparator)
-            .Title("ADVANCED ASSETS"),
+            .Title("ADVANCED"),
 
             NewMenuItem()
             .Text("Physics")
@@ -316,6 +331,7 @@ namespace CE::Editor
                         }
                     })
                 )
+                .ContentPadding(ContextMenuPadding)
                 .MinWidth(MinContextMenuWidth)
                 .As<EditorMenuPopup>()
             ),
@@ -419,12 +435,14 @@ namespace CE::Editor
 
     FMenuItem& AssetBrowserGridView::NewMenuItem()
     {
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         return 
         FNew(FMenuItem)
         //.Text("New Folder")
         .IconEnabled(true)
         //.Icon(FBrush("/Editor/Assets/Icons/NewFolder"))
-        .FontSize(9)
+        .FontSize(fontSize)
         .ContentPadding(Vec4(5, -2, 5, -2));
     }
 

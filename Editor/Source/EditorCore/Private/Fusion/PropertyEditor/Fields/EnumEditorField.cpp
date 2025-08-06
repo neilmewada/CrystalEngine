@@ -12,10 +12,12 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         Child(
             FAssignNew(FComboBox, comboBox)
             .OnSelectionChanged(FUNCTION_BINDING(this, OnSelectionChanged))
-            .FontSize(10)
+            .FontSize(fontSize)
             .HAlign(HAlign::Left)
             .Width(100)
         );
@@ -40,6 +42,8 @@ namespace CE::Editor
         if (!IsBound())
             return;
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         Ref<Object> target = targets[0].Lock();
         if (target.IsNull())
             return;
@@ -55,6 +59,8 @@ namespace CE::Editor
             return;
 
         auto enumType = static_cast<EnumType*>(field->GetDeclarationType());
+
+        comboBox->FontSize(fontSize);
 
         if (comboBox->Items().IsEmpty())
         {

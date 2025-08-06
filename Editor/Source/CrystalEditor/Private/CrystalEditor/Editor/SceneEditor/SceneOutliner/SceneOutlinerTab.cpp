@@ -16,29 +16,30 @@ namespace CE::Editor
 
         CE::Scene* scene = gEngine->GetActiveScene();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         treeViewModel = CreateObject<SceneTreeViewModel>(this, "TreeViewModel");
         
         (*this)
-			.Title("Scene Outliner")
-			.Child(
-                FAssignNew(SceneTreeView, treeView)
-                .Header(
-                    FNew(FTreeViewHeader)
-                    .Columns(
-                        FNew(FTreeViewHeaderColumn)
-                        .Title("Name")
-                        .FillRatio(0.5f),
+		.Title("Scene Outliner")
+		.Child(
+            FAssignNew(SceneTreeView, treeView)
+            .Header(
+                FNew(FTreeViewHeader)
+                .Columns(
+                    FNew(FTreeViewHeaderColumn)
+                    .Title("Name")
+                    .FillRatio(0.5f),
 
-                        FNew(FTreeViewHeaderColumn)
-                        .Title("Type")
-                        .FillRatio(0.5f)
-                    )
+                    FNew(FTreeViewHeaderColumn)
+                    .Title("Type")
+                    .FillRatio(0.5f)
                 )
-                .RowHeight(25)
-                .HAlign(HAlign::Fill)
-                .VAlign(VAlign::Fill)
             )
-    	;
+            .RowHeight(25)
+            .HAlign(HAlign::Fill)
+            .VAlign(VAlign::Fill)
+        );
 
         if (scene)
         {

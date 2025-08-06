@@ -67,10 +67,12 @@ namespace CE::Editor
 
     	settingsClasses = Settings::GetAllSettingsClasses();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         left->AddChild(
             FNew(FTextButton)
             .Text("All Settings")
-            .FontSize(11)
+            .FontSize(fontSize + 1)
             .Cursor(SystemCursor::Hand)
             .OnClicked(FUNCTION_BINDING(this, ShowAllSettings))
             .ClipChildren(true)
@@ -86,7 +88,7 @@ namespace CE::Editor
             left->AddChild(
                 FNew(FTextButton)
                 .Text(clazz->GetDisplayName())
-                .FontSize(11)
+                .FontSize(fontSize + 1)
                 .Cursor(SystemCursor::Hand)
                 .OnClicked([this, index]
                 {

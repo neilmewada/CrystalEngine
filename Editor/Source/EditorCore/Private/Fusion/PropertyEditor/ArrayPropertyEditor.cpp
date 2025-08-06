@@ -60,13 +60,15 @@ namespace CE::Editor
     {
         right->DestroyAllChildren();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         auto printError = [&](const String& msg)
             {
                 right->AddChild(
                     FNew(FLabel)
-                    .FontSize(10)
+                    .FontSize(fontSize)
                     .Text("Error: " + msg)
-                    .Foreground(Color::Red())
+                    .Foreground(Colors::Red)
                 );
             };
 
@@ -159,7 +161,8 @@ namespace CE::Editor
         (*right)
         .Gap(10)
         (
-            FAssignNew(FLabel, countLabel),
+            FAssignNew(FLabel, countLabel)
+            .FontSize(fontSize),
 
             FNew(FImageButton)
             .Image(addIcon)

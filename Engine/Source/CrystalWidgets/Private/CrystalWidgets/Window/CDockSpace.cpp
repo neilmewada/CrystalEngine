@@ -240,7 +240,7 @@ namespace CE::Widgets
         Color bgColor = computedStyle.properties[CStylePropertyType::Background].color;
 
         CPen pen = CPen(Color::RGBA8(60, 60, 60));
-        CBrush brush = CBrush(Color::Clear());
+        CBrush brush = CBrush(Colors::Clear);
         CFont font = CFont("Roboto", 15, false);
 
         if (GetDockType() == CDockType::Major) // Major dock space
@@ -307,7 +307,7 @@ namespace CE::Widgets
                     Rect rect = Rect::FromSize(posX, 2.0f, padding.x * 2 + textSize.width, padding.y * 2 + textSize.height);
                     menuItemRects.Add(rect);
 
-                    Color textColor = Color::White();
+                    Color textColor = Colors::White;
                     pen = CPen(textColor);
                     painter->SetPen(pen);
 

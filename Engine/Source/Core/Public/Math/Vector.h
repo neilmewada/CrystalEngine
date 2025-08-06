@@ -33,10 +33,10 @@ namespace CE
     {
     public:
 
-        TVector2() : x(0), y(0)
+        constexpr TVector2() : x(0), y(0)
         {}
 
-        TVector2(T x, T y) : x(x), y(y)
+        constexpr TVector2(T x, T y) : x(x), y(y)
         {}
 
         TVector2(TVector3<T> vec3);
@@ -68,7 +68,7 @@ namespace CE
             });
 		}
 
-        Vec2 ToVec2() const
+        constexpr Vec2 ToVec2() const
 		{
             return Vec2(x, y);
 		}
@@ -78,104 +78,104 @@ namespace CE
             return TVector2<s32>((s32)x, (s32)y);
         }
 
-        inline TVector2 operator+(const TVector2& rhs) const
+        constexpr  TVector2 operator+(const TVector2& rhs) const
         {
             return TVector2(x + rhs.x, y + rhs.y);
         }
 
-        inline TVector2 operator-(const TVector2& rhs) const
+        constexpr  TVector2 operator-(const TVector2& rhs) const
         {
             return TVector2(x - rhs.x, y - rhs.y);
         }
 
-        inline TVector2 operator+() const
+        constexpr  TVector2 operator+() const
         {
             return *this;
         }
 
-        inline TVector2 operator-() const
+        constexpr  TVector2 operator-() const
         {
             return TVector2(-x, -y);
         }
 
-        inline TVector2 operator+=(const TVector2& rhs)
+        constexpr  TVector2 operator+=(const TVector2& rhs)
         {
             *this = *this + rhs;
             return *this;
         }
 
-        inline TVector2 operator-=(const TVector2& rhs)
+        constexpr  TVector2 operator-=(const TVector2& rhs)
         {
             *this = *this - rhs;
             return *this;
         }
 
-        inline bool operator==(const TVector2& rhs) const
+        constexpr  bool operator==(const TVector2& rhs) const
         {
             return Math::ApproxEquals(x, rhs.x) && Math::ApproxEquals(y, rhs.y);
         }
 
-        inline bool operator!=(const TVector2& rhs) const
+        constexpr  bool operator!=(const TVector2& rhs) const
         {
             return !operator==(rhs);
         }
 
-        inline TVector2 operator*(s32 value) const
+        constexpr  TVector2 operator*(s32 value) const
         {
             return TVector2(value * x, value * y);
         }
 
-        inline TVector2 operator*(u32 value) const
+        constexpr  TVector2 operator*(u32 value) const
         {
             return TVector2(value * x, value * y);
         }
 
-        inline TVector2 operator*(f32 value) const
+        constexpr  TVector2 operator*(f32 value) const
         {
             return TVector2(value * x, value * y);
         }
 
-        inline TVector2 operator*(TVector2 value) const
+        constexpr  TVector2 operator*(TVector2 value) const
         {
             return TVector2(value.x * x, value.y * y);
         }
 
-        inline TVector2 operator*=(s32 value)
+        constexpr  TVector2 operator*=(s32 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline TVector2 operator*=(u32 value)
+        constexpr  TVector2 operator*=(u32 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline TVector2 operator*=(f32 value)
+        constexpr  TVector2 operator*=(f32 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline TVector2 operator*=(TVector2 value)
+        constexpr  TVector2 operator*=(TVector2 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline TVector2 operator/(f32 value) const
+        constexpr  TVector2 operator/(f32 value) const
         {
             return TVector2(x / value, y / value);
         }
 
-        inline TVector2 operator/=(f32 value)
+        constexpr  TVector2 operator/=(f32 value)
         {
             *this = *this / value;
             return *this;
         }
 
-        inline f32 GetSqrMagnitude() const
+        constexpr  f32 GetSqrMagnitude() const
         {
             return x * x + y * y;
         }
@@ -195,7 +195,7 @@ namespace CE
             return Math::Max({x, y});
         }
 
-        static f32 SqrDistance(TVector2 a, TVector2 b)
+        constexpr static f32 SqrDistance(TVector2 a, TVector2 b)
 		{
             return (b - a).GetSqrMagnitude();
 		}
@@ -205,12 +205,12 @@ namespace CE
             return (b - a).GetMagnitude();
 		}
 
-        inline static T Dot(TVector2 a, TVector2 b)
+        constexpr static T Dot(TVector2 a, TVector2 b)
         {
             return a.x * b.x + a.y * b.y;
         }
 
-        inline f32 Dot(TVector2 b) const
+        constexpr f32 Dot(TVector2 b) const
         {
             return x * b.x + y * b.y;
         }
@@ -248,17 +248,17 @@ namespace CE
     {
     public:
 
-        TVector3() : x(0), y(0), z(0)
+        constexpr TVector3() : x(0), y(0), z(0)
         {}
 
-        TVector3(T x, T y) : x(x), y(y), z(0)
+        constexpr TVector3(T x, T y) : x(x), y(y), z(0)
         {}
 
-        TVector3(T x, T y, T z) : x(x), y(y), z(z)
+        constexpr TVector3(T x, T y, T z) : x(x), y(y), z(z)
         {}
 
-        TVector3(TVector2<T> vec2);
-        TVector3(TVector4<T> vec4);
+        constexpr TVector3(TVector2<T> vec2);
+        constexpr TVector3(TVector4<T> vec4);
 
         union {
             struct {
@@ -279,114 +279,114 @@ namespace CE
             return xyz[index];
         }
 
-        Vec3 ToVec3() const
+        constexpr Vec3 ToVec3() const
         {
             return Vec3(x, y, z);
         }
 
-        TVector3<s32> ToVec3i() const
+        constexpr TVector3<s32> ToVec3i() const
         {
             return TVector3<s32>((s32)x, (s32)y, (s32)z);
         }
 
-        inline TVector3 operator+(const TVector3& rhs) const
+        constexpr TVector3 operator+(const TVector3& rhs) const
         {
             return TVector3(x + rhs.x, y + rhs.y, z + rhs.z);
         }
 
-        inline TVector3 operator-(const TVector3& rhs) const
+        constexpr TVector3 operator-(const TVector3& rhs) const
         {
             return TVector3(x - rhs.x, y - rhs.y, z - rhs.z);
         }
 
-        inline TVector3 operator+() const
+        constexpr TVector3 operator+() const
         {
             return *this;
         }
 
-        inline TVector3 operator-() const
+        constexpr TVector3 operator-() const
         {
             return TVector3(-x, -y, -z);
         }
 
-        inline TVector3 operator+=(const TVector3& rhs)
+        constexpr TVector3 operator+=(const TVector3& rhs)
         {
             *this = *this + rhs;
             return *this;
         }
 
-        inline TVector3 operator-=(const TVector3& rhs)
+        constexpr TVector3 operator-=(const TVector3& rhs)
         {
             *this = *this - rhs;
             return *this;
         }
 
-        inline bool operator==(const TVector3& rhs) const
+        constexpr bool operator==(const TVector3& rhs) const
         {
             return Math::ApproxEquals(x, rhs.x) && Math::ApproxEquals(y, rhs.y) && Math::ApproxEquals(z, rhs.z);
         }
 
-        inline bool operator!=(const TVector3& rhs) const
+        constexpr bool operator!=(const TVector3& rhs) const
         {
             return !operator==(rhs);
         }
 
-        inline TVector3 operator*(s32 value) const
+        constexpr TVector3 operator*(s32 value) const
         {
             return TVector3(value * x, value * y, value * z);
         }
 
-        inline TVector3 operator*(u32 value) const
+        constexpr TVector3 operator*(u32 value) const
         {
             return TVector3(value * x, value * y, value * z);
         }
 
-        inline TVector3 operator*(f32 value) const
+        constexpr TVector3 operator*(f32 value) const
         {
             return TVector3(value * x, value * y, value * z);
         }
 
-        inline TVector3 operator*(const TVector3& value) const
+        constexpr TVector3 operator*(const TVector3& value) const
         {
             return TVector3(value.x * x, value.y * y, value.z * z);
         }
 
-        inline TVector3 operator*=(s32 value)
+        constexpr TVector3 operator*=(s32 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline TVector3 operator*=(u32 value)
+        constexpr TVector3 operator*=(u32 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline TVector3 operator*=(f32 value)
+        constexpr TVector3 operator*=(f32 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline TVector3 operator*=(const TVector3& value)
+        constexpr TVector3 operator*=(const TVector3& value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline TVector3 operator/(f32 value) const
+        constexpr TVector3 operator/(f32 value) const
         {
             return TVector3(x / value, y / value, z / value);
         }
 
-        inline TVector3 operator/=(f32 value)
+        constexpr TVector3 operator/=(f32 value)
         {
             *this = *this / value;
             return *this;
         }
 
-        inline f32 GetSqrMagnitude() const
+        constexpr f32 GetSqrMagnitude() const
         {
             return x * x + y * y + z * z;
         }
@@ -401,27 +401,27 @@ namespace CE
             return *this / GetMagnitude();
         }
 
-        f32 GetMax() const
+        constexpr f32 GetMax() const
         {
             return Math::Max({x, y, z});
         }
 
-        inline static T Dot(TVector3 a, TVector3 b)
+        constexpr static T Dot(TVector3 a, TVector3 b)
         {
             return a.x * b.x + a.y * b.y + a.z * b.z;
         }
 
-        inline f32 Dot(TVector3 b) const
+        constexpr f32 Dot(TVector3 b) const
         {
             return x * b.x + y * b.y + z * b.z;
         }
 
-        inline static TVector3 Cross(TVector3 a, TVector3 b)
+        constexpr static TVector3 Cross(TVector3 a, TVector3 b)
         {
             return TVector3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
         }
 
-        inline TVector3 Cross(TVector3 b) const
+        constexpr TVector3 Cross(TVector3 b) const
         {
             return TVector3(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x);
         }
@@ -438,7 +438,7 @@ namespace CE
             return SignedAngle(*this, b);
         }
 
-        static f32 SqrDistance(TVector3 a, TVector3 b)
+        constexpr static f32 SqrDistance(TVector3 a, TVector3 b)
         {
             return (b - a).GetSqrMagnitude();
         }
@@ -469,16 +469,16 @@ namespace CE
     {
     public:
 
-        TVector4() : x(0), y(0), z(0), w(0)
+        constexpr TVector4() : x(0), y(0), z(0), w(0)
         {}
 
-        TVector4(T x, T y) : x(x), y(y), z(0), w(0)
+        constexpr TVector4(T x, T y) : x(x), y(y), z(0), w(0)
         {}
 
-        TVector4(T x, T y, T z) : x(x), y(y), z(z), w(0)
+        constexpr TVector4(T x, T y, T z) : x(x), y(y), z(z), w(0)
         {}
 
-		TVector4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w)
+        constexpr TVector4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w)
 		{}
 
         TVector4(TVector2<T> vec2);
@@ -534,105 +534,105 @@ namespace CE
             return xyzw[index];
         }
 
-        inline TVector4 operator+(const TVector4& rhs) const
+        constexpr TVector4 operator+(const TVector4& rhs) const
         {
             return TVector4(x + rhs.x, y + rhs.y, z + rhs.z, w + rhs.w);
         }
 
-        inline TVector4 operator-(const TVector4& rhs) const
+        constexpr TVector4 operator-(const TVector4& rhs) const
         {
             return TVector4(x - rhs.x, y - rhs.y, z - rhs.z, w - rhs.w);
         }
 
-        inline TVector4 operator+() const
+        constexpr TVector4 operator+() const
         {
             return *this;
         }
 
-        inline TVector4 operator-() const
+        constexpr TVector4 operator-() const
         {
             return TVector4(-x, -y, -z, -w);
         }
 
-        inline TVector4 operator+=(const TVector4& rhs)
+        constexpr TVector4 operator+=(const TVector4& rhs)
         {
             *this = *this + rhs;
             return *this;
         }
 
-        inline TVector4 operator-=(const TVector4& rhs)
+        constexpr TVector4 operator-=(const TVector4& rhs)
         {
             *this = *this - rhs;
             return *this;
         }
 
-        inline bool operator==(const TVector4& rhs) const
+        constexpr bool operator==(const TVector4& rhs) const
         {
             return Math::ApproxEquals(x, rhs.x) && Math::ApproxEquals(y, rhs.y) && Math::ApproxEquals(z, rhs.z) &&
                 Math::ApproxEquals(w, rhs.w);
         }
 
-        inline bool operator!=(const TVector4& rhs) const
+        constexpr bool operator!=(const TVector4& rhs) const
         {
             return !operator==(rhs);
         }
 
-        inline TVector4 operator*(s32 value) const
+        constexpr TVector4 operator*(s32 value) const
         {
             return TVector4(value * x, value * y, value * z, value * w);
         }
 
-        inline TVector4 operator*(u32 value) const
+        constexpr TVector4 operator*(u32 value) const
         {
             return TVector4(value * x, value * y, value * z, value * w);
         }
 
-        inline TVector4 operator*(f32 value) const
+        constexpr TVector4 operator*(f32 value) const
         {
             return TVector4(value * x, value * y, value * z, value * w);
         }
 
-        inline TVector4 operator*(const TVector4& value) const
+        constexpr TVector4 operator*(const TVector4& value) const
         {
             return TVector4(value.x * x, value.y * y, value.z * z, value.w * w);
         }
 
-        inline TVector4 operator*=(s32 value)
+        constexpr TVector4 operator*=(s32 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline TVector4 operator*=(u32 value)
+        constexpr TVector4 operator*=(u32 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline TVector4 operator*=(f32 value)
+        constexpr TVector4 operator*=(f32 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline TVector4 operator*=(const TVector4& value)
+        constexpr TVector4 operator*=(const TVector4& value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline TVector4 operator/(f32 value) const
+        constexpr TVector4 operator/(f32 value) const
         {
             return TVector4(x / value, y / value, z / value, w / value);
         }
 
-        inline TVector4 operator/=(f32 value)
+        constexpr TVector4 operator/=(f32 value)
         {
             *this = *this / value;
             return *this;
         }
 
-        inline f32 GetSqrMagnitude() const
+        constexpr f32 GetSqrMagnitude() const
         {
             return x * x + y * y + z * z + w * w;
         }
@@ -652,27 +652,27 @@ namespace CE
             return Math::Max({x, y, z, w});
 		}
 
-        inline static f32 Dot(TVector4 a, TVector4 b)
+        constexpr static f32 Dot(TVector4 a, TVector4 b)
         {
-            return a.x * b.x + a.y * b.y + a.z * b.z;
+            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
         }
 
-        inline f32 Dot(TVector4 b) const
+        constexpr f32 Dot(TVector4 b) const
         {
             return x * b.x + y * b.y + z * b.z + w * b.w;
         }
 
-        inline static TVector4 Cross(TVector4 a, TVector4 b)
+        constexpr static TVector4 Cross(TVector4 a, TVector4 b)
         {
             return TVector4(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x, a.w * b.w);
         }
 
-        inline TVector4 Cross(TVector4 b) const
+        constexpr TVector4 Cross(TVector4 b) const
         {
             return TVector4(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x, w * b.w);
         }
 
-        static f32 SqrDistance(TVector4 a, TVector4 b)
+        constexpr static f32 SqrDistance(TVector4 a, TVector4 b)
 		{
             return (b - a).GetSqrMagnitude();
 		}
@@ -907,13 +907,13 @@ namespace CE
     {}
 
     template<typename T>
-    TVector3<T>::TVector3(TVector4<T> vec4) : x(vec4.x), y(vec4.y), z(vec4.z)
+    constexpr TVector3<T>::TVector3(TVector4<T> vec4) : x(vec4.x), y(vec4.y), z(vec4.z)
     {
         xyz[3] = 0;
     }
 
     template<typename T>
-    TVector3<T>::TVector3(TVector2<T> vec2) : x(vec2.x), y(vec2.y), z(0)
+    constexpr TVector3<T>::TVector3(TVector2<T> vec2) : x(vec2.x), y(vec2.y), z(0)
     {
         xyz[3] = 0;
     }

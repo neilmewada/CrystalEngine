@@ -18,6 +18,9 @@ namespace CE::Editor
 
         void OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName, const CE::Name& newPath) override;
 
+        virtual void ConstructMenuBar() {}
+        virtual void ConstructToolBar() {}
+
     public: // - Public API -
 
         const Ref<EditorHistory>& GetHistory() const { return history; }

@@ -82,11 +82,11 @@ namespace CE
 				windowCloseButton = CreateObject<FWindowControlButtonStyle>(rootStyle, "Button_WindowClose");
 				rootStyle->Add("Button.WindowClose", windowCloseButton);
 
-				windowCloseButton->background = Color::Clear();
+				windowCloseButton->background = Colors::Clear;
 				windowCloseButton->hoveredBackground = Color::RGBA(161, 57, 57);
 				windowCloseButton->hoveredBackground = Color::RGBA(196, 43, 28);
 				windowCloseButton->pressedBackground = Color::RGBA(178, 43, 30);
-				windowCloseButton->borderColor = Color::Clear();
+				windowCloseButton->borderColor = Colors::Clear;
 				windowCloseButton->borderWidth = 0.0f;
 				windowCloseButton->cornerRadius = Vec4();
 				windowCloseButton->contentMoveY = 0;
@@ -94,10 +94,10 @@ namespace CE
 				windowControlButton = CreateObject<FWindowControlButtonStyle>(rootStyle, "Button_WindowControl");
 				rootStyle->Add("Button.WindowControl", windowControlButton);
 
-				windowControlButton->background = Color::Clear();
+				windowControlButton->background = Colors::Clear;
 				windowControlButton->hoveredBackground = Color::RGBA(58, 58, 58);
 				windowControlButton->pressedBackground = Color::RGBA(48, 48, 48);
-				windowControlButton->borderColor = Color::Clear();
+				windowControlButton->borderColor = Colors::Clear;
 				windowControlButton->borderWidth = 0.0f;
 				windowControlButton->cornerRadius = Vec4();
 				windowControlButton->contentMoveY = 0;
@@ -131,9 +131,9 @@ namespace CE
 				auto primaryComboBoxItem = CreateObject<FComboBoxItemStyle>(rootStyle, "PrimaryComboBoxItemStyle");
 				rootStyle->Add("ComboBoxItem.Primary", primaryComboBoxItem);
 
-				primaryComboBoxItem->background = Color::Clear();
+				primaryComboBoxItem->background = Colors::Clear;
 				primaryComboBoxItem->hoverBackground = Color::RGBA(0, 112, 224);
-				primaryComboBoxItem->selectedBackground = Color::Clear();
+				primaryComboBoxItem->selectedBackground = Colors::Clear;
 				primaryComboBoxItem->selectedShape = FShapeType::RoundedRect;
 				primaryComboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
 				primaryComboBoxItem->selectedBorderColor = primaryComboBoxItem->hoverBackground.GetFillColor();
@@ -180,7 +180,7 @@ namespace CE
 				auto menuBarStyle = CreateObject<FMenuBarStyle>(rootStyle, "MenuBarStyle");
 				rootStyle->Add("MenuBar.Primary", menuBarStyle);
 
-				menuBarStyle->background = Color::Black();
+				menuBarStyle->background = Colors::Black;
 				menuBarStyle->itemPadding = Vec4(5, 5, 5, 5);
 				menuBarStyle->itemHoverBackground = Color::RGBA(0, 112, 224);
 
@@ -202,9 +202,9 @@ namespace CE
 				auto comboBoxItem = CreateObject<FComboBoxItemStyle>(rootStyle, "ComboBoxItem");
 				rootStyle->Add("ComboBoxItem", comboBoxItem);
 
-				comboBoxItem->background = Color::Clear();
+				comboBoxItem->background = Colors::Clear;
 				comboBoxItem->hoverBackground = Color::RGBA(0, 112, 224);
-				comboBoxItem->selectedBackground = Color::Clear();
+				comboBoxItem->selectedBackground = Colors::Clear;
 				comboBoxItem->selectedShape = FShapeType::RoundedRect;
 				comboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
 				comboBoxItem->selectedBorderColor = Color::RGBA(0, 112, 224);

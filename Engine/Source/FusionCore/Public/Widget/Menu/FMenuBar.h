@@ -20,6 +20,8 @@ namespace CE
 
         Ref<FWidget> GetContainerChild(u32 index) const { return container->GetChild(index); }
 
+        void SetFontSizeRecursively(f32 fontSize);
+
     protected:
 
         void Construct() override final;

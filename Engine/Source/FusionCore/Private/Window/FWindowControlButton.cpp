@@ -59,7 +59,7 @@ namespace CE
             icon->Width(5);
             icon->Height(5);
             iconImage.SetBrushSize(Vec2(6, 6));
-            iconImage.SetFillColor(Color::Black());
+            iconImage.SetFillColor(Colors::Black);
         }
 
         icon->Background(iconImage);

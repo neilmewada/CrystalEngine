@@ -20,7 +20,7 @@ namespace CE
             .ContentVAlign(VAlign::Fill)
             .VAlign(VAlign::Fill)
             .HAlign(HAlign::Fill)
-            .Padding(Vec4(1.5f, 2, 1.5f, 2) * 3)
+            .Padding(Vec4(1.5f, 1.5f, 1.5f, 1.5f) * 3)
             (
                 FAssignNew(FImageButton, arrowIcon)
                 .Image(downwardArrow)
@@ -40,11 +40,12 @@ namespace CE
                 .Width(12)
                 .Height(12)
                 .VAlign(VAlign::Center)
-                .Margin(Vec4(0, 0, 2.5f, 0))
+                .Margin(Vec4(0, 0, 5, 0))
                 .Enabled(false),
 
                 FAssignNew(FLabel, label)
                 .HAlign(HAlign::Left)
+                .VAlign(VAlign::Center)
             )
         );
 

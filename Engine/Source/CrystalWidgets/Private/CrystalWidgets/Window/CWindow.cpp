@@ -224,7 +224,7 @@ namespace CE::Widgets
                 }
                 else
                 {
-                    pen.SetColor(Color::White());
+                    pen.SetColor(Colors::White);
                     painter->SetPen(pen);
                 }
 
@@ -243,8 +243,8 @@ namespace CE::Widgets
                 }
             }
 
-            brush.SetColor(Color::Clear());
-            pen.SetColor(Color::Clear());
+            brush.SetColor(Colors::Clear);
+            pen.SetColor(Colors::Clear);
             pen.SetWidth(0.0f);
 
             if (!hoveredControls[0] || clickedControlIdx == 0)
@@ -255,7 +255,7 @@ namespace CE::Widgets
             }
             else
             {
-                brush.SetColor(Color::White());
+                brush.SetColor(Colors::White);
                 painter->SetPen(pen);
                 painter->SetBrush(brush);
             }

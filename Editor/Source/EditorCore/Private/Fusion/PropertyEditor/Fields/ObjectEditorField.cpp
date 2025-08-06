@@ -15,6 +15,8 @@ namespace CE::Editor
         constexpr f32 height = 50;
         constexpr f32 cornerRadius = 5;
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         FBrush assetCircle = FBrush("/Editor/Assets/Icons/DoubleCircle", Color::RGBHex(0xd9d9d9));
 
         FBrush useAsset = FBrush("/Editor/Assets/Icons/SelectFile");
@@ -43,18 +45,18 @@ namespace CE::Editor
                     .Margin(Vec4(0, 0, 7.5f, 0))
                     (
                         FNew(FStyledWidget)
-                        .Background(Color::Black())
+                        .Background(Colors::Black)
                         .CornerRadius(Vec4(1, 1, 1, 1) * cornerRadius)
                         .Width(height)
                         .Height(height),
 
                         FAssignNew(FImage, thumbnail)
-                        .Background(Color::Cyan())
+                        .Background(Colors::Cyan)
                         .Width(38)
                         .Height(38),
 
                         FAssignNew(FStyledWidget, colorTag)
-                        .Background(Color::Clear())
+                        .Background(Colors::Clear)
                         .CornerRadius(Vec4(0, 0, 1, 1) * 2.0f)
                         .Height(2.0f)
                         .VAlign(VAlign::Bottom)
@@ -88,7 +90,7 @@ namespace CE::Editor
                                     FAssignNew(FLabel, valueLabel)
                                     .Text("[None]")
                                     .WordWrap(FWordWrap::NoWrap)
-                                    .FontSize(10)
+                                    .FontSize(fontSize)
                                     .HAlign(HAlign::Fill)
                                 ),
 
@@ -417,7 +419,7 @@ namespace CE::Editor
 
         curValue = value;
 
-        thumbnail->Background(Color::Clear());
+        thumbnail->Background(Colors::Clear);
 
         if (value == nullptr)
         {

@@ -115,7 +115,7 @@ namespace WidgetTests
 
         FusionRenderer2* renderer = painter->GetRenderer();
 
-        renderer->SetPen(FPen(Color::Green(), 2.0f));
+        renderer->SetPen(FPen(Colors::Green, 2.0f));
 
         renderer->PathClear();
         renderer->PathLineTo(Vec2(100, 200));

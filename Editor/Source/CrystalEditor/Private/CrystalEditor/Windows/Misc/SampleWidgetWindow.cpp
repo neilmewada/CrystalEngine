@@ -50,6 +50,8 @@ namespace CE::Editor
         grid.SetBrushTiling(FBrushTiling::TileXY);
         grid.SetBrushSize(Vec2(16, 16));
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         (*this)
             .Title("Fusion Samples")
             .MinimizeEnabled(false)
@@ -75,17 +77,17 @@ namespace CE::Editor
                 .Name("DebugSplitBox")
                 (
                     FNew(FStyledWidget)
-                    .Background(Color::Yellow())
+                    .Background(Colors::Yellow)
                     .Height(25)
                     .FillRatio(0.25f),
 
                     FNew(FStyledWidget)
-                    .Background(Color::Green())
+                    .Background(Colors::Green)
                     .Height(25)
                     .FillRatio(0.25f),
 
                     FNew(FStyledWidget)
-                    .Background(Color::Cyan())
+                    .Background(Colors::Cyan)
                     .Height(25)
                     .FillRatio(0.5f)
                 ),
@@ -102,7 +104,7 @@ namespace CE::Editor
                     .Text("This is overlay text")
                     .FontSize(18)
                     .Bold(true)
-                    .Foreground(Color::Black())
+                    .Foreground(Colors::Black)
                     .HAlign(HAlign::Center)
                 ),
 
@@ -111,7 +113,7 @@ namespace CE::Editor
                 .ContentHAlign(HAlign::Left)
                 (
                     FNew(FTextButton)
-                    .FontSize(10)
+                    .FontSize(fontSize)
                     .Text("Add Item")
                     .OnClicked([this]
                     {
@@ -141,7 +143,7 @@ namespace CE::Editor
                     .Margin(Vec4(0, 0, 10, 0)),
 
                     FNew(FTextButton)
-                    .FontSize(10)
+                    .FontSize(fontSize)
                     .Text("Randomize")
                     .OnClicked(FUNCTION_BINDING(model, ModifyTextInCode)),
 

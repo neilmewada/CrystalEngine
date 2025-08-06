@@ -22,6 +22,50 @@ namespace CE::Editor
         assetBrowser->BrowseToAsset(path);
     }
 
+    bool SceneEditor::OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle)
+    {
+    	if (!targetObject || !bundle)
+            return false;
+        if (!CanEdit(targetObject))
+            return false;
+
+        Ref<CE::Scene> scene = CastTo<CE::Scene>(targetObject);
+        if (!scene)
+            return false;
+
+        if (!OpenScene(scene))
+        {
+	        return false;
+        }
+
+    	Super::OpenEditor(targetObject, bundle);
+        return true;
+    }
+
+    bool SceneEditor::OpenScene(Ref<CE::Scene> scene)
+    {
+        if (!scene)
+            return false;
+        if (!scene->GetRpiScene())
+            return false;
+
+        if (targetScene.IsValid() && targetScene->GetOuter() == this)
+        {
+            targetScene->BeginDestroy();
+            targetScene = nullptr;
+        }
+
+        targetScene = scene;
+
+        EditorViewport* viewport = viewportTab->GetViewport();
+        viewport->SetScene(scene->GetRpiScene());
+
+        sceneOutlinerTab->SetScene(scene.Get());
+        detailsTab->SetSelectedActor(nullptr);
+        
+        return true;
+    }
+
     SceneEditor::SceneEditor()
     {
         m_CanBeUndocked = false;
@@ -93,7 +137,7 @@ namespace CE::Editor
 			CE::Material* arrowMaterial = CreateObject<CE::Material>(scene, "ArrowMaterial");
             arrowMaterial->SetShader(standardShader.Get());
             {
-                arrowMaterial->SetProperty("_Albedo", Color::White());
+                arrowMaterial->SetProperty("_Albedo", Colors::White);
                 arrowMaterial->ApplyProperties();
 			}
 
@@ -203,7 +247,7 @@ namespace CE::Editor
                 DirectionalLightComponent* directionalLight = lightActor->GetDirectionalLightComponent();
                 directionalLight->SetLocalEulerAngles(Vec3(30, 0, 0));
                 directionalLight->SetIntensity(10);
-                directionalLight->SetLightColor(Color::White());
+                directionalLight->SetLightColor(Colors::White);
             }
 
             CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
@@ -252,6 +296,13 @@ namespace CE::Editor
         Title(scene->GetName().GetString());
     }
 
+    void SceneEditor::LoadEmptyScene()
+    {
+        Ref<CE::Scene> scene = CreateObject<CE::Scene>(this, "UntitledScene");
+
+        OpenScene(scene);
+    }
+
     void SceneEditor::Construct()
     {
         Super::Construct();
@@ -260,11 +311,9 @@ namespace CE::Editor
 
         gEngine->GetSceneSubsystem()->AddCallbacks(this);
 
-        ConstructMenuBar();
         ConstructDockspaces();
-        ConstructToolBar();
-
-        LoadSandboxScene();
+    	LoadSandboxScene();
+        //LoadEmptyScene();
     }
 
     void SceneEditor::OnBeginDestroy()
@@ -376,6 +425,8 @@ namespace CE::Editor
 
     void SceneEditor::ConstructMenuBar()
     {
+        Super::ConstructMenuBar();
+
         (*menuBar)
             .Content(
                 FNew(FMenuItem)
@@ -532,6 +583,8 @@ namespace CE::Editor
 
     void SceneEditor::ConstructToolBar()
     {
+        Super::ConstructToolBar();
+
         (*toolBar)
             .Content(
                 EditorToolBar::NewImageButton("/Editor/Assets/Icons/Save")

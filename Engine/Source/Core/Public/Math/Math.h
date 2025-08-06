@@ -89,7 +89,7 @@ namespace CE
         INLINE static auto Pow(T1 base, T2 power) { return pow(base, power); }
 
         template<typename T>
-        CE_INLINE static T Min(std::initializer_list<T> list)
+        constexpr static T Min(std::initializer_list<T> list)
         {
             auto min = std::numeric_limits<T>::max();
 
@@ -103,7 +103,7 @@ namespace CE
         }
 
         template<typename T>
-        CE_INLINE static T Max(std::initializer_list<T> list)
+        constexpr static T Max(std::initializer_list<T> list)
         {
             auto max = std::numeric_limits<T>::min();
             

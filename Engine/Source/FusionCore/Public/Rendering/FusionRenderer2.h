@@ -289,7 +289,7 @@ namespace CE
         {
             Vec2 position;
             Vec2 uv;
-            u32 color = Color::White().ToU32();
+            u32 color = Colors::White.ToU32();
             FDrawType drawType = DRAW_Geometry;
             int index = -1;
         };

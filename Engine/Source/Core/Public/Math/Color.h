@@ -3,106 +3,115 @@
 namespace CE
 {
     
-    class CORE_API Color
+    class Color
     {
     public:
-        Color() : r(0), g(0), b(0), a(0)
+        constexpr Color() : a(0), b(0), g(0), r(0)
         {
 
         }
 
-        Color(f32 r, f32 g, f32 b, f32 a)
-            : r(r), g(g), b(b), a(a)
+        constexpr Color(f32 r, f32 g, f32 b, f32 a)
+            : a(a), b(b), g(g), r(r)
         {
             
         }
 
-        Color(f32 r, f32 g, f32 b)
-            : r(r), g(g), b(b), a(1)
+        constexpr Color(f32 r, f32 g, f32 b)
+            : a(1), b(b), g(g), r(r)
         {
 
         }
 
-        Color(Vec4 v)
-            : r(v.x), g(v.y), b(v.z), a(v.w)
+        constexpr Color(Vec4 v)
+            : a(v.w), b(v.z), g(v.y), r(v.x)
         {
 
         }
 
-        Color(Vec3 v)
-            : r(v.x), g(v.y), b(v.z), a(1)
+        constexpr Color(Vec3 v)
+            : a(1), b(v.z), g(v.y), r(v.x)
         {
 
         }
 
-		static Color RGBA8(u8 r, u8 g, u8 b, u8 a = (u8)255);
+		static constexpr Color RGBA8(u8 r, u8 g, u8 b, u8 a = (u8)255)
+        {
+            return Color(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+        }
 
-        static Color RGBHex(u32 hex);
+        static constexpr Color RGBHex(u32 hex)
+        {
+            return RGBA8((u8)(hex >> 16), (u8)(hex >> 8), (u8)(hex));
+        }
 
-		static Color RGBAHex(u32 hex);
+		static constexpr Color RGBAHex(u32 hex)
+        {
+            return RGBA8((u8)(hex >> 24), (u8)(hex >> 16), (u8)(hex >> 8), (u8)(hex));
+        }
 
-        static Color HSV(f32 h, f32 s, f32 v);
+        CORE_API static Color HSV(f32 h, f32 s, f32 v);
 
-		static inline Color RGBA(u8 r, u8 g, u8 b, u8 a = (u8)255)
+		static constexpr Color RGBA(u8 r, u8 g, u8 b, u8 a = (u8)255)
 		{
 			return RGBA8(r, g, b, a);
 		}
 
-        bool operator==(const Color& rhs) const
+        constexpr bool operator==(const Color& rhs) const
 		{
             return r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a;
 		}
 
-        bool operator!=(const Color& rhs) const
+        constexpr bool operator!=(const Color& rhs) const
         {
             return operator==(rhs);
         }
 
-        inline Color operator*(s32 value) const
+        constexpr Color operator*(s32 value) const
         {
             return Color(value * r, value * g, value * b, value * a);
         }
 
-        inline Color operator*(u32 value) const
+        constexpr Color operator*(u32 value) const
         {
             return Color(value * r, value * g, value * b, value * a);
         }
 
-        inline Color operator*(f32 value) const
+        constexpr Color operator*(f32 value) const
         {
             return Color(value * r, value * g, value * b, value * a);
         }
 
-        inline Color operator*=(s32 value)
+        constexpr Color operator*=(s32 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline Color operator*=(u32 value)
+        constexpr Color operator*=(u32 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline Color operator*=(f32 value)
+        constexpr Color operator*=(f32 value)
         {
             *this = *this * value;
             return *this;
         }
 
-        inline Color operator/(f32 value) const
+        constexpr Color operator/(f32 value) const
         {
             return Color(r / value, g / value, b / value, a / value);
         }
 
-        inline Color operator/=(f32 value)
+        constexpr Color operator/=(f32 value)
         {
             *this = *this / value;
             return *this;
         }
 
-        inline f32 operator[](u32 index)
+        f32 operator[](u32 index)
         {
             if (index == 0)
             {
@@ -122,54 +131,50 @@ namespace CE
             }
             return 0;
         }
-
-        // - Preset Colors -
-
-        inline static Color Red()
-        {
-            return Color(1, 0, 0, 1);
-        }
-
-        inline static Color Green()
-        {
-            return Color(0, 1, 0, 1);
-        }
-
-        inline static Color Blue()
-        {
-            return Color(0, 0, 1, 1);
-        }
-
-        inline static Color Black()
-        {
-            return Color(0, 0, 0, 1);
-        }
-
-		inline static Color White()
-		{
-			return Color(1, 1, 1, 1);
-		}
-
-        inline static Color Yellow()
-        {
-            return Color(1, 1, 0, 1);
-        }
-
-		inline static Color Clear()
-		{
-			return Color(0, 0, 0, 0);
-		}
-
-		inline static Color Cyan()
-		{
-			return Color(0, 1, 1, 1);
-		}
         
-        u32 ToU32() const;
+        constexpr u32 ToU32() const
+        {
+            return ((u32)(r * 255)) | ((u32)(g * 255) << 8) | ((u32)(b * 255) << 16) | ((u32)(a * 255) << 24);
+        }
         
-        Vec4 ToVec4() const;
+        constexpr Vec4 ToVec4() const
+        {
+            return Vec4(r, g, b, a);
+        }
 
-        Vec3 ToHSV() const;
+        constexpr Vec3 ToHSV() const
+        {
+            f32 cmax = std::max(r, std::max(g, b)); // maximum of r, g, b 
+            f32 cmin = std::min(r, std::min(g, b)); // minimum of r, g, b 
+            f32 diff = cmax - cmin; // diff of cmax and cmin. 
+            f32 h = -1, s = -1;
+
+            // if cmax and cmax are equal then h = 0 
+            if (cmax == cmin)
+                h = 0;
+
+            // if cmax equal r then compute h 
+            else if (cmax == r)
+                h = fmod(60 * ((g - b) / diff) + 360, 360);
+
+            // if cmax equal g then compute h 
+            else if (cmax == g)
+                h = fmod(60 * ((b - r) / diff) + 120, 360);
+
+            // if cmax equal b then compute h 
+            else if (cmax == b)
+                h = fmod(60 * ((r - g) / diff) + 240, 360);
+
+            // if cmax equal zero 
+            if (cmax == 0)
+                s = 0;
+            else
+                s = (diff / cmax) * 100;
+
+            f32 v = cmax * 100;
+
+            return Vec3(h, s / 100.0f, v / 100.0f);
+        }
 
 		inline static Color Lerp(const Color& from, const Color& to, f32 t)
 		{
@@ -199,6 +204,39 @@ namespace CE
             f32 rgba[4] = { 0, 0, 0, 0 };
         };
     };
+
+    namespace Colors
+    {
+        // Primary
+        constexpr Color Red = Color(1.0f, 0.0f, 0.0f, 1.0f);
+        constexpr Color Green = Color(0.0f, 1.0f, 0.0f, 1.0f);
+        constexpr Color Blue = Color(0.0f, 0.0f, 1.0f, 1.0f);
+
+        // Secondary
+        constexpr Color Yellow = Color(1.0f, 1.0f, 0.0f, 1.0f);
+        constexpr Color Cyan = Color(0.0f, 1.0f, 1.0f, 1.0f);
+        constexpr Color Magenta = Color(1.0f, 0.0f, 1.0f, 1.0f);
+
+        // Greyscale
+        constexpr Color White = Color(1.0f, 1.0f, 1.0f, 1.0f);
+        constexpr Color Black = Color(0.0f, 0.0f, 0.0f, 1.0f);
+        constexpr Color Gray = Color(0.5f, 0.5f, 0.5f, 1.0f);
+        constexpr Color LightGray = Color(0.75f, 0.75f, 0.75f, 1.0f);
+        constexpr Color DarkGray = Color(0.25f, 0.25f, 0.25f, 1.0f);
+        constexpr Color Clear = Color(0.0f, 0.0f, 0.0f, 0.0f);
+
+        // Extra (Editor / Debug / Stylized)
+        constexpr Color Orange = Color(1.0f, 0.6f, 0.0f, 1.0f);
+        constexpr Color Purple = Color(0.5f, 0.0f, 0.5f, 1.0f);
+        constexpr Color Pink = Color(1.0f, 0.4f, 0.7f, 1.0f);
+        constexpr Color Lime = Color(0.5f, 1.0f, 0.0f, 1.0f);
+        constexpr Color Teal = Color(0.0f, 0.5f, 0.5f, 1.0f);
+        constexpr Color Olive = Color(0.5f, 0.5f, 0.0f, 1.0f);
+        constexpr Color Maroon = Color(0.5f, 0.0f, 0.0f, 1.0f);
+        constexpr Color Navy = Color(0.0f, 0.0f, 0.5f, 1.0f);
+        constexpr Color Gold = Color(1.0f, 0.84f, 0.0f, 1.0f);
+        constexpr Color SkyBlue = Color(0.53f, 0.81f, 0.92f, 1.0f);
+    }
 
 } // namespace CE
 

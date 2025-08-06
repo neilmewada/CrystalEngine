@@ -24,7 +24,7 @@ namespace CE::Editor
                 .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
                 .OnEndEditing(FUNCTION_BINDING(this, OnEndEditing))
                 .ColorTagVisible(true)
-                .ColorTag(Color::Red())
+                .ColorTag(Colors::Red)
                 .VAlign(VAlign::Fill)
                 .FillRatio(1.0f),
 
@@ -34,7 +34,7 @@ namespace CE::Editor
                 .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
                 .OnEndEditing(FUNCTION_BINDING(this, OnEndEditing))
                 .ColorTagVisible(true)
-                .ColorTag(Color::Green())
+                .ColorTag(Colors::Green)
                 .VAlign(VAlign::Fill)
                 .FillRatio(1.0f),
 
@@ -44,7 +44,7 @@ namespace CE::Editor
                 .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
                 .OnEndEditing(FUNCTION_BINDING(this, OnEndEditing))
                 .ColorTagVisible(true)
-                .ColorTag(Color::Blue())
+                .ColorTag(Colors::Blue)
                 .VAlign(VAlign::Fill)
                 .FillRatio(1.0f),
 
@@ -54,7 +54,7 @@ namespace CE::Editor
                 .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))
                 .OnEndEditing(FUNCTION_BINDING(this, OnEndEditing))
                 .ColorTagVisible(true)
-                .ColorTag(Color::White())
+                .ColorTag(Colors::White)
                 .VAlign(VAlign::Fill)
                 .FillRatio(1.0f)
             )

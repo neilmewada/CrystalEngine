@@ -12,8 +12,11 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         Child(
             FAssignNew(FTextInput, input)
+            .FontSize(fontSize)
             .OnTextEditingFinished(FUNCTION_BINDING(this, OnFinishEdit))
             .OnTextEdited(FUNCTION_BINDING(this, OnTextFieldEdited))
             .OnBeginEditing(FUNCTION_BINDING(this, OnBeginEditing))

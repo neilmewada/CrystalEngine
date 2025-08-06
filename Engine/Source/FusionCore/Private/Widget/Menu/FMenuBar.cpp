@@ -36,6 +36,19 @@ namespace CE
         }
     }
 
+    void FMenuBar::SetFontSizeRecursively(f32 fontSize)
+    {
+        for (FMenuItem* menuItem : menuItems)
+        {
+            menuItem->FontSize(fontSize);
+
+            if (FMenuPopup* subMenu = menuItem->GetSubMenu())
+            {
+                subMenu->SetFontSizeRecursively(fontSize);
+            }
+        }
+    }
+
     void FMenuBar::Construct()
     {
         Super::Construct();

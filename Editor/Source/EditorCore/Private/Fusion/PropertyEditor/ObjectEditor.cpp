@@ -308,6 +308,8 @@ namespace CE::Editor
 
         // Create category sections
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         for (int i = 0; i < categories.GetSize(); ++i)
         {
             const CE::Name& category = categories[i];
@@ -319,6 +321,7 @@ namespace CE::Editor
 
             FAssignNew(FExpandableSection, section)
             .Title(category.GetString())
+            .TitleFontSize(fontSize + 2)
 			.ExpandableContent(
                 FAssignNew(FVerticalStack, expandContent)
             );

@@ -87,7 +87,7 @@ namespace CE::Editor
                 .HAlign(HAlign::Fill)
                 (
                     FAssignNew(FStyledWidget, background)
-                    .Background(Color::Black())
+                    .Background(Colors::Black)
                     .VAlign(VAlign::Fill)
                     .HAlign(HAlign::Fill),
 

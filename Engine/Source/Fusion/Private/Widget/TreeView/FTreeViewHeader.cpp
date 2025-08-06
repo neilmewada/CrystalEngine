@@ -29,7 +29,7 @@ namespace CE
             .Direction(FSplitDirection::Horizontal)
             .SplitterSize(10)
             .SplitterDrawRatio(0.1f)
-            .SplitterBackground(Color::Black())
+            .SplitterBackground(Colors::Black)
             .SplitterHoverBackground(Color::RGBA(160, 160, 160))
             .ContentHAlign(HAlign::Fill)
             .ContentVAlign(VAlign::Fill)
@@ -49,7 +49,7 @@ namespace CE
         FStyledWidget* separator = nullptr;
 
         FAssignNew(FStyledWidget, separator)
-        .Background(Color::Black())
+        .Background(Colors::Black)
         .Width(1)
         .Padding(Vec4())
         .VAlign(VAlign::Fill)

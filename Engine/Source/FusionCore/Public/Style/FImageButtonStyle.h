@@ -19,13 +19,13 @@ namespace CE
     public: // - Properties - 
 
         FIELD()
-        Color tintColor = Color::White();
+        Color tintColor = Colors::White;
 
         FIELD()
-        Color hoverTintColor = Color::White();
+        Color hoverTintColor = Colors::White;
 
         FIELD()
-        Color pressedTintColor = Color::White();
+        Color pressedTintColor = Colors::White;
 
     };
     

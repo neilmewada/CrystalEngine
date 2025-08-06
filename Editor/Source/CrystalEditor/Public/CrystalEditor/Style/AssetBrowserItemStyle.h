@@ -20,7 +20,7 @@ namespace CE
 
 
         FIELD()
-        FBrush folderBackground = Color::Clear();
+        FBrush folderBackground = Colors::Clear;
 
     };
     

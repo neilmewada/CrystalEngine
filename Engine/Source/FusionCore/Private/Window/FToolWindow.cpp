@@ -10,7 +10,7 @@ namespace CE
 
     void FToolWindow::SetMaximizeButton(bool interactable)
     {
-        Color tintColor = interactable ? Color::White() : Color::RGBA(255, 255, 255, 80);
+        Color tintColor = interactable ? Colors::White : Color::RGBA(255, 255, 255, 80);
 
         //maximizeIcon->Background(maximizeIcon->Background().WithTint(tintColor));
         maximizeButton->SetInteractionEnabled(interactable);
@@ -18,7 +18,7 @@ namespace CE
 
     void FToolWindow::SetMinimizeButton(bool interactable)
     {
-        Color tintColor = interactable ? Color::White() : Color::RGBA(255, 255, 255, 80);
+        Color tintColor = interactable ? Colors::White : Color::RGBA(255, 255, 255, 80);
 
         //minimizeIcon->Background(minimizeIcon->Background().WithTint(tintColor));
         minimizeButton->SetInteractionEnabled(interactable);

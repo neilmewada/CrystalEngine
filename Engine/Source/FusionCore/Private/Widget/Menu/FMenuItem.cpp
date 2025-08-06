@@ -52,7 +52,16 @@ namespace CE
 
                 FAssignNew(FLabel, label)
                 .Text("")
-                .FontSize(9)
+                .FontSize(9),
+
+                FNew(FWidget)
+                .FillRatio(1.0f),
+
+                FAssignNew(FImage, arrow)
+                .Background(FBrush("/Engine/Resources/Icons/ForwardArrow"))
+                .Width(10)
+                .Height(10)
+                .Enabled(false)
             )
         );
     }
@@ -146,6 +155,20 @@ namespace CE
         }
 
 	    Super::HandleEvent(event);
+    }
+
+    void FMenuItem::OnAttachedToParent(FWidget* parent)
+    {
+        Super::OnAttachedToParent(parent);
+
+        if (subMenu != nullptr && parent && parent->GetParent() && parent->GetParent()->IsOfType<FMenuPopup>())
+        {
+            arrow->Enabled(true);
+        }
+        else
+        {
+            arrow->Enabled(false);
+        }
     }
 
     FMenuItem& FMenuItem::SubMenu(FMenuPopup& subMenu)

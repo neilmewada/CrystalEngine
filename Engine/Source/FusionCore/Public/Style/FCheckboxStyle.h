@@ -17,16 +17,16 @@ namespace CE
         void MakeStyle(FWidget& widget) override;
 
         FIELD()
-        Color foregroundDisabledColor = Color::White();
+        Color foregroundDisabledColor = Colors::White;
 
         FIELD()
-        Color foregroundColor = Color::White();
+        Color foregroundColor = Colors::White;
 
         FIELD()
-        Color foregroundHoverColor = Color::White();
+        Color foregroundHoverColor = Colors::White;
 
         FIELD()
-        Color foregroundPressedColor = Color::White();
+        Color foregroundPressedColor = Colors::White;
     };
     
 }

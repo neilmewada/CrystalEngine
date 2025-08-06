@@ -12,6 +12,8 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         (*this)
         .RightClickSelects(true)
         .Width(80)
@@ -25,7 +27,7 @@ namespace CE::Editor
             .VAlign(VAlign::Fill)
             (
                 FAssignNew(FStyledWidget, iconBg)
-                .Background(Color::Black())
+                .Background(Colors::Black)
                 .BackgroundShape(FRoundedRectangle(5, 5, 0, 0))
                 .Height(68)
                 (
@@ -38,7 +40,7 @@ namespace CE::Editor
                 ),
 
                 FAssignNew(FStyledWidget, colorTag)
-                .Background(Color::Cyan())
+                .Background(Colors::Cyan)
                 .Height(2.5f),
 
                 FAssignNew(FCompoundWidget, titleLabelParent)
@@ -49,9 +51,9 @@ namespace CE::Editor
                 (
                     FAssignNew(FLabel, titleLabel)
                     .Text("Asset")
-                    .FontSize(9)
+                    .FontSize(fontSize - 0.5f)
                     .WordWrap(FWordWrap::Normal)
-                    .Foreground(Color::White())
+                    .Foreground(Colors::White)
                     .HAlign(HAlign::Left)
                     .VAlign(VAlign::Bottom)
                     .Margin(Vec4(2.5f, 0, 2.5f, 0))
@@ -60,7 +62,7 @@ namespace CE::Editor
 
                 FAssignNew(FTextInput, titleInput)
                 .Text("Asset")
-                .FontSize(9)
+                .FontSize(fontSize - 0.5f)
                 .OnTextEditingFinished(FUNCTION_BINDING(this, OnTextEditingFinished))
                 .Validator([this](const String& in) -> bool
                 {
@@ -84,8 +86,8 @@ namespace CE::Editor
 
                 FAssignNew(FLabel, subtitleLabel)
                 .Text("Asset Type")
-                .FontSize(7)
-                .Foreground(Color::White().WithAlpha(0.5f))
+                .FontSize(fontSize - 2)
+                .Foreground(Colors::White.WithAlpha(0.5f))
                 .HAlign(HAlign::Left)
                 .VAlign(VAlign::Bottom)
                 .Margin(Vec4(2.5f, 0, 0, 0))
@@ -155,7 +157,7 @@ namespace CE::Editor
         titleLabel->Margin(isDirectory ? Vec4() : Vec4(2.5f, 0, 2.5f, 0));
 
         colorTag->Visible(!isDirectory);
-        iconBg->Background(isDirectory ? Color::Clear() : Color::Black());
+        iconBg->Background(isDirectory ? Colors::Clear : Colors::Black);
         subtitleLabel->Visible(!isDirectory);
         auto assetData = (AssetData*)node->userData;
 

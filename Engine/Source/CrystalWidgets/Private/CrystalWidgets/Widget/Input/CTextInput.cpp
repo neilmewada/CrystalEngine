@@ -893,7 +893,7 @@ namespace CE::Widgets
         if (computedStyle.properties.KeyExists(CStylePropertyType::FontSize))
             fontSize = computedStyle.properties[CStylePropertyType::FontSize].single;
 
-        Color color = Color::White();
+        Color color = Colors::White;
         Color textSelectionColor = Color::RGBA8(0, 112, 224);
 
         if (computedStyle.properties.KeyExists(CStylePropertyType::Foreground))
@@ -991,7 +991,7 @@ namespace CE::Widgets
                 
                 if (cursorState)
                 {
-                    brush.SetColor(Color::White());
+                    brush.SetColor(Colors::White);
                     painter->SetBrush(brush);
 
                     painter->DrawRect(cursorRect);

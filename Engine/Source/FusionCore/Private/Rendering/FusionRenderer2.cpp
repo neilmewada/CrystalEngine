@@ -1169,7 +1169,7 @@ namespace CE
 
         PrimReserve(4, 6);
 
-        u32 color = Color::White().ToU32();
+        u32 color = Colors::White.ToU32();
 
         drawCmdList.Last().textureSrgOverride = viewport->GetTextureSrg();
 
@@ -1212,7 +1212,7 @@ namespace CE
     {
         PrimReserve(4, 6);
 
-        u32 color = Color::White().ToU32();
+        u32 color = Colors::White.ToU32();
 
         PrimRect(quad, color, nullptr, DRAW_TextureAtlas, layerIndex);
     }
@@ -1221,7 +1221,7 @@ namespace CE
     {
         PrimReserve(4, 6);
 
-        u32 color = Color::White().ToU32();
+        u32 color = Colors::White.ToU32();
 
         PrimRect(rect, color, nullptr, DRAW_FontAtlas, layerIndex);
     }

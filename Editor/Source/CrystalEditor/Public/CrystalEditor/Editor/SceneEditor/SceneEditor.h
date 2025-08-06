@@ -14,7 +14,7 @@ namespace CE::Editor
 
         bool AllowMultipleInstances() const override { return false; }
 
-        Ref<Object> GetTargetObject() const override { return sandboxScene; }
+        Ref<Object> GetTargetObject() const override { return targetScene; }
 
         bool CanEdit(Ref<Object> targetObject) const override;
 
@@ -22,11 +22,15 @@ namespace CE::Editor
 
         void BrowseToAsset(const CE::Name& path) override;
 
+        bool OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle) override;
+
     protected:
 
         SceneEditor();
 
         void LoadSandboxScene();
+
+        void LoadEmptyScene();
 
         void Construct() override;
 
@@ -54,8 +58,10 @@ namespace CE::Editor
 
     private:
 
-        void ConstructMenuBar();
-        void ConstructToolBar();
+        bool OpenScene(Ref<CE::Scene> scene);
+
+        void ConstructMenuBar() override;
+        void ConstructToolBar() override;
         void ConstructDockspaces();
 
         EditorMinorDockspace* rightTop = nullptr;
@@ -75,6 +81,8 @@ namespace CE::Editor
 
         // Sandbox
         Ref<CE::Scene> sandboxScene = nullptr;
+
+        Ref<CE::Scene> targetScene;
 
     public: // - Fusion Properties - 
 

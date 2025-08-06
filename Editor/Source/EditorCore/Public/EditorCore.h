@@ -31,6 +31,7 @@
 #include "Asset/ShaderAssetImporter.h"
 #include "Asset/ComputeShaderAssetDefinition.h"
 #include "Asset/ComputeShaderAssetImporter.h"
+#include "Asset/SceneAssetDefinition.h"
 #include "Asset/MaterialAssetDefinition.h"
 #include "Asset/PhysicsMaterialAssetDefinition.h"
 #include "Asset/TextureAssetDefinition.h"

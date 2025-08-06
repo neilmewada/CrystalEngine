@@ -26,7 +26,7 @@ namespace CE
 
         if (PlatformMisc::GetCurrentPlatform() == PlatformName::Mac)
         {
-            Color bg = Color::Clear();
+            Color bg = Colors::Clear;
 
             bool shouldShowIcon = false;
             for (const auto& controlBtn : button.GetControlGroup())

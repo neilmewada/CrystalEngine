@@ -25,7 +25,7 @@ namespace CE
         Vec4 headerCornerRadius;
 
         FIELD()
-        Color headerBorderColor = Color::Clear();
+        Color headerBorderColor = Colors::Clear;
 
         FIELD()
         f32 headerBorder = 0;
@@ -37,7 +37,7 @@ namespace CE
         Vec4 contentCornerRadius;
 
         FIELD()
-        Color contentBorderColor = Color::Clear();
+        Color contentBorderColor = Colors::Clear;
 
         FIELD()
         f32 contentBorder = 0;

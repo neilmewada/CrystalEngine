@@ -30,6 +30,7 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(bool, Expanded);
 
         FUSION_PROPERTY_WRAPPER2(Text, titleLabel, Title);
+        FUSION_PROPERTY_WRAPPER2(FontSize, titleLabel, TitleFontSize);
         FUSION_PROPERTY_WRAPPER2(FillRatio, content, ContentFillRatio);
 
         FUSION_EVENT(ScriptEvent<void(FExpandableSection*)>, OnExpansionChanged);

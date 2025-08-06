@@ -144,7 +144,7 @@ namespace CE
         b8 clearScreen = true;
 
         FIELD()
-        Color clearColor = Color::Clear();
+        Color clearColor = Colors::Clear;
 
         FIELD()
         f32 scaleFactor = 1.0f;

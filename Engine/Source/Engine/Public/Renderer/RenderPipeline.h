@@ -48,7 +48,7 @@ namespace CE
     public:
 
         FIELD(EditAnywhere)
-        Color clearColor = Color::Black();
+        Color clearColor = Colors::Black;
 
         FIELD(EditAnywhere, Category = "Anti-Aliasing")
         MSAA msaa = MSAA2;

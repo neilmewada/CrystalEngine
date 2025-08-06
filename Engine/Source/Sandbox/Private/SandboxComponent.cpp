@@ -151,7 +151,7 @@ namespace CE
 			sunLight->SetLocalPosition(Vec3(0, 0, 0));
 			sunLight->SetLocalEulerAngles(Vec3(30, 0, 0));
 			sunLight->SetIntensity(20.0f);
-			sunLight->SetLightColor(Color::White());
+			sunLight->SetLightColor(Colors::White);
 		}
     }
 

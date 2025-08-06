@@ -61,7 +61,7 @@ namespace CE
 
         if (IsEditing() && cursorState)
         {
-            painter->SetPen(FPen(Color::White(), 1.2f));
+            painter->SetPen(FPen(Colors::White, 1.2f));
             painter->SetBrush(FBrush());
 
             f32 posX = GetCharacterMinMax(cursorPos).min;
@@ -862,7 +862,7 @@ namespace CE
                     .Text("")
                     .WordWrap(FWordWrap::NoWrap)
                     .FontSize(10)
-                    .Foreground(Color::White())
+                    .Foreground(Colors::White)
                     .HAlign(HAlign::Fill)
                     .VAlign(VAlign::Fill)
                 )

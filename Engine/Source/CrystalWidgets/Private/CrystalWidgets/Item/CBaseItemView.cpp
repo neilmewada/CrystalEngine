@@ -526,7 +526,7 @@ namespace CE::Widgets
 
 				itemStyle.padding = cellStyle.GetPadding();
 				itemStyle.textColor = computedStyle.GetForegroundColor();
-				itemStyle.bgColor = Color::Clear();
+				itemStyle.bgColor = Colors::Clear;
 				itemStyle.expandableColumn = expandableColumn;
 
 				f32 indentationX = 0.0f;
@@ -729,7 +729,7 @@ namespace CE::Widgets
 
 				itemStyle.padding = cellStyle.GetPadding();
 				itemStyle.textColor = computedStyle.GetForegroundColor();
-				itemStyle.bgColor = Color::Clear();
+				itemStyle.bgColor = Colors::Clear;
 				itemStyle.expandableColumn = expandableColumn;
 
 				Vec2 size = delegate->GetSizeHint(itemStyle, index);

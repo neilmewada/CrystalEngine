@@ -20,6 +20,16 @@ namespace CE::Editor
         {
             SetAssetDirty(true);
         });
+
+        ConstructMenuBar();
+        ConstructToolBar();
+
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
+        if (menuBar)
+        {
+            menuBar->SetFontSizeRecursively(fontSize);
+        }
     }
 
     void EditorBase::HandleEvent(FEvent* event)
