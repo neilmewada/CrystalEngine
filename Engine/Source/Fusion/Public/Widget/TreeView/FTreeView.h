@@ -18,6 +18,7 @@ namespace CE
 
         FStyledWidget* GetHeaderContainer() const { return headerContainer; }
 
+        Ref<FTreeViewRow> FindRow(const FModelIndex& index);
         void SelectRow(const FModelIndex& index);
         void DeselectRow(const FModelIndex& index);
         void ClearSelection();

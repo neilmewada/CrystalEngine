@@ -171,6 +171,8 @@ namespace WidgetTests
     {
 	    Super::OnPaint(painter);
 
+        return;
+
         FusionRenderer2* renderer = painter->GetRenderer();
 
         renderer->SetPen(FPen(Colors::Green, 2.0f));

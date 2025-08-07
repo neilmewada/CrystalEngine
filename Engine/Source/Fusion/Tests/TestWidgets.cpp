@@ -105,6 +105,21 @@ namespace WidgetTests
 			FNew(FTreeViewCell)
 			.Text("Name")
 			.ArrowEnabled(true)
+			.OnLabelEdited([this](FTreeViewCell& cell, const String& newLabel)
+			{
+				if (Ref<FTreeViewRow> row = cell.GetRow())
+				{
+					FModelIndex index = row->GetIndex();
+					if (index.IsValid() && index.GetData().HasValue())
+					{
+						if (PathTreeNode* node = index.GetData().GetValue<PathTreeNode*>())
+						{
+							node->name = newLabel;
+							OnModelUpdate();
+						}
+					}
+				}
+			})
 			.FontSize(fontSize),
 
 			FNew(FTreeViewCell)
@@ -123,19 +138,60 @@ namespace WidgetTests
 		FNew(FMenuPopup)
 		.Content(
 			FNew(FMenuItem)
-			.Text("Item 0"),
+			.Text("Add Child")
+			.OnClick([this]
+			{
+				FModelIndex index = SelectionModel()->GetSelectedIndex();
+				if (index.IsValid())
+				{
+					if (PathTreeNode* node = index.GetData().GetValue<PathTreeNode*>())
+					{
+						String newName = "Child_0";
+						int i = 0;
+						while (node->ChildExists(newName))
+						{
+							newName = String::Format("Child_{}", ++i);
+						}
+
+						node->GetOrAddChild(newName, PathTreeNodeType::Directory);
+
+						OnModelUpdate();
+					}
+				}
+			}),
 
 			FNew(FMenuItem)
-			.Text("Item 1"),
+			.Text("Delete")
+			.OnClick([this]
+			{
+				FModelIndex index = SelectionModel()->GetSelectedIndex();
+				if (index.IsValid())
+				{
+					if (PathTreeNode* node = index.GetData().GetValue<PathTreeNode*>())
+					{
+						if (PathTreeNode* parent = node->parent)
+						{
+							parent->children.Remove(node);
+
+							OnModelUpdate();
+						}
+					}
+				}
+			}),
 
 			FNew(FMenuItem)
-			.Text("Item 2"),
-
-			FNew(FMenuItem)
-			.Text("Item 3"),
-
-			FNew(FMenuItem)
-			.Text("Item 4")
+			.Text("Rename")
+			.OnClick([this]
+			{
+				FModelIndex index = SelectionModel()->GetSelectedIndex();
+				if (index.IsValid())
+				{
+					if (Ref<FTreeViewRow> row = FindRow(index))
+					{
+						row->GetCell(0)->StartEditing();
+					}
+				}
+			})
 		)
 		.MinWidth(140)
 		.As<FMenuPopup>();
@@ -176,7 +232,6 @@ namespace WidgetTests
 			return {};
 
 		return CreateIndex(row, column, parentNode->children[row]);
-
 	}
 
 	u32 SceneTreeViewModel::GetRowCount(const FModelIndex& parent)

@@ -87,6 +87,16 @@ namespace CE
         }
     }
 
+    Ref<FTreeViewRow> FTreeViewContainer::FindRow(const FModelIndex& index)
+    {
+        if (rowCache.KeyExists(index))
+        {
+            return rowCache[index];
+        }
+
+        return nullptr;
+    }
+
     FWidget* FTreeViewContainer::HitTest(Vec2 localMousePos)
     {
         FWidget* thisHitTest = Super::HitTest(localMousePos);
@@ -191,6 +201,8 @@ namespace CE
             model->SetHeaderData(*treeView->header);
         }
 
+        rowCache.Clear();
+
         Delegate<void(const FModelIndex&, int)> visitor = [&](const FModelIndex& parent, int indentLevel) -> void
             {
                 int rowCount = model->GetRowCount(parent);
@@ -238,6 +250,8 @@ namespace CE
                         rowWidget = &treeView->m_GenerateRowDelegate();
                         children.Insert(rowWidget);
                     }
+
+                    rowCache[index] = rowWidget;
 
                     rowWidget->SetParent(this);
                     rowWidget->index = index;

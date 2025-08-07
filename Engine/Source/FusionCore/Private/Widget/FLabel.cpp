@@ -105,22 +105,22 @@ namespace CE
         return Font(copy);
     }
 
-    const CE::Name& FLabel::FontFamily()
+    CE::Name FLabel::FontFamily()
     {
         return m_Font.GetFamily();
     }
 
-    const f32& FLabel::FontSize()
+    f32 FLabel::FontSize()
     {
         return m_Font.GetFontSize();
     }
 
-    const bool& FLabel::Bold()
+    bool FLabel::Bold()
     {
         return m_Font.IsBold();
     }
 
-    const bool& FLabel::Italic()
+    bool FLabel::Italic()
     {
         return m_Font.IsItalic();
     }

@@ -52,6 +52,44 @@ namespace CE
         ArrowExpanded(false);
     }
 
+    void FTreeViewCell::StartEditing()
+    {
+        if (textInput)
+        {
+            contentStack->RemoveChild(textInput.Get());
+            textInput->BeginDestroy();
+            textInput = nullptr;
+        }
+
+        FAssignNew(FTextInput, textInput)
+        .Text(label->Text())
+        .FontSize(label->FontSize())
+        .HAlign(HAlign::Left)
+    	.VAlign(VAlign::Center);
+
+        textInput->FontSize(label->FontSize());
+
+        contentStack->AddChild(textInput.Get());
+
+        label->Enabled(false);
+        textInput->Enabled(true);
+
+        textInput->StartEditing(true, true);
+
+        textInput->OnTextEditingFinished([this](FTextInput*)
+            {
+				String text = textInput->Text();
+				label->Text(text);
+                contentStack->RemoveChild(textInput.Get());
+                textInput->QueueDestroy();
+
+                label->Enabled(true);
+                this->textInput = nullptr;
+
+                m_OnLabelEdited.Invoke(*this, text);
+            });
+    }
+
     FTreeViewCell::Self& FTreeViewCell::IconWidth(f32 value)
     {
         icon->Width(value);

@@ -29,10 +29,10 @@ namespace CE
         Self& Bold(bool bold);
         Self& Italic(bool italic);
 
-        const CE::Name& FontFamily();
-        const f32& FontSize();
-        const bool& Bold();
-        const bool& Italic();
+        CE::Name FontFamily();
+        f32 FontSize();
+        bool Bold();
+        bool Italic();
 
     protected:
 

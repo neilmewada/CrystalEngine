@@ -40,6 +40,8 @@ namespace CE
 
         const HashSet<FModelIndex>& GetSelection() const { return selection; }
 
+        FModelIndex GetSelectedIndex();
+
         void Select(const FModelIndex& index);
 
         void Deselect(const FModelIndex& index);
@@ -55,6 +57,7 @@ namespace CE
         void ValidateSelection();
 
         HashSet<FModelIndex> selection{};
+        Array<FModelIndex> selectionStack;
         FSelectionMode selectionMode = FSelectionMode::None;
         FSelectionType selectionType = FSelectionType::Row;
 

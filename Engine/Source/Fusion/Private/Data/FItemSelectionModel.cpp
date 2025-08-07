@@ -13,20 +13,30 @@ namespace CE
         
     }
 
+    FModelIndex FItemSelectionModel::GetSelectedIndex()
+    {
+        if (selectionStack.IsEmpty())
+            return {};
+        return selectionStack.GetLast();
+    }
+
     void FItemSelectionModel::Select(const FModelIndex& index)
     {
         if (selectionMode == FSelectionMode::Single)
         {
             selection.Clear();
+            selectionStack.Clear();
         }
         else if (selectionMode == FSelectionMode::None)
         {
             selection.Clear();
+            selectionStack.Clear();
 	        return;
         }
 
         selection.Add(index);
-
+        selectionStack.Add(index);
+        
         ValidateSelection();
 
         m_OnSelectionChanged.Broadcast(this);
@@ -37,6 +47,7 @@ namespace CE
         if (selection.Exists(index))
         {
             selection.Remove(index);
+            selectionStack.Remove(index);
 
             m_OnSelectionChanged.Broadcast(this);
         }
@@ -82,6 +93,7 @@ namespace CE
     void FItemSelectionModel::ClearSelection()
     {
         selection.Clear();
+        selectionStack.Clear();
 
         m_OnSelectionChanged.Broadcast(this);
     }
@@ -91,12 +103,16 @@ namespace CE
         if (selectionMode == FSelectionMode::None)
         {
             selection.Clear();
+            selectionStack.Clear();
         }
         else if (selectionMode == FSelectionMode::Single && selection.GetSize() > 1)
         {
             auto first = *(selection.end() - 1);
             selection.Clear();
+            selectionStack.Clear();
+
             selection.Add(first);
+            selectionStack.Add(first);
         }
     }
 

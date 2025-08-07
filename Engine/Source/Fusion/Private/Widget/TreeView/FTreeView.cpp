@@ -116,6 +116,11 @@ namespace CE
         container->OnModelUpdate();
     }
 
+    Ref<FTreeViewRow> FTreeView::FindRow(const FModelIndex& index)
+    {
+        return container->FindRow(index);
+    }
+
     void FTreeView::SelectRow(const FModelIndex& index)
     {
         m_SelectionModel->Select(index);

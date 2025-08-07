@@ -817,12 +817,12 @@ namespace CE
 			}
             inputLabel->StartEditing();
 
+            FusionApplication::Get()->GetRootContext()->SetFocusWidget(inputLabel);
+
             if (selectAll)
             {
                 inputLabel->SelectAll();
             }
-            
-            FusionApplication::Get()->GetRootContext()->SetFocusWidget(inputLabel);
         }
     }
 

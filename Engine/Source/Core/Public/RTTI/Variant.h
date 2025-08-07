@@ -80,6 +80,7 @@ namespace CE
 		Variant(s32 value) { SetInternalValue(value); }
 		Variant(s64 value) { SetInternalValue(value); }
 		Variant(const Matrix4x4& value) { SetInternalValue(value); }
+		Variant(const Uuid& value) { SetInternalValue(value); }
 
 		Variant(bool value) { SetInternalValue(value); }
         
@@ -480,6 +481,7 @@ namespace CE
 
 			IO::Path pathValue;
 			CE::Name nameValue;
+			Uuid uuidValue;
 
 			// Arrays
 			CE::Array<u8> rawArrayValue;

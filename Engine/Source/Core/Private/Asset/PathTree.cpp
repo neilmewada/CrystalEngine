@@ -28,8 +28,10 @@ namespace CE
 		return false;
 	}
 
-	bool PathTreeNode::ChildExists(const String& name)
+	bool PathTreeNode::ChildExists(const String& nameStr)
 	{
+		CE::Name name = nameStr;
+
 		for (auto child : children)
 		{
 			if (child != nullptr && child->name == name)

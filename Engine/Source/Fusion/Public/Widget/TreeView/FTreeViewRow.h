@@ -2,6 +2,7 @@
 
 namespace CE
 {
+
     CLASS()
     class FUSION_API FTreeViewRow : public FStyledWidget
     {
@@ -61,7 +62,8 @@ namespace CE
                     CE_LOG(Error, All, "Invalid widget of type {}! Expected widget FTreeViewCell.", widget->GetClass()->GetName().GetLastComponent());
                     continue;
                 }
-                contentStack->AddChild(widget);
+                ((FTreeViewCell*)widget)->row = this;
+            	contentStack->AddChild(widget);
             }
 
             return *this;
