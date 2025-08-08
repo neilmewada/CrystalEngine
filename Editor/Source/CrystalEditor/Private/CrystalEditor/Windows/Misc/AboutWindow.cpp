@@ -13,8 +13,10 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         titleBar->Height(30);
-        titleBarLabel->FontSize(13);
+        titleBarLabel->FontSize(fontSize + 2);
 
         constexpr auto splashImage = "/Editor/Assets/UI/Splash";
 
@@ -41,22 +43,22 @@ namespace CE::Editor
                 .Margin(Vec4(0, 0, 0, 10)),
 
                 FNew(FLabel)
-                .FontSize(13)
+                .FontSize(fontSize + 2)
                 .Text("CrystalEditor")
                 .HAlign(HAlign::Left),
 
                 FNew(FLabel)
-                .FontSize(10)
+                .FontSize(fontSize)
                 .Text("Version: " CE_ENGINE_VERSION_STRING_SHORT " pre-alpha [Build " CE_TOSTRING(CE_VERSION_BUILD) "]")
                 .HAlign(HAlign::Left),
 
                 FNew(FLabel)
-                .FontSize(10)
+                .FontSize(fontSize)
                 .Text("Platform: " + PlatformMisc::GetOSVersionString())
                 .HAlign(HAlign::Left),
 
                 FNew(FLabel)
-                .FontSize(10)
+                .FontSize(fontSize)
                 .Text("Icons by flaticon.com")
                 .HAlign(HAlign::Left)
 	        )

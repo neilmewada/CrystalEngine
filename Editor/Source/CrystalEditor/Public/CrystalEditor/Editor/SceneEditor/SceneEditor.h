@@ -54,6 +54,9 @@ namespace CE::Editor
         FUNCTION()
         void OnClickStop();
 
+        FUNCTION()
+        void OnClickAddActorMenuButton();
+
         FSplitBox* rootSplitBox = nullptr;
 
     private:
@@ -72,12 +75,17 @@ namespace CE::Editor
         Ref<EditorViewportTab> viewportTab = nullptr;
         Ref<SceneOutlinerTab> sceneOutlinerTab = nullptr;
         Ref<AssetBrowser> assetBrowser;
-        Ref<DetailsTab> detailsTab = nullptr;
+        Ref<ActorDetailsTab> detailsTab = nullptr;
 
         // Toolbar
         Ref<FImageButton> playButton;
         Ref<FImageButton> pauseButton;
         Ref<FImageButton> stopButton;
+
+        Ref<FImageButton> addActorButton;
+
+        // Context Menus
+        Ref<EditorMenuPopup> addActorContextMenu;
 
         // Sandbox
         Ref<CE::Scene> sandboxScene = nullptr;

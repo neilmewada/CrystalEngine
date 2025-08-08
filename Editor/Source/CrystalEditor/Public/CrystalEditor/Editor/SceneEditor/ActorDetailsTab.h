@@ -3,17 +3,20 @@
 namespace CE::Editor
 {
     CLASS()
-    class CRYSTALEDITOR_API DetailsTab : public EditorDockWindow
+    class CRYSTALEDITOR_API ActorDetailsTab : public EditorDockWindow
     {
-        CE_CLASS(DetailsTab, EditorDockWindow)
+        CE_CLASS(ActorDetailsTab, EditorDockWindow)
     protected:
 
-        DetailsTab();
+        ActorDetailsTab();
 
         void Construct() override;
 
         FUNCTION()
         void OnComponentSelectionChanged(ComponentTreeItem* item);
+
+        FUNCTION()
+        void OnAddComponentButtonClicked();
 
     public: // - Public API -
 
@@ -37,4 +40,4 @@ namespace CE::Editor
     
 }
 
-#include "DetailsTab.rtti.h"
+#include "ActorDetailsTab.rtti.h"

@@ -10,6 +10,8 @@ namespace CE::Editor
 
         // - Public API -
 
+        static FMenuItem& NewMenuItem();
+
     protected:
 
         EditorMenuPopup();

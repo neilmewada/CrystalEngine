@@ -3,16 +3,18 @@
 namespace CE::Editor
 {
 
-    DetailsTab::DetailsTab()
+    ActorDetailsTab::ActorDetailsTab()
     {
 
     }
 
-    void DetailsTab::Construct()
+    void ActorDetailsTab::Construct()
     {
         Super::Construct();
 
         ConstructMinorDockWindow();
+
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
 
         (*this)
 		.Title("Details")
@@ -22,7 +24,7 @@ namespace CE::Editor
             .HAlign(HAlign::Fill)
             (
                 FAssignNew(FLabel, emptyLabel)
-                .Text("Please select an actor in Scene Outliner to see it's properties.")
+                .Text("Please select an actor in Scene Outliner to see its properties.")
                 .VAlign(VAlign::Top)
                 .HAlign(HAlign::Center)
                 .Margin(Vec4(0, 50, 0, 0)),
@@ -43,11 +45,38 @@ namespace CE::Editor
                         .HAlign(HAlign::Fill)
                         .FillRatio(0.3f)
                         (
-                            FAssignNew(FLabel, actorName)
-                            .Text("Actor Name")
-                            .FontSize(11)
-                            .HAlign(HAlign::Left)
-                            .Margin(Vec4(5, 10, 5, 10)),
+                            FNew(FHorizontalStack)
+                            .ContentVAlign(VAlign::Center)
+                            .HAlign(HAlign::Fill)
+                            .Padding(Vec4(5, 10, 5, 10))
+                            (
+                                FAssignNew(FLabel, actorName)
+                                .Text("Actor Name")
+                                .FontSize(11),
+
+                                FNew(FWidget)
+                                .FillRatio(1.0f),
+
+                                FNew(FButton)
+                                .OnClicked(FUNCTION_BINDING(this, OnAddComponentButtonClicked))
+                                .Child(
+                                    FNew(FHorizontalStack)
+                                    .ContentVAlign(VAlign::Center)
+                                    .Gap(5)
+                                    .HAlign(HAlign::Center)
+                                    (
+                                        FNew(FImage)
+                                        .Background(FBrush("/Editor/Assets/Icons/Plus").WithTint(Color::RGBHex(0x4CAF50)))
+                                        .Width(14)
+                                        .Height(14),
+
+                                        FNew(FLabel)
+                                        .Text("Add Component")
+                                        .FontSize(fontSize - 1)
+                                    )
+                                )
+                                .Height(18)
+                            ),
 
                             FAssignNew(ComponentTreeView, treeView)
                             .OnSelectionChanged(FUNCTION_BINDING(this, OnComponentSelectionChanged))
@@ -77,7 +106,7 @@ namespace CE::Editor
         SetSelectedActor(nullptr);
     }
 
-    void DetailsTab::OnComponentSelectionChanged(ComponentTreeItem* item)
+    void ActorDetailsTab::OnComponentSelectionChanged(ComponentTreeItem* item)
     {
         editorContainer->RemoveChildWidget();
         f32 splitRatio = -1;
@@ -97,7 +126,12 @@ namespace CE::Editor
         }
     }
 
-    void DetailsTab::SetSelectedActor(Actor* actor)
+    void ActorDetailsTab::OnAddComponentButtonClicked()
+    {
+        
+    }
+
+    void ActorDetailsTab::SetSelectedActor(Actor* actor)
     {
         if (actor)
         {

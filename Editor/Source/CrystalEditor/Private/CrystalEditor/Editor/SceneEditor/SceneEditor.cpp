@@ -72,6 +72,8 @@ namespace CE::Editor
     SceneEditor::SceneEditor()
     {
         m_CanBeUndocked = false;
+
+        addActorContextMenu = CreateDefaultSubobject<EditorMenuPopup>("AddActorMenu");
     }
 
     void SceneEditor::LoadSandboxScene()
@@ -319,8 +321,8 @@ namespace CE::Editor
         gEngine->GetSceneSubsystem()->AddCallbacks(this);
 
         ConstructDockspaces();
-    	LoadSandboxScene();
-        //LoadEmptyScene();
+    	//LoadSandboxScene();
+        LoadEmptyScene();
     }
 
     void SceneEditor::OnBeginDestroy()
@@ -396,6 +398,42 @@ namespace CE::Editor
         stopButton->Enabled(false);
     }
 
+    void SceneEditor::OnClickAddActorMenuButton()
+    {
+        if (!GetContext())
+            return;
+
+        //addActorContextMenu->ClosePopup();
+        addActorContextMenu->DestroyAllItems();
+
+        (*addActorContextMenu)
+            .Content(
+                FNew(FMenuItemSeparator)
+                .Title("BASIC"),
+
+                EditorMenuPopup::NewMenuItem()
+                .Text("Actor")
+                .OnClick([this]
+                {
+	                if (targetScene)
+	                {
+                        Ref<Actor> actor = CreateObject<Actor>(targetScene.Get(), "EmptyActor");
+                        targetScene->AddActor(actor.Get());
+	                }
+                }),
+
+                FNew(FMenuItemSeparator)
+                .Title("SHAPES"),
+
+                EditorMenuPopup::NewMenuItem()
+                .Text("Sphere")
+            );
+
+        Vec2 popupPos = addActorButton->GetGlobalPosition() + Vec2(0, addActorButton->GetComputedSize().y);
+
+        GetContext()->PushLocalPopup(addActorContextMenu.Get(), popupPos, Vec2(), addActorButton->GetComputedSize());
+    }
+
     void SceneEditor::ConstructDockspaces()
     {
         ZoneScoped;
@@ -412,7 +450,7 @@ namespace CE::Editor
         );
 
         sceneOutlinerTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Bottom,
-			FAssignNew(DetailsTab, detailsTab),
+			FAssignNew(ActorDetailsTab, detailsTab),
             0.65f
         );
 
@@ -597,28 +635,30 @@ namespace CE::Editor
         Super::ConstructToolBar();
 
         (*toolBar)
-            .Content(
-                EditorToolBar::NewImageButton("/Editor/Assets/Icons/Save")
-                .OnClicked(FUNCTION_BINDING(this, SaveChanges)),
+        .Content(
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/Save")
+            .OnClicked(FUNCTION_BINDING(this, SaveChanges)),
 
-                EditorToolBar::NewSeparator(),
+            EditorToolBar::NewSeparator(),
 
-                EditorToolBar::NewImageButton("/Editor/Assets/Icons/AddObject"),
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/AddObject")
+            .Assign(addActorButton)
+            .OnClicked(FUNCTION_BINDING(this, OnClickAddActorMenuButton)),
 
-                EditorToolBar::NewImageButton("/Editor/Assets/Icons/Play")
-                .Assign(playButton)
-                .OnClicked(FUNCTION_BINDING(this, OnClickPlay)),
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/Play")
+            .Assign(playButton)
+            .OnClicked(FUNCTION_BINDING(this, OnClickPlay)),
 
-                EditorToolBar::NewImageButton("/Editor/Assets/Icons/Pause")
-                .Assign(pauseButton)
-                .OnClicked(FUNCTION_BINDING(this, OnClickPause))
-                .Enabled(false),
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/Pause")
+            .Assign(pauseButton)
+            .OnClicked(FUNCTION_BINDING(this, OnClickPause))
+            .Enabled(false),
 
-                EditorToolBar::NewImageButton("/Editor/Assets/Icons/Stop")
-                .Assign(stopButton)
-                .OnClicked(FUNCTION_BINDING(this, OnClickStop))
-                .Enabled(false)
-			);
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/Stop")
+            .Assign(stopButton)
+            .OnClicked(FUNCTION_BINDING(this, OnClickStop))
+            .Enabled(false)
+		);
     }
 }
 

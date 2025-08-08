@@ -757,7 +757,8 @@ namespace CE
                     curClass->functions.Add({
                         .name = "Get" + name,
                         .signature = "() const",
-                        .returnType = "const decltype(" + fieldPath + ")&",
+                        //.returnType = "const decltype(" + fieldPath + ")&",
+                        .returnType = "decltype(" + fieldPath + ")",
                         .isSignal = false,
                         .isEvent = false,
                         .attribs = {}

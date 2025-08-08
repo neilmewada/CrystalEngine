@@ -39,7 +39,7 @@
 			DirtyFunc;}\
 			return *this;\
 		}\
-		const auto& PropertyName() const { return this->m_##PropertyName; }
+		auto PropertyName() const { return this->m_##PropertyName; }
 
 #define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkLayoutDirty())
 
@@ -83,7 +83,7 @@
 		PropertyType m_##PropertyName = {};\
 		FUSION_EVENT(ScriptEvent<void(Object*)>, On##PropertyName##Updated)\
 	public:\
-		const auto& Get##PropertyName() const { return m_##PropertyName; }\
+		auto Get##PropertyName() const { return m_##PropertyName; }\
 		void Set##PropertyName(const PropertyType& value, Object* modifyingObject = nullptr) {\
 			m_##PropertyName = value; m_On##PropertyName##Updated(modifyingObject);\
 			thread_local const CE::Name propName = #PropertyName;\
@@ -98,7 +98,7 @@
 		WrappingVariable->PropertyName(value);\
 		return *this;\
 	}\
-	const auto& PropertyName() const { return WrappingVariable->PropertyName(); }
+	auto PropertyName() const { return WrappingVariable->PropertyName(); }
 
 #define FUSION_PROPERTY_WRAPPER2(PropertyName, WrappingVariable, WrappedPropertyName)\
 	Self& WrappedPropertyName(const __WRAPPED_PROP_TYPE(PropertyName, WrappingVariable)& value) {\
@@ -106,7 +106,7 @@
 		WrappingVariable->PropertyName(value);\
 		return *this;\
 	}\
-	const auto& WrappedPropertyName() const { return WrappingVariable->PropertyName(); }
+	auto WrappedPropertyName() const { return WrappingVariable->PropertyName(); }
 
 #define FUSION_DATA_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
 	FUSION_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\

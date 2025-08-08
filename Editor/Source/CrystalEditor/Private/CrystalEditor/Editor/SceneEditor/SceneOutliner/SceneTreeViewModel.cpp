@@ -33,7 +33,6 @@ namespace CE
             return {};
 
         return CreateIndex(row, column, parentActor->GetChild(row));
-
     }
 
     FModelIndex SceneTreeViewModel::GetParent(const FModelIndex& index)

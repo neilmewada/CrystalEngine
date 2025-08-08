@@ -192,11 +192,6 @@ namespace CE
 	{
 		if (!actor)
 			return;
-
-		for (ISceneCallbacks* callbacks : sceneCallbacks)
-		{
-			callbacks->OnSceneHierarchyUpdated(this);
-		}
 		
 		std::function<void(SceneComponent*)> recursivelyAddSceneComponents = [&](SceneComponent* sceneComponent)
         {
@@ -263,6 +258,11 @@ namespace CE
 
 		recursivelyAdd(actor);
 
+		for (ISceneCallbacks* callbacks : sceneCallbacks)
+		{
+			callbacks->OnSceneHierarchyUpdated(this);
+		}
+
 		if (isPlaying && !actor->hasBegunPlaying)
 		{
 			actor->OnBeginPlay();
@@ -273,11 +273,6 @@ namespace CE
 	{
 		if (!actor)
 			return;
-
-		for (ISceneCallbacks* callbacks : sceneCallbacks)
-		{
-			callbacks->OnSceneHierarchyUpdated(this);
-		}
         
 		std::function<void(SceneComponent*)> recursivelyRemoveSceneComponents = [&](SceneComponent* sceneComponent)
         {
@@ -352,6 +347,11 @@ namespace CE
         };
 		
 		recursivelyRemove(actor);
+
+		for (ISceneCallbacks* callbacks : sceneCallbacks)
+		{
+			callbacks->OnSceneHierarchyUpdated(this);
+		}
 	}
 
 	void CE::Scene::RegisterSceneComponent(SceneComponent* sceneComponent)

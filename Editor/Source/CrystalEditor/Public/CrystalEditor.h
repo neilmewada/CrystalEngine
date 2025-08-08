@@ -42,13 +42,10 @@
 // Crystal Editor
 // ------------------------------------------------
 
-// - Viewport -
+// - Common Dock Tabs -
 
 #include "CrystalEditor/Editor/DockTabs/EditorViewportTab.h"
-
-// - Details -
-
-#include "CrystalEditor/Editor/DockTabs/Details/DetailsTab.h"
+#include "CrystalEditor/Editor/DockTabs/DetailsTab.h"
 
 // - Asset Browser -
 
@@ -68,6 +65,7 @@
 #include "CrystalEditor/Editor/SceneEditor/SceneOutliner/SceneTreeViewModel.h"
 #include "CrystalEditor/Editor/SceneEditor/SceneOutliner/SceneTreeView.h"
 #include "CrystalEditor/Editor/SceneEditor/SceneOutliner/SceneOutlinerTab.h"
+#include "CrystalEditor/Editor/SceneEditor/ActorDetailsTab.h"
 #include "CrystalEditor/Editor/SceneEditor/SceneEditor.h"
 
 // - Material Editor -

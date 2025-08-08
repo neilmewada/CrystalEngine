@@ -12,8 +12,6 @@ namespace CE::Editor
     {
 	    Super::Construct();
 
-        AllowedDockspaces(FDockspaceFilter().WithDockTypeMask(FDockTypeMask::All));
-
         Title("DataAsset Editor");
 
         ToolBarEnabled(true);
@@ -23,6 +21,14 @@ namespace CE::Editor
             EditorToolBar::NewImageButton("/Editor/Assets/Icons/Save")
             .OnClicked(FUNCTION_BINDING(this, SaveChanges))
         );
+
+        minorDockspace->AddDockWindow(
+            FAssignNew(DetailsTab, detailsTab)
+        );
+
+        detailsTab->SetOwnerEditor(this);
+
+        return;
 
         minorDockspace->Child(
             FNew(FScrollBox)
@@ -81,7 +87,7 @@ namespace CE::Editor
 
         Title(title);
 
-        editorContainer->RemoveChildWidget();
+        //editorContainer->RemoveChildWidget();
 
         if (editor.IsValid())
         {
@@ -89,9 +95,11 @@ namespace CE::Editor
             editor = nullptr;
         }
 
-        editor = ObjectEditorRegistry::Get().Create(dataAsset.Get(), GetHistory());
-        editor->ExpandAll(true, true);
-        editorContainer->AddChild(editor.Get());
+        detailsTab->SetTargetObject(dataAsset);
+
+        //editor = ObjectEditorRegistry::Get().Create(dataAsset.Get(), GetHistory());
+        //editor->ExpandAll(true, true);
+        //editorContainer->AddChild(editor.Get());
     }
 
 } // namespace CE

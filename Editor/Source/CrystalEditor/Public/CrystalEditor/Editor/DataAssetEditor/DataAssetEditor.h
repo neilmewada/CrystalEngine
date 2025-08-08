@@ -28,6 +28,7 @@ namespace CE::Editor
 
         Ref<CE::DataAsset> targetAsset;
         Ref<ObjectEditor> editor;
+        Ref<DetailsTab> detailsTab;
 
         Ref<FStyledWidget> editorContainer;
     };
