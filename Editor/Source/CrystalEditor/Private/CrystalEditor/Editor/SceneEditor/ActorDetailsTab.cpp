@@ -5,7 +5,7 @@ namespace CE::Editor
 
     ActorDetailsTab::ActorDetailsTab()
     {
-
+        addComponentMenu = CreateDefaultSubobject<ActorComponentMenu>("AddComponentMenu");
     }
 
     void ActorDetailsTab::Construct()
@@ -58,7 +58,7 @@ namespace CE::Editor
                                 .FillRatio(1.0f),
 
                                 FNew(FButton)
-                                .OnClicked(FUNCTION_BINDING(this, OnAddComponentButtonClicked))
+                                .OnButtonClicked(FUNCTION_BINDING(this, OnAddComponentButtonClicked))
                                 .Child(
                                     FNew(FHorizontalStack)
                                     .ContentVAlign(VAlign::Center)
@@ -75,7 +75,7 @@ namespace CE::Editor
                                         .FontSize(fontSize - 1)
                                     )
                                 )
-                                .Height(18)
+                                .Height(17)
                             ),
 
                             FAssignNew(ComponentTreeView, treeView)
@@ -126,9 +126,9 @@ namespace CE::Editor
         }
     }
 
-    void ActorDetailsTab::OnAddComponentButtonClicked()
+    void ActorDetailsTab::OnAddComponentButtonClicked(FButton* button, Vec2 mousePos)
     {
-        
+        addComponentMenu->Show(button);
     }
 
     void ActorDetailsTab::SetSelectedActor(Actor* actor)

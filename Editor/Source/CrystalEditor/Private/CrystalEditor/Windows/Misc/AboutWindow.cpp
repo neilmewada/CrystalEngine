@@ -27,9 +27,6 @@ namespace CE::Editor
         splash.SetImageFit(FImageFit::Cover);
         splash.SetBrushPosition(Vec2(0.5f, 0.5f));
 
-        // Factors:
-        // VAlign, HAlign, TileX, TileY, Width, Height
-
         (*this)
 	        .Title("About Crystal Editor")
 	        .MinimizeEnabled(false)
