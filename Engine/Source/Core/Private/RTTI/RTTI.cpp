@@ -207,7 +207,7 @@ namespace CE
 				return displayName;
 		}
 
-        auto tempStr = name.GetString();
+        auto tempStr = name.GetLastComponent();
         displayName = "";
 
         for (int i = 0; i < tempStr.GetLength(); i++)

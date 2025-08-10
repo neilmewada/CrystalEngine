@@ -12,6 +12,8 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void OnPopupClosed() override;
+
     public: // - Public API -
 
         void Show(Ref<FButton> senderButton);
@@ -19,7 +21,9 @@ namespace CE::Editor
     protected: // - Internal -
 
         Ref<FTextInput> searchBox;
-        Ref<FVerticalStack> contentBox;
+
+        Ref<ActorComponentTreeView> treeView;
+        Ref<ActorComponentTreeViewModel> treeViewModel;
 
     public: // - Fusion Properties - 
 

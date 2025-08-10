@@ -660,7 +660,8 @@ namespace CE
 		}
 
         Array<TypeId> GetDerivedClassesTypeId() const;
-        Array<ClassType*> GetDerivedClasses() const;
+		Array<ClassType*> GetDerivedClasses() const;
+		Array<ClassType*> GetDirectDerivedClasses() const;
 
 	private:
 

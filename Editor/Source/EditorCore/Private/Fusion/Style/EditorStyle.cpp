@@ -326,7 +326,7 @@ namespace CE::Editor
 
 		GetDefaultWidget<EditorMenuPopup>()
 			.Style(menuPopup->GetName());
-
+		
 		GetDefaultWidget<ActorComponentMenu>()
 			.Style(menuPopup->GetName());
 

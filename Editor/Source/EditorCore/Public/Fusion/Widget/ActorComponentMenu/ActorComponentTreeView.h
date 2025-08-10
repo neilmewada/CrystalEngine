@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORCORE_API ActorComponentTreeView : public FListView
+    class EDITORCORE_API ActorComponentTreeView : public FTreeView
     {
-        CE_CLASS(ActorComponentTreeView, FListView)
+        CE_CLASS(ActorComponentTreeView, FTreeView)
     protected:
 
         ActorComponentTreeView();
@@ -17,7 +17,9 @@ namespace CE::Editor
 
     protected: // - Internal -
 
-        FListViewRow& GenerateRow();
+        FTreeViewRow& GenerateRow();
+
+        
 
     public: // - Fusion Properties - 
 

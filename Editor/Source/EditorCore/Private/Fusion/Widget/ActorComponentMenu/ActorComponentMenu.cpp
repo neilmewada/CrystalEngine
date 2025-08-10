@@ -12,29 +12,32 @@ namespace CE::Editor
     {
         Super::Construct();
 
-        MinWidth(200);
+        Width(200);
+        Height(150);
+
+        treeViewModel = CreateObject<ActorComponentTreeViewModel>(this, "ActorComponentTreeViewModel");
 
         Content(
             FAssignNew(FTextInput, searchBox),
 
-            FNew(FScrollBox)
-            .FillRatio(1.0f)
-            .Height(300)
+            FAssignNew(ActorComponentTreeView, treeView)
+            .Model(treeViewModel)
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
-            (
-                FAssignNew(FVerticalStack, contentBox)
-                .HAlign(HAlign::Fill)
-                .VAlign(VAlign::Top)
-            )
+            .FillRatio(1.0f)
         );
+    }
+
+    void ActorComponentMenu::OnPopupClosed()
+    {
+	    Super::OnPopupClosed();
+
+
     }
 
     void ActorComponentMenu::Show(Ref<FButton> senderButton)
     {
         ClosePopup();
-
-        contentBox->DestroyAllChildren();
 
         if (!senderButton)
             return;
@@ -46,8 +49,6 @@ namespace CE::Editor
         // TODO: Build content
 
         ClassType* base = ActorComponent::StaticClass();
-
-        
 
         context->PushLocalPopup(this, senderButton->GetGlobalPosition() + Vec2(0, senderButton->GetComputedSize().height),
             Vec2(), senderButton->GetComputedSize());
