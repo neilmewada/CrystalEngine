@@ -122,7 +122,7 @@ namespace CE::Editor
 
         if (!item)
             return;
-
+        
         if (Actor* actor = item->GetActor())
         {
             editor = ObjectEditorRegistry::Get().Create(actor, GetOwnerEditor()->GetHistory());

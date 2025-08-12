@@ -321,8 +321,8 @@ namespace CE::Editor
         gEngine->GetSceneSubsystem()->AddCallbacks(this);
 
         ConstructDockspaces();
-    	//LoadSandboxScene();
-        LoadEmptyScene();
+    	LoadSandboxScene();
+        //LoadEmptyScene();
     }
 
     void SceneEditor::OnBeginDestroy()
@@ -649,7 +649,7 @@ namespace CE::Editor
 
             EditorToolBar::NewImageButton("/Editor/Assets/Icons/AddObject")
             .Assign(addActorButton)
-            .OnClicked(FUNCTION_BINDING(this, OnClickAddActorMenuButton)),
+            .OnClicked(FUNCTION_BINDING(this, OnClickAddActorMenuButton))/*,
 
             EditorToolBar::NewImageButton("/Editor/Assets/Icons/Play")
             .Assign(playButton)
@@ -663,7 +663,7 @@ namespace CE::Editor
             EditorToolBar::NewImageButton("/Editor/Assets/Icons/Stop")
             .Assign(stopButton)
             .OnClicked(FUNCTION_BINDING(this, OnClickStop))
-            .Enabled(false)
+            .Enabled(false)*/
 		);
     }
 }
