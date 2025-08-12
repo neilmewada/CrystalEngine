@@ -18,6 +18,9 @@ namespace CE::Editor
         FUNCTION()
         void OnAddComponentButtonClicked(FButton* button, Vec2 mousePos);
 
+        FUNCTION()
+        void AddNewComponent(ClassType* componentClass);
+
     public: // - Public API -
 
         void SetSelectedActor(Actor* actor);
@@ -31,7 +34,7 @@ namespace CE::Editor
         FCompoundWidget* detailsContainer = nullptr;
         FStyledWidget* editorContainer = nullptr;
         Ref<ObjectEditor> editor = nullptr;
-        Ref<ActorComponentMenu> addComponentMenu;
+        Ref<AddComponentMenu> addComponentMenu;
 
         FLabel* actorName = nullptr;
         ComponentTreeView* treeView = nullptr;

@@ -5,7 +5,7 @@ namespace CE::Editor
 
     ActorDetailsTab::ActorDetailsTab()
     {
-        addComponentMenu = CreateDefaultSubobject<ActorComponentMenu>("AddComponentMenu");
+        addComponentMenu = CreateDefaultSubobject<AddComponentMenu>("AddComponentMenu");
     }
 
     void ActorDetailsTab::Construct()
@@ -15,6 +15,8 @@ namespace CE::Editor
         ConstructMinorDockWindow();
 
         const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
+        addComponentMenu->OnComponentClassSelected(FUNCTION_BINDING(this, AddNewComponent));
 
         (*this)
 		.Title("Details")
@@ -118,9 +120,18 @@ namespace CE::Editor
             editor = nullptr;
         }
 
-        if (item && item->GetActor())
+        if (!item)
+            return;
+
+        if (Actor* actor = item->GetActor())
         {
-            editor = ObjectEditorRegistry::Get().Create(item->GetActor(), GetOwnerEditor()->GetHistory());
+            editor = ObjectEditorRegistry::Get().Create(actor, GetOwnerEditor()->GetHistory());
+
+            editorContainer->AddChild(editor.Get());
+        }
+        else if (ActorComponent* component = item->GetComponent())
+        {
+            editor = ObjectEditorRegistry::Get().Create(component, GetOwnerEditor()->GetHistory());
 
             editorContainer->AddChild(editor.Get());
         }
@@ -129,6 +140,87 @@ namespace CE::Editor
     void ActorDetailsTab::OnAddComponentButtonClicked(FButton* button, Vec2 mousePos)
     {
         addComponentMenu->Show(button);
+    }
+
+    void ActorDetailsTab::AddNewComponent(ClassType* componentClass)
+    {
+        if (!componentClass || !componentClass->IsSubclassOf<ActorComponent>())
+            return;
+        if (!componentClass->CanBeInstantiated())
+            return;
+
+        Ref<ComponentTreeItem> selectedItem = treeView->GetSelectedItem();
+        if (!selectedItem)
+        {
+            selectedItem = treeView->GetActorItem();
+        }
+
+        String newComponentName = FixObjectName(componentClass->GetName().GetLastComponent());
+
+        if (selectedItem->IsActor())
+        {
+            Ref<Actor> actor = selectedItem->GetActor();
+
+            if (componentClass->IsSubclassOf<SceneComponent>())
+            {
+                Ref<SceneComponent> sceneComponent = CreateObject<SceneComponent>(actor.Get(), newComponentName, OF_NoFlags, componentClass);
+                if (actor->GetRootComponent() == nullptr)
+                {
+                    actor->SetRootComponent(sceneComponent.Get());
+                }
+                else
+                {
+                    actor->GetRootComponent()->SetupAttachment(sceneComponent.Get());
+                }
+            }
+            else
+            {
+                Ref<ActorComponent> component = CreateObject<ActorComponent>(actor.Get(), newComponentName, OF_NoFlags, componentClass);
+                actor->AttachComponent(component.Get());
+            }
+        }
+        else if (selectedItem->IsSceneComponent())
+        {
+            Ref<SceneComponent> sceneComponent = (SceneComponent*)selectedItem->GetComponent();
+
+            if (componentClass->IsSubclassOf<SceneComponent>())
+            {
+                Ref<SceneComponent> newComponent = CreateObject<SceneComponent>(sceneComponent.Get(), newComponentName, OF_NoFlags, componentClass);
+                sceneComponent->SetupAttachment(newComponent.Get());
+            }
+            else if (Ref<Actor> actor = sceneComponent->GetActor())
+            {
+                Ref<SceneComponent> newComponent = CreateObject<SceneComponent>(actor.Get(), newComponentName, OF_NoFlags, componentClass);
+                actor->AttachComponent(newComponent.Get());
+            }
+        }
+        else if (selectedItem->IsActorComponent())
+        {
+            Ref<ActorComponent> component = selectedItem->GetComponent();
+
+            if (componentClass->IsSubclassOf<SceneComponent>())
+            {
+                if (Ref<Actor> actor = component->GetActor())
+                {
+                    Ref<SceneComponent> newComponent = CreateObject<SceneComponent>(component.Get(), newComponentName, OF_NoFlags, componentClass);
+                    if (actor->GetRootComponent() == nullptr)
+                    {
+                        actor->SetRootComponent(newComponent.Get());
+                    }
+                    else
+                    {
+                        actor->GetRootComponent()->SetupAttachment(newComponent.Get());
+                    }
+                }
+            }
+            else if (Ref<Actor> actor = component->GetActor())
+            {
+                Ref<ActorComponent> newComponent = CreateObject<ActorComponent>(actor.Get(), newComponentName, OF_NoFlags, componentClass);
+                actor->AttachComponent(newComponent.Get());
+            }
+        }
+
+        treeView->Update();
     }
 
     void ActorDetailsTab::SetSelectedActor(Actor* actor)

@@ -27,21 +27,6 @@ namespace CE::Editor
         );
 
         detailsTab->SetOwnerEditor(this);
-
-        return;
-
-        minorDockspace->Child(
-            FNew(FScrollBox)
-            .VerticalScroll(true)
-            .HorizontalScroll(false)
-            .HAlign(HAlign::Fill)
-            .VAlign(VAlign::Fill)
-            (
-                FAssignNew(FStyledWidget, editorContainer)
-                .HAlign(HAlign::Fill)
-                .VAlign(VAlign::Top)
-            )
-        );
     }
 
     ClassType* DataAssetEditor::GetTargetObjectType() const

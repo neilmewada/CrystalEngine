@@ -3,12 +3,12 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORCORE_API ActorComponentMenu : public EditorMenuPopup
+    class EDITORCORE_API AddComponentMenu : public EditorMenuPopup
     {
-        CE_CLASS(ActorComponentMenu, EditorMenuPopup)
+        CE_CLASS(AddComponentMenu, EditorMenuPopup)
     protected:
 
-        ActorComponentMenu();
+        AddComponentMenu();
 
         void Construct() override;
 
@@ -22,15 +22,16 @@ namespace CE::Editor
 
         Ref<FTextInput> searchBox;
 
-        Ref<ActorComponentTreeView> treeView;
-        Ref<ActorComponentTreeViewModel> treeViewModel;
+        Ref<AddComponentTreeView> treeView;
+        Ref<AddComponentTreeViewModel> treeViewModel;
 
     public: // - Fusion Properties - 
 
+        FUSION_PROPERTY(ScriptDelegate<void(ClassType*)>, OnComponentClassSelected);
 
         FUSION_WIDGET;
     };
     
 }
 
-#include "ActorComponentMenu.rtti.h"
+#include "AddComponentMenu.rtti.h"

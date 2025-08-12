@@ -3,12 +3,12 @@
 namespace CE::Editor
 {
 
-    ActorComponentTreeView::ActorComponentTreeView()
+    AddComponentTreeView::AddComponentTreeView()
     {
 
     }
 
-    void ActorComponentTreeView::Construct()
+    void AddComponentTreeView::Construct()
     {
         Super::Construct();
 
@@ -19,7 +19,7 @@ namespace CE::Editor
         Style("TreeView");
     }
 
-    FTreeViewRow& ActorComponentTreeView::GenerateRow()
+    FTreeViewRow& AddComponentTreeView::GenerateRow()
     {
         const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
 

@@ -23,6 +23,8 @@ namespace CE::Editor
 
         bool IsActor() const { return actor != nullptr && component == nullptr; }
 
+        bool IsActorComponent() const { return component != nullptr && !IsActor() && !IsSceneComponent(); }
+
     protected:
 
         Actor* actor = nullptr;

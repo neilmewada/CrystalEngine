@@ -3,12 +3,12 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORCORE_API ActorComponentTreeView : public FTreeView
+    class EDITORCORE_API AddComponentTreeView : public FTreeView
     {
-        CE_CLASS(ActorComponentTreeView, FTreeView)
+        CE_CLASS(AddComponentTreeView, FTreeView)
     protected:
 
-        ActorComponentTreeView();
+        AddComponentTreeView();
 
         void Construct() override;
 
@@ -19,8 +19,6 @@ namespace CE::Editor
 
         FTreeViewRow& GenerateRow();
 
-        
-
     public: // - Fusion Properties - 
 
 
@@ -29,4 +27,4 @@ namespace CE::Editor
     
 }
 
-#include "ActorComponentTreeView.rtti.h"
+#include "AddComponentTreeView.rtti.h"

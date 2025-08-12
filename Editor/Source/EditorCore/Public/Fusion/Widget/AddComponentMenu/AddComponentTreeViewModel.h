@@ -3,12 +3,12 @@
 namespace CE::Editor
 {
     CLASS()
-    class EDITORCORE_API ActorComponentTreeViewModel : public FTreeViewModel
+    class EDITORCORE_API AddComponentTreeViewModel : public FTreeViewModel
     {
-        CE_CLASS(ActorComponentTreeViewModel, FTreeViewModel)
+        CE_CLASS(AddComponentTreeViewModel, FTreeViewModel)
     protected:
 
-        ActorComponentTreeViewModel();
+        AddComponentTreeViewModel();
 
 	public:
 
@@ -18,11 +18,16 @@ namespace CE::Editor
         u32 GetColumnCount(const FModelIndex& parent) override;
         void SetData(u32 row, FWidget& rowWidget, const FModelIndex& parent) override;
 
+        bool IsFiltered() const { return filter.NotEmpty(); }
+
+        void SetFilter(const String& filter);
+
     private:
 
-        
+        String filter = "";
+        Array<ClassType*> filteredList;
     };
     
 } // namespace CE
 
-#include "ActorComponentTreeViewModel.rtti.h"
+#include "AddComponentTreeViewModel.rtti.h"

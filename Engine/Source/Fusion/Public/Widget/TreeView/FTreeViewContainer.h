@@ -35,6 +35,8 @@ namespace CE
 
         void ExpandRow(const FModelIndex& index, bool recursive = true);
 
+        void ExpandAllRows();
+
         Ref<FTreeViewRow> FindRow(const FModelIndex& index);
 
     protected:

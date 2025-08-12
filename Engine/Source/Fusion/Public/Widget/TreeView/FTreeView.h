@@ -29,6 +29,8 @@ namespace CE
 
         void ExpandRow(const FModelIndex& index, bool recursive);
 
+        void ExpandAllRows();
+
     protected:
 
         FTreeView();
@@ -63,7 +65,7 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(float, ScrollBarWidth);
         FUSION_LAYOUT_PROPERTY(float, ScrollBarMargin);
 
-        FUSION_PROPERTY(Ref<FAbstractItemModel>, Model);
+        FUSION_PROPERTY(Ref<FTreeViewModel>, Model);
         FUSION_PROPERTY(Ref<FItemSelectionModel>, SelectionModel);
 
         FUSION_PROPERTY(int, ExpandableColumn);

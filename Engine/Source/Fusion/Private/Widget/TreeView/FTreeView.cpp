@@ -65,6 +65,11 @@ namespace CE
         container->ExpandRow(index, recursive);
     }
 
+    void FTreeView::ExpandAllRows()
+    {
+        container->ExpandAllRows();
+    }
+
     void FTreeView::OnFusionPropertyModified(const CE::Name& propertyName)
     {
 	    Super::OnFusionPropertyModified(propertyName);
@@ -74,6 +79,11 @@ namespace CE
 
         if (propertyName == model)
         {
+            if (m_Model)
+            {
+                m_Model->treeView = this;
+                m_Model->OnTreeViewAssigned();
+            }
             MarkLayoutDirty();
         }
     }

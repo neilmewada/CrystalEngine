@@ -372,6 +372,8 @@ namespace CE::Editor
 
     void SceneEditor::OnClickPlay()
     {
+        return;
+
         gEngine->GetSceneSubsystem()->PlayActiveScene();
         sandboxScene->GetPhysicsScene()->SetSimulationEnabled(true);
 
@@ -382,6 +384,8 @@ namespace CE::Editor
 
     void SceneEditor::OnClickPause()
     {
+        return;
+
         sandboxScene->GetPhysicsScene()->SetSimulationEnabled(false);
 
         playButton->Enabled(true);
@@ -391,6 +395,8 @@ namespace CE::Editor
 
     void SceneEditor::OnClickStop()
     {
+        return;
+
         // TODO: Restore scene to original state
 
         playButton->Enabled(true);

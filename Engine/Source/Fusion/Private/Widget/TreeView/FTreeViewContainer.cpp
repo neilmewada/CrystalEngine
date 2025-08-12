@@ -87,6 +87,28 @@ namespace CE
         }
     }
 
+    void FTreeViewContainer::ExpandAllRows()
+    {
+        if (Ref<FAbstractItemModel> model = treeView->Model())
+        {
+            std::function<void(const FModelIndex&)> visitor = [&](const FModelIndex& parent)
+                {
+                    int rows = model->GetRowCount(parent);
+                    for (int i = 0; i < rows; ++i)
+                    {
+                        FModelIndex index = model->GetIndex(i, 0, parent);
+                        if (index.IsValid() && index.GetData().HasValue())
+                        {
+                            expandedRows.Add(index);
+                            visitor(index);
+                        }
+                    }
+                };
+
+            visitor({});
+        }
+    }
+
     Ref<FTreeViewRow> FTreeViewContainer::FindRow(const FModelIndex& index)
     {
         if (rowCache.KeyExists(index))
