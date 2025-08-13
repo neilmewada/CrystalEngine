@@ -1,0 +1,13 @@
+#pragma kernel CSMain
+
+// SRG includes
+#include "Core/Macros.hlsli"
+
+RWTexture2D<float4> _TextureTest : SRG_PerPass(u0);
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 tid : SV_DispatchThreadID)
+{
+    const uint2 uv = tid.xy;
+    _TextureTest[uv] = float4(_TextureTest[uv].r, _TextureTest[uv].g * 0.1, 0, 1);
+}

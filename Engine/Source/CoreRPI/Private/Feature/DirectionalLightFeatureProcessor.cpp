@@ -27,7 +27,7 @@ namespace CE::RPI
         constants.viewProjectionMatrix = viewProjectionMatrix;
         constants.viewPosition = viewPosition;
         constants.pixelResolution = pixelResolution.ToVec2();
-
+        
         view->UpdateSrg(imageIndex);
     }
 
@@ -58,7 +58,6 @@ namespace CE::RPI
     {
         DirectionalLightHandle handle = lightInstances.Insert({});
         handle->scene = GetScene();
-        
 
         return handle;
     }

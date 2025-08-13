@@ -397,10 +397,6 @@ namespace CE::Vulkan
 
 				HashMap<RHI::ScopeAttachment*, RHI::ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerRhiScope, current);
 
-				// TODO: Add support for Compute Shader barriers
-				// Currently, Shader attachments only consider Vertex/Fragment shaders
-				// We can use producerScope and current to determine which one is a Raster pass or a compute pass
-
 				for (auto [from, to] : commonAttachments)
 				{
 					Scope::Barrier barrier{};

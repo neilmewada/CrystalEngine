@@ -6,7 +6,7 @@ namespace CE::RPI
 	{
 		Vec4 ambientColor{};
 		u32 totalDirectionalLights;
-		u32 totalPointLights;
+		u32 totalLocalLights;
 	};
 
 	CLASS(Abstract)

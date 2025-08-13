@@ -71,6 +71,7 @@ namespace CE::RPI
 #include "Feature/FeatureProcessorRegistry.h"
 #include "Feature/LightFeatureProcessor.h"
 #include "Feature/DirectionalLightFeatureProcessor.h"
+#include "Feature/LocalLightFeatureProcessor.h"
 #include "Feature/StaticMeshFeatureProcessor.h"
 
 #include "Scene.h"

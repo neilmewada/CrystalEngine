@@ -154,12 +154,10 @@ Shader "PBR/Standard"
                     light.viewDir = viewDir;
                     light.halfway = normalize(viewDir + light.lightDir);
 
-                    float4 lightSpacePos = mul(float4(input.worldPos, 1.0), _DirectionalLights[i].lightSpaceMatrix);
-                    // Disable shadows temporarily
                     float shadow = 0.0;
                     if (_DirectionalLights[i].shadow > 0)
                     {
-                        // TODO: Add shadow
+                        float4 lightSpacePos = mul(float4(input.worldPos, 1.0), _DirectionalLights[i].lightSpaceMatrix);
                         shadow = CalculateDirectionalShadow(lightSpacePos, dot(vertNormal, light.lightDir));
                     }
                     shadow = clamp(shadow, 0, 1);

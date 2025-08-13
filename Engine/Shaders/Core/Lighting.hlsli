@@ -16,38 +16,55 @@ struct DirectionalLight
     uint shadow;
 };
 
-struct PointLight
-{
-    float4 position;
-    float4 colorAndIntensity;
-    float radius;
-    float attenuation;
-};
-
 cbuffer _DirectionalLightsArray : SRG_PerScene(b0)
 {
     DirectionalLight _DirectionalLights[MAX_DIRECTIONAL_LIGHTS];
 };
 
-StructuredBuffer<PointLight> _PointLights : SRG_PerScene(t1);
-
-cbuffer _LightData : SRG_PerScene(b2)
+enum LocalLightType : uint
 {
-    float4 ambient;
-    uint totalDirectionalLights;
-    uint totalPointLights;
+    LocalLightType_Point,
+    LocalLightType_Spot
 };
 
-SamplerState _ShadowMapSampler : SRG_PerScene(s3);
+struct LocalLightData
+{
+    // xyz = world position, w = range (meters)
+    float4 worldPosAndRange;
+
+    // xyz = color * intensity (linear RGB), w = (optional: unused or intensity if you prefer)
+    float4 colorAndIntensity;
+
+    // xyz = world-space spot direction (normalized), w = unused
+    float4 spotLightDirection;
+
+    // radians (outer cone half-angle for spots). For points, set <= 0
+    float  spotLightAngle;
+
+    // 0 = point, 1 = spot
+    LocalLightType type;
+};
 
 // - Per Pass -
 Texture2D<float> _DirectionalShadowMap : SRG_PerPass(t0);
 
-TextureCube<float4> _Skybox : SRG_PerScene(t5);
-SamplerState _DefaultSampler : SRG_PerScene(s6);
-TextureCube<float4> _SkyboxIrradiance : SRG_PerScene(t7);
-SamplerState _SkyboxSampler : SRG_PerScene(s8);
-Texture2D<float2> _BrdfLut : SRG_PerScene(s9);
+TextureCube<float4> _Skybox : SRG_PerScene(t1);
+SamplerState _DefaultSampler : SRG_PerScene(s2);
+TextureCube<float4> _SkyboxIrradiance : SRG_PerScene(t3);
+SamplerState _SkyboxSampler : SRG_PerScene(s4);
+Texture2D<float2> _BrdfLut : SRG_PerScene(s5);
+
+StructuredBuffer<LocalLightData> _LocalLights : SRG_PerScene(t6);
+
+// index into _LocalLights
+StructuredBuffer<uint> _LightIndexPool : SRG_PerScene(t7);
+
+// {offset, count}
+StructuredBuffer<uint2> _TileHeaders : SRG_PerScene(t8);
+
+
+
+SamplerState _ShadowMapSampler : SRG_PerScene(s10);
 
 float CalculateDirectionalShadow(in float4 lightSpacePos, in float NdotL)
 {
