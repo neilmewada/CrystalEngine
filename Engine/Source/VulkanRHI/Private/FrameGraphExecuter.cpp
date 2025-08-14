@@ -662,9 +662,13 @@ namespace CE::Vulkan
 								}
 
 								if (currentScope->passShaderResourceGroup)
+								{
 									commandList->SetShaderResourceGroup(currentScope->passShaderResourceGroup);
+								}
 								if (currentScope->subpassShaderResourceGroup)
+								{
 									commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
+								}
 
 								const auto& drawItemProperties = drawList->GetDrawItem(i);
 								const RHI::DrawItem* drawItem = drawItemProperties.item;
@@ -709,12 +713,12 @@ namespace CE::Vulkan
 										commandList->SetRootConstants(0, (u32)drawItem->rootConstantSize / 4, drawItem->rootConstants);
 									}
 									
-									if (drawItem->arguments.type == RHI::DrawArgumentsType::DrawArgumentsIndexed)
+									if (drawItem->arguments.type == DrawArgumentsIndexed)
 									{
 										commandList->BindIndexBuffer(*drawItem->indexBufferView);
 										commandList->DrawIndexed(drawItem->arguments.indexedArgs);
 									}
-									else if (drawItem->arguments.type == RHI::DrawArgumentsType::DrawArgumentsLinear)
+									else if (drawItem->arguments.type == DrawArgumentsLinear)
 									{
 										commandList->DrawLinear(drawItem->arguments.linearArgs);
 									}
@@ -795,7 +799,6 @@ namespace CE::Vulkan
 				{
 					commandList->ClearShaderResourceGroups();
 
-					// TODO: Add compute pass
 					RHI::PipelineState* pipelineToUse = nullptr;
 
 					for (RHI::PipelineState* pipeline : currentScope->usePipelines)
@@ -820,7 +823,7 @@ namespace CE::Vulkan
 						if (currentScope->subpassShaderResourceGroup)
 							commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
 
-						commandList->CommitShaderResources();;
+						commandList->CommitShaderResources();
 
 						commandList->Dispatch(Math::Max((u32)1, currentScope->groupCountX),
 							Math::Max((u32)1, currentScope->groupCountY),

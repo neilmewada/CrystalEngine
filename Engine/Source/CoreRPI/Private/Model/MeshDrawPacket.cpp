@@ -160,6 +160,12 @@ namespace CE::RPI
 
 			const auto& shaderReflection = variant->GetShaderReflection();
 
+			if (drawListTag == RPISystem::Get().GetBuiltinDrawListTag(BuiltinDrawItemTag::Opaque) && 
+				!shaderReflection.srgLayouts.Exists([](const ShaderResourceGroupLayout& l) { return l.srgType == SRGType::PerPass; }))
+			{
+				String::IsAlphabet('a');
+			}
+
 			RHI::DrawPacketBuilder::DrawItemRequest drawItem{};
 			drawItem.drawFilterMask = RHI::DrawFilterMask::ALL;
 			drawItem.drawItemTag = drawListTag;

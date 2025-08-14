@@ -13,6 +13,34 @@ namespace CE
 	    
     }
 
+    void MainRenderPipeline::OnAfterConstruct()
+    {
+	    Super::OnAfterConstruct();
+
+        if (RHI::gDynamicRHI == nullptr)
+            return;
+
+	    for (int i = 0; i < cullingParamsBuffer.GetSize(); ++i)
+	    {
+            RHI::BufferDescriptor desc{};
+            desc.bindFlags = BufferBindFlags::ConstantBuffer;
+            desc.bufferSize = sizeof(CullingParams);
+            desc.defaultHeapType = MemoryHeapType::Upload;
+            desc.name = "CullingParams Buffer";
+            cullingParamsBuffer[i] = RHI::gDynamicRHI->CreateBuffer(desc);
+	    }
+    }
+
+    void MainRenderPipeline::OnBeforeDestroy()
+    {
+	    Super::OnBeforeDestroy();
+
+	    for (int i = 0; i < cullingParamsBuffer.GetSize(); ++i)
+	    {
+            delete cullingParamsBuffer[i]; cullingParamsBuffer[i] = nullptr;
+	    }
+    }
+
     void MainRenderPipeline::ConstructPipeline()
     {
 	    Super::ConstructPipeline();
@@ -23,6 +51,18 @@ namespace CE
 	    RPI::ParentPass* rootPass = passTree->GetRootPass();
 
     	RPI::PassAttachment* pipelineOutput = renderPipeline->FindAttachment("PipelineOutput");
+
+        auto assetManager = AssetManager::Get();
+
+        if (tileCullingComputeShader == nullptr)
+        {
+            tileCullingComputeShader = assetManager->LoadAssetAtPath<CE::ComputeShader>("/Engine/Assets/Shaders/PBR/ComputeTiledLightList");
+
+            if (tileCullingComputeShader.IsValid())
+            {
+                
+            }
+        }
 
         // -------------------------------
         // Transient Attachments
@@ -116,7 +156,7 @@ namespace CE
             directionalShadowMapDesc.imageDescriptor.sampleCount = 1;
             directionalShadowMapDesc.imageDescriptor.bindFlags = TextureBindFlags::Depth | TextureBindFlags::ShaderRead;
             directionalShadowMapDesc.fallbackFormats = { Format::D32_SFLOAT_S8_UINT, Format::D24_UNORM_S8_UINT, Format::D16_UNORM, Format::D16_UNORM_S8_UINT };
-
+            
             directionalShadowMap = renderPipeline->AddAttachment(directionalShadowMapDesc);
 	    }
 
@@ -284,8 +324,6 @@ namespace CE
 	    }
 
     	// - Test Compute Pass -
-
-    	auto assetManager = AssetManager::Get();
 
 	    if (false)
     	{

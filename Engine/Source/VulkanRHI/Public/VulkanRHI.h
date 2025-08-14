@@ -9,7 +9,6 @@ typedef VkInstance_T* VkInstance;
 struct VkDebugUtilsMessengerEXT_T;
 typedef VkDebugUtilsMessengerEXT_T* VkDebugUtilsMessengerEXT;
 
-
 namespace CE::Vulkan
 {
     class VulkanDevice;

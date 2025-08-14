@@ -257,6 +257,24 @@ namespace CE::Editor
                 directionalLight->SetLightColor(Colors::White);
             }
 
+            constexpr int NumLights = 9;
+            constexpr std::array<Vec3, NumLights> LightPos = { Vec3(-2, 0, -2), Vec3(0, 0, -2), Vec3(2, 0, -2),
+	            Vec3(-2, 0, 0), Vec3(0, 0, 0), Vec3(2, 0, 0),
+	            Vec3(-2, 0, 2), Vec3(0, 0, 2), Vec3(2, 0, 2) };
+
+            for (int i = 0; i < NumLights; ++i)
+            {
+                PointLight* pointLight = CreateObject<PointLight>(scene, "PointLight");
+                scene->AddActor(pointLight);
+                {
+                    Ref<PointLightComponent> pointLightComponent = pointLight->GetPointLightComponent();
+                    pointLightComponent->SetLocalPosition(Vec3(LightPos[i].x, 1, LightPos[i].z));
+                    pointLightComponent->SetRange(2.5f);
+                    pointLightComponent->SetLightColor(Colors::White);
+                    pointLightComponent->SetIntensity(10);
+                }
+            }
+
             CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
             camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 0));
             scene->AddActor(camera);

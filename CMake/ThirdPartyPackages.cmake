@@ -5,32 +5,7 @@ find_package(Git REQUIRED)
 set(BUILD_SHARED_LIBS OFF)
 option(BUILD_SHARED_LIBS OFF)
 
-# 3rd Party Packages
-#find_package(xxHash REQUIRED)
-#find_package(spdlog REQUIRED)
-#find_package(efsw REQUIRED)
-#find_package(zip REQUIRED)
-#find_package(crcpp REQUIRED)
-#find_package(stb REQUIRED)
-#find_package(miniz REQUIRED)
-#find_package(freetype REQUIRED)
-#find_package(assimp REQUIRED)
-
-# Enable these
-#find_package(dxcompiler REQUIRED)
 find_package(ispctexturecompressor REQUIRED)
-
-#FetchContent_Declare(
-#    tracy
-#    GIT_REPOSITORY https://github.com/wolfpld/tracy.git
-#    GIT_TAG master
-#    GIT_SHALLOW TRUE
-#    GIT_PROGRESS TRUE
-#)
-#FetchContent_MakeAvailable(tracy)
-
-# SDL2
-#find_package(sdl REQUIRED)
 
 # Vulkan
 if(${PAL_TRAIT_VULKAN_SUPPORTED})

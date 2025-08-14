@@ -30,7 +30,7 @@ namespace CE::RPI
 			return variant->GetPipeline();
 		}
 
-		RPI::ShaderVariant* AddVariant(const ShaderVariantDescriptor2& variantDesc);
+		RPI::ShaderVariant* AddVariant(const ShaderVariantDescriptor& variantDesc);
 
 		inline u32 GetDefaultVariantIndex() const { return defaultVariantIndex; }
 

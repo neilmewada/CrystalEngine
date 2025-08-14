@@ -487,7 +487,7 @@ namespace CE
         JsonSerializer::Deserialize2(vertexShaderJson, vertexReflection);
         JsonSerializer::Deserialize2(fragmentShaderJson, fragmentReflection);
 
-        RPI::ShaderVariantDescriptor2 variantDesc{};
+        RPI::ShaderVariantDescriptor variantDesc{};
         variantDesc.interleaveVertexData = true;
         variantDesc.shaderName = "FusionShader";
         variantDesc.entryPoints.Resize(2);
@@ -620,7 +620,7 @@ namespace CE
         JsonSerializer::Deserialize2(vertexShaderJson, vertexReflection);
         JsonSerializer::Deserialize2(fragmentShaderJson, fragmentReflection);
 
-        RPI::ShaderVariantDescriptor2 variantDesc{};
+        RPI::ShaderVariantDescriptor variantDesc{};
         variantDesc.interleaveVertexData = true;
         variantDesc.shaderName = "FusionSDFGlyphGen";
         variantDesc.entryPoints.Resize(2);

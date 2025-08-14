@@ -97,7 +97,7 @@ namespace CE
 				{
 					const CE::ShaderVariant& variant = shaderPass->variants[j];
 
-					RPI::ShaderVariantDescriptor2 variantDesc{};
+					RPI::ShaderVariantDescriptor variantDesc{};
 					variantDesc.shaderName = shaderPass->passName;
 					variantDesc.reflectionInfo = variant.reflectionInfo;
 					variantDesc.tags = {};

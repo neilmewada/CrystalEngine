@@ -66,6 +66,8 @@ namespace CE::Editor
 #include "GameFramework/SceneComponent.h"
 #include "GameFramework/LightComponent.h"
 #include "GameFramework/DirectionalLightComponent.h"
+#include "GameFramework/LocalLightComponent.h"
+#include "GameFramework/PointLightComponent.h"
 #include "GameFramework/GeometryComponent.h"
 #include "GameFramework/MeshComponent.h"
 #include "GameFramework/StaticMeshComponent.h"
@@ -77,6 +79,7 @@ namespace CE::Editor
 #include "GameFramework/CameraActor.h"
 #include "GameFramework/Light.h"
 #include "GameFramework/DirectionalLight.h"
+#include "GameFramework/PointLight.h"
 
 // Scene
 #include "Engine/Scene.h"

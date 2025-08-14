@@ -15,7 +15,7 @@ namespace CE::RPI
 		if (!flags.initialized)
 			return;
 
-		views.Clear();
+		shadowViews.Clear();
 		flags.initialized = false;
 	}
 
@@ -60,6 +60,26 @@ namespace CE::RPI
 		tileHeaders.Shutdown();
     }
 
+	LocalLightHandle LocalLightFeatureProcessor::AcquireLight(const LocalLightHandleDescriptor& desc)
+	{
+		LocalLightHandle handle = lightInstances.Insert({});
+		handle->scene = scene;
+
+		return handle;
+	}
+
+	bool LocalLightFeatureProcessor::ReleaseLight(LocalLightHandle& handle)
+	{
+		if (handle.IsValid())
+		{
+			handle->Deinit(this);
+			lightInstances.Remove(handle);
+			return true;
+		}
+
+		return false;
+	}
+
     void LocalLightFeatureProcessor::Simulate(const SimulatePacket& packet)
     {
 		Super::Simulate(packet);
@@ -79,16 +99,23 @@ namespace CE::RPI
 
 			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 			{
-				sceneSrg->Bind(i, "_LocalLights", localLights.GetBuffer(i));
-				sceneSrg->Bind(i, "_LightIndexPool", lightIndexPool.GetBuffer(i));
-				sceneSrg->Bind(i, "_TileHeaders", tileHeaders.GetBuffer(i));
+				//sceneSrg->Bind(i, "_LocalLights", localLights.GetBuffer(i));
+				//sceneSrg->Bind(i, "_LightIndexPool", lightIndexPool.GetBuffer(i));
+				//sceneSrg->Bind(i, "_TileHeaders", tileHeaders.GetBuffer(i));
 			}
 
 			sceneSrg->FlushBindings();
 			initialized = true;
 		}
 
-		scene->GetLightConstants().totalLocalLights = lightInstances.GetCount();
+		constexpr u32 MaxResolution = 4096;
+		constexpr u32 LightIndexPoolCapacity = (MaxResolution * MaxResolution) / (Limits::LocalLightTileSize * Limits::LocalLightTileSize) * Limits::MaxLightsPerTile;
+
+		auto& lightConstants = scene->GetLightConstants();
+		lightConstants.totalLocalLights = lightInstances.GetCount();
+		lightConstants.tileSizeX = lightConstants.tileSizeY = Limits::LocalLightTileSize;
+		lightConstants.lightsPerTile = Limits::MaxLightsPerTile;
+		lightConstants.lightIndexPoolCapacity = LightIndexPoolCapacity;
     }
 
     void LocalLightFeatureProcessor::Render(const RenderPacket& packet)
@@ -112,14 +139,9 @@ namespace CE::RPI
 							it->Init(this);
 						}
 
-						it->cameraViews.Clear();
-
-						for (View* view : packet.views)
+						if (!it->flags.visible)
 						{
-							if (EnumHasFlag(view->GetUsageFlags(), View::UsageCamera))
-							{
-								it->cameraViews.Add(view);
-							}
+							continue;
 						}
 
 						it->UpdateSrgs(imageIndex);

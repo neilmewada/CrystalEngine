@@ -72,6 +72,7 @@ namespace CE::RPI
 	{
 		AddFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
 		AddFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
+		AddFeatureProcessor<RPI::LocalLightFeatureProcessor>();
 	}
 
 	void Scene::AddView(SceneViewTag viewTag, ViewPtr view)

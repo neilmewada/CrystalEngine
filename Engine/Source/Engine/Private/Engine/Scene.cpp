@@ -402,6 +402,12 @@ namespace CE
 
 			rpiScene->AddView("DirectionalLightShadow", directionalLight->GetRpiView());
 		}
+		else if (sceneComponent->IsOfType<LocalLightComponent>())
+		{
+			auto localLight = static_cast<LocalLightComponent*>(sceneComponent);
+
+
+		}
 	}
 
 	void CE::Scene::OnSceneComponentDetached(SceneComponent* sceneComponent)
@@ -411,6 +417,12 @@ namespace CE
 			auto directionalLight = static_cast<DirectionalLightComponent*>(sceneComponent);
 
 			rpiScene->RemoveView("DirectionalLightShadow", directionalLight->GetRpiView());
+		}
+		else if (sceneComponent->IsOfType<LocalLightComponent>())
+		{
+			auto localLight = static_cast<LocalLightComponent*>(sceneComponent);
+
+
 		}
 	}
 

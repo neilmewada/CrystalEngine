@@ -99,7 +99,7 @@ namespace CE
         Vec3 forward = GetForwardVector();
         Vec3 up = GetUpwardVector();
 
-        lightHandle->view = rpiView;
+        lightHandle->shadowView = rpiView;
         lightHandle->flags.shadows = enableShadows;
 
         lightHandle->colorAndIntensity = lightColor.ToVec4();

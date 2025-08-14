@@ -28,7 +28,7 @@ namespace CE::RPI
 		float temperature = 0;
 		float shadowDistance = 10;
 
-		ViewPtr view = nullptr;
+		ViewPtr shadowView = nullptr;
 
 		void Init(DirectionalLightFeatureProcessor* fp);
 		void Deinit(DirectionalLightFeatureProcessor* fp);

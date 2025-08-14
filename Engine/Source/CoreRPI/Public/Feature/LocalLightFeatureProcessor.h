@@ -2,7 +2,11 @@
 
 namespace CE::RPI
 {
-    static constexpr u32 LocalLightTileSize = 16;
+	namespace Limits
+	{
+        static constexpr u32 LocalLightTileSize = 32;
+        static constexpr u32 MaxLightsPerTile = 128;
+	}
 
     class LocalLightFeatureProcessor;
 
@@ -33,14 +37,11 @@ namespace CE::RPI
 
     struct CORERPI_API LocalLightInstance
     {
-        Matrix4x4 projectionMatrix;
+        // These fields are for shadows
         Matrix4x4 viewMatrix;
-        Matrix4x4 viewProjectionMatrix;
         Vec3 viewPosition;
         Vec2i pixelResolution;
-
-        Array<ViewPtr> views;
-        Array<ViewPtr> cameraViews;
+        Array<ViewPtr> shadowViews;
 
         Vec4 direction;
         Vec4 colorAndIntensity;
@@ -70,6 +71,11 @@ namespace CE::RPI
         friend class LocalLightFeatureProcessor;
     };
 
+    struct LocalLightHandleDescriptor
+    {
+
+    };
+
     static constexpr SIZE_T LocalLightArrayElementsPerPage = 128;
 
     using LocalLightDynamicArray = PagedDynamicArray<LocalLightInstance, LocalLightArrayElementsPerPage>;
@@ -92,6 +98,9 @@ namespace CE::RPI
         void Render(const RenderPacket& packet) override;
         
     public:
+
+        LocalLightHandle AcquireLight(const LocalLightHandleDescriptor& desc);
+        bool ReleaseLight(LocalLightHandle& handle);
 
     protected:
 

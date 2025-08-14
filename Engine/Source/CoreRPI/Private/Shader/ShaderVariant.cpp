@@ -3,7 +3,7 @@
 namespace CE::RPI
 {
 
-	ShaderVariant::ShaderVariant(const ShaderVariantDescriptor2& desc)
+	ShaderVariant::ShaderVariant(const ShaderVariantDescriptor& desc)
 		: reflectionInfo(desc.reflectionInfo)
 	{
 		variantId = 0;

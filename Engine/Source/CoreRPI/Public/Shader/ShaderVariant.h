@@ -3,7 +3,7 @@
 namespace CE::RPI
 {
 
-	struct ShaderVariantDescriptor2
+	struct ShaderVariantDescriptor
 	{
 		Name shaderName{};
 		ShaderReflection reflectionInfo;
@@ -38,7 +38,7 @@ namespace CE::RPI
 	{
 	public:
 
-		ShaderVariant(const ShaderVariantDescriptor2& desc);
+		ShaderVariant(const ShaderVariantDescriptor& desc);
 
 		~ShaderVariant();
 
