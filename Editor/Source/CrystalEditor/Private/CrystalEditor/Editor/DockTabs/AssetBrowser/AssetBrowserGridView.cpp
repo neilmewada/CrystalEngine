@@ -288,7 +288,7 @@ namespace CE::Editor
             }),
 
             FNew(FMenuItemSeparator)
-            .Title("BASIC"),
+            .Title("BASIC ASSETS"),
 
             NewMenuItem()
             .Text("Scene")
@@ -313,7 +313,7 @@ namespace CE::Editor
             }),
 
             FNew(FMenuItemSeparator)
-            .Title("ADVANCED"),
+            .Title("ADVANCED ASSETS"),
 
             NewMenuItem()
             .Text("Physics")
