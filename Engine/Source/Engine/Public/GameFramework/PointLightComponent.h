@@ -17,6 +17,10 @@ namespace CE
         void OnFieldChanged(const Name& fieldName) override;
         void OnFieldEdited(const Name& fieldName) override;
 
+        void OnEnabled() override;
+
+        void OnDisabled() override;
+
     public:
 
     private:

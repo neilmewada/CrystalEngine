@@ -234,18 +234,21 @@ namespace CE::Editor
                 meshComponent->SetMaterial(woodMaterial, 0, 0);
             }
 
-            if (Ref<StaticMesh> arrowMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Engine/Assets/Models/SM_Editor_Arrow"))
-        	{
-		        StaticMeshActor* arrowActor = CreateObject<StaticMeshActor>(scene, "ArrowMesh");
-            	scene->AddActor(arrowActor);
-	            {
-		        	StaticMeshComponent* meshComponent = arrowActor->GetMeshComponent();
-		        	meshComponent->SetStaticMesh(arrowMesh);
-		        	meshComponent->SetLocalPosition(Vec3(0, 0, 5));
-		        	meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
-		        	meshComponent->SetLocalScale(Vec3(1, 1, 1));
-					meshComponent->SetMaterial(arrowMaterial, 0, 0);
-	            }
+            if (false)
+	        {
+		        if (Ref<StaticMesh> arrowMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Engine/Assets/Models/SM_Editor_Arrow"))
+		        {
+		        	StaticMeshActor* arrowActor = CreateObject<StaticMeshActor>(scene, "ArrowMesh");
+		        	scene->AddActor(arrowActor);
+			        {
+		        		StaticMeshComponent* meshComponent = arrowActor->GetMeshComponent();
+		        		meshComponent->SetStaticMesh(arrowMesh);
+		        		meshComponent->SetLocalPosition(Vec3(0, 0, 5));
+		        		meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
+		        		meshComponent->SetLocalScale(Vec3(1, 1, 1));
+		        		meshComponent->SetMaterial(arrowMaterial, 0, 0);
+			        }
+		        }
 	        }
 
             DirectionalLight* lightActor = CreateObject<DirectionalLight>(scene, "Sun");
@@ -257,10 +260,15 @@ namespace CE::Editor
                 directionalLight->SetLightColor(Colors::White);
             }
 
-            constexpr std::array LightPos = { Vec3(-2, 0, -2), Vec3(0, 0, -2), Vec3(2, 0, -2),
+            lightActor->SetEnabled(false);
+
+            constexpr int NumLights = 9;
+            constexpr std::array<Vec3, NumLights> LightPos = { Vec3(-2, 0, -2), Vec3(0, 0, -2), Vec3(2, 0, -2),
 	            Vec3(-2, 0, 0), Vec3(0, 0, 0), Vec3(2, 0, 0),
 	            Vec3(-2, 0, 2), Vec3(0, 0, 2), Vec3(2, 0, 2) };
-            constexpr int NumLights = LightPos.size();
+            constexpr std::array<Color, NumLights> LightColors = { Colors::Red, Colors::Green, Colors::Blue,
+                Colors::Yellow, Colors::Cyan, Colors::Magenta,
+				Colors::White, Colors::Orange, Colors::Purple };
             
             for (int i = 0; i < NumLights; ++i)
             {
@@ -268,10 +276,10 @@ namespace CE::Editor
                 scene->AddActor(pointLight);
                 {
                     Ref<PointLightComponent> pointLightComponent = pointLight->GetPointLightComponent();
-                    pointLightComponent->SetLocalPosition(Vec3(LightPos[i].x, 0.5f, LightPos[i].z));
-                    pointLightComponent->SetRange(2.0f);
-                    pointLightComponent->SetLightColor(Colors::White);
-                    pointLightComponent->SetIntensity(10);
+                    pointLightComponent->SetLocalPosition(Vec3(LightPos[i].x * 2, -0.5f, LightPos[i].z * 2 + 5));
+                    pointLightComponent->SetRange(5.0f);
+                    pointLightComponent->SetLightColor(LightColors[i]);
+                    pointLightComponent->SetIntensity(25);
                 }
             }
 

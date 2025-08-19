@@ -8,39 +8,48 @@
 
 // --------------------------- Resources --------------------------------------
 
-static const float ndcNear = -1; // D3D: 0, Vulkan/GL: -1
-static const float ndcFar  =  1; // D3D: 1, Vulkan/GL: 1
+// NDC constants for Vulkan
+static const float ndcNear = -1.0f; // Vulkan: -1, D3D: 0
+static const float ndcFar  =  1.0f; // Vulkan: 1, D3D: 1
 
-// index into _LocalLights
+// Light index pool - stores indices into _LocalLights array
 RWStructuredBuffer<uint> _LightIndexPool : SRG_PerPass(u1);
 
-// {offset, count}
+// Tile headers - stores {offset, count} for each tile
 RWStructuredBuffer<uint2> _TileHeaders : SRG_PerPass(u2);
 
-// Just size of 1
+// Pool allocator - atomic counter for managing light index pool
 RWStructuredBuffer<uint> _PoolAlloc : SRG_PerPass(u3);
 
 // --------------------------- Frustum helpers --------------------------------
-struct TileFrustum { float4 planes[6]; }; // plane.xyzw = (n.xyz, d); dot(n,P)+d >= 0 is inside
 
-// Convert a pixel corner to world space at a given NDC z using inv(viewProj).
+struct TileFrustum 
+{ 
+    float4 planes[6]; // plane.xyzw = (n.xyz, d); dot(n,P)+d >= 0 is inside
+};
+
+// Convert a pixel corner to world space at a given NDC z using inv(viewProj)
 float3 CornerWS(uint px, uint py, float ndcZ, float4x4 invViewProj)
 {
     // Pixel center to [0,1]
-    float2 uv  = (float2(px, py) + 0.5) / pixelResolution.xy;
-    // [0,1] -> NDC; flip Y for D3D NDC. If Vulkan/GL, adjust if needed.
-    float2 ndc = float2(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0);
-    float4 pCS = float4(ndc, ndcZ, 1.0);
+    float2 uv = (float2(px, py) + 0.5f) / pixelResolution.xy;
+    
+    // [0,1] -> NDC; flip Y for Vulkan NDC
+    float2 ndc = float2(uv.x * 2.0f - 1.0f, 1.0f - uv.y * 2.0f);
+    
+    float4 pCS = float4(ndc, ndcZ, 1.0f);
     float4 pWS = mul(invViewProj, pCS);
     return pWS.xyz / pWS.w;
 }
 
-float4 MakePlane(float3 a, float3 b, float3 c) // CCW -> inside on left
+// Create a plane from 3 points (CCW winding -> inside on left)
+float4 MakePlane(float3 a, float3 b, float3 c)
 {
     float3 n = normalize(cross(b - a, c - a));
     return float4(n, -dot(n, a));
 }
 
+// Build frustum for a specific tile
 void BuildTileFrustum(uint tileId, out TileFrustum fr, float4x4 invViewProj,
                       uint tilesX, uint tilesY, uint width, uint height)
 {
@@ -52,16 +61,19 @@ void BuildTileFrustum(uint tileId, out TileFrustum fr, float4x4 invViewProj,
     const uint x1 = min((tx + 1) * tileSizeX, width);
     const uint y1 = min((ty + 1) * tileSizeY, height);
 
+    // Near plane corners
     float3 n00 = CornerWS(x0,     y0,     ndcNear, invViewProj);
     float3 n10 = CornerWS(x1 - 1, y0,     ndcNear, invViewProj);
     float3 n01 = CornerWS(x0,     y1 - 1, ndcNear, invViewProj);
     float3 n11 = CornerWS(x1 - 1, y1 - 1, ndcNear, invViewProj);
 
+    // Far plane corners
     float3 f00 = CornerWS(x0,     y0,     ndcFar, invViewProj);
     float3 f10 = CornerWS(x1 - 1, y0,     ndcFar, invViewProj);
     float3 f01 = CornerWS(x0,     y1 - 1, ndcFar, invViewProj);
     float3 f11 = CornerWS(x1 - 1, y1 - 1, ndcFar, invViewProj);
 
+    // Build frustum planes (CCW winding)
     fr.planes[0] = MakePlane(n00, f00, f01); // Left
     fr.planes[1] = MakePlane(n11, f11, f10); // Right
     fr.planes[2] = MakePlane(n10, f10, f00); // Top
@@ -70,6 +82,7 @@ void BuildTileFrustum(uint tileId, out TileFrustum fr, float4x4 invViewProj,
     fr.planes[5] = MakePlane(f11, f10, f00); // Far
 }
 
+// Test if a sphere intersects with the frustum
 bool SphereVsFrustum(float3 centerWS, float radius, TileFrustum fr)
 {
     for (int i = 0; i < 6; ++i)
@@ -80,77 +93,93 @@ bool SphereVsFrustum(float3 centerWS, float radius, TileFrustum fr)
     return true;
 }
 
+// Test if a cone covers a sphere (for spot lights)
 bool ConeCoversSphere(float3 tipWS, float3 dirWS_norm, float cosOuter,
                       float3 centerWS, float radius)
 {
-    float3 v  = centerWS - tipWS;
-    float  VL = length(v);
-    if (VL <= 1e-5) return true;
-    float  cosTheta = dot(dirWS_norm, v / VL);
-    float  relax    = saturate(radius / max(VL, 1e-5));
+    float3 v = centerWS - tipWS;
+    float VL = length(v);
+    if (VL <= 1e-5f) return true;
+    
+    float cosTheta = dot(dirWS_norm, v / VL);
+    float relax = saturate(radius / max(VL, 1e-5f));
     return cosTheta >= (cosOuter - relax);
 }
 
+// Test if a light affects a tile
 bool LightAffectsTile(LocalLightData L, TileFrustum fr)
 {
     const float3 P = L.worldPosAndRange.xyz;
-    const float  R = L.worldPosAndRange.w;
+    const float R = L.worldPosAndRange.w;
 
+    // First test: sphere vs frustum
     if (!SphereVsFrustum(P, R, fr)) return false;
 
+    // Second test: spot light cone (if applicable)
     if (L.type == LocalLightType_Spot && L.spotLightAngle > 0.0f)
     {
         float3 dirN = normalize(L.spotLightDirection.xyz);
-        float  co   = cos(L.spotLightAngle);
+        float co = cos(L.spotLightAngle);
         if (!ConeCoversSphere(P, dirN, co, P, R)) return false;
     }
+    
     return true;
 }
 
+// Main compute shader
 [numthreads(8, 8, 1)]
 void CSMain(uint3 dtid : SV_DispatchThreadID)
 {
-    // Derive tiling from current RT size
-    const uint width   = (uint)pixelResolution.x;
-    const uint height  = (uint)pixelResolution.y;
-    const uint tilesX  = (width  + tileSizeX - 1) / tileSizeX;
-    const uint tilesY  = (height + tileSizeY - 1) / tileSizeY;
+    // Derive tiling from current render target size
+    const uint width = (uint)pixelResolution.x;
+    const uint height = (uint)pixelResolution.y;
+    const uint tilesX = (width + tileSizeX - 1) / tileSizeX;
+    const uint tilesY = (height + tileSizeY - 1) / tileSizeY;
 
-    // Map global thread to tile coord (tx, ty)
+    // Map global thread to tile coordinates
     const uint tx = dtid.x;
     const uint ty = dtid.y;
 
     // Out-of-bounds threads (when tilesX/Y not multiples of 8)
     if (tx >= tilesX || ty >= tilesY) return;
 
-    // Linear tile id for headers/pool addressing
+    // Linear tile ID for headers/pool addressing
     const uint tileId = ty * tilesX + tx;
 
+    // Get inverse view-projection matrix
     float4x4 invViewProj = inverse(viewProjectionMatrix);
 
     // Build this tile's frustum
     TileFrustum fr;
     BuildTileFrustum(tileId, fr, invViewProj, tilesX, tilesY, width, height);
 
-    // Pass 1: count how many lights overlap this tile
+    // Pass 1: Count how many lights overlap this tile
     uint count = 0;
     for (uint i = 0; i < totalLocalLights; ++i)
-        if (LightAffectsTile(_LocalLights[i], fr)) count++;
+    {
+        if (LightAffectsTile(_LocalLights[i], fr)) 
+            count++;
+    }
 
     // Reserve a contiguous slice in the global pool
     uint base = 0;
-    if (count > 0) InterlockedAdd(_PoolAlloc[0], count, base);
+    if (count > 0) 
+        InterlockedAdd(_PoolAlloc[0], count, base);
 
-    // Clamp to capacity if needed (debug: grow next frame)
+    // Clamp to capacity if needed
     if (base + count > lightIndexPoolCapacity)
         count = (base < lightIndexPoolCapacity) ? (lightIndexPoolCapacity - base) : 0;
 
     // Write per-tile header {offset, count}
     _TileHeaders[tileId] = uint2(base, count);
 
-    // Pass 2: fill the actual indices
+    // Pass 2: Fill the actual light indices
     uint write = 0;
     for (uint i = 0; i < totalLocalLights && write < count; ++i)
+    {
         if (LightAffectsTile(_LocalLights[i], fr))
+        {
             _LightIndexPool[base + write++] = i; // index into _LocalLights
+        }
+    }
 }

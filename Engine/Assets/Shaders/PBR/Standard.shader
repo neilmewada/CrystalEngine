@@ -118,8 +118,8 @@ Shader "PBR/Standard"
 
             float4 FragMain(PSInput input) : SV_TARGET
             {
-                float tempVal = _TileHeaders[0].x + _LightIndexPool[0]; // Just to use _TileHeaders
-                tempVal /= 100000000;
+                float tempVal = _TileHeaders[0].y + _LightIndexPool[0]; // Just to use _TileHeaders
+                tempVal /= 1000000000;
 
                 float3 diffuse = 0;
                 float3 specular = 0;
@@ -159,6 +159,35 @@ Shader "PBR/Standard"
                         shadow = CalculateDirectionalShadow(lightSpacePos, dot(vertNormal, light.lightDir));
                     }
                     shadow = clamp(shadow, 0, 1);
+
+                    Lo += CalculateBRDF(light, material) * (1.0 - shadow);
+                }
+
+                for (i = 0; i < totalLocalLights; i++)
+                {
+                    LocalLightType lightType = _LocalLights[i].type;
+
+                    LightInput light;
+                    float3 luminosity = _LocalLights[i].colorAndIntensity.rgb * _LocalLights[i].colorAndIntensity.a;
+
+                    if (lightType == LocalLightType_Point)
+                    {
+                        light.lightDir = _LocalLights[i].worldPosAndRange.xyz - input.worldPos;
+                        float distance = length(light.lightDir);
+                        float attenuation = 1.0 / max(distance * distance, 0.01);
+                        light.lightDir = normalize(light.lightDir);
+                        light.lightRadiance = luminosity * attenuation;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                    
+                    light.normal = normal;
+                    light.viewDir = viewDir;
+                    light.halfway = normalize(viewDir + light.lightDir);
+
+                    float shadow = 0.0;
 
                     Lo += CalculateBRDF(light, material) * (1.0 - shadow);
                 }

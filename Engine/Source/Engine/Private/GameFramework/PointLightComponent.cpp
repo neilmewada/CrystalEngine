@@ -106,5 +106,25 @@ namespace CE
         }
     }
 
+    void PointLightComponent::OnEnabled()
+    {
+	    Super::OnEnabled();
+
+        if (lightHandle.IsValid())
+        {
+			lightHandle->flags.visible = true;
+        }
+    }
+
+    void PointLightComponent::OnDisabled()
+    {
+	    Super::OnDisabled();
+
+        if (lightHandle.IsValid())
+        {
+            lightHandle->flags.visible = false;
+        }
+    }
+
 } // namespace CE
 

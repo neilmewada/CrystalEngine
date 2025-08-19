@@ -109,10 +109,11 @@ namespace CE
         lightHandle->pixelResolution = Vec2i(1, 1) * rp->directionalShadowResolution;
 
         lightHandle->direction = forward;
+        Vec3 cameraForward = mainCamera->GetForwardVector();
 
         // TODO: Fix view position
-        lightHandle->viewPosition = mainCamera->GetPosition() + Vec4(0, 5, 0, 0); // Position light 5 units above camera
-        lightHandle->projectionMatrix = Matrix4x4::OrthographicProjection(-shadowDistance, shadowDistance, shadowDistance, -shadowDistance, 1.0f, 100.0f);
+        lightHandle->viewPosition = mainCamera->GetPosition() - forward * 5.0f; // Position light 5 units above camera
+        lightHandle->projectionMatrix = Matrix4x4::OrthographicProjection(-shadowDistance, shadowDistance, shadowDistance, -shadowDistance, 0.01f, 100.0f);
         lightHandle->viewMatrix = Matrix4x4::Translation(-lightHandle->viewPosition) *
             Quat::LookRotation(lightHandle->direction).ToMatrix();
         lightHandle->viewProjectionMatrix = lightHandle->projectionMatrix * lightHandle->viewMatrix;
