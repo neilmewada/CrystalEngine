@@ -261,7 +261,7 @@ namespace CE::Editor
 	            Vec3(-2, 0, 0), Vec3(0, 0, 0), Vec3(2, 0, 0),
 	            Vec3(-2, 0, 2), Vec3(0, 0, 2), Vec3(2, 0, 2) };
             constexpr int NumLights = LightPos.size();
-
+            
             for (int i = 0; i < NumLights; ++i)
             {
                 PointLight* pointLight = CreateObject<PointLight>(scene, "PointLight");
@@ -269,7 +269,7 @@ namespace CE::Editor
                 {
                     Ref<PointLightComponent> pointLightComponent = pointLight->GetPointLightComponent();
                     pointLightComponent->SetLocalPosition(Vec3(LightPos[i].x, 0.5f, LightPos[i].z));
-                    pointLightComponent->SetRange(2.5f);
+                    pointLightComponent->SetRange(2.0f);
                     pointLightComponent->SetLightColor(Colors::White);
                     pointLightComponent->SetIntensity(10);
                 }
