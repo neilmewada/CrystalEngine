@@ -212,8 +212,9 @@ namespace CE
 		template<typename T>
 		const T& GetArrayElementValueAt(u32 index, void* instance) const
 		{
+			thread_local const T def = {};
 			if (!IsArrayField())
-				return {};
+				return def;
 
 			const Array<T>& array = GetFieldValue<Array<T>>(instance);
             return array[index];

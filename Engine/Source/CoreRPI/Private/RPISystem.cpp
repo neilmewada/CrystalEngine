@@ -109,6 +109,16 @@ namespace CE::RPI
 
 		    	viewSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerView);
 		    	sceneSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerScene);
+
+                for (auto& variable : sceneSrgLayout.variables)
+                {
+                    variable.shaderStages |= RHI::ShaderStage::Compute;
+                }
+
+                for (auto& variable : viewSrgLayout.variables)
+                {
+					variable.shaderStages |= RHI::ShaderStage::Compute;
+                }
 		    }
 	    }
 
@@ -334,7 +344,7 @@ namespace CE::RPI
 
         for (Scene* scene : scenes)
         {
-            scene->Simulate(currentTime);
+            scene->Simulate(currentTime, imageIndex);
         }
     }
 

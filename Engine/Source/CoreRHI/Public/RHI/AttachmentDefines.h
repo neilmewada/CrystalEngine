@@ -128,6 +128,9 @@ namespace CE::RHI
 		Vec4 clearValue{};
 
 		FIELD()
+		u32 clearValueBuffer = 0;
+
+		FIELD()
 		f32 clearValueDepth = 1.0f;
 
 		FIELD()

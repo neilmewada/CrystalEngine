@@ -10,6 +10,13 @@
 
 Texture2D<float> _DirectionalShadowMap : SRG_PerPass(t0);
 
+// index into _LocalLights
+StructuredBuffer<uint> _LightIndexPool : SRG_PerPass(t1);
+
+// {offset, count}
+StructuredBuffer<uint2> _TileHeaders : SRG_PerPass(t2);
+
+
 float CalculateDirectionalShadow(in float4 lightSpacePos, in float NdotL)
 {
     float3 projectionCoords = lightSpacePos.xyz / lightSpacePos.w;

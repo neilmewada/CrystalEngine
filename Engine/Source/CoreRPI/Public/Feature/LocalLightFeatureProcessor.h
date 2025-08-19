@@ -6,6 +6,10 @@ namespace CE::RPI
 	{
         static constexpr u32 LocalLightTileSize = 32;
         static constexpr u32 MaxLightsPerTile = 128;
+
+        
+		constexpr u32 MaxNumTiles = (RHI::Limits::MaxRenderTargetResolution * RHI::Limits::MaxRenderTargetResolution) / (LocalLightTileSize * LocalLightTileSize);
+        constexpr u32 LightIndexPoolCapacity = MaxNumTiles * MaxLightsPerTile;
 	}
 
     class LocalLightFeatureProcessor;
@@ -45,6 +49,7 @@ namespace CE::RPI
 
         Vec4 direction;
         Vec4 colorAndIntensity;
+        Vec3 worldPos;
         float temperature = 0;
         f32 range = 0;
         f32 angle = 0;
@@ -116,8 +121,6 @@ namespace CE::RPI
 
         bool initialized = false;
         DynamicStructuredBuffer<LocalLightShaderData> localLights;
-        DynamicStructuredBuffer<uint> lightIndexPool;
-        DynamicStructuredBuffer<uint2> tileHeaders;
 
     };
     

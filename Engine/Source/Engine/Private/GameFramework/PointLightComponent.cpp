@@ -71,6 +71,7 @@ namespace CE
         lightHandle->range = range;
         lightHandle->temperature = temperature;
         lightHandle->colorAndIntensity = Vec4(lightColor.r, lightColor.g, lightColor.b, intensity);
+        lightHandle->worldPos = GetPosition();
     }
 
     void PointLightComponent::OnFieldChanged(const Name& fieldName)

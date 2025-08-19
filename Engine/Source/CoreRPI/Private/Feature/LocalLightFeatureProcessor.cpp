@@ -21,7 +21,7 @@ namespace CE::RPI
 
 	void LocalLightInstance::UpdateSrgs(int imageIndex)
 	{
-
+		
 	}
 
 	LocalLightFeatureProcessor::LocalLightFeatureProcessor()
@@ -37,8 +37,6 @@ namespace CE::RPI
 			return;
 
 		localLights.Init("LocalLightDataBuffer", LightDataBufferInitialSize);
-		lightIndexPool.Init("LightIndexPool", LightIndexPoolBufferInitialSize);
-		tileHeaders.Init("TileHeaders", TileHeaderBufferInitialSize);
     }
 
     void LocalLightFeatureProcessor::OnBeforeDestroy()
@@ -56,8 +54,6 @@ namespace CE::RPI
 		}
 
 		localLights.Shutdown();
-		lightIndexPool.Shutdown();
-		tileHeaders.Shutdown();
     }
 
 	LocalLightHandle LocalLightFeatureProcessor::AcquireLight(const LocalLightHandleDescriptor& desc)
@@ -86,6 +82,8 @@ namespace CE::RPI
 
 		bool isDirty = false;
 
+		u32 imageIndex = packet.imageIndex;
+
 		if (lightInstances.GetCount() > localLights.GetElementCount())
 		{
 			localLights.GrowToFit(Math::Max<u32>(localLights.GetElementCount() * BufferGrowRatio, lightInstances.GetCount()));
@@ -93,44 +91,21 @@ namespace CE::RPI
 			isDirty = true;
 		}
 
-		if (!initialized || isDirty)
-		{
-			auto sceneSrg = scene->GetShaderResourceGroup();
+		std::atomic<int> lightCounter = 0;
 
-			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+		{
+			RHI::Buffer* localLightsBuffer = localLights.GetBuffer(imageIndex);
+
+			LocalLightShaderData* data = nullptr;
+			localLightsBuffer->Map(0, localLightsBuffer->GetBufferSize(), (void**)&data);
+
+			auto parallelRanges = lightInstances.GetParallelRanges();
+
+			JobCompletion jobCompletion = JobCompletion();
+
+			for (const auto& range : parallelRanges)
 			{
-				//sceneSrg->Bind(i, "_LocalLights", localLights.GetBuffer(i));
-				//sceneSrg->Bind(i, "_LightIndexPool", lightIndexPool.GetBuffer(i));
-				//sceneSrg->Bind(i, "_TileHeaders", tileHeaders.GetBuffer(i));
-			}
-
-			sceneSrg->FlushBindings();
-			initialized = true;
-		}
-
-		constexpr u32 MaxResolution = 4096;
-		constexpr u32 LightIndexPoolCapacity = (MaxResolution * MaxResolution) / (Limits::LocalLightTileSize * Limits::LocalLightTileSize) * Limits::MaxLightsPerTile;
-
-		auto& lightConstants = scene->GetLightConstants();
-		lightConstants.totalLocalLights = lightInstances.GetCount();
-		lightConstants.tileSizeX = lightConstants.tileSizeY = Limits::LocalLightTileSize;
-		lightConstants.lightsPerTile = Limits::MaxLightsPerTile;
-		lightConstants.lightIndexPoolCapacity = LightIndexPoolCapacity;
-    }
-
-    void LocalLightFeatureProcessor::Render(const RenderPacket& packet)
-    {
-	    Super::Render(packet);
-
-		u32 imageIndex = packet.imageIndex;
-
-		JobCompletion jobCompletion{};
-
-		auto parallelRanges = lightInstances.GetParallelRanges();
-
-		for (const auto& range : parallelRanges)
-		{
-			Job* jobFunction = new JobFunction([&range, imageIndex, &packet, this](Job*)
+				Job* jobFunction = new JobFunction([&range, imageIndex, this, &lightCounter, data](Job*)
 				{
 					for (auto it = range.begin; it != range.end; ++it)
 					{
@@ -144,15 +119,50 @@ namespace CE::RPI
 							continue;
 						}
 
-						it->UpdateSrgs(imageIndex);
+						data[lightCounter].lightType = it->lightType;
+						data[lightCounter].colorAndIntensity = it->colorAndIntensity;
+						data[lightCounter].worldPosAndRange = Vec4(it->worldPos, it->range);
+
+						lightCounter.fetch_add(1, std::memory_order_acq_rel);
 					}
 				});
 
-			jobFunction->SetDependent(&jobCompletion);
-			jobFunction->Start();
+				jobFunction->SetDependent(&jobCompletion);
+				jobFunction->Start();
+			}
+
+			jobCompletion.StartAndWaitForCompletion();
+
+			localLightsBuffer->Unmap();
 		}
 
-		jobCompletion.StartAndWaitForCompletion();
+		if (!initialized || isDirty)
+		{
+			auto sceneSrg = scene->GetShaderResourceGroup();
+
+			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+			{
+				sceneSrg->Bind(i, "_LocalLights", localLights.GetBuffer(i));
+			}
+
+			sceneSrg->FlushBindings();
+			initialized = true;
+		}
+
+		auto& lightConstants = scene->GetLightConstants();
+		lightConstants.totalLocalLights = lightCounter;
+		lightConstants.tileSizeX = lightConstants.tileSizeY = Limits::LocalLightTileSize;
+		lightConstants.lightsPerTile = Limits::MaxLightsPerTile;
+		lightConstants.lightIndexPoolCapacity = Limits::LightIndexPoolCapacity;
+    }
+
+    void LocalLightFeatureProcessor::Render(const RenderPacket& packet)
+    {
+	    Super::Render(packet);
+
+		u32 imageIndex = packet.imageIndex;
+
+		
     }
 
 } // namespace CE

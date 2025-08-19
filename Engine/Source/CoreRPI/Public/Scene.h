@@ -65,7 +65,7 @@ namespace CE::RPI
 
 		const SceneViewsByTag& GetViews() const { return viewsByTag; }
 
-		void Simulate(f32 currentTime);
+		void Simulate(f32 currentTime, u32 imageIndex);
 
 		void PrepareRender(f32 currentTime, u32 imageIndex);
 

@@ -17,8 +17,8 @@ RWStructuredBuffer<uint> _LightIndexPool : SRG_PerPass(u1);
 // {offset, count}
 RWStructuredBuffer<uint2> _TileHeaders : SRG_PerPass(u2);
 
-//RWStructuredBuffer<uint> _PoolAlloc : SRG_PerPass(u3);
-groupshared uint _PoolAlloc[1]; // [0] = temp value
+// Just size of 1
+RWStructuredBuffer<uint> _PoolAlloc : SRG_PerPass(u3);
 
 // --------------------------- Frustum helpers --------------------------------
 struct TileFrustum { float4 planes[6]; }; // plane.xyzw = (n.xyz, d); dot(n,P)+d >= 0 is inside
@@ -72,7 +72,7 @@ void BuildTileFrustum(uint tileId, out TileFrustum fr, float4x4 invViewProj,
 
 bool SphereVsFrustum(float3 centerWS, float radius, TileFrustum fr)
 {
-    [unroll] for (int i = 0; i < 6; ++i)
+    for (int i = 0; i < 6; ++i)
     {
         float d = dot(fr.planes[i].xyz, centerWS) + fr.planes[i].w;
         if (d < -radius) return false;
@@ -107,18 +107,24 @@ bool LightAffectsTile(LocalLightData L, TileFrustum fr)
     return true;
 }
 
-[numthreads(64, 1, 1)]
+[numthreads(8, 8, 1)]
 void CSMain(uint3 dtid : SV_DispatchThreadID)
 {
-    // --- Per-view derived values (computed once per thread) ---
-    uint  width   = (uint)pixelResolution.x;
-    uint  height  = (uint)pixelResolution.y;
-    uint  tilesX  = (width  + tileSizeX - 1) / tileSizeX;
-    uint  tilesY  = (height + tileSizeY - 1) / tileSizeY;
-    uint  numTiles= tilesX * tilesY;
+    // Derive tiling from current RT size
+    const uint width   = (uint)pixelResolution.x;
+    const uint height  = (uint)pixelResolution.y;
+    const uint tilesX  = (width  + tileSizeX - 1) / tileSizeX;
+    const uint tilesY  = (height + tileSizeY - 1) / tileSizeY;
 
-    uint tileId = dtid.x;
-    if (tileId >= numTiles) return;
+    // Map global thread to tile coord (tx, ty)
+    const uint tx = dtid.x;
+    const uint ty = dtid.y;
+
+    // Out-of-bounds threads (when tilesX/Y not multiples of 8)
+    if (tx >= tilesX || ty >= tilesY) return;
+
+    // Linear tile id for headers/pool addressing
+    const uint tileId = ty * tilesX + tx;
 
     float4x4 invViewProj = inverse(viewProjectionMatrix);
 

@@ -114,7 +114,7 @@ namespace CE::RPI
                         }
                         else if (sourceAttachment->IsBufferAttachment())
                         {
-
+							// TODO: Handle buffer attachment size source
                         }
                     }
                 }

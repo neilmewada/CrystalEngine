@@ -126,7 +126,7 @@ namespace CE::RPI
 		return viewsByTag[viewTag].views;
 	}
 
-	void Scene::Simulate(f32 currentTime)
+	void Scene::Simulate(f32 currentTime, u32 imageIndex)
 	{
 		ZoneScoped;
 
@@ -217,7 +217,7 @@ namespace CE::RPI
 
 		for (FeatureProcessor* fp : featureProcessors)
 		{
-			fp->Simulate({});
+			fp->Simulate({ .imageIndex = imageIndex });
 		}
 	}
 

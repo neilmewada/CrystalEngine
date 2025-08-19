@@ -69,6 +69,19 @@ namespace CE::RPI
 		}
 		
 		pipelineDesc.srgLayouts = desc.reflectionInfo.srgLayouts;
+		for (auto& srgLayout : pipelineDesc.srgLayouts)
+		{
+			if (srgLayout.srgType != SRGType::PerScene &&
+				srgLayout.srgType != SRGType::PerView)
+			{
+				continue;
+			}
+
+			for (auto& variable : srgLayout.variables)
+			{
+				variable.shaderStages |= ShaderStage::Compute;
+			}
+		}
 
 		pipelineDesc.multisampleState.sampleCount = 1;
 

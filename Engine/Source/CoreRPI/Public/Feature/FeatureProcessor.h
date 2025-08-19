@@ -16,6 +16,7 @@ namespace CE::RPI
 
 		struct SimulatePacket
 		{
+			u32 imageIndex = 0;
 			Job* parentJob = nullptr;
 		};
 

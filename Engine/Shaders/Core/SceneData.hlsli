@@ -3,7 +3,7 @@
 
 #include "LightingData.hlsli"
 
-#if FRAGMENT
+#if FRAGMENT || COMPUTE
 
 cbuffer _DirectionalLightsArray : SRG_PerScene(b0)
 {

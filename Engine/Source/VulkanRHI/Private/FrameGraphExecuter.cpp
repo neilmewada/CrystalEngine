@@ -615,6 +615,64 @@ namespace CE::Vulkan
 					}
 				}
 
+				if (!shouldNotExecuteAtAll)
+				{
+					Vulkan::Scope* currentSubPassScope = currentScope;
+					HashSet<RHI::AttachmentID> initializedAttachmentIds{};
+
+					while (currentSubPassScope != nullptr)
+					{
+						for (auto scopeAttachment : currentSubPassScope->attachments)
+						{
+							if (!scopeAttachment->IsBufferAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
+								!scopeAttachment->GetFrameAttachment()->IsBufferAttachment())
+								continue;
+
+							RHI::BufferScopeAttachment* bufferScopeAttachment = (RHI::BufferScopeAttachment*)scopeAttachment;
+							RHI::BufferFrameAttachment* bufferFrameAttachment = (RHI::BufferFrameAttachment*)scopeAttachment->GetFrameAttachment();
+
+							RHI::RHIResource* resource = bufferFrameAttachment->GetResource(currentSubmissionIndex);
+
+							if (resource == nullptr)
+								continue;
+							if (resource->GetResourceType() != RHI::ResourceType::Buffer)
+								continue;
+							if (initializedAttachmentIds.Exists(bufferFrameAttachment->GetId()))
+								continue;
+
+							initializedAttachmentIds.Add(bufferFrameAttachment->GetId());
+
+							Vulkan::Buffer* buffer = (Vulkan::Buffer*)resource;
+							if (buffer->GetBuffer() == VK_NULL_HANDLE)
+								continue;
+
+							const auto& bufferLoadStore = bufferScopeAttachment->GetLoadStoreAction();
+
+							if (bufferLoadStore.loadAction == AttachmentLoadAction::Clear)
+							{
+								vkCmdFillBuffer(cmdBuffer, buffer->GetBuffer(), 0, buffer->GetBufferSize(), bufferLoadStore.clearValueBuffer);
+
+								VkBufferMemoryBarrier bufferBarrier{};
+								bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+								bufferBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+								bufferBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+								bufferBarrier.srcQueueFamilyIndex = bufferBarrier.dstQueueFamilyIndex = currentScope->queue->GetFamilyIndex();
+								bufferBarrier.buffer = buffer->GetBuffer();
+								bufferBarrier.offset = 0;
+								bufferBarrier.size = buffer->GetBufferSize();
+
+								vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+									0,
+									0, nullptr,
+									1, &bufferBarrier,
+									0, nullptr);
+							}
+						}
+
+						currentSubPassScope = (Vulkan::Scope*)currentSubPassScope->nextSubPass;
+					}
+				}
+
 				// Graphics operation
 				if (!shouldNotExecuteAtAll && currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
 				{

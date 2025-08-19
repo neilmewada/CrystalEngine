@@ -19,6 +19,18 @@ namespace CE::RPI
         };
         pipelineDesc.srgLayouts = desc.reflectionInfo.srgLayouts;
 
+        for (int i = 0; i < pipelineDesc.srgLayouts.GetSize(); ++i)
+        {
+	        if (pipelineDesc.srgLayouts[i].srgType == SRGType::PerScene)
+	        {
+				pipelineDesc.srgLayouts[i] = RPISystem::Get().GetSceneSrgLayout();
+	        }
+            if (pipelineDesc.srgLayouts[i].srgType == SRGType::PerView)
+            {
+                pipelineDesc.srgLayouts[i] = RPISystem::Get().GetViewSrgLayout();
+            }
+        }
+
         computePipelineState = RHI::gDynamicRHI->CreateComputePipeline(pipelineDesc);
     }
 

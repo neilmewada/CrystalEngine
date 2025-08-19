@@ -4,6 +4,8 @@ namespace CE::RHI
 {
 	namespace Limits
 	{
+		constexpr u32 MaxRenderTargetResolution = 4096*2;
+
 		constexpr u32 ModelLodCountMax = 8;
 
 		constexpr u64 MaxConstantBufferSize = 16_KB; // 16384 bytes

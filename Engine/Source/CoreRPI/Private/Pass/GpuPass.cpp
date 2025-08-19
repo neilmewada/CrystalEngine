@@ -26,8 +26,9 @@ namespace CE::RPI
     					bufferDescriptor.bindFlags = attachmentDescriptor.bufferDesc.bindFlags;
     					bufferDescriptor.bufferSize = attachmentDescriptor.bufferDesc.byteSize;
     					bufferDescriptor.defaultHeapType = RHI::MemoryHeapType::Default;
+						bufferDescriptor.structureByteStride = bufferDescriptor.bufferSize;
 
-    					//attachmentDatabase.EmplaceFrameAttachment(attachment->attachmentId, bufferDescriptor);
+    					attachmentDatabase.EmplaceFrameAttachment(attachment->attachmentId, bufferDescriptor);
     				}
     					break;
     				case RHI::AttachmentType::Image:
