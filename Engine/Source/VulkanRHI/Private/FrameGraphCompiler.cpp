@@ -292,10 +292,10 @@ namespace CE::Vulkan
 
 			HashMap<RHI::ScopeAttachment*, RHI::ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerScope, current);
 
+			VkPipelineStageFlags flags{};
+
 			for (auto [from, to] : commonAttachments)
 			{
-				VkPipelineStageFlags flags{};
-
 				if (to->GetUsage() == RHI::ScopeAttachmentUsage::Color)
 				{
 					flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -314,13 +314,13 @@ namespace CE::Vulkan
 				}
 
 				flags = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT | VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-
-				for (int i = 0; i < imageCount; i++)
-				{
-					current->waitSemaphores[i].Add(producerScope->signalSemaphoresByConsumerScope[i][current->id]);
-				}
-				current->waitSemaphoreStageFlags.Add(flags);
 			}
+
+			for (int i = 0; i < imageCount; i++)
+			{
+				current->waitSemaphores[i].Add(producerScope->signalSemaphoresByConsumerScope[i][current->id]);
+			}
+			current->waitSemaphoreStageFlags.Add(flags);
 		}
 
 		for (RHI::Scope* consumer : current->consumers)

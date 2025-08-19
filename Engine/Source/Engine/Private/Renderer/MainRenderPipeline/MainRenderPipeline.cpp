@@ -283,7 +283,6 @@ namespace CE
 
                 RPI::PassAttachmentBinding lightIndexPoolBinding{};
                 lightIndexPoolBinding.name = "LightIndexPool";
-                lightIndexPoolBinding.shaderInputName = "_LightIndexPool";
                 lightIndexPoolBinding.slotType = RPI::PassSlotType::Output;
                 lightIndexPoolBinding.attachment = lightIndexPool;
                 lightIndexPoolBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
@@ -306,7 +305,6 @@ namespace CE
 
                 RPI::PassAttachmentBinding tileHeadersBinding{};
                 tileHeadersBinding.name = "TileHeaders";
-                tileHeadersBinding.shaderInputName = "_TileHeaders";
                 tileHeadersBinding.slotType = RPI::PassSlotType::Output;
                 tileHeadersBinding.attachment = tileHeaders;
                 tileHeadersBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
@@ -330,7 +328,6 @@ namespace CE
 
                 RPI::PassAttachmentBinding poolAllocBinding{};
                 poolAllocBinding.name = "PoolAlloc";
-                poolAllocBinding.shaderInputName = "_PoolAlloc";
                 poolAllocBinding.slotType = RPI::PassSlotType::Output;
                 poolAllocBinding.attachment = poolAlloc;
                 poolAllocBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
@@ -420,11 +417,13 @@ namespace CE
                 lightIndexPoolSlot.shaderInputName = "_LightIndexPool";
 
                 opaquePass->AddSlot(lightIndexPoolSlot);
+
                 RPI::PassAttachmentBinding lightIndexPoolBinding{};
                 lightIndexPoolBinding.name = "LightIndexPool";
                 lightIndexPoolBinding.slotType = RPI::PassSlotType::Input;
                 lightIndexPoolBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
                 lightIndexPoolBinding.connectedBinding = tileCullingPass->FindOutputBinding("LightIndexPool");
+
 				opaquePass->AddAttachmentBinding(lightIndexPoolBinding);
             }
 
@@ -432,18 +431,21 @@ namespace CE
             {
 	            RPI::PassSlot tileHeadersSlot{};
                 tileHeadersSlot.name = "TileHeaders";
+                tileHeadersSlot.shaderInputName = "_TileHeaders";
                 tileHeadersSlot.slotType = RPI::PassSlotType::Input;
                 tileHeadersSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
                 tileHeadersSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
                 tileHeadersSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
-                tileHeadersSlot.shaderInputName = "_TileHeaders";
 
                 opaquePass->AddSlot(tileHeadersSlot);
+
                 RPI::PassAttachmentBinding tileHeadersBinding{};
                 tileHeadersBinding.name = "TileHeaders";
                 tileHeadersBinding.slotType = RPI::PassSlotType::Input;
                 tileHeadersBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
 				tileHeadersBinding.connectedBinding = tileCullingPass->FindOutputBinding("TileHeaders");
+
+				opaquePass->AddAttachmentBinding(tileHeadersBinding);
             }
 
             rootPass->AddChild(opaquePass);

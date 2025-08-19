@@ -230,7 +230,7 @@ namespace CE::Editor
                 StaticMeshComponent* meshComponent = groundActor->GetMeshComponent();
                 meshComponent->SetStaticMesh(cubeMesh);
                 meshComponent->SetLocalPosition(Vec3(0, -1, 5));
-                meshComponent->SetLocalScale(Vec3(10, 0.1f, 10));
+                meshComponent->SetLocalScale(Vec3(15, 0.1f, 15));
                 meshComponent->SetMaterial(woodMaterial, 0, 0);
             }
 
@@ -257,10 +257,10 @@ namespace CE::Editor
                 directionalLight->SetLightColor(Colors::White);
             }
 
-            constexpr int NumLights = 9;
-            constexpr std::array<Vec3, NumLights> LightPos = { Vec3(-2, 0, -2), Vec3(0, 0, -2), Vec3(2, 0, -2),
+            constexpr std::array LightPos = { Vec3(-2, 0, -2), Vec3(0, 0, -2), Vec3(2, 0, -2),
 	            Vec3(-2, 0, 0), Vec3(0, 0, 0), Vec3(2, 0, 0),
 	            Vec3(-2, 0, 2), Vec3(0, 0, 2), Vec3(2, 0, 2) };
+            constexpr int NumLights = LightPos.size();
 
             for (int i = 0; i < NumLights; ++i)
             {
@@ -268,7 +268,7 @@ namespace CE::Editor
                 scene->AddActor(pointLight);
                 {
                     Ref<PointLightComponent> pointLightComponent = pointLight->GetPointLightComponent();
-                    pointLightComponent->SetLocalPosition(Vec3(LightPos[i].x, 1, LightPos[i].z));
+                    pointLightComponent->SetLocalPosition(Vec3(LightPos[i].x, 0.5f, LightPos[i].z));
                     pointLightComponent->SetRange(2.5f);
                     pointLightComponent->SetLightColor(Colors::White);
                     pointLightComponent->SetIntensity(10);
@@ -276,10 +276,11 @@ namespace CE::Editor
             }
 
             CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
-            camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 0));
             scene->AddActor(camera);
 
             CameraComponent* cameraComponent = camera->GetCameraComponent();
+            cameraComponent->SetLocalPosition(Vec3(0, 1, -5));
+            cameraComponent->SetLocalEulerAngles(Vec3(10, 0, 0));
             cameraComponent->SetFieldOfView(60);
 
             StaticMeshActor* skyboxActor = CreateObject<StaticMeshActor>(scene, "SkyboxActor");

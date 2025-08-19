@@ -118,6 +118,9 @@ Shader "PBR/Standard"
 
             float4 FragMain(PSInput input) : SV_TARGET
             {
+                float tempVal = _TileHeaders[0].x + _LightIndexPool[0]; // Just to use _TileHeaders
+                tempVal /= 100000000;
+
                 float3 diffuse = 0;
                 float3 specular = 0;
                 float3 vertNormal = normalize(input.normal);
@@ -149,7 +152,7 @@ Shader "PBR/Standard"
                     light.viewDir = viewDir;
                     light.halfway = normalize(viewDir + light.lightDir);
 
-                    float shadow = 0.0;
+                    float shadow = tempVal;
                     if (_DirectionalLights[i].shadow > 0)
                     {
                         float4 lightSpacePos = mul(float4(input.worldPos, 1.0), _DirectionalLights[i].lightSpaceMatrix);

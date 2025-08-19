@@ -37,9 +37,6 @@ namespace CE::RPI
         
 		/// @brief Name of the attachment binding. Either pass slot name, or attachment name.
 		Name name = "";
-
-		/// @brief Name of shader input field.
-		Name shaderInputName = "";
         
 		PassSlotType slotType = PassSlotType::Undefined;
         
