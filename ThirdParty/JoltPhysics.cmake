@@ -10,6 +10,8 @@ set(LIB_NAME "Jolt")
 
 
 set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "Use static MSVC runtime library for JoltPhysics" FORCE)
+set(CPP_RTTI_ENABLED ON CACHE BOOL "C++ RTTI For Jolt" FORCE)
+
 add_subdirectory(vendor/${PACKAGE_NAME}/Build)
 
 add_library(${TARGET_WITH_NAMESPACE} ALIAS ${LIB_NAME})
