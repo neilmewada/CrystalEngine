@@ -116,7 +116,7 @@ bool LightAffectsTile(LocalLightData L, TileFrustum fr)
     if (!SphereVsFrustum(P, R, fr)) return false;
 
     // Second test: spot light cone (if applicable)
-    if (L.type == LocalLightType_Spot && L.spotLightAngle > 0.0f)
+    if (L.type == LocalLightType_Spot && L.spotLightAngle > 0.01f)
     {
         float3 dirN = normalize(L.spotLightDirection.xyz);
         float co = cos(L.spotLightAngle);

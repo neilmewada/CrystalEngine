@@ -198,6 +198,27 @@ Shader "PBR/Standard"
 
                 color = color / (color + float3(1.0, 1.0, 1.0) * 0.5); // HDR Tonemapping (optional)
                 color = LinearToGamma(color); // Convert to Gamma space
+
+                float2 screenPos = ((input.position.xy / pixelResolution.xy) * 0.5 + 0.125) * pixelResolution.xy;
+
+                // Derive tiling from current render target size
+                const uint width = (uint)pixelResolution.x;
+                const uint height = (uint)pixelResolution.y;
+                const uint tilesX = (width + tileSizeX - 1) / tileSizeX;
+                const uint tilesY = (height + tileSizeY - 1) / tileSizeY;
+
+                // Map global thread to tile coordinates
+                const uint tx = (uint)(screenPos.x / tileSizeX);
+                const uint ty = (uint)(screenPos.y / tileSizeY);
+                const uint tileId = ty * tilesX + tx;
+
+                //return float4(color, 1.0);
+
+                color.rgb = 0.0;
+                const uint base = _TileHeaders[tileId].x;
+                const uint count = _TileHeaders[tileId].y;
+                color.r = (float)count / 9.0;
+
                 return float4(color, 1.0);
             }
 

@@ -230,8 +230,14 @@ namespace CE::Editor
                 StaticMeshComponent* meshComponent = groundActor->GetMeshComponent();
                 meshComponent->SetStaticMesh(cubeMesh);
                 meshComponent->SetLocalPosition(Vec3(0, -1, 5));
-                meshComponent->SetLocalScale(Vec3(15, 0.1f, 15));
+                meshComponent->SetLocalScale(Vec3(30, 0.1f, 30));
                 meshComponent->SetMaterial(woodMaterial, 0, 0);
+            }
+
+            if (true)
+            {
+                carActor->SetEnabled(false);
+                chairActor->SetEnabled(false);
             }
 
             if (false)
@@ -277,7 +283,7 @@ namespace CE::Editor
                 {
                     Ref<PointLightComponent> pointLightComponent = pointLight->GetPointLightComponent();
                     pointLightComponent->SetLocalPosition(Vec3(LightPos[i].x * 2, -0.5f, LightPos[i].z * 2 + 5));
-                    pointLightComponent->SetRange(5.0f);
+                    pointLightComponent->SetRange(2.0f);
                     pointLightComponent->SetLightColor(LightColors[i]);
                     pointLightComponent->SetIntensity(25);
                 }
@@ -287,8 +293,8 @@ namespace CE::Editor
             scene->AddActor(camera);
 
             CameraComponent* cameraComponent = camera->GetCameraComponent();
-            cameraComponent->SetLocalPosition(Vec3(0, 1, -5));
-            cameraComponent->SetLocalEulerAngles(Vec3(10, 0, 0));
+            cameraComponent->SetLocalPosition(Vec3(0, 5, -5));
+            cameraComponent->SetLocalEulerAngles(Vec3(35, 0, 0));
             cameraComponent->SetFieldOfView(60);
 
             StaticMeshActor* skyboxActor = CreateObject<StaticMeshActor>(scene, "SkyboxActor");
