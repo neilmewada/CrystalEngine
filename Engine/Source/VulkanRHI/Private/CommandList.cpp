@@ -118,7 +118,7 @@ namespace CE::Vulkan
 
 			if (srgsToMerge[setNumber].GetSize() == 1)
 			{
-				if (commitedSRGsBySetNumber[setNumber] != srgsToMerge[setNumber][0]->GetDescriptorSet()) // SRG has changed
+				if (needsSrgCommit || commitedSRGsBySetNumber[setNumber] != srgsToMerge[setNumber][0]->GetDescriptorSet()) // SRG has changed
 				{
 					DescriptorSet* descriptorSet = srgsToMerge[setNumber][0]->GetDescriptorSet();
 
@@ -161,6 +161,8 @@ namespace CE::Vulkan
 				}
 			}
 		}
+
+		needsSrgCommit = false;
 	}
 
 	void CommandList::BindPipelineState(RHI::PipelineState* rhiPipelineState)
@@ -182,11 +184,23 @@ namespace CE::Vulkan
 			Vulkan::GraphicsPipeline* gfxPipeline = (Vulkan::GraphicsPipeline*)boundPipeline;
 			VkPipeline vkPipeline = gfxPipeline->FindOrCompile(currentPass, currentSubpass);
 
+			if (curPipelineType != VK_PIPELINE_BIND_POINT_GRAPHICS)
+			{
+				needsSrgCommit = true;
+			}
+
 			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline);
+			curPipelineType = VK_PIPELINE_BIND_POINT_GRAPHICS;
 		}
 		else if (pipelineType == RHI::PipelineStateType::Compute)
 		{
+			if (curPipelineType != VK_PIPELINE_BIND_POINT_COMPUTE)
+			{
+				needsSrgCommit = true;
+			}
+
 			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, boundPipeline->GetPipeline());
+			curPipelineType = VK_PIPELINE_BIND_POINT_COMPUTE;
 		}
 	}
 

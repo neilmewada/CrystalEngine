@@ -890,7 +890,81 @@ namespace CE::Vulkan
 				}
 				else if (currentScope->queueClass == RHI::HardwareQueueClass::Transfer)
 				{
-					// TODO: Add transfer pass
+					// TODO: Finish the transfer pass
+
+					commandList->ClearShaderResourceGroups();
+
+					if (currentScope->readAttachments.NotEmpty() && currentScope->writeAttachments.NotEmpty())
+					{
+						ScopeAttachment* fromAttachment = currentScope->readAttachments[0];
+						ScopeAttachment* toAttachment = currentScope->writeAttachments[0];
+
+						if (fromAttachment->IsImageAttachment() && toAttachment->IsImageAttachment())
+						{
+							RHI::RHIResource* fromResource = fromAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
+							RHI::RHIResource* toResource = toAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
+
+							if (fromResource != nullptr && toResource != nullptr &&
+								fromResource->GetResourceType() == RHI::ResourceType::Texture &&
+								toResource->GetResourceType() == RHI::ResourceType::Texture)
+							{
+								Vulkan::Texture* fromImage = (Vulkan::Texture*)fromResource;
+								Vulkan::Texture* toImage = (Vulkan::Texture*)toResource;
+								if (fromImage->GetImage() != VK_NULL_HANDLE && toImage->GetImage() != VK_NULL_HANDLE)
+								{
+									for (int mip = 0; mip < fromImage->GetMipLevelCount(); mip++)
+									{
+										VkImageCopy copyRegion{};
+										copyRegion.srcOffset = { 0, 0, 0 };
+										copyRegion.srcSubresource.baseArrayLayer = 0;
+										copyRegion.srcSubresource.layerCount = fromImage->GetArrayLayerCount();
+										copyRegion.srcSubresource.mipLevel = mip;
+										copyRegion.srcSubresource.aspectMask = fromImage->aspectMask;
+
+										copyRegion.dstOffset = { 0, 0, 0 };
+										copyRegion.dstSubresource.baseArrayLayer = 0;
+										copyRegion.dstSubresource.layerCount = toImage->GetArrayLayerCount();
+										copyRegion.dstSubresource.mipLevel = mip;
+										copyRegion.dstSubresource.aspectMask = toImage->aspectMask;
+
+										copyRegion.extent.width = Math::Max<u32>(1, fromImage->GetWidth(mip));
+										copyRegion.extent.height = Math::Max<u32>(1, fromImage->GetHeight(mip));
+										copyRegion.extent.depth = Math::Max<u32>(1, fromImage->GetDepth(mip));
+
+										vkCmdCopyImage(cmdBuffer,
+											fromImage->GetImage(), fromImage->curImageLayout,
+											toImage->GetImage(), toImage->curImageLayout,
+											1, &copyRegion);
+									}
+								}
+							}
+						}
+						else if (fromAttachment->IsBufferAttachment() && toAttachment->IsBufferAttachment())
+						{
+							RHI::RHIResource* fromResource = fromAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
+							RHI::RHIResource* toResource = toAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
+
+							if (fromResource != nullptr && toResource != nullptr &&
+								fromResource->GetResourceType() == RHI::ResourceType::Buffer &&
+								toResource->GetResourceType() == RHI::ResourceType::Buffer)
+							{
+								Vulkan::Buffer* fromBuffer = (Vulkan::Buffer*)fromResource;
+								Vulkan::Buffer* toBuffer = (Vulkan::Buffer*)toResource;
+								if (fromBuffer->GetBuffer() != VK_NULL_HANDLE && toBuffer->GetBuffer() != VK_NULL_HANDLE)
+								{
+									VkBufferCopy copyRegion{};
+									copyRegion.srcOffset = 0;
+									copyRegion.dstOffset = 0;
+									copyRegion.size = Math::Min(fromBuffer->GetBufferSize(), toBuffer->GetBufferSize());
+
+									vkCmdCopyBuffer(cmdBuffer,
+										fromBuffer->GetBuffer(),
+										toBuffer->GetBuffer(),
+										1, &copyRegion);
+								}
+							}
+						}
+					}
 				}
 
 				// Execute compiled pipeline barriers (exit barriers)

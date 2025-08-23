@@ -69,6 +69,9 @@ namespace CE::Vulkan
 		u32 currentSubpass = 0;
 		Vulkan::Pipeline* boundPipeline = nullptr;
 
+		bool needsSrgCommit = true;
+		VkPipelineBindPoint curPipelineType = VK_PIPELINE_BIND_POINT_MAX_ENUM;
+
 		StaticArray<Vulkan::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> boundSRGs{};
 		StaticArray<Vulkan::DescriptorSet*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> commitedSRGsBySetNumber{};
 

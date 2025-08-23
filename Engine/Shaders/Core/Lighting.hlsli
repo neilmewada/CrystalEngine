@@ -16,6 +16,7 @@ StructuredBuffer<uint> _LightIndexPool : SRG_PerPass(t1);
 // {offset, count}
 StructuredBuffer<uint2> _TileHeaders : SRG_PerPass(t2);
 
+Texture2D<float> _DepthMap : SRG_PerPass(t3);
 
 float CalculateDirectionalShadow(in float4 lightSpacePos, in float NdotL)
 {

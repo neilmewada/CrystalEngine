@@ -82,6 +82,7 @@ namespace CE::RHI
 
     	bool IsGraphicsPass() const { return operation == ScopeOperation::Rasterization; }
     	bool IsComputePass() const { return operation == ScopeOperation::Compute; }
+		bool IsTransferPass() const { return operation == ScopeOperation::Transfer; }
 
 		void SetShaderResourceGroups(const Array<RHI::ShaderResourceGroup*>& srgs);
 		void AddShaderResourceGroups(RHI::ShaderResourceGroup* srg);

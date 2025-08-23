@@ -9,8 +9,13 @@
 // --------------------------- Resources --------------------------------------
 
 // NDC constants for Vulkan
-static const float ndcNear = -1.0f; // Vulkan: -1, D3D: 0
-static const float ndcFar  =  1.0f; // Vulkan: 1, D3D: 1
+// vulkan ndc, minDepth = 0.0, maxDepth = 1.0
+static const float2 ndc_upper_left = float2(-1.0, -1.0);
+static const float2 ndc_lower_right = float2(1.0, 1.0);
+static const float ndc_near_plane = 0.0;
+static const float ndc_far_plane = 1.0;
+static const float min_depth = 0.0;
+static const float max_depth = 1.0;
 
 // Light index pool - stores indices into _LocalLights array
 RWStructuredBuffer<uint> _LightIndexPool : SRG_PerPass(u1);
@@ -21,11 +26,14 @@ RWStructuredBuffer<uint2> _TileHeaders : SRG_PerPass(u2);
 // Pool allocator - atomic counter for managing light index pool
 RWStructuredBuffer<uint> _PoolAlloc : SRG_PerPass(u3);
 
+Texture2D<float> _DepthMap : SRG_PerPass(t4);
+
 // --------------------------- Frustum helpers --------------------------------
 
 struct TileFrustum 
 { 
     float4 planes[6]; // plane.xyzw = (n.xyz, d); dot(n,P)+d >= 0 is inside
+    float3 points[8]; // 0-3 near, 4-7 far
 };
 
 // Convert a pixel corner to world space at a given NDC z using inv(viewProj)
@@ -49,37 +57,49 @@ float4 MakePlane(float3 a, float3 b, float3 c)
     return float4(n, -dot(n, a));
 }
 
-// Build frustum for a specific tile
-void BuildTileFrustum(uint tileId, out TileFrustum fr, float4x4 invViewProj,
-                      uint tilesX, uint tilesY, uint width, uint height)
+TileFrustum CreateFrustum(uint2 tileId, in float4x4 invViewProj)
 {
-    const uint tx = tileId % tilesX;
-    const uint ty = tileId / tilesX;
+    TileFrustum frustum;
 
-    const uint x0 = tx * tileSizeX;
-    const uint y0 = ty * tileSizeY;
-    const uint x1 = min((tx + 1) * tileSizeX, width);
-    const uint y1 = min((ty + 1) * tileSizeY, height);
+    float2 ndc_size_per_tile = 2.0 * float2(tileSizeX, tileSizeY) / pixelResolution.xy;
+    float2 ndc_pts[4];
+    ndc_pts[0] = ndc_upper_left + tileId * ndc_size_per_tile;  // upper left
+	ndc_pts[1] = float2(ndc_pts[0].x + ndc_size_per_tile.x, ndc_pts[0].y); // upper right
+	ndc_pts[2] = ndc_pts[0] + ndc_size_per_tile;
+	ndc_pts[3] = float2(ndc_pts[0].x, ndc_pts[0].y + ndc_size_per_tile.y); // lower left
 
-    // Near plane corners
-    float3 n00 = CornerWS(x0,     y0,     ndcNear, invViewProj);
-    float3 n10 = CornerWS(x1 - 1, y0,     ndcNear, invViewProj);
-    float3 n01 = CornerWS(x0,     y1 - 1, ndcNear, invViewProj);
-    float3 n11 = CornerWS(x1 - 1, y1 - 1, ndcNear, invViewProj);
+    float4 temp;
+    for (int i = 0; i < 4; i++)
+	{
+		temp = mul(invViewProj, float4(ndc_pts[i], min_depth, 1.0));
+		frustum.points[i] = temp.xyz / temp.w;
+		temp = mul(invViewProj, float4(ndc_pts[i], max_depth, 1.0));
+		frustum.points[i + 4] = temp.xyz / temp.w;
+	}
 
-    // Far plane corners
-    float3 f00 = CornerWS(x0,     y0,     ndcFar, invViewProj);
-    float3 f10 = CornerWS(x1 - 1, y0,     ndcFar, invViewProj);
-    float3 f01 = CornerWS(x0,     y1 - 1, ndcFar, invViewProj);
-    float3 f11 = CornerWS(x1 - 1, y1 - 1, ndcFar, invViewProj);
+    float3 temp_normal;
+	for (int i = 0; i < 4; i++)
+	{
+		//Cax+Cby+Ccz+Cd = 0, planes[i] = (Ca, Cb, Cc, Cd)
+		// temp_normal: normal without normalization
+		temp_normal = cross(frustum.points[i] - viewPosition, frustum.points[i + 1] - viewPosition);
+		temp_normal = normalize(temp_normal);
+		frustum.planes[i] = float4(temp_normal, - dot(temp_normal, frustum.points[i]));
+	}
+	// near plane
+	{
+		temp_normal = cross(frustum.points[1] - frustum.points[0], frustum.points[3] - frustum.points[0]);
+		temp_normal = normalize(temp_normal);
+		frustum.planes[4] = float4(temp_normal, - dot(temp_normal, frustum.points[0]));
+	}
+	// far plane
+	{
+		temp_normal = cross(frustum.points[7] - frustum.points[4], frustum.points[5] - frustum.points[4]);
+		temp_normal = normalize(temp_normal);
+		frustum.planes[5] = float4(temp_normal, - dot(temp_normal, frustum.points[4]));
+	}
 
-    // Build frustum planes (CCW winding)
-    fr.planes[0] = MakePlane(n00, f00, f01); // Left
-    fr.planes[1] = MakePlane(n11, f11, f10); // Right
-    fr.planes[2] = MakePlane(n10, f10, f00); // Top
-    fr.planes[3] = MakePlane(n01, f01, f11); // Bottom
-    fr.planes[4] = MakePlane(n00, n10, n11); // Near
-    fr.planes[5] = MakePlane(f11, f10, f00); // Far
+	return frustum;
 }
 
 // Test if a sphere intersects with the frustum
@@ -150,8 +170,8 @@ void CSMain(uint3 dtid : SV_DispatchThreadID)
     float4x4 invViewProj = inverse(viewProjectionMatrix);
 
     // Build this tile's frustum
-    TileFrustum fr;
-    BuildTileFrustum(tileId, fr, invViewProj, tilesX, tilesY, width, height);
+    TileFrustum fr = CreateFrustum(uint2(tx, ty), invViewProj);
+    //BuildTileFrustum(tileId, fr, invViewProj, tilesX, tilesY, width, height);
 
     // Pass 1: Count how many lights overlap this tile
     uint count = 0;

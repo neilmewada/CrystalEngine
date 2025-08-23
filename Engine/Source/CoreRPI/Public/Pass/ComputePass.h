@@ -1,8 +1,9 @@
 #pragma once
-#include "Shader/ComputeShader.h"
 
 namespace CE::RPI
 {
+	class ComputeShader;
+
     CLASS()
     class CORERPI_API ComputePass : public GpuPass
     {

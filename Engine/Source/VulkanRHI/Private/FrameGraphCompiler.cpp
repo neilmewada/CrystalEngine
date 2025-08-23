@@ -384,6 +384,11 @@ namespace CE::Vulkan
 
 		if (!visitedScopes[imageIndex].Exists(current->id))
 		{
+			if (current->operation == ScopeOperation::Compute)
+			{
+				String::IsAlphabet('a');
+			}
+
 			current->initialBarriers[imageIndex].Clear();
 			current->barriers[imageIndex].Clear();
 
@@ -398,6 +403,50 @@ namespace CE::Vulkan
 				for (auto [from, to] : commonAttachments)
 				{
 					Scope::Barrier barrier{};
+
+					switch (from->GetUsage())
+					{
+					case ScopeAttachmentUsage::Color:
+						barrier.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						break;
+					case ScopeAttachmentUsage::DepthStencil:
+						barrier.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+						break;
+					case ScopeAttachmentUsage::Copy:
+						barrier.srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+						break;
+					case ScopeAttachmentUsage::SubpassInput:
+					case ScopeAttachmentUsage::Shader:
+						barrier.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+						break;
+					case ScopeAttachmentUsage::Resolve:
+						barrier.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						break;
+					default:
+						break;
+					}
+
+					switch (to->GetUsage())
+					{
+					case ScopeAttachmentUsage::Color:
+						barrier.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						break;
+					case ScopeAttachmentUsage::DepthStencil:
+						barrier.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+						break;
+					case ScopeAttachmentUsage::Copy:
+						barrier.dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+						break;
+					case ScopeAttachmentUsage::Shader:
+					case ScopeAttachmentUsage::SubpassInput:
+						barrier.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+						break;
+					case ScopeAttachmentUsage::Resolve:
+						barrier.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						break;
+					default:
+						break;
+					}
 
 					// Image -> Image barrier
 					if (from->IsImageAttachment() && to->IsImageAttachment() && RequiresDependency(from, to))
@@ -447,12 +496,10 @@ namespace CE::Vulkan
 						switch (fromImage->GetUsage())
 						{
 						case RHI::ScopeAttachmentUsage::Color:
-							barrier.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 							imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 							break;
 						case RHI::ScopeAttachmentUsage::DepthStencil:
-							barrier.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
 							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 							imageBarrier.srcAccessMask = 0;
 							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
@@ -467,7 +514,6 @@ namespace CE::Vulkan
 							break;
 						case RHI::ScopeAttachmentUsage::SubpassInput:
 						case RHI::ScopeAttachmentUsage::Shader:
-							barrier.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 							imageBarrier.srcAccessMask = 0;
 							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
 							{
@@ -484,7 +530,6 @@ namespace CE::Vulkan
 							}
 							break;
 						case RHI::ScopeAttachmentUsage::Copy:
-							barrier.srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
 							imageBarrier.srcAccessMask = 0;
 							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
 							{
@@ -498,7 +543,6 @@ namespace CE::Vulkan
 							}
 							break;
 						case RHI::ScopeAttachmentUsage::Resolve:
-							barrier.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 							imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 							break;
@@ -509,12 +553,10 @@ namespace CE::Vulkan
 						switch (toImage->GetUsage())
 						{
 						case RHI::ScopeAttachmentUsage::Color:
-							barrier.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 							imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 							imageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 							break;
 						case RHI::ScopeAttachmentUsage::DepthStencil:
-							barrier.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
 							imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 							imageBarrier.dstAccessMask = 0;
 							if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
@@ -529,7 +571,6 @@ namespace CE::Vulkan
 							break;
 						case RHI::ScopeAttachmentUsage::SubpassInput:
 						case RHI::ScopeAttachmentUsage::Shader:
-							barrier.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 							imageBarrier.dstAccessMask = 0;
 							if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
 							{
@@ -546,7 +587,6 @@ namespace CE::Vulkan
 							}
 							break;
 						case RHI::ScopeAttachmentUsage::Copy:
-							barrier.dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
 							imageBarrier.dstAccessMask = 0;
 							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
 							{
@@ -560,7 +600,6 @@ namespace CE::Vulkan
 							}
 							break;
 						case RHI::ScopeAttachmentUsage::Resolve:
-							barrier.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 							imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 							imageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 							break;
@@ -630,11 +669,8 @@ namespace CE::Vulkan
 						{
 						case RHI::ScopeAttachmentUsage::Copy:
 						case RHI::ScopeAttachmentUsage::Shader:
-							if (EnumHasFlag(fromBuffer->GetAccess(), RHI::ScopeAttachmentAccess::Read))
-							{
-								bufferBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-							}
-							else if (EnumHasFlag(fromBuffer->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+							bufferBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+							if (EnumHasFlag(fromBuffer->GetAccess(), RHI::ScopeAttachmentAccess::Write))
 							{
 								bufferBarrier.srcAccessMask |= VK_ACCESS_MEMORY_WRITE_BIT;
 							}
@@ -647,11 +683,8 @@ namespace CE::Vulkan
 						{
 						case RHI::ScopeAttachmentUsage::Copy:
 						case RHI::ScopeAttachmentUsage::Shader:
-							if (EnumHasFlag(toBuffer->GetAccess(), RHI::ScopeAttachmentAccess::Read))
-							{
-								bufferBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-							}
-							else if (EnumHasFlag(toBuffer->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+							bufferBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+							if (EnumHasFlag(toBuffer->GetAccess(), RHI::ScopeAttachmentAccess::Write))
 							{
 								bufferBarrier.dstAccessMask |= VK_ACCESS_MEMORY_WRITE_BIT;
 							}
@@ -663,7 +696,7 @@ namespace CE::Vulkan
 						Scope::BufferFamilyTransition transition{};
 						transition.buffer = buffer;
 						transition.queueFamilyIndex = current->queue->GetFamilyIndex();
-
+						
 						barrier.bufferBarriers.Add(bufferBarrier);
 						barrier.bufferFamilyTransitions.Add(transition);
 

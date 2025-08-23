@@ -72,12 +72,12 @@ namespace CE
             depthStencilAttachmentDesc.lifetime = RHI::AttachmentLifetimeType::Transient;
             depthStencilAttachmentDesc.sizeSource.source = pipelineOutput->name;
 
-            depthStencilAttachmentDesc.imageDescriptor.format = RHI::Format::D32_SFLOAT_S8_UINT;
+            depthStencilAttachmentDesc.imageDescriptor.format = RHI::Format::D32_SFLOAT;
             depthStencilAttachmentDesc.imageDescriptor.arrayLayers = 1;
             depthStencilAttachmentDesc.imageDescriptor.mipCount = 1;
             depthStencilAttachmentDesc.imageDescriptor.dimension = RHI::Dimension::Dim2D;
-            depthStencilAttachmentDesc.imageDescriptor.bindFlags = RHI::TextureBindFlags::DepthStencil;
-            depthStencilAttachmentDesc.fallbackFormats = { RHI::Format::D24_UNORM_S8_UINT, RHI::Format::D16_UNORM_S8_UINT };
+            depthStencilAttachmentDesc.imageDescriptor.bindFlags = RHI::TextureBindFlags::Depth;
+            depthStencilAttachmentDesc.fallbackFormats = { RHI::Format::D16_UNORM };
 
             switch (msaa)
             {
@@ -96,6 +96,39 @@ namespace CE
             }
 
             depthStencilAttachment = renderPipeline->AddAttachment(depthStencilAttachmentDesc);
+	    }
+
+		RPI::PassAttachment* depthTextureAttachment;
+	    {
+		    RPI::PassImageAttachmentDesc depthTextureAttachmentDesc{};
+            depthTextureAttachmentDesc.name = "DepthTexture";
+            depthTextureAttachmentDesc.lifetime = RHI::AttachmentLifetimeType::Transient;
+            depthTextureAttachmentDesc.sizeSource.source = pipelineOutput->name;
+
+            depthTextureAttachmentDesc.imageDescriptor.format = RHI::Format::D32_SFLOAT;
+            depthTextureAttachmentDesc.imageDescriptor.mipCount = 1;
+            depthTextureAttachmentDesc.imageDescriptor.arrayLayers = 1;
+            depthTextureAttachmentDesc.imageDescriptor.dimension = RHI::Dimension::Dim2D;
+	    	depthTextureAttachmentDesc.imageDescriptor.bindFlags = RHI::TextureBindFlags::Depth | RHI::TextureBindFlags::ShaderRead;
+            depthTextureAttachmentDesc.fallbackFormats = { RHI::Format::D16_UNORM };
+
+            switch (msaa)
+            {
+            case MSAA1:
+                depthTextureAttachmentDesc.imageDescriptor.sampleCount = 1;
+                break;
+            case MSAA2:
+                depthTextureAttachmentDesc.imageDescriptor.sampleCount = 2;
+                break;
+            case MSAA4:
+                depthTextureAttachmentDesc.imageDescriptor.sampleCount = 4;
+                break;
+            case MSAA8:
+                depthTextureAttachmentDesc.imageDescriptor.sampleCount = 8;
+                break;
+			}
+
+			depthTextureAttachment = renderPipeline->AddAttachment(depthTextureAttachmentDesc);
 	    }
 
     	// - Color MSAA -
@@ -214,6 +247,31 @@ namespace CE
             depthPass->AddAttachmentBinding(outputBinding);
             
             rootPass->AddChild(depthPass);
+	    }
+
+		// - Depth Copy Pass -
+
+		RPI::CopyPass* depthCopyPass = (RPI::CopyPass*)RPI::PassSystem::Get().CreatePass(this, "CopyPass");
+		depthCopyPass->SetViewTag(mainViewTag);
+	    {
+		    RPI::PassAttachmentBinding depthInputBinding{};
+            depthInputBinding.name = "Input";
+            depthInputBinding.slotType = RPI::PassSlotType::Input;
+            depthInputBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Copy;
+            depthInputBinding.connectedBinding = depthPass->FindOutputBinding("DepthOutput");
+
+			depthCopyPass->AddAttachmentBinding(depthInputBinding);
+
+            RPI::PassAttachmentBinding outputBinding{};
+			outputBinding.name = "Output";
+			outputBinding.slotType = RPI::PassSlotType::Output;
+			outputBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Copy;
+            outputBinding.attachment = depthTextureAttachment;
+			outputBinding.connectedBinding = outputBinding.fallbackBinding = nullptr;
+
+			depthCopyPass->AddAttachmentBinding(outputBinding);
+
+			rootPass->AddChild(depthCopyPass);
 	    }
 
         // - Skybox Pass -
@@ -336,6 +394,27 @@ namespace CE
                 tileCullingPass->AddAttachmentBinding(poolAllocBinding);
             }
 
+            // _DepthMap
+            {
+	            RPI::PassSlot depthMapSlot{};
+                depthMapSlot.name = "DepthMap";
+				depthMapSlot.slotType = PassSlotType::Input;
+				depthMapSlot.shaderInputName = "_DepthMap";
+				depthMapSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
+				depthMapSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
+				depthMapSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+
+				tileCullingPass->AddSlot(depthMapSlot);
+
+				RPI::PassAttachmentBinding depthMapBinding{};
+				depthMapBinding.name = "DepthMap";
+				depthMapBinding.slotType = PassSlotType::Input;
+				depthMapBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+				depthMapBinding.connectedBinding = depthCopyPass->FindOutputBinding("Output");
+
+				tileCullingPass->AddAttachmentBinding(depthMapBinding);
+            }
+
             rootPass->AddChild(tileCullingPass);
         }
 
@@ -383,6 +462,28 @@ namespace CE
                 colorBinding.connectedBinding = skyboxPass->FindOutputBinding("ColorOutput");
 
                 opaquePass->AddAttachmentBinding(colorBinding);
+            }
+
+            // DepthMap
+            {
+                RPI::PassSlot depthMapSlot{};
+				depthMapSlot.name = "DepthMap";
+                depthMapSlot.slotType = PassSlotType::Input;
+				depthMapSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
+				depthMapSlot.dimensions = { RHI::Dimension::Dim2D };
+                depthMapSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
+				depthMapSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+				depthMapSlot.shaderInputName = "_DepthMap";
+
+                opaquePass->AddSlot(depthMapSlot);
+
+				RPI::PassAttachmentBinding depthMapBinding{};
+				depthMapBinding.name = "DepthMap";
+				depthMapBinding.slotType = PassSlotType::Input;
+				depthMapBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+                depthMapBinding.connectedBinding = depthCopyPass->FindOutputBinding("Output");
+
+				opaquePass->AddAttachmentBinding(depthMapBinding);
             }
 
             // DirectionalShadowMap
