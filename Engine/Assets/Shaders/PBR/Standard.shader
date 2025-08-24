@@ -116,6 +116,27 @@ Shader "PBR/Standard"
             Texture2D<float4> _NormalTex : SRG_PerMaterial(t3);
             Texture2D<float> _MetallicTex : SRG_PerMaterial(t4);
 
+            struct TileFrustum 
+            { 
+                float4 planes[6]; // plane.xyzw = (n.xyz, d); dot(n,P) + d == 0 is inside
+            };
+
+            float3 ReconstructWorldPos(float4 svPos, in float4x4 invView, in float4x4 invProj)
+            {
+                // window → NDC
+                float4 ndc;
+                ndc.xy = (svPos.xy / pixelResolution) * 2.0f - 1.0f;   // [-1,1]
+                ndc.z  = svPos.z;                    // [-1,1]
+                ndc.w  = 1.0f;
+                
+                float4 clipPos = ndc;
+
+                // clip → world
+                float3 viewPos = mul(invView, clipPos);
+                float4 worldH = mul(invProj, float4(viewPos, 1.0));
+                return worldH.xyz; // perspective divide
+            }
+
             float4 FragMain(PSInput input) : SV_TARGET
             {
                 float tempVal = _TileHeaders[0].y + _LightIndexPool[0]; // Just to use _TileHeaders
@@ -199,7 +220,7 @@ Shader "PBR/Standard"
                 color = color / (color + float3(1.0, 1.0, 1.0) * 0.5); // HDR Tonemapping (optional)
                 color = LinearToGamma(color); // Convert to Gamma space
 
-                float2 screenPos = ((input.position.xy / pixelResolution.xy) * 0.5 + 0.125) * pixelResolution.xy;
+                float2 screenPos = input.position.xy;
 
                 // Derive tiling from current render target size
                 const uint width = (uint)pixelResolution.x;
@@ -212,7 +233,22 @@ Shader "PBR/Standard"
                 const uint ty = (uint)(screenPos.y / tileSizeY);
                 const uint tileId = ty * tilesX + tx;
 
-                //return float4(color, 1.0);
+                const float4x4 invViewProj = inverse(viewProjectionMatrix);
+                const float4x4 invView = inverse(viewMatrix);
+                const float4x4 invProj = inverse(projectionMatrix);
+
+                float2 pBase = float2(uint2(tx, ty) * uint2(tileSizeX, tileSizeY));
+
+                float2 p00 = pBase / pixelResolution.xy * 2.0f - 1.0f;
+                float2 p10 = float2(pBase.x + tileSizeX, pBase.y) / pixelResolution.xy * 2.0f - 1.0f;
+                float2 p01 = float2(pBase.x, pBase.y + tileSizeY) / pixelResolution.xy * 2.0f - 1.0f;
+                float2 p11 = float2(pBase.x + tileSizeX, pBase.y + tileSizeY) / pixelResolution.xy * 2.0f - 1.0f;
+
+                float3 worldPos = ReconstructWorldPos(input.position, invView, invProj);
+
+                float ndcZ = input.position.z; // Far plane
+
+                return float4(color, 1.0);
 
                 color.rgb = 0.0;
                 const uint base = _TileHeaders[tileId].x;

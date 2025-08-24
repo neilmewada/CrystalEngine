@@ -1012,7 +1012,7 @@ namespace CE::Vulkan
 					imageBarrier.srcQueueFamilyIndex = image->curFamilyIndex;
 					imageBarrier.dstQueueFamilyIndex = presentQueue->GetFamilyIndex();
 					imageBarrier.image = image->image;
-					imageBarrier.oldLayout = image->curImageLayout;//VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					imageBarrier.oldLayout = image->curImageLayout;
 					imageBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 					imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 					imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;

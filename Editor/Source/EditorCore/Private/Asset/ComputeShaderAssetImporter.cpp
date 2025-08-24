@@ -88,6 +88,7 @@ namespace CE::Editor
                 L"-D", L"COMPILE=1",
                 L"-D", L"COMPUTE=1",
                 L"-fspv-preserve-bindings",
+                L"-fspv-debug=vulkan-with-source"
             });
 
             ShaderCompiler compiler{};

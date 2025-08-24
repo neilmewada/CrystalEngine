@@ -46,7 +46,7 @@ float3 CornerWS(uint px, uint py, float ndcZ, float4x4 invViewProj)
     float2 ndc = float2(uv.x * 2.0f - 1.0f, 1.0f - uv.y * 2.0f);
     
     float4 pCS = float4(ndc, ndcZ, 1.0f);
-    float4 pWS = mul(invViewProj, pCS);
+    float4 pWS = mul(pCS, invViewProj);
     return pWS.xyz / pWS.w;
 }
 
@@ -55,51 +55,6 @@ float4 MakePlane(float3 a, float3 b, float3 c)
 {
     float3 n = normalize(cross(b - a, c - a));
     return float4(n, -dot(n, a));
-}
-
-TileFrustum CreateFrustum(uint2 tileId, in float4x4 invViewProj)
-{
-    TileFrustum frustum;
-
-    float2 ndc_size_per_tile = 2.0 * float2(tileSizeX, tileSizeY) / pixelResolution.xy;
-    float2 ndc_pts[4];
-    ndc_pts[0] = ndc_upper_left + tileId * ndc_size_per_tile;  // upper left
-	ndc_pts[1] = float2(ndc_pts[0].x + ndc_size_per_tile.x, ndc_pts[0].y); // upper right
-	ndc_pts[2] = ndc_pts[0] + ndc_size_per_tile;
-	ndc_pts[3] = float2(ndc_pts[0].x, ndc_pts[0].y + ndc_size_per_tile.y); // lower left
-
-    float4 temp;
-    for (int i = 0; i < 4; i++)
-	{
-		temp = mul(invViewProj, float4(ndc_pts[i], min_depth, 1.0));
-		frustum.points[i] = temp.xyz / temp.w;
-		temp = mul(invViewProj, float4(ndc_pts[i], max_depth, 1.0));
-		frustum.points[i + 4] = temp.xyz / temp.w;
-	}
-
-    float3 temp_normal;
-	for (int i = 0; i < 4; i++)
-	{
-		//Cax+Cby+Ccz+Cd = 0, planes[i] = (Ca, Cb, Cc, Cd)
-		// temp_normal: normal without normalization
-		temp_normal = cross(frustum.points[i] - viewPosition, frustum.points[i + 1] - viewPosition);
-		temp_normal = normalize(temp_normal);
-		frustum.planes[i] = float4(temp_normal, - dot(temp_normal, frustum.points[i]));
-	}
-	// near plane
-	{
-		temp_normal = cross(frustum.points[1] - frustum.points[0], frustum.points[3] - frustum.points[0]);
-		temp_normal = normalize(temp_normal);
-		frustum.planes[4] = float4(temp_normal, - dot(temp_normal, frustum.points[0]));
-	}
-	// far plane
-	{
-		temp_normal = cross(frustum.points[7] - frustum.points[4], frustum.points[5] - frustum.points[4]);
-		temp_normal = normalize(temp_normal);
-		frustum.planes[5] = float4(temp_normal, - dot(temp_normal, frustum.points[4]));
-	}
-
-	return frustum;
 }
 
 // Test if a sphere intersects with the frustum
@@ -146,6 +101,51 @@ bool LightAffectsTile(LocalLightData L, TileFrustum fr)
     return true;
 }
 
+TileFrustum CreateFrustum(uint2 tileId, in float4x4 invViewProj)
+{
+    TileFrustum frustum;
+
+    float2 ndc_size_per_tile = 2.0 * float2(tileSizeX, tileSizeY) / pixelResolution.xy;
+    float2 ndc_pts[4];
+    ndc_pts[0] = ndc_upper_left + tileId * ndc_size_per_tile;  // upper left
+	ndc_pts[1] = float2(ndc_pts[0].x + ndc_size_per_tile.x, ndc_pts[0].y); // upper right
+	ndc_pts[2] = ndc_pts[0] + ndc_size_per_tile;
+	ndc_pts[3] = float2(ndc_pts[0].x, ndc_pts[0].y + ndc_size_per_tile.y); // lower left
+
+    float4 temp;
+    for (int i = 0; i < 4; i++)
+	{
+		temp = mul(invViewProj, float4(ndc_pts[i], min_depth, 1.0));
+		frustum.points[i] = temp.xyz / temp.w;
+		temp = mul(invViewProj, float4(ndc_pts[i], max_depth, 1.0));
+		frustum.points[i + 4] = temp.xyz / temp.w;
+	}
+
+    float3 temp_normal;
+	for (int i = 0; i < 4; i++)
+	{
+		//Cax+Cby+Ccz+Cd = 0, planes[i] = (Ca, Cb, Cc, Cd)
+		// temp_normal: normal without normalization
+		temp_normal = cross(frustum.points[i] - viewPosition.xyz, frustum.points[i + 1] - viewPosition.xyz);
+		temp_normal = normalize(temp_normal);
+		frustum.planes[i] = float4(temp_normal, - dot(temp_normal, frustum.points[i]));
+	}
+	// near plane
+	{
+		temp_normal = cross(frustum.points[1] - frustum.points[0], frustum.points[3] - frustum.points[0]);
+		temp_normal = normalize(temp_normal);
+		frustum.planes[4] = float4(temp_normal, - dot(temp_normal, frustum.points[0]));
+	}
+	// far plane
+	{
+		temp_normal = cross(frustum.points[7] - frustum.points[4], frustum.points[5] - frustum.points[4]);
+		temp_normal = normalize(temp_normal);
+		frustum.planes[5] = float4(temp_normal, - dot(temp_normal, frustum.points[4]));
+	}
+
+	return frustum;
+}
+
 // Main compute shader
 [numthreads(8, 8, 1)]
 void CSMain(uint3 dtid : SV_DispatchThreadID)
@@ -171,15 +171,15 @@ void CSMain(uint3 dtid : SV_DispatchThreadID)
 
     // Build this tile's frustum
     TileFrustum fr = CreateFrustum(uint2(tx, ty), invViewProj);
-    //BuildTileFrustum(tileId, fr, invViewProj, tilesX, tilesY, width, height);
 
     // Pass 1: Count how many lights overlap this tile
     uint count = 0;
-    for (uint i = 0; i < totalLocalLights; ++i)
+
+    /*for (uint i = 0; i < totalLocalLights; ++i)
     {
         if (LightAffectsTile(_LocalLights[i], fr)) 
             count++;
-    }
+    }*/
 
     // Reserve a contiguous slice in the global pool
     uint base = 0;

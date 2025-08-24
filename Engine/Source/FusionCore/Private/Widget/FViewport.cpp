@@ -110,8 +110,6 @@ namespace CE
             currentSize = Vec2i(512, 512);
         }
 
-        scene->SetPrimaryViewportSize(currentSize);
-
 		bool isFirstTime = true;
 
         for (int i = 0; i < frames.GetSize(); ++i)
@@ -140,6 +138,8 @@ namespace CE
         textureDescriptor.texture.height = (u32)(currentSize.y * scaling);
         textureDescriptor.texture.depth = 1;
         textureDescriptor.texture.dimension = Dimension::Dim2DArray;
+
+        scene->SetPrimaryViewportSize(Vec2i(textureDescriptor.texture.width, textureDescriptor.texture.height));
 
 	    RHI::TextureViewDescriptor textureViewDescriptor{};
 	    textureViewDescriptor.format = textureDescriptor.texture.format;
