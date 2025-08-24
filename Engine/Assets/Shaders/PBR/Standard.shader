@@ -121,20 +121,25 @@ Shader "PBR/Standard"
                 float4 planes[6]; // plane.xyzw = (n.xyz, d); dot(n,P) + d == 0 is inside
             };
 
-            float3 ReconstructWorldPos(float4 svPos, in float4x4 invView, in float4x4 invProj)
-            {
-                // window → NDC
-                float4 ndc;
-                ndc.xy = (svPos.xy / pixelResolution) * 2.0f - 1.0f;   // [-1,1]
-                ndc.z  = svPos.z;                    // [-1,1]
-                ndc.w  = 1.0f;
-                
-                float4 clipPos = ndc;
+            struct Ray { float3 origin; float3 dir; };
 
-                // clip → world
-                float3 viewPos = mul(invView, clipPos);
-                float4 worldH = mul(invProj, float4(viewPos, 1.0));
-                return worldH.xyz; // perspective divide
+            Ray ScreenToWorldRay(float2 pixelXY, in float4x4 invView, in float4x4 invProj)
+            {
+                float2 ndcXY = (pixelXY / pixelResolution) * 2.0 - 1.0;
+
+                float4 nearPointNDC = float4(ndcXY, 0, 1);
+                float4 farPointNDC = float4(ndcXY, 1, 1);
+
+                float4 wNear = mul(invProj, nearPointNDC); wNear /= wNear.w;
+                float4 wFar = mul(invProj, farPointNDC); wFar /= wFar.w;
+
+                wNear = mul(invView, float4(wNear.xyz, 1));
+                wFar = mul(invView, float4(wFar.xyz, 1));
+
+                Ray r;
+                r.origin = wNear.xyz;
+                r.dir = normalize(wFar.xyz - wNear.xyz);
+                return r;
             }
 
             float4 FragMain(PSInput input) : SV_TARGET
@@ -244,9 +249,16 @@ Shader "PBR/Standard"
                 float2 p01 = float2(pBase.x, pBase.y + tileSizeY) / pixelResolution.xy * 2.0f - 1.0f;
                 float2 p11 = float2(pBase.x + tileSizeX, pBase.y + tileSizeY) / pixelResolution.xy * 2.0f - 1.0f;
 
-                float3 worldPos = ReconstructWorldPos(input.position, invView, invProj);
+                float depth = _DepthMap.Load(uint3(screenPos.x, screenPos.y, 0), 0).r;
+                float2 ndcXY = screenPos / pixelResolution * 2.0 - 1.0;
+                float ndcZ = depth;
 
-                float ndcZ = input.position.z; // Far plane
+                float4 clip = float4(ndcXY, ndcZ, 1);
+                float4 viewH = mul(invProj, clip);
+                float3 view  = viewH.xyz / viewH.w;
+
+                // 4) View -> world
+                float4 worldH = mul(invView, float4(view, 1.0));
 
                 return float4(color, 1.0);
 

@@ -914,27 +914,53 @@ namespace CE::Vulkan
 								{
 									for (int mip = 0; mip < fromImage->GetMipLevelCount(); mip++)
 									{
-										VkImageCopy copyRegion{};
-										copyRegion.srcOffset = { 0, 0, 0 };
-										copyRegion.srcSubresource.baseArrayLayer = 0;
-										copyRegion.srcSubresource.layerCount = fromImage->GetArrayLayerCount();
-										copyRegion.srcSubresource.mipLevel = mip;
-										copyRegion.srcSubresource.aspectMask = fromImage->aspectMask;
+										if (fromImage->GetSampleCount() == toImage->GetSampleCount())
+										{
+											VkImageCopy copyRegion{};
+											copyRegion.srcOffset = { 0, 0, 0 };
+											copyRegion.srcSubresource.baseArrayLayer = 0;
+											copyRegion.srcSubresource.layerCount = fromImage->GetArrayLayerCount();
+											copyRegion.srcSubresource.mipLevel = mip;
+											copyRegion.srcSubresource.aspectMask = fromImage->aspectMask;
 
-										copyRegion.dstOffset = { 0, 0, 0 };
-										copyRegion.dstSubresource.baseArrayLayer = 0;
-										copyRegion.dstSubresource.layerCount = toImage->GetArrayLayerCount();
-										copyRegion.dstSubresource.mipLevel = mip;
-										copyRegion.dstSubresource.aspectMask = toImage->aspectMask;
+											copyRegion.dstOffset = { 0, 0, 0 };
+											copyRegion.dstSubresource.baseArrayLayer = 0;
+											copyRegion.dstSubresource.layerCount = toImage->GetArrayLayerCount();
+											copyRegion.dstSubresource.mipLevel = mip;
+											copyRegion.dstSubresource.aspectMask = toImage->aspectMask;
 
-										copyRegion.extent.width = Math::Max<u32>(1, fromImage->GetWidth(mip));
-										copyRegion.extent.height = Math::Max<u32>(1, fromImage->GetHeight(mip));
-										copyRegion.extent.depth = Math::Max<u32>(1, fromImage->GetDepth(mip));
+											copyRegion.extent.width = Math::Max<u32>(1, fromImage->GetWidth(mip));
+											copyRegion.extent.height = Math::Max<u32>(1, fromImage->GetHeight(mip));
+											copyRegion.extent.depth = Math::Max<u32>(1, fromImage->GetDepth(mip));
 
-										vkCmdCopyImage(cmdBuffer,
-											fromImage->GetImage(), fromImage->curImageLayout,
-											toImage->GetImage(), toImage->curImageLayout,
-											1, &copyRegion);
+											vkCmdCopyImage(cmdBuffer,
+												fromImage->GetImage(), fromImage->curImageLayout,
+												toImage->GetImage(), toImage->curImageLayout,
+												1, &copyRegion);
+										}
+										else if (fromImage->GetSampleCount() > 1 && toImage->GetSampleCount() == 1)
+										{
+											VkImageResolve resolveRegion{};
+											resolveRegion.srcOffset = { 0, 0, 0 };
+											resolveRegion.srcSubresource.baseArrayLayer = 0;
+											resolveRegion.srcSubresource.layerCount = fromImage->GetArrayLayerCount();
+											resolveRegion.srcSubresource.mipLevel = mip;
+											resolveRegion.srcSubresource.aspectMask = fromImage->aspectMask;
+
+											resolveRegion.dstOffset = { 0, 0, 0 };
+											resolveRegion.dstSubresource.baseArrayLayer = 0;
+											resolveRegion.dstSubresource.layerCount = toImage->GetArrayLayerCount();
+											resolveRegion.dstSubresource.mipLevel = mip;
+											resolveRegion.dstSubresource.aspectMask = toImage->aspectMask;
+
+											resolveRegion.extent.width = Math::Max<u32>(1, fromImage->GetWidth(mip));
+											resolveRegion.extent.height = Math::Max<u32>(1, fromImage->GetHeight(mip));
+											resolveRegion.extent.depth = Math::Max<u32>(1, fromImage->GetDepth(mip));
+
+											vkCmdResolveImage(cmdBuffer, fromImage->GetImage(), fromImage->curImageLayout,
+												toImage->GetImage(), toImage->curImageLayout,
+												1, &resolveRegion);
+										}
 									}
 								}
 							}

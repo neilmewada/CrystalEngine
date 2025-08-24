@@ -88,6 +88,8 @@ namespace CE
             viewConstants.viewPosition = GetPosition();
             viewConstants.pixelResolution = windowSize.ToVec2();
             viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix * viewConstants.viewMatrix;
+			viewConstants.nearPlane = nearPlane;
+            viewConstants.farPlane = farPlane;
         }
     }
 

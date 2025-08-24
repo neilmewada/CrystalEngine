@@ -126,7 +126,7 @@ namespace CE
             case MSAA8:
                 depthTextureAttachmentDesc.imageDescriptor.sampleCount = 8;
                 break;
-			}
+            }
 
 			depthTextureAttachment = renderPipeline->AddAttachment(depthTextureAttachmentDesc);
 	    }

@@ -12,6 +12,8 @@ namespace CE::RPI
 		Matrix4x4 projectionMatrix = Matrix4x4::Identity();
 		Vec4 viewPosition = Vec4();
 		Vec2 pixelResolution = Vec2();
+		f32 farPlane = 0;
+		f32 nearPlane = 0;
 	};
     
 	class CORERPI_API View final : public InstanceBase
