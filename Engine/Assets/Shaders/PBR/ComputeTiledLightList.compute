@@ -84,6 +84,7 @@ bool ConeCoversSphere(float3 tipWS, float3 dirWS_norm, float cosOuter,
 // Test if a light affects a tile
 bool LightAffectsTile(LocalLightData L, TileFrustum fr)
 {
+    return true;
     const float3 P = L.worldPosAndRange.xyz;
     const float R = L.worldPosAndRange.w;
 
@@ -115,9 +116,9 @@ TileFrustum CreateFrustum(uint2 tileId, in float4x4 invViewProj)
     float4 temp;
     for (int i = 0; i < 4; i++)
 	{
-		temp = mul(invViewProj, float4(ndc_pts[i], min_depth, 1.0));
+		temp = mul(float4(ndc_pts[i], min_depth, 1.0), invViewProj);
 		frustum.points[i] = temp.xyz / temp.w;
-		temp = mul(invViewProj, float4(ndc_pts[i], max_depth, 1.0));
+		temp = mul(float4(ndc_pts[i], max_depth, 1.0), invViewProj);
 		frustum.points[i + 4] = temp.xyz / temp.w;
 	}
 
@@ -175,11 +176,11 @@ void CSMain(uint3 dtid : SV_DispatchThreadID)
     // Pass 1: Count how many lights overlap this tile
     uint count = 0;
 
-    /*for (uint i = 0; i < totalLocalLights; ++i)
+    for (uint i = 0; i < totalLocalLights; ++i)
     {
         if (LightAffectsTile(_LocalLights[i], fr)) 
             count++;
-    }*/
+    }
 
     // Reserve a contiguous slice in the global pool
     uint base = 0;

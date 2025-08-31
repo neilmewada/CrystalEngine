@@ -12,4 +12,9 @@ cbuffer _PerViewData : SRG_PerView(b0)
     float nearPlane;
 };
 
+inline float LinearizeDepth(float depth)
+{
+    return nearPlane * farPlane / (farPlane + depth * (nearPlane - farPlane));
+}
+
 #endif // __VIEW_DATA_HLSL__

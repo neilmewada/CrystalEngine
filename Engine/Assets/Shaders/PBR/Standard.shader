@@ -83,6 +83,7 @@ Shader "PBR/Standard"
                 float2 uv : TEXCOORD2;
                 float3 tangent : TEXCOORD3;
                 float3 bitangent : TEXCOORD4;
+                float4 clipPos : TEXCOORD5;
             };
 
             #if VERTEX
@@ -121,25 +122,74 @@ Shader "PBR/Standard"
                 float4 planes[6]; // plane.xyzw = (n.xyz, d); dot(n,P) + d == 0 is inside
             };
 
-            struct Ray { float3 origin; float3 dir; };
-
-            Ray ScreenToWorldRay(float2 pixelXY, in float4x4 invView, in float4x4 invProj)
+            inline float3 ScreenToWorldSpace(float2 screenPos, float ndcZ, in float4x4 invViewProj)
             {
-                float2 ndcXY = (pixelXY / pixelResolution) * 2.0 - 1.0;
+                float2 ndcXY = screenPos / pixelResolution * 2.0 - 1.0;
 
-                float4 nearPointNDC = float4(ndcXY, 0, 1);
-                float4 farPointNDC = float4(ndcXY, 1, 1);
+                float4 clip = float4(ndcXY, ndcZ, 1);
+                float4 worldH = mul(clip, invViewProj);
+                return worldH.xyz / worldH.w;
+            }
 
-                float4 wNear = mul(invProj, nearPointNDC); wNear /= wNear.w;
-                float4 wFar = mul(invProj, farPointNDC); wFar /= wFar.w;
+            inline float3 ScreenToViewSpace(float2 screenPos, float ndcZ, in float4x4 invProj)
+            {
+                float2 ndcXY = screenPos / pixelResolution * 2.0 - 1.0;
 
-                wNear = mul(invView, float4(wNear.xyz, 1));
-                wFar = mul(invView, float4(wFar.xyz, 1));
+                float4 clip = float4(ndcXY, ndcZ, 1);
+                float4 viewH = mul(clip, invProj);
+                return viewH.xyz / viewH.w;
+            }
 
-                Ray r;
-                r.origin = wNear.xyz;
-                r.dir = normalize(wFar.xyz - wNear.xyz);
-                return r;
+            inline float3 NDCToViewSpace(float2 ndcXY, float ndcZ, in float4x4 invProj)
+            {
+                float4 clip = float4(ndcXY, ndcZ, 1);
+                float4 viewH = mul(clip, invProj);
+                return viewH.xyz / viewH.w;
+            }
+
+            float4 MakePlane(float3 a, float3 b, float3 c)
+            {
+                float3 n = normalize(cross(b - a, c - a));
+                float d = -dot(n, a);
+                return float4(n, d);
+            }
+
+            TileFrustum CreateTileFrustum(uint2 tilePos, in float4x4 invViewProj, in float4x4 invProj)
+            {
+                const uint width = (uint)pixelResolution.x;
+                const uint height = (uint)pixelResolution.y;
+                const uint tilesX = (width + tileSizeX - 1) / tileSizeX;
+                const uint tilesY = (height + tileSizeY - 1) / tileSizeY;
+                //const uint tileId = ty * tilesX + tx;
+
+                TileFrustum fr;
+                
+                float2 pBase = float2(tilePos * uint2(tileSizeX, tileSizeY));
+
+                // NDC coordinates range: [-1, 1]
+                float2 p00 = pBase / pixelResolution.xy * 2.0f - 1.0f;
+                float2 p10 = float2(pBase.x + tileSizeX, pBase.y) / pixelResolution.xy * 2.0f - 1.0f;
+                float2 p01 = float2(pBase.x, pBase.y + tileSizeY) / pixelResolution.xy * 2.0f - 1.0f;
+                float2 p11 = float2(pBase.x + tileSizeX, pBase.y + tileSizeY) / pixelResolution.xy * 2.0f - 1.0f;
+
+                float3 topLeftFront = NDCToViewSpace(p00, 0.0, invProj);
+                float3 topLeftBack = NDCToViewSpace(p00, 1.0, invProj);
+                float3 topRightFront = NDCToViewSpace(p10, 0.0, invProj);
+                float3 topRightBack = NDCToViewSpace(p10, 1.0, invProj);
+                float3 bottomLeftFront = NDCToViewSpace(p01, 0.0, invProj);
+                float3 bottomLeftBack = NDCToViewSpace(p01, 1.0, invProj);
+                float3 bottomRightFront = NDCToViewSpace(p11, 0.0, invProj);
+                float3 bottomRightBack = NDCToViewSpace(p11, 1.0, invProj);
+
+                // fr.planes = left, top, right, bottom, front, back
+                fr.planes[0] = MakePlane(topLeftFront, topLeftBack, bottomLeftFront);
+                fr.planes[1] = MakePlane(topLeftBack, topRightBack, topRightFront);
+                fr.planes[2] = MakePlane(topRightFront, bottomRightFront, topRightBack);
+                fr.planes[3] = MakePlane(bottomLeftBack, bottomLeftFront, bottomRightFront);
+                fr.planes[4] = MakePlane(topLeftFront, topLeftFront, bottomLeftFront); // front
+                fr.planes[5] = MakePlane(topRightBack, bottomRightBack, topLeftBack); // back
+
+                return fr;
             }
 
             float4 FragMain(PSInput input) : SV_TARGET
@@ -225,7 +275,7 @@ Shader "PBR/Standard"
                 color = color / (color + float3(1.0, 1.0, 1.0) * 0.5); // HDR Tonemapping (optional)
                 color = LinearToGamma(color); // Convert to Gamma space
 
-                float2 screenPos = input.position.xy;
+                const float2 screenPos = input.position.xy;
 
                 // Derive tiling from current render target size
                 const uint width = (uint)pixelResolution.x;
@@ -250,17 +300,23 @@ Shader "PBR/Standard"
                 float2 p11 = float2(pBase.x + tileSizeX, pBase.y + tileSizeY) / pixelResolution.xy * 2.0f - 1.0f;
 
                 float depth = _DepthMap.Load(uint3(screenPos.x, screenPos.y, 0), 0).r;
+                float linearDepth = LinearizeDepth(depth);
+
                 float2 ndcXY = screenPos / pixelResolution * 2.0 - 1.0;
                 float ndcZ = depth;
 
                 float4 clip = float4(ndcXY, ndcZ, 1);
-                float4 viewH = mul(invProj, clip);
-                float3 view  = viewH.xyz / viewH.w;
+                float4 worldH = mul(clip, invViewProj);
+                float3 world = worldH.xyz / worldH.w;
 
-                // 4) View -> world
-                float4 worldH = mul(invView, float4(view, 1.0));
+                TileFrustum frustum = CreateTileFrustum(uint2(tx, ty), invViewProj, invProj);
 
-                return float4(color, 1.0);
+                float3 viewSpacePos = ScreenToViewSpace(screenPos, depth, invProj);
+                
+                float distLeft = abs(dot(frustum.planes[0].xyz, viewSpacePos) + frustum.planes[0].w);
+                float distTop = abs(dot(frustum.planes[1].xyz, viewSpacePos) + frustum.planes[1].w);
+                float distRight = abs(dot(frustum.planes[2].xyz, viewSpacePos) + frustum.planes[2].w);
+                float distBottom = abs(dot(frustum.planes[3].xyz, viewSpacePos) + frustum.planes[3].w);
 
                 color.rgb = 0.0;
                 const uint base = _TileHeaders[tileId].x;
