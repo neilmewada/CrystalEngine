@@ -183,10 +183,11 @@ Shader "PBR/Standard"
 
                 // fr.planes = left, top, right, bottom, front, back
                 fr.planes[0] = MakePlane(topLeftFront, topLeftBack, bottomLeftFront);
-                fr.planes[1] = MakePlane(topLeftBack, topRightBack, topRightFront);
+                fr.planes[1] = MakePlane(topLeftFront, topRightFront, topRightBack);
                 fr.planes[2] = MakePlane(topRightFront, bottomRightFront, topRightBack);
-                fr.planes[3] = MakePlane(bottomLeftBack, bottomLeftFront, bottomRightFront);
-                fr.planes[4] = MakePlane(topLeftFront, topLeftFront, bottomLeftFront); // front
+                fr.planes[3] = MakePlane(bottomLeftFront, bottomLeftBack, bottomRightFront);
+
+                fr.planes[4] = MakePlane(topRightFront, topLeftFront, bottomLeftFront); // front
                 fr.planes[5] = MakePlane(topRightBack, bottomRightBack, topLeftBack); // back
 
                 return fr;
@@ -194,9 +195,6 @@ Shader "PBR/Standard"
 
             float4 FragMain(PSInput input) : SV_TARGET
             {
-                float tempVal = _TileHeaders[0].y + _LightIndexPool[0]; // Just to use _TileHeaders
-                tempVal /= 1000000000;
-
                 float3 diffuse = 0;
                 float3 specular = 0;
                 float3 vertNormal = normalize(input.normal);
@@ -228,7 +226,7 @@ Shader "PBR/Standard"
                     light.viewDir = viewDir;
                     light.halfway = normalize(viewDir + light.lightDir);
 
-                    float shadow = tempVal;
+                    float shadow = 0.0;
                     if (_DirectionalLights[i].shadow > 0)
                     {
                         float4 lightSpacePos = mul(float4(input.worldPos, 1.0), _DirectionalLights[i].lightSpaceMatrix);
@@ -239,18 +237,35 @@ Shader "PBR/Standard"
                     Lo += CalculateBRDF(light, material) * (1.0 - shadow);
                 }
 
-                for (i = 0; i < totalLocalLights; i++)
+                const float2 screenPos = input.position.xy;
+
+                // Derive tiling from current render target size
+                const uint width = (uint)pixelResolution.x;
+                const uint height = (uint)pixelResolution.y;
+                const uint tilesX = (width + tileSizeX - 1) / tileSizeX;
+                const uint tilesY = (height + tileSizeY - 1) / tileSizeY;
+
+                // Map global thread to tile coordinates
+                const uint tx = (uint)(screenPos.x / tileSizeX);
+                const uint ty = (uint)(screenPos.y / tileSizeY);
+                const uint tileId = ty * tilesX + tx;
+
+                const uint localLightBase = _TileHeaders[tileId].x;
+                const uint numLocalLights = _TileHeaders[tileId].y;
+
+                for (i = 0; i < numLocalLights; i++)
                 {
-                    LocalLightType lightType = _LocalLights[i].type;
+                    uint lightIndex = _LightIndexPool[localLightBase + i];
+                    LocalLightType lightType = _LocalLights[lightIndex].type;
 
                     LightInput light;
-                    float3 luminosity = _LocalLights[i].colorAndIntensity.rgb * _LocalLights[i].colorAndIntensity.a;
+                    float3 luminosity = _LocalLights[lightIndex].colorAndIntensity.rgb * _LocalLights[lightIndex].colorAndIntensity.a;
 
                     if (lightType == LocalLightType_Point)
                     {
-                        light.lightDir = _LocalLights[i].worldPosAndRange.xyz - input.worldPos;
+                        light.lightDir = _LocalLights[lightIndex].worldPosAndRange.xyz - input.worldPos;
                         float distance = length(light.lightDir);
-                        float attenuation = 1.0 / max(distance * distance, 0.01);
+                        float attenuation = AttenuateCusp(distance, _LocalLights[lightIndex].worldPosAndRange.w, 2.0, 4.0);
                         light.lightDir = normalize(light.lightDir);
                         light.lightRadiance = luminosity * attenuation;
                     }
@@ -271,57 +286,9 @@ Shader "PBR/Standard"
                 float3 color = ComputeSkyboxIBL(material, normal, viewDir);
 
                 color += Lo;
-
                 color = color / (color + float3(1.0, 1.0, 1.0) * 0.5); // HDR Tonemapping (optional)
+
                 color = LinearToGamma(color); // Convert to Gamma space
-
-                const float2 screenPos = input.position.xy;
-
-                // Derive tiling from current render target size
-                const uint width = (uint)pixelResolution.x;
-                const uint height = (uint)pixelResolution.y;
-                const uint tilesX = (width + tileSizeX - 1) / tileSizeX;
-                const uint tilesY = (height + tileSizeY - 1) / tileSizeY;
-
-                // Map global thread to tile coordinates
-                const uint tx = (uint)(screenPos.x / tileSizeX);
-                const uint ty = (uint)(screenPos.y / tileSizeY);
-                const uint tileId = ty * tilesX + tx;
-
-                const float4x4 invViewProj = inverse(viewProjectionMatrix);
-                const float4x4 invView = inverse(viewMatrix);
-                const float4x4 invProj = inverse(projectionMatrix);
-
-                float2 pBase = float2(uint2(tx, ty) * uint2(tileSizeX, tileSizeY));
-
-                float2 p00 = pBase / pixelResolution.xy * 2.0f - 1.0f;
-                float2 p10 = float2(pBase.x + tileSizeX, pBase.y) / pixelResolution.xy * 2.0f - 1.0f;
-                float2 p01 = float2(pBase.x, pBase.y + tileSizeY) / pixelResolution.xy * 2.0f - 1.0f;
-                float2 p11 = float2(pBase.x + tileSizeX, pBase.y + tileSizeY) / pixelResolution.xy * 2.0f - 1.0f;
-
-                float depth = _DepthMap.Load(uint3(screenPos.x, screenPos.y, 0), 0).r;
-                float linearDepth = LinearizeDepth(depth);
-
-                float2 ndcXY = screenPos / pixelResolution * 2.0 - 1.0;
-                float ndcZ = depth;
-
-                float4 clip = float4(ndcXY, ndcZ, 1);
-                float4 worldH = mul(clip, invViewProj);
-                float3 world = worldH.xyz / worldH.w;
-
-                TileFrustum frustum = CreateTileFrustum(uint2(tx, ty), invViewProj, invProj);
-
-                float3 viewSpacePos = ScreenToViewSpace(screenPos, depth, invProj);
-                
-                float distLeft = abs(dot(frustum.planes[0].xyz, viewSpacePos) + frustum.planes[0].w);
-                float distTop = abs(dot(frustum.planes[1].xyz, viewSpacePos) + frustum.planes[1].w);
-                float distRight = abs(dot(frustum.planes[2].xyz, viewSpacePos) + frustum.planes[2].w);
-                float distBottom = abs(dot(frustum.planes[3].xyz, viewSpacePos) + frustum.planes[3].w);
-
-                color.rgb = 0.0;
-                const uint base = _TileHeaders[tileId].x;
-                const uint count = _TileHeaders[tileId].y;
-                color.r = (float)count / 9.0;
 
                 return float4(color, 1.0);
             }

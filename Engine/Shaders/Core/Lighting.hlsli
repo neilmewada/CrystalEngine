@@ -18,6 +18,23 @@ StructuredBuffer<uint2> _TileHeaders : SRG_PerPass(t2);
 
 Texture2DMS<float> _DepthMap : SRG_PerPass(t3);
 
+inline float sqr(float x)
+{
+    return x * x;
+}
+
+float AttenuateCusp(float distance, float radius, float max_intensity, float falloff)
+{
+    float s = distance / radius;
+
+    if (s >= 1.0)
+        return 0.0;
+
+    float s2 = sqr(s);
+
+    return max_intensity * sqr(1 - s2) / (1 + falloff * s);
+}
+
 float CalculateDirectionalShadow(in float4 lightSpacePos, in float NdotL)
 {
     float3 projectionCoords = lightSpacePos.xyz / lightSpacePos.w;
