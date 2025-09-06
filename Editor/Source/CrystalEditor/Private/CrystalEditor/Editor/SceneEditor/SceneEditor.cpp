@@ -284,7 +284,7 @@ namespace CE::Editor
                 Colors::Yellow, Colors::Cyan, Colors::Magenta,
 				Colors::White, Colors::Orange, Colors::Purple };
 			constexpr float Separation = 3.0f;
-			constexpr Vec2i LightGrid = Vec2i(8, 8);
+			constexpr Vec2i LightGrid = Vec2i(16, 16);
 			int lightIndex = 0;
             
             for (int x = -LightGrid.x / 2; x <= LightGrid.x / 2; ++x)

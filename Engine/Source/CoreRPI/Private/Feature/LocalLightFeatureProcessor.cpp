@@ -4,6 +4,8 @@ namespace CE::RPI
 {
 	void LocalLightInstance::Init(LocalLightFeatureProcessor* fp)
 	{
+		ZoneScoped;
+
 		if (flags.initialized)
 			return;
 
@@ -12,6 +14,8 @@ namespace CE::RPI
 
 	void LocalLightInstance::Deinit(LocalLightFeatureProcessor* fp)
 	{
+		ZoneScoped;
+
 		if (!flags.initialized)
 			return;
 
@@ -58,6 +62,8 @@ namespace CE::RPI
 
 	LocalLightHandle LocalLightFeatureProcessor::AcquireLight(const LocalLightHandleDescriptor& desc)
 	{
+		ZoneScoped;
+
 		LocalLightHandle handle = lightInstances.Insert({});
 		handle->scene = scene;
 
@@ -66,6 +72,8 @@ namespace CE::RPI
 
 	bool LocalLightFeatureProcessor::ReleaseLight(LocalLightHandle& handle)
 	{
+		ZoneScoped;
+
 		if (handle.IsValid())
 		{
 			handle->Deinit(this);
@@ -78,6 +86,8 @@ namespace CE::RPI
 
     void LocalLightFeatureProcessor::Simulate(const SimulatePacket& packet)
     {
+		ZoneScoped;
+
 		Super::Simulate(packet);
 
 		bool isDirty = false;
@@ -106,29 +116,32 @@ namespace CE::RPI
 			for (const auto& range : parallelRanges)
 			{
 				Job* jobFunction = new JobFunction([&range, imageIndex, this, &lightCounter, data](Job*)
-				{
-					for (auto it = range.begin; it != range.end; ++it)
 					{
-						if (!it->flags.initialized)
+						for (auto it = range.begin; it != range.end; ++it)
 						{
-							it->Init(this);
+							if (!it->flags.initialized)
+							{
+								it->Init(this);
+							}
+
+							if (!it->flags.visible)
+							{
+								continue;
+							}
+
+							int idx = lightCounter.fetch_add(1, std::memory_order_acq_rel);
+
+							data[idx].lightType = it->lightType;
+							data[idx].colorAndIntensity = it->colorAndIntensity;
+							data[idx].worldPosAndRange = Vec4(it->worldPos, it->range);
 						}
-
-						if (!it->flags.visible)
-						{
-							continue;
-						}
-
-						data[lightCounter].lightType = it->lightType;
-						data[lightCounter].colorAndIntensity = it->colorAndIntensity;
-						data[lightCounter].worldPosAndRange = Vec4(it->worldPos, it->range);
-
-						lightCounter.fetch_add(1, std::memory_order_acq_rel);
-					}
-				});
+					});
 
 				jobFunction->SetDependent(&jobCompletion);
 				jobFunction->Start();
+
+				//jobFunction->Process();
+				//delete jobFunction;
 			}
 
 			jobCompletion.StartAndWaitForCompletion();
