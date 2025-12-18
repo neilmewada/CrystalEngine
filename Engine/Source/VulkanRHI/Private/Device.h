@@ -181,6 +181,12 @@ namespace CE::Vulkan
 
         // Debug functions
         PFN_vkSetDebugUtilsObjectNameEXT setDebugUtilsObjectName = nullptr;
+
+    public:
+
+		// Ray Tracing EXT Functions
+		PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR = nullptr;
+        PFN_vkDestroyAccelerationStructureKHR vkDestroyAccelerationStructureKHR = nullptr;
         
         friend class FrameGraphCompiler;
         friend class VulkanRHI;

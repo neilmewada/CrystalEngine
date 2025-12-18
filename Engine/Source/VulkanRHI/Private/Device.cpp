@@ -61,6 +61,10 @@ namespace CE::Vulkan
 
 		renderPassCache = new RenderPassCache(this);
 
+		// Initialize Ray Tracing functions
+		vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)vkGetDeviceProcAddr(device, "vkCreateAccelerationStructureKHR");
+		vkDestroyAccelerationStructureKHR = (PFN_vkDestroyAccelerationStructureKHR)vkGetDeviceProcAddr(device, "vkDestroyAccelerationStructureKHR");
+
 		isInitialized = true;
 
 		CE_LOG(Info, All, "Vulkan device initialized");

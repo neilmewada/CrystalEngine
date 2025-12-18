@@ -29,6 +29,18 @@ namespace CE::Vulkan
 		{
 			bufferUsageFlags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		}
+		if (EnumHasFlag(bindFlags, RHI::BufferBindFlags::RayTracingAccelerationStructure))
+		{
+			bufferUsageFlags |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR;
+		}
+		if (EnumHasFlag(bindFlags, RHI::BufferBindFlags::RayTracingShaderTable))
+		{
+			bufferUsageFlags |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR;
+		}
+		if (EnumHasFlag(bindFlags, RHI::BufferBindFlags::RayTracingScratchBuffer))
+		{
+			bufferUsageFlags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+		}
 		
 		return bufferUsageFlags;
 	}
