@@ -21,6 +21,8 @@ namespace CE::RHI
             return IsFormatSupported(format, bindFlags) && (imageFormatSupport[format].filterMask & (1 << (u32)filterMode)) != 0;
         }
 
+		inline bool IsRayTracingSupported() const { return isRayTracingSupported; }
+
         inline u64 GetMaxConstantBufferRange() const { return maxConstantBufferRange; }
         inline u64 GetMaxStructuredBufferRange() const { return maxStructuredBufferRange; }
 
@@ -69,6 +71,8 @@ namespace CE::RHI
         bool sparseResidency2DSample16 = false;
 
         bool sparseResidency3D = false;
+
+        bool isRayTracingSupported = false;
     };
     
 } // namespace CE::RHI

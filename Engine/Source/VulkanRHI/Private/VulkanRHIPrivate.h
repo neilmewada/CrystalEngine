@@ -42,6 +42,9 @@
 #include "CommandList.h"
 #include "CommandBufferAllocator.h"
 
+// Ray Tracing
+#include "RayTracingAccelerationStructure.h"
+
 // Frame
 #include "Scope.h"
 #include "FrameGraphCompiler.h"

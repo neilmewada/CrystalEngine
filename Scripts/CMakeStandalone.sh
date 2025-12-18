@@ -16,13 +16,13 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     DefaultGenerator="Xcode"
 elif [[ "$OSTYPE" == "cygwin" ]]; then
     host_platform="Windows"
-    DefaultGenerator="Visual Studio 17"
+    DefaultGenerator="Visual Studio 18"
 elif [[ "$OSTYPE" == "msys" ]]; then
     host_platform="Windows"
-    DefaultGenerator="Visual Studio 17"
+    DefaultGenerator="Visual Studio 18"
 elif [[ "$OSTYPE" == "win32" ]]; then
     host_platform="Windows"
-    DefaultGenerator="Visual Studio 17"
+    DefaultGenerator="Visual Studio 18"
 elif [[ "$OSTYPE" == "freebsd"* ]]; then
     host_platform="Linux"
     Compiler="-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
