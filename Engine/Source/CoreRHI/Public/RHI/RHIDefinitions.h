@@ -93,8 +93,12 @@ namespace CE::RHI
         IndexBuffer = BIT(1),
         ConstantBuffer = BIT(2),
         StructuredBuffer = BIT(3),
-        // Internal usage only!
+        
         StagingBuffer = BIT(4),
+
+		RayTracingAccelerationStructure = BIT(5),
+		RayTracingShaderTable = BIT(6),
+		RayTracingScratchBuffer = BIT(7),
     };
     ENUM_CLASS_FLAGS(BufferBindFlags);
 

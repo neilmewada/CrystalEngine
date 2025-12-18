@@ -92,8 +92,6 @@ namespace CE::Vulkan
 		}
 
 		isRayTracingSupported = rayTracingExtFound[0] && rayTracingExtFound[1] && rayTracingExtFound[2];
-
-		String::IsAlphabet('a');
 	}
 
 } // namespace CE::Vulkan
