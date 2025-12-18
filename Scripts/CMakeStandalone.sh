@@ -15,16 +15,13 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     host_platform="Mac"
     DefaultGenerator="Xcode"
 elif [[ "$OSTYPE" == "cygwin" ]]; then
-    platform="Windows"
-    SystemName="Windows"
+    host_platform="Windows"
     DefaultGenerator="Visual Studio 18"
 elif [[ "$OSTYPE" == "msys" ]]; then
-    platform="Windows"
-    SystemName="Windows"
+    host_platform="Windows"
     DefaultGenerator="Visual Studio 18"
 elif [[ "$OSTYPE" == "win32" ]]; then
-    platform="Windows"
-    SystemName="Windows"
+    host_platform="Windows"
     DefaultGenerator="Visual Studio 18"
 elif [[ "$OSTYPE" == "freebsd"* ]]; then
     host_platform="Linux"

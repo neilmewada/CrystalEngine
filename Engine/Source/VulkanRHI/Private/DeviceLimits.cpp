@@ -27,10 +27,6 @@ namespace CE::Vulkan
 			VkFormat vkFormat = RHIFormatToVkFormat(rhiFormat);
 			if (vkFormat == VK_FORMAT_UNDEFINED)
 				continue;
-			if (vkFormat == VK_FORMAT_D32_SFLOAT)
-			{
-				String::IsAlphabet('a');
-			}
 
 			VkFormatProperties properties;
 			vkGetPhysicalDeviceFormatProperties(device->GetPhysicalHandle(), vkFormat, &properties);
@@ -69,6 +65,35 @@ namespace CE::Vulkan
 				imageFormatSupport[rhiFormat].bindFlags |= RHI::TextureBindFlags::Color;
 			}
 		}
+
+		isRayTracingSupported = false;
+
+		uint32_t deviceExtensionCount = 0;
+		vkEnumerateDeviceExtensionProperties(device->gpu, nullptr, &deviceExtensionCount, nullptr);
+		auto deviceExtensionProperties = Array<VkExtensionProperties>(deviceExtensionCount);
+		vkEnumerateDeviceExtensionProperties(device->gpu, nullptr, &deviceExtensionCount, deviceExtensionProperties.GetData());
+
+		bool rayTracingExtFound[3] = { false, false, false };
+
+		for (int i = 0; i < deviceExtensionCount; ++i)
+		{
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME) == 0)
+			{
+				rayTracingExtFound[0] = true;
+			}
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME) == 0)
+			{
+				rayTracingExtFound[1] = true;
+			}
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_RAY_QUERY_EXTENSION_NAME) == 0)
+			{
+				rayTracingExtFound[2] = true;
+			}
+		}
+
+		isRayTracingSupported = rayTracingExtFound[0] && rayTracingExtFound[1] && rayTracingExtFound[2];
+
+		String::IsAlphabet('a');
 	}
 
 } // namespace CE::Vulkan

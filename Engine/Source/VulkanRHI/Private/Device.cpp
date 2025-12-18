@@ -361,6 +361,35 @@ namespace CE::Vulkan
 				deviceExtensionNames.Add(VK_KHR_MAINTENANCE3_EXTENSION_NAME);
 			}
 
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME) == 0)
+			{
+				deviceExtensionNames.Add(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME);
+			}
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME) == 0)
+			{
+				deviceExtensionNames.Add(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
+			}
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_RAY_QUERY_EXTENSION_NAME) == 0)
+			{
+				deviceExtensionNames.Add(VK_KHR_RAY_QUERY_EXTENSION_NAME);
+			}
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME) == 0)
+			{
+				deviceExtensionNames.Add(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
+			}
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME) == 0)
+			{
+				deviceExtensionNames.Add(VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME);
+			}
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_SPIRV_1_4_EXTENSION_NAME) == 0)
+			{
+				deviceExtensionNames.Add(VK_KHR_SPIRV_1_4_EXTENSION_NAME);
+			}
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME) == 0)
+			{
+				deviceExtensionNames.Add(VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME);
+			}
+
 #if CE_DEBUG && PLATFORM_DESKTOP
 			// Debugging Extensions
 			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME) == 0)
