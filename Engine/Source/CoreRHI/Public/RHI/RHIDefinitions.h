@@ -36,7 +36,10 @@ namespace CE::RHI
 
         Fence,
 		CommandQueue,
-        CommandList
+        CommandList,
+
+		// Ray Tracing
+		RayTracingBlas,
     };
 
     enum class DeviceObjectType

@@ -44,6 +44,9 @@
 // Draw Data dependents
 #include "RHI/CommandList.h"
 
+// RayTracing
+#include "RHI/RayTracingAccelerationStructure.h"
+
 // Frame Graph
 #include "RHI/FrameAttachment.h"
 #include "RHI/BufferFrameAttachment.h"

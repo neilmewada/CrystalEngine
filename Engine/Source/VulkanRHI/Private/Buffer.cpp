@@ -81,6 +81,7 @@ namespace CE::Vulkan
 		bufferSize = desc.bufferSize;
 		heapType = desc.defaultHeapType;
 		structureByteStride = desc.structureByteStride;
+		alignment = desc.alignment;
 
 		VkBufferCreateInfo bufferCI{};
 		bufferCI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -162,6 +163,7 @@ namespace CE::Vulkan
 		heapType = memoryHeap->GetHeapType();
 		structureByteStride = desc.structureByteStride;
         bufferMemory = nullptr;
+		alignment = desc.alignment;
 
 		VkBufferCreateInfo bufferCI{};
 		bufferCI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;

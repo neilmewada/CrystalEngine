@@ -77,6 +77,8 @@ namespace CE::RPI
 
 	private:
 
+		void OnPostProcess();
+
 		// Each model can have multiple meshes (aka SubMeshes)
 		Array<Mesh> meshes{};
 

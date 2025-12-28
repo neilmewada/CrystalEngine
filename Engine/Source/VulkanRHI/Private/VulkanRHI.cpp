@@ -468,7 +468,17 @@ namespace CE::Vulkan
 		delete shaderResourceGroup;
 	}
 
-    RHI::PipelineState* VulkanRHI::CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc)
+	RHI::RayTracingBlas* VulkanRHI::CreateRayTracingBlas(const RHI::RayTracingBlasDescriptor& desc)
+	{
+		return new Vulkan::RayTracingBlas(device, desc);
+	}
+
+	void VulkanRHI::DestroyRayTracingBlas(RHI::RayTracingBlas* blas)
+	{
+		delete blas;
+	}
+
+	RHI::PipelineState* VulkanRHI::CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc)
     {
         return new Vulkan::PipelineState(device, desc);
     }

@@ -187,6 +187,8 @@ namespace CE::Vulkan
 		// Ray Tracing EXT Functions
 		PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR = nullptr;
         PFN_vkDestroyAccelerationStructureKHR vkDestroyAccelerationStructureKHR = nullptr;
+        PFN_vkGetBufferDeviceAddress vkGetBufferDeviceAddress = nullptr;
+		PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR = nullptr;
         
         friend class FrameGraphCompiler;
         friend class VulkanRHI;

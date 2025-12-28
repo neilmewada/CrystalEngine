@@ -4,9 +4,11 @@
 
 namespace CE::Vulkan
 {
-	RayTracingAccelerationStructure::RayTracingAccelerationStructure(VulkanDevice* device) : device(device)
+
+	RayTracingAccelerationStructure::RayTracingAccelerationStructure(VulkanDevice* device, const VkAccelerationStructureCreateInfoKHR& createInfo) 
+		: device(device)
 	{
-		device->vkCreateAccelerationStructureKHR(device->GetHandle(), nullptr, VULKAN_CPU_ALLOCATOR, &accelerationStructure);
+		device->vkCreateAccelerationStructureKHR(device->GetHandle(), &createInfo, VULKAN_CPU_ALLOCATOR, &accelerationStructure);
 		
 	}
 
@@ -17,5 +19,6 @@ namespace CE::Vulkan
 			device->vkDestroyAccelerationStructureKHR(device->GetHandle(), accelerationStructure, VULKAN_CPU_ALLOCATOR);
 			accelerationStructure = nullptr;
 		}
+
 	}
 } // namespace CE::Vulkan

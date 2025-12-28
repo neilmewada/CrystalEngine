@@ -136,6 +136,9 @@ namespace CE::Vulkan
 		virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDescriptor& srgDescriptor) override;
 		virtual void DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup) override;
 
+        virtual RHI::RayTracingBlas* CreateRayTracingBlas(const RHI::RayTracingBlasDescriptor& desc) override;
+        virtual void DestroyRayTracingBlas(RHI::RayTracingBlas* blas) override;
+
 		// - Pipeline State -
 
         virtual RHI::PipelineState* CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc) override;
