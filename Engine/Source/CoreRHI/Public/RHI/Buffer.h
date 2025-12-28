@@ -10,6 +10,8 @@ namespace CE::RHI
 		u64 bufferSize = 0;
 
 		u64 structureByteStride = 0;
+
+		u64 alignment = 0;
 		
 		BufferBindFlags bindFlags{};
 
@@ -91,6 +93,8 @@ namespace CE::RHI
 		u64 bufferSize = 0;
 
 		u64 structureByteStride = 0;
+
+		u64 alignment = 0;
 
 		RHI::MemoryHeapType heapType = RHI::MemoryHeapType::Default;
 	};

@@ -19,6 +19,8 @@ namespace CE::Vulkan
 
         VkBuffer GetBuffer() { return buffer; }
 
+		VkDeviceMemory GetBufferMemory() { return bufferMemory; }
+
         virtual void UploadData(const RHI::BufferData& bufferData) override;
 
         //! Allocates a raw buffer in CPU memory and reads buffer data into it. You are responsible for releasing outData memory block using Memory::Free().

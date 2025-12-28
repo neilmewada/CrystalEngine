@@ -69,6 +69,7 @@
 #include "Math/Matrix.h"
 #include "Math/Color.h"
 #include "Math/Gradient.h"
+#include "Math/Aabb.h"
 
 // Jobs
 #include "Jobs/JobContext.h"

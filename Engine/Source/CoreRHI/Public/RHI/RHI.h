@@ -147,6 +147,11 @@ namespace CE::RHI
 		virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout) = 0;
 		virtual void DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup) = 0;
 
+		// - Ray Tracing -
+
+		virtual RHI::RayTracingBlas* CreateRayTracingBlas(const RHI::RayTracingBlasDescriptor& desc) = 0;
+		virtual void DestroyRayTracingBlas(RHI::RayTracingBlas* blas) = 0;
+
 		// - Pipeline State -
 
 		virtual RHI::PipelineState* CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc) = 0;

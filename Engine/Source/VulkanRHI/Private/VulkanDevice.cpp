@@ -5,6 +5,8 @@
 #define VMA_IMPLEMENTATION
 //#include <vma/vk_mem_alloc.h>
 
+#define VULKAN_EXT_METHOD(name) name = (decltype(name))vkGetDeviceProcAddr(device, #name)
+
 namespace CE::Vulkan
 {
 	static void InitDescriptorPool(DescriptorPool& pool)
@@ -61,9 +63,14 @@ namespace CE::Vulkan
 
 		renderPassCache = new RenderPassCache(this);
 
-		// Initialize Ray Tracing functions
-		vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)vkGetDeviceProcAddr(device, "vkCreateAccelerationStructureKHR");
-		vkDestroyAccelerationStructureKHR = (PFN_vkDestroyAccelerationStructureKHR)vkGetDeviceProcAddr(device, "vkDestroyAccelerationStructureKHR");
+		// Initialize Ray Tracing extension function pointers
+		if (deviceLimits->IsRayTracingSupported())
+		{
+			VULKAN_EXT_METHOD(vkCreateAccelerationStructureKHR);
+			VULKAN_EXT_METHOD(vkDestroyAccelerationStructureKHR);
+			VULKAN_EXT_METHOD(vkGetBufferDeviceAddress);
+			VULKAN_EXT_METHOD(vkGetAccelerationStructureBuildSizesKHR);
+		}
 
 		isInitialized = true;
 

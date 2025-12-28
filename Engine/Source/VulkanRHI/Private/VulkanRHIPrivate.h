@@ -44,6 +44,7 @@
 
 // Ray Tracing
 #include "RayTracingAccelerationStructure.h"
+#include "RayTracingBlas.h"
 
 // Frame
 #include "Scope.h"

@@ -16,13 +16,13 @@ namespace CE::RPI
 
         Ref<ModelLodAsset> GetModelLod(u32 index) const { return lods[index]; }
 
-        Model* CreateModel();
-
         Model* GetModel();
 
         void AddModelLod(ModelLodAsset* lod);
 
     private:
+
+        Model* CreateModel();
 
         Model* model = nullptr;
 

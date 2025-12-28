@@ -54,6 +54,9 @@ namespace CE
 
 		CE::Variant& operator=(const CE::Variant& copy)
 		{
+			if (this == &copy)
+				return *this;
+
 			Free();
 			CopyFrom(copy);
 			return *this;
@@ -80,6 +83,7 @@ namespace CE
 		Variant(s32 value) { SetInternalValue(value); }
 		Variant(s64 value) { SetInternalValue(value); }
 		Variant(const Matrix4x4& value) { SetInternalValue(value); }
+		Variant(const Aabb& value) { SetInternalValue(value); }
 		Variant(const Uuid& value) { SetInternalValue(value); }
 
 		Variant(bool value) { SetInternalValue(value); }
@@ -472,6 +476,7 @@ namespace CE
             Vec4   Vec4Value;
 			Quat   QuatValue;
 			Matrix4x4 MatrixValue;
+			Aabb   AabbValue;
 
 			Color  ColorValue;
 
