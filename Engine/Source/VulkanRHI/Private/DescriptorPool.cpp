@@ -199,20 +199,14 @@ namespace CE::Vulkan
 		return sets;
 	}
 
-	void DescriptorPool::Free(const List<VkDescriptorSet>& sets)
+	void DescriptorPool::Free(VkDescriptorPool owningPool, const List<VkDescriptorSet>& sets)
 	{
 		if (sets.IsEmpty())
 			return;
 
 		LockGuard guard{ vkPoolMutex };
 
-		for (int i = descriptorPools.GetSize() - 1; i >= 0; i--)
-		{
-			auto result = vkFreeDescriptorSets(device->GetHandle(), descriptorPools[i], sets.GetSize(), sets.GetData());
-
-			if (result == VK_SUCCESS)
-				return;
-		}
+		vkFreeDescriptorSets(device->GetHandle(), owningPool, sets.GetSize(), sets.GetData());
 	}
 
     void DescriptorPool::Increment(u32 incrementSize)
