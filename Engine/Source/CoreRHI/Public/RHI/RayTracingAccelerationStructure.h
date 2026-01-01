@@ -17,6 +17,7 @@ namespace CE::RHI
 		VertexAttributeDataType vertexDataType = VertexAttributeDataType::Undefined;
         VertexBufferView vertexBuffer;
         IndexBufferView indexBuffer;
+        u32 vertexOffset = 0;
 	};
 
     struct RayTracingBlasDescriptor
@@ -26,10 +27,13 @@ namespace CE::RHI
 		RayTracingBuildFlags buildFlags = RayTracingBuildFlags::FastTrace;
     };
 
-    class CORERHI_API RayTracingBlas : RHI::RHIResource
+    class CORERHI_API RayTracingBlas : RHI::RHIResource, public IDeviceObject
     {
     protected:
-		RayTracingBlas(const RHI::RayTracingBlasDescriptor& desc) : RHIResource(ResourceType::RayTracingBlas), geometries(desc.geometries)
+		RayTracingBlas(const RHI::RayTracingBlasDescriptor& desc) 
+    	: RHIResource(ResourceType::RayTracingBlas)
+			, IDeviceObject(DeviceObjectType::Blas)
+    		, geometries(desc.geometries)
 		{}
 
     public:

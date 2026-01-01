@@ -88,6 +88,16 @@ namespace CE::RPI
             }
             builtinDrawTags[(BuiltinDrawItemTag)i] = tag;
         }
+
+        isRayTracingEnabled = false;
+
+		RHI::DeviceLimits* deviceLimits = RHI::gDynamicRHI->GetDeviceLimits();
+		Ref<RenderingSettings> renderingSettings = GetSettings<RenderingSettings>();
+
+		if (deviceLimits->IsRayTracingSupported() && renderingSettings->IsRayTracingEnabled())
+        {
+            isRayTracingEnabled = true;
+        }
     }
 
     void RPISystem::PostInitialize(const RPISystemInitInfo& initInfo)

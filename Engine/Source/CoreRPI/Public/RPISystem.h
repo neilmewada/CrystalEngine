@@ -38,6 +38,8 @@ namespace CE::RPI
 			return rhiSystem.GetDrawListTagRegistry();
 		}
 
+		bool IsRayTracingEnabled() const { return isRayTracingEnabled; }
+
 		void Initialize();
 		void PostInitialize(const RPISystemInitInfo& initInfo);
 
@@ -99,6 +101,7 @@ namespace CE::RPI
 		void CreateBrdfLutTexture();
 
 		bool isInitialized = false;
+		bool isRayTracingEnabled = false;
 
 		struct RHIDestructionEntry
 		{

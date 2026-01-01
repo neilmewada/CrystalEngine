@@ -12,6 +12,10 @@ namespace CE
 
 		virtual ~RenderingSettings();
 
+		bool IsRayTracingEnabled() const { return enableRayTracing; }
+
+    private:
+
 		FIELD(EditAnywhere, Category = "Ray Tracing")
 		bool enableRayTracing = true;
 

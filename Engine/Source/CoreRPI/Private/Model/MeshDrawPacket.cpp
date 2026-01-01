@@ -45,6 +45,9 @@ namespace CE::RPI
 
 	MeshDrawPacket& MeshDrawPacket::operator=(MeshDrawPacket&& move) noexcept
 	{
+		if (this == &move)
+			return *this;
+
 		Move(move);
 		return *this;
 	}
@@ -56,6 +59,9 @@ namespace CE::RPI
 
 	MeshDrawPacket& MeshDrawPacket::operator=(const MeshDrawPacket& copy)
 	{
+		if (this == &copy)
+			return *this;
+
 		CopyFrom(copy);
 		return *this;
 	}
@@ -85,6 +91,12 @@ namespace CE::RPI
 
 	void MeshDrawPacket::CopyFrom(const MeshDrawPacket& from)
 	{
+		for (int i = 0; i < perDrawSrgs.GetSize(); ++i)
+		{
+			delete perDrawSrgs[i]; perDrawSrgs[i] = nullptr;
+		}
+		perDrawSrgs.Clear();
+
 		drawPacket = from.drawPacket;
 		modelLod = from.modelLod;
 		modelLodMeshIndex = from.modelLodMeshIndex;

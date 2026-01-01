@@ -10,6 +10,7 @@ namespace CE::RHI
 	class IDeviceObject;
 	class RenderTarget;
 	class RenderTargetBuffer;
+	class RayTracingBlas;
 	struct AttachmentClearValue;
 
 	enum class CommandListType
@@ -166,6 +167,10 @@ namespace CE::RHI
 		virtual void CopyTextureRegion(const TextureToBufferCopy& region) = 0;
 
 		virtual void CopyBufferRegion(const BufferCopy& copy) = 0;
+
+		// - Ray Tracing -
+
+		virtual void BuildBlas(RHI::RayTracingBlas* blas) = 0;
 
 	protected:
 

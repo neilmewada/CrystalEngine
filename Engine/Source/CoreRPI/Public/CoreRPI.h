@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "CoreSettings.h"
 #include "CoreRHI.h"
 #include "CoreShader.h"
 #include "CoreMesh.h"

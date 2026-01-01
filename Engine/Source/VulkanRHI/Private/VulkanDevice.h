@@ -113,6 +113,9 @@ namespace CE::Vulkan
 
         void SetObjectDebugName(uint64_t objectHandle, VkObjectType objectType, const char* objectName);
 
+		bool HasRayTracing() const { return hasRayTracing; }
+		bool HasBufferDeviceAddressExt() const { return hasBufferDeviceAddressExt; }
+
     protected:
 
     private:
@@ -135,6 +138,9 @@ namespace CE::Vulkan
 		/// @brief Vulkan can be initialized without any Native windows (i.e. offscreen mode).
 		/// Potentially useful for command line applications/toos.
 		bool surfaceSupported = false;
+
+        bool hasRayTracing = false;
+        bool hasBufferDeviceAddressExt = false;
 
         VkInstance instance = nullptr;
         VulkanRHI* vulkanRhi = nullptr;
@@ -187,8 +193,10 @@ namespace CE::Vulkan
 		// Ray Tracing EXT Functions
 		PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR = nullptr;
         PFN_vkDestroyAccelerationStructureKHR vkDestroyAccelerationStructureKHR = nullptr;
-        PFN_vkGetBufferDeviceAddress vkGetBufferDeviceAddress = nullptr;
+        PFN_vkGetBufferDeviceAddressKHR vkGetBufferDeviceAddressKHR = nullptr;
 		PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR = nullptr;
+		PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR = nullptr;
+        PFN_vkGetAccelerationStructureDeviceAddressKHR vkGetAccelerationStructureDeviceAddressKHR = nullptr;
         
         friend class FrameGraphCompiler;
         friend class VulkanRHI;

@@ -24,6 +24,7 @@ namespace CE::Vulkan
         Array<VkAccelerationStructureBuildRangeInfoKHR> rangeInfos;
         VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
 
+        friend class CommandList;
 	};
 
 }

@@ -16,11 +16,13 @@ namespace CE::Vulkan
 		allocInfo.allocationSize = heapSize;
 
 		bool useUnifiedMemory = (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar()) && (usageFlags == RHI::MemoryHeapUsageFlags::Buffer);
+		bool useDeviceAddressExt = false;
 
 		switch (heapType)
 		{
 		case MemoryHeapType::Default:
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			useDeviceAddressExt = device->HasBufferDeviceAddressExt();
 			break;
 		case MemoryHeapType::Upload:
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
@@ -33,6 +35,16 @@ namespace CE::Vulkan
 		if (useUnifiedMemory)
 		{
 			memoryPropertyFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+		}
+
+		VkMemoryAllocateFlagsInfo allocFlagsInfo{};
+		allocFlagsInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
+		allocFlagsInfo.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
+		allocFlagsInfo.pNext = nullptr;
+
+		if (useDeviceAddressExt)
+		{
+			allocInfo.pNext = &allocFlagsInfo;
 		}
 		
 		VkPhysicalDeviceMemoryProperties memoryProps = device->GetMemoryProperties();
