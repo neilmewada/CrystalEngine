@@ -10,6 +10,8 @@ namespace CE::RPI
 
 	ModelLod::~ModelLod()
 	{
+		delete blas; blas = nullptr;
+
 		for (auto buffer : trackedBuffers)
 		{
 			RPISystem::Get().QueueDestroy(buffer);
@@ -82,7 +84,53 @@ namespace CE::RPI
 
 	void ModelLod::OnPostProcess()
 	{
+		if (RPISystem::Get().IsRayTracingEnabled())
+		{
+			RHI::RayTracingBlasDescriptor blasDesc{};
+			blasDesc.buildFlags = RHI::RayTracingBuildFlags::FastTrace;
+			blasDesc.geometries.Reserve(meshes.GetSize());
 
+			for (const RPI::Mesh& mesh : meshes)
+			{
+				RHI::RayTracingGeometryDescriptor geometryDesc{};
+				
+				for (const auto& vertexBufferInfo : mesh.vertexBufferInfos)
+				{
+					if (vertexBufferInfo.semantic.attribute == VertexInputAttribute::Position)
+					{
+						geometryDesc.vertexBuffer = RHI::VertexBufferView(GetBuffer(vertexBufferInfo.bufferIndex), 
+							vertexBufferInfo.byteOffset, 
+							vertexBufferInfo.byteCount, 
+							vertexBufferInfo.stride);
+
+						geometryDesc.indexBuffer = mesh.indexBufferView;
+						geometryDesc.vertexDataType = vertexBufferInfo.attributeType;
+
+						blasDesc.geometries.Add(geometryDesc);
+
+						break;
+					}
+				}
+			}
+
+			blas = RHI::gDynamicRHI->CreateRayTracingBlas(blasDesc);
+
+			RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+			RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
+			RHI::Fence* fence = RHI::gDynamicRHI->CreateFence(false);
+
+			cmdList->Begin();
+			{
+				//cmdList->BuildBlas(blas);
+			}
+			cmdList->End();
+
+			queue->Execute(1, &cmdList, fence);
+			fence->WaitForFence();
+
+			RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
+			RHI::gDynamicRHI->DestroyFence(fence);
+		}
 	}
 
 } // namespace CE::RPI

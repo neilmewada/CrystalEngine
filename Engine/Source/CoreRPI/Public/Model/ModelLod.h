@@ -75,9 +75,13 @@ namespace CE::RPI
 		//! Temporary function
 		void BuildVertexInputAttributeList(u32 meshIndex, Array<RHI::VertexAttributeDescriptor>& outVertexAttribs);
 
+		RHI::RayTracingBlas* GetBlas() const { return blas; }
+
 	private:
 
 		void OnPostProcess();
+
+		RHI::RayTracingBlas* blas = nullptr;
 
 		// Each model can have multiple meshes (aka SubMeshes)
 		Array<Mesh> meshes{};

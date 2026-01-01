@@ -114,7 +114,7 @@ namespace CE::Vulkan
 				geometryDesc.pNext = nullptr;
 				geometryDesc.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
 				geometryDesc.geometry.triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
-				geometryDesc.pNext = nullptr;
+				geometryDesc.geometry.triangles.pNext = nullptr;
 
 				VkBuffer vertexBuffer = (VkBuffer)geometry.vertexBuffer.GetBuffer()->GetHandle();
 				VkBuffer indexBuffer = (VkBuffer)geometry.indexBuffer.GetBuffer()->GetHandle();
@@ -124,13 +124,13 @@ namespace CE::Vulkan
 				addressInfo.pNext = nullptr;
 
 				addressInfo.buffer = vertexBuffer;
-				geometryDesc.geometry.triangles.vertexData.deviceAddress = device->vkGetBufferDeviceAddress(device->GetHandle(), &addressInfo);
+				geometryDesc.geometry.triangles.vertexData.deviceAddress = device->vkGetBufferDeviceAddressKHR(device->GetHandle(), &addressInfo);
 				geometryDesc.geometry.triangles.vertexStride = geometry.vertexBuffer.GetVertexStride();
 				geometryDesc.geometry.triangles.maxVertex = static_cast<uint32_t>(geometry.vertexBuffer.GetByteCount() / geometryDesc.geometry.triangles.vertexStride);
 				geometryDesc.geometry.triangles.vertexFormat = ToVkFormat(geometry.vertexDataType);
 
 				addressInfo.buffer = indexBuffer;
-				geometryDesc.geometry.triangles.indexData.deviceAddress = device->vkGetBufferDeviceAddress(device->GetHandle(), &addressInfo);
+				geometryDesc.geometry.triangles.indexData.deviceAddress = device->vkGetBufferDeviceAddressKHR(device->GetHandle(), &addressInfo);
 				geometryDesc.geometry.triangles.indexType = geometry.indexBuffer.GetIndexFormat() == RHI::IndexFormat::Uint16 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
 				geometryDesc.geometry.triangles.transformData = {};
 
@@ -138,9 +138,9 @@ namespace CE::Vulkan
 				geometryDescriptors.Add(geometryDesc);
 
 				u32 indexCount = static_cast<u32>(geometry.indexBuffer.GetByteCount() / (geometry.indexBuffer.GetIndexFormat() == RHI::IndexFormat::Uint16 ? sizeof(u16) : sizeof(u32)));
-
+				
 				VkAccelerationStructureBuildRangeInfoKHR rangeInfo{};
-				rangeInfo.firstVertex = 0;
+				rangeInfo.firstVertex = geometry.vertexOffset;
 				rangeInfo.primitiveOffset = 0;
 				rangeInfo.transformOffset = 0;
 				rangeInfo.primitiveCount = indexCount / 3;
@@ -210,7 +210,7 @@ namespace CE::Vulkan
 		buildInfo.dstAccelerationStructure = (VkAccelerationStructureKHR)accelerationStructure->GetHandle();
 
 		addressInfo.buffer = scratchBuffer->GetBuffer();
-		buildInfo.scratchData.deviceAddress = device->vkGetBufferDeviceAddress(device->GetHandle(), &addressInfo);
+		buildInfo.scratchData.deviceAddress = device->vkGetBufferDeviceAddressKHR(device->GetHandle(), &addressInfo);
 	}
 
 	RayTracingBlas::~RayTracingBlas()

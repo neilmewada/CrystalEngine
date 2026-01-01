@@ -59,6 +59,8 @@ namespace CE::Vulkan
 
 		void EndRenderPass() override;
 
+		void BuildBlas(RHI::RayTracingBlas* blas) override;
+
 	private:
 		
 		Device* device = nullptr;

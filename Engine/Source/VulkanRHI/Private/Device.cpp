@@ -68,10 +68,12 @@ namespace CE::Vulkan
 		{
 			VULKAN_EXT_METHOD(vkCreateAccelerationStructureKHR);
 			VULKAN_EXT_METHOD(vkDestroyAccelerationStructureKHR);
-			VULKAN_EXT_METHOD(vkGetBufferDeviceAddress);
+			VULKAN_EXT_METHOD(vkGetBufferDeviceAddressKHR);
 			VULKAN_EXT_METHOD(vkGetAccelerationStructureBuildSizesKHR);
+			VULKAN_EXT_METHOD(vkCmdBuildAccelerationStructuresKHR);
+			VULKAN_EXT_METHOD(vkGetAccelerationStructureDeviceAddressKHR);
 		}
-
+		
 		isInitialized = true;
 
 		CE_LOG(Info, All, "Vulkan device initialized");
@@ -291,7 +293,7 @@ namespace CE::Vulkan
 		// Store Queue Families & Surface Support Info for later use
 		//queueFamilies = GetQueueFamilies(gpu);
 		surfaceSupport = FetchSurfaceSupportInfo(gpu);
-		
+
 		// Fetch Queue properties
 		u32 queuePropertyCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queuePropertyCount, nullptr);
@@ -346,6 +348,8 @@ namespace CE::Vulkan
 		vkEnumerateDeviceExtensionProperties(gpu, nullptr, &deviceExtensionCount, deviceExtensionProperties.GetData());
 
 		supportedDeviceExtensions.Clear();
+		hasRayTracing = false;
+		hasBufferDeviceAddressExt = false;
 
 		for (int i = 0; i < deviceExtensionCount; ++i)
 		{
@@ -375,6 +379,7 @@ namespace CE::Vulkan
 			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME) == 0)
 			{
 				deviceExtensionNames.Add(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME);
+				hasRayTracing = true;
 			}
 			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME) == 0)
 			{
@@ -391,6 +396,7 @@ namespace CE::Vulkan
 			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME) == 0)
 			{
 				deviceExtensionNames.Add(VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME);
+				hasBufferDeviceAddressExt = true;
 			}
 			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_SPIRV_1_4_EXTENSION_NAME) == 0)
 			{
@@ -422,13 +428,16 @@ namespace CE::Vulkan
 
 		VkPhysicalDeviceFeatures deviceFeaturesToUse{};
 		deviceFeaturesToUse.samplerAnisotropy = VK_TRUE;
+
+		VkPhysicalDeviceVulkan12Features vulkan12Features{};
+		vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+
 #if PLATFORM_DESKTOP
 		deviceFeaturesToUse.textureCompressionBC = VK_TRUE;
+		vulkan12Features.bufferDeviceAddress = VK_TRUE;
 #endif
 
 #if PLATFORM_DESKTOP
-		VkPhysicalDeviceVulkan12Features vulkan12Features{};
-		vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 		vulkan12Features.pNext = nullptr;
 		vulkan12Features.timelineSemaphore = VK_TRUE;
 
@@ -439,6 +448,15 @@ namespace CE::Vulkan
 		vulkan12Features.descriptorBindingPartiallyBound = VK_TRUE;
 
 		deviceCI.pNext = &vulkan12Features;
+
+		VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures{};
+		accelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+		accelerationStructureFeatures.accelerationStructure = VK_TRUE;
+
+		if (hasRayTracing)
+		{
+			vulkan12Features.pNext = &accelerationStructureFeatures;
+		}
 #endif
 
 		deviceCI.pEnabledFeatures = &deviceFeaturesToUse;

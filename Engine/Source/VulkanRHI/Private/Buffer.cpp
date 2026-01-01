@@ -93,6 +93,16 @@ namespace CE::Vulkan
 		
 		bufferCI.usage = VkBufferUsageFlagsFromBufferBindFlags(desc.bindFlags) | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		
+		if (device->HasBufferDeviceAddressExt() && heapType == MemoryHeapType::Default)
+		{
+			bufferCI.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+		}
+
+		if (device->HasRayTracing() && EnumHasAnyFlags(bindFlags, BufferBindFlags::VertexBuffer | BufferBindFlags::IndexBuffer))
+		{
+			bufferCI.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+		}
+
 		if (vkCreateBuffer(device->GetHandle(), &bufferCI, VULKAN_CPU_ALLOCATOR, &buffer) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create buffer with name {} of size {} bytes", name, bufferSize);
@@ -131,6 +141,16 @@ namespace CE::Vulkan
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = device->FindMemoryType(memRequirements.memoryTypeBits, memoryFlags);
 		allocInfo.pNext = nullptr;
+
+		VkMemoryAllocateFlagsInfo allocFlagsInfo{};
+		allocFlagsInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
+		allocFlagsInfo.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
+		allocFlagsInfo.pNext = nullptr;
+
+		if (device->HasBufferDeviceAddressExt() && heapType == MemoryHeapType::Default)
+		{
+			allocInfo.pNext = &allocFlagsInfo;
+		}
 
 		auto result = vkAllocateMemory(device->GetHandle(), &allocInfo, VULKAN_CPU_ALLOCATOR, &bufferMemory);
 
@@ -174,6 +194,16 @@ namespace CE::Vulkan
 		bufferCI.pQueueFamilyIndices = nullptr;
 		
 		bufferCI.usage = VkBufferUsageFlagsFromBufferBindFlags(desc.bindFlags) | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+
+		if (device->HasBufferDeviceAddressExt() && memoryHeap->GetHeapType() == MemoryHeapType::Default)
+		{
+			bufferCI.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+		}
+
+		if (device->HasRayTracing() && EnumHasAnyFlags(bindFlags, BufferBindFlags::VertexBuffer | BufferBindFlags::IndexBuffer))
+		{
+			bufferCI.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+		}
 
 		if (vkCreateBuffer(device->GetHandle(), &bufferCI, VULKAN_CPU_ALLOCATOR, &buffer) != VK_SUCCESS)
 		{

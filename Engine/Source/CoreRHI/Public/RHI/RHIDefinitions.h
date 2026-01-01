@@ -48,7 +48,8 @@ namespace CE::RHI
         Buffer,
         Texture,
         SwapChain,
-        TextureView
+        TextureView,
+		Blas,
     };
 
     struct FontDesc
@@ -473,7 +474,10 @@ namespace CE::RHI
         // Read/Write resource
         ShaderWrite = BIT(12),
         BlitSource = BIT(13),
-        BlitDestination = BIT(14)
+        BlitDestination = BIT(14),
+		// Ray Tracing
+		AccelerationStructureBuild = BIT(15),
+		AccelerationStructureRead = BIT(16),
     };
 
 } // namespace CE

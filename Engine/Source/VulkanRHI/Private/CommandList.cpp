@@ -271,6 +271,7 @@ namespace CE::Vulkan
 
 			List<VkBufferMemoryBarrier> bufferBarriers{};
 			List<VkImageMemoryBarrier> imageBarriers{};
+			List<VkMemoryBarrier> memoryBarriers{};
 
 			const RHI::ResourceBarrierDescriptor& barrierInfo = barriers[i];
 			if (barrierInfo.resource == nullptr)
@@ -771,9 +772,61 @@ namespace CE::Vulkan
 
 				buffer->curFamilyIndex = queueFamilyIndex;
 			}
+			else if (resourceType == DeviceObjectType::Blas)
+			{
+				Vulkan::RayTracingBlas* blas = static_cast<Vulkan::RayTracingBlas*>(barrierInfo.resource);
 
+				VkMemoryBarrier memoryBarrier{};
+				memoryBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+
+				switch (barrierInfo.fromState)
+				{
+				case ResourceState::Undefined:
+					srcStageMask = VK_PIPELINE_STAGE_NONE;
+					memoryBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+					break;
+				case ResourceState::General:
+					srcStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+					memoryBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+					break;
+				case ResourceState::AccelerationStructureBuild:
+					srcStageMask = VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR;
+					memoryBarrier.srcAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+					break;
+				case ResourceState::AccelerationStructureRead:
+					srcStageMask = VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
+						VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					memoryBarrier.srcAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
+					break;
+				}
+
+				switch (barrierInfo.toState)
+				{
+				case ResourceState::Undefined:
+					dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+					memoryBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+					break;
+				case ResourceState::General:
+					dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+					memoryBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+					break;
+				case ResourceState::AccelerationStructureBuild:
+					dstStageMask = VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR;
+					memoryBarrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+					break;
+				case ResourceState::AccelerationStructureRead:
+					dstStageMask = VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
+						VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					memoryBarrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
+					break;
+				}
+
+				vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask, 0,
+					1, &memoryBarrier,
+					0, nullptr,
+					0, nullptr);
+			}
 		}
-
 	}
 
 	void CommandList::CopyTextureRegion(const BufferToTextureCopy& region)
@@ -956,4 +1009,12 @@ namespace CE::Vulkan
 		vkCmdEndRenderPass(commandBuffer);
     }
 
+	void CommandList::BuildBlas(RHI::RayTracingBlas* blas)
+	{
+		Vulkan::RayTracingBlas* vkBlas = (Vulkan::RayTracingBlas*)blas;
+
+		auto rangeInfo = vkBlas->rangeInfos.GetData();
+
+		device->vkCmdBuildAccelerationStructuresKHR(commandBuffer, 1, &vkBlas->buildInfo, &rangeInfo);
+	}
 } // namespace CE::Vulkan
