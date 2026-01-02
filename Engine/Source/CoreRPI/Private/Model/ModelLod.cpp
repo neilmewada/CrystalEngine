@@ -123,7 +123,7 @@ namespace CE::RPI
 
 			cmdList->Begin();
 			{
-				//cmdList->BuildBlas(blas);
+				cmdList->BuildBlas(blas);
 			}
 			cmdList->End();
 
