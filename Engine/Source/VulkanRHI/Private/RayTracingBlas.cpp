@@ -89,15 +89,7 @@ namespace CE::Vulkan
 
 		VkPhysicalDevice physicalDevice = device->GetPhysicalHandle();
 
-		VkPhysicalDeviceAccelerationStructurePropertiesKHR accelProps{};
-		accelProps.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR;
-		accelProps.pNext = nullptr;
-
-		VkPhysicalDeviceProperties2 props2{};
-		props2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-		props2.pNext = &accelProps;
-
-		vkGetPhysicalDeviceProperties2(physicalDevice, &props2);
+		const VkPhysicalDeviceAccelerationStructurePropertiesKHR& accelProps = device->GetAccelerationStructureProperties();
 
 		if (desc.geometries.NotEmpty())
 		{
@@ -124,13 +116,19 @@ namespace CE::Vulkan
 				addressInfo.pNext = nullptr;
 
 				addressInfo.buffer = vertexBuffer;
-				geometryDesc.geometry.triangles.vertexData.deviceAddress = device->vkGetBufferDeviceAddressKHR(device->GetHandle(), &addressInfo);
+				VkDeviceAddress vertexAddress = device->vkGetBufferDeviceAddressKHR(device->GetHandle(), &addressInfo) +
+					geometry.vertexBuffer.GetByteOffset();
+
+				geometryDesc.geometry.triangles.vertexData.deviceAddress = vertexAddress;
 				geometryDesc.geometry.triangles.vertexStride = geometry.vertexBuffer.GetVertexStride();
 				geometryDesc.geometry.triangles.maxVertex = static_cast<uint32_t>(geometry.vertexBuffer.GetByteCount() / geometryDesc.geometry.triangles.vertexStride);
 				geometryDesc.geometry.triangles.vertexFormat = ToVkFormat(geometry.vertexDataType);
 
 				addressInfo.buffer = indexBuffer;
-				geometryDesc.geometry.triangles.indexData.deviceAddress = device->vkGetBufferDeviceAddressKHR(device->GetHandle(), &addressInfo);
+				VkDeviceAddress indexAddress = device->vkGetBufferDeviceAddressKHR(device->GetHandle(), &addressInfo) +
+					geometry.indexBuffer.GetByteOffset();
+
+				geometryDesc.geometry.triangles.indexData.deviceAddress = indexAddress;
 				geometryDesc.geometry.triangles.indexType = geometry.indexBuffer.GetIndexFormat() == RHI::IndexFormat::Uint16 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
 				geometryDesc.geometry.triangles.transformData = {};
 

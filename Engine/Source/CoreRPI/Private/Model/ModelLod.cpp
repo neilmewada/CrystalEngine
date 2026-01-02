@@ -103,6 +103,8 @@ namespace CE::RPI
 							vertexBufferInfo.byteCount, 
 							vertexBufferInfo.stride);
 
+						geometryDesc.vertexOffset = mesh.drawArguments.indexedArgs.vertexOffset;
+
 						geometryDesc.indexBuffer = mesh.indexBufferView;
 						geometryDesc.vertexDataType = vertexBufferInfo.attributeType;
 
