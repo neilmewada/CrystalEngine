@@ -96,6 +96,13 @@ namespace CE::Vulkan
 			return gpuProperties.limits;
 		}
 
+        const VkPhysicalDeviceProperties2& GetPhysicalDeviceProperties2() const { return gpuProperties2; }
+
+        const VkPhysicalDeviceAccelerationStructurePropertiesKHR& GetAccelerationStructureProperties() const
+        {
+            return accelerationStructureProperties;
+		}
+
 		INLINE ShaderResourceManager* GetShaderResourceManager() const
 		{
 			return srgManager;
@@ -153,6 +160,9 @@ namespace CE::Vulkan
 
         VkPhysicalDevice gpu = nullptr;
         VkPhysicalDeviceProperties gpuProperties{};
+		VkPhysicalDeviceProperties2 gpuProperties2{};
+        VkPhysicalDeviceAccelerationStructurePropertiesKHR accelerationStructureProperties{};
+
 		Array<VkQueueFamilyProperties> queueFamilyProperties{};
         Array<RHI::Format> availableDepthStencilFormats{};
         Array<RHI::Format> availableDepthOnlyFormats{};

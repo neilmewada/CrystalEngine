@@ -235,6 +235,14 @@ namespace CE::Vulkan
 		this->gpu = physicalDevices[selectedGpuIndex];
 		vkGetPhysicalDeviceProperties(this->gpu, &gpuProperties);
 
+		accelerationStructureProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR;
+		accelerationStructureProperties.pNext = nullptr;
+
+		gpuProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+		gpuProperties2.pNext = &accelerationStructureProperties;
+
+		vkGetPhysicalDeviceProperties2(this->gpu, &gpuProperties2);
+
 		CE_LOG(Info, All, "Selected {} as the target GPU", gpuProperties.deviceName);
 	}
 
