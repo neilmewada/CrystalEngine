@@ -36,7 +36,8 @@ namespace CE::RHI
         CommandList,
 
 		// Ray Tracing
-		RayTracingBlas,
+        RayTracingBlas,
+        RayTracingTlas,
     };
 
     enum class DeviceObjectType
@@ -45,7 +46,8 @@ namespace CE::RHI
         Buffer,
         Texture,
         TextureView,
-		Blas,
+        Blas,
+        Tlas,
     };
 
     struct FontDesc
