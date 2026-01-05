@@ -31,7 +31,7 @@ namespace CE::RHI
     {
     protected:
 		RayTracingBlas(const RHI::RayTracingBlasDescriptor& desc) 
-    	: RHIResource(ResourceType::RayTracingBlas)
+    		: RHIResource(ResourceType::RayTracingBlas)
 			, IDeviceObject(DeviceObjectType::Blas)
     		, geometries(desc.geometries)
 		{}
@@ -43,6 +43,31 @@ namespace CE::RHI
     protected:
 
         Array<RayTracingGeometryDescriptor> geometries;
+    };
+
+    struct RayTracingTlasInstance
+    {
+        
+	};
+
+    struct RayTracingTlasDescriptor
+    {
+	    
+    };
+
+    class CORERHI_API RayTracingTlas : RHI::RHIResource, public IDeviceObject
+    {
+	protected:
+		RayTracingTlas(const RHI::RayTracingTlasDescriptor& desc)
+			: RHIResource(ResourceType::RayTracingTlas)
+			, IDeviceObject(DeviceObjectType::Tlas)
+		{}
+
+    public:
+
+    protected:
+
+
     };
     
 } // namespace CE::RHI

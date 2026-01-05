@@ -201,7 +201,6 @@ namespace CE
             struct {
 				f32 a, b, g, r;
             };
-            f32 rgba[4] = { 0, 0, 0, 0 };
         };
     };
 
