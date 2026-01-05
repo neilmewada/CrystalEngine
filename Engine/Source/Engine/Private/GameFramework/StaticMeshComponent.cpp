@@ -96,6 +96,12 @@ namespace CE
         }
     }
 
+    void StaticMeshComponent::OnBeginPlay()
+    {
+	    Super::OnBeginPlay();
+
+    }
+
     void StaticMeshComponent::Tick(f32 delta)
     {
 	    Super::Tick(delta);

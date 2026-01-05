@@ -19,7 +19,7 @@ namespace CE::Vulkan
             List<VkPipelineStageFlags> waitDstStageMask{};
         };
 
-        CommandQueue(VulkanDevice* device, u32 familyIndex, u32 queueIndex, RHI::HardwareQueueClassMask queueMask, VkQueue queue, bool presentSupported);
+        CommandQueue(VulkanDevice* device, u32 familyIndex, u32 queueIndex, RHI::HardwareQueueClassMask queueMask, RHI::HardwareQueueClass queueClass, VkQueue queue, bool presentSupported);
         virtual ~CommandQueue();
 
 		inline VkQueue GetHandle() const

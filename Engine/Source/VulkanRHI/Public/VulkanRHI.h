@@ -76,7 +76,7 @@ namespace CE::Vulkan
 
 		virtual bool IsOffscreenOnly() override;
 
-		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) override;
+		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClass queueClass) override;
 
         virtual RHI::CommandQueue* GetPrimaryGraphicsQueue() override;
         virtual RHI::CommandQueue* GetPrimaryTransferQueue() override;

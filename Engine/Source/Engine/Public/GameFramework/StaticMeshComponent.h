@@ -27,6 +27,8 @@ namespace CE
 
 		void OnDisabled() override;
 
+		void OnBeginPlay() override;
+
 		void Tick(f32 delta) override;
 
 		FIELD(EditAnywhere, Category = "Static Mesh")

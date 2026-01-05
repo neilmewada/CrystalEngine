@@ -447,6 +447,11 @@ namespace CE::RPI
         return builtinTextures[name];
     }
 
+    void RPISystem::EnqueueBlasBuild(ModelLod* lod)
+    {
+        blasBuilds.Add(lod);
+    }
+
     void RPISystem::CreateDefaultTextures()
     {
         auto prevTime = clock();

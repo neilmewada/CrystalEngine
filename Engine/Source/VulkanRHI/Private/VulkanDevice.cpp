@@ -545,6 +545,36 @@ namespace CE::Vulkan
 			if (queueFamilyProperty.queueFlags & VK_QUEUE_TRANSFER_BIT)
 				queueMask |= RHI::HardwareQueueClassMask::Transfer;
 
+			RHI::HardwareQueueClass queueClass{};
+			if (EnumHasAllFlags(queueMask, RHI::HardwareQueueClassMask::Graphics))
+			{
+				queueClass = RHI::HardwareQueueClass::Graphics;
+				if (graphicsFamilyIdx == -1)
+					graphicsFamilyIdx = familyIdx;
+				else
+					continue;
+			}
+			else if (EnumHasFlag(queueMask, RHI::HardwareQueueClassMask::Compute))
+			{
+				queueClass = RHI::HardwareQueueClass::Compute;
+				if (computeFamilyIdx == -1)
+					computeFamilyIdx = familyIdx;
+				else
+					continue;
+			}
+			else if (EnumHasFlag(queueMask, RHI::HardwareQueueClassMask::Transfer))
+			{
+				queueClass = RHI::HardwareQueueClass::Transfer;
+				if (transferFamilyIdx == -1)
+					transferFamilyIdx = familyIdx;
+				else
+					continue;
+			}
+			else
+			{
+				continue;
+			}
+
 			VkBool32 presentationSupported = VK_FALSE;
 			if (testSurface != nullptr)
 				vkGetPhysicalDeviceSurfaceSupportKHR(gpu, familyIdx, testSurface, &presentationSupported);
@@ -558,9 +588,17 @@ namespace CE::Vulkan
 				VkQueue vkQueue = nullptr;
 				vkGetDeviceQueue(device, familyIdx, i, &vkQueue);
 
-				CommandQueue* queue = new CommandQueue(this, familyIdx, i, queueMask, vkQueue, presentationSupported > 0);
+				CommandQueue* queue = new CommandQueue(this, familyIdx, i, queueMask, queueClass, vkQueue, presentationSupported > 0);
 				queues.Add(queue);
 				queuesByFamily[familyIdx].Add(queue);
+				
+				if (queueClass == RHI::HardwareQueueClass::Graphics)
+					queuesByClass[RHI::HardwareQueueClass::Graphics].Add(queue);
+				else if (queueClass == RHI::HardwareQueueClass::Compute)
+					queuesByClass[RHI::HardwareQueueClass::Compute].Add(queue);
+				else if (queueClass == RHI::HardwareQueueClass::Transfer)
+					queuesByClass[RHI::HardwareQueueClass::Transfer].Add(queue);
+
                 if (presentationSupported)
                 {
                     presentQueues.Add(queue);
@@ -1088,17 +1126,17 @@ namespace CE::Vulkan
 			queueFamilyIndex);
 	}
 
-	Array<RHI::CommandQueue*> VulkanDevice::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
+	Array<RHI::CommandQueue*> VulkanDevice::GetHardwareQueues(RHI::HardwareQueueClass queueClass)
 	{
-		Array<RHI::CommandQueue*> result{};
+		Array<RHI::CommandQueue*> queues{};
+		queues.Reserve(queuesByClass[queueClass].GetSize());
 
-		for (int i = 0; i < queues.GetSize(); i++)
+		for (CommandQueue* commandQueue : queuesByClass[queueClass])
 		{
-			if ((queues[i]->GetQueueMask() & queueMask) == queueMask)
-				result.Add(queues[i]);
+			queues.Add(commandQueue);
 		}
 
-		return result;
+		return queues;
 	}
 
 	Array<RHI::CommandQueue*> VulkanDevice::AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass)

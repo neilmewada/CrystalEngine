@@ -81,7 +81,7 @@ namespace CE::RHI
 		virtual Array<RHI::Format> GetAvailableDepthStencilFormats() = 0;
 		virtual Array<RHI::Format> GetAvailableDepthOnlyFormats() = 0;
 
-		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) = 0;
+		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClass queueMask) = 0;
 
 		virtual RHI::CommandQueue* GetPrimaryGraphicsQueue() = 0;
 		virtual RHI::CommandQueue* GetPrimaryTransferQueue() = 0;

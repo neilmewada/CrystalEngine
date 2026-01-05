@@ -84,7 +84,7 @@ namespace CE::RPI
 
 	void ModelLod::OnPostProcess()
 	{
-		if (RPISystem::Get().IsRayTracingEnabled())
+		if (RPISystem::Get().IsRayTracingEnabled() && blas == nullptr)
 		{
 			RHI::RayTracingBlasDescriptor blasDesc{};
 			blasDesc.buildFlags = RHI::RayTracingBuildFlags::FastTrace;
@@ -116,6 +116,9 @@ namespace CE::RPI
 			}
 
 			blas = RHI::gDynamicRHI->CreateRayTracingBlas(blasDesc);
+
+			RPISystem::Get().EnqueueBlasBuild(this);
+			return;
 
 			RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
 			RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);

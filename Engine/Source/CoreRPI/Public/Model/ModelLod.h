@@ -41,7 +41,7 @@ namespace CE::RPI
 		MaterialSlotId materialSlotId = 0;
 	};
 
-	class CORERPI_API ModelLod final
+	class CORERPI_API ModelLod final : public InstanceBase
 	{
 	public:
 

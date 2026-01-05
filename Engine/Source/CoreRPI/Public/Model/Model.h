@@ -16,7 +16,7 @@ namespace CE::RPI
 
 	private:
 
-		Array<ModelLod*> lods{};
+		Array<Ptr<ModelLod>> lods{};
 
 		friend class ModelAsset;
 
