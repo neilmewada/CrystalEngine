@@ -134,17 +134,6 @@ namespace CE
 			skyboxMaterial->ApplyProperties();
 		}
 
-		// - Mesh 1 -
-
-		StaticMeshActor* mesh1 = CreateObject<StaticMeshActor>(scene, "Mesh_1");
-		scene->AddActor(mesh1);
-		{
-			StaticMeshComponent* meshComponent = mesh1->GetMeshComponent();
-			meshComponent->SetStaticMesh(sphereMesh);
-			meshComponent->SetLocalPosition(Vec3(0, 0, 5));
-			meshComponent->SetMaterial(aluminiumMaterial, 0, 0);
-		}
-
 		// - Sponza -
 		StaticMeshActor* sponzaActor = CreateObject<StaticMeshActor>(scene, "SponzaMesh");
 		scene->AddActor(sponzaActor);

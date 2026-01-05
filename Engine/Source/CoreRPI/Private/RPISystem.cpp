@@ -97,6 +97,12 @@ namespace CE::RPI
 		if (deviceLimits->IsRayTracingSupported() && renderingSettings->IsRayTracingEnabled())
         {
             isRayTracingEnabled = true;
+
+            Array<CommandQueue*> queues = RHI::gDynamicRHI->GetHardwareQueues(HardwareQueueClass::Graphics);
+            blasCommandQueue = queues[0];
+
+			blasCommandList = RHI::gDynamicRHI->AllocateCommandList(blasCommandQueue);
+			blasFence = RHI::gDynamicRHI->CreateFence(false);
         }
     }
 
@@ -277,6 +283,17 @@ namespace CE::RPI
         standardShader = nullptr;
         isInitialized = false;
 
+        if (blasCommandList)
+        {
+            RHI::gDynamicRHI->FreeCommandLists(1, &blasCommandList);
+			blasCommandList = nullptr;
+        }
+        if (blasFence)
+        {
+            RHI::gDynamicRHI->DestroyFence(blasFence);
+			blasFence = nullptr;
+        }
+
         for (const auto& [builtinTag, drawListTag] : builtinDrawTags)
         {
             if (!drawListTag.IsValid())
@@ -360,6 +377,22 @@ namespace CE::RPI
         }
 
         currentTime = GetCurrentTime();
+
+		if (blasBuilds.GetSize() > 0 && blasCommandList && blasFence)
+        {
+            blasCommandList->Begin();
+            {
+                for (ModelLod* lod : blasBuilds)
+                {
+                    blasCommandList->BuildBlas(lod->GetBlas());
+                }
+            }
+            blasCommandList->End();
+            
+            blasCommandQueue->Execute(1, &blasCommandList, blasFence);
+            blasFence->WaitForFence();
+            blasBuilds.Clear();
+        }
 
         for (Scene* scene : scenes)
         {
