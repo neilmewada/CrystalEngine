@@ -6,7 +6,8 @@ namespace CE::Vulkan
 
 	CommandQueue::CommandQueue(Device* device, 
 		u32 familyIndex, u32 queueIndex, 
-		RHI::HardwareQueueClassMask queueMask, 
+		RHI::HardwareQueueClassMask queueMask,
+		RHI::HardwareQueueClass queueClass,
 		VkQueue queue, bool presentSupported)
 		: device(device)
 		, familyIndex(familyIndex)
@@ -15,6 +16,7 @@ namespace CE::Vulkan
 		, presentSupported(presentSupported)
 	{
 		this->queueMask = queueMask;
+		this->queueClass = queueClass;
 	}
 
 	CommandQueue::~CommandQueue()

@@ -3,6 +3,7 @@
 namespace CE::RPI
 {
 	class Texture;
+	class ModelLod;
 	class ShaderCollection;
 	class ShaderVariant;
 
@@ -93,6 +94,8 @@ namespace CE::RPI
 
 		RPI::Texture* FindBuiltinTexture(const Name& name);
 
+		void EnqueueBlasBuild(ModelLod* lod);
+
 	private:
 
 		RPISystem() = default;
@@ -118,6 +121,8 @@ namespace CE::RPI
 		Array<RHI::Buffer*> vertexBuffers{};
 		Array<RHI::VertexBufferView> quadVertexBufferViews{};
 		RHI::DrawLinearArguments quadDrawArgs{};
+
+		Array<Ptr<ModelLod>> blasBuilds;
 
 		Array<RHI::VertexBufferView> textQuadVertexBufferViews{};
 		RHI::DrawLinearArguments textQuadDrawArgs{};

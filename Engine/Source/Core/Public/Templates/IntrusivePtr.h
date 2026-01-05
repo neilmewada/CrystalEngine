@@ -45,7 +45,7 @@ namespace CE
 
 		}
 
-		inline u32 GetCount() const
+		inline u32 GetRefCount() const
 		{
 			return refCount;
 		}

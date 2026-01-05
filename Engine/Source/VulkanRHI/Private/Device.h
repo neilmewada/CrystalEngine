@@ -61,7 +61,7 @@ namespace CE::Vulkan
 
         // - Getters -
 
-		Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClass queueClass);
+		Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClass queueMask);
 		Array<RHI::CommandQueue*> AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass);
 
 		inline bool IsUnifiedMemoryArchitecture() const { return isUnifiedMemory; }
@@ -167,6 +167,10 @@ namespace CE::Vulkan
         Array<RHI::Format> availableDepthStencilFormats{};
         Array<RHI::Format> availableDepthOnlyFormats{};
 
+        int graphicsFamilyIdx = -1;
+        int computeFamilyIdx = -1;
+		int transferFamilyIdx = -1;
+
         GpuMetaData gpuMetaData{};
 
         VkDevice device = nullptr;
@@ -178,6 +182,7 @@ namespace CE::Vulkan
 		Array<CommandQueue*> queues{};
         Array<CommandQueue*> presentQueues{};
 		HashMap<int, Array<CommandQueue*>> queuesByFamily{};
+        HashMap<RHI::HardwareQueueClass, Array<CommandQueue*>> queuesByClass;
 
 		CommandBufferAllocator* commandAllocator = nullptr;
         CommandQueue* primaryGraphicsQueue = nullptr;

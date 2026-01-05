@@ -60,7 +60,7 @@ namespace CE::RHI
         
         virtual bool Submit(const CommandQueueSubmission& submission) = 0;
 
-		inline HardwareQueueClassMask GetQueueMask() const
+		HardwareQueueClassMask GetQueueMask() const
 		{
 			return queueMask;
 		}
@@ -70,12 +70,19 @@ namespace CE::RHI
             return queueClass;
         }
 
-		inline bool SupportsOperation(HardwareQueueClass operationType) const
+		HardwareQueueClass GetQueueClass() const
+		{
+			return queueClass;
+		}
+
+		bool SupportsOperation(HardwareQueueClass operationType) const
 		{
 			return (queueMask & (1 << (u32)operationType)) != 0;
 		}
 
 	protected:
+
+		HardwareQueueClass queueClass{};
 
 		HardwareQueueClassMask queueMask{};
         HardwareQueueClass queueClass{};

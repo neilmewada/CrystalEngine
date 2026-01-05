@@ -1017,4 +1017,5 @@ namespace CE::Vulkan
 
 		device->vkCmdBuildAccelerationStructuresKHR(commandBuffer, 1, &vkBlas->buildInfo, &rangeInfo);
 	}
+
 } // namespace CE::Vulkan
