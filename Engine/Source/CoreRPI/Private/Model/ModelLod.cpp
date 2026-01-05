@@ -118,23 +118,6 @@ namespace CE::RPI
 			blas = RHI::gDynamicRHI->CreateRayTracingBlas(blasDesc);
 
 			RPISystem::Get().EnqueueBlasBuild(this);
-			return;
-
-			RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
-			RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
-			RHI::Fence* fence = RHI::gDynamicRHI->CreateFence(false);
-
-			cmdList->Begin();
-			{
-				cmdList->BuildBlas(blas);
-			}
-			cmdList->End();
-
-			queue->Execute(1, &cmdList, fence);
-			fence->WaitForFence();
-
-			RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
-			RHI::gDynamicRHI->DestroyFence(fence);
 		}
 	}
 

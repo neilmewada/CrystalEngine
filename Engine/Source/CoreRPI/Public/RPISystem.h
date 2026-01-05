@@ -120,7 +120,11 @@ namespace CE::RPI
 		Array<RHI::VertexBufferView> quadVertexBufferViews{};
 		RHI::DrawLinearArguments quadDrawArgs{};
 
+		// - Blas -
 		Array<Ptr<ModelLod>> blasBuilds;
+		RHI::CommandQueue* blasCommandQueue = nullptr;
+		RHI::CommandList* blasCommandList = nullptr;
+		RHI::Fence* blasFence = nullptr;
 
 		Array<RHI::VertexBufferView> textQuadVertexBufferViews{};
 		RHI::DrawLinearArguments textQuadDrawArgs{};
