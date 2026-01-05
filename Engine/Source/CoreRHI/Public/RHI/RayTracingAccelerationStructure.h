@@ -47,12 +47,18 @@ namespace CE::RHI
 
     struct RayTracingTlasInstance
     {
-        
+		u32 instanceID = 0;
+		u32 hitGroupIndex = 0;
+		u32 instanceMask = 0xFF;
+		Matrix4x4 transform = Matrix4x4::Identity();
+		bool transparent = false;
+		RayTracingBlas* blas = nullptr;
 	};
 
     struct RayTracingTlasDescriptor
     {
-	    
+		Array<RayTracingTlasInstance> instances;
+
     };
 
     class CORERHI_API RayTracingTlas : RHI::RHIResource, public IDeviceObject
