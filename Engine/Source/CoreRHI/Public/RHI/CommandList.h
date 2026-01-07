@@ -11,6 +11,7 @@ namespace CE::RHI
 	class RenderTarget;
 	class RenderTargetBuffer;
 	class RayTracingBlas;
+	class RayTracingTlas;
 	struct AttachmentClearValue;
 
 	enum class CommandListType
@@ -171,6 +172,8 @@ namespace CE::RHI
 		// - Ray Tracing -
 
 		virtual void BuildBlas(RHI::RayTracingBlas* blas) = 0;
+
+		virtual void BuildTlas(RHI::RayTracingTlas* tlas) = 0;
 
 	protected:
 

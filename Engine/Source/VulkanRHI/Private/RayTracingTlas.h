@@ -12,6 +12,8 @@ namespace CE::Vulkan
 
 		~RayTracingTlas() override;
 
+		RayTracingAccelerationStructure* GetAccelerationStructure() const { return accelerationStructure; }
+
     private:
 
         VulkanDevice* device = nullptr;
@@ -22,6 +24,7 @@ namespace CE::Vulkan
         Array<VkAccelerationStructureInstanceKHR> vkInstances;
         Vulkan::Buffer* tlasInstancesBuffer = nullptr;
 
+        VkAccelerationStructureGeometryKHR geometry{};
         VkAccelerationStructureBuildRangeInfoKHR offsetInfo{};
 		VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
         u32 instanceCount = 0;
