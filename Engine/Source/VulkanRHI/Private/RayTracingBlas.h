@@ -12,6 +12,8 @@ namespace CE::Vulkan
 
 		~RayTracingBlas() override;
 
+		RayTracingAccelerationStructure* GetAccelerationStructure() const { return accelerationStructure; }
+
     private:
 
         VulkanDevice* device = nullptr;

@@ -87,8 +87,6 @@ namespace CE::Vulkan
 	{
 		Array<uint32_t> primitiveCounts;
 
-		VkPhysicalDevice physicalDevice = device->GetPhysicalHandle();
-
 		const VkPhysicalDeviceAccelerationStructurePropertiesKHR& accelProps = device->GetAccelerationStructureProperties();
 
 		if (desc.geometries.NotEmpty())

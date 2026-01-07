@@ -61,6 +61,8 @@ namespace CE::Vulkan
 
 		void BuildBlas(RHI::RayTracingBlas* blas) override;
 
+		void BuildTlas(RHI::RayTracingTlas* tlas) override;
+
 	private:
 		
 		Device* device = nullptr;

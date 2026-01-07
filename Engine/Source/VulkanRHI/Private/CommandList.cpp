@@ -1018,4 +1018,12 @@ namespace CE::Vulkan
 		device->vkCmdBuildAccelerationStructuresKHR(commandBuffer, 1, &vkBlas->buildInfo, &rangeInfo);
 	}
 
+	void CommandList::BuildTlas(RHI::RayTracingTlas* tlas)
+	{
+		Vulkan::RayTracingTlas* vkTlas = (Vulkan::RayTracingTlas*)tlas;
+
+		const VkAccelerationStructureBuildRangeInfoKHR* offsetInfo = &vkTlas->offsetInfo;
+		device->vkCmdBuildAccelerationStructuresKHR(commandBuffer, 1, &vkTlas->buildInfo, &offsetInfo);
+	}
+
 } // namespace CE::Vulkan
