@@ -12,6 +12,8 @@ namespace CE
 
         virtual ~FRootContext();
 
+        void Tick() override;
+
         void TickInput() override;
 
         void TickNativeContextInput(Ref<FNativeContext> nativeContext);

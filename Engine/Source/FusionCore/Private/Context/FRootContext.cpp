@@ -15,6 +15,18 @@ namespace CE
         
     }
 
+    void FRootContext::Tick()
+    {
+		ZoneScoped;
+
+		TickInput();
+
+		for (Ref<FFusionContext> childContext : childContexts)
+		{
+			childContext->Tick();
+		}
+    }
+
     void FRootContext::TickInput()
     {
         ZoneScoped;
