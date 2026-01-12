@@ -348,12 +348,12 @@ namespace CE
 
         struct FTextCacheEntry
         {
-            Uuid cacheId;
+            SIZE_T cacheId;
             Vec2 finalSize;
             Array<Rect> quads;
 		};
 
-		HashMap<Uuid, FTextCacheEntry> sdfTextCache;
+		HashMap<SIZE_T, FTextCacheEntry> sdfTextCache;
 
         // - Setup -
 
