@@ -152,6 +152,9 @@ namespace CE::RHI
 		virtual RHI::RayTracingBlas* CreateRayTracingBlas(const RHI::RayTracingBlasDescriptor& desc) = 0;
 		virtual void DestroyRayTracingBlas(RHI::RayTracingBlas* blas) = 0;
 
+		virtual RHI::RayTracingTlas* CreateRayTracingTlas(const RHI::RayTracingTlasDescriptor& desc) = 0;
+		virtual void DestroyRayTracingTlas(RHI::RayTracingTlas* tlas) = 0;
+
 		// - Pipeline State -
 
 		virtual RHI::PipelineState* CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc) = 0;
