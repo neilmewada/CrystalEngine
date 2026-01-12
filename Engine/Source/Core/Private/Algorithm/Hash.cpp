@@ -9,6 +9,8 @@ namespace CE
 {
 	CORE_API Hash128 CalculateHash128(const void* data, SIZE_T length)
 	{
+		ZoneScoped;
+
 		XXH128_hash_t hash = XXH3_128bits(data, length);
 		Hash128 out;
 		out.high64 = hash.high64;
@@ -18,6 +20,8 @@ namespace CE
 
 	CORE_API SIZE_T CalculateHash(const void* data, SIZE_T length)
 	{
+		ZoneScoped;
+
 #if IS_64BIT
 		return XXH64(data, length, 0);
 #else
@@ -27,16 +31,22 @@ namespace CE
 
 	CORE_API u32 CalculateCRC(const void* data, SIZE_T size)
 	{
+		ZoneScoped;
+
 		return CRC::Calculate(data, size, CRC::CRC_32());
 	}
 
 	CORE_API u32 CalculateCRC(const void* data, SIZE_T size, u32 crc)
 	{
+		ZoneScoped;
+
 		return CRC::Calculate(data, size, CRC::CRC_32(), crc);
 	}
 
 	CORE_API SIZE_T GetCombinedHashes(const CE::Array<SIZE_T>& hashes)
 	{
+		ZoneScoped;
+
 		if (hashes.GetSize() == 0)
 			return 0;
 		

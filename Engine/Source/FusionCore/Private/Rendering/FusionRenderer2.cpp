@@ -402,6 +402,8 @@ namespace CE
         footprint += clipRectBuffer.GetBuffer(0)->GetBufferSize() * numFrames;
         footprint += drawDataBuffer.GetBuffer(0)->GetBufferSize() * numFrames;
 
+        footprint += sdfTextCache.GetSize() * (sizeof(FTextCacheEntry) + sizeof(SIZE_T));
+
         return footprint;
     }
 
@@ -1171,16 +1173,21 @@ namespace CE
         return finalSize;
     }
 
-    Vec2 FusionRenderer2::DrawSDFTextCached(Uuid cacheId, const String& text, Vec2 textPos, Vec2 size,
+    Vec2 FusionRenderer2::DrawSDFTextCached(Uuid __ignore, const String& text, Vec2 textPos, Vec2 size,
 	    FWordWrap wordWrap)
     {
         ZoneScoped;
         // TODO: Fix SDF Cache
 
-        /*if (sdfTextCache.KeyExists(cacheId))
+        SIZE_T cacheId = GetHash(text);
+        CombineHash(cacheId, currentFont);
+        CombineHash(cacheId, size.width);
+        CombineHash(cacheId, wordWrap);
+
+        if (sdfTextCache.KeyExists(cacheId))
         {
             const FTextCacheEntry& entry = sdfTextCache.Get(cacheId);
-            const Array<Rect>& quads = entry.quads;
+            const Rect* quads = entry.quads.GetData();
 
             const bool isFixedSize = !Math::ApproxEquals(size.x, 0.0f) && !Math::ApproxEquals(size.y, 0.0f);
 
@@ -1196,10 +1203,10 @@ namespace CE
                 return Vec2();
             }
 
-            DrawSDFTextInternal(quads.GetData(), text.GetData(), text.GetLength(), currentFont, textPos);
+            DrawSDFTextInternal(quads, text.GetData(), text.GetLength(), currentFont, textPos);
             return finalSize;
         }
-        else*/
+        else
         {
             thread_local Array<Rect> quads{};
             const bool isFixedSize = !Math::ApproxEquals(size.x, 0.0f) && !Math::ApproxEquals(size.y, 0.0f);
@@ -1213,7 +1220,7 @@ namespace CE
 
             Vec2 finalSize = CalculateSDFTextQuads(quads, text, currentFont, size.width, wordWrap);
 
-			//sdfTextCache[cacheId] = FTextCacheEntry{ .cacheId = cacheId, .finalSize = finalSize, .quads = quads };
+			sdfTextCache[cacheId] = FTextCacheEntry{ .cacheId = cacheId, .finalSize = finalSize, .quads = quads };
 
             if (!isFixedSize && IsRectClipped(Rect::FromSize(textPos, finalSize)))
             {
@@ -1229,7 +1236,7 @@ namespace CE
     {
         ZoneScoped;
 
-        sdfTextCache.Remove(cacheId);
+        //sdfTextCache.Remove(cacheId);
     }
 
     void FusionRenderer2::DrawViewport(const Rect& rect, FViewport* viewport)
