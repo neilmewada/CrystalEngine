@@ -470,12 +470,28 @@ namespace CE::Vulkan
 
 	RHI::RayTracingBlas* VulkanRHI::CreateRayTracingBlas(const RHI::RayTracingBlasDescriptor& desc)
 	{
+        if (!GetDeviceLimits()->IsRayTracingSupported())
+			return nullptr;
+
 		return new Vulkan::RayTracingBlas(device, desc);
 	}
 
 	void VulkanRHI::DestroyRayTracingBlas(RHI::RayTracingBlas* blas)
 	{
 		delete blas;
+	}
+
+	RHI::RayTracingTlas* VulkanRHI::CreateRayTracingTlas(const RHI::RayTracingTlasDescriptor& desc)
+	{
+        if (!GetDeviceLimits()->IsRayTracingSupported())
+            return nullptr;
+
+		return new Vulkan::RayTracingTlas(device, desc);
+	}
+
+	void VulkanRHI::DestroyRayTracingTlas(RHI::RayTracingTlas* tlas)
+	{
+		delete tlas;
 	}
 
 	RHI::PipelineState* VulkanRHI::CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc)

@@ -139,6 +139,9 @@ namespace CE::Vulkan
         virtual RHI::RayTracingBlas* CreateRayTracingBlas(const RHI::RayTracingBlasDescriptor& desc) override;
         virtual void DestroyRayTracingBlas(RHI::RayTracingBlas* blas) override;
 
+        RHI::RayTracingTlas* CreateRayTracingTlas(const RHI::RayTracingTlasDescriptor& desc) override;
+        void DestroyRayTracingTlas(RHI::RayTracingTlas* tlas) override;
+
 		// - Pipeline State -
 
         virtual RHI::PipelineState* CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc) override;
