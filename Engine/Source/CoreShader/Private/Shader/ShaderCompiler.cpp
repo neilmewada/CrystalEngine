@@ -217,6 +217,11 @@ namespace CE
         return ERR_Success;
     }
 
+    ShaderCompiler::ErrorCode ShaderCompiler::CompileSpirv(const IO::Path& hlslPath, const ShaderCompilationInfo& config)
+    {
+        return ERR_Success;
+    }
+
 	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 	{
 		if (!hlslPath.Exists())

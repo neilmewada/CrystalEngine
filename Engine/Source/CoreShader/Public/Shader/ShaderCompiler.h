@@ -32,6 +32,36 @@ namespace CE
         PlatformName targetPlatform = PlatformName::None;
 	};
 
+    struct ShaderCompilationStage
+    {
+        String debugName = "";
+        String entryPoint;
+        RHI::ShaderStage stage;
+        
+        Array<std::wstring> extraArgs;
+        BinaryBlob* outByteCode = nullptr;
+        ShaderReflection* outReflection = nullptr;
+    };
+
+    struct ShaderCompilationInfo
+    {
+        String debugName = "";
+        HlslShaderModel shaderModel = HlslShaderModel::SM_6_0;
+        u32 maxPermutations = 1024;
+        Array<String> globalDefines{};
+        
+        // Define flags to build multiple permutations of the shader
+        Array<String> featurePermutationDefines{};
+        // Define flags to strip from compilation
+        Array<String> unusedDefines{};
+
+        Array<IO::Path> includeSearchPaths{};
+        
+        PlatformName targetPlatform = PlatformName::None;
+        
+        Array<ShaderCompilationStage> stages;
+    };
+
     /*
     *   Low level access to DirectX Shader Compiler.
     */
@@ -41,17 +71,20 @@ namespace CE
         enum ErrorCode
         {
             ERR_Success = 0,
+            ERR_Unknown,
 			ERR_InvalidBuildFormat,
             ERR_FileNotFound,
             ERR_InvalidFile,
             ERR_FailedToLoadFile,
             ERR_CompilationFailure,
 			ERR_InvalidArgs,
-            ERR_UnsupportedPlatform,
+            ERR_UnsupportedPlatform
         };
 
         ShaderCompiler();
         ~ShaderCompiler();
+        
+        ErrorCode CompileSpirv(const IO::Path& hlslPath, const ShaderCompilationInfo& config);
 
 		// It allocates memory to the *outByteCode location which you will have to manually release after use.
 		ErrorCode BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs);
