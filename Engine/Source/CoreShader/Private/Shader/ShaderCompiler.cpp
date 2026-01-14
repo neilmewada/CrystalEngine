@@ -38,6 +38,22 @@ namespace CE
 			std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(stringToConvert);
 		return wideString;
 	}
+
+    static spv::ExecutionModel ShaderStageToExecutionModel(RHI::ShaderStage stage)
+    {
+        switch (stage) {
+            case RHI::ShaderStage::Vertex:
+                return spv::ExecutionModelVertex;
+            case RHI::ShaderStage::Fragment:
+                return spv::ExecutionModelFragment;
+            case RHI::ShaderStage::Compute:
+                return spv::ExecutionModelKernel;
+            case RHI::ShaderStage::Geometry:
+                return spv::ExecutionModelGeometry;
+            default:
+                return spv::ExecutionModelMax;
+        }
+    }
 	
 	struct ShaderCompiler::Impl
 	{
@@ -68,7 +84,7 @@ namespace CE
 		delete impl;
 	}
 
-    ShaderCompiler::ErrorCode ShaderCompiler::BuildMSL(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
+    ShaderCompiler::ErrorCode ShaderCompiler::BuildMSL(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs, ShaderReflection* outReflection)
     {
 #if !PLATFORM_MAC
         return ERR_UnsupportedPlatform;
@@ -100,13 +116,19 @@ namespace CE
             return result;
         }
         
-        spirv_cross::CompilerReflection* reflection = new spirv_cross::CompilerReflection((const uint32_t*)spirvCode.GetDataPtr(), spirvCode.GetDataSize() / 4);
-        defer(&)
+        if (outReflection != nullptr)
         {
-            delete reflection;
-        };
-
-        auto resources = reflection->get_shader_resources();
+            ShaderReflector reflector{};
+            reflector.ReflectSpirv(spirvCode.GetDataPtr(), spirvCode.GetDataSize(), buildConfig.stage, *outReflection, buildConfig.entry);
+            
+            for (int i = 0; i < outReflection->srgLayouts.GetSize(); i++)
+            {
+                for (int j = 0; j < outReflection->srgLayouts[i].variables.GetSize(); j++)
+                {
+                    //outReflection->srgLayouts[i].variables[j].bindingSlot = j;
+                }
+            }
+        }
         
         spirv_cross::CompilerMSL compiler((u32*)spirvCode.GetDataPtr(), spirvCode.GetDataSize() / 4);
         
@@ -117,39 +139,80 @@ namespace CE
         mslOptions.platform = spirv_cross::CompilerMSL::Options::Platform::iOS;
 #endif
         mslOptions.msl_version = spirv_cross::CompilerMSL::Options::make_msl_version(2, 3);
+        mslOptions.argument_buffers = true;
+        mslOptions.force_active_argument_buffer_resources = true;
+        mslOptions.pad_argument_buffer_resources = true;
         compiler.set_msl_options(mslOptions);
         
-        u32 resourceIndex = 0;
-        for (auto& ubo : resources.uniform_buffers)
+        if (outReflection != nullptr)
         {
-            compiler.set_decoration(ubo.id, spv::DecorationBinding, resourceIndex++);
-        }
-        for (auto& ssbo : resources.storage_buffers)
-        {
-            compiler.set_decoration(ssbo.id, spv::DecorationBinding, resourceIndex++);
-        }
-        for (auto& image : resources.separate_images)
-        {
-            compiler.set_decoration(image.id, spv::DecorationBinding, resourceIndex++);
-        }
-        for (auto& image : resources.sampled_images)
-        {
-            compiler.set_decoration(image.id, spv::DecorationBinding, resourceIndex++);
-        }
-        for (auto& image : resources.storage_images)
-        {
-            compiler.set_decoration(image.id, spv::DecorationBinding, resourceIndex++);
-        }
-        for (auto& sampler : resources.separate_samplers)
-        {
-            compiler.set_decoration(sampler.id, spv::DecorationBinding, resourceIndex++);
+            for (int i = 0; i < outReflection->srgLayouts.GetSize(); i++)
+            {
+                for (int j = 0; j < outReflection->srgLayouts[i].variables.GetSize(); j++)
+                {
+                    const auto& variable = outReflection->srgLayouts[i].variables[j];
+                    
+                    spirv_cross::MSLResourceBinding mslBinding{};
+                    mslBinding.desc_set = (uint32_t)outReflection->srgLayouts[i].srgType;
+                    mslBinding.binding = variable.bindingSlot;
+                    mslBinding.stage = ShaderStageToExecutionModel(buildConfig.stage);
+                    mslBinding.count = 1;
+                    
+                    switch (variable.type)
+                    {
+                        case RHI::ShaderResourceType::None:
+                            continue;
+                        case RHI::ShaderResourceType::ConstantBuffer:
+                        case RHI::ShaderResourceType::StructuredBuffer:
+                        case RHI::ShaderResourceType::RWStructuredBuffer:
+                            mslBinding.basetype = spirv_cross::SPIRType::Void;
+                            mslBinding.msl_buffer = variable.bindingSlot;
+                            break;
+                        case RHI::ShaderResourceType::Texture1D:
+                        case RHI::ShaderResourceType::Texture2D:
+                        case RHI::ShaderResourceType::Texture2DArray:
+                        case RHI::ShaderResourceType::Texture3D:
+                        case RHI::ShaderResourceType::TextureCube:
+                        case RHI::ShaderResourceType::RWTexture2D:
+                        case RHI::ShaderResourceType::RWTexture3D:
+                        case RHI::ShaderResourceType::RWTexture2DArray:
+                        case RHI::ShaderResourceType::SubpassInput:
+                            mslBinding.basetype = spirv_cross::SPIRType::Image;
+                            mslBinding.msl_texture = variable.bindingSlot;
+                            break;
+                        case RHI::ShaderResourceType::SamplerState:
+                            mslBinding.basetype = spirv_cross::SPIRType::Sampler;
+                            mslBinding.msl_sampler = variable.bindingSlot;
+                            break;
+                    }
+                    
+                    try
+                    {
+                        compiler.add_msl_resource_binding(mslBinding);
+                    }
+                    catch (const std::exception& e)
+                    {
+                        const char* msg = e.what();
+                        String::IsAlphabet('a');
+                    }
+                }
+            }
         }
         
-        std::string resultStr = compiler.compile();
-        if (resultStr.empty())
-            return ERR_CompilationFailure;
-        
-        outByteCode.LoadData(resultStr.c_str(), resultStr.length() + 1); // +1 for null-terminator
+        try
+        {
+            std::string resultStr = compiler.compile();
+            if (resultStr.empty())
+                return ERR_CompilationFailure;
+            
+            outByteCode.LoadData(resultStr.c_str(), resultStr.length() + 1); // +1 for null-terminator
+        }
+        catch (const std::exception& e)
+        {
+            const char* msg = e.what();
+            
+            return ERR_InvalidBuildFormat;
+        }
         
         return ERR_Success;
     }

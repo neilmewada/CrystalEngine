@@ -77,10 +77,25 @@ static void WindowTestEnd()
 }
 
 constexpr const char HLSL_Test[] = R"(
-cbuffer _SceneData : register(b0, space0)
+#include "Core/Macros.hlsli"
+
+cbuffer _SceneData : SRG_PerScene(b0)
 {
     float _TimeElapsed;
 };
+
+#if FRAGMENT
+
+cbuffer _MaterialData : SRG_PerMaterial(b1)
+{
+    float4 _Albedo;
+    float _Roughness;
+    float _Metallic;
+};
+
+#endif
+
+
 
 struct VSInput
 {
@@ -130,16 +145,20 @@ TEST(RHI, MetalBasic)
     buildConfig.entry = "VertMain";
     buildConfig.stage = RHI::ShaderStage::Vertex;
     buildConfig.debugName = "VertMain";
+    buildConfig.includeSearchPaths.Add(PlatformDirectories::GetLaunchDir() / "Engine/Shaders");
     
     Array<std::wstring> vertexExtraArgs{};
     vertexExtraArgs.AddRange({
         L"-D", L"COMPILE=1",
         L"-D", L"VERTEX=1",
         L"-fspv-preserve-bindings",
+        L"-fspv-preserve-interface"
         });
     
+    ShaderReflection vertReflection{};
+    
     BinaryBlob vertexMsl;
-    ShaderCompiler::ErrorCode result = compiler.BuildMSL(HLSL_Test, COUNTOF(HLSL_Test), buildConfig, vertexMsl, vertexExtraArgs);
+    ShaderCompiler::ErrorCode result = compiler.BuildMSL(HLSL_Test, COUNTOF(HLSL_Test), buildConfig, vertexMsl, vertexExtraArgs, &vertReflection);
     
     buildConfig.entry = "FragMain";
     buildConfig.stage = RHI::ShaderStage::Fragment;
@@ -150,15 +169,19 @@ TEST(RHI, MetalBasic)
         L"-D", L"COMPILE=1",
         L"-D", L"FRAGMENT=1",
         L"-fspv-preserve-bindings",
+        L"-fspv-preserve-interface"
         });
     
+    ShaderReflection fragReflection{};
+    
     BinaryBlob fragmentMsl;
-    result = compiler.BuildMSL(HLSL_Test, COUNTOF(HLSL_Test), buildConfig, fragmentMsl, fragmentExtraArgs);
+    result = compiler.BuildMSL(HLSL_Test, COUNTOF(HLSL_Test), buildConfig, fragmentMsl, fragmentExtraArgs, &fragReflection);
     
     while (!IsEngineRequestingExit())
     {
         app->Tick();
         InputManager::Get().Tick();
+        
         
     }
     
