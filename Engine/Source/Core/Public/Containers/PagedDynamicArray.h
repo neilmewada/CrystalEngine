@@ -243,7 +243,7 @@ namespace CE
     auto PagedDynamicArray<T, ElementsPerPage, Allocator>::PageIterator::operator++(int) -> this_type
     {
         this_type temp = *this;
-        ++this;
+        this->operator++();
         return temp;
     }
 
@@ -506,7 +506,7 @@ namespace CE
     auto PagedDynamicArray<T, ElementsPerPage, Allocator>::iterator::operator++(int) -> this_type
     {
         this_type temp = *this;
-        ++this;
+        this->operator++();
         return temp;
     }
 
@@ -571,7 +571,7 @@ namespace CE
     auto PagedDynamicArray<T, ElementsPerPage, Allocator>::const_iterator::operator++(int) -> this_type
     {
         this_type temp = *this;
-        ++this;
+        this->operator++();
         return temp;
     }
 

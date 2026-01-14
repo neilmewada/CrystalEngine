@@ -163,7 +163,7 @@ namespace CE::Metal
     {
         for (auto rhiSrg : srgs)
         {
-            auto srg = (Vulkan::ShaderResourceGroup*)rhiSrg;
+            auto srg = (Metal::ShaderResourceGroup*)rhiSrg;
             boundSRGs[(int)srg->GetSRGType()] = srg;
         }
     }
