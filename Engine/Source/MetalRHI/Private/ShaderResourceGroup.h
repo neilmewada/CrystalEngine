@@ -55,6 +55,8 @@ namespace CE::Metal
         Device* device = nullptr;
         RHI::ShaderResourceGroupLayout srgLayout;
         
+        
+        
         id<MTLArgumentEncoder> encoder;
         id<MTLBuffer> argumentBuffer;
     };

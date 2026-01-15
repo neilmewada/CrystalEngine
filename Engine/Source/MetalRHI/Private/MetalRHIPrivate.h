@@ -10,6 +10,7 @@
 #include "Buffer.h"
 #include "Texture.h"
 #include "TextureView.h"
+#include "Sampler.h"
 
 #include "ShaderModule.h"
 
