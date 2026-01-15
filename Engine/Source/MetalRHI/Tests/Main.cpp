@@ -76,6 +76,13 @@ static void WindowTestEnd()
     ModuleManager::Get().UnloadModule("Core");
 }
 
+struct MaterialData
+{
+    Vec4 albedo;
+    float roughness;
+    float metallic;
+};
+
 constexpr const char HLSL_Test[] = R"(
 #include "Core/Macros.hlsli"
 
@@ -86,7 +93,7 @@ cbuffer _SceneData : SRG_PerScene(b0)
 
 #if FRAGMENT
 
-cbuffer _MaterialData : SRG_PerMaterial(b1)
+cbuffer _MaterialData : SRG_PerMaterial(b0)
 {
     float4 _Albedo;
     float _Roughness;
@@ -95,7 +102,7 @@ cbuffer _MaterialData : SRG_PerMaterial(b1)
 
 #endif
 
-
+Texture2D _AlbedoTex : SRG_PerMaterial(t1);
 
 struct VSInput
 {
@@ -112,7 +119,7 @@ struct PSInput
 PSInput VertMain(VSInput input)
 {
     PSInput o;
-    o.position = float4(input.position, 1.0 * _TimeElapsed);
+    o.position = float4(input.position * _TimeElapsed, 1.0);
     return o;
 }
 #endif
@@ -121,7 +128,7 @@ PSInput VertMain(VSInput input)
 
 float4 FragMain(PSInput input) : SV_TARGET
 {
-    return float4(0, 0, 0, 1);
+    return float4(_Albedo.xyz, 1);
 }
 
 #endif
@@ -140,42 +147,85 @@ TEST(RHI, MetalBasic)
     u32 height = 0;
     
     ShaderCompiler compiler{};
-
-    ShaderBuildConfig buildConfig{};
-    buildConfig.entry = "VertMain";
-    buildConfig.stage = RHI::ShaderStage::Vertex;
-    buildConfig.debugName = "VertMain";
-    buildConfig.includeSearchPaths.Add(PlatformDirectories::GetLaunchDir() / "Engine/Shaders");
     
-    Array<std::wstring> vertexExtraArgs{};
-    vertexExtraArgs.AddRange({
+    ShaderReflection reflection{};
+    BinaryBlob vertMSL;
+    BinaryBlob fragMSL;
+    
+    ShaderCompilationInfo compileInfo{};
+    compileInfo.includeSearchPaths.Add(PlatformDirectories::GetLaunchDir() / "Engine/Shaders");
+    compileInfo.outReflection = &reflection;
+    
+    compileInfo.stages.Add({});
+    compileInfo.stages.GetLast().entryPoint = "VertMain";
+    compileInfo.stages.GetLast().stage = RHI::ShaderStage::Vertex;
+    compileInfo.stages.GetLast().debugName = "VertMain";
+    compileInfo.stages.GetLast().extraArgs.AddRange({
         L"-D", L"COMPILE=1",
         L"-D", L"VERTEX=1",
         L"-fspv-preserve-bindings",
         L"-fspv-preserve-interface"
-        });
+    });
+    compileInfo.stages.GetLast().outByteCode = &vertMSL;
     
-    ShaderReflection vertReflection{};
-    
-    BinaryBlob vertexMsl;
-    ShaderCompiler::ErrorCode result = compiler.BuildMSL(HLSL_Test, COUNTOF(HLSL_Test), buildConfig, vertexMsl, vertexExtraArgs, &vertReflection);
-    
-    buildConfig.entry = "FragMain";
-    buildConfig.stage = RHI::ShaderStage::Fragment;
-    buildConfig.debugName = "FragMain";
-    
-    Array<std::wstring> fragmentExtraArgs{};
-    fragmentExtraArgs.AddRange({
+    compileInfo.stages.Add({});
+    compileInfo.stages.GetLast().entryPoint = "FragMain";
+    compileInfo.stages.GetLast().stage = RHI::ShaderStage::Fragment;
+    compileInfo.stages.GetLast().debugName = "FragMain";
+    compileInfo.stages.GetLast().extraArgs.AddRange({
         L"-D", L"COMPILE=1",
         L"-D", L"FRAGMENT=1",
         L"-fspv-preserve-bindings",
         L"-fspv-preserve-interface"
-        });
+    });
+    compileInfo.stages.GetLast().outByteCode = &fragMSL;
     
-    ShaderReflection fragReflection{};
+    auto result = compiler.CompileMSL(HLSL_Test, COUNTOF(HLSL_Test), compileInfo);
+    EXPECT_EQ(result, ShaderCompiler::ERR_Success);
     
-    BinaryBlob fragmentMsl;
-    result = compiler.BuildMSL(HLSL_Test, COUNTOF(HLSL_Test), buildConfig, fragmentMsl, fragmentExtraArgs, &fragReflection);
+    RHI::ShaderModuleDescriptor vertShaderDesc{};
+    vertShaderDesc.name = "Vertex Shader";
+    vertShaderDesc.defaultEntryPoint = "VertMain";
+    vertShaderDesc.stage = RHI::ShaderStage::Vertex;
+    vertShaderDesc.debugName = vertShaderDesc.name;
+    vertShaderDesc.byteCode = vertMSL.GetDataPtr();
+    vertShaderDesc.byteSize = vertMSL.GetDataSize();
+    
+    RHI::ShaderModule* vertShader = gDynamicRHI->CreateShaderModule(vertShaderDesc);
+    
+    RHI::ShaderModuleDescriptor fragShaderDesc{};
+    fragShaderDesc.name = "Fragment Shader";
+    fragShaderDesc.defaultEntryPoint = "FragMain";
+    fragShaderDesc.stage = RHI::ShaderStage::Fragment;
+    fragShaderDesc.debugName = fragShaderDesc.name;
+    fragShaderDesc.byteCode = fragMSL.GetDataPtr();
+    fragShaderDesc.byteSize = fragMSL.GetDataSize();
+    
+    RHI::ShaderModule* fragShader = gDynamicRHI->CreateShaderModule(fragShaderDesc);
+    
+    RHI::ShaderResourceGroup* perSceneSrg = nullptr;
+    {
+        const RHI::ShaderResourceGroupLayout& perSceneSrgLayout = reflection.srgLayouts[0];
+        
+        RHI::ShaderResourceGroupDescriptor perSceneSrgDesc{};
+        perSceneSrgDesc.name = "SRG_PerScene";
+        perSceneSrgDesc.layout = perSceneSrgLayout;
+        perSceneSrgDesc.shader = vertShader;
+        
+        perSceneSrg = gDynamicRHI->CreateShaderResourceGroup(perSceneSrgDesc);
+    }
+    
+    RHI::ShaderResourceGroup* perMaterialSrg = nullptr;
+    {
+        const RHI::ShaderResourceGroupLayout& perMaterialSrgLayout = reflection.srgLayouts[1];
+        
+        RHI::ShaderResourceGroupDescriptor perMaterialSrgDesc{};
+        perMaterialSrgDesc.name = "SRG_PerMaterial";
+        perMaterialSrgDesc.layout = perMaterialSrgLayout;
+        perMaterialSrgDesc.shader = fragShader;
+        
+        perMaterialSrg = gDynamicRHI->CreateShaderResourceGroup(perMaterialSrgDesc);
+    }
     
     while (!IsEngineRequestingExit())
     {
@@ -184,6 +234,9 @@ TEST(RHI, MetalBasic)
         
         
     }
+    
+    delete vertShader; delete fragShader;
+    delete perSceneSrg; delete perMaterialSrg;
     
     WINDOW_TEST_END;
 }

@@ -256,17 +256,17 @@ namespace CE::Metal
 
     RHI::ShaderModule* MetalRHI::CreateShaderModule(const RHI::ShaderModuleDescriptor& desc)
     {
-        return nullptr;
+        return new Metal::ShaderModule(device, desc);
     }
 
     void MetalRHI::DestroyShaderModule(RHI::ShaderModule* shaderModule)
     {
-        
+        delete shaderModule;
     }
 
-    RHI::ShaderResourceGroup* MetalRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout)
+    RHI::ShaderResourceGroup* MetalRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupDescriptor& srgDescriptor)
     {
-        return nullptr;
+        return new Metal::ShaderResourceGroup(device, srgDescriptor);
     }
 
     void MetalRHI::DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup)

@@ -9,6 +9,7 @@ namespace CE::Metal
         this->stage = desc.stage;
         this->name = desc.debugName;
         this->isValid = false;
+        this->defaultEntryPoint = desc.defaultEntryPoint;
 
         if (desc.byteSize == 0 || desc.byteCode == nullptr)
             return;

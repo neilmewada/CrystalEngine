@@ -105,7 +105,7 @@ namespace CE::Metal
         
         void DestroyShaderModule(RHI::ShaderModule* shaderModule) override;
         
-        RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout) override;
+        RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDescriptor& srgDescriptor) override;
         
         void DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup) override;
         

@@ -495,9 +495,9 @@ namespace CE::Vulkan
 		delete shaderModule;
 	}
 
-	RHI::ShaderResourceGroup* VulkanRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout)
+	RHI::ShaderResourceGroup* VulkanRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupDescriptor& srgDescriptor)
 	{
-		return new Vulkan::ShaderResourceGroup(device, srgLayout);
+		return new Vulkan::ShaderResourceGroup(device, srgDescriptor.layout);
 	}
 
 	void VulkanRHI::DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup)

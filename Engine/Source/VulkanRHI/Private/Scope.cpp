@@ -176,7 +176,11 @@ namespace CE::Vulkan
 						{
 							foundPipelineLayout = true;
 							const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
-							next->passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+                            RHI::ShaderResourceGroupDescriptor srgDesc{};
+                            srgDesc.layout = srgLayout;
+                            srgDesc.shader = nullptr; // TODO
+                            
+							next->passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
 
 							// Bind Pass attachments to SRG
 						}
@@ -185,7 +189,11 @@ namespace CE::Vulkan
 						{
 							foundSubpassPipelineLayout = true;
 							const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerSubPass];
-							next->subpassShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+                            RHI::ShaderResourceGroupDescriptor srgDesc{};
+                            srgDesc.layout = srgLayout;
+                            srgDesc.shader = nullptr; // TODO
+                            
+							next->subpassShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
 
 							// Bind Pass attachments to SRG
 						}
@@ -207,7 +215,10 @@ namespace CE::Vulkan
 
 				if (!passSrgLayout.IsEmpty())
 				{
-					passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(passSrgLayout);
+                    RHI::ShaderResourceGroupDescriptor passSrgDesc{};
+                    passSrgDesc.layout = passSrgLayout;
+                    
+					passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(passSrgDesc);
 
 					// Bind Pass attachments to SRG
 
@@ -280,7 +291,11 @@ namespace CE::Vulkan
 					{
 						foundPipelineLayout = true;
 						const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
-						passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+                        
+                        RHI::ShaderResourceGroupDescriptor srgDesc{};
+                        srgDesc.layout = srgLayout;
+                        
+						passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
 
 						// Bind Pass attachments to SRG
 
@@ -367,7 +382,10 @@ namespace CE::Vulkan
 					const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
 					if (passShaderResourceGroup == nullptr)
 					{
-						passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+                        RHI::ShaderResourceGroupDescriptor srgDesc{};
+                        srgDesc.layout = srgLayout;
+                        
+						passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
 					}
 
 					// Bind Pass attachments to SRG

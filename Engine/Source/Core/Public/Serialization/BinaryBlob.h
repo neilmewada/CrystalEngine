@@ -22,6 +22,7 @@ namespace CE
 		~BinaryBlob();
 
 		BinaryBlob(BinaryBlob&& move) noexcept;
+        BinaryBlob& operator=(BinaryBlob&& move) noexcept;
 
 		void Free();
 		void Reserve(u64 byteSize);

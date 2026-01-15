@@ -37,10 +37,10 @@ namespace CE
         String debugName = "";
         String entryPoint;
         RHI::ShaderStage stage;
+        Array<String> stageDefines{};
         
         Array<std::wstring> extraArgs;
         BinaryBlob* outByteCode = nullptr;
-        ShaderReflection* outReflection = nullptr;
     };
 
     struct ShaderCompilationInfo
@@ -60,6 +60,8 @@ namespace CE
         PlatformName targetPlatform = PlatformName::None;
         
         Array<ShaderCompilationStage> stages;
+        
+        ShaderReflection* outReflection = nullptr;
     };
 
     /*
@@ -77,6 +79,8 @@ namespace CE
             ERR_InvalidFile,
             ERR_FailedToLoadFile,
             ERR_CompilationFailure,
+            ERR_ReflectionFailure,
+            ERR_ReflectionRequired,
 			ERR_InvalidArgs,
             ERR_UnsupportedPlatform
         };
@@ -84,7 +88,9 @@ namespace CE
         ShaderCompiler();
         ~ShaderCompiler();
         
-        ErrorCode CompileSpirv(const IO::Path& hlslPath, const ShaderCompilationInfo& config);
+        ErrorCode CompileMSL(const IO::Path& hlslPath, ShaderCompilationInfo& config);
+        
+        ErrorCode CompileMSL(const void* data, u32 dataSize, ShaderCompilationInfo& config);
 
 		// It allocates memory to the *outByteCode location which you will have to manually release after use.
 		ErrorCode BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs);
@@ -120,6 +126,8 @@ namespace CE
 
     protected:
 
+        ErrorCode CompileMSL(DxcBuffer buffer, ShaderCompilationInfo& config);
+        
 		ErrorCode BuildSpirv(DxcBuffer buffer, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs);
 
         String errorMessage = "";

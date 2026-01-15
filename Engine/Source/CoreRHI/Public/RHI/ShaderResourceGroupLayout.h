@@ -176,6 +176,16 @@ namespace CE::RHI
 		}
 
 	};
+
+    struct CORERHI_API ShaderResourceGroupDescriptor
+    {
+        Name name = "ShaderResourceGroup";
+        RHI::ShaderResourceGroupLayout layout{};
+        
+        /// You need to pass a shader module to create a shader resource group, just for the setup.
+        /// The shader module does not need to be active after the initialization.
+        RHI::ShaderModule* shader = nullptr;
+    };
     
 } // namespace CE::RHI
 

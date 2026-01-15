@@ -334,6 +334,7 @@ namespace CE::RHI
 	{
         Name debugName = nullptr;
 		String name = "";
+        String defaultEntryPoint = "";
 		ShaderStage stage = ShaderStage::None;
 		void* byteCode = nullptr;
 		SIZE_T byteSize = 0;
