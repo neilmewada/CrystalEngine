@@ -13,8 +13,6 @@ namespace CE::Metal
         window->GetDrawableWindowSize(&width, &height);
         
         metalLayer = MetalPlatform::GetCAMetalLayer(window);
-        
-        String::IsAlphabet('a');
     }
 
     void SwapChain::Rebuild()
