@@ -146,12 +146,12 @@ namespace CE::Metal
 
     RHI::RenderTarget* MetalRHI::CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout)
     {
-        return nullptr;
+        return new Metal::RenderTarget(device, rtLayout);
     }
 
     void MetalRHI::DestroyRenderTarget(RHI::RenderTarget* renderTarget)
     {
-        return nullptr;
+        delete renderTarget;
     }
 
     RHI::RenderTargetBuffer* MetalRHI::CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::TextureView*>& imageAttachments, u32 imageIndex)
@@ -166,37 +166,37 @@ namespace CE::Metal
 
     void MetalRHI::DestroyRenderTargetBuffer(RHI::RenderTargetBuffer* renderTargetBuffer)
     {
-        
+        delete renderTargetBuffer;
     }
 
     RHI::SwapChain* MetalRHI::CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
     {
-        return nullptr;
+        return new Metal::SwapChain(device, window, desc);
     }
 
     void MetalRHI::DestroySwapChain(RHI::SwapChain* swapChain)
     {
-        return nullptr;
+        delete swapChain;
     }
 
     RHI::MemoryHeap* MetalRHI::AllocateMemoryHeap(const RHI::MemoryHeapDescriptor& desc)
     {
-        return nullptr;
+        return new Metal::MemoryHeap(device, desc);
     }
 
     void MetalRHI::FreeMemoryHeap(RHI::MemoryHeap* memoryHeap)
     {
-        
+        delete memoryHeap;
     }
 
     void MetalRHI::GetBufferMemoryRequirements(const RHI::BufferDescriptor& bufferDesc, RHI::ResourceMemoryRequirements& outRequirements)
     {
-        
+        // TODO
     }
 
     void MetalRHI::GetTextureMemoryRequirements(const RHI::TextureDescriptor& textureDesc, RHI::ResourceMemoryRequirements& outRequirements)
     {
-        
+        // TODO
     }
 
     RHI::ResourceMemoryRequirements MetalRHI::GetCombinedResourceRequirements(u32 count, RHI::ResourceMemoryRequirements* requirementsList, u64* outOffsetsList)
@@ -206,52 +206,52 @@ namespace CE::Metal
 
     RHI::Buffer* MetalRHI::CreateBuffer(const RHI::BufferDescriptor& bufferDesc)
     {
-        return nullptr;
+        return new Metal::Buffer(device, bufferDesc);
     }
 
     RHI::Buffer* MetalRHI::CreateBuffer(const RHI::BufferDescriptor& bufferDesc, const RHI::ResourceMemoryDescriptor& memoryDesc)
     {
-        return nullptr;
+        return new Metal::Buffer(device, bufferDesc, memoryDesc);
     }
 
     void MetalRHI::DestroyBuffer(RHI::Buffer* buffer)
     {
-        
+        delete buffer;
     }
 
     RHI::TextureView* MetalRHI::CreateTextureView(const RHI::TextureViewDescriptor& desc)
     {
-        return nullptr;
+        return new Metal::TextureView(device, desc);
     }
 
     void MetalRHI::DestroyTextureView(RHI::TextureView* textureView)
     {
-        
+        delete textureView;
     }
 
     RHI::Texture* MetalRHI::CreateTexture(const RHI::TextureDescriptor& textureDesc)
     {
-        return nullptr;
+        return new Metal::Texture(device, textureDesc);
     }
 
     RHI::Texture* MetalRHI::CreateTexture(const RHI::TextureDescriptor& textureDesc, const RHI::ResourceMemoryDescriptor& memoryDesc)
     {
-        return nullptr;
+        return new Metal::Texture(device, textureDesc, memoryDesc);
     }
 
     void MetalRHI::DestroyTexture(RHI::Texture* texture)
     {
-        
+        delete texture;
     }
 
     RHI::Sampler* MetalRHI::CreateSampler(const SamplerDescriptor& samplerDesc)
     {
-        return nullptr;
+        return new Metal::Sampler(device, samplerDesc);
     }
 
-    void MetalRHI::DestroySampler(Sampler* sampler)
+    void MetalRHI::DestroySampler(RHI::Sampler* sampler)
     {
-        
+        delete sampler;
     }
 
     RHI::ShaderModule* MetalRHI::CreateShaderModule(const RHI::ShaderModuleDescriptor& desc)
@@ -271,7 +271,7 @@ namespace CE::Metal
 
     void MetalRHI::DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup)
     {
-        
+        delete shaderResourceGroup;
     }
 
     RHI::PipelineState* MetalRHI::CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc)
@@ -286,17 +286,19 @@ namespace CE::Metal
 
     void MetalRHI::DestroyPipeline(const RHI::PipelineState* pipeline)
     {
-        
+        delete pipeline;
     }
 
     u64 MetalRHI::GetShaderStructMemberAlignment(const RHI::ShaderStructMember& member)
     {
-        
+        // TODO
+        return 0;
     }
 
     u64 MetalRHI::GetShaderStructMemberSize(const RHI::ShaderStructMember& member)
     {
-        
+        // TODO
+        return 0;
     }
 
     void MetalRHI::GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets)

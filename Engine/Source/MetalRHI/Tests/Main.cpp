@@ -83,6 +83,11 @@ struct MaterialData
     float metallic;
 };
 
+struct SceneData
+{
+    float timeElapsed;
+};
+
 constexpr const char HLSL_Test[] = R"(
 #include "Core/Macros.hlsli"
 
@@ -145,6 +150,16 @@ TEST(RHI, MetalBasic)
     
     u32 width = 0;
     u32 height = 0;
+    
+    // - SwapChain -
+    
+    RHI::SwapChain* swapChain = nullptr;
+    {
+        RHI::SwapChainDescriptor desc{};
+        desc.imageCount = 2;
+        
+        swapChain = gDynamicRHI->CreateSwapChain(mainWindow, desc);
+    }
     
     ShaderCompiler compiler{};
     
@@ -225,6 +240,39 @@ TEST(RHI, MetalBasic)
         perMaterialSrgDesc.shader = fragShader;
         
         perMaterialSrg = gDynamicRHI->CreateShaderResourceGroup(perMaterialSrgDesc);
+    }
+    
+    SceneData sceneData{};
+    sceneData.timeElapsed = 1.0f;
+    
+    RHI::Buffer* sceneDataBuffer = nullptr;
+    {
+        RHI::BufferDescriptor bufferDesc{};
+        bufferDesc.name = "PerScene cbuffer";
+        bufferDesc.bufferSize = sizeof(SceneData);
+        bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+        bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+        
+        sceneDataBuffer = gDynamicRHI->CreateBuffer(bufferDesc);
+        
+        sceneDataBuffer->UploadData(&sceneData, sizeof(SceneData));
+    }
+    
+    perSceneSrg->Bind("_SceneData", sceneDataBuffer);
+    perSceneSrg->FlushBindings();
+    
+    RHI::Buffer* vertexBuffer = nullptr;
+    {
+        RHI::BufferDescriptor vertexBufferDesc{};
+        
+        vertexBufferDesc.name = "Vertex Buffer";
+        vertexBufferDesc.bufferSize = sizeof(TriangleVertices);
+        vertexBufferDesc.bindFlags = RHI::BufferBindFlags::VertexBuffer;
+        vertexBufferDesc.defaultHeapType = RHI::MemoryHeapType::Default;
+        
+        vertexBuffer = gDynamicRHI->CreateBuffer(vertexBufferDesc);
+        
+        vertexBuffer->UploadData(TriangleVertices, sizeof(TriangleVertices));
     }
     
     while (!IsEngineRequestingExit())

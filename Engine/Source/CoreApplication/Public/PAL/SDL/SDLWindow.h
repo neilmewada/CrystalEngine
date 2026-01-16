@@ -2,6 +2,10 @@
 
 struct SDL_Window;
 
+#if PAL_TRAIT_METAL_SUPPORTED
+typedef void *SDL_MetalView;
+#endif
+
 namespace CE
 {
 
@@ -14,6 +18,8 @@ namespace CE
         virtual void* GetUnderlyingHandle() override;
 		virtual WindowHandle GetOSNativeHandle() override;
         virtual String GetTitle() override;
+        
+        void* GetViewHandle() override;
 
         u32 GetWindowDpi() override;
 
@@ -71,6 +77,10 @@ namespace CE
         SDL_Window* handle = nullptr;
 
         PlatformWindowFlags initialFlags{};
+        
+#if PAL_TRAIT_METAL_SUPPORTED
+        SDL_MetalView metalView = nullptr;
+#endif
 
     private:
 

@@ -15,95 +15,370 @@ namespace CE::Metal
         
         NSUInteger setNumber = (u32)srgLayout.srgType;
         
-        encoder = [function newArgumentEncoderWithBufferIndex:setNumber];
+        encoders = [[NSMutableArray<id<MTLArgumentEncoder>> alloc] init];
+        argumentBuffers = [[NSMutableArray<id<MTLBuffer>> alloc] init];
         
-        argumentBuffer = [device->GetHandle() newBufferWithLength:encoder.encodedLength options:MTLResourceStorageModeShared];
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            [encoders addObject:[function newArgumentEncoderWithBufferIndex:setNumber]];
+            [argumentBuffers addObject:[device->GetHandle() newBufferWithLength:encoders[i].encodedLength options:MTLResourceStorageModeShared]];
+            
+            String bufferLabelString = srgDescriptor.name.GetString();
+            NSString* bufferLabel = [[NSString alloc] initWithCString:bufferLabelString.GetCString()];
+            
+            argumentBuffers[i].label = bufferLabel;
+            
+            [encoders[i] setArgumentBuffer:argumentBuffers[i] offset:0];
+        }
         
-        String bufferLabelString = srgDescriptor.name.GetString();
-        NSString* bufferLabel = [[NSString alloc] initWithCString:bufferLabelString.GetCString()];
+        bindingSlotsByVariableName.Clear();
         
-        argumentBuffer.label = bufferLabel;
-        
-        [encoder setArgumentBuffer:argumentBuffer offset:0];
-        
-        
+        for (const auto& variable : srgLayout.variables)
+        {
+            int binding = variable.bindingSlot;
+            
+            bindingSlotsByVariableName[variable.name] = binding;
+        }
     }
 
     ShaderResourceGroup::~ShaderResourceGroup()
     {
-        
+        encoders = nil;
+        argumentBuffers = nil;
     }
 
     bool ShaderResourceGroup::HasVariable(const Name& variableName)
     {
-        
+        return bindingSlotsByVariableName.KeyExists(variableName);
     }
 
     bool ShaderResourceGroup::Bind(Name name, RHI::BufferView bufferView)
     {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            Bind(i, name, bufferView);
+        }
+        
+        return true;
     }
 
     bool ShaderResourceGroup::Bind(Name name, RHI::Texture* texture)
     {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            Bind(i, name, texture);
+        }
+        
+        return true;
     }
 
     bool ShaderResourceGroup::Bind(Name name, RHI::TextureView* textureViews)
     {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            Bind(i, name, textureViews);
+        }
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(Name name, RHI::Sampler* sampler) {
+    bool ShaderResourceGroup::Bind(Name name, RHI::Sampler* sampler)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            Bind(i, name, sampler);
+        }
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::BufferView* bufferViews) {
+    bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::BufferView* bufferViews)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            Bind(i, name, count, bufferViews);
+        }
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::Texture** textures) {
+    bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::Texture** textures)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            Bind(i, name, count, textures);
+        }
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::TextureView** textureViews) {
+    bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::TextureView** textureViews)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            Bind(i, name, count, textureViews);
+        }
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::Sampler** samplers) {
+    bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::Sampler** samplers)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            Bind(i, name, count, samplers);
+        }
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, RHI::BufferView bufferView) {
+    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, RHI::BufferView bufferView)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        if (boundBuffersBySlot[imageIndex][bindingSlot].GetSize() == 1 &&
+            boundBuffersBySlot[imageIndex][bindingSlot][0].GetBuffer() == bufferView.GetBuffer() &&
+            boundBuffersBySlot[imageIndex][bindingSlot][0].GetByteCount() == bufferView.GetByteCount() &&
+            boundBuffersBySlot[imageIndex][bindingSlot][0].GetByteOffset() == bufferView.GetByteOffset())
+        {
+            return true;
+        }
+        
+        boundBuffersBySlot[imageIndex][bindingSlot].Resize(1);
+        boundBuffersBySlot[imageIndex][bindingSlot][0] = bufferView;
+        
+        needsFlush = true;
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, RHI::Texture* texture) {
+    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, RHI::Texture* texture)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        if (boundTexturesBySlot[imageIndex][bindingSlot].GetSize() == 1 &&
+            boundTexturesBySlot[imageIndex][bindingSlot][0].resourceType == RHI::ResourceType::Texture &&
+            boundTexturesBySlot[imageIndex][bindingSlot][0].texture == (Metal::Texture*)texture)
+        {
+            return true;
+        }
+        
+        boundTexturesBySlot[imageIndex][bindingSlot].Resize(1);
+        boundTexturesBySlot[imageIndex][bindingSlot][0].resourceType = RHI::ResourceType::Texture;
+        boundTexturesBySlot[imageIndex][bindingSlot][0].texture = (Metal::Texture*)texture;
+        
+        needsFlush = true;
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, RHI::TextureView* textureView) {
+    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, RHI::TextureView* textureView)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        if (boundTexturesBySlot[imageIndex][bindingSlot].GetSize() == 1 &&
+            boundTexturesBySlot[imageIndex][bindingSlot][0].resourceType == RHI::ResourceType::TextureView &&
+            boundTexturesBySlot[imageIndex][bindingSlot][0].textureView == (Metal::TextureView*)textureView)
+        {
+            return true;
+        }
+        
+        boundTexturesBySlot[imageIndex][bindingSlot].Resize(1);
+        boundTexturesBySlot[imageIndex][bindingSlot][0].resourceType = RHI::ResourceType::TextureView;
+        boundTexturesBySlot[imageIndex][bindingSlot][0].textureView = (Metal::TextureView*)textureView;
+        
+        needsFlush = true;
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, RHI::Sampler* sampler) {
+    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, RHI::Sampler* sampler)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        if (boundSamplersBySlot[imageIndex][bindingSlot].GetSize() == 1 &&
+            boundSamplersBySlot[imageIndex][bindingSlot][0] == sampler)
+        {
+            return true;
+        }
+        
+        boundSamplersBySlot[imageIndex][bindingSlot][0] = (Metal::Sampler*)sampler;
+        
+        needsFlush = true;
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 count, RHI::BufferView* bufferViews) {
+    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 count, RHI::BufferView* bufferViews)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        boundBuffersBySlot[imageIndex][bindingSlot].Clear();
+        boundBuffersBySlot[imageIndex][bindingSlot].Reserve(count);
+        
+        for (int i = 0; i < count; i++)
+        {
+            boundBuffersBySlot[imageIndex][bindingSlot].Add(bufferViews[i]);
+        }
+        
+        needsFlush = true;
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 count, RHI::Texture** textures) {
+    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 count, RHI::Texture** textures)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        boundTexturesBySlot[imageIndex][bindingSlot].Clear();
+        boundTexturesBySlot[imageIndex][bindingSlot].Reserve(count);
+        
+        for (int i = 0; i < count; i++)
+        {
+            TextureBinding textureBinding{};
+            textureBinding.resourceType = RHI::ResourceType::Texture;
+            textureBinding.texture = (Metal::Texture*)textures[i];
+            
+            boundTexturesBySlot[imageIndex][bindingSlot].Add(textureBinding);
+        }
+        
+        needsFlush = true;
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 count, RHI::TextureView** textureViews) {
+    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 count, RHI::TextureView** textureViews)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        boundTexturesBySlot[imageIndex][bindingSlot].Clear();
+        boundTexturesBySlot[imageIndex][bindingSlot].Reserve(count);
+        
+        for (int i = 0; i < count; i++)
+        {
+            TextureBinding textureBinding{};
+            textureBinding.resourceType = RHI::ResourceType::TextureView;
+            textureBinding.textureView = (Metal::TextureView*)textureViews[i];
+            
+            boundTexturesBySlot[imageIndex][bindingSlot].Add(textureBinding);
+        }
+        
+        needsFlush = true;
+        
+        return true;
     }
 
-    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 count, RHI::Sampler** samplers) {
+    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 count, RHI::Sampler** samplers)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
         
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+        
+        boundSamplersBySlot[imageIndex][bindingSlot].Clear();
+        boundSamplersBySlot[imageIndex][bindingSlot].Reserve(count);
+        
+        for (int i = 0; i < count; i++)
+        {
+            boundSamplersBySlot[imageIndex][bindingSlot].Add((Metal::Sampler*)samplers[i]);
+        }
+        
+        needsFlush = true;
+        
+        return true;
     }
 
     void ShaderResourceGroup::Compile()
@@ -120,7 +395,7 @@ namespace CE::Metal
                 {
                     if (Metal::Buffer* buffer = (Metal::Buffer*)bufferView.GetBuffer())
                     {
-                        [encoder setBuffer:buffer->GetMtlBuffer() offset:bufferView.GetByteOffset() atIndex:(binding + idx)];
+                        [encoders[i] setBuffer:buffer->GetMtlBuffer() offset:bufferView.GetByteOffset() atIndex:(binding + idx)];
                     }
                     idx++;
                 }
@@ -133,11 +408,11 @@ namespace CE::Metal
                 {
                     if (textureBinding.resourceType == RHI::ResourceType::Texture)
                     {
-                        [encoder setTexture:textureBinding.texture->GetMtlTexture() atIndex:(binding + idx)];
+                        [encoders[i] setTexture:textureBinding.texture->GetMtlTexture() atIndex:(binding + idx)];
                     }
                     else if (textureBinding.resourceType == RHI::ResourceType::TextureView)
                     {
-                        [encoder setTexture:textureBinding.textureView->GetMtlTextureView() atIndex:(binding + idx)];
+                        [encoders[i] setTexture:textureBinding.textureView->GetMtlTextureView() atIndex:(binding + idx)];
                     }
                     idx++;
                 }
@@ -148,7 +423,7 @@ namespace CE::Metal
                 int idx = 0;
                 for (Metal::Sampler* samplerState : boundSamplers)
                 {
-                    [encoder setSamplerState:samplerState->GetHandle() atIndex:(binding + idx)];
+                    [encoders[i] setSamplerState:samplerState->GetMtlSamplerState() atIndex:(binding + idx)];
                     idx++;
                 }
             }
@@ -159,6 +434,9 @@ namespace CE::Metal
 
     void ShaderResourceGroup::FlushBindings()
     {
+        if (needsFlush)
+            isCompiled = false;
+        
         if (!isCompiled)
         {
             Compile();

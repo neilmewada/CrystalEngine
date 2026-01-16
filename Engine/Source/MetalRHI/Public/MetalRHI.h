@@ -7,6 +7,7 @@ namespace CE::Metal
 {
     class Device;
     class CommandQueue;
+    class SwapChain;
 
     class MetalRHI : public RHI::DynamicRHI
     {
@@ -99,7 +100,7 @@ namespace CE::Metal
         
         RHI::Sampler* CreateSampler(const SamplerDescriptor& samplerDesc) override;
         
-        void DestroySampler(Sampler* sampler) override;
+        void DestroySampler(RHI::Sampler* sampler) override;
         
         RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDescriptor& desc) override;
         

@@ -268,6 +268,7 @@ namespace CE::RPI
 
 			auto moduleDesc = desc.moduleDesc[i];
 			moduleDesc.debugName = desc.shaderName;
+			moduleDesc.defaultEntryPoint = desc.entryPoints[i];
 
 			auto module = RHI::gDynamicRHI->CreateShaderModule(moduleDesc);
 			modulesByStage[moduleDesc.stage] = module;

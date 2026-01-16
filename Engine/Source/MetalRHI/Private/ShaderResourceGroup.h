@@ -63,16 +63,19 @@ namespace CE::Metal
         };
         
         bool failed = false;
+        bool needsFlush = true;
         
         Device* device = nullptr;
         RHI::ShaderResourceGroupLayout srgLayout;
+        
+        HashMap<Name, BindingSlotId> bindingSlotsByVariableName{};
         
         StaticArray<HashMap<BindingSlotId, List<RHI::BufferView>>, RHI::Limits::MaxSwapChainImageCount> boundBuffersBySlot{};
         StaticArray<HashMap<BindingSlotId, List<TextureBinding>>, RHI::Limits::MaxSwapChainImageCount> boundTexturesBySlot{};
         StaticArray<HashMap<BindingSlotId, List<Metal::Sampler*>>, RHI::Limits::MaxSwapChainImageCount> boundSamplersBySlot{};
         
-        id<MTLArgumentEncoder> encoder;
-        id<MTLBuffer> argumentBuffer;
+        NSMutableArray<id<MTLArgumentEncoder>>* encoders;
+        NSMutableArray<id<MTLBuffer>>* argumentBuffers;
     };
     
 } // namespace CE::Metal

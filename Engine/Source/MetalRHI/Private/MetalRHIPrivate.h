@@ -6,6 +6,8 @@
 
 #include "Metal/Metal.h"
 
+#include "PAL/Common/MetalPlatform.h"
+
 #include "MemoryHeap.h"
 #include "Buffer.h"
 #include "Texture.h"
@@ -14,6 +16,7 @@
 
 #include "ShaderModule.h"
 
+#include "SwapChain.h"
 #include "RenderTarget.h"
 #include "Pipeline.h"
 #include "GraphicsPipeline.h"

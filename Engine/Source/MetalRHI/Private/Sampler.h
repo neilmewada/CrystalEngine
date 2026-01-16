@@ -9,7 +9,12 @@ namespace CE::Metal
         Sampler(Device* device, const RHI::SamplerDescriptor& samplerDesc);
         virtual ~Sampler();
         
-        id<MTLSamplerState> GetHandle() const { return sampler; }
+        void *GetHandle() override
+        {
+            return (void*)sampler;
+        }
+        
+        id<MTLSamplerState> GetMtlSamplerState() const { return sampler; }
         
     private:
         
