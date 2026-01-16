@@ -10,6 +10,8 @@ namespace CE::Metal
         TextureView(Device* device, const RHI::TextureViewDescriptor& desc);
         
         virtual ~TextureView();
+        
+        id<MTLTexture> GetMtlTextureView() const { return mtlTextureView; }
 
     private:
     

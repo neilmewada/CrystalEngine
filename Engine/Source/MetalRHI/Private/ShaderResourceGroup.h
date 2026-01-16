@@ -49,13 +49,27 @@ namespace CE::Metal
         
         void FlushBindings() override;
         
-        
     private:
+        
+        using BindingSlotId = int;
+        
+        struct TextureBinding
+        {
+            RHI::ResourceType resourceType;
+            union {
+                Metal::Texture* texture;
+                Metal::TextureView* textureView;
+            };
+        };
+        
+        bool failed = false;
         
         Device* device = nullptr;
         RHI::ShaderResourceGroupLayout srgLayout;
         
-        
+        StaticArray<HashMap<BindingSlotId, List<RHI::BufferView>>, RHI::Limits::MaxSwapChainImageCount> boundBuffersBySlot{};
+        StaticArray<HashMap<BindingSlotId, List<TextureBinding>>, RHI::Limits::MaxSwapChainImageCount> boundTexturesBySlot{};
+        StaticArray<HashMap<BindingSlotId, List<Metal::Sampler*>>, RHI::Limits::MaxSwapChainImageCount> boundSamplersBySlot{};
         
         id<MTLArgumentEncoder> encoder;
         id<MTLBuffer> argumentBuffer;

@@ -25,6 +25,8 @@ namespace CE::Metal
         argumentBuffer.label = bufferLabel;
         
         [encoder setArgumentBuffer:argumentBuffer offset:0];
+        
+        
     }
 
     ShaderResourceGroup::~ShaderResourceGroup()
@@ -104,13 +106,63 @@ namespace CE::Metal
         
     }
 
-    void ShaderResourceGroup::Compile() {
+    void ShaderResourceGroup::Compile()
+    {
+        if (isCompiled)
+            return;
         
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            for (const auto& [binding, boundBuffers] : boundBuffersBySlot[i])
+            {
+                int idx = 0;
+                for (const RHI::BufferView& bufferView : boundBuffers)
+                {
+                    if (Metal::Buffer* buffer = (Metal::Buffer*)bufferView.GetBuffer())
+                    {
+                        [encoder setBuffer:buffer->GetMtlBuffer() offset:bufferView.GetByteOffset() atIndex:(binding + idx)];
+                    }
+                    idx++;
+                }
+            }
+            
+            for (const auto& [binding, boundTextures] : boundTexturesBySlot[i])
+            {
+                int idx = 0;
+                for (const TextureBinding& textureBinding : boundTextures)
+                {
+                    if (textureBinding.resourceType == RHI::ResourceType::Texture)
+                    {
+                        [encoder setTexture:textureBinding.texture->GetMtlTexture() atIndex:(binding + idx)];
+                    }
+                    else if (textureBinding.resourceType == RHI::ResourceType::TextureView)
+                    {
+                        [encoder setTexture:textureBinding.textureView->GetMtlTextureView() atIndex:(binding + idx)];
+                    }
+                    idx++;
+                }
+            }
+            
+            for (const auto& [binding, boundSamplers] : boundSamplersBySlot[i])
+            {
+                int idx = 0;
+                for (Metal::Sampler* samplerState : boundSamplers)
+                {
+                    [encoder setSamplerState:samplerState->GetHandle() atIndex:(binding + idx)];
+                    idx++;
+                }
+            }
+        }
+        
+        isCompiled = true;
     }
 
-    void ShaderResourceGroup::FlushBindings() {
-        
+    void ShaderResourceGroup::FlushBindings()
+    {
+        if (!isCompiled)
+        {
+            Compile();
+        }
     }
-
     
 } // namespace CE::Metal
