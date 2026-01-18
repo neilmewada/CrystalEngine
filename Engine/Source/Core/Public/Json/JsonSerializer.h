@@ -10,14 +10,14 @@ namespace CE
     public:
         CE_STATIC_CLASS(JsonSerializer);
 
-		CE_DEPRECATED(0, "Use Deserialize2 instead.") static JsonValue* Deserialize(Stream* stream);
+		CE_DEPRECATED("Use Deserialize2 instead.") static JsonValue* Deserialize(Stream* stream);
 
 		static bool Deserialize2(Stream* stream, JValue& out);
 
 		static bool Deserialize2(const String& json, JValue& out);
 		
         template<typename WritePolicy = JsonPrettyPrintPolicy>
-		CE_DEPRECATED(0, "Use Serialize2 instead.") static void Serialize(Stream* stream, const JsonValue* json)
+		CE_DEPRECATED("Use Serialize2 instead.") static void Serialize(Stream* stream, const JsonValue* json)
         {
             if (stream == nullptr || !stream->CanWrite())
                 return;

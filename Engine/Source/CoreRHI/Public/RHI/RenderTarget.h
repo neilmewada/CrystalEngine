@@ -3,6 +3,8 @@
 namespace CE::RHI
 {
 
+    struct CE_DEPRECATED("RHI::RenderAttachmentLayout is deprecated. Please use RHI::RenderPassAttachmentLayout instead.") RenderAttachmentLayout;
+
     struct RenderAttachmentLayout
     {
         AttachmentID attachmentId{};
@@ -17,6 +19,8 @@ namespace CE::RHI
         AttachmentStoreAction storeActionStencil{};
     };
 
+    struct CE_DEPRECATED("RHI::RenderTargetSubpassLayout is deprecated. Please use RHI::RenderPassSubpassLayout instead.") RenderTargetSubpassLayout;
+
     struct RenderTargetSubpassLayout
     {
         FixedArray<u32, RHI::Limits::Pipeline::MaxColorAttachmentCount> colorAttachments{};
@@ -25,11 +29,15 @@ namespace CE::RHI
         FixedArray<u32, RHI::Limits::Pipeline::MaxColorAttachmentCount> subpassInputAttachments{};
     };
 
+    struct CE_DEPRECATED("RHI::RenderTargetLayout is deprecated. Please use RHI::RenderPassLayout instead.") RenderTargetLayout;
+
     struct RenderTargetLayout
     {
         FixedArray<RenderAttachmentLayout, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachmentLayouts{};
         FixedArray<RenderTargetSubpassLayout, RHI::Limits::Pipeline::MaxSubPassCount> subpasses{};
     };
+
+    class CE_DEPRECATED("RHI::RenderTarget is deprecated. Please use RHI::RenderPass instead!") RenderTarget;
 
     class CORERHI_API RenderTarget : RHI::RHIResource
     {

@@ -13,6 +13,8 @@ namespace CE::Metal
         
         id<MTLCommandQueue> GetMtlQueue() const { return mtlQueue; }
         
+        bool Submit(const CommandQueueSubmission& submission) override;
+        
     private:
         
         Device* device = nullptr;

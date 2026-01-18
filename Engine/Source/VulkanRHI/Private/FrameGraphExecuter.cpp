@@ -266,6 +266,8 @@ namespace CE::Vulkan
 			scopeInChain = (Vulkan::Scope*)scopeInChain->next;
 		}
 
+		// We remove swapchain of scopes that have already been executed.
+		// So we are left with a set of swapchains that are going to be used for the first time in current frame in flight.
 		for (const auto& executedScopeId : executedScopes)
 		{
 			Vulkan::Scope* executedScope = (Vulkan::Scope*)frameGraph->scopesById[executedScopeId];

@@ -19,29 +19,46 @@ namespace CE::Metal
 
     bool CommandQueue::Execute(u32 count, RHI::CommandList** commandLists, RHI::Fence* fence)
     {
-        for (int i = 0; i < count; i++)
+        // Never use this
+        return false;
+    }
+
+    bool CommandQueue::Submit(const CommandQueueSubmission& submission)
+    {
+        if (submission.numCommandLists == 0 || submission.commandLists == nullptr)
+            return false;
+        
+        Metal::CommandList* firstCmdList = static_cast<Metal::CommandList*>(submission.commandLists[0]);
+        Metal::CommandList* lastCmdList = static_cast<Metal::CommandList*>(submission.commandLists[submission.numCommandLists - 1]);
+        
+        if (!firstCmdList || !lastCmdList)
+            return false;
+        
+        id<MTLCommandBuffer> firstCmdBuffer = firstCmdList->GetMtlCommandBuffer();
+        id<MTLCommandBuffer> lastCmdBuffer = lastCmdList->GetMtlCommandBuffer();
+        
+        if (!firstCmdBuffer || !lastCmdBuffer)
+            return false;
+        
+        if (submission.waitFence)
         {
-            auto cmdList = (Metal::CommandList*)commandLists[i];
-            if (cmdList == nullptr)
-                continue;
+            Metal::Fence* fence = static_cast<Metal::Fence*>(submission.waitFence);
             
-            auto metalFence = (Metal::Fence*)fence;
-            if (metalFence != nullptr)
-            {
-                metalFence->SetCommandList(cmdList);
-            }
+            [firstCmdBuffer encodeWaitForEvent:fence->GetEvent() value:submission.waitFenceValue];
+        }
+        
+        if (submission.signalFence)
+        {
+            Metal::Fence* fence = static_cast<Metal::Fence*>(submission.signalFence);
             
-            id<MTLCommandBuffer> mtlCmdBuffer = cmdList->GetMtlCommandBuffer();
+            [lastCmdBuffer encodeWaitForEvent:fence->GetEvent() value:submission.signalFenceValue];
+        }
+        
+        for (u32 i = 0; i < submission.numCommandLists; i++)
+        {
+            Metal::CommandList* cmdList = static_cast<Metal::CommandList*>(submission.commandLists[i]);
             
-            [mtlCmdBuffer addCompletedHandler:^(id<MTLCommandBuffer> cmdBuffer)
-             {
-                if (metalFence)
-                {
-                    metalFence->signalled = true;
-                }
-            }];
-            
-            [mtlCmdBuffer commit];
+            [cmdList->GetMtlCommandBuffer() commit];
         }
         
         return true;

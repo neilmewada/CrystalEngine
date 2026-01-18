@@ -139,12 +139,12 @@ namespace CE::Metal
 
     void GraphicsPipeline::SetupColorAttachments()
     {
-        const RenderTargetSubpassLayout& subpass = pipelineDesc.rtLayout.subpasses[pipelineDesc.subpass];
+        const RenderPassSubpassLayout& subpass = pipelineDesc.renderPassLayout.subpasses[pipelineDesc.subpass];
         
         for (int i = 0; i < subpass.colorAttachments.GetSize(); i++)
         {
             u32 attachmentIdx = subpass.colorAttachments[i];
-            const RenderAttachmentLayout& attachmentLayout = pipelineDesc.rtLayout.attachmentLayouts[attachmentIdx];
+            const RenderPassAttachmentLayout& attachmentLayout = pipelineDesc.renderPassLayout.attachmentLayouts[attachmentIdx];
             
             if (i < pipelineDesc.blendState.colorBlends.GetSize())
             {
@@ -168,7 +168,7 @@ namespace CE::Metal
         if (!subpass.depthStencilAttachment.IsEmpty())
         {
             u32 attachmentIdx = subpass.depthStencilAttachment[0];
-            const RenderAttachmentLayout& attachmentLayout = pipelineDesc.rtLayout.attachmentLayouts[attachmentIdx];
+            const RenderPassAttachmentLayout& attachmentLayout = pipelineDesc.renderPassLayout.attachmentLayouts[attachmentIdx];
             
             pipelineDescriptor.depthAttachmentPixelFormat = ToMtlFormat(attachmentLayout.format);
             pipelineDescriptor.stencilAttachmentPixelFormat = ToMtlFormat(attachmentLayout.format);

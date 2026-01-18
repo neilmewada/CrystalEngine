@@ -18,6 +18,8 @@
 
 #include "SwapChain.h"
 #include "RenderTarget.h"
+#include "RenderPass.h"
+#include "RenderPassFrameBuffer.h"
 #include "Pipeline.h"
 #include "GraphicsPipeline.h"
 #include "ComputePipeline.h"

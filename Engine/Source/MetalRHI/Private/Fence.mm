@@ -3,58 +3,50 @@
 namespace CE::Metal
 {
 
-    Fence::Fence(Device* device, bool initiallySignalled)
-        : device(device), signalled(initiallySignalled)
+    Fence::Fence(Device* device, uint64_t initialValue) : RHI::Fence(initialValue), device(device)
     {
+        event = [device->GetHandle() newSharedEvent];
         
+        event.signaledValue = initialValue;
     }
 
     Fence::~Fence() noexcept
     {
-        if (cmdList)
+        
+    }
+
+    void Fence::RefreshCompletedValue()
+    {
+        SetCompletedValue(event.signaledValue);
+    }
+
+    bool Fence::WaitCPU(uint64_t value, uint64_t timeoutNs)
+    {
+        if (event.signaledValue >= value)
         {
-            cmdList->DeregisterFence(this);
-        }
-        cmdList = nullptr;
-    }
-
-    void Fence::Reset()
-    {
-        signalled = false;
-    }
-
-    void Fence::WaitForFence()
-    {
-        if (cmdList)
-        {
-            [cmdList->GetMtlCommandBuffer() waitUntilCompleted];
-        }
-        signalled = true;
-    }
-
-    bool Fence::IsSignalled()
-    {
-        return cmdList == nullptr || signalled;
-    }
-
-    void Fence::SetCommandList(CommandList* cmdList)
-    {
-        if (this->cmdList == cmdList)
-        {
-            return;
+            RefreshCompletedValue();
+            return true;
         }
         
-        if (this->cmdList)
-        {
-            this->cmdList->DeregisterFence(this);
-        }
+        MTLSharedEventListener* listener = [[MTLSharedEventListener alloc] init];
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
         
-        this->cmdList = cmdList;
+        [event notifyListener:listener
+                      atValue:value
+                        block:^(__unused id<MTLSharedEvent> e, __unused uint64_t v) {
+                            dispatch_semaphore_signal(semaphore);
+                        }
+        ];
         
-        if (cmdList)
-        {
-            cmdList->RegisterFence(this);
-        }
+        dispatch_time_t timeout = (timeoutNs == ~0ull)
+                    ? DISPATCH_TIME_FOREVER
+                    : dispatch_time(DISPATCH_TIME_NOW, (int64_t)timeoutNs);
+        
+        long result = dispatch_semaphore_wait(semaphore, timeout);
+        
+        RefreshCompletedValue();
+        
+        return result == 0;
     }
     
 } // namespace CE::Metal

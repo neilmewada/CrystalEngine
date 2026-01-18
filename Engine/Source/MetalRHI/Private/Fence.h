@@ -7,23 +7,20 @@ namespace CE::Metal
     {
     public:
         
-        Fence(Device* device, bool initiallySignalled);
-        virtual ~Fence();
+        Fence(Device* device, uint64_t initialValue);
+        virtual ~Fence() noexcept;
         
-        void Reset() override;
+        void RefreshCompletedValue() override;
         
-        void WaitForFence() override;
+        bool WaitCPU(uint64_t value, uint64_t timeoutNs = ~0ULL) override;
         
-        bool IsSignalled() override;
-        
-        void SetCommandList(CommandList* cmdList);
+        id<MTLSharedEvent> GetEvent() const { return event; }
 
     private:
         
         Device* device = nullptr;
-        CommandList* cmdList = nullptr;
         
-        bool signalled = false;
+        id<MTLSharedEvent> event = nil;
         
         friend class CommandList;
         friend class CommandQueue;

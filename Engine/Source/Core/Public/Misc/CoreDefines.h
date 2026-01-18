@@ -10,7 +10,7 @@
 
 #define CE_ENGINE_NAME_STRING "Crystal Engine"
 
-#define CE_DEPRECATED(Version, Message) [[deprecated(Message " Please update your code to not use the deprecated API.")]]
+#define CE_DEPRECATED(Message) [[deprecated(Message "")]]
 
 #define CE_NO_COPY(Class) Class(const Class&) = delete; Class& operator=(const Class&) = delete;
 

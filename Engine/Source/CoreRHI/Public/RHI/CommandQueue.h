@@ -29,6 +29,17 @@ namespace CE::RHI
 	};
 	ENUM_CLASS_FLAGS(HardwareQueueClassMask);
 
+    struct CommandQueueSubmission
+    {
+        u32 numCommandLists = 0;
+        RHI::CommandList** commandLists = nullptr;
+        
+        RHI::Fence* waitFence = nullptr;
+        uint64_t waitFenceValue = 0;
+        
+        RHI::Fence* signalFence = nullptr;
+        uint64_t signalFenceValue = 0;
+    };
 
 	class CORERHI_API CommandQueue : RHIResource
 	{
@@ -39,6 +50,8 @@ namespace CE::RHI
 		virtual ~CommandQueue() = default;
 
 	public:
+        
+        virtual bool Submit(const CommandQueueSubmission& submission) = 0;
 
 		inline HardwareQueueClassMask GetQueueMask() const
 		{

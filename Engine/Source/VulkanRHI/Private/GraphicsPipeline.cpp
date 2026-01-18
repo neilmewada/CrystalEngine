@@ -361,6 +361,11 @@ namespace CE::Vulkan
 
             colorBlendAttachments.Add(colorBlendAttachment);
         }
+        
+        if (desc.renderPass != nullptr)
+        {
+            
+        }
 
         if (desc.renderTarget != nullptr)
         {

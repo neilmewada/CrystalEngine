@@ -11,6 +11,7 @@ namespace CE::RHI
 	class RenderTarget;
 	class RenderTargetBuffer;
 	struct AttachmentClearValue;
+    class SwapChain;
 
 	enum class CommandListType
 	{
@@ -121,9 +122,14 @@ namespace CE::RHI
 		virtual void Begin() = 0;
 		virtual void End() = 0;
 
+        CE_DEPRECATED("BeginRenderTarget is deprecated! Use BeginRenderPass instead.")
 		virtual void BeginRenderTarget(RenderTarget* renderTarget, RenderTargetBuffer* renderTargetBuffer, AttachmentClearValue* clearValuesPerAttachment) = 0;
+        
         virtual void RenderTargetNextSubPass() = 0;
+        
 		virtual void EndRenderTarget() = 0;
+        
+        //virtual void AcquireNextSwapChainImage(RHI::SwapChain* swapChain) = 0;
 
 		inline void SetCurrentImageIndex(u32 imageIndex)
 		{

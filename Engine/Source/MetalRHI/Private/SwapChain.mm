@@ -17,7 +17,7 @@ namespace CE::Metal
 
     void SwapChain::Rebuild()
     {
-        
+        // Do nothing
     }
     
 } // namespace CE::Metal
