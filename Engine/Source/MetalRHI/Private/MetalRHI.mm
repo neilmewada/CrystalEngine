@@ -82,19 +82,24 @@ namespace CE::Metal
         return {};
     }
 
-    Array<RHI::CommandQueue*> MetalRHI::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
+    Array<RHI::CommandQueue*> MetalRHI::GetHardwareQueues(RHI::HardwareQueueClass queueClass)
     {
-        return {};
+        if (queueClass == RHI::HardwareQueueClass::Transfer)
+            return {device->GetTransferQueue()};
+        else if (queueClass == RHI::HardwareQueueClass::Compute)
+            return {device->GetComputeQueue()};
+        
+        return {device->GetPrimaryQueue()};
     }
 
     RHI::CommandQueue* MetalRHI::GetPrimaryGraphicsQueue()
     {
-        return nullptr;
+        return device->GetPrimaryQueue();
     }
 
     RHI::CommandQueue* MetalRHI::GetPrimaryTransferQueue()
     {
-        return nullptr;
+        return device->GetTransferQueue();
     }
 
     bool MetalRHI::IsOffscreenOnly()
@@ -169,6 +174,26 @@ namespace CE::Metal
         delete renderTargetBuffer;
     }
 
+    RHI::RenderPass* MetalRHI::CreateRenderPass(const RHI::RenderPassLayout& rpLayout)
+    {
+        return new Metal::RenderPass(device, rpLayout);
+    }
+
+    void MetalRHI::DestroyRenderPass(RHI::RenderPass* renderPass)
+    {
+        delete renderPass;
+    }
+    
+    RHI::RenderPassFrameBuffer* MetalRHI::CreateRenderPassFrameBuffer(const RHI::RenderPassFrameBufferDescriptor& descriptor)
+    {
+        return new Metal::RenderPassFrameBuffer(device, descriptor);
+    }
+    
+    void MetalRHI::DestroyRenderPassFrameBuffer(RHI::RenderPassFrameBuffer* frameBuffer)
+    {
+        delete frameBuffer;
+    }
+    
     RHI::SwapChain* MetalRHI::CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
     {
         return new Metal::SwapChain(device, window, desc);
@@ -276,12 +301,12 @@ namespace CE::Metal
 
     RHI::PipelineState* MetalRHI::CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc)
     {
-        return nullptr;
+        return new Metal::PipelineState(device, desc);
     }
 
     RHI::PipelineState* MetalRHI::CreateComputePipeline(const RHI::ComputePipelineDescriptor& desc)
     {
-        return nullptr;
+        return new Metal::PipelineState(device, desc);
     }
 
     void MetalRHI::DestroyPipeline(const RHI::PipelineState* pipeline)

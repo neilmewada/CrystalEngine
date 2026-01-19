@@ -538,13 +538,13 @@ namespace CE::Vulkan
 		}
 	}
 
-	void RenderPass::BuildDescriptor(const RHI::RenderTargetLayout& rtLayout, Descriptor& outDescriptor)
+	void RenderPass::BuildDescriptor(const RHI::RenderPassLayout& rpLayout, Descriptor& outDescriptor)
 	{
 		outDescriptor = {};
 
-		for (int i = 0; i < rtLayout.attachmentLayouts.GetSize(); i++)
+		for (int i = 0; i < rpLayout.attachmentLayouts.GetSize(); i++)
 		{
-			const auto& attachmentLayout = rtLayout.attachmentLayouts[i];
+			const auto& attachmentLayout = rpLayout.attachmentLayouts[i];
 			if (attachmentLayout.attachmentUsage == RHI::ScopeAttachmentUsage::Shader ||
 				attachmentLayout.attachmentUsage == RHI::ScopeAttachmentUsage::Copy)
 				continue;
@@ -583,15 +583,15 @@ namespace CE::Vulkan
 
 		HashSet<u32> renderPassUsedAttachments{};
 
-		if (rtLayout.subpasses.GetSize() == 0) // No subpasses provided by user, automatically create one based on all attachments
+		if (rpLayout.subpasses.GetSize() == 0) // No subpasses provided by user, automatically create one based on all attachments
 		{
 			SubPassDescriptor subpass{};
 
-			for (int i = 0; i < rtLayout.attachmentLayouts.GetSize(); i++)
+			for (int i = 0; i < rpLayout.attachmentLayouts.GetSize(); i++)
 			{
 				SubPassAttachment attachmentRef{};
 
-				switch (rtLayout.attachmentLayouts[i].attachmentUsage)
+				switch (rpLayout.attachmentLayouts[i].attachmentUsage)
 				{
 				case RHI::ScopeAttachmentUsage::Color:
 					attachmentRef.attachmentIndex = i;
@@ -620,7 +620,7 @@ namespace CE::Vulkan
 		}
 		else
 		{
-			for (int i = 0; i < rtLayout.subpasses.GetSize(); i++)
+			for (int i = 0; i < rpLayout.subpasses.GetSize(); i++)
 			{
 				SubPassDescriptor subpass{};
 				HashSet<u32> unusedAttachmentsThisSubpass{};
@@ -631,10 +631,10 @@ namespace CE::Vulkan
 					unusedAttachmentsThisSubpass.Add(j);
 				}
 
-				for (int j = 0; j < rtLayout.subpasses[i].colorAttachments.GetSize(); j++)
+				for (int j = 0; j < rpLayout.subpasses[i].colorAttachments.GetSize(); j++)
 				{
 					SubPassAttachment attachmentRef{};
-					attachmentRef.attachmentIndex = rtLayout.subpasses[i].colorAttachments[j];
+					attachmentRef.attachmentIndex = rpLayout.subpasses[i].colorAttachments[j];
 					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					unusedAttachmentsThisSubpass.Remove(attachmentRef.attachmentIndex);
 					usedAttachmentsThisSubpass.Add(attachmentRef.attachmentIndex);
@@ -642,10 +642,10 @@ namespace CE::Vulkan
 					subpass.colorAttachments.Add(attachmentRef);
 				}
 
-				for (int j = 0; j < rtLayout.subpasses[i].depthStencilAttachment.GetSize(); j++)
+				for (int j = 0; j < rpLayout.subpasses[i].depthStencilAttachment.GetSize(); j++)
 				{
 					SubPassAttachment attachmentRef{};
-					attachmentRef.attachmentIndex = rtLayout.subpasses[i].depthStencilAttachment[j];
+					attachmentRef.attachmentIndex = rpLayout.subpasses[i].depthStencilAttachment[j];
 					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 					unusedAttachmentsThisSubpass.Remove(attachmentRef.attachmentIndex);
 					usedAttachmentsThisSubpass.Add(attachmentRef.attachmentIndex);
@@ -653,10 +653,10 @@ namespace CE::Vulkan
 					subpass.depthStencilAttachment.Add(attachmentRef);
 				}
 
-				for (int j = 0; j < rtLayout.subpasses[i].resolveAttachments.GetSize(); j++)
+				for (int j = 0; j < rpLayout.subpasses[i].resolveAttachments.GetSize(); j++)
 				{
 					SubPassAttachment attachmentRef{};
-					attachmentRef.attachmentIndex = rtLayout.subpasses[i].resolveAttachments[j];
+					attachmentRef.attachmentIndex = rpLayout.subpasses[i].resolveAttachments[j];
 					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					unusedAttachmentsThisSubpass.Remove(attachmentRef.attachmentIndex);
 					usedAttachmentsThisSubpass.Add(attachmentRef.attachmentIndex);
@@ -664,10 +664,10 @@ namespace CE::Vulkan
 					subpass.resolveAttachments.Add(attachmentRef);
 				}
 
-				for (int j = 0; j < rtLayout.subpasses[i].subpassInputAttachments.GetSize(); j++)
+				for (int j = 0; j < rpLayout.subpasses[i].subpassInputAttachments.GetSize(); j++)
 				{
 					SubPassAttachment attachmentRef{};
-					attachmentRef.attachmentIndex = rtLayout.subpasses[i].subpassInputAttachments[j];
+					attachmentRef.attachmentIndex = rpLayout.subpasses[i].subpassInputAttachments[j];
 					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 					unusedAttachmentsThisSubpass.Remove(attachmentRef.attachmentIndex);
 					usedAttachmentsThisSubpass.Add(attachmentRef.attachmentIndex);

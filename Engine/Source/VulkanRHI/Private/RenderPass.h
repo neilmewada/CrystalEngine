@@ -76,7 +76,7 @@ namespace CE::Vulkan
 
 		static void BuildDescriptor(Vulkan::Scope* pass, Descriptor& outDescriptor);
 
-		static void BuildDescriptor(const RHI::RenderTargetLayout& rtLayout, Descriptor& outDescriptor);
+		static void BuildDescriptor(const RHI::RenderPassLayout& rpLayout, Descriptor& outDescriptor);
 
 		RHI::ScopeAttachmentUsage GetAttachmentUsage(u32 attachmentIndex);
 

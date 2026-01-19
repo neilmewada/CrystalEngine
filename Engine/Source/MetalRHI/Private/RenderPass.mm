@@ -34,6 +34,8 @@ namespace CE::Metal
     RenderPass::RenderPass(Device* device, const RHI::RenderPassLayout& rpLayout)
         : device(device), rpLayout(rpLayout)
     {
+        renderPassDescArray = [[NSMutableArray alloc] initWithCapacity:rpLayout.subpasses.GetSize()];
+        
         for (int i = 0; i < rpLayout.subpasses.GetSize(); i++)
         {
             const auto& subpass = rpLayout.subpasses[i];

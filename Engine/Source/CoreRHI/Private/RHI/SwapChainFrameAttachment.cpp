@@ -7,7 +7,25 @@ namespace CE::RHI
 		: ImageFrameAttachment(id, nullptr)
 		, swapChain(swapChain)
     {
-		for (int i = 0; i < swapChain->GetImageCount(); i++)
+        // TODO: Fix this ASAP
+        
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            descriptor.width = swapChain->GetWidth();
+            descriptor.height = swapChain->GetHeight();
+            descriptor.depth = 1;
+            descriptor.format = swapChain->GetSwapChainFormat();
+            descriptor.sampleCount = 1;
+            descriptor.dimension = RHI::Dimension::Dim2D;
+            descriptor.arrayLayers = 1;
+            descriptor.bindFlags = RHI::TextureBindFlags::Color;
+            descriptor.mipLevels = 1;
+            descriptor.defaultHeapType = MemoryHeapType::Default;
+            
+            SetResource(i, nullptr);
+        }
+        
+		/*for (int i = 0; i < swapChain->GetImageCount(); i++)
 		{
 			Texture* image = swapChain->GetImage(i);
 			if (image)
@@ -25,7 +43,7 @@ namespace CE::RHI
 			}
 
 			SetResource(i, image);
-		}
+		}*/
     }
 
 	void SwapChainFrameAttachment::UpdateImage()

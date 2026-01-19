@@ -14,10 +14,13 @@ namespace CE::RHI
 
 		//! @brief Array of preferred image formats to use.
 		Array<RHI::Format> preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM, };
-
+        
 		u32 preferredWidth = 0;
 		u32 preferredHeight = 0;
 
+        //! @brief When set to true, the SwapChain can only be used as a color attachment, or as a transfer destination, i.e. SwapChain will become a Write-Only resource.
+        bool frameBufferOnly = true;
+        
 		bool useMailboxMode = false;
 	};
     
@@ -33,15 +36,8 @@ namespace CE::RHI
 		{
 			return currentImageIndex;
 		}
-
-		inline Texture* GetCurrentImage() const
-		{
-			return images[currentImageIndex];
-		}
-
-		inline Texture* GetImage(u32 index) const { return images[index]; }
-
-		inline u32 GetImageCount() const { return images.GetSize(); }
+        
+        bool IsFrameBufferOnly() const { return frameBufferOnly; }
 
 		inline u32 GetWidth() const { return width; }
 		inline u32 GetHeight() const { return height; }
@@ -58,9 +54,9 @@ namespace CE::RHI
 		virtual void Rebuild() = 0;
 
 	protected:
-
-		Array<Texture*> images{};
+        
 		RHI::Format swapChainColorFormat{};
+        bool frameBufferOnly = true;
 
 		u32 currentImageIndex = 0;
 		u32 width = 0;

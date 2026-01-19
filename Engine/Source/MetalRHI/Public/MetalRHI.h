@@ -36,7 +36,7 @@ namespace CE::Metal
         
         Array<RHI::Format> GetAvailableDepthOnlyFormats() override;
         
-        Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) override;
+        Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClass queueClass) override;
         
         RHI::CommandQueue* GetPrimaryGraphicsQueue() override;
         
@@ -44,13 +44,13 @@ namespace CE::Metal
         
         bool IsOffscreenOnly() override;
         
-        Vec2i GetScreenSizeForWindow(void *platformWindowHandle) override;
+        Vec2i GetScreenSizeForWindow(void* platformWindowHandle) override;
         
         RHI::Fence* CreateFence(bool initiallySignalled = false) override;
         
-        void DestroyFence(RHI::Fence *fence) override;
+        void DestroyFence(RHI::Fence* fence) override;
         
-        RHI::CommandList *AllocateCommandList(RHI::CommandQueue *associatedQueue, CommandListType commandListType = CommandListType::Direct) override;
+        RHI::CommandList *AllocateCommandList(RHI::CommandQueue* associatedQueue, CommandListType commandListType = CommandListType::Direct) override;
         
         Array<RHI::CommandList *> AllocateCommandLists(u32 count, RHI::CommandQueue* associatedQueue, CommandListType commandListType = CommandListType::Direct) override;
         
@@ -67,6 +67,12 @@ namespace CE::Metal
         RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::Texture*> &imageAttachments, u32 imageIndex = 0) override;
         
         void DestroyRenderTargetBuffer(RHI::RenderTargetBuffer* renderTargetBuffer) override;
+        
+        RHI::RenderPass* CreateRenderPass(const RHI::RenderPassLayout& rpLayout) override;
+        void DestroyRenderPass(RHI::RenderPass* renderPass) override;
+        
+        RHI::RenderPassFrameBuffer* CreateRenderPassFrameBuffer(const RHI::RenderPassFrameBufferDescriptor& descriptor) override;
+        void DestroyRenderPassFrameBuffer(RHI::RenderPassFrameBuffer* frameBuffer) override;
         
         RHI::SwapChain* CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc) override;
         

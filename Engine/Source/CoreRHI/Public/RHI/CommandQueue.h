@@ -57,17 +57,24 @@ namespace CE::RHI
 		{
 			return queueMask;
 		}
+        
+        inline HardwareQueueClass GetQueueClass() const
+        {
+            return queueClass;
+        }
 
 		inline bool SupportsOperation(HardwareQueueClass operationType) const
 		{
 			return (queueMask & (1 << (u32)operationType)) != 0;
 		}
 
+        CE_DEPRECATED("Please use Submit() instead.")
 		virtual bool Execute(u32 count, RHI::CommandList** commandLists, RHI::Fence* fence = nullptr) = 0;
 
 	protected:
 
 		HardwareQueueClassMask queueMask{};
+        HardwareQueueClass queueClass{};
 
 	};
     

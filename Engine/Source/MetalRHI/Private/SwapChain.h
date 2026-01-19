@@ -12,6 +12,8 @@ namespace CE::Metal
         
         void Rebuild() override;
         
+        CAMetalLayer* GetMetalLayer() const { return metalLayer; }
+        
     private:
         
         Device* device = nullptr;

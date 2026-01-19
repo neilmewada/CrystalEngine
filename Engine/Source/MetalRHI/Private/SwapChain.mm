@@ -1,5 +1,7 @@
 #include "MetalRHIPrivate.h"
 
+#include "TextureFormats.inl"
+
 namespace CE::Metal
 {
 
@@ -9,10 +11,16 @@ namespace CE::Metal
         this->desc.preferredFormats.AddRange({ RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM });
         this->preferredWidth = desc.preferredWidth;
         this->preferredHeight = desc.preferredHeight;
-        
-        window->GetDrawableWindowSize(&width, &height);
+        this->swapChainColorFormat = this->desc.preferredFormats[0];
+        this->frameBufferOnly = desc.frameBufferOnly;
         
         metalLayer = MetalPlatform::GetCAMetalLayer(window);
+        
+        metalLayer.maximumDrawableCount = desc.imageCount;
+        metalLayer.pixelFormat = ToMtlFormat(this->swapChainColorFormat);
+        metalLayer.framebufferOnly = frameBufferOnly;
+        
+        window->GetDrawableWindowSize(&width, &height);
     }
 
     void SwapChain::Rebuild()

@@ -5,11 +5,12 @@
 namespace CE::Metal
 {
 
-    CommandQueue::CommandQueue(Device* device, HardwareQueueClassMask queueClassMask) : device(device)
+    CommandQueue::CommandQueue(Device* device, HardwareQueueClassMask queueClassMask, HardwareQueueClass queueClass) : device(device)
     {
         mtlQueue = [device->GetHandle() newCommandQueue];
         
         this->queueMask = queueClassMask;
+        this->queueClass = queueClass;
     }
     
     CommandQueue::~CommandQueue()

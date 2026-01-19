@@ -197,7 +197,9 @@ namespace CE::RHI
 	{
 		if (!currentScope || !frameGraph)
 			return false;
-		frameGraph->numFramesInFlight = swapChain->GetImageCount();
+        
+        // FIXME: below line
+		//frameGraph->numFramesInFlight = swapChain->GetImageCount();
 		frameGraph->presentSwapChains.Add(swapChain);
 		frameGraph->presentingScopes.Add(currentScope);
 		currentScope->presentSwapChains.Add(swapChain);

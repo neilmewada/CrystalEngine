@@ -96,27 +96,16 @@ cbuffer _SceneData : SRG_PerScene(b0)
     float _TimeElapsed;
 };
 
-#if FRAGMENT
-
-cbuffer _MaterialData : SRG_PerMaterial(b0)
-{
-    float4 _Albedo;
-    float _Roughness;
-    float _Metallic;
-};
-
-#endif
-
-Texture2D _AlbedoTex : SRG_PerMaterial(t1);
-
 struct VSInput
 {
     float3 position : POSITION;
+    float3 color : TEXCOORD0;
 };
 
 struct PSInput
 {
     float4 position : SV_POSITION;
+    float3 color : TEXCOORD0;
 };
 
 #if VERTEX
@@ -125,6 +114,7 @@ PSInput VertMain(VSInput input)
 {
     PSInput o;
     o.position = float4(input.position * _TimeElapsed, 1.0);
+    o.color = input.color;
     return o;
 }
 #endif
@@ -133,7 +123,7 @@ PSInput VertMain(VSInput input)
 
 float4 FragMain(PSInput input) : SV_TARGET
 {
-    return float4(_Albedo.xyz, 1);
+    return float4(input.color, 1);
 }
 
 #endif
@@ -146,10 +136,10 @@ TEST(RHI, MetalBasic)
     PlatformApplication* app = PlatformApplication::Get();
     PlatformWindow* mainWindow = app->GetMainWindow();
     
-    auto rhi = RHI::gDynamicRHI;
-    
     u32 width = 0;
     u32 height = 0;
+    
+    constexpr u32 kNumFrames = RHI::Limits::MaxSwapChainImageCount;
     
     // - SwapChain -
     
@@ -157,9 +147,12 @@ TEST(RHI, MetalBasic)
     {
         RHI::SwapChainDescriptor desc{};
         desc.imageCount = 2;
+        desc.frameBufferOnly = true;
         
         swapChain = gDynamicRHI->CreateSwapChain(mainWindow, desc);
     }
+    
+    // - Shader -
     
     ShaderCompiler compiler{};
     
@@ -196,6 +189,7 @@ TEST(RHI, MetalBasic)
     compileInfo.stages.GetLast().outByteCode = &fragMSL;
     
     auto result = compiler.CompileMSL(HLSL_Test, COUNTOF(HLSL_Test), compileInfo);
+    String errorMsg = compiler.GetErrorMessage();
     EXPECT_EQ(result, ShaderCompiler::ERR_Success);
     
     RHI::ShaderModuleDescriptor vertShaderDesc{};
@@ -218,6 +212,8 @@ TEST(RHI, MetalBasic)
     
     RHI::ShaderModule* fragShader = gDynamicRHI->CreateShaderModule(fragShaderDesc);
     
+    // - Shader Resources -
+    
     RHI::ShaderResourceGroup* perSceneSrg = nullptr;
     {
         const RHI::ShaderResourceGroupLayout& perSceneSrgLayout = reflection.srgLayouts[0];
@@ -230,22 +226,10 @@ TEST(RHI, MetalBasic)
         perSceneSrg = gDynamicRHI->CreateShaderResourceGroup(perSceneSrgDesc);
     }
     
-    RHI::ShaderResourceGroup* perMaterialSrg = nullptr;
-    {
-        const RHI::ShaderResourceGroupLayout& perMaterialSrgLayout = reflection.srgLayouts[1];
-        
-        RHI::ShaderResourceGroupDescriptor perMaterialSrgDesc{};
-        perMaterialSrgDesc.name = "SRG_PerMaterial";
-        perMaterialSrgDesc.layout = perMaterialSrgLayout;
-        perMaterialSrgDesc.shader = fragShader;
-        
-        perMaterialSrg = gDynamicRHI->CreateShaderResourceGroup(perMaterialSrgDesc);
-    }
-    
     SceneData sceneData{};
     sceneData.timeElapsed = 1.0f;
     
-    RHI::Buffer* sceneDataBuffer = nullptr;
+    RHI::Buffer* sceneDataBuffer = nullptr; // Should be double buffers too
     {
         RHI::BufferDescriptor bufferDesc{};
         bufferDesc.name = "PerScene cbuffer";
@@ -261,6 +245,8 @@ TEST(RHI, MetalBasic)
     perSceneSrg->Bind("_SceneData", sceneDataBuffer);
     perSceneSrg->FlushBindings();
     
+    // - Vertex & Index Buffers -
+    
     RHI::Buffer* vertexBuffer = nullptr;
     {
         RHI::BufferDescriptor vertexBufferDesc{};
@@ -275,6 +261,105 @@ TEST(RHI, MetalBasic)
         vertexBuffer->UploadData(TriangleVertices, sizeof(TriangleVertices));
     }
     
+    // - Render Pass -
+    
+    RHI::RenderPassLayout rpLayout{};
+    RHI::RenderPass* renderPass = nullptr;
+    RHI::RenderPassFrameBuffer* frameBuffers[kNumFrames] = {};
+    {
+        {
+            RHI::RenderPassAttachmentLayout colorAttachmentLayout{};
+            colorAttachmentLayout.format = swapChain->GetSwapChainFormat();
+            colorAttachmentLayout.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
+            colorAttachmentLayout.multisampleState.sampleCount = 1;
+            
+            colorAttachmentLayout.loadAction = RHI::AttachmentLoadAction::Clear;
+            colorAttachmentLayout.storeAction = RHI::AttachmentStoreAction::Store;
+            
+            rpLayout.attachmentLayouts.Add(colorAttachmentLayout);
+        }
+        
+        {
+            RHI::RenderPassSubpassLayout subpass{};
+            subpass.colorAttachments.Add(0);
+            
+            rpLayout.subpasses.Add(subpass);
+        }
+        
+        renderPass = gDynamicRHI->CreateRenderPass(rpLayout);
+        
+        RHI::RenderPassFrameBufferDescriptor frameBufferDesc{};
+        frameBufferDesc.renderPass = renderPass;
+        frameBufferDesc.attachments.Add(RenderPassFrameAttachment(swapChain));
+        
+        for (int i = 0; i < kNumFrames; i++)
+        {
+            frameBuffers[i] = gDynamicRHI->CreateRenderPassFrameBuffer(frameBufferDesc);
+        }
+    }
+    
+    // - Graphics Pipeline -
+    
+    RHI::PipelineState* pipeline = nullptr;
+    {
+        RHI::GraphicsPipelineDescriptor desc{};
+        
+        desc.blendState.colorBlends.Add({});
+        
+        desc.depthStencilState.depthState.enable = false;
+        desc.depthStencilState.stencilState.enable = false;
+        
+        desc.rasterState.cullMode = RHI::CullMode::Off;
+        desc.rasterState.fillMode = RHI::FillMode::Solid;
+        
+        desc.multisampleState.sampleCount = 1;
+        
+        desc.renderPassLayout = rpLayout;
+        desc.subpass = 0;
+        
+        desc.vertexInputSlots.Add({});
+        desc.vertexInputSlots[0].inputRate = RHI::VertexInputRate::PerVertex;
+        desc.vertexInputSlots[0].inputSlot = 0;
+        desc.vertexInputSlots[0].stride = sizeof(TriVertex);
+        
+        desc.vertexAttributes.Add({});
+        desc.vertexAttributes[0].location = 0;
+        desc.vertexAttributes[0].offset = 0;
+        desc.vertexAttributes[0].dataType = RHI::VertexAttributeDataType::Float3;
+        desc.vertexAttributes[0].inputSlot = 0;
+        
+        desc.vertexAttributes.Add({});
+        desc.vertexAttributes[1].location = 1;
+        desc.vertexAttributes[1].offset = offsetof(TriVertex, color);
+        desc.vertexAttributes[1].dataType = RHI::VertexAttributeDataType::Float3;
+        desc.vertexAttributes[1].inputSlot = 0;
+        
+        desc.srgLayouts.Add(perSceneSrg->GetLayout());
+        
+        desc.shaderStages.Add({});
+        desc.shaderStages[0].entryPoint = "VertMain";
+        desc.shaderStages[0].shaderModule = vertShader;
+        
+        desc.shaderStages.Add({});
+        desc.shaderStages[1].entryPoint = "FragMain";
+        desc.shaderStages[1].shaderModule = fragShader;
+        
+        pipeline = gDynamicRHI->CreateGraphicsPipeline(desc);
+    }
+    
+    // - Command Lists -
+    
+    RHI::CommandQueue* cmdQueue = gDynamicRHI->GetPrimaryGraphicsQueue();
+    RHI::CommandList* cmdLists[kNumFrames] = {};
+    {
+        for (int i = 0; i < kNumFrames; i++)
+        {
+            cmdLists[i] = gDynamicRHI->AllocateCommandList(cmdQueue);
+        }
+    }
+    
+    int currentFrameInFlight = 0;
+    
     while (!IsEngineRequestingExit())
     {
         app->Tick();
@@ -283,8 +368,19 @@ TEST(RHI, MetalBasic)
         
     }
     
+    // - Cleanup -
+    
     delete vertShader; delete fragShader;
-    delete perSceneSrg; delete perMaterialSrg;
+    delete perSceneSrg;
+    delete swapChain;
+    delete renderPass;
+    gDynamicRHI->FreeCommandLists(kNumFrames, cmdLists);
+    delete pipeline;
+    
+    for (int i = 0; i < kNumFrames; i++)
+    {
+        delete frameBuffers[i];
+    }
     
     WINDOW_TEST_END;
 }

@@ -11,16 +11,7 @@ namespace CE::Metal
 
     CommandList::~CommandList()
     {
-        LockGuard guard{ fenceLock };
         
-        for (int i = 0; i < fenceInstances.GetSize(); i++)
-        {
-            if (fenceInstances[i])
-            {
-                fenceInstances[i]->cmdList = nullptr;
-                fenceInstances[i]->signalled = true;
-            }
-        }
     }
 
     void CommandList::Begin()
@@ -291,21 +282,5 @@ namespace CE::Metal
         
         [blitEncoder endEncoding];
     }
-
-    void CommandList::RegisterFence(Fence* fence)
-    {
-        LockGuard guard{ fenceLock };
-        
-        fenceInstances.Add(fence);
-    }
-
-    void CommandList::DeregisterFence(Fence* fence)
-    {
-        LockGuard guard{ fenceLock };
-        
-        fenceInstances.Remove(fence);
-    }
-
-
 
 } // namespace CE::Metal

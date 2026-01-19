@@ -25,6 +25,10 @@ namespace CE::Metal
         
         CommandQueue* GetPrimaryQueue() const { return primaryQueue; }
         
+        CommandQueue* GetComputeQueue() const { return computeQueue; }
+        
+        CommandQueue* GetTransferQueue() const { return transferQueue; }
+        
         DeviceLimits* GetDeviceLimits() const { return deviceLimits; }
         
     private:
@@ -33,6 +37,10 @@ namespace CE::Metal
         bool isInitialized = false;
         
         CommandQueue* primaryQueue = nullptr;
+        
+        CommandQueue* computeQueue = nullptr;
+        
+        CommandQueue* transferQueue = nullptr;
         
         // - ObjC -
         

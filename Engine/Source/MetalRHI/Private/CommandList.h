@@ -54,9 +54,6 @@ namespace CE::Metal
         void CopyTextureRegion(const TextureToBufferCopy& region) override;
         
         void CopyBufferRegion(const BufferCopy& copy) override;
-        
-        void RegisterFence(Fence* fence);
-        void DeregisterFence(Fence* fence);
 
     private:
 
@@ -69,9 +66,6 @@ namespace CE::Metal
         id<MTLCommandBuffer> mtlCommandBuffer = nil;
         id<MTLRenderCommandEncoder> mtlRenderEncoder = nil;
         id<MTLComputeCommandEncoder> mtlComputeEncoder = nil;
-        
-        List<Fence*> fenceInstances;
-        SharedMutex fenceLock;
         
         StaticArray<Metal::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> boundSRGs{};
         

@@ -21,6 +21,8 @@ namespace CE::RHI
 	struct TextureDescriptor;
 	struct ResourceMemoryRequirements;
 	class DeviceLimits;
+    class RenderPass;
+    class RenderPassFrameBuffer;
 
 	enum class ValidationMessageType
 	{
@@ -81,7 +83,7 @@ namespace CE::RHI
 		virtual Array<RHI::Format> GetAvailableDepthStencilFormats() = 0;
 		virtual Array<RHI::Format> GetAvailableDepthOnlyFormats() = 0;
 
-		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) = 0;
+		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClass queueClass) = 0;
 
 		virtual RHI::CommandQueue* GetPrimaryGraphicsQueue() = 0;
 		virtual RHI::CommandQueue* GetPrimaryTransferQueue() = 0;
@@ -115,6 +117,12 @@ namespace CE::RHI
 		virtual RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::TextureView*>& imageAttachments, u32 imageIndex = 0) = 0;
 		virtual RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::Texture*>& imageAttachments, u32 imageIndex = 0) = 0;
 		virtual void DestroyRenderTargetBuffer(RHI::RenderTargetBuffer* renderTargetBuffer) = 0;
+        
+        virtual RHI::RenderPass* CreateRenderPass(const RHI::RenderPassLayout& rpLayout) = 0;
+        virtual void DestroyRenderPass(RHI::RenderPass* renderPass) = 0;
+        
+        virtual RHI::RenderPassFrameBuffer* CreateRenderPassFrameBuffer(const RHI::RenderPassFrameBufferDescriptor& descriptor) = 0;
+        virtual void DestroyRenderPassFrameBuffer(RHI::RenderPassFrameBuffer* frameBuffer) = 0;
 
 		virtual RHI::SwapChain* CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc) = 0;
 		virtual void DestroySwapChain(RHI::SwapChain* swapChain) = 0;

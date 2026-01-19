@@ -6,7 +6,7 @@ namespace CE::Metal
     class CommandQueue : public RHI::CommandQueue
     {
     public:
-        CommandQueue(Device* device, HardwareQueueClassMask queueClassMask);
+        CommandQueue(Device* device, HardwareQueueClassMask queueClassMask, HardwareQueueClass queueClass);
         ~CommandQueue();
         
         bool Execute(u32 count, RHI::CommandList** commandLists, RHI::Fence* fence = nullptr) override;
