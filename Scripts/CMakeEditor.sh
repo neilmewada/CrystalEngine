@@ -16,15 +16,15 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
 elif [[ "$OSTYPE" == "cygwin" ]]; then
     platform="Windows"
     SystemName="Windows"
-    DefaultGenerator="Visual Studio 17"
+    DefaultGenerator="Visual Studio 18"
 elif [[ "$OSTYPE" == "msys" ]]; then
     platform="Windows"
     SystemName="Windows"
-    DefaultGenerator="Visual Studio 17"
+    DefaultGenerator="Visual Studio 18"
 elif [[ "$OSTYPE" == "win32" ]]; then
     platform="Windows"
     SystemName="Windows"
-    DefaultGenerator="Visual Studio 17"
+    DefaultGenerator="Visual Studio 18"
 elif [[ "$OSTYPE" == "freebsd"* ]]; then
     platform="Linux"
     SystemName="Linux"
