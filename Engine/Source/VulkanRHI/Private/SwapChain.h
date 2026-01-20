@@ -62,10 +62,11 @@ namespace CE::Vulkan
         
         Array<Vulkan::Texture*> images{};
 		u32 currentImageIndex = 0;
-
-		//! Used to 
+		u32 currentImageAcquiredSemaphoreIndex = 0;
+		bool shouldRebuild = false;
+		
 		StaticArray<VkImageLayout, RHI::Limits::MaxSwapChainImageCount> swapChainInitialImageLayouts{};
-
+		StaticArray<VkSemaphore, RHI::Limits::MaxSwapChainImageCount> imageAcquiredSemaphores{};
 		StaticArray<VkSemaphore, RHI::Limits::MaxSwapChainImageCount> renderFinishedSemaphores{};
 
 		List<VkSurfaceFormatKHR> surfaceFormats{};

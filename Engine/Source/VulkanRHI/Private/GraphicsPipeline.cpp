@@ -551,14 +551,14 @@ namespace CE::Vulkan
             case VertexAttributeDataType::UInt4:
                 attrib.format = VK_FORMAT_R32G32B32A32_UINT;
                 break;
-			case VertexAttributeDataType::Undefined:
-				break;
 			case VertexAttributeDataType::Char4:
                 attrib.format = VK_FORMAT_R8G8B8A8_SNORM;
 				break;
 			case VertexAttributeDataType::UChar4:
                 attrib.format = VK_FORMAT_R8G8B8A8_UNORM;
 				break;
+            case VertexAttributeDataType::Undefined:
+                break;
             }
 
             vertexInputDescriptions.Add(attrib);

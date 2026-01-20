@@ -137,7 +137,7 @@ namespace CE::RHI
 
 		inline void SetFrameIndex(u32 frameIndex)
 		{
-			this->currentImageIndex = frameIndex;
+			this->currentFrameIndex = frameIndex;
 		}
 
 		virtual void ResourceBarrier(u32 count, ResourceBarrierDescriptor* barriers) = 0;
@@ -180,7 +180,7 @@ namespace CE::RHI
 
 	protected:
 
-		u32 currentImageIndex = 0;
+		u32 currentFrameIndex = 0;
 
 		RHI::CommandListType commandListType = RHI::CommandListType::Direct;
 

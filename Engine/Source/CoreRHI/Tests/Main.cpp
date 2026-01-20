@@ -2,9 +2,10 @@
 #include "CoreApplication.h"
 
 #if PAL_TRAIT_METAL_SUPPORTED
-#include "MetalRHI.h"
-#elif PAL_TRAIT_VULKAN_SUPPORTED
-#include "VulkanRHI.h"
+#   include "MetalRHI.h"
+#endif
+#if PAL_TRAIT_VULKAN_SUPPORTED
+#   include "VulkanRHI.h"
 #endif
 
 #include "CoreShader.h"
@@ -29,7 +30,8 @@ static void WindowTestBegin()
     ModuleManager::Get().LoadModule("CoreRHI");
 #if PAL_TRAIT_METAL_SUPPORTED
     ModuleManager::Get().LoadModule("MetalRHI");
-#elif PAL_TRAIT_VULKAN_SUPPORTED
+#endif
+#if PAL_TRAIT_VULKAN_SUPPORTED
     ModuleManager::Get().LoadModule("VulkanRHI");
 #endif
     ModuleManager::Get().LoadModule("CoreShader");
@@ -54,7 +56,8 @@ static void WindowTestBegin()
 
 #if PAL_TRAIT_METAL_SUPPORTED
     RHI::gDynamicRHI = new CE::Metal::MetalRHI();
-#elif PAL_TRAIT_VULKAN_SUPPORTED
+#endif
+#if PAL_TRAIT_VULKAN_SUPPORTED
     RHI::gDynamicRHI = new CE::Vulkan::VulkanRHI();
 #endif
     //RHI::gDynamicRHI->AddValidationCallbackHandler(OnValidationMessage, RHI::ValidationMessageType::Warning);
@@ -85,7 +88,8 @@ static void WindowTestEnd()
     ModuleManager::Get().UnloadModule("CoreShader");
 #if PAL_TRAIT_METAL_SUPPORTED
     ModuleManager::Get().UnloadModule("MetalRHI");
-#elif PAL_TRAIT_VULKAN_SUPPORTED
+#endif
+#if PAL_TRAIT_VULKAN_SUPPORTED
     ModuleManager::Get().UnloadModule("VulkanRHI");
 #endif
     ModuleManager::Get().UnloadModule("CoreRHI");
@@ -106,7 +110,7 @@ struct SceneData
     float timeElapsed;
 };
 
-constexpr const char HLSL_Triangle_Shader[] = R"(
+constexpr const char RHI_Triangle_Shader[] = R"(
 #include "Core/Macros.hlsli"
 
 cbuffer _SceneData : SRG_PerScene(b0)
@@ -206,13 +210,7 @@ TEST(RHI, Triangle)
     });
     compileInfo.stages.GetLast().outByteCode = &fragBlob;
     
-	ShaderBlobFormat blobFormat = ShaderBlobFormat::Spirv;
-    if (RHI::gDynamicRHI->GetGraphicsBackend() == GraphicsBackend::Vulkan)
-        blobFormat = ShaderBlobFormat::Spirv;
-	else if (RHI::gDynamicRHI->GetGraphicsBackend() == GraphicsBackend::Metal)
-        blobFormat = ShaderBlobFormat::MSL;
-
-    auto result = compiler.Compile(blobFormat, HLSL_Triangle_Shader, COUNTOF(HLSL_Triangle_Shader), compileInfo);
+    auto result = compiler.CompileAuto(RHI_Triangle_Shader, COUNTOF(RHI_Triangle_Shader), compileInfo);
     String errorMsg = compiler.GetErrorMessage();
     EXPECT_EQ(result, ShaderCompiler::ERR_Success);
     
@@ -270,11 +268,11 @@ TEST(RHI, Triangle)
     perSceneSrg->FlushBindings();
     
     // - Vertex & Index Buffers -
-    
-    RHI::Buffer* vertexBuffer = nullptr;
+
     RHI::VertexBufferView vertexBufferView{};
     u32 numVertices = 0;
     {
+        RHI::Buffer* vertexBuffer = nullptr;
         RHI::BufferDescriptor vertexBufferDesc{};
         
         vertexBufferDesc.name = "Vertex Buffer";
@@ -295,7 +293,7 @@ TEST(RHI, Triangle)
     
     RHI::RenderPassLayout rpLayout{};
     RHI::RenderPass* renderPass = nullptr;
-    RHI::RenderPassFrameBuffer* frameBuffers[kNumFrames] = {};
+    RHI::RenderPassFrameBuffer* frameBuffer = nullptr;
     {
         {
             RHI::RenderPassAttachmentLayout colorAttachmentLayout{};
@@ -318,14 +316,11 @@ TEST(RHI, Triangle)
         
         renderPass = gDynamicRHI->CreateRenderPass(rpLayout);
         
-        for (int i = 0; i < kNumFrames; i++)
-        {
-            RHI::RenderPassFrameBufferDescriptor frameBufferDesc{};
-            frameBufferDesc.renderPass = renderPass;
-            frameBufferDesc.attachments.Add(RenderPassFrameAttachment(swapChain, i));
+        RHI::RenderPassFrameBufferDescriptor frameBufferDesc{};
+        frameBufferDesc.renderPass = renderPass;
+        frameBufferDesc.attachments.Add(RenderPassFrameAttachment(swapChain));
 
-            frameBuffers[i] = gDynamicRHI->CreateRenderPassFrameBuffer(frameBufferDesc);
-        }
+        frameBuffer = gDynamicRHI->CreateRenderPassFrameBuffer(frameBufferDesc);
     }
     
     // - Graphics Pipeline -
@@ -390,6 +385,7 @@ TEST(RHI, Triangle)
     }
     
     int frameIndex = 0;
+    int totalFrames = 0;
     uint64_t frameDoneValue[kNumFrames] = {};
     RHI::Fence* graphicsFence = gDynamicRHI->CreateFence();
     
@@ -397,12 +393,18 @@ TEST(RHI, Triangle)
     {
         app->Tick();
         InputManager::Get().Tick();
-        
-        swapChain->AcquireNextImage();
-        
+
+		// - Render Loop -
+
         if (frameDoneValue[frameIndex] != 0)
         {
             graphicsFence->WaitCPU(frameDoneValue[frameIndex]);
+        }
+
+        bool imageAcquired = swapChain->AcquireNextImage();
+        if (!imageAcquired)
+        {
+            continue;
         }
         
         uint64_t done = graphicsFence->NextSignalValue();
@@ -424,8 +426,15 @@ TEST(RHI, Triangle)
         {
             AttachmentClearValue clearValue{};
             clearValue.clearValue = Vec4(0, 0, 0, 1);
+
+            RHI::ResourceBarrierDescriptor barrier{};
+
+            barrier.resource = swapChain;
+            barrier.fromState = ResourceState::Undefined;
+			barrier.toState = ResourceState::ColorOutput;
+			cmdList->ResourceBarrier(1, &barrier);
             
-            cmdList->BeginRenderPass(renderPass, frameBuffers[frameIndex], &clearValue);
+            cmdList->BeginRenderPass(renderPass, frameBuffer, &clearValue);
             {
                 RHI::ScissorState scissor{};
                 scissor.x = scissor.y = 0;
@@ -446,21 +455,29 @@ TEST(RHI, Triangle)
                 cmdList->CommitShaderResources();
                 
                 cmdList->BindVertexBuffers(0, 1, &vertexBufferView);
-                
+
                 cmdList->DrawLinear(RHI::DrawLinearArguments{
-                    .firstInstance = 0,
                     .instanceCount = 1,
-                    .vertexCount = 3,
+                    .firstInstance = 0,
+                    .vertexCount = numVertices,
                     .vertexOffset = 0
                 });
             }
             cmdList->EndRenderPass();
+
+            barrier.resource = swapChain;
+			barrier.fromState = ResourceState::ColorOutput;
+			barrier.toState = ResourceState::Present;
+			cmdList->ResourceBarrier(1, &barrier);
         }
         cmdList->End();
         
         cmdQueue->Submit(submission);
+
+        String::IsAlphabet('a');
         
         frameIndex = (frameIndex + 1) % kNumFrames;
+        totalFrames++;
     }
     
     // - Cleanup -
@@ -469,14 +486,12 @@ TEST(RHI, Triangle)
     delete perSceneSrg;
     delete swapChain;
     delete renderPass;
+    delete sceneDataBuffer;
     gDynamicRHI->FreeCommandLists(kNumFrames, cmdLists);
     delete pipeline;
     delete graphicsFence;
-    
-    for (int i = 0; i < kNumFrames; i++)
-    {
-        delete frameBuffers[i];
-    }
+    delete frameBuffer;
+    delete vertexBufferView.GetBuffer();
     
     WINDOW_TEST_END;
 }

@@ -9,7 +9,7 @@ namespace CE::Vulkan
         RenderPassFrameBuffer(Device* device, const RHI::RenderPassFrameBufferDescriptor& desc);
         virtual ~RenderPassFrameBuffer();
 
-		VkFramebuffer GetHandle() const { return frameBuffer; }
+		VkFramebuffer GetHandle(u32 imageIndex) const { return framebuffers[imageIndex]; }
 
 		u32 GetWidth() const { return width; }
 		u32 GetHeight() const { return height; }
@@ -17,7 +17,7 @@ namespace CE::Vulkan
     private:
 
         Device* device = nullptr;
-        VkFramebuffer frameBuffer = nullptr;
+		StaticArray<VkFramebuffer, RHI::Limits::MaxSwapChainImageCount> framebuffers{};
 
         u32 width = 0;
         u32 height = 0;

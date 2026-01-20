@@ -386,18 +386,19 @@ namespace CE::Vulkan
 		deviceFeaturesToUse.textureCompressionBC = VK_TRUE;
 #endif
 
-		// Descriptor Indexing features
-		VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};
-		descriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
-
-		// Enable non-uniform indexing
-		descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
-		descriptorIndexingFeatures.runtimeDescriptorArray = VK_TRUE;
-		descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = VK_TRUE;
-		descriptorIndexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
-
 #if PLATFORM_DESKTOP
-		deviceCI.pNext = &descriptorIndexingFeatures;
+		VkPhysicalDeviceVulkan12Features vulkan12Features{};
+		vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+		vulkan12Features.pNext = nullptr;
+		vulkan12Features.timelineSemaphore = VK_TRUE;
+
+		vulkan12Features.descriptorIndexing = VK_TRUE;
+		vulkan12Features.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+		vulkan12Features.runtimeDescriptorArray = VK_TRUE;
+		vulkan12Features.descriptorBindingVariableDescriptorCount = VK_TRUE;
+		vulkan12Features.descriptorBindingPartiallyBound = VK_TRUE;
+
+		deviceCI.pNext = &vulkan12Features;
 #endif
 
 		deviceCI.pEnabledFeatures = &deviceFeaturesToUse;

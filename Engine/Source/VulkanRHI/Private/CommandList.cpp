@@ -122,7 +122,7 @@ namespace CE::Vulkan
 				{
 					DescriptorSet* descriptorSet = srgsToMerge[setNumber][0]->GetDescriptorSet();
 
-					srgsToMerge[setNumber][0]->currentImageIndex = currentImageIndex;
+					srgsToMerge[setNumber][0]->currentImageIndex = currentFrameIndex;
 					srgsToMerge[setNumber][0]->FlushBindings();
 
 					if (commitedSRGsBySetNumber[setNumber] != nullptr)
@@ -145,7 +145,7 @@ namespace CE::Vulkan
 
 				//if (commitedSRGsBySetNumber[setNumber] != (Vulkan::ShaderResourceGroup*)mergedSrg) // SRG has changed
 				{
-					mergedSrg->currentImageIndex = currentImageIndex;
+					mergedSrg->currentImageIndex = currentFrameIndex;
 					mergedSrg->FlushBindings();
 
 					if (commitedSRGsBySetNumber[setNumber] != nullptr)
@@ -258,10 +258,21 @@ namespace CE::Vulkan
 				continue;
 			
 			RHI::DeviceObjectType resourceType = barrierInfo.resource->GetDeviceObjectType();
-			if (resourceType == RHI::DeviceObjectType::Texture)
+			if (resourceType == RHI::DeviceObjectType::Texture || resourceType == DeviceObjectType::SwapChain)
 			{
-				Vulkan::Texture* texture = (Vulkan::Texture*)barrierInfo.resource;
-				if (texture->GetImage() == nullptr)
+				Vulkan::Texture* texture = nullptr;
+
+				if (resourceType == RHI::DeviceObjectType::Texture)
+				{
+					texture = (Vulkan::Texture*)barrierInfo.resource;
+				}
+				else if (resourceType == DeviceObjectType::SwapChain)
+				{
+					Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)barrierInfo.resource;
+					texture = swapChain->GetCurrentImage();
+				}
+				
+				if (texture == nullptr || texture->GetImage() == nullptr)
 					continue;
 
 				VkImageMemoryBarrier imageBarrier{};
@@ -737,8 +748,21 @@ namespace CE::Vulkan
 
 		FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
 
+		u32 frameIndex = this->currentFrameIndex;
+
 		for (int i = 0; i < attachmentCount; i++)
 		{
+			if (frameBuffer->GetAttachment(i).GetSwapChain() != nullptr) // SwapChain attachment
+			{
+				Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)frameBuffer->GetAttachment(i).GetSwapChain();
+				frameIndex = swapChain->GetCurrentImageIndex();
+
+				if (swapChain->GetCurrentImageIndex() != this->currentFrameIndex)
+				{
+					String::IsAlphabet('a');
+				}
+			}
+
 			const auto& attachmentLayout = renderPass->GetRenderPassLayout().attachmentLayouts[i];
 
 			VkClearValue clearValue;
@@ -765,7 +789,7 @@ namespace CE::Vulkan
 		beginInfo.pClearValues = clearValues.GetData();
 
 		beginInfo.renderPass = currentPass->GetHandle();
-		beginInfo.framebuffer = frameBuffer->GetHandle();
+		beginInfo.framebuffer = frameBuffer->GetHandle(frameIndex);
 
 		beginInfo.renderArea.offset = { 0, 0 };
 		beginInfo.renderArea.extent.width = frameBuffer->GetWidth();

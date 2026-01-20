@@ -11,36 +11,67 @@ namespace CE::RHI
         RenderPassFrameAttachment() = default;
         
         RenderPassFrameAttachment(RHI::Texture* texture)
-            : texture(texture)
-        {}
+        {
+			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+            {
+                textures[i] = texture;
+            }
+        }
+
+        RenderPassFrameAttachment(const StaticArray<RHI::Texture*, RHI::Limits::MaxSwapChainImageCount>& textures)
+        {
+            for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+            {
+                this->textures[i] = textures[i];
+            }
+        }
         
         RenderPassFrameAttachment(RHI::TextureView* textureView)
-            : textureView(textureView)
-        {}
-        
-        RenderPassFrameAttachment(RHI::SwapChain* swapChain, u32 imageIndex)
-            : swapChain(swapChain), imageIndex(imageIndex)
-        {}
-        
-        RHI::Texture* GetTexture() const { return texture; }
-        
-        RHI::TextureView* GetTextureView() const { return textureView; }
-        
-        RHI::SwapChain* GetSwapChain() const { return swapChain; }
+        {
+			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+            {
+                textureViews[i] = textureView;
+            }
+        }
 
-        u32 GetImageIndex() const { return imageIndex; }
+		RenderPassFrameAttachment(const StaticArray<RHI::TextureView*, RHI::Limits::MaxSwapChainImageCount>& textureViews)
+        {
+            for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+            {
+                this->textureViews[i] = textureViews[i];
+            }
+        }
+        
+		//! @brief A SwapChain attachment. Note: imageIndex is only relevant for Vulkan SwapChains.
+        RenderPassFrameAttachment(RHI::SwapChain* swapChain) : swapChain(swapChain)
+        {}
         
         bool IsValid() const
         {
-            return texture != nullptr || textureView != nullptr || swapChain != nullptr;
+			if (swapChain != nullptr)
+                return true;
+
+			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+            {
+                if (textures[i] != nullptr || textureViews[i] != nullptr)
+                    return true;
+            }
+
+            return false;
         }
+
+        RHI::Texture* GetTexture(u32 index) const { return textures[index]; }
+
+		RHI::TextureView* GetTextureView(u32 index) const { return textureViews[index]; }
+
+		RHI::SwapChain* GetSwapChain() const { return swapChain; }
         
     private:
+
+        StaticArray<RHI::Texture*, RHI::Limits::MaxSwapChainImageCount> textures;
+        StaticArray<RHI::TextureView*, RHI::Limits::MaxSwapChainImageCount> textureViews;
         
-        RHI::Texture* texture = nullptr;
-        RHI::TextureView* textureView = nullptr;
         RHI::SwapChain* swapChain = nullptr;
-        u32 imageIndex = 0;
     };
     
 } // namespace CE::RHI

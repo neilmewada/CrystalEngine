@@ -43,7 +43,8 @@ namespace CE::RHI
     {
         None,
         Buffer,
-        Texture
+        Texture,
+        SwapChain
     };
 
     struct FontDesc

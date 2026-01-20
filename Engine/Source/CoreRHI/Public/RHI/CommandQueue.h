@@ -37,6 +37,9 @@ namespace CE::RHI
         
         RHI::Fence* waitFence = nullptr;
         uint64_t waitFenceValue = 0;
+
+		//! @brief The pipeline stage to wait on for the wait fence. If Undefined, wait on all stages. Only used in Vulkan.
+		RHI::ResourceState waitFenceStage = RHI::ResourceState::Undefined;
         
         RHI::Fence* signalFence = nullptr;
         uint64_t signalFenceValue = 0;

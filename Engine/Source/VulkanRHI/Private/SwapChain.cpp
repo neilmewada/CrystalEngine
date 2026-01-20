@@ -35,8 +35,11 @@ namespace CE::Vulkan
 
 			VkSemaphore semaphore = nullptr;
 			vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &semaphore);
-
 			renderFinishedSemaphores[i] = semaphore;
+
+			VkSemaphore imageAcquired = nullptr;
+			vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &imageAcquired);
+			imageAcquiredSemaphores[i] = imageAcquired;
 		}
 	}
 
@@ -44,8 +47,19 @@ namespace CE::Vulkan
 	{
 		vkDeviceWaitIdle(device->GetHandle());
 
+		for (int i = 0; i < images.GetSize(); i++)
+		{
+			delete images[i];
+		}
+		images.Clear();
+
 		for (int i = 0; i < renderFinishedSemaphores.GetSize(); i++)
 		{
+			if (imageAcquiredSemaphores[i] != nullptr)
+			{
+				vkDestroySemaphore(device->GetHandle(), imageAcquiredSemaphores[i], VULKAN_CPU_ALLOCATOR);
+				imageAcquiredSemaphores[i] = nullptr;
+			}
 
 			if (renderFinishedSemaphores[i] != nullptr)
 			{
@@ -88,20 +102,30 @@ namespace CE::Vulkan
 
 	bool SwapChain::AcquireNextImage()
 	{
-		VkFenceCreateInfo fenceCI{};
-		fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-		fenceCI.flags = 0;
+		if (shouldRebuild)
+		{
+			RebuildSwapChain();
+			shouldRebuild = false;
+		}
 
-		VkFence fence = nullptr;
-		vkCreateFence(device->GetHandle(), &fenceCI, VULKAN_CPU_ALLOCATOR, &fence);
+		VkSemaphoreCreateInfo semaphoreCI{};
+		semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+		semaphoreCI.pNext = nullptr;
 
-		VkResult result = vkAcquireNextImageKHR(device->GetHandle(), swapChain, NumericLimits<uint64_t>::Max(), nullptr, fence, &currentImageIndex);
+		currentImageAcquiredSemaphoreIndex = (currentImageAcquiredSemaphoreIndex + 1) % imageAcquiredSemaphores.GetSize();
 
-		vkWaitForFences(device->GetHandle(), 1, &fence, VK_TRUE, NumericLimits<u64>::Max());
+		VkResult result = vkAcquireNextImageKHR(device->GetHandle(), swapChain, NumericLimits<uint64_t>::Max(), imageAcquiredSemaphores[currentImageAcquiredSemaphoreIndex], nullptr, &currentImageIndex);
 
-		vkDestroyFence(device->GetHandle(), fence, VULKAN_CPU_ALLOCATOR);
+		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+		{
+			if (result == VK_ERROR_OUT_OF_DATE_KHR)
+			{
+				RebuildSwapChain();
+			}
+			return false;
+		}
 
-		return result == VK_SUCCESS;
+		return true;
 	}
 
 	void SwapChain::OnWindowResized(PlatformWindow* window, u32 newDrawWidth, u32 newDrawHeight)

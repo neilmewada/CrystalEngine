@@ -4,100 +4,122 @@ namespace CE::Vulkan
 {
 	RenderPassFrameBuffer::RenderPassFrameBuffer(Device* device, const RHI::RenderPassFrameBufferDescriptor& desc) : RHI::RenderPassFrameBuffer(desc), device(device)
 	{
-		FixedArray<VkImageView, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
-
-		width = 0;
-		height = 0;
-
-		VkFramebufferCreateInfo framebufferCI{};
-		framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-
-		for (int i = 0; i < desc.attachments.GetSize(); i++)
+		for (u32 imageIndex = 0; imageIndex < framebuffers.GetSize(); imageIndex++)
 		{
-			if (!desc.attachments[i].IsValid())
-				continue;
+			FixedArray<VkImageView, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
 
-			const auto& frameAttachment = desc.attachments[i];
+			width = 0;
+			height = 0;
 
-			if (frameAttachment.GetSwapChain() != nullptr)
+			const auto& rpLayout = desc.renderPass->GetRenderPassLayout();
+
+			VkFramebufferCreateInfo framebufferCI{};
+			framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+
+			for (int i = 0; i < desc.attachments.GetSize(); i++)
 			{
-				SwapChain* swapChain = (SwapChain*)frameAttachment.GetSwapChain();
-				u32 imageIndex = frameAttachment.GetImageIndex();
-				Vulkan::Texture* image = swapChain->GetImage(imageIndex);
+				if (!desc.attachments[i].IsValid())
+					continue;
 
-				u32 imageWidth = image->GetWidth();
-				u32 imageHeight = image->GetHeight();
+				const auto& frameAttachment = desc.attachments[i];
 
-				if (width == 0 || height == 0)
+				if (frameAttachment.GetSwapChain() != nullptr)
 				{
-					width = imageWidth;
-					height = imageHeight;
-				}
-				else if (width != imageWidth || height != imageHeight)
-				{
-					CE_LOG(Error, All, "Failed to create RenderPassFrameBuffer: Width and/or height mismatch!");
-					width = height = 0;
-					return;
-				}
+					SwapChain* swapChain = (SwapChain*)frameAttachment.GetSwapChain();
+					Vulkan::Texture* image = swapChain->GetImage(imageIndex);
 
-				attachments.Add(image->GetImageView());
+					u32 imageWidth = image->GetWidth();
+					u32 imageHeight = image->GetHeight();
+
+					RHI::ScopeAttachmentUsage attachmentUsage = rpLayout.attachmentLayouts[i].attachmentUsage;
+
+					if (swapChain->IsFrameBufferOnly() && attachmentUsage != RHI::ScopeAttachmentUsage::Color && attachmentUsage != RHI::ScopeAttachmentUsage::Resolve)
+					{
+						CE_LOG(Error, All, "Failed to create RenderPassFrameBuffer: A SwapChain attachment marked as FrameBufferOnly is being used as a {} attachment!", attachmentUsage);
+						width = height = 0;
+						return;
+					}
+
+					if (width == 0 || height == 0)
+					{
+						width = imageWidth;
+						height = imageHeight;
+					}
+					else if (width != imageWidth || height != imageHeight)
+					{
+						CE_LOG(Error, All, "Failed to create RenderPassFrameBuffer: Width and/or height mismatch!");
+						width = height = 0;
+						return;
+					}
+
+					attachments.Add(image->GetImageView());
+				}
+				else if (frameAttachment.GetTextureView(imageIndex) != nullptr)
+				{
+					Vulkan::TextureView* textureView = (Vulkan::TextureView*)frameAttachment.GetTextureView(imageIndex);
+
+					u32 imageWidth = textureView->GetTexture()->GetWidth();
+					u32 imageHeight = textureView->GetTexture()->GetHeight();
+
+					if (width == 0 || height == 0)
+					{
+						width = imageWidth;
+						height = imageHeight;
+					}
+					else if (width != imageWidth || height != imageHeight)
+					{
+						CE_LOG(Error, All, "Failed to create RenderPassFrameBuffer: Width and/or height mismatch!");
+						width = height = 0;
+						return;
+					}
+
+					attachments.Add(textureView->GetImageView());
+				}
+				else if (frameAttachment.GetTexture(imageIndex) != nullptr)
+				{
+					Vulkan::Texture* image = (Vulkan::Texture*)frameAttachment.GetTexture(imageIndex);
+					u32 imageWidth = image->GetWidth();
+					u32 imageHeight = image->GetHeight();
+
+					if (width == 0 || height == 0)
+					{
+						width = imageWidth;
+						height = imageHeight;
+					}
+					else if (width != imageWidth || height != imageHeight)
+					{
+						CE_LOG(Error, All, "Failed to create RenderPassFrameBuffer: Width and/or height mismatch!");
+						width = height = 0;
+						return;
+					}
+
+					attachments.Add(image->GetImageView());
+				}
 			}
-			else if (frameAttachment.GetTextureView() != nullptr)
-			{
-				Vulkan::TextureView* textureView = (Vulkan::TextureView*)frameAttachment.GetTextureView();
-				
-				u32 imageWidth = textureView->GetTexture()->GetWidth();
-				u32 imageHeight = textureView->GetTexture()->GetHeight();
 
-				if (width == 0 || height == 0)
-				{
-					width = imageWidth;
-					height = imageHeight;
-				}
-				else if (width != imageWidth || height != imageHeight)
-				{
-					CE_LOG(Error, All, "Failed to create RenderPassFrameBuffer: Width and/or height mismatch!");
-					width = height = 0;
-					return;
-				}
+			framebufferCI.renderPass = ((Vulkan::RenderPass*)desc.renderPass)->GetHandle();
+			framebufferCI.layers = 1;
+			framebufferCI.width = width;
+			framebufferCI.height = height;
 
-				attachments.Add(textureView->GetImageView());
-			}
-			else if (frameAttachment.GetTexture() != nullptr)
-			{
-				Vulkan::Texture* image = (Vulkan::Texture*)frameAttachment.GetTexture();
-				u32 imageWidth = image->GetWidth();
-				u32 imageHeight = image->GetHeight();
+			framebufferCI.attachmentCount = attachments.GetSize();
+			framebufferCI.pAttachments = attachments.GetData();
 
-				if (width == 0 || height == 0)
-				{
-					width = imageWidth;
-					height = imageHeight;
-				}
-				else if (width != imageWidth || height != imageHeight)
-				{
-					CE_LOG(Error, All, "Failed to create RenderPassFrameBuffer: Width and/or height mismatch!");
-					width = height = 0;
-					return;
-				}
-
-				attachments.Add(image->GetImageView());
-			}
+			VkFramebuffer framebuffer = nullptr;
+			vkCreateFramebuffer(device->GetHandle(), &framebufferCI, VULKAN_CPU_ALLOCATOR, &framebuffer);
+			this->framebuffers[imageIndex] = framebuffer;
 		}
-
-		framebufferCI.renderPass = ((Vulkan::RenderPass*)desc.renderPass)->GetHandle();
-		framebufferCI.layers = 1;
-		framebufferCI.width = width;
-		framebufferCI.height = height;
-
-		framebufferCI.attachmentCount = attachments.GetSize();
-		framebufferCI.pAttachments = attachments.GetData();
-
-		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, VULKAN_CPU_ALLOCATOR, &frameBuffer);
 	}
 
 	RenderPassFrameBuffer::~RenderPassFrameBuffer()
 	{
-		vkDestroyFramebuffer(device->GetHandle(), frameBuffer, VULKAN_CPU_ALLOCATOR);
+		for (u32 imageIndex = 0; imageIndex < framebuffers.GetSize(); imageIndex++)
+		{
+			if (framebuffers[imageIndex] != nullptr)
+			{
+				vkDestroyFramebuffer(device->GetHandle(), framebuffers[imageIndex], VULKAN_CPU_ALLOCATOR);
+				framebuffers[imageIndex] = nullptr;
+			}
+		}
 	}
 } // namespace CE::Vulkan

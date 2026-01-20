@@ -24,10 +24,10 @@ namespace CE::RHI
 		bool useMailboxMode = false;
 	};
     
-	class CORERHI_API SwapChain : public RHIResource
+	class CORERHI_API SwapChain : public RHIResource, public IDeviceObject
 	{
 	protected:
-		SwapChain() : RHIResource(ResourceType::SwapChain)
+		SwapChain() : RHIResource(ResourceType::SwapChain), IDeviceObject(DeviceObjectType::SwapChain)
 		{}
 
 	public:

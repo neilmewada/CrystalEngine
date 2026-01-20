@@ -95,8 +95,13 @@ namespace CE
         ErrorCode CompileSpirv(const void* data, u32 dataSize, ShaderCompilationInfo& config);
 
         ErrorCode Compile(ShaderBlobFormat outFormat, const IO::Path& hlslPath, ShaderCompilationInfo& config);
-
         ErrorCode Compile(ShaderBlobFormat outFormat, const void* data, u32 dataSize, ShaderCompilationInfo& config);
+
+		//! @brief Compiles HLSL to the appropriate format based on the target graphics backend set in RHI.
+        ErrorCode CompileAuto(const IO::Path& hlslPath, ShaderCompilationInfo& config);
+
+		//! @brief Compiles HLSL to the appropriate format based on the target graphics backend set in RHI.
+        ErrorCode CompileAuto(const void* data, u32 dataSize, ShaderCompilationInfo& config);
 
 		// It allocates memory to the *outByteCode location which you will have to manually release after use.
 		ErrorCode BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs);

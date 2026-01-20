@@ -8,15 +8,17 @@
 #   define __EMULATE_UUID
 #endif
 
-#if PLATFORM_DESKTOP
+#if PLATFORM_DESKTOP && !CE_STANDALONE
 #include <spirv_cross/spirv_msl.hpp>
 #include "spirv_cross/spirv_reflect.hpp"
 #include "spirv_cross/spirv_parser.hpp"
 #include <spirv-tools/libspirv.hpp>
-#endif
 
 #undef SIZE_T
 #include <dxc/dxcapi.h>
+
+#define SHADER_COMPILATION_SUPPORTED 1
+#endif
 
 #include <locale>
 #include <codecvt>
@@ -86,9 +88,9 @@ namespace CE
 
     ShaderCompiler::ErrorCode ShaderCompiler::BuildMSL(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs, ShaderReflection* outReflection)
     {
-#if !PLATFORM_MAC
+#if !SHADER_COMPILATION_SUPPORTED
         return ERR_UnsupportedPlatform;
-#endif
+#else
         
         HRESULT status = 0;
         ShaderBuildConfig& config = const_cast<ShaderBuildConfig&>(buildConfig);
@@ -133,11 +135,7 @@ namespace CE
         spirv_cross::CompilerMSL compiler((u32*)spirvCode.GetDataPtr(), spirvCode.GetDataSize() / 4);
         
         spirv_cross::CompilerMSL::Options mslOptions;
-#if PLATFORM_MAC
         mslOptions.platform = spirv_cross::CompilerMSL::Options::Platform::macOS;
-#elif PLATFORM_IOS
-        mslOptions.platform = spirv_cross::CompilerMSL::Options::Platform::iOS;
-#endif
         mslOptions.msl_version = spirv_cross::CompilerMSL::Options::make_msl_version(2, 3);
         mslOptions.argument_buffers = true;
         mslOptions.force_active_argument_buffer_resources = true;
@@ -215,6 +213,7 @@ namespace CE
         }
         
         return ERR_Success;
+#endif
     }
 
     ShaderCompiler::ErrorCode ShaderCompiler::CompileMSL(const IO::Path& hlslPath, ShaderCompilationInfo& config)
@@ -340,6 +339,44 @@ namespace CE
         return CompileSpirv(data, dataSize, config);
     }
 
+    ShaderCompiler::ErrorCode ShaderCompiler::CompileAuto(const IO::Path& hlslPath, ShaderCompilationInfo& config)
+    {
+		ShaderBlobFormat outFormat = ShaderBlobFormat::Spirv;
+        if (gDynamicRHI != nullptr)
+        {
+	        switch (gDynamicRHI->GetGraphicsBackend())
+	        {
+	        case GraphicsBackend::Metal:
+				outFormat = ShaderBlobFormat::MSL;
+		        break;
+	        default:
+            case GraphicsBackend::Vulkan:
+				outFormat = ShaderBlobFormat::Spirv;
+                break;
+	        }
+        }
+		return Compile(outFormat, hlslPath, config);
+    }
+
+    ShaderCompiler::ErrorCode ShaderCompiler::CompileAuto(const void* data, u32 dataSize, ShaderCompilationInfo& config)
+    {
+		ShaderBlobFormat outFormat = ShaderBlobFormat::Spirv;
+        if (gDynamicRHI != nullptr)
+        {
+            switch (gDynamicRHI->GetGraphicsBackend())
+            {
+            case GraphicsBackend::Metal:
+                outFormat = ShaderBlobFormat::MSL;
+                break;
+            default:
+            case GraphicsBackend::Vulkan:
+                outFormat = ShaderBlobFormat::Spirv;
+                break;
+            }
+        }
+		return Compile(outFormat, data, dataSize, config);
+    }
+
     ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 	{
 		if (!hlslPath.Exists())
@@ -373,6 +410,7 @@ namespace CE
 	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, 
 		BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 	{
+#if SHADER_COMPILATION_SUPPORTED
 		HRESULT status = 0;
 		ShaderBuildConfig& config = const_cast<ShaderBuildConfig&>(buildConfig);
 
@@ -392,10 +430,14 @@ namespace CE
 		buffer.Encoding = DXC_CP_UTF8;
 
 		return BuildSpirv(buffer, config, outByteCode, extraArgs);
+#else
+		return ERR_UnsupportedPlatform;
+#endif
 	}
 
     ShaderCompiler::ErrorCode ShaderCompiler::CompileMSL(DxcBuffer buffer, ShaderCompilationInfo& config)
     {
+#if SHADER_COMPILATION_SUPPORTED
         HRESULT status = 0;
         
         if (config.outReflection == nullptr)
@@ -527,11 +569,7 @@ namespace CE
             spirv_cross::CompilerMSL compiler((u32*)spirvByteCode.GetDataPtr(), spirvByteCode.GetDataSize() / 4);
             
             spirv_cross::CompilerMSL::Options mslOptions;
-    #if PLATFORM_MAC
             mslOptions.platform = spirv_cross::CompilerMSL::Options::Platform::macOS;
-    #elif PLATFORM_IOS
-            mslOptions.platform = spirv_cross::CompilerMSL::Options::Platform::iOS;
-    #endif
             mslOptions.msl_version = spirv_cross::CompilerMSL::Options::make_msl_version(2, 3);
             mslOptions.argument_buffers = true;
             mslOptions.force_active_argument_buffer_resources = true;
@@ -612,6 +650,9 @@ namespace CE
         }
         
         return ERR_Success;
+#else
+		return ERR_UnsupportedPlatform;
+#endif
     }
 
     ShaderCompiler::ErrorCode ShaderCompiler::CompileSpirv(DxcBuffer buffer, ShaderCompilationInfo& config)
