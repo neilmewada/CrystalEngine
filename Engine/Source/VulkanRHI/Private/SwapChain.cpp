@@ -26,18 +26,32 @@ namespace CE::Vulkan
 		Create();
 
 		windowResizeCallback = PlatformApplication::Get()->onWindowDrawableSizeChanged.AddDelegateInstance(MemberDelegate(&SwapChain::OnWindowResized, this));
+
+		for (int i = 0; i < renderFinishedSemaphores.GetSize(); i++)
+		{
+			VkSemaphoreCreateInfo semaphoreCI{};
+			semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+			semaphoreCI.pNext = nullptr;
+
+			VkSemaphore semaphore = nullptr;
+			vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &semaphore);
+
+			renderFinishedSemaphores[i] = semaphore;
+		}
 	}
 
 	SwapChain::~SwapChain()
 	{
 		vkDeviceWaitIdle(device->GetHandle());
 
-		// Delete images
-		for (auto image : images)
+		for (int i = 0; i < renderFinishedSemaphores.GetSize(); i++)
 		{
-			delete image;
+			if (renderFinishedSemaphores[i] == nullptr)
+				continue;
+
+			vkDestroySemaphore(device->GetHandle(), renderFinishedSemaphores[i], VULKAN_CPU_ALLOCATOR);
+			renderFinishedSemaphores[i] = nullptr;
 		}
-		images.Clear();
 
 		if (swapChain != nullptr)
 		{

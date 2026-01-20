@@ -11,6 +11,8 @@ namespace CE::Metal
         
         virtual ~GraphicsPipeline();
         
+        id<MTLRenderPipelineState> GetMtlPipeline() const { return mtlPipeline; }
+        
     private:
         
         void Create();

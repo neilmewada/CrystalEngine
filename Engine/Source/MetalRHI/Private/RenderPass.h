@@ -27,7 +27,6 @@ namespace CE::Metal
     private:
         
         Device* device = nullptr;
-        RHI::RenderPassLayout rpLayout{};
         
         NSMutableArray* renderPassDescArray = nil;
     };

@@ -52,6 +52,8 @@ namespace CE::Vulkan
 		//! Used to 
 		StaticArray<VkImageLayout, RHI::Limits::MaxSwapChainImageCount> swapChainInitialImageLayouts{};
 
+		StaticArray<VkSemaphore, RHI::Limits::MaxSwapChainImageCount> renderFinishedSemaphores{};
+
 		List<VkSurfaceFormatKHR> surfaceFormats{};
 		VkSurfaceCapabilitiesKHR surfaceCapabilities{};
 		List<VkPresentModeKHR> presentationModes{};

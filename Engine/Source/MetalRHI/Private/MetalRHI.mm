@@ -112,9 +112,9 @@ namespace CE::Metal
         return {};
     }
 
-    RHI::Fence* MetalRHI::CreateFence(bool initiallySignalled)
+    RHI::Fence* MetalRHI::CreateFence(uint64_t initialValue)
     {
-        return new Metal::Fence(device, initiallySignalled);
+        return new Metal::Fence(device, initialValue);
     }
 
     void MetalRHI::DestroyFence(RHI::Fence* fence)
@@ -133,15 +133,30 @@ namespace CE::Metal
         return new Metal::CommandList(device, mtlQueue, commandListType);
     }
 
-    Array<RHI::CommandList*> MetalRHI::AllocateCommandLists(u32 count,
-                                                            RHI::CommandQueue* associatedQueue, CommandListType commandListType)
+    Array<RHI::CommandList*> MetalRHI::AllocateCommandLists(u32 count, RHI::CommandQueue* associatedQueue, CommandListType commandListType)
     {
-        return {};
+        if (associatedQueue == nullptr)
+            return {};
+        
+        auto queue = (Metal::CommandQueue*)associatedQueue;
+        id<MTLCommandQueue> mtlQueue = queue->GetMtlQueue();
+        
+        Array<RHI::CommandList*> result{};
+        
+        for (int i = 0; i < count; i++)
+        {
+            result.Add(new Metal::CommandList(device, mtlQueue, commandListType));
+        }
+        
+        return result;
     }
 
     void MetalRHI::FreeCommandLists(u32 count, RHI::CommandList** commandLists)
     {
-        
+        for (int i = 0; i < count; i++)
+        {
+            delete commandLists[i];
+        }
     }
 
     RHI::DeviceLimits* MetalRHI::GetDeviceLimits()

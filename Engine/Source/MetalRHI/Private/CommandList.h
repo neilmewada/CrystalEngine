@@ -23,6 +23,12 @@ namespace CE::Metal
         
         void RenderTargetNextSubPass() override;
         
+        bool BeginRenderPass(RHI::RenderPass* renderPass, RHI::RenderPassFrameBuffer* frameBuffer, RHI::AttachmentClearValue* clearValuesPerAttachment) override;
+        
+        void RenderPassNextSubpass() override;
+        
+        void EndRenderPass() override;
+        
         void ResourceBarrier(u32 count, ResourceBarrierDescriptor* barriers) override;
         
         void SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup* >& srgs) override;
@@ -59,7 +65,8 @@ namespace CE::Metal
 
         Device* device = nullptr;
         
-        Metal::RenderTarget* curRenderTarget = nullptr;
+        //Metal::RenderTarget* curRenderTarget = nullptr;
+        Metal::RenderPass* curRenderPass = nullptr;
         int curSubpass = 0;
         
         id<MTLCommandQueue> mtlCommandQueue = nil;
@@ -67,8 +74,14 @@ namespace CE::Metal
         id<MTLRenderCommandEncoder> mtlRenderEncoder = nil;
         id<MTLComputeCommandEncoder> mtlComputeEncoder = nil;
         
+        RHI::IndexBufferView indexBufferView{};
+        
+        RHI::PipelineState* boundPipeline = nullptr;
+        
         StaticArray<Metal::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> boundSRGs{};
         
+        Array<MTLViewport> viewportsArray;
+        Array<MTLScissorRect> scissorsArray;
     };
     
 } // namespace CE::Metal

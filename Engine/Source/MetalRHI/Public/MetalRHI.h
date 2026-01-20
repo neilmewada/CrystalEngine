@@ -20,7 +20,7 @@ namespace CE::Metal
         virtual void PreShutdown() override;
         virtual void Shutdown() override;
         
-        void *GetNativeHandle() override;
+        void* GetNativeHandle() override;
         
         GraphicsBackend GetGraphicsBackend() override { 
             return RHI::GraphicsBackend::Metal;
@@ -46,7 +46,7 @@ namespace CE::Metal
         
         Vec2i GetScreenSizeForWindow(void* platformWindowHandle) override;
         
-        RHI::Fence* CreateFence(bool initiallySignalled = false) override;
+        RHI::Fence* CreateFence(uint64_t initialValue = 0) override;
         
         void DestroyFence(RHI::Fence* fence) override;
         

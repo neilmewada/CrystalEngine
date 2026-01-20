@@ -129,11 +129,15 @@ namespace CE::RHI
         
 		virtual void EndRenderTarget() = 0;
         
-        //virtual void AcquireNextSwapChainImage(RHI::SwapChain* swapChain) = 0;
+        virtual bool BeginRenderPass(RenderPass* renderPass, RenderPassFrameBuffer* frameBuffer, AttachmentClearValue* clearValuesPerAttachment) = 0;
+        
+        virtual void RenderPassNextSubpass() = 0;
+        
+        virtual void EndRenderPass() = 0;
 
-		inline void SetCurrentImageIndex(u32 imageIndex)
+		inline void SetFrameIndex(u32 frameIndex)
 		{
-			currentImageIndex = imageIndex;
+			this->currentImageIndex = frameIndex;
 		}
 
 		virtual void ResourceBarrier(u32 count, ResourceBarrierDescriptor* barriers) = 0;

@@ -3,6 +3,7 @@
 namespace CE::RHI
 {
 	class CommandList;
+    class SwapChain;
 
 	enum class HardwareQueueClass
 	{
@@ -39,6 +40,9 @@ namespace CE::RHI
         
         RHI::Fence* signalFence = nullptr;
         uint64_t signalFenceValue = 0;
+        
+        u32 numPresentSwapChains = 0;
+        RHI::SwapChain** presentSwapChains = nullptr;
     };
 
 	class CORERHI_API CommandQueue : RHIResource

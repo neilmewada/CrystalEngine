@@ -49,6 +49,8 @@ namespace CE::Metal
         
         void FlushBindings() override;
         
+        id<MTLBuffer> GetArgumentBuffer(u32 frameIndex) { return argumentBuffers[frameIndex]; }
+        
     private:
         
         using BindingSlotId = int;

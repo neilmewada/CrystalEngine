@@ -16,6 +16,7 @@ namespace CE::Metal
         
         metalLayer = MetalPlatform::GetCAMetalLayer(window);
         
+        metalLayer.device = device->GetHandle();
         metalLayer.maximumDrawableCount = desc.imageCount;
         metalLayer.pixelFormat = ToMtlFormat(this->swapChainColorFormat);
         metalLayer.framebufferOnly = frameBufferOnly;
@@ -26,6 +27,13 @@ namespace CE::Metal
     void SwapChain::Rebuild()
     {
         // Do nothing
+    }
+    
+    bool SwapChain::AcquireNextImage()
+    {
+        curDrawable = [metalLayer nextDrawable];
+        
+        return curDrawable != nil;
     }
     
 } // namespace CE::Metal

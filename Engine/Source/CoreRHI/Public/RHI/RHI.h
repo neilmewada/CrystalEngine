@@ -96,7 +96,7 @@ namespace CE::RHI
 
         // - Command List -
 
-		virtual RHI::Fence* CreateFence(bool initiallySignalled = false) = 0;
+		virtual RHI::Fence* CreateFence(uint64_t initialValue = 0) = 0;
 		virtual void DestroyFence(RHI::Fence* fence) = 0;
 
 		virtual RHI::CommandList* AllocateCommandList(RHI::CommandQueue* associatedQueue, 

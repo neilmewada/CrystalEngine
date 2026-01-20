@@ -52,14 +52,31 @@ namespace CE::Metal
         {
             Metal::Fence* fence = static_cast<Metal::Fence*>(submission.signalFence);
             
-            [lastCmdBuffer encodeWaitForEvent:fence->GetEvent() value:submission.signalFenceValue];
+            [lastCmdBuffer encodeSignalEvent:fence->GetEvent() value:submission.signalFenceValue];
         }
         
         for (u32 i = 0; i < submission.numCommandLists; i++)
         {
             Metal::CommandList* cmdList = static_cast<Metal::CommandList*>(submission.commandLists[i]);
             
+            if (i == submission.numCommandLists - 1 && submission.presentSwapChains != nullptr && submission.numPresentSwapChains > 0)
+            {
+                for (int j = 0; j < submission.numPresentSwapChains; j++)
+                {
+                    Metal::SwapChain* swapChain = (Metal::SwapChain*)submission.presentSwapChains[j];
+                    
+                    [cmdList->GetMtlCommandBuffer() presentDrawable:swapChain->GetCurrentDrawable()];
+                }
+            }
+            
             [cmdList->GetMtlCommandBuffer() commit];
+        }
+        
+        for (int j = 0; j < submission.numPresentSwapChains; j++)
+        {
+            Metal::SwapChain* swapChain = (Metal::SwapChain*)submission.presentSwapChains[j];
+            
+            swapChain->curDrawable = nil;
         }
         
         return true;

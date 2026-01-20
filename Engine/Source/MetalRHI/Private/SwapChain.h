@@ -14,6 +14,10 @@ namespace CE::Metal
         
         CAMetalLayer* GetMetalLayer() const { return metalLayer; }
         
+        id<CAMetalDrawable> GetCurrentDrawable() const { return curDrawable; }
+        
+        bool AcquireNextImage() override;
+        
     private:
         
         Device* device = nullptr;
@@ -24,7 +28,9 @@ namespace CE::Metal
     private:
         
         CAMetalLayer* metalLayer = nil;
+        id<CAMetalDrawable> curDrawable = nil;
         
+        friend class Metal::CommandQueue;
     };
 
 } // namespace CE::Metal

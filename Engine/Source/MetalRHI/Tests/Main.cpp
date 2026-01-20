@@ -113,7 +113,7 @@ struct PSInput
 PSInput VertMain(VSInput input)
 {
     PSInput o;
-    o.position = float4(input.position * _TimeElapsed, 1.0);
+    o.position = float4(input.position, 1.0);
     o.color = input.color;
     return o;
 }
@@ -248,6 +248,8 @@ TEST(RHI, MetalBasic)
     // - Vertex & Index Buffers -
     
     RHI::Buffer* vertexBuffer = nullptr;
+    RHI::VertexBufferView vertexBufferView{};
+    u32 numVertices = 0;
     {
         RHI::BufferDescriptor vertexBufferDesc{};
         
@@ -259,6 +261,10 @@ TEST(RHI, MetalBasic)
         vertexBuffer = gDynamicRHI->CreateBuffer(vertexBufferDesc);
         
         vertexBuffer->UploadData(TriangleVertices, sizeof(TriangleVertices));
+        
+        vertexBufferView = RHI::VertexBufferView(vertexBuffer, 0, vertexBuffer->GetBufferSize(), sizeof(TriVertex));
+        
+        numVertices = COUNTOF(TriangleVertices);
     }
     
     // - Render Pass -
@@ -355,17 +361,82 @@ TEST(RHI, MetalBasic)
         for (int i = 0; i < kNumFrames; i++)
         {
             cmdLists[i] = gDynamicRHI->AllocateCommandList(cmdQueue);
+            cmdLists[i]->SetFrameIndex(i);
         }
     }
     
-    int currentFrameInFlight = 0;
+    int frameIndex = 0;
+    uint64_t frameDoneValue[kNumFrames] = {};
+    RHI::Fence* graphicsFence = gDynamicRHI->CreateFence();
     
     while (!IsEngineRequestingExit())
     {
         app->Tick();
         InputManager::Get().Tick();
         
+        swapChain->AcquireNextImage();
         
+        if (frameDoneValue[frameIndex] != 0)
+        {
+            graphicsFence->WaitCPU(frameDoneValue[frameIndex]);
+        }
+        
+        uint64_t done = graphicsFence->NextSignalValue();
+        frameDoneValue[frameIndex] = done;
+        
+        RHI::CommandQueueSubmission submission{};
+        submission.numCommandLists = 1;
+        submission.commandLists = &cmdLists[frameIndex];
+        
+        submission.signalFence = graphicsFence;
+        submission.signalFenceValue = done;
+        
+        submission.numPresentSwapChains = 1;
+        submission.presentSwapChains = &swapChain;
+        
+        auto cmdList = cmdLists[frameIndex];
+        
+        cmdList->Begin();
+        {
+            AttachmentClearValue clearValue{};
+            clearValue.clearValue = Vec4(0, 0, 0, 1);
+            
+            cmdList->BeginRenderPass(renderPass, frameBuffers[frameIndex], &clearValue);
+            {
+                RHI::ScissorState scissor{};
+                scissor.x = scissor.y = 0;
+                scissor.width = swapChain->GetWidth();
+                scissor.height = swapChain->GetHeight();
+                cmdList->SetScissors(1, &scissor);
+                
+                RHI::ViewportState viewport{};
+                viewport.x = viewport.y = 0;
+                viewport.minDepth = 0; viewport.maxDepth = 1;
+                viewport.width = scissor.width;
+                viewport.height = scissor.height;
+                cmdList->SetViewports(1, &viewport);
+                
+                cmdList->BindPipelineState(pipeline);
+                
+                cmdList->SetShaderResourceGroups({ perSceneSrg });
+                cmdList->CommitShaderResources();
+                
+                cmdList->BindVertexBuffers(0, 1, &vertexBufferView);
+                
+                cmdList->DrawLinear(RHI::DrawLinearArguments{
+                    .firstInstance = 0,
+                    .instanceCount = 1,
+                    .vertexCount = 3,
+                    .vertexOffset = 0
+                });
+            }
+            cmdList->EndRenderPass();
+        }
+        cmdList->End();
+        
+        cmdQueue->Submit(submission);
+        
+        frameIndex = (frameIndex + 1) % kNumFrames;
     }
     
     // - Cleanup -
@@ -376,6 +447,7 @@ TEST(RHI, MetalBasic)
     delete renderPass;
     gDynamicRHI->FreeCommandLists(kNumFrames, cmdLists);
     delete pipeline;
+    delete graphicsFence;
     
     for (int i = 0; i < kNumFrames; i++)
     {

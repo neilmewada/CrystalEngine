@@ -53,11 +53,14 @@ namespace CE::RHI
 
         //! @brief Returns the formats of color & depth-stencil attachments at the given subpass number.
         virtual void GetAttachmentFormats(Array<RHI::Format>& outColorFormats, RHI::Format& outDepthStencilFormat, u32 subpassSelection) = 0;
+        
+        const RHI::RenderPassLayout& GetRenderPassLayout() const { return rpLayout; }
 
     protected:
-        RenderPass() : RHI::RHIResource(RHI::ResourceType::RenderPass)
+        RenderPass(const RenderPassLayout& rpLayout) : RHI::RHIResource(RHI::ResourceType::RenderPass), rpLayout(rpLayout)
         {}
         
+        RHI::RenderPassLayout rpLayout{};
     };
     
 } // namespace CE::RHI
