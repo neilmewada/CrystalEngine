@@ -333,7 +333,9 @@ namespace CE
 	VkSurfaceKHR SDLPlatformWindow::CreateVulkanSurface(VkInstance instance)
 	{
 		VkSurfaceKHR surface = nullptr;
+#if PAL_TRAIT_VULKAN_SUPPORTED
 		SDL_Vulkan_CreateSurface(handle, instance, &surface);
+#endif
 		return surface;
 	}
 

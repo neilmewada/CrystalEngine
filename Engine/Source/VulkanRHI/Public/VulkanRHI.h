@@ -77,7 +77,7 @@ namespace CE::Vulkan
 
 		virtual bool IsOffscreenOnly() override;
 
-		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) override;
+		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClass queueClass) override;
 
         virtual RHI::CommandQueue* GetPrimaryGraphicsQueue() override;
         virtual RHI::CommandQueue* GetPrimaryTransferQueue() override;
@@ -87,7 +87,7 @@ namespace CE::Vulkan
 
         // - Command List -
 
-        virtual RHI::Fence* CreateFence(bool initiallySignalled = false) override;
+        virtual RHI::Fence* CreateFence(uint64_t initialValue) override;
 
         virtual void DestroyFence(RHI::Fence* fence) override;
 

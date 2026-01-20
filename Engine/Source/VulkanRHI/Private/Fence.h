@@ -6,18 +6,22 @@ namespace CE::Vulkan
     class Fence : public RHI::Fence
     {
     public:
-        Fence(VulkanDevice* device, bool signalled = false);
+        Fence(VulkanDevice* device, uint64_t initialValue);
 
         virtual ~Fence();
 
-        virtual void Reset() override;
-
-        virtual void WaitForFence() override;
-
-        virtual bool IsSignalled() override;
-
         inline VkFence GetHandle() const { return fence; }
 
+        void RefreshCompletedValue() override
+        {
+            
+        }
+        
+        bool WaitCPU(uint64_t value, uint64_t timeoutNs = ~0ull) override
+        {
+            
+        }
+        
     protected:
 
         VulkanDevice* device = nullptr;

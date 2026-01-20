@@ -2,14 +2,14 @@
 
 namespace CE::Vulkan
 {
+    // FIXME: Rewrite the whole fence class
     
-    Fence::Fence(VulkanDevice* device, bool signalled)
-        : device(device)
+    Fence::Fence(VulkanDevice* device, uint64_t initialValue) : RHI::Fence(initialValue)
     {
         VkFenceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         createInfo.flags = 0;
-        if (signalled)
+        if (initialValue != 0)
             createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
         vkCreateFence(device->GetHandle(), &createInfo, VULKAN_CPU_ALLOCATOR, &fence);
@@ -18,21 +18,6 @@ namespace CE::Vulkan
     Fence::~Fence()
     {
         vkDestroyFence(device->GetHandle(), fence, VULKAN_CPU_ALLOCATOR);
-    }
-
-    void Fence::Reset()
-    {
-        vkResetFences(device->GetHandle(), 1, &fence);
-    }
-
-    void Fence::WaitForFence()
-    {
-        vkWaitForFences(device->GetHandle(), 1, &fence, VK_TRUE, NumericLimits<u64>::Max());
-    }
-
-    bool Fence::IsSignalled()
-    {
-        return vkGetFenceStatus(device->GetHandle(), fence) == VK_SUCCESS;
     }
 
 } // namespace CE::Vulkan

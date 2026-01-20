@@ -34,6 +34,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::CoreShader
             CE::CoreRHI
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
+            $<${PAL_TRAIT_METAL_SUPPORTED}:CE::MetalRHI>
     RUNTIME_DEPENDENCIES
 
 )

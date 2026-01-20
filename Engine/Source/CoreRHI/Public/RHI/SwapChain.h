@@ -31,11 +31,6 @@ namespace CE::RHI
 		{}
 
 	public:
-
-		inline u32 GetCurrentImageIndex() const
-		{
-			return currentImageIndex;
-		}
         
         bool IsFrameBufferOnly() const { return frameBufferOnly; }
 
@@ -59,8 +54,7 @@ namespace CE::RHI
         
 		RHI::Format swapChainColorFormat{};
         bool frameBufferOnly = true;
-
-		u32 currentImageIndex = 0;
+        
 		u32 width = 0;
 		u32 height = 0;
 

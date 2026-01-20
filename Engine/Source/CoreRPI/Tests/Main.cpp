@@ -5,8 +5,6 @@
 
 #include <gtest/gtest.h>
 
-using namespace CE;
-
 #include "CoreRPI_Test.private.h"
 
 #include "TestFeatureProcessor.h"

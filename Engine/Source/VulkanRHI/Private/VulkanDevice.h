@@ -62,7 +62,7 @@ namespace CE::Vulkan
 
         // - Getters -
 
-		Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask);
+		Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClass queueClass);
 		Array<RHI::CommandQueue*> AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass);
 
 		inline bool IsUnifiedMemoryArchitecture() const { return isUnifiedMemory; }

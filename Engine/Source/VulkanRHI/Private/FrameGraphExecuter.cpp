@@ -303,7 +303,7 @@ namespace CE::Vulkan
 
 		commandList->Begin();
 		{
-			commandList->SetCurrentImageIndex(currentSubmissionIndex);
+			commandList->SetFrameIndex(currentSubmissionIndex);
 
 			for (int scopeIndex = 0; scopeIndex < scopeChain.GetSize(); scopeIndex++)
 			{
@@ -868,7 +868,9 @@ namespace CE::Vulkan
 			{
 				for (int i = 0; i < scopeChain.Top()->presentSwapChains.GetSize(); i++)
 				{
-					Vulkan::Texture* image = (Vulkan::Texture*)scopeChain.Top()->presentSwapChains[i]->GetCurrentImage();
+                    auto presentSwapChain = (Vulkan::SwapChain*)scopeChain.Top()->presentSwapChains[i];
+                    
+					Vulkan::Texture* image = presentSwapChain->GetCurrentImage();
 					if (image->curFamilyIndex < 0)
 						image->curFamilyIndex = presentQueue->GetFamilyIndex();
 

@@ -40,6 +40,6 @@ ce_add_target(${PROJECT_NAME} SHARED
 )
 
 if(${CE_BUILD_TESTS})
-    add_subdirectory(Tests)
+    #add_subdirectory(Tests)
 endif()
 

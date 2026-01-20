@@ -26,13 +26,13 @@ else()
 endif()
 
 # Graphics APIs
-ce_set(PAL_TRAIT_VULKAN_SUPPORTED 1)
+ce_set(PAL_TRAIT_VULKAN_SUPPORTED 0)
 ce_set(PAL_TRAIT_METAL_SUPPORTED 1)
 ce_set(PAL_TRAIT_SDL_SUPPORTED 1)
 
 set(CMAKE_XCODE_SCHEME_ENABLE_GPU_API_VALIDATION 1)
 
-add_compile_definitions(PAL_TRAIT_VULKAN_SUPPORTED=1)
+add_compile_definitions(PAL_TRAIT_VULKAN_SUPPORTED=0)
 add_compile_definitions(PAL_TRAIT_METAL_SUPPORTED=1)
 add_compile_definitions(PAL_TRAIT_SDL_SUPPORTED=1)
 # For testing only

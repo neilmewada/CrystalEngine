@@ -968,14 +968,15 @@ namespace CE::Vulkan
 
 	}
 
-	Array<RHI::CommandQueue*> VulkanDevice::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
+	Array<RHI::CommandQueue*> VulkanDevice::GetHardwareQueues(RHI::HardwareQueueClass queueClass)
 	{
 		Array<RHI::CommandQueue*> result{};
 
 		for (int i = 0; i < queues.GetSize(); i++)
 		{
-			if ((queues[i]->GetQueueMask() & queueMask) == queueMask)
-				result.Add(queues[i]);
+            // FIXME: fix this asap
+			//if ((queues[i]->GetQueueMask() & queueMask) == queueMask)
+			//	result.Add(queues[i]);
 		}
 
 		return result;

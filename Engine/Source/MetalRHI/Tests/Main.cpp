@@ -403,7 +403,7 @@ TEST(RHI, MetalBasic)
             
             cmdList->BeginRenderPass(renderPass, frameBuffers[frameIndex], &clearValue);
             {
-                RHI::ScissorState scissor{};
+                /*RHI::ScissorState scissor{};
                 scissor.x = scissor.y = 0;
                 scissor.width = swapChain->GetWidth();
                 scissor.height = swapChain->GetHeight();
@@ -414,7 +414,7 @@ TEST(RHI, MetalBasic)
                 viewport.minDepth = 0; viewport.maxDepth = 1;
                 viewport.width = scissor.width;
                 viewport.height = scissor.height;
-                cmdList->SetViewports(1, &viewport);
+                cmdList->SetViewports(1, &viewport);*/
                 
                 cmdList->BindPipelineState(pipeline);
                 

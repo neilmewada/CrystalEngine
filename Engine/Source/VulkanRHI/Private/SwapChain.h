@@ -36,6 +36,8 @@ namespace CE::Vulkan
 		{
 			RebuildSwapChain();
 		}
+        
+        Vulkan::Texture* GetImageAt(u32 index) { return images[index]; }
 
 	protected:
 
@@ -48,6 +50,8 @@ namespace CE::Vulkan
 		PlatformWindow* window = nullptr;
 
 		RHI::SwapChainDescriptor desc{};
+        
+        Array<Vulkan::Texture*> images{};
 
 		//! Used to 
 		StaticArray<VkImageLayout, RHI::Limits::MaxSwapChainImageCount> swapChainInitialImageLayouts{};

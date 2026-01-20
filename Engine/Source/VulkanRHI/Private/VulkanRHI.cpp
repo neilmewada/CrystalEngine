@@ -302,9 +302,9 @@ namespace CE::Vulkan
 		return VulkanPlatform::GetScreenSizeForWindow(platformWindowHandle);
 	}
 
-    RHI::Fence* VulkanRHI::CreateFence(bool initiallySignalled)
+    RHI::Fence* VulkanRHI::CreateFence(uint64_t initialValue)
     {
-        return new Vulkan::Fence(device, initiallySignalled);
+        return new Vulkan::Fence(device, initialValue);
     }
 
     void VulkanRHI::DestroyFence(RHI::Fence* fence)
@@ -520,9 +520,9 @@ namespace CE::Vulkan
         delete pipeline;
     }
 
-	Array<RHI::CommandQueue*> VulkanRHI::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
+	Array<RHI::CommandQueue*> VulkanRHI::GetHardwareQueues(RHI::HardwareQueueClass queueClass)
 	{
-		return device->GetHardwareQueues(queueMask);
+		return device->GetHardwareQueues(queueClass);
 	}
 
     RHI::CommandQueue* VulkanRHI::GetPrimaryGraphicsQueue()

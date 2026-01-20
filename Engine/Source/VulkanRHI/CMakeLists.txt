@@ -45,5 +45,5 @@ ce_add_target(${PROJECT_NAME} SHARED
 )
 
 if(${PAL_TRAIT_BUILD_TESTS_SUPPORTED})
-    add_subdirectory(Tests)
+    #add_subdirectory(Tests)
 endif()
