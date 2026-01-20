@@ -47,7 +47,7 @@ static void WindowTestBegin()
     PlatformWindowInfo windowInfo{
         .maximised = false,
         .fullscreen = false,
-        .resizable = false,
+        .resizable = true,
         .hidden = false,
         .windowFlags = PlatformWindowFlags::DestroyOnClose
     };
