@@ -123,7 +123,7 @@ namespace CE::Vulkan
 			return false;
 		}
 
-		Array<VkCommandBuffer> commandBuffers{};
+		List<VkCommandBuffer> commandBuffers{};
 		commandBuffers.Reserve(submission.numCommandLists);
 
 		for (u32 i = 0; i < submission.numCommandLists; i++)
@@ -133,18 +133,18 @@ namespace CE::Vulkan
 			commandBuffers.Add(((Vulkan::CommandList*)submission.commandLists[i])->GetCommandBuffer());
 		}
 
-		Array<VkSemaphore> waitSemaphores{};
-		Array<VkPipelineStageFlags> waitStages{};
-		Array<uint64_t> waitValues{};
+		List<VkSemaphore> waitSemaphores{};
+		List<VkPipelineStageFlags> waitStages{};
+		List<uint64_t> waitValues{};
 
-		Array<VkSemaphore> signalSemaphores{};
-		Array<uint64_t> signalValues{};
+		List<VkSemaphore> signalSemaphores{};
+		List<uint64_t> signalValues{};
 
 		waitSemaphores.Reserve(submission.numPresentSwapChains + 1);
 		waitStages.Reserve(submission.numPresentSwapChains + 1);
 		waitValues.Reserve(submission.numPresentSwapChains + 1);
 
-		Array<VkSwapchainKHR> swapChains{};
+		List<VkSwapchainKHR> swapChains{};
 		swapChains.Reserve(submission.numPresentSwapChains);
 
 		for (u32 i = 0; i < submission.numPresentSwapChains; ++i)
@@ -166,6 +166,7 @@ namespace CE::Vulkan
 		submitInfo.pNext = &timelineSemaphoreSubmitInfo;
 		submitInfo.commandBufferCount = submission.numCommandLists;
 		
+		// TODO:
 	}
 
 } // namespace CE

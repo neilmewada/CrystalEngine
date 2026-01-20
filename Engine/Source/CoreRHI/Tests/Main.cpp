@@ -106,7 +106,7 @@ struct SceneData
     float timeElapsed;
 };
 
-constexpr const char HLSL_Test[] = R"(
+constexpr const char HLSL_Triangle_Shader[] = R"(
 #include "Core/Macros.hlsli"
 
 cbuffer _SceneData : SRG_PerScene(b0)
@@ -175,8 +175,8 @@ TEST(RHI, Triangle)
     ShaderCompiler compiler{};
     
     ShaderReflection reflection{};
-    BinaryBlob vertMSL;
-    BinaryBlob fragMSL;
+    BinaryBlob vertBlob;
+    BinaryBlob fragBlob;
     
     ShaderCompilationInfo compileInfo{};
     compileInfo.includeSearchPaths.Add(PlatformDirectories::GetLaunchDir() / "Engine/Shaders");
@@ -192,7 +192,7 @@ TEST(RHI, Triangle)
         L"-fspv-preserve-bindings",
         L"-fspv-preserve-interface"
     });
-    compileInfo.stages.GetLast().outByteCode = &vertMSL;
+    compileInfo.stages.GetLast().outByteCode = &vertBlob;
     
     compileInfo.stages.Add({});
     compileInfo.stages.GetLast().entryPoint = "FragMain";
@@ -204,9 +204,15 @@ TEST(RHI, Triangle)
         L"-fspv-preserve-bindings",
         L"-fspv-preserve-interface"
     });
-    compileInfo.stages.GetLast().outByteCode = &fragMSL;
+    compileInfo.stages.GetLast().outByteCode = &fragBlob;
     
-    auto result = compiler.CompileMSL(HLSL_Test, COUNTOF(HLSL_Test), compileInfo);
+	ShaderBlobFormat blobFormat = ShaderBlobFormat::Spirv;
+    if (RHI::gDynamicRHI->GetGraphicsBackend() == GraphicsBackend::Vulkan)
+        blobFormat = ShaderBlobFormat::Spirv;
+	else if (RHI::gDynamicRHI->GetGraphicsBackend() == GraphicsBackend::Metal)
+        blobFormat = ShaderBlobFormat::MSL;
+
+    auto result = compiler.Compile(blobFormat, HLSL_Triangle_Shader, COUNTOF(HLSL_Triangle_Shader), compileInfo);
     String errorMsg = compiler.GetErrorMessage();
     EXPECT_EQ(result, ShaderCompiler::ERR_Success);
     
@@ -215,8 +221,8 @@ TEST(RHI, Triangle)
     vertShaderDesc.defaultEntryPoint = "VertMain";
     vertShaderDesc.stage = RHI::ShaderStage::Vertex;
     vertShaderDesc.debugName = vertShaderDesc.name;
-    vertShaderDesc.byteCode = vertMSL.GetDataPtr();
-    vertShaderDesc.byteSize = vertMSL.GetDataSize();
+    vertShaderDesc.byteCode = vertBlob.GetDataPtr();
+    vertShaderDesc.byteSize = vertBlob.GetDataSize();
     
     RHI::ShaderModule* vertShader = gDynamicRHI->CreateShaderModule(vertShaderDesc);
     
@@ -225,8 +231,8 @@ TEST(RHI, Triangle)
     fragShaderDesc.defaultEntryPoint = "FragMain";
     fragShaderDesc.stage = RHI::ShaderStage::Fragment;
     fragShaderDesc.debugName = fragShaderDesc.name;
-    fragShaderDesc.byteCode = fragMSL.GetDataPtr();
-    fragShaderDesc.byteSize = fragMSL.GetDataSize();
+    fragShaderDesc.byteCode = fragBlob.GetDataPtr();
+    fragShaderDesc.byteSize = fragBlob.GetDataSize();
     
     RHI::ShaderModule* fragShader = gDynamicRHI->CreateShaderModule(fragShaderDesc);
     

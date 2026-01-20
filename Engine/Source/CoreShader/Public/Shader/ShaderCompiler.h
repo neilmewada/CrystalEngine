@@ -89,8 +89,14 @@ namespace CE
         ~ShaderCompiler();
         
         ErrorCode CompileMSL(const IO::Path& hlslPath, ShaderCompilationInfo& config);
-        
         ErrorCode CompileMSL(const void* data, u32 dataSize, ShaderCompilationInfo& config);
+
+        ErrorCode CompileSpirv(const IO::Path& hlslPath, ShaderCompilationInfo& config);
+        ErrorCode CompileSpirv(const void* data, u32 dataSize, ShaderCompilationInfo& config);
+
+        ErrorCode Compile(ShaderBlobFormat outFormat, const IO::Path& hlslPath, ShaderCompilationInfo& config);
+
+        ErrorCode Compile(ShaderBlobFormat outFormat, const void* data, u32 dataSize, ShaderCompilationInfo& config);
 
 		// It allocates memory to the *outByteCode location which you will have to manually release after use.
 		ErrorCode BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs);
@@ -127,6 +133,9 @@ namespace CE
     protected:
 
         ErrorCode CompileMSL(DxcBuffer buffer, ShaderCompilationInfo& config);
+        ErrorCode CompileSpirv(DxcBuffer buffer, ShaderCompilationInfo& config);
+
+        ErrorCode Compile(ShaderBlobFormat outFormat, DxcBuffer buffer, ShaderCompilationInfo& config);
         
 		ErrorCode BuildSpirv(DxcBuffer buffer, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs);
 

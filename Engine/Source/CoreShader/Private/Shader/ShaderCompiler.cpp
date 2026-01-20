@@ -268,7 +268,79 @@ namespace CE
         return CompileMSL(buffer, config);
     }
 
-	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
+    ShaderCompiler::ErrorCode ShaderCompiler::CompileSpirv(const IO::Path& hlslPath, ShaderCompilationInfo& config)
+    {
+        if (!hlslPath.Exists())
+            return ERR_FileNotFound;
+        if (hlslPath.IsDirectory())
+            return ERR_InvalidFile;
+
+        HRESULT status;
+
+        CComPtr<IDxcBlobEncoding> source = nullptr;
+        std::wstring str = ToWString(hlslPath.GetString());
+        std::wstring fileNameStr = ToWString(hlslPath.GetFileName().GetString());
+
+        status = impl->utils->LoadFile(str.data(), nullptr, &source);
+
+        if (!SUCCEEDED(status))
+        {
+            this->errorMessage = "Failed to load source file";
+            return ERR_FailedToLoadFile;
+        }
+
+        DxcBuffer buffer;
+        buffer.Ptr = source->GetBufferPointer();
+        buffer.Size = source->GetBufferSize();
+        buffer.Encoding = DXC_CP_UTF8;
+
+        return CompileSpirv(buffer, config);
+    }
+
+    ShaderCompiler::ErrorCode ShaderCompiler::CompileSpirv(const void* data, u32 dataSize, ShaderCompilationInfo& config)
+    {
+        HRESULT status = 0;
+
+        CComPtr<IDxcBlobEncoding> source = nullptr;
+
+        status = impl->utils->CreateBlob(data, dataSize, DXC_CP_UTF8, &source);
+
+        if (!SUCCEEDED(status))
+        {
+            this->errorMessage = "Failed to load source file";
+            return ERR_FailedToLoadFile;
+        }
+
+        DxcBuffer buffer;
+        buffer.Ptr = source->GetBufferPointer();
+        buffer.Size = source->GetBufferSize();
+        buffer.Encoding = DXC_CP_UTF8;
+
+        return CompileSpirv(buffer, config);
+    }
+
+    ShaderCompiler::ErrorCode ShaderCompiler::Compile(ShaderBlobFormat outFormat, const IO::Path& hlslPath,
+                                                      ShaderCompilationInfo& config)
+    {
+		if (outFormat == ShaderBlobFormat::MSL)
+        {
+            return CompileMSL(hlslPath, config);
+        }
+        
+        return CompileSpirv(hlslPath, config);
+    }
+
+    ShaderCompiler::ErrorCode ShaderCompiler::Compile(ShaderBlobFormat outFormat, const void* data, u32 dataSize, ShaderCompilationInfo& config)
+    {
+		if (outFormat == ShaderBlobFormat::MSL)
+        {
+            return CompileMSL(data, dataSize, config);
+        }
+
+        return CompileSpirv(data, dataSize, config);
+    }
+
+    ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 	{
 		if (!hlslPath.Exists())
 			return ERR_FileNotFound;
@@ -520,23 +592,6 @@ namespace CE
                     };
                     
                     add_msl_binding();
-                    
-                    /*if (variable.shaderStages == RHI::ShaderStage::Compute)
-                    {
-                        mslBinding.stage = spv::ExecutionModelKernel;
-                    }
-                    else if (variable.shaderStages == RHI::ShaderStage::Vertex)
-                    {
-                        mslBinding.stage = spv::ExecutionModelVertex;
-                    }
-                    else if (variable.shaderStages == RHI::ShaderStage::Fragment)
-                    {
-                        mslBinding.stage = spv::ExecutionModelFragment;
-                    }
-                    else if (variable.shaderStages == (RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment))
-                    {
-                        mslBinding.stage = spv::ExecutionModelFragment;
-                    }*/
                 }
             }
             
@@ -559,7 +614,149 @@ namespace CE
         return ERR_Success;
     }
 
-	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(DxcBuffer buffer, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
+    ShaderCompiler::ErrorCode ShaderCompiler::CompileSpirv(DxcBuffer buffer, ShaderCompilationInfo& config)
+    {
+        HRESULT status = 0;
+
+        if (config.outReflection == nullptr)
+        {
+            return ERR_ReflectionRequired;
+        }
+
+        Array<std::wstring> globalDefinesWString = config.globalDefines.Transform<std::wstring>([&](String& string)
+            {
+                return ToWString(string);
+            });
+
+        RHI::ShaderStage stageMasks = RHI::ShaderStage::None;
+
+        for (int i = 0; i < config.stages.GetSize(); i++)
+        {
+            auto& stageInfo = config.stages[i];
+
+            Array<const wchar_t*> wcharArgs{};
+            for (const auto& arg : stageInfo.extraArgs)
+            {
+                wcharArgs.Add(arg.data());
+            }
+
+            wcharArgs.Add(L"-spirv");
+
+            std::wstring entryName = ToWString(stageInfo.entryPoint);
+
+            wcharArgs.AddRange({ L"-E", entryName.data() });
+
+            if (stageInfo.stage == RHI::ShaderStage::Vertex)
+            {
+                wcharArgs.AddRange({ L"-T", L"vs_6_0" });
+            }
+            else if (stageInfo.stage == RHI::ShaderStage::Fragment)
+            {
+                wcharArgs.AddRange({ L"-T", L"ps_6_0" });
+            }
+            else if (stageInfo.stage == RHI::ShaderStage::Compute)
+            {
+                wcharArgs.AddRange({ L"-T", L"cs_6_0" });
+            }
+            else
+            {
+                continue;
+            }
+
+            for (const auto& define : globalDefinesWString)
+            {
+                wcharArgs.AddRange({ L"-D", define.data() });
+            }
+
+            Array<std::wstring> stageDefinesWString = stageInfo.stageDefines.Transform<std::wstring>([&](String& string)
+                {
+                    return ToWString(string);
+                });
+
+            for (const auto& define : stageDefinesWString)
+            {
+                wcharArgs.AddRange({ L"-D", define.data() });
+            }
+
+            Array<std::wstring> includeSearchPathsWString = config.includeSearchPaths.Transform<std::wstring>([&](IO::Path& path) -> std::wstring
+                {
+                    return ToWString(path.GetString());
+                });
+
+            for (const auto& includePath : includeSearchPathsWString)
+            {
+                wcharArgs.AddRange({ L"-I", includePath.data() });
+            }
+
+            CComPtr<IDxcResult> results;
+            status = impl->compiler->Compile(
+                &buffer,                // Source buffer.
+                wcharArgs.GetData(),     // Array of pointers to arguments.
+                (u32)wcharArgs.GetSize(),      // Number of arguments.
+                impl->includeHandler,    // User-provided interface to handle #include directives (optional).
+                IID_PPV_ARGS(&results)  // Compiler output status, buffer, and errors.
+            );
+
+            defer(&)
+            {
+                results.Release();
+            };
+
+            results->GetStatus(&status);
+
+            if (!SUCCEEDED(status))
+            {
+                CComPtr<IDxcBlobEncoding> error;
+                results->GetErrorBuffer(&error);
+                char* message = (char*)error->GetBufferPointer();
+                auto size = error->GetBufferSize();
+                this->errorMessage = message;
+                return ERR_CompilationFailure;
+            }
+
+            CComPtr<IDxcBlob> blob;
+            status = results->GetResult(&blob);
+
+            if (!SUCCEEDED(status))
+            {
+                return ERR_CompilationFailure;
+            }
+
+            if (config.outReflection != nullptr)
+            {
+                ShaderReflector reflector{};
+                auto reflectionError = reflector.ReflectSpirv(blob->GetBufferPointer(), (u32)blob->GetBufferSize(), stageInfo.stage, *config.outReflection, stageInfo.entryPoint);
+
+                if (reflectionError != ShaderReflector::ERR_Success)
+                {
+                    return ERR_ReflectionFailure;
+                }
+            }
+
+            stageInfo.outByteCode->LoadData(blob->GetBufferPointer(), blob->GetBufferSize());
+
+            stageMasks |= stageInfo.stage;
+        }
+
+        return ERR_Success;
+    }
+
+    ShaderCompiler::ErrorCode ShaderCompiler::Compile(ShaderBlobFormat outFormat, DxcBuffer buffer,
+                                                      ShaderCompilationInfo& config)
+    {
+		if (outFormat == ShaderBlobFormat::MSL)
+        {
+            return CompileMSL(buffer, config);
+        }
+        else if (outFormat == ShaderBlobFormat::Spirv)
+        {
+            return CompileSpirv(buffer, config);
+        }
+
+        return ERR_InvalidArgs;
+    }
+
+    ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(DxcBuffer buffer, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 	{
 		HRESULT status = 0;
 		ShaderBuildConfig& config = const_cast<ShaderBuildConfig&>(buildConfig);
