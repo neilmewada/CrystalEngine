@@ -6,7 +6,7 @@ namespace CE::Vulkan
 	class VULKANRHI_API CommandBufferAllocator final
 	{
 	public:
-		CommandBufferAllocator(VulkanDevice* device);
+		CommandBufferAllocator(Device* device);
 		virtual ~CommandBufferAllocator();
 
 		VkCommandPool Allocate(u32 count, VkCommandBuffer* outBuffers, VkCommandBufferLevel level, u32 queueFamilyIndex);
@@ -18,7 +18,7 @@ namespace CE::Vulkan
 		struct Context
 		{
 			CommandBufferAllocator* allocator = nullptr;
-			VulkanDevice* device = nullptr;
+			Device* device = nullptr;
 		};
 
 		struct CommandPool
@@ -39,7 +39,7 @@ namespace CE::Vulkan
 			List<CommandPool> commandPools{};
 		};
 
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
 
 		ThreadLocalContext<Allocator> threadedAllocator;
 

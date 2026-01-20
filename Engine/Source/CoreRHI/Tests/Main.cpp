@@ -312,12 +312,12 @@ TEST(RHI, Triangle)
         
         renderPass = gDynamicRHI->CreateRenderPass(rpLayout);
         
-        RHI::RenderPassFrameBufferDescriptor frameBufferDesc{};
-        frameBufferDesc.renderPass = renderPass;
-        frameBufferDesc.attachments.Add(RenderPassFrameAttachment(swapChain));
-        
         for (int i = 0; i < kNumFrames; i++)
         {
+            RHI::RenderPassFrameBufferDescriptor frameBufferDesc{};
+            frameBufferDesc.renderPass = renderPass;
+            frameBufferDesc.attachments.Add(RenderPassFrameAttachment(swapChain, i));
+
             frameBuffers[i] = gDynamicRHI->CreateRenderPassFrameBuffer(frameBufferDesc);
         }
     }

@@ -4,7 +4,7 @@
 namespace CE::Vulkan
 {
 
-	CommandQueue::CommandQueue(VulkanDevice* device, 
+	CommandQueue::CommandQueue(Device* device, 
 		u32 familyIndex, u32 queueIndex, 
 		RHI::HardwareQueueClassMask queueMask, 
 		VkQueue queue, bool presentSupported)
@@ -47,7 +47,7 @@ namespace CE::Vulkan
 		if (fence != nullptr)
 		{
 			auto submitFence = ((Vulkan::Fence*)fence)->GetHandle();
-			vkQueueSubmit(queue, 1, &submitInfo, submitFence);
+			vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
 		}
 		else
 		{
@@ -114,6 +114,58 @@ namespace CE::Vulkan
 		submissionMutex.Unlock();
 
 		return true;
+	}
+
+	bool CommandQueue::Submit(const CommandQueueSubmission& submission)
+	{
+		if (submission.numCommandLists == 0 || submission.commandLists == nullptr)
+		{
+			return false;
+		}
+
+		Array<VkCommandBuffer> commandBuffers{};
+		commandBuffers.Reserve(submission.numCommandLists);
+
+		for (u32 i = 0; i < submission.numCommandLists; i++)
+		{
+			if (submission.commandLists[i] == nullptr)
+				return false;
+			commandBuffers.Add(((Vulkan::CommandList*)submission.commandLists[i])->GetCommandBuffer());
+		}
+
+		Array<VkSemaphore> waitSemaphores{};
+		Array<VkPipelineStageFlags> waitStages{};
+		Array<uint64_t> waitValues{};
+
+		Array<VkSemaphore> signalSemaphores{};
+		Array<uint64_t> signalValues{};
+
+		waitSemaphores.Reserve(submission.numPresentSwapChains + 1);
+		waitStages.Reserve(submission.numPresentSwapChains + 1);
+		waitValues.Reserve(submission.numPresentSwapChains + 1);
+
+		Array<VkSwapchainKHR> swapChains{};
+		swapChains.Reserve(submission.numPresentSwapChains);
+
+		for (u32 i = 0; i < submission.numPresentSwapChains; ++i)
+		{
+			if (submission.presentSwapChains[i] == nullptr)
+				return false;
+
+			Vulkan::SwapChain* presentSwapChain = (Vulkan::SwapChain*)submission.presentSwapChains[i];
+			swapChains.Add(presentSwapChain->GetHandle());
+
+			VkSemaphore renderFinishedSemaphore = presentSwapChain->renderFinishedSemaphores[presentSwapChain->currentImageIndex];
+		}
+
+		VkTimelineSemaphoreSubmitInfo timelineSemaphoreSubmitInfo{};
+		timelineSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.pNext = &timelineSemaphoreSubmitInfo;
+		submitInfo.commandBufferCount = submission.numCommandLists;
+		
 	}
 
 } // namespace CE

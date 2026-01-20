@@ -12,11 +12,14 @@
 #include "DeviceLimits.h"
 #include "VulkanRHI.h"
 #include "CommandQueue.h"
-#include "VulkanDevice.h"
+#include "Device.h"
 #include "SwapChain.h"
 #include "Viewport.h"
-#include "RenderPass.h"
+#include "VulkanRenderPass.h"
 #include "RenderPassCache.h"
+
+#include "RenderPass.h"
+#include "RenderPassFrameBuffer.h"
 
 #include "DescriptorPool.h"
 #include "DescriptorSet.h"

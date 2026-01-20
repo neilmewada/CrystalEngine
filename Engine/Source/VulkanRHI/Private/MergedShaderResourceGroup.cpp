@@ -2,7 +2,7 @@
 
 namespace CE::Vulkan
 {
-    MergedShaderResourceGroup::MergedShaderResourceGroup(VulkanDevice* device, u32 srgCount, Vulkan::ShaderResourceGroup** srgs)
+    MergedShaderResourceGroup::MergedShaderResourceGroup(Device* device, u32 srgCount, Vulkan::ShaderResourceGroup** srgs)
 		: ShaderResourceGroup(device)
     {
 		srgLayout = {};

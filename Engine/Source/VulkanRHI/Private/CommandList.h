@@ -8,7 +8,7 @@ namespace CE::Vulkan
 	class CommandList : public RHI::CommandList
 	{
 	public:
-		CommandList(VulkanDevice* device, VkCommandBuffer commandBuffer, RHI::CommandListType type, u32 queueFamilyIndex, VkCommandPool pool);
+		CommandList(Device* device, VkCommandBuffer commandBuffer, RHI::CommandListType type, u32 queueFamilyIndex, VkCommandPool pool);
 
 		virtual ~CommandList();
 
@@ -56,9 +56,15 @@ namespace CE::Vulkan
         
         void RenderTargetNextSubPass() override;
 
+		bool BeginRenderPass(RHI::RenderPass* renderPass, RHI::RenderPassFrameBuffer* frameBuffer, AttachmentClearValue* clearValuesPerAttachment) override;
+
+		void RenderPassNextSubpass() override;
+
+		void EndRenderPass() override;
+
 	private:
 		
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
 		ShaderResourceManager* srgManager = nullptr;
 
 		VkCommandBuffer commandBuffer = nullptr;
@@ -67,7 +73,7 @@ namespace CE::Vulkan
 		u32 queueFamilyIndex = 0;
 		VkQueueFlags curQueueFlags{};
 
-		RenderPass* currentPass = nullptr;
+		VulkanRenderPass* currentPass = nullptr;
 		u32 currentSubpass = 0;
 		Vulkan::Pipeline* boundPipeline = nullptr;
 

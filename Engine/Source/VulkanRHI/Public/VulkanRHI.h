@@ -12,7 +12,7 @@ typedef VkDebugUtilsMessengerEXT_T* VkDebugUtilsMessengerEXT;
 
 namespace CE::Vulkan
 {
-    class VulkanDevice;
+    class Device;
     class Viewport;
     class GraphicsCommandList;
     class RenderTarget;
@@ -154,7 +154,12 @@ namespace CE::Vulkan
         virtual u64 GetShaderStructMemberSize(const RHI::ShaderStructMember& member) override;
         virtual void GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets) override;
 
-        inline VulkanDevice* GetDevice() const { return device; }
+        inline Device* GetDevice() const { return device; }
+
+        RHI::RenderPass* CreateRenderPass(const RHI::RenderPassLayout& rpLayout) override;
+        void DestroyRenderPass(RHI::RenderPass* renderPass) override;
+        RHI::RenderPassFrameBuffer* CreateRenderPassFrameBuffer(const RHI::RenderPassFrameBufferDescriptor& descriptor) override;
+        void DestroyRenderPassFrameBuffer(RHI::RenderPassFrameBuffer* frameBuffer) override;
 
     protected:
 
@@ -162,7 +167,7 @@ namespace CE::Vulkan
         VkInstance vkInstance = nullptr;
         VkDebugUtilsMessengerEXT vkMessenger = nullptr;
 
-        VulkanDevice* device = nullptr;
+        Device* device = nullptr;
         Array<const char*> instanceExtensions{};
     };
     

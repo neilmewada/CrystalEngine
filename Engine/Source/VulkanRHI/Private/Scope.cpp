@@ -3,7 +3,7 @@
 namespace CE::Vulkan
 {
     
-	Scope::Scope(VulkanDevice* device, const RHI::ScopeDescriptor& desc) : Super(desc), device(device)
+	Scope::Scope(Device* device, const RHI::ScopeDescriptor& desc) : Super(desc), device(device)
 	{
 
 	}
@@ -64,7 +64,7 @@ namespace CE::Vulkan
 
 		if (frameGraph->GetSwapChainCount() > 0)
 		{
-			imageCount = frameGraph->GetSwapChain(0)->GetImageCount();
+			imageCount = ((Vulkan::SwapChain*)frameGraph->GetSwapChain(0))->GetImageCount();
 		}
 
 		waitSemaphores.Clear();
@@ -150,8 +150,8 @@ namespace CE::Vulkan
 				}
 
 				RenderPassCache* rpCache = device->GetRenderPassCache();
-				RenderPass::Descriptor descriptor{};
-				RenderPass::BuildDescriptor(this, descriptor);
+				VulkanRenderPass::Descriptor descriptor{};
+				VulkanRenderPass::BuildDescriptor(this, descriptor);
 				renderPass = rpCache->FindOrCreate(descriptor);
 
 				next = this;
@@ -207,8 +207,8 @@ namespace CE::Vulkan
 			{
 				// Compile Render Pass
 	            RenderPassCache* rpCache = device->GetRenderPassCache();
-	            RenderPass::Descriptor descriptor{};
-	            RenderPass::BuildDescriptor(this, descriptor);
+	            VulkanRenderPass::Descriptor descriptor{};
+	            VulkanRenderPass::BuildDescriptor(this, descriptor);
 	            renderPass = rpCache->FindOrCreate(descriptor);
 				subpassIndex = 0;
 				bool foundPipelineLayout = false;

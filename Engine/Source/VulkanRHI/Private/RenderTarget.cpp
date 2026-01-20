@@ -4,22 +4,22 @@
 namespace CE::Vulkan
 {
 
-    RenderTarget::RenderTarget(VulkanDevice* device, const RHI::RenderTargetLayout& rtLayout)
+    RenderTarget::RenderTarget(Device* device, const RHI::RenderTargetLayout& rtLayout)
         : device(device)
     {
-        RenderPass::Descriptor desc{};
+        VulkanRenderPass::Descriptor desc{};
         desc.name = "RenderTarget";
-        RenderPass::BuildDescriptor(rtLayout, desc);
+        //VulkanRenderPass::BuildDescriptor(rtLayout, desc);
         renderPass = device->GetRenderPassCache()->FindOrCreate(desc);
     }
 
-    RenderTarget::RenderTarget(VulkanDevice* device, const RenderPass::Descriptor& rpDesc)
+    RenderTarget::RenderTarget(Device* device, const VulkanRenderPass::Descriptor& rpDesc)
         : device(device)
     {
         renderPass = device->GetRenderPassCache()->FindOrCreate(rpDesc);
     }
 
-    RenderTarget::RenderTarget(VulkanDevice* device, RenderPass* renderPass)
+    RenderTarget::RenderTarget(Device* device, VulkanRenderPass* renderPass)
         : device(device), renderPass(renderPass)
     {
         
@@ -30,7 +30,7 @@ namespace CE::Vulkan
         if (renderPass == nullptr)
             return nullptr;
 
-        RenderPass::Descriptor rpDesc = renderPass->GetDescriptor();
+        VulkanRenderPass::Descriptor rpDesc = renderPass->GetDescriptor();
         if (subpassSelection >= rpDesc.subpasses.GetSize())
             return nullptr;
         
@@ -61,7 +61,7 @@ namespace CE::Vulkan
         if (renderPass == nullptr)
             return nullptr;
 
-        RenderPass::Descriptor rpDesc = renderPass->GetDescriptor();
+        VulkanRenderPass::Descriptor rpDesc = renderPass->GetDescriptor();
         if (subpassSelection >= rpDesc.subpasses.GetSize())
             return nullptr;
 
@@ -97,7 +97,7 @@ namespace CE::Vulkan
         if (renderPass == nullptr)
             return;
 
-        RenderPass::Descriptor rpDesc = renderPass->GetDescriptor();
+        VulkanRenderPass::Descriptor rpDesc = renderPass->GetDescriptor();
         if (subpassSelection >= rpDesc.subpasses.GetSize())
             return;
 
@@ -126,7 +126,7 @@ namespace CE::Vulkan
         return renderPass->GetDescriptor().attachments.GetSize();
     }
 
-    const RenderPass::AttachmentBinding& RenderTarget::GetAttachment(u32 index)
+    const VulkanRenderPass::AttachmentBinding& RenderTarget::GetAttachment(u32 index)
     {
         return renderPass->GetDescriptor().attachments[index];
     }

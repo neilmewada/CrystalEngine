@@ -7,7 +7,7 @@ namespace CE::Vulkan
     {
     public:
 
-        TextureView(VulkanDevice* device, const RHI::TextureViewDescriptor& desc);
+        TextureView(Device* device, const RHI::TextureViewDescriptor& desc);
 
         ~TextureView();
 
@@ -15,7 +15,7 @@ namespace CE::Vulkan
 
     private:
 
-        VulkanDevice* device = nullptr;
+        Device* device = nullptr;
         VkImageView imageView = nullptr;
         VkImageAspectFlags aspectMask{};
     };

@@ -59,7 +59,7 @@ namespace CE::Vulkan
         return true;
     }
 
-    Pipeline::Pipeline(VulkanDevice* device, const PipelineDescriptor& desc) : RHI::RHIResource(RHI::ResourceType::Pipeline), name(desc.name)
+    Pipeline::Pipeline(Device* device, const PipelineDescriptor& desc) : RHI::RHIResource(RHI::ResourceType::Pipeline), name(desc.name)
     {
         this->device = device;
         

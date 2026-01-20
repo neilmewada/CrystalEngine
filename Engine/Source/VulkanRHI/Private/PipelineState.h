@@ -10,8 +10,8 @@ namespace CE::Vulkan
     class PipelineState : public RHI::PipelineState
     {
     public:
-        PipelineState(VulkanDevice* device, const RHI::GraphicsPipelineDescriptor& graphicsDesc);
-    	PipelineState(VulkanDevice* device, const RHI::ComputePipelineDescriptor& computeDesc);
+        PipelineState(Device* device, const RHI::GraphicsPipelineDescriptor& graphicsDesc);
+    	PipelineState(Device* device, const RHI::ComputePipelineDescriptor& computeDesc);
         virtual ~PipelineState();
 
         virtual IPipelineLayout* GetPipelineLayout() override;
@@ -20,7 +20,7 @@ namespace CE::Vulkan
 
     protected:
 
-        VulkanDevice* device = nullptr;
+        Device* device = nullptr;
 
 		Pipeline* pipeline = nullptr;
 

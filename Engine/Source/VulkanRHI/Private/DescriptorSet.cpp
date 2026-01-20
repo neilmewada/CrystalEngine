@@ -2,7 +2,7 @@
 
 namespace CE::Vulkan
 {
-    DescriptorSet::DescriptorSet(VulkanDevice* device, VkDescriptorSetLayout setLayout, const RHI::ShaderResourceGroupLayout& srgLayout)
+    DescriptorSet::DescriptorSet(Device* device, VkDescriptorSetLayout setLayout, const RHI::ShaderResourceGroupLayout& srgLayout)
 		: device(device)
     {
 		this->srgLayout = srgLayout;
@@ -21,7 +21,7 @@ namespace CE::Vulkan
 		descriptorSet = allocatedSets[0];
     }
 
-    DescriptorSet::DescriptorSet(VulkanDevice* device, VkDescriptorSetLayout setLayout,
+    DescriptorSet::DescriptorSet(Device* device, VkDescriptorSetLayout setLayout,
 	    const RHI::ShaderResourceGroupLayout& srgLayout, u32 arrayCount)
 		: device(device)
     {

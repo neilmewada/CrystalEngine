@@ -8,7 +8,7 @@ namespace CE::Vulkan
     {
     public:
 
-        ComputePipeline(VulkanDevice* device, const RHI::ComputePipelineDescriptor& desc);
+        ComputePipeline(Device* device, const RHI::ComputePipelineDescriptor& desc);
         virtual ~ComputePipeline();
 
         VkPipelineBindPoint GetBindPoint() override { return VK_PIPELINE_BIND_POINT_COMPUTE; }

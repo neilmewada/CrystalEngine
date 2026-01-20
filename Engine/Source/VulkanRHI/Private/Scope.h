@@ -37,7 +37,7 @@ namespace CE::Vulkan
 			List<BufferFamilyTransition> bufferFamilyTransitions{};
 		};
 
-		Scope(VulkanDevice* device, const RHI::ScopeDescriptor& desc);
+		Scope(Device* device, const RHI::ScopeDescriptor& desc);
 		virtual ~Scope();
 
 		virtual bool CompileInternal(const RHI::FrameGraphCompileRequest& compileRequest) override;
@@ -62,14 +62,14 @@ namespace CE::Vulkan
 
 		FixedArray<Array<Vulkan::CommandList*>, RHI::Limits::MaxSwapChainImageCount> commandListsByFamilyIndexPerImage{};
 
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
         CommandQueue* queue = nullptr;
-		RenderPass* renderPass = nullptr;
+		VulkanRenderPass* renderPass = nullptr;
 		u32 subpassIndex = 0;
         
 		friend class FrameGraphCompiler;
 		friend class FrameGraphExecuter;
-		friend class RenderPass;
+		friend class VulkanRenderPass;
 		friend class FrameBuffer;
 	};
     

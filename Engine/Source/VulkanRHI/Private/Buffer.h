@@ -8,8 +8,8 @@ namespace CE::Vulkan
     class Buffer : public RHI::Buffer
     {
     public:
-		Buffer(VulkanDevice* device, const RHI::BufferDescriptor& desc);
-		Buffer(VulkanDevice* device, const RHI::BufferDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc);
+		Buffer(Device* device, const RHI::BufferDescriptor& desc);
+		Buffer(Device* device, const RHI::BufferDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc);
         virtual ~Buffer();
 
         virtual void* GetHandle() override
@@ -56,7 +56,7 @@ namespace CE::Vulkan
 		int initialFamilyIndex = -1;
         int curFamilyIndex = -1;
 
-        VulkanDevice* device = nullptr;
+        Device* device = nullptr;
         VkBuffer buffer = nullptr;
         VkDeviceMemory bufferMemory = nullptr;
 

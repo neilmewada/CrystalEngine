@@ -327,14 +327,14 @@ namespace CE::RHI
 		DepthStencilState depthStencilState{};
 		MultisampleState multisampleState{};
 
-        //RenderPass* renderPass = nullptr;
+        RenderPass* renderPassHint = nullptr;
         RenderPassLayout renderPassLayout{};
 		
         CE_DEPRECATED("renderTarget is deprecated. Use renderPass instead.")
         RenderTarget* renderTarget = nullptr;
         
-        CE_DEPRECATED("rtLayout is deprecated. Use renderPassLayout instead.")
-		RenderTargetLayout rtLayout{};
+        //CE_DEPRECATED("rtLayout is deprecated. Use renderPassLayout instead.")
+		//RenderTargetLayout rtLayout{};
 
 		u32 subpass = 0;
 

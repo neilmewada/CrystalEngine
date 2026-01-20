@@ -7,14 +7,14 @@ namespace CE::Vulkan
 	{
 	public:
 
-		ShaderModule(VulkanDevice* device, const RHI::ShaderModuleDescriptor& desc);
+		ShaderModule(Device* device, const RHI::ShaderModuleDescriptor& desc);
 		~ShaderModule();
 
 		inline VkShaderModule GetHandle() const { return shaderModule; }
 
 	private:
 
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
 		VkShaderModule shaderModule = nullptr;
 
 		HashMap<Name, int> variableBindingMap{};

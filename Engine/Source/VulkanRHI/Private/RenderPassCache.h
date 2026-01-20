@@ -6,16 +6,16 @@ namespace CE::Vulkan
 	class VULKANRHI_API RenderPassCache final
 	{
 	public:
-		RenderPassCache(VulkanDevice* device);
+		RenderPassCache(Device* device);
 		virtual ~RenderPassCache();
 
-		RenderPass* FindOrCreate(const RenderPass::Descriptor& desc);
+		VulkanRenderPass* FindOrCreate(const VulkanRenderPass::Descriptor& desc);
 
 	private:
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
 
 		SharedMutex mutex{};
-		HashMap<SIZE_T, RenderPass*> renderPassCache{};
+		HashMap<SIZE_T, VulkanRenderPass*> renderPassCache{};
 	};
     
 } // namespace CE::Vulkan

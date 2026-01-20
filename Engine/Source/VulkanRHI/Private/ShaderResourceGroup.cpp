@@ -3,7 +3,7 @@
 namespace CE::Vulkan
 {
 
-	ShaderResourceManager::ShaderResourceManager(VulkanDevice* device)
+	ShaderResourceManager::ShaderResourceManager(Device* device)
 		: device(device)
 	{
 		const auto& limits = device->GetDeviceLimits();
@@ -253,7 +253,7 @@ namespace CE::Vulkan
 		}
 	}
 
-    ShaderResourceGroup::ShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupLayout& srgLayout)
+    ShaderResourceGroup::ShaderResourceGroup(Device* device, const RHI::ShaderResourceGroupLayout& srgLayout)
 		: device(device)
     {
 		this->srgType = srgLayout.srgType;
@@ -365,7 +365,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	ShaderResourceGroup::ShaderResourceGroup(VulkanDevice* device)
+	ShaderResourceGroup::ShaderResourceGroup(Device* device)
 		: device(device)
 	{
 		pool = device->GetDescriptorPool();

@@ -18,8 +18,8 @@ namespace CE::RHI
             : textureView(textureView)
         {}
         
-        RenderPassFrameAttachment(RHI::SwapChain* swapChain)
-            : swapChain(swapChain)
+        RenderPassFrameAttachment(RHI::SwapChain* swapChain, u32 imageIndex)
+            : swapChain(swapChain), imageIndex(imageIndex)
         {}
         
         RHI::Texture* GetTexture() const { return texture; }
@@ -27,6 +27,8 @@ namespace CE::RHI
         RHI::TextureView* GetTextureView() const { return textureView; }
         
         RHI::SwapChain* GetSwapChain() const { return swapChain; }
+
+        u32 GetImageIndex() const { return imageIndex; }
         
         bool IsValid() const
         {
@@ -38,6 +40,7 @@ namespace CE::RHI
         RHI::Texture* texture = nullptr;
         RHI::TextureView* textureView = nullptr;
         RHI::SwapChain* swapChain = nullptr;
+        u32 imageIndex = 0;
     };
     
 } // namespace CE::RHI

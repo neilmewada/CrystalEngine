@@ -5,7 +5,7 @@ namespace CE::Vulkan
 
 	Array<CommandBufferAllocator::Context> CommandBufferAllocator::commandAllocatorContexts{};
 
-    CommandBufferAllocator::CommandBufferAllocator(VulkanDevice* device)
+    CommandBufferAllocator::CommandBufferAllocator(Device* device)
 		: device(device)
 		, threadedAllocator()
     {

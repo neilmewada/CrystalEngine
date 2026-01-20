@@ -3,7 +3,7 @@
 namespace CE::Vulkan
 {
 
-	FrameGraphExecuter::FrameGraphExecuter(VulkanDevice* device) : device(device)
+	FrameGraphExecuter::FrameGraphExecuter(Device* device) : device(device)
 	{
 		
 	}
@@ -321,7 +321,7 @@ namespace CE::Vulkan
 				commandList->currentSubpass = currentScope->subpassIndex;
 
 				//bool usesSwapChainAttachment = currentScope->swapChainsUsedByAttachments.NotEmpty();
-				RenderPass* renderPass = currentScope->renderPass;
+				VulkanRenderPass* renderPass = currentScope->renderPass;
 				FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
 				HashSet<RHI::AttachmentID> clearedAttachments{};
 
@@ -973,12 +973,13 @@ namespace CE::Vulkan
 
 			for (int i = 0; i < scopeChain.Top()->presentSwapChains.GetSize(); i++)
 			{
-				VkSwapchainKHR swapchainKhr = ((Vulkan::SwapChain*)scopeChain.Top()->presentSwapChains[i])->GetHandle();
+				Vulkan::SwapChain* presentSwapChain = (Vulkan::SwapChain*)scopeChain.Top()->presentSwapChains[i];
+				VkSwapchainKHR swapchainKhr = presentSwapChain->GetHandle();
 				if (swapchainKhr == nullptr)
 					continue;
 
 				swapchainKhrs.Add(swapchainKhr);
-				imageIndices.Add(scopeChain.Top()->presentSwapChains[i]->GetCurrentImageIndex());
+				imageIndices.Add(presentSwapChain->GetCurrentImageIndex());
 			}
 
 			if (!swapchainKhrs.IsEmpty())

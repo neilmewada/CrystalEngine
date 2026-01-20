@@ -4,7 +4,7 @@
 namespace CE::Vulkan
 {
 
-	RenderPassCache::RenderPassCache(VulkanDevice* device) : device(device)
+	RenderPassCache::RenderPassCache(Device* device) : device(device)
     {
 
     }
@@ -20,7 +20,7 @@ namespace CE::Vulkan
 		renderPassCache.Clear();
     }
 
-	RenderPass* RenderPassCache::FindOrCreate(const RenderPass::Descriptor& desc)
+	VulkanRenderPass* RenderPassCache::FindOrCreate(const VulkanRenderPass::Descriptor& desc)
 	{
 		LockGuard<SharedMutex> lock{ mutex };
 
@@ -30,7 +30,7 @@ namespace CE::Vulkan
 		if (renderPassCache[hash] != nullptr)
 			return renderPassCache[hash];
 
-		RenderPass* renderPass = new RenderPass(device, desc);
+		VulkanRenderPass* renderPass = new VulkanRenderPass(device, desc);
 		renderPass->hash = hash;
 		renderPassCache[hash] = renderPass;
 		return renderPass;

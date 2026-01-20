@@ -37,7 +37,7 @@ namespace CE::Vulkan
 		return VK_FILTER_LINEAR;
 	}
 
-    Sampler::Sampler(VulkanDevice* device, const RHI::SamplerDescriptor& samplerDesc)
+    Sampler::Sampler(Device* device, const RHI::SamplerDescriptor& samplerDesc)
         : device(device), borderColor(samplerDesc.borderColor)
     {
         VkSamplerCreateInfo samplerCI{};

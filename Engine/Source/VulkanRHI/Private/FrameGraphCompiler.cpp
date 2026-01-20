@@ -49,7 +49,7 @@ namespace CE::Vulkan
         HashMap<int, Array<CommandQueue*>> queuesByFamily{};
     };
     
-	FrameGraphCompiler::FrameGraphCompiler(VulkanDevice* device) : device(device)
+	FrameGraphCompiler::FrameGraphCompiler(Device* device) : device(device)
 	{
 
 	}
@@ -140,7 +140,7 @@ namespace CE::Vulkan
 
 		if (frameGraph->presentSwapChains.NotEmpty())
 		{
-			imageCount = frameGraph->presentSwapChains[0]->GetImageCount();
+			imageCount = ((Vulkan::SwapChain*)frameGraph->presentSwapChains[0])->GetImageCount();
 			numFramesInFlight = imageCount;
 			presentSwapChains = true;
 		}

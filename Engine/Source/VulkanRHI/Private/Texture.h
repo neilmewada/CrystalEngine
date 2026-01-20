@@ -2,15 +2,15 @@
 
 namespace CE::Vulkan
 {
-	class VulkanDevice;
+	class Device;
 
     class Texture : public RHI::Texture
     {
     public:
-        Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc);
-		Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc);
+        Texture(Device* device, const RHI::TextureDescriptor& desc);
+		Texture(Device* device, const RHI::TextureDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc);
 
-		Texture(VulkanDevice* device, VkImage importedImage, const RHI::TextureDescriptor& imageDesc, 
+		Texture(Device* device, VkImage importedImage, const RHI::TextureDescriptor& imageDesc, 
 			VkImageLayout dstLayout = VK_IMAGE_LAYOUT_UNDEFINED);
 
         virtual ~Texture();
@@ -65,7 +65,7 @@ namespace CE::Vulkan
 
         Atomic<int> curFamilyIndex = -1;
 
-        VulkanDevice* device = nullptr;
+        Device* device = nullptr;
         VkImage image = nullptr;
         VkDeviceMemory imageMemory = nullptr;
         VkImageView imageView = nullptr;

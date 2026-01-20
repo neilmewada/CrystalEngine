@@ -3,7 +3,7 @@
 
 namespace CE::Vulkan
 {
-	ShaderModule::ShaderModule(VulkanDevice* device, const RHI::ShaderModuleDescriptor& desc)
+	ShaderModule::ShaderModule(Device* device, const RHI::ShaderModuleDescriptor& desc)
 		: device(device)
 	{
 		this->stage = desc.stage;

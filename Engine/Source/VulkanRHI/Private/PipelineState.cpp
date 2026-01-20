@@ -3,7 +3,7 @@
 namespace CE::Vulkan
 {
 
-    PipelineState::PipelineState(VulkanDevice* device, const RHI::GraphicsPipelineDescriptor& graphicsDesc)
+    PipelineState::PipelineState(Device* device, const RHI::GraphicsPipelineDescriptor& graphicsDesc)
 		: device(device)
     {
 		this->graphicsDescriptor = graphicsDesc;
@@ -12,7 +12,7 @@ namespace CE::Vulkan
     	pipelineType = PipelineStateType::Graphics;
     }
 
-    PipelineState::PipelineState(VulkanDevice* device, const RHI::ComputePipelineDescriptor& computeDesc)
+    PipelineState::PipelineState(Device* device, const RHI::ComputePipelineDescriptor& computeDesc)
 	    : device(device)
     {
     	this->computeDescriptor = computeDesc;

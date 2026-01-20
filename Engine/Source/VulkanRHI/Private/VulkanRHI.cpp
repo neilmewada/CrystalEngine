@@ -224,7 +224,7 @@ namespace CE::Vulkan
 
     void VulkanRHI::PostInitialize()
     {
-        device = new VulkanDevice(vkInstance, this);
+        device = new Device(vkInstance, this);
         device->Initialize();
     }
 
@@ -612,6 +612,26 @@ namespace CE::Vulkan
             outOffsets.Add(offset);
             offset += GetShaderStructMemberSize(member);
         }
+    }
+
+    RHI::RenderPass* VulkanRHI::CreateRenderPass(const RHI::RenderPassLayout& rpLayout)
+    {
+		return new Vulkan::RenderPass(device, rpLayout);
+    }
+
+    void VulkanRHI::DestroyRenderPass(RHI::RenderPass* renderPass)
+    {
+		delete renderPass;
+    }
+
+    RHI::RenderPassFrameBuffer* VulkanRHI::CreateRenderPassFrameBuffer(const RHI::RenderPassFrameBufferDescriptor& descriptor)
+    {
+		return new Vulkan::RenderPassFrameBuffer(device, descriptor);
+    }
+
+    void VulkanRHI::DestroyRenderPassFrameBuffer(RHI::RenderPassFrameBuffer* frameBuffer)
+    {
+        delete frameBuffer;
     }
 
     RHI::ResourceMemoryRequirements VulkanRHI::GetCombinedResourceRequirements(u32 count, RHI::ResourceMemoryRequirements* requirementsList, u64* outOffsetsList)

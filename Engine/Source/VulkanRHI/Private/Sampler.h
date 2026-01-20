@@ -6,7 +6,7 @@ namespace CE::Vulkan
     class VULKANRHI_API Sampler : public RHI::Sampler
     {
     public:
-        Sampler(VulkanDevice* device, const RHI::SamplerDescriptor& samplerDesc);
+        Sampler(Device* device, const RHI::SamplerDescriptor& samplerDesc);
         virtual ~Sampler();
         
         virtual void* GetHandle() override
@@ -23,7 +23,7 @@ namespace CE::Vulkan
         
     private:
         
-        VulkanDevice* device = nullptr;
+        Device* device = nullptr;
         VkSampler sampler{};
         SamplerBorderColor borderColor{};
     };

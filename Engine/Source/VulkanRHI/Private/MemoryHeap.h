@@ -7,7 +7,7 @@ namespace CE::Vulkan
 	class MemoryHeap final : public RHI::MemoryHeap
 	{
 	public:
-		MemoryHeap(VulkanDevice* device, const RHI::MemoryHeapDescriptor& desc);
+		MemoryHeap(Device* device, const RHI::MemoryHeapDescriptor& desc);
 
 		~MemoryHeap();
 
@@ -30,7 +30,7 @@ namespace CE::Vulkan
 		Array<Range> allocatedRanges{};
 		VkDeviceMemory allocation{};
 
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
 		VkMemoryPropertyFlags memoryPropertyFlags{};
 		u32 supportedMemoryTypeBitMask = 0;
 		u32 allocatedMemoryTypeIndex = 0;

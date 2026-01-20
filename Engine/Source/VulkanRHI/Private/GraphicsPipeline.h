@@ -9,7 +9,7 @@ namespace CE::Vulkan
 
         struct PipelineVariant
         {
-            RenderPass* pass = nullptr;
+            VulkanRenderPass* pass = nullptr;
             u32 subpass = 0;
             u32 numViewports = 1;
             u32 numScissors = 1;
@@ -29,12 +29,12 @@ namespace CE::Vulkan
             }
         };
 
-        GraphicsPipeline(VulkanDevice* device, const RHI::GraphicsPipelineDescriptor& desc);
+        GraphicsPipeline(Device* device, const RHI::GraphicsPipelineDescriptor& desc);
         virtual ~GraphicsPipeline();
 
         virtual bool IsGraphicsPipeline() const override final { return true; }
 
-        VkPipeline FindOrCompile(RenderPass* renderPass, u32 subpass, u32 numViewports = 1, u32 numScissors = 1);
+        VkPipeline FindOrCompile(VulkanRenderPass* renderPass, u32 subpass, u32 numViewports = 1, u32 numScissors = 1);
 
         inline void Compile(const Array<PipelineVariant>& passes)
         {
@@ -44,7 +44,7 @@ namespace CE::Vulkan
             }
         }
 
-        inline void Compile(RenderPass* renderPass, u32 subpass)
+        inline void Compile(VulkanRenderPass* renderPass, u32 subpass)
         {
             FindOrCompile(renderPass, subpass);
         }
@@ -53,7 +53,7 @@ namespace CE::Vulkan
 
     private:
 
-        VkPipeline CompileInternal(RenderPass* renderPass, u32 subpass, u32 numViewports = 1, u32 numScissors = 1);
+        VkPipeline CompileInternal(VulkanRenderPass* renderPass, u32 subpass, u32 numViewports = 1, u32 numScissors = 1);
 
         void SetupColorBlendState();
         void SetupDepthStencilState();
@@ -63,7 +63,7 @@ namespace CE::Vulkan
 
         void SetupVertexInputState();
 
-        RenderPass* renderPass = nullptr;
+        VulkanRenderPass* renderPass = nullptr;
 
         SharedMutex pipelineMutex{};
 

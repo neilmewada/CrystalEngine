@@ -6,7 +6,7 @@
 
 namespace CE::Vulkan
 {
-	SwapChain::SwapChain(VulkanRHI* rhi, VulkanDevice* device, PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
+	SwapChain::SwapChain(VulkanRHI* rhi, Device* device, PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
 		: rhi(rhi), device(device), window(window), desc(desc)
 	{
 		this->desc.preferredFormats.AddRange({ RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM });
@@ -46,11 +46,12 @@ namespace CE::Vulkan
 
 		for (int i = 0; i < renderFinishedSemaphores.GetSize(); i++)
 		{
-			if (renderFinishedSemaphores[i] == nullptr)
-				continue;
 
-			vkDestroySemaphore(device->GetHandle(), renderFinishedSemaphores[i], VULKAN_CPU_ALLOCATOR);
-			renderFinishedSemaphores[i] = nullptr;
+			if (renderFinishedSemaphores[i] != nullptr)
+			{
+				vkDestroySemaphore(device->GetHandle(), renderFinishedSemaphores[i], VULKAN_CPU_ALLOCATOR);
+				renderFinishedSemaphores[i] = nullptr;
+			}
 		}
 
 		if (swapChain != nullptr)
@@ -83,6 +84,24 @@ namespace CE::Vulkan
 		}
 
 		Create();
+	}
+
+	bool SwapChain::AcquireNextImage()
+	{
+		VkFenceCreateInfo fenceCI{};
+		fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceCI.flags = 0;
+
+		VkFence fence = nullptr;
+		vkCreateFence(device->GetHandle(), &fenceCI, VULKAN_CPU_ALLOCATOR, &fence);
+
+		VkResult result = vkAcquireNextImageKHR(device->GetHandle(), swapChain, NumericLimits<uint64_t>::Max(), nullptr, fence, &currentImageIndex);
+
+		vkWaitForFences(device->GetHandle(), 1, &fence, VK_TRUE, NumericLimits<u64>::Max());
+
+		vkDestroyFence(device->GetHandle(), fence, VULKAN_CPU_ALLOCATOR);
+
+		return result == VK_SUCCESS;
 	}
 
 	void SwapChain::OnWindowResized(PlatformWindow* window, u32 newDrawWidth, u32 newDrawHeight)

@@ -2,12 +2,12 @@
 
 namespace CE::Vulkan
 {
-    class VulkanDevice;
+    class Device;
 
     class DeviceLimits : public RHI::DeviceLimits
     {
     public:
-        DeviceLimits(VulkanDevice* device);
+        DeviceLimits(Device* device);
 
 
     private:

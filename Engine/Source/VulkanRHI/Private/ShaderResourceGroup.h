@@ -10,7 +10,7 @@ namespace CE::Vulkan
 	{
 	public:
 
-		ShaderResourceManager(VulkanDevice* device);
+		ShaderResourceManager(Device* device);
 		~ShaderResourceManager();
 
 		inline u32 GetMaxBoundSets() const { return maxBoundDescriptorSets; }
@@ -42,7 +42,7 @@ namespace CE::Vulkan
             int set;
         };
         
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
         Array<SRGSlot> srgSlots{};
         
         HashMap<RHI::SRGType, SRGSlot> srgTypeToDescriptorSet{};
@@ -70,7 +70,7 @@ namespace CE::Vulkan
 	{
 	public:
 
-		ShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupLayout& srgLayout);
+		ShaderResourceGroup(Device* device, const RHI::ShaderResourceGroupLayout& srgLayout);
 
 		virtual ~ShaderResourceGroup();
 
@@ -121,7 +121,7 @@ namespace CE::Vulkan
 
 	protected:
 
-		ShaderResourceGroup(VulkanDevice* device);
+		ShaderResourceGroup(Device* device);
 
 		// Queue the native DescriptorSet* to be destroyed later
 		void QueueDestroy();
@@ -131,7 +131,7 @@ namespace CE::Vulkan
 		bool failed = false;
 		bool needsRecompile = true;
 
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
 		DescriptorPool* pool = nullptr;
 		VkDescriptorPool allocPool = nullptr;
 

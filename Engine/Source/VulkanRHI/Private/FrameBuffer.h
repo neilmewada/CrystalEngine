@@ -11,12 +11,12 @@ namespace CE::Vulkan
 	{
 	public:
 
-		FrameBuffer(VulkanDevice* device, Scope* scope, u32 imageIndex);
+		FrameBuffer(Device* device, Scope* scope, u32 imageIndex);
 		virtual ~FrameBuffer();
 
-		FrameBuffer(VulkanDevice* device, const Array<Vulkan::Texture*>& images, RenderPass* renderPass, u32 imageIndex = 0);
+		FrameBuffer(Device* device, const Array<Vulkan::Texture*>& images, VulkanRenderPass* renderPass, u32 imageIndex = 0);
 
-		FrameBuffer(VulkanDevice* device, const Array<Vulkan::TextureView*>& imageViews, RenderPass* renderPass, u32 imageIndex = 0);
+		FrameBuffer(Device* device, const Array<Vulkan::TextureView*>& imageViews, VulkanRenderPass* renderPass, u32 imageIndex = 0);
 
 		inline VkFramebuffer GetHandle() const { return frameBuffer; }
 
@@ -25,7 +25,7 @@ namespace CE::Vulkan
 
 	private:
 
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
 		VkFramebuffer frameBuffer = nullptr;
 
 		u32 width = 0;

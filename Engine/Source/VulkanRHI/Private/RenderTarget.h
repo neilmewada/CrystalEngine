@@ -6,9 +6,9 @@ namespace CE::Vulkan
     class RenderTarget : public RHI::RenderTarget
     {
     public:
-        RenderTarget(VulkanDevice* device, const RHI::RenderTargetLayout& rtLayout);
-        RenderTarget(VulkanDevice* device, const RenderPass::Descriptor& rpDesc);
-        RenderTarget(VulkanDevice* device, RenderPass* renderPass);
+        RenderTarget(Device* device, const RHI::RenderTargetLayout& rtLayout);
+        RenderTarget(Device* device, const VulkanRenderPass::Descriptor& rpDesc);
+        RenderTarget(Device* device, VulkanRenderPass* renderPass);
 
         RenderTarget* Clone(const Array<RHI::Format>& newColorFormats, RHI::Format depthStencilFormat, u32 subpassSelection) override;
 
@@ -20,14 +20,14 @@ namespace CE::Vulkan
 
         u32 GetAttachmentCount() const;
 
-        const RenderPass::AttachmentBinding& GetAttachment(u32 index);
+        const VulkanRenderPass::AttachmentBinding& GetAttachment(u32 index);
 
-        inline RenderPass* GetRenderPass() const { return renderPass; }
+        inline VulkanRenderPass* GetRenderPass() const { return renderPass; }
 
     private:
 
-        VulkanDevice* device = nullptr;
-        RenderPass* renderPass = nullptr;
+        Device* device = nullptr;
+        VulkanRenderPass* renderPass = nullptr;
 
         friend class CommandList;
     };

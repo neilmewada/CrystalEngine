@@ -10,7 +10,7 @@ namespace CE {
 
 namespace CE::Vulkan
 {
-    class VulkanDevice;
+    class Device;
     class Texture;
 
     struct VulkanSwapChainImage
@@ -22,11 +22,13 @@ namespace CE::Vulkan
 	class SwapChain : public RHI::SwapChain
 	{
 	public:
-		SwapChain(VulkanRHI* rhi, VulkanDevice* device, PlatformWindow* window, const RHI::SwapChainDescriptor& desc);
+		SwapChain(VulkanRHI* rhi, Device* device, PlatformWindow* window, const RHI::SwapChainDescriptor& desc);
 
 		virtual ~SwapChain();
 
 		void RebuildSwapChain();
+
+		bool AcquireNextImage() override;
 
 		inline VkSwapchainKHR GetHandle() const { return swapChain; }
 
@@ -37,7 +39,13 @@ namespace CE::Vulkan
 			RebuildSwapChain();
 		}
         
-        Vulkan::Texture* GetImageAt(u32 index) { return images[index]; }
+        Vulkan::Texture* GetCurrentImage() { return images[currentImageIndex]; }
+
+		u32 GetCurrentImageIndex() const { return currentImageIndex; }
+
+		u32 GetImageCount() const { return images.GetSize(); }
+
+		Vulkan::Texture* GetImage(u32 imageIndex) const { return images[imageIndex]; }
 
 	protected:
 
@@ -45,13 +53,15 @@ namespace CE::Vulkan
 
 		void Create();
 
+	protected:
 		VulkanRHI* rhi = nullptr;
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
 		PlatformWindow* window = nullptr;
 
 		RHI::SwapChainDescriptor desc{};
         
         Array<Vulkan::Texture*> images{};
+		u32 currentImageIndex = 0;
 
 		//! Used to 
 		StaticArray<VkImageLayout, RHI::Limits::MaxSwapChainImageCount> swapChainInitialImageLayouts{};
@@ -74,6 +84,7 @@ namespace CE::Vulkan
 		DelegateHandle windowResizeCallback = 0;
 
 		friend class FrameGraphExecuter;
+		friend class CommandQueue;
 	};
 
 } // namespace CE
