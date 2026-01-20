@@ -756,11 +756,6 @@ namespace CE::Vulkan
 			{
 				Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)frameBuffer->GetAttachment(i).GetSwapChain();
 				frameIndex = swapChain->GetCurrentImageIndex();
-
-				if (swapChain->GetCurrentImageIndex() != this->currentFrameIndex)
-				{
-					String::IsAlphabet('a');
-				}
 			}
 
 			const auto& attachmentLayout = renderPass->GetRenderPassLayout().attachmentLayouts[i];

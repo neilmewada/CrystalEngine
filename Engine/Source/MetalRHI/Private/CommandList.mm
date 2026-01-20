@@ -84,6 +84,8 @@ namespace CE::Metal
         const auto& subpassLayout = rpLayout.subpasses[curSubpass];
         bool hasResolve = (subpassLayout.resolveAttachments.GetSize() == subpassLayout.colorAttachments.GetSize());
         
+        u32 frameIndex = this->currentFrameIndex;
+        
         for (int i = 0; i < subpassLayout.colorAttachments.GetSize(); i++)
         {
             u32 colorAttachmentIdx = subpassLayout.colorAttachments[i];
@@ -103,14 +105,14 @@ namespace CE::Metal
                 rpDesc.colorAttachments[i].texture = [metalSwapChain->GetCurrentDrawable() texture];
                 rpDesc.colorAttachments[i].clearColor = MTLClearColorMake(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
             }
-            else if (RHI::TextureView* textureViewAttachment = colorAttachment.GetTextureView())
+            else if (RHI::TextureView* textureViewAttachment = colorAttachment.GetTextureView(frameIndex))
             {
                 Metal::TextureView* textureView = (Metal::TextureView*)textureViewAttachment;
                 
                 rpDesc.colorAttachments[i].texture = textureView->GetMtlTextureView();
                 rpDesc.colorAttachments[i].clearColor = MTLClearColorMake(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
             }
-            else if (RHI::Texture* textureAttachment = colorAttachment.GetTexture())
+            else if (RHI::Texture* textureAttachment = colorAttachment.GetTexture(frameIndex))
             {
                 Metal::Texture* texture = (Metal::Texture*)textureAttachment;
                 
@@ -140,13 +142,13 @@ namespace CE::Metal
                     
                     rpDesc.colorAttachments[i].resolveTexture = [metalSwapChain->GetCurrentDrawable() texture];
                 }
-                else if (RHI::TextureView* textureViewAttachment = resolveAttachment.GetTextureView())
+                else if (RHI::TextureView* textureViewAttachment = resolveAttachment.GetTextureView(frameIndex))
                 {
                     Metal::TextureView* textureView = (Metal::TextureView*)textureViewAttachment;
                     
                     rpDesc.colorAttachments[i].resolveTexture = textureView->GetMtlTextureView();
                 }
-                else if (RHI::Texture* textureAttachment = resolveAttachment.GetTexture())
+                else if (RHI::Texture* textureAttachment = resolveAttachment.GetTexture(frameIndex))
                 {
                     Metal::Texture* texture = (Metal::Texture*)textureAttachment;
                     
@@ -170,7 +172,7 @@ namespace CE::Metal
             
             bool hasStencil = IsDepthStencilFormat(depthStencilAttachmentLayout.format);
             
-            if (RHI::TextureView* textureViewAttachment = depthStencilAttachment.GetTextureView())
+            if (RHI::TextureView* textureViewAttachment = depthStencilAttachment.GetTextureView(frameIndex))
             {
                 Metal::TextureView* textureView = (Metal::TextureView*)textureViewAttachment;
                 
@@ -183,7 +185,7 @@ namespace CE::Metal
                     rpDesc.stencilAttachment.clearStencil = stencilClearValue;
                 }
             }
-            else if (RHI::Texture* textureAttachment = depthStencilAttachment.GetTexture())
+            else if (RHI::Texture* textureAttachment = depthStencilAttachment.GetTexture(frameIndex))
             {
                 Metal::Texture* texture = (Metal::Texture*)textureAttachment;
                 
@@ -412,7 +414,7 @@ namespace CE::Metal
             if (!srg)
                 continue;
             
-            id<MTLBuffer> argumentBuffer = srg->GetArgumentBuffer(currentImageIndex);
+            id<MTLBuffer> argumentBuffer = srg->GetArgumentBuffer(currentFrameIndex);
             
             [mtlRenderEncoder setVertexBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
             [mtlRenderEncoder setFragmentBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
