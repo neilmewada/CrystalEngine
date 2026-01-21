@@ -170,7 +170,13 @@ namespace CE::RPI
 			if (variant->HasSrgLayout(RHI::SRGType::PerDraw))
 			{
 				const RHI::ShaderResourceGroupLayout& drawSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerDraw);
-				perDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(drawSrgLayout);
+
+				RHI::ShaderResourceGroupDescriptor drawSrgDesc{};
+				drawSrgDesc.name = "SRG_PerDraw";
+				drawSrgDesc.layout = drawSrgLayout;
+				drawSrgDesc.shaderHint = variant->GetShaderModule(RHI::ShaderStage::Vertex);
+
+				perDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(drawSrgDesc);
 				perDrawSrgs.Add(perDrawSrg);
 				drawItem.uniqueShaderResourceGroups.Add(perDrawSrg);
 			}

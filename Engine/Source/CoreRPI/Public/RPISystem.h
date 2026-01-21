@@ -4,6 +4,7 @@ namespace CE::RPI
 {
 	class Texture;
 	class ShaderCollection;
+	class ShaderVariant;
 
 	enum class BuiltinDrawItemTag
 	{
@@ -82,6 +83,7 @@ namespace CE::RPI
 
 		const auto& GetViewSrgLayout() const { return viewSrgLayout; }
 		const auto& GetSceneSrgLayout() const { return sceneSrgLayout; }
+		RPI::ShaderVariant* GetSrgShaderHint() const { return standardShaderSrgHint; }
 
 		void QueueDestroy(RHI::RHIResource* rhiResource);
 
@@ -121,6 +123,7 @@ namespace CE::RPI
 
 		RHI::ShaderResourceGroupLayout sceneSrgLayout{};
 		RHI::ShaderResourceGroupLayout viewSrgLayout{};
+		RPI::ShaderVariant* standardShaderSrgHint = nullptr;
 
 		RPI::ShaderCollection* standardShader = nullptr;
 		RPI::ShaderCollection* iblConvolutionShader = nullptr;

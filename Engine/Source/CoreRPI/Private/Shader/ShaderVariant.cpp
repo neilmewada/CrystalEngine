@@ -268,7 +268,7 @@ namespace CE::RPI
 
 			auto moduleDesc = desc.moduleDesc[i];
 			moduleDesc.debugName = desc.shaderName;
-			moduleDesc.defaultEntryPoint = desc.entryPoints[i];
+			moduleDesc.defaultEntryPoint = desc.entryPoints[i].GetString();
 
 			auto module = RHI::gDynamicRHI->CreateShaderModule(moduleDesc);
 			modulesByStage[moduleDesc.stage] = module;
@@ -278,17 +278,17 @@ namespace CE::RPI
 			pipelineDesc.shaderStages.Top().shaderModule = module;
 		}
 
-		// Default RenderTarget Layout
-		RHI::RenderAttachmentLayout colorAttachment{};
+		// Default RenderPass Attachment Layout
+		RHI::RenderPassAttachmentLayout colorAttachment{};
 		colorAttachment.format = RHI::Format::R8G8B8A8_UNORM;
 		colorAttachment.attachmentUsage = ScopeAttachmentUsage::Color;
 		colorAttachment.attachmentId = "Color";
 		colorAttachment.multisampleState.sampleCount = 1;
 		colorAttachment.loadAction = AttachmentLoadAction::Clear;
 		colorAttachment.storeAction = AttachmentStoreAction::Store;
-		pipelineDesc.rtLayout.attachmentLayouts.Add(colorAttachment);
+		pipelineDesc.renderPassLayout.attachmentLayouts.Add(colorAttachment);
 
-		RHI::RenderAttachmentLayout depthStencilAttachment{};
+		RHI::RenderPassAttachmentLayout depthStencilAttachment{};
 		depthStencilAttachment.attachmentId = "DepthStencil";
 		depthStencilAttachment.format = RHI::gDynamicRHI->GetAvailableDepthStencilFormats()[0];
 		depthStencilAttachment.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
@@ -306,7 +306,7 @@ namespace CE::RPI
 				depthStencilAttachment.loadAction = AttachmentLoadAction::Load;
 			}
 
-			pipelineDesc.rtLayout.attachmentLayouts.Add(depthStencilAttachment);
+			pipelineDesc.renderPassLayout.attachmentLayouts.Add(depthStencilAttachment);
 		}
 
 		pipelineDesc.rootConstantLayout = desc.reflectionInfo.rootConstantLayout;

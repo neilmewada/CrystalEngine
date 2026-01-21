@@ -107,6 +107,8 @@ namespace CE::RPI
 		    	if (!variant)
 		    		continue;
 
+                standardShaderSrgHint = variant;
+
 		    	viewSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerView);
 		    	sceneSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerScene);
 		    }
@@ -233,8 +235,15 @@ namespace CE::RPI
         }
         cmdList->End();
 
-        queue->Execute(1, &cmdList, fence);
-        fence->WaitForFence();
+        RHI::CommandQueueSubmission submission{};
+        submission.numCommandLists = 1;
+        submission.commandLists = &cmdList;
+        submission.signalFence = fence;
+        submission.signalFenceValue = fence->NextSignalValue();
+
+        queue->Submit(submission);
+
+        fence->WaitCPU(submission.signalFenceValue);
 
         RHI::gDynamicRHI->DestroyFence(fence); fence = nullptr;
         RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
@@ -583,8 +592,15 @@ namespace CE::RPI
         }
         cmdList->End();
 
-        queue->Execute(1, &cmdList, fence);
-        fence->WaitForFence();
+        RHI::CommandQueueSubmission submission{};
+        submission.numCommandLists = 1;
+        submission.commandLists = &cmdList;
+        submission.signalFence = fence;
+        submission.signalFenceValue = fence->NextSignalValue();
+
+        queue->Submit(submission);
+
+        fence->WaitCPU(submission.signalFenceValue);
 
         // Cleanup
         RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);

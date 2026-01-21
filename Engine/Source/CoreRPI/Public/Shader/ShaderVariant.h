@@ -56,6 +56,16 @@ namespace CE::RPI
 
 		const ShaderReflection& GetShaderReflection() const { return reflectionInfo; }
 
+		RHI::ShaderModule* GetShaderModule(RHI::ShaderStage stage)
+		{
+			if (modulesByStage.KeyExists(stage))
+			{
+				return modulesByStage[stage];
+			}
+
+			return nullptr;
+		}
+
 	private:
 
 		SIZE_T variantId = 0;

@@ -46,11 +46,19 @@ namespace CE::RPI
 
 		ShaderVariant* drawShaderVariant = drawShader->GetVariant(drawShader->GetDefaultVariantIndex());
 
-		RHI::ShaderResourceGroupLayout perViewSrgLayout = drawShaderVariant->GetSrgLayout(RHI::SRGType::PerView);
-		perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
+		RHI::ShaderResourceGroupDescriptor perViewSrgDesc{};
+		perViewSrgDesc.name = "SRG_PerView";
+		perViewSrgDesc.layout = drawShaderVariant->GetSrgLayout(RHI::SRGType::PerView);
+		perViewSrgDesc.shaderHint = drawShaderVariant->GetShaderModule(RHI::ShaderStage::Vertex);
 
-		RHI::ShaderResourceGroupLayout perDrawSrgLayout = drawShaderVariant->GetSrgLayout(RHI::SRGType::PerDraw);
-		drawItemSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawSrgLayout);
+		perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgDesc);
+
+		RHI::ShaderResourceGroupDescriptor perDrawSrgDesc{};
+		perDrawSrgDesc.name = "SRG_PerDraw";
+		perDrawSrgDesc.layout = drawShaderVariant->GetSrgLayout(RHI::SRGType::PerDraw);
+		perDrawSrgDesc.shaderHint = perViewSrgDesc.shaderHint;
+
+		drawItemSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawSrgDesc);
 
 		for (int i = 0; i < numFramesInFlight; i++)
 		{

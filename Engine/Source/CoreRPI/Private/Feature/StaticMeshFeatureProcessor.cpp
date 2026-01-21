@@ -109,9 +109,12 @@ namespace CE::RPI
 				}
 			}
 
-			const auto& objectSrgLayout = material->GetCurrentShader()->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerObject);
+			RHI::ShaderResourceGroupDescriptor objectSrgDesc{};
+			objectSrgDesc.name = "SRG_PerObject";
+			objectSrgDesc.layout = material->GetCurrentShader()->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerObject);
+			objectSrgDesc.shaderHint = material->GetCurrentShader()->GetDefaultVariant()->GetShaderModule(RHI::ShaderStage::Vertex);
 
-			RHI::ShaderResourceGroup* objectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(objectSrgLayout);
+			RHI::ShaderResourceGroup* objectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(objectSrgDesc);
 
 			for (int j = 0; j < objectBuffers.GetSize(); ++j)
 			{

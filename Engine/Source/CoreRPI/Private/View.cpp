@@ -30,7 +30,12 @@ namespace CE::RPI
 
 		if (gDynamicRHI != nullptr)
 		{
-			view->shaderResourceGroup = gDynamicRHI->CreateShaderResourceGroup(RPISystem::Get().GetViewSrgLayout());
+			RHI::ShaderResourceGroupDescriptor viewSrgDesc{};
+			viewSrgDesc.name = "SRG_PerView";
+			viewSrgDesc.layout = RPISystem::Get().GetViewSrgLayout();
+			viewSrgDesc.shaderHint = RPISystem::Get().GetSrgShaderHint()->GetShaderModule(RHI::ShaderStage::Vertex);
+
+			view->shaderResourceGroup = gDynamicRHI->CreateShaderResourceGroup(viewSrgDesc);
 
 			RHI::BufferDescriptor bufferDescriptor{};
 			bufferDescriptor.name = "ViewConstants";

@@ -60,10 +60,16 @@ namespace CE
 
         auto app = FusionApplication::Get();
 
-        RHI::ShaderResourceGroupLayout textureSrgLayout = app->GetFusionShader2()->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerDraw);
         if (textureSrg == nullptr)
         {
-            textureSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(textureSrgLayout);
+            RPI::ShaderVariant* shader = app->GetFusionShader2()->GetDefaultVariant();
+
+			RHI::ShaderResourceGroupDescriptor textureSrgDesc{};
+			textureSrgDesc.name = GetName().GetString() + " Texture SRG";
+			textureSrgDesc.layout = shader->GetSrgLayout(RHI::SRGType::PerDraw);
+			textureSrgDesc.shaderHint = shader->GetShaderModule(RHI::ShaderStage::Vertex);
+
+            textureSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(textureSrgDesc);
         }
 
         FusionApplication::Get()->RegisterViewport(this);

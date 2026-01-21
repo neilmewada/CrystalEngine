@@ -384,26 +384,26 @@ namespace CE::RPI
 		/////////////////////////////////////////////
 		// - Render Targets & RTBs -
 
-		RHI::RenderTarget* hdrRenderTarget = nullptr;
+		RHI::RenderPass* hdrRenderPass = nullptr;
 		RHI::TextureView* cubeMapRTVs[6] = {};
-		RHI::RenderTargetBuffer* cubeMapRTBs[6] = {};
+		RHI::RenderPassFrameBuffer* cubeMapRTBs[6] = {};
 		RHI::TextureView* irradianceCubeMapRTVs[6] = {};
-		RHI::RenderTargetBuffer* irradianceCubeMapRTBs[6] = {};
+		RHI::RenderPassFrameBuffer* irradianceCubeMapRTBs[6] = {};
 
 		// Input HDRI MipMap RTBs
 		Array<RPI::Texture*> hdriMapMipViews{};
-		Array<RHI::RenderTargetBuffer*> hdriMapRTBs{};
+		Array<RHI::RenderPassFrameBuffer*> hdriMapRTBs{};
 
 		// Specular Convolution
 		Array<RHI::TextureView*> specularConvolutionRTVs{};
-		Array<RHI::RenderTargetBuffer*> specularConvolutionRTBs{};
+		Array<RHI::RenderPassFrameBuffer*> specularConvolutionRTBs{};
 		
 		StaticArray<Array<RHI::TextureView*>, 6> cubeMapRTVMips{};
-		StaticArray<Array<RHI::RenderTargetBuffer*>, 6> cubeMapRTBMips{};
+		StaticArray<Array<RHI::RenderPassFrameBuffer*>, 6> cubeMapRTBMips{};
 
 		{
-			RHI::RenderTargetLayout rtLayout{};
-			RHI::RenderAttachmentLayout colorAttachment{};
+			RHI::RenderPassLayout rpLayout{};
+			RHI::RenderPassAttachmentLayout colorAttachment{};
 			colorAttachment.attachmentId = "Color";
 			colorAttachment.format = hdriFormat;
 			colorAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
@@ -413,9 +413,9 @@ namespace CE::RPI
 			colorAttachment.storeActionStencil = RHI::AttachmentStoreAction::DontCare;
 			colorAttachment.multisampleState.sampleCount = 1;
 
-			rtLayout.attachmentLayouts.Add(colorAttachment);
+			rpLayout.attachmentLayouts.Add(colorAttachment);
 
-			hdrRenderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+			hdrRenderPass = RHI::gDynamicRHI->CreateRenderPass(rpLayout);
 
 			for (int i = 0; i < 6; i++)
 			{
@@ -429,11 +429,11 @@ namespace CE::RPI
 				viewDesc.format = cubeMap->GetFormat();
 
 				cubeMapRTVs[i] = RHI::gDynamicRHI->CreateTextureView(viewDesc);
-				cubeMapRTBs[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { cubeMapRTVs[i] });
+				cubeMapRTBs[i] = RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { cubeMapRTVs[i] } });
 
 				viewDesc.texture = diffuseIrradianceCubeMap;
 				irradianceCubeMapRTVs[i] = RHI::gDynamicRHI->CreateTextureView(viewDesc);
-				irradianceCubeMapRTBs[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { irradianceCubeMapRTVs[i] });
+				irradianceCubeMapRTBs[i] = RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { irradianceCubeMapRTVs[i] } });
 			}
 
 			for (int mip = 0; mip < hdriMap->GetMipLevelCount(); mip++)
@@ -449,7 +449,7 @@ namespace CE::RPI
 
 				RHI::TextureView* textureView = RHI::gDynamicRHI->CreateTextureView(viewDesc);
 				hdriMapMipViews.Add(new RPI::Texture(textureView));
-				hdriMapRTBs.Add(RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { textureView }));
+				hdriMapRTBs.Add(RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { textureView } }));
 			}
 
 			if (computeSpecularConvolution)
@@ -466,7 +466,7 @@ namespace CE::RPI
 					viewDesc.format = specularConvolution->GetFormat();
 
 					specularConvolutionRTVs.Add(RHI::gDynamicRHI->CreateTextureView(viewDesc));
-					specularConvolutionRTBs.Add(RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { specularConvolutionRTVs.Top() }));
+					specularConvolutionRTBs.Add(RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { specularConvolutionRTVs.Top() } }));
 				}
 
 				for (int face = 0; face < 6; face++)
@@ -483,27 +483,27 @@ namespace CE::RPI
 						viewDesc.format = cubeMap->GetFormat();
 
 						cubeMapRTVMips[face].Add(RHI::gDynamicRHI->CreateTextureView(viewDesc));
-						cubeMapRTBMips[face].Add(RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { cubeMapRTVMips[face].Top() }));
+						cubeMapRTBMips[face].Add(RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { cubeMapRTVMips[face].Top() } }));
 					}
 				}
 			}
 		}
 
-		RHI::RenderTarget* grayscaleRenderTarget = nullptr;
-		RHI::RenderTargetBuffer* grayscaleRTB = nullptr;
-		RHI::RenderTargetBuffer* rowAverageRTB = nullptr;
-		RHI::RenderTargetBuffer* columnAverageRTB = nullptr;
-		RHI::RenderTargetBuffer* pdfJointRTB = nullptr;
-		RHI::RenderTargetBuffer* pdfMarginalRTB = nullptr;
-		RHI::RenderTargetBuffer* pdfConditionalRTB = nullptr;
-		RHI::RenderTargetBuffer* cdfMarginalInverseRTB = nullptr;
-		RHI::RenderTargetBuffer* cdfConditionalInverseRTB = nullptr;
-		RHI::RenderTargetBuffer* diffuseConvolutionRTB = nullptr;
+		RHI::RenderPass* grayscaleRenderTarget = nullptr;
+		RHI::RenderPassFrameBuffer* grayscaleRTB = nullptr;
+		RHI::RenderPassFrameBuffer* rowAverageRTB = nullptr;
+		RHI::RenderPassFrameBuffer* columnAverageRTB = nullptr;
+		RHI::RenderPassFrameBuffer* pdfJointRTB = nullptr;
+		RHI::RenderPassFrameBuffer* pdfMarginalRTB = nullptr;
+		RHI::RenderPassFrameBuffer* pdfConditionalRTB = nullptr;
+		RHI::RenderPassFrameBuffer* cdfMarginalInverseRTB = nullptr;
+		RHI::RenderPassFrameBuffer* cdfConditionalInverseRTB = nullptr;
+		RHI::RenderPassFrameBuffer* diffuseConvolutionRTB = nullptr;
 
 		if (diffuseIrradiance != nullptr)
 		{
-			RHI::RenderTargetLayout rtLayout{};
-			RHI::RenderAttachmentLayout colorAttachment{};
+			RHI::RenderPassLayout rtLayout{};
+			RHI::RenderPassAttachmentLayout colorAttachment{};
 			colorAttachment.attachmentId = "Color";
 			colorAttachment.format = RHI::Format::R16_SFLOAT;
 			colorAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
@@ -515,23 +515,22 @@ namespace CE::RPI
 
 			rtLayout.attachmentLayouts.Add(colorAttachment);
 
-			grayscaleRenderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+			grayscaleRenderTarget = RHI::gDynamicRHI->CreateRenderPass(rtLayout);
 
-			grayscaleRTB = gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { grayscale });
-			rowAverageRTB = gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { rowAverage });
-			columnAverageRTB = gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { columnAverage });
-			pdfJointRTB = gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { pdfJoint });
-			pdfMarginalRTB = gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { pdfMarginal });
-			pdfConditionalRTB = gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { pdfConditional });
-			cdfMarginalInverseRTB = gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { cdfMarginalInverse });
-			cdfConditionalInverseRTB = gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { cdfConditionalInverse });
-
-			diffuseConvolutionRTB = gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { diffuseIrradiance });
+			grayscaleRTB = gDynamicRHI->CreateRenderPassFrameBuffer({ grayscaleRenderTarget, { grayscale } });
+			rowAverageRTB = gDynamicRHI->CreateRenderPassFrameBuffer({ grayscaleRenderTarget, { rowAverage } });
+			columnAverageRTB = gDynamicRHI->CreateRenderPassFrameBuffer({ grayscaleRenderTarget, { columnAverage } });
+			pdfJointRTB = gDynamicRHI->CreateRenderPassFrameBuffer({ grayscaleRenderTarget, { pdfJoint } });
+			pdfMarginalRTB = gDynamicRHI->CreateRenderPassFrameBuffer({ grayscaleRenderTarget, { pdfMarginal } });
+			pdfConditionalRTB = gDynamicRHI->CreateRenderPassFrameBuffer({ grayscaleRenderTarget, { pdfConditional } });
+			cdfMarginalInverseRTB = gDynamicRHI->CreateRenderPassFrameBuffer({ grayscaleRenderTarget, { cdfMarginalInverse } });
+			cdfConditionalInverseRTB = gDynamicRHI->CreateRenderPassFrameBuffer({ grayscaleRenderTarget, { cdfConditionalInverse } });
+			diffuseConvolutionRTB = gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { diffuseIrradiance } });
 		}
 
 		defer(&)
 		{
-			delete hdrRenderTarget;
+			delete hdrRenderPass;
 			for (int i = 0; i < 6; i++)
 			{
 				for (int mip = 0; mip < cubeMapRTBMips[i].GetSize(); mip++)
@@ -788,7 +787,7 @@ namespace CE::RPI
 			// Convert equirectangular HDR flat image to HDR CubeMap
 			for (int i = 0; i < 6; i++)
 			{
-				cmdList->BeginRenderTarget(hdrRenderTarget, cubeMapRTBs[i], &clearValue);
+				cmdList->BeginRenderPass(hdrRenderPass, cubeMapRTBs[i], &clearValue);
 
 				RHI::ViewportState viewportState{};
 				viewportState.x = viewportState.y = 0;
@@ -816,7 +815,7 @@ namespace CE::RPI
 
 				cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
 
-				cmdList->EndRenderTarget();
+				cmdList->EndRenderPass();
 			}
 
 			barrier.resource = cubeMap;
@@ -836,7 +835,7 @@ namespace CE::RPI
 				cmdList->ResourceBarrier(1, &barrier);
 
 				// Grayscale image
-				cmdList->BeginRenderTarget(grayscaleRenderTarget, grayscaleRTB, &clearValue);
+				cmdList->BeginRenderPass(grayscaleRenderTarget, grayscaleRTB, &clearValue);
 				{
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;
@@ -863,7 +862,7 @@ namespace CE::RPI
 
 					cmdList->DrawLinear(fullscreenQuadArgs);
 				}
-				cmdList->EndRenderTarget();
+				cmdList->EndRenderPass();
 
 				barrier.resource = grayscale;
 				barrier.fromState = ResourceState::ColorOutput;
@@ -916,7 +915,7 @@ namespace CE::RPI
 				cmdList->ClearShaderResourceGroups();
 
 				// Row Average
-				cmdList->BeginRenderTarget(grayscaleRenderTarget, rowAverageRTB, &clearValue);
+				cmdList->BeginRenderPass(grayscaleRenderTarget, rowAverageRTB, &clearValue);
 				{
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;
@@ -943,7 +942,7 @@ namespace CE::RPI
 
 					cmdList->DrawLinear(fullscreenQuadArgs);
 				}
-				cmdList->EndRenderTarget();
+				cmdList->EndRenderPass();
 
 				cmdList->ClearShaderResourceGroups();
 
@@ -956,7 +955,7 @@ namespace CE::RPI
 				///////////////////////////////////////////////////////////////////////
 
 				// Column Average
-				cmdList->BeginRenderTarget(grayscaleRenderTarget, columnAverageRTB, &clearValue);
+				cmdList->BeginRenderPass(grayscaleRenderTarget, columnAverageRTB, &clearValue);
 				{
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;
@@ -983,12 +982,12 @@ namespace CE::RPI
 
 					cmdList->DrawLinear(fullscreenQuadArgs);
 				}
-				cmdList->EndRenderTarget();
+				cmdList->EndRenderPass();
 
 				cmdList->ClearShaderResourceGroups();
 
 				// PDF Conditional
-				cmdList->BeginRenderTarget(grayscaleRenderTarget, pdfConditionalRTB, &clearValue);
+				cmdList->BeginRenderPass(grayscaleRenderTarget, pdfConditionalRTB, &clearValue);
 				{
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;
@@ -1015,7 +1014,7 @@ namespace CE::RPI
 
 					cmdList->DrawLinear(fullscreenQuadArgs);
 				}
-				cmdList->EndRenderTarget();
+				cmdList->EndRenderPass();
 
 				cmdList->ClearShaderResourceGroups();
 
@@ -1034,7 +1033,7 @@ namespace CE::RPI
 				///////////////////////////////////////////////////////////////////////
 
 				// PDF Marginal
-				cmdList->BeginRenderTarget(grayscaleRenderTarget, pdfMarginalRTB, &clearValue);
+				cmdList->BeginRenderPass(grayscaleRenderTarget, pdfMarginalRTB, &clearValue);
 				{
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;
@@ -1061,12 +1060,12 @@ namespace CE::RPI
 
 					cmdList->DrawLinear(fullscreenQuadArgs);
 				}
-				cmdList->EndRenderTarget();
+				cmdList->EndRenderPass();
 
 				cmdList->ClearShaderResourceGroups();
 
 				// CDF Conditional Inverse
-				cmdList->BeginRenderTarget(grayscaleRenderTarget, cdfConditionalInverseRTB, &clearValue);
+				cmdList->BeginRenderPass(grayscaleRenderTarget, cdfConditionalInverseRTB, &clearValue);
 				{
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;
@@ -1093,12 +1092,12 @@ namespace CE::RPI
 
 					cmdList->DrawLinear(fullscreenQuadArgs);
 				}
-				cmdList->EndRenderTarget();
+				cmdList->EndRenderPass();
 
 				cmdList->ClearShaderResourceGroups();
 
 				// PDF Joint
-				cmdList->BeginRenderTarget(grayscaleRenderTarget, pdfJointRTB, &clearValue);
+				cmdList->BeginRenderPass(grayscaleRenderTarget, pdfJointRTB, &clearValue);
 				{
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;
@@ -1125,7 +1124,7 @@ namespace CE::RPI
 
 					cmdList->DrawLinear(fullscreenQuadArgs);
 				}
-				cmdList->EndRenderTarget();
+				cmdList->EndRenderPass();
 
 				cmdList->ClearShaderResourceGroups();
 
@@ -1151,7 +1150,7 @@ namespace CE::RPI
 
 				// CDF Marginal Inverse
 
-				cmdList->BeginRenderTarget(grayscaleRenderTarget, cdfMarginalInverseRTB, &clearValue);
+				cmdList->BeginRenderPass(grayscaleRenderTarget, cdfMarginalInverseRTB, &clearValue);
 				{
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;
@@ -1178,7 +1177,7 @@ namespace CE::RPI
 
 					cmdList->DrawLinear(fullscreenQuadArgs);
 				}
-				cmdList->EndRenderTarget();
+				cmdList->EndRenderPass();
 
 				cmdList->ClearShaderResourceGroups();
 
@@ -1198,7 +1197,7 @@ namespace CE::RPI
 				barrier.subresourceRange = RHI::SubresourceRange::All();
 				cmdList->ResourceBarrier(1, &barrier);
 
-				cmdList->BeginRenderTarget(hdrRenderTarget, diffuseConvolutionRTB, &clearValue);
+				cmdList->BeginRenderPass(hdrRenderPass, diffuseConvolutionRTB, &clearValue);
 				{
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;
@@ -1225,7 +1224,7 @@ namespace CE::RPI
 
 					cmdList->DrawLinear(fullscreenQuadArgs);
 				}
-				cmdList->EndRenderTarget();
+				cmdList->EndRenderPass();
 
 				cmdList->ClearShaderResourceGroups();
 
@@ -1247,7 +1246,7 @@ namespace CE::RPI
 
 				for (int i = 0; i < 6; i++)
 				{
-					cmdList->BeginRenderTarget(hdrRenderTarget, irradianceCubeMapRTBs[i], &clearValue);
+					cmdList->BeginRenderPass(hdrRenderPass, irradianceCubeMapRTBs[i], &clearValue);
 
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;
@@ -1275,7 +1274,7 @@ namespace CE::RPI
 
 					cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
 
-					cmdList->EndRenderTarget();
+					cmdList->EndRenderPass();
 				}
 
 				barrier.resource = diffuseIrradianceCubeMap;
@@ -1314,7 +1313,7 @@ namespace CE::RPI
 			for (int i = 1; i < hdriMap->GetMipLevelCount(); i++)
 			{
 				// Generate mip level 'i'
-				cmdList->BeginRenderTarget(hdrRenderTarget, hdriMapRTBs[i], &clearValue);
+				cmdList->BeginRenderPass(hdrRenderPass, hdriMapRTBs[i], &clearValue);
 				RHI::ViewportState viewportState{};
 				viewportState.x = viewportState.y = 0;
 				viewportState.width = hdriMap->GetWidth(i);
@@ -1340,7 +1339,7 @@ namespace CE::RPI
 
 				cmdList->DrawLinear(fullscreenQuadArgs);
 
-				cmdList->EndRenderTarget();
+				cmdList->EndRenderPass();
 
 				barrier.resource = hdriMap;
 				barrier.fromState = ResourceState::ColorOutput;
@@ -1365,7 +1364,7 @@ namespace CE::RPI
 
 				for (int mip = 1; mip < specularConvolution->GetMipLevelCount(); mip++)
 				{
-					cmdList->BeginRenderTarget(hdrRenderTarget, specularConvolutionRTBs[mip], &clearValue);
+					cmdList->BeginRenderPass(hdrRenderPass, specularConvolutionRTBs[mip], &clearValue);
 
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;
@@ -1392,7 +1391,7 @@ namespace CE::RPI
 
 					cmdList->DrawLinear(fullscreenQuadArgs);
 
-					cmdList->EndRenderTarget();
+					cmdList->EndRenderPass();
 				}
 
 				barrier.resource = specularConvolution;
@@ -1411,7 +1410,7 @@ namespace CE::RPI
 				{
 					for (int face = 0; face < 6; face++)
 					{
-						cmdList->BeginRenderTarget(hdrRenderTarget, cubeMapRTBMips[face][mip], &clearValue);
+						cmdList->BeginRenderPass(hdrRenderPass, cubeMapRTBMips[face][mip], &clearValue);
 						
 						RHI::ViewportState viewportState{};
 						viewportState.x = viewportState.y = 0;
@@ -1439,7 +1438,7 @@ namespace CE::RPI
 
 						cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
 
-						cmdList->EndRenderTarget();
+						cmdList->EndRenderPass();
 					}
 				}
 
@@ -1485,8 +1484,15 @@ namespace CE::RPI
 		}
 		cmdList->End();
 
-		queue->Execute(1, &cmdList, fence);
-		fence->WaitForFence();
+		RHI::CommandQueueSubmission submission{};
+		submission.numCommandLists = 1;
+		submission.commandLists = &cmdList;
+		submission.signalFence = fence;
+		submission.signalFenceValue = fence->NextSignalValue();
+
+		queue->Submit(submission);
+		
+		fence->WaitCPU(submission.signalFenceValue);
 
 		/////////////////////////////////////////////
 		// - Output Data -

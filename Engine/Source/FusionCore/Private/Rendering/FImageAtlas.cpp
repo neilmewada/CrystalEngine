@@ -51,8 +51,12 @@ namespace CE
 
         auto fusionShader = FusionApplication::Get()->GetFusionShader2();
 
-        auto perDrawSrgLayout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerDraw);
-        textureSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawSrgLayout);
+        RHI::ShaderResourceGroupDescriptor perDrawSrgDesc{};
+		perDrawSrgDesc.name = "FImageAtlas SRG_PerDraw";
+    	perDrawSrgDesc.layout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerDraw);
+        perDrawSrgDesc.shaderHint = fusionShader->GetDefaultVariant()->GetShaderModule(RHI::ShaderStage::Vertex);
+
+        textureSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawSrgDesc);
 
         RPI::TextureDescriptor textureDescriptor{};
         textureDescriptor.texture.width = textureDescriptor.texture.height = atlasSize;
@@ -232,9 +236,15 @@ namespace CE
             }
             commandList->End();
 
-            stagingBufferFence->Reset();
-            stagingCommandQueue->Execute(1, &commandList, stagingBufferFence);
-            stagingBufferFence->WaitForFence();
+            RHI::CommandQueueSubmission submission{};
+            submission.numCommandLists = 1;
+			submission.commandLists = &commandList;
+			submission.signalFence = stagingBufferFence;
+            submission.signalFenceValue = stagingBufferFence->NextSignalValue();
+
+            stagingCommandQueue->Submit(submission);
+            
+        	stagingBufferFence->WaitCPU(submission.signalFenceValue);
         }
 
         flushRequiredPerImage[imageIndex] = false;

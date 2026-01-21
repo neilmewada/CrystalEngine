@@ -455,7 +455,17 @@ namespace CE::Vulkan
 				}
 				else
 				{
-					RHIResource* resource = imageFrameAttachment->GetResource();
+					RHIResource* resource = nullptr;
+					if (imageFrameAttachment->IsSwapChainAttachment())
+					{
+						SwapChainFrameAttachment* swapChainAttachment = (SwapChainFrameAttachment*)imageFrameAttachment;
+						resource = ((Vulkan::SwapChain*)swapChainAttachment->GetSwapChain())->GetImage(0); // We only need format/sampleCount, so index 0 is fine
+					}
+					else
+					{
+						resource = imageFrameAttachment->GetResource();
+					}
+					
 					if (resource == nullptr)
 						continue;
 

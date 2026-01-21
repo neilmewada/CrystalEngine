@@ -40,7 +40,20 @@ namespace CE::Vulkan
 				}
 
 				RHI::ImageScopeAttachment* imageScopeAttachment = (RHI::ImageScopeAttachment*)attachment;
-				RHI::RHIResource* resource = imageScopeAttachment->GetFrameAttachment()->GetResource(imageIndex);
+				RHI::RHIResource* resource = nullptr;
+
+				if (frameAttachment->IsSwapChainAttachment())
+				{
+					auto swapChainAttachment = (RHI::SwapChainFrameAttachment*)frameAttachment;
+					auto vulkanSwapChain = (Vulkan::SwapChain*)swapChainAttachment->GetSwapChain();
+
+					resource = vulkanSwapChain->GetImage(imageIndex);
+				}
+				else
+				{
+					resource = frameAttachment->GetResource(imageIndex);
+				}
+
 				if (!resource)
 					continue;
 

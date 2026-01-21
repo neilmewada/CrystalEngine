@@ -55,7 +55,7 @@ namespace CE::RPI
         else
         {
             cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
-            fence = RHI::gDynamicRHI->CreateFence(false);
+            fence = RHI::gDynamicRHI->CreateFence(0);
 
             bufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
             bufferDesc.defaultHeapType = MemoryHeapType::Upload;
@@ -245,8 +245,15 @@ namespace CE::RPI
 
             cmdList->End();
 
-            queue->Execute(1, &cmdList, fence);
-            fence->WaitForFence();
+			RHI::CommandQueueSubmission submission{};
+			submission.numCommandLists = 1;
+			submission.commandLists = &cmdList;
+			submission.signalFence = fence;
+			submission.signalFenceValue = fence->NextSignalValue();
+			
+			queue->Submit(submission);
+
+			fence->WaitCPU(submission.signalFenceValue);
 
             delete stagingBuffer;
             delete cmdList;
