@@ -456,7 +456,7 @@ TEST(RHI, Triangle)
                         .firstInstance = 0,
                         .vertexCount = numVertices,
                         .vertexOffset = 0
-                        });
+                    });
                 }
                 cmdList->EndRenderPass();
 
@@ -474,7 +474,7 @@ TEST(RHI, Triangle)
         };
 
     // Exposed Tick
-    app->AddTickHandler(renderLoop);
+    auto handle = app->AddTickHandler(renderLoop);
     
     while (!IsEngineRequestingExit())
     {
@@ -485,6 +485,8 @@ TEST(RHI, Triangle)
 
         renderLoop();
     }
+
+    app->RemoveTickHandler(handle);
     
     // - Cleanup -
     
