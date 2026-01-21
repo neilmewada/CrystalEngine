@@ -430,6 +430,9 @@ TEST(RHI, Triangle)
     int totalFrames = 0;
     uint64_t frameDoneValue[kNumFrames] = {};
     RHI::Fence* graphicsFence = gDynamicRHI->CreateFence();
+    
+    f32 deltaTime = 0.0f;
+    f32 eulerY = 0;
 
     auto renderLoop = [&]
         {
@@ -443,6 +446,10 @@ TEST(RHI, Triangle)
 
             viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -5));
             viewData.viewProjectionMatrix = projectionMatrix * viewMatrix;
+            
+            eulerY += deltaTime * 5;
+            
+            objectData.modelMatrix = Matrix4x4::Translation(Vec3(0, 0, 10)) * Quat::EulerRadians(0, eulerY, 0).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1) * 5);
 
 			perViewDataBuffers[frameIndex]->UploadData(&viewData, sizeof(ViewDataConstants));
 			perObjectDataBuffers[frameIndex]->UploadData(&objectData, sizeof(ObjectDataConstants));
@@ -527,14 +534,21 @@ TEST(RHI, Triangle)
     // Exposed Tick
     auto handle = app->AddTickHandler(renderLoop);
     
+    clock_t prevTime = clock();
+    
     while (!IsEngineRequestingExit())
     {
+        auto curTime = clock();
+        deltaTime = (f32)(curTime - prevTime) / CLOCKS_PER_SEC;
+        
         app->Tick();
         InputManager::Get().Tick();
 
 		// - Render Loop -
 
         renderLoop();
+        
+        prevTime = curTime;
     }
 
     app->RemoveTickHandler(handle);

@@ -22,6 +22,7 @@ namespace CE::Metal
         metalLayer.device = device->GetHandle();
         metalLayer.maximumDrawableCount = desc.imageCount;
         metalLayer.pixelFormat = ToMtlFormat(this->swapChainColorFormat);
+        metalLayer.displaySyncEnabled = YES;
         
         metalLayer.framebufferOnly = frameBufferOnly;
     }
