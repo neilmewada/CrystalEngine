@@ -182,17 +182,18 @@ namespace CE::Metal
         for (int i = 0; i < pipelineDesc.vertexInputSlots.GetSize(); i++)
         {
             int inputSlot = pipelineDesc.vertexInputSlots[i].inputSlot;
+            int bufferIndex = (int)RHI::SRGType::COUNT + inputSlot;
             
-            pipelineDescriptor.vertexDescriptor.layouts[inputSlot].stride = pipelineDesc.vertexInputSlots[i].stride;
-            pipelineDescriptor.vertexDescriptor.layouts[inputSlot].stepRate = 1;
+            pipelineDescriptor.vertexDescriptor.layouts[bufferIndex].stride = pipelineDesc.vertexInputSlots[i].stride;
+            pipelineDescriptor.vertexDescriptor.layouts[bufferIndex].stepRate = 1;
             
             switch (pipelineDesc.vertexInputSlots[i].inputRate)
             {
                 case RHI::VertexInputRate::PerVertex:
-                    pipelineDescriptor.vertexDescriptor.layouts[inputSlot].stepFunction = MTLVertexStepFunctionPerVertex;
+                    pipelineDescriptor.vertexDescriptor.layouts[bufferIndex].stepFunction = MTLVertexStepFunctionPerVertex;
                     break;
                 case RHI::VertexInputRate::PerInstance:
-                    pipelineDescriptor.vertexDescriptor.layouts[inputSlot].stepFunction = MTLVertexStepFunctionPerInstance;
+                    pipelineDescriptor.vertexDescriptor.layouts[bufferIndex].stepFunction = MTLVertexStepFunctionPerInstance;
                     break;
             }
         }
@@ -202,7 +203,7 @@ namespace CE::Metal
             int location = pipelineDesc.vertexAttributes[i].location;
             
             pipelineDescriptor.vertexDescriptor.attributes[location].offset = pipelineDesc.vertexAttributes[i].offset;
-            pipelineDescriptor.vertexDescriptor.attributes[location].bufferIndex = pipelineDesc.vertexAttributes[i].inputSlot;
+            pipelineDescriptor.vertexDescriptor.attributes[location].bufferIndex = (int)RHI::SRGType::COUNT + pipelineDesc.vertexAttributes[i].inputSlot;
             
             switch (pipelineDesc.vertexAttributes[i].dataType)
             {

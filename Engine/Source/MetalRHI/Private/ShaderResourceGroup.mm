@@ -382,6 +382,37 @@ namespace CE::Metal
         
         return true;
     }
+    
+    void ShaderResourceGroup::MtlUseResources(id<MTLRenderCommandEncoder> mtlRenderEncoder, int frameIndex)
+    {
+        for (const auto& [binding, boundBuffers] : boundBuffersBySlot[frameIndex])
+        {
+            for (const RHI::BufferView& bufferView : boundBuffers)
+            {
+                if (Metal::Buffer* buffer = (Metal::Buffer*)bufferView.GetBuffer())
+                {
+                    MTLResourceUsage usage = MTLResourceUsageRead | MTLResourceUsageWrite;
+                    [mtlRenderEncoder useResource:buffer->GetMtlBuffer() usage:usage];
+                }
+            }
+        }
+        
+        for (const auto& [binding, boundTextures] : boundTexturesBySlot[frameIndex])
+        {
+            for (const TextureBinding& textureBinding : boundTextures)
+            {
+                MTLResourceUsage usage = MTLResourceUsageSample;
+                if (textureBinding.resourceType == RHI::ResourceType::Texture)
+                {
+                    [mtlRenderEncoder useResource:textureBinding.texture->GetMtlTexture() usage:usage];
+                }
+                else if (textureBinding.resourceType == RHI::ResourceType::TextureView)
+                {
+                    [mtlRenderEncoder useResource:textureBinding.textureView->GetMtlTextureView() usage:usage];
+                }
+            }
+        }
+    }
 
     void ShaderResourceGroup::Compile()
     {

@@ -418,6 +418,8 @@ namespace CE::Metal
             
             [mtlRenderEncoder setVertexBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
             [mtlRenderEncoder setFragmentBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
+            
+            srg->MtlUseResources(mtlRenderEncoder, currentFrameIndex);
         }
     }
 
@@ -447,7 +449,7 @@ namespace CE::Metal
             RHI:VertexBufferView bufferView = bufferViews[i];
             Metal::Buffer* buffer = (Metal::Buffer*)bufferView.GetBuffer();
             
-            [mtlRenderEncoder setVertexBuffer:buffer->GetMtlBuffer() offset:bufferView.GetByteOffset() atIndex:firstInputSlot + i];
+            [mtlRenderEncoder setVertexBuffer:buffer->GetMtlBuffer() offset:bufferView.GetByteOffset() atIndex:((int)RHI::SRGType::COUNT + firstInputSlot + i)];
         }
     }
 
