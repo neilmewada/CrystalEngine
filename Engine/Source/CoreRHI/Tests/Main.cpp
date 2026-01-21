@@ -266,8 +266,7 @@ TEST(RHI, Triangle)
     ViewDataConstants viewData{};
     
 	Matrix4x4 projectionMatrix = Matrix4x4::PerspectiveProjection((f32)swapChain->GetWidth() / (f32)swapChain->GetHeight(), 60, 0.1f, 1000.0f);
-    if (gDynamicRHI->GetGraphicsBackend() == GraphicsBackend::Metal)
-		projectionMatrix[1][1] *= -1; // Flip Y for Metal
+    projectionMatrix[1][1] *= gDynamicRHI->GetClipSpaceSignY();
 
     Matrix4x4 viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -5));
 	viewData.viewProjectionMatrix = projectionMatrix * viewMatrix;
@@ -438,6 +437,12 @@ TEST(RHI, Triangle)
             {
                 graphicsFence->WaitCPU(frameDoneValue[frameIndex]);
             }
+            
+            projectionMatrix = Matrix4x4::PerspectiveProjection((f32)swapChain->GetWidth() / (f32)swapChain->GetHeight(), 60, 0.1f, 1000.0f);
+            projectionMatrix[1][1] *= gDynamicRHI->GetClipSpaceSignY();
+
+            viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -5));
+            viewData.viewProjectionMatrix = projectionMatrix * viewMatrix;
 
 			perViewDataBuffers[frameIndex]->UploadData(&viewData, sizeof(ViewDataConstants));
 			perObjectDataBuffers[frameIndex]->UploadData(&objectData, sizeof(ObjectDataConstants));

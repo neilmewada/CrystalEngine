@@ -128,6 +128,7 @@ namespace CE::Metal
         
         void GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets) override;
         
+        int GetClipSpaceSignY() override { return -1; }
         
     private:
         
