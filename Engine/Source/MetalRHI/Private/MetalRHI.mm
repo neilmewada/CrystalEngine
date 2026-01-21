@@ -58,18 +58,17 @@ namespace CE::Metal
 
     RHI::Scope* MetalRHI::CreateScope(const ScopeDescriptor& desc)
     {
-        // TODO
-        return nullptr;
+        return new Metal::Scope(device, desc);
     }
 
     RHI::FrameGraphCompiler* MetalRHI::CreateFrameGraphCompiler()
     {
-        return nullptr;
+        return new Metal::FrameGraphCompiler(device);
     }
 
     RHI::FrameGraphExecuter* MetalRHI::CreateFrameGraphExecuter()
     {
-        return nullptr;
+        return new Metal::FrameGraphExecuter(device);
     }
 
     Array<RHI::Format> MetalRHI::GetAvailableDepthStencilFormats()

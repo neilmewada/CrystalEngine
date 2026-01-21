@@ -34,3 +34,8 @@
 #include "DeviceLimits.h"
 #include "Device.h"
 
+// FrameGraph
+#include "Scope.h"
+#include "FrameGraphCompiler.h"
+#include "FrameGraphExecuter.h"
+
