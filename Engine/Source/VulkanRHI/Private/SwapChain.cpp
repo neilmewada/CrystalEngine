@@ -349,6 +349,8 @@ namespace CE::Vulkan
 		}
 		images.Clear();
 
+		int idx = 0;
+
 		// Create new images
 		for (VkImage swapChainImage : swapChainImages)
 		{
@@ -362,8 +364,14 @@ namespace CE::Vulkan
 			imageDesc.sampleCount = 1;
 			imageDesc.bindFlags = RHI::TextureBindFlags::Color;
 
-			Vulkan::Texture* image = new Vulkan::Texture(device, swapChainImage, imageDesc, VK_IMAGE_LAYOUT_UNDEFINED);
+			Vulkan::Texture* image = new Vulkan::Texture(device, swapChainImage, imageDesc, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 			images.Add(image);
+
+			String imageName = String::Format("SwapChain Image {}", idx);
+
+			device->SetObjectDebugName((uint64_t)image->GetImage(), VK_OBJECT_TYPE_IMAGE, imageName.GetCString());
+
+			idx++;
 		}
 
 		for (int i = 0; i < swapChainInitialImageLayouts.GetSize(); i++)

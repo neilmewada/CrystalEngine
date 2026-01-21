@@ -408,12 +408,26 @@ namespace CE::Vulkan
 							RHI::ImageScopeAttachment* imageScopeAttachment = (RHI::ImageScopeAttachment*)scopeAttachment;
 							RHI::ImageFrameAttachment* imageFrameAttachment = (RHI::ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
 
-							RHI::RHIResource* resource = imageFrameAttachment->GetResource(currentSubmissionIndex);
+							RHI::RHIResource* resource = nullptr;
+
+							if (imageFrameAttachment->IsSwapChainAttachment())
+							{
+								RHI::SwapChainFrameAttachment* swapChainFrameAttachment = (RHI::SwapChainFrameAttachment*)imageFrameAttachment;
+								Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)swapChainFrameAttachment->GetSwapChain();
+
+								//resource = swapChain->GetImage(currentSubmissionIndex);
+								resource = swapChain->GetImage(swapChain->GetCurrentImageIndex());
+							}
+							else
+							{
+								resource = imageFrameAttachment->GetResource(currentSubmissionIndex);
+							}
+
 							if (resource == nullptr)
 								continue;
 							if (initializedAttachmentIds.Exists(imageFrameAttachment->GetId()))
 								continue;
-							if (resource->GetResourceType() != RHI::ResourceType::Buffer && resource->GetResourceType() != RHI::ResourceType::Texture &&
+							if (resource->GetResourceType() != RHI::ResourceType::Texture &&
 								resource->GetResourceType() != RHI::ResourceType::TextureView)
 								continue;
 
@@ -622,10 +636,17 @@ namespace CE::Vulkan
 				{
 					commandList->ClearShaderResourceGroups();
 
+					int frameBufferIndex = currentSubmissionIndex;
+
+					if (currentScope->presentSwapChains.GetSize() == 1)
+					{
+						frameBufferIndex = ((Vulkan::SwapChain*)currentScope->presentSwapChains[0])->currentImageIndex;
+					}
+
 					VkRenderPassBeginInfo beginInfo{};
 					beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 					beginInfo.renderPass = renderPass->GetHandle();
-					FrameBuffer* frameBuffer = currentScope->frameBuffers[currentSubmissionIndex];
+					FrameBuffer* frameBuffer = currentScope->frameBuffers[frameBufferIndex];
 					beginInfo.framebuffer = frameBuffer->GetHandle();
 					beginInfo.clearValueCount = clearValues.GetSize();
 					beginInfo.pClearValues = clearValues.GetData();
@@ -963,7 +984,6 @@ namespace CE::Vulkan
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandList->commandBuffer;
 		
-		//result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentSubmissionIndex]);
 		bool success = scope->queue->Submit(1, &submitInfo, scope->renderFinishedFences[currentSubmissionIndex]);
 
 		if (presentRequired && scopeChain.Top()->presentSwapChains.NotEmpty())
