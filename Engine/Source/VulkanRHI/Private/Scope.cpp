@@ -178,7 +178,7 @@ namespace CE::Vulkan
 							const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
                             RHI::ShaderResourceGroupDescriptor srgDesc{};
                             srgDesc.layout = srgLayout;
-                            srgDesc.shader = nullptr; // TODO
+                            srgDesc.shaderHint = nullptr; // TODO
                             
 							next->passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
 
@@ -191,7 +191,7 @@ namespace CE::Vulkan
 							const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerSubPass];
                             RHI::ShaderResourceGroupDescriptor srgDesc{};
                             srgDesc.layout = srgLayout;
-                            srgDesc.shader = nullptr; // TODO
+                            srgDesc.shaderHint = nullptr; // TODO
                             
 							next->subpassShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
 

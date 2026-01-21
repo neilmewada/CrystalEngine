@@ -98,25 +98,28 @@ static void WindowTestEnd()
     ModuleManager::Get().UnloadModule("Core");
 }
 
-struct MaterialData
+struct alignas(16) ViewDataConstants
 {
-    Vec4 albedo;
-    float roughness;
-    float metallic;
+    Matrix4x4 viewProjectionMatrix;
 };
 
-struct SceneData
+struct alignas(16) ObjectDataConstants
 {
-    float timeElapsed;
+    Matrix4x4 modelMatrix;
 };
 
 constexpr const char RHI_Triangle_Shader[] = R"(
 #include "Core/Macros.hlsli"
 
-cbuffer _SceneData : SRG_PerScene(b0)
+cbuffer _ViewData : SRG_PerView(b0)
 {
-    float _TimeElapsed;
+    float4x4 viewProjectionMatrix;
 };
+
+cbuffer _ObjectData : SRG_PerObject(b0)
+{
+    float4x4 modelMatrix;
+}
 
 struct VSInput
 {
@@ -135,7 +138,8 @@ struct PSInput
 PSInput VertMain(VSInput input)
 {
     PSInput o;
-    o.position = float4(input.position, 1.0);
+	o.position = mul(mul(float4(input.position, 1.0), modelMatrix), viewProjectionMatrix);
+	//o.position = float4(input.position, 1.0);
     o.color = input.color;
     return o;
 }
@@ -236,36 +240,71 @@ TEST(RHI, Triangle)
     
     // - Shader Resources -
     
-    RHI::ShaderResourceGroup* perSceneSrg = nullptr;
+    RHI::ShaderResourceGroup* perViewSrg = nullptr;
     {
-        const RHI::ShaderResourceGroupLayout& perSceneSrgLayout = reflection.srgLayouts[0];
+        const RHI::ShaderResourceGroupLayout& perViewSrgLayout = reflection.srgLayouts[0];
         
-        RHI::ShaderResourceGroupDescriptor perSceneSrgDesc{};
-        perSceneSrgDesc.name = "SRG_PerScene";
-        perSceneSrgDesc.layout = perSceneSrgLayout;
-        perSceneSrgDesc.shader = vertShader;
+        RHI::ShaderResourceGroupDescriptor perViewSrgDesc{};
+        perViewSrgDesc.name = "SRG_PerView";
+        perViewSrgDesc.layout = perViewSrgLayout;
+        perViewSrgDesc.shaderHint = vertShader;
         
-        perSceneSrg = gDynamicRHI->CreateShaderResourceGroup(perSceneSrgDesc);
+        perViewSrg = gDynamicRHI->CreateShaderResourceGroup(perViewSrgDesc);
+    }
+
+    RHI::ShaderResourceGroup* perObjectSrg = nullptr;
+    {
+	    const RHI::ShaderResourceGroupLayout& perObjectSrgLayout = reflection.srgLayouts[1];
+        
+        RHI::ShaderResourceGroupDescriptor perObjectSrgDesc{};
+        perObjectSrgDesc.name = "SRG_PerObject";
+        perObjectSrgDesc.layout = perObjectSrgLayout;
+        perObjectSrgDesc.shaderHint = vertShader;
+        
+		perObjectSrg = gDynamicRHI->CreateShaderResourceGroup(perObjectSrgDesc);
     }
     
-    SceneData sceneData{};
-    sceneData.timeElapsed = 1.0f;
+    ViewDataConstants viewData{};
+    Matrix4x4 projectionMatrix = Matrix4x4::PerspectiveProjection((f32)swapChain->GetWidth() / (f32)swapChain->GetHeight(), 60, 0.1f, 1000.0f);
+    Matrix4x4 viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -5));
+	viewData.viewProjectionMatrix = projectionMatrix * viewMatrix;
+
+    ObjectDataConstants objectData{};
+	objectData.modelMatrix = Matrix4x4::Translation(Vec3(0, 0, 10)) * Matrix4x4::Scale(Vec3(1, 1, 1) * 5);
     
-    RHI::Buffer* sceneDataBuffer = nullptr; // Should be double buffers too
+    StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> perViewDataBuffers{};
+    StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> perObjectDataBuffers{};
     {
         RHI::BufferDescriptor bufferDesc{};
         bufferDesc.name = "PerScene cbuffer";
-        bufferDesc.bufferSize = sizeof(SceneData);
+        bufferDesc.bufferSize = sizeof(ViewDataConstants);
         bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
         bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
         
-        sceneDataBuffer = gDynamicRHI->CreateBuffer(bufferDesc);
-        
-        sceneDataBuffer->UploadData(&sceneData, sizeof(SceneData));
+		for (u32 i = 0; i < kNumFrames; i++)
+		{
+			perViewDataBuffers[i] = gDynamicRHI->CreateBuffer(bufferDesc);
+
+            perViewDataBuffers[i]->UploadData(&viewData, sizeof(ViewDataConstants));
+
+            perViewSrg->Bind(i, "_ViewData", perViewDataBuffers[i]);
+		}
+
+		bufferDesc.name = "PerObject cbuffer";
+		bufferDesc.bufferSize = sizeof(ObjectDataConstants);
+		
+    	for (u32 i = 0; i < kNumFrames; i++)
+		{
+			perObjectDataBuffers[i] = gDynamicRHI->CreateBuffer(bufferDesc);
+
+            perObjectDataBuffers[i]->UploadData(&objectData, sizeof(ObjectDataConstants));
+
+            perObjectSrg->Bind(i, "_ObjectData", perObjectDataBuffers[i]);
+		}
     }
-    
-    perSceneSrg->Bind("_SceneData", sceneDataBuffer);
-    perSceneSrg->FlushBindings();
+
+    perViewSrg->FlushBindings();
+	perObjectSrg->FlushBindings();
     
     // - Vertex & Index Buffers -
 
@@ -359,7 +398,8 @@ TEST(RHI, Triangle)
         desc.vertexAttributes[1].dataType = RHI::VertexAttributeDataType::Float3;
         desc.vertexAttributes[1].inputSlot = 0;
         
-        desc.srgLayouts.Add(perSceneSrg->GetLayout());
+        desc.srgLayouts.Add(perViewSrg->GetLayout());
+        desc.srgLayouts.Add(perObjectSrg->GetLayout());
         
         desc.shaderStages.Add({});
         desc.shaderStages[0].entryPoint = "VertMain";
@@ -395,6 +435,9 @@ TEST(RHI, Triangle)
             {
                 graphicsFence->WaitCPU(frameDoneValue[frameIndex]);
             }
+
+			perViewDataBuffers[frameIndex]->UploadData(&viewData, sizeof(ViewDataConstants));
+			perObjectDataBuffers[frameIndex]->UploadData(&objectData, sizeof(ObjectDataConstants));
 
             bool imageAcquired = swapChain->AcquireNextImage();
             if (!imageAcquired)
@@ -446,7 +489,7 @@ TEST(RHI, Triangle)
 
                     cmdList->BindPipelineState(pipeline);
 
-                    cmdList->SetShaderResourceGroups({ perSceneSrg });
+                    cmdList->SetShaderResourceGroups({ perViewSrg, perObjectSrg });
                     cmdList->CommitShaderResources();
 
                     cmdList->BindVertexBuffers(0, 1, &vertexBufferView);
@@ -490,11 +533,16 @@ TEST(RHI, Triangle)
     
     // - Cleanup -
     
+	for (u32 i = 0; i < kNumFrames; i++)
+    {
+        delete perViewDataBuffers[i];
+        delete perObjectDataBuffers[i];
+    }
+
     delete vertShader; delete fragShader;
-    delete perSceneSrg;
     delete swapChain;
     delete renderPass;
-    delete sceneDataBuffer;
+    delete perObjectSrg; delete perViewSrg;
     gDynamicRHI->FreeCommandLists(kNumFrames, cmdLists);
     delete pipeline;
     delete graphicsFence;

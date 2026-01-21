@@ -184,7 +184,7 @@ namespace CE::RHI
         
         /// You need to pass a shader module to create a shader resource group, just for the setup.
         /// The shader module does not need to be active after the initialization.
-        RHI::ShaderModule* shader = nullptr;
+        RHI::ShaderModule* shaderHint = nullptr;
     };
     
 } // namespace CE::RHI
