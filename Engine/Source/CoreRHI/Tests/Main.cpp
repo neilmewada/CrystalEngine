@@ -139,7 +139,6 @@ PSInput VertMain(VSInput input)
 {
     PSInput o;
 	o.position = mul(mul(float4(input.position, 1.0), modelMatrix), viewProjectionMatrix);
-	//o.position = float4(input.position, 1.0);
     o.color = input.color;
     return o;
 }
@@ -265,14 +264,16 @@ TEST(RHI, Triangle)
     }
     
     ViewDataConstants viewData{};
-    Matrix4x4 projectionMatrix = Matrix4x4::PerspectiveProjection((f32)swapChain->GetWidth() / (f32)swapChain->GetHeight(), 60, 0.1f, 1000.0f);
+    
+	Matrix4x4 projectionMatrix = Matrix4x4::PerspectiveProjection((f32)swapChain->GetWidth() / (f32)swapChain->GetHeight(), 60, 0.1f, 1000.0f);
+    if (gDynamicRHI->GetGraphicsBackend() == GraphicsBackend::Metal)
+		projectionMatrix[1][1] *= -1; // Flip Y for Metal
+
     Matrix4x4 viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -5));
 	viewData.viewProjectionMatrix = projectionMatrix * viewMatrix;
-    //viewData.viewProjectionMatrix = Matrix4x4::Identity();
 
     ObjectDataConstants objectData{};
 	objectData.modelMatrix = Matrix4x4::Translation(Vec3(0, 0, 10)) * Matrix4x4::Scale(Vec3(1, 1, 1) * 5);
-    //objectData.modelMatrix = Matrix4x4::Identity();
     
     StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> perViewDataBuffers{};
     StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> perObjectDataBuffers{};
