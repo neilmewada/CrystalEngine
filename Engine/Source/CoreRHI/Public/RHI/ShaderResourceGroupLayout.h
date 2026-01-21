@@ -130,6 +130,21 @@ namespace CE::RHI
 
 			return empty;
 		}
+        
+        const SRGVariableDescriptor& FindVariable(u32 bindingSlot) const
+        {
+            static SRGVariableDescriptor empty{};
+
+            for (const auto& variable : variables)
+            {
+                if (variable.bindingSlot == bindingSlot)
+                {
+                    return variable;
+                }
+            }
+
+            return empty;
+        }
 
 		Self& TryAdd(const SRGVariableDescriptor& variable)
 		{

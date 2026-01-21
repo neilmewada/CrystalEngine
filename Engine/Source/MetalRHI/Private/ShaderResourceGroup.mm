@@ -391,7 +391,23 @@ namespace CE::Metal
             {
                 if (Metal::Buffer* buffer = (Metal::Buffer*)bufferView.GetBuffer())
                 {
-                    MTLResourceUsage usage = MTLResourceUsageRead | MTLResourceUsageWrite;
+                    MTLResourceUsage usage = MTLResourceUsageRead;
+                    
+                    const auto& variableDesc = srgLayout.FindVariable(binding);
+                    if (variableDesc.name.IsValid())
+                    {
+                        switch (variableDesc.type)
+                        {
+                            case RHI::ShaderResourceType::ConstantBuffer:
+                            case RHI::ShaderResourceType::StructuredBuffer:
+                                usage = MTLResourceUsageRead;
+                                break;
+                            case RHI::ShaderResourceType::RWStructuredBuffer:
+                                usage = MTLResourceUsageRead | MTLResourceUsageWrite;
+                                break;
+                        }
+                    }
+                    
                     [mtlRenderEncoder useResource:buffer->GetMtlBuffer() usage:usage];
                 }
             }
@@ -402,6 +418,27 @@ namespace CE::Metal
             for (const TextureBinding& textureBinding : boundTextures)
             {
                 MTLResourceUsage usage = MTLResourceUsageSample;
+                
+                const auto& variableDesc = srgLayout.FindVariable(binding);
+                if (variableDesc.name.IsValid())
+                {
+                    switch (variableDesc.type)
+                    {
+                        case RHI::ShaderResourceType::Texture1D:
+                        case RHI::ShaderResourceType::Texture2D:
+                        case RHI::ShaderResourceType::Texture3D:
+                        case RHI::ShaderResourceType::TextureCube:
+                        case RHI::ShaderResourceType::Texture2DArray:
+                            usage = MTLResourceUsageSample;
+                            break;
+                        case RHI::ShaderResourceType::RWTexture2D:
+                        case RHI::ShaderResourceType::RWTexture3D:
+                        case RHI::ShaderResourceType::RWTexture2DArray:
+                            usage = MTLResourceUsageRead | MTLResourceUsageWrite;
+                            break;
+                    }
+                }
+                
                 if (textureBinding.resourceType == RHI::ResourceType::Texture)
                 {
                     [mtlRenderEncoder useResource:textureBinding.texture->GetMtlTexture() usage:usage];
