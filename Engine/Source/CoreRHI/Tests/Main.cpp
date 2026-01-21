@@ -388,6 +388,93 @@ TEST(RHI, Triangle)
     int totalFrames = 0;
     uint64_t frameDoneValue[kNumFrames] = {};
     RHI::Fence* graphicsFence = gDynamicRHI->CreateFence();
+
+    auto renderLoop = [&]
+        {
+            if (frameDoneValue[frameIndex] != 0)
+            {
+                graphicsFence->WaitCPU(frameDoneValue[frameIndex]);
+            }
+
+            bool imageAcquired = swapChain->AcquireNextImage();
+            if (!imageAcquired)
+            {
+                return;
+            }
+
+            uint64_t done = graphicsFence->NextSignalValue();
+            frameDoneValue[frameIndex] = done;
+
+            RHI::CommandQueueSubmission submission{};
+            submission.numCommandLists = 1;
+            submission.commandLists = &cmdLists[frameIndex];
+
+            submission.signalFence = graphicsFence;
+            submission.signalFenceValue = done;
+
+            submission.numPresentSwapChains = 1;
+            submission.presentSwapChains = &swapChain;
+
+            auto cmdList = cmdLists[frameIndex];
+
+            cmdList->Begin();
+            {
+                AttachmentClearValue clearValue{};
+                clearValue.clearValue = Vec4(0, 0, 0, 1);
+
+                RHI::ResourceBarrierDescriptor barrier{};
+
+                barrier.resource = swapChain;
+                barrier.fromState = ResourceState::Undefined;
+                barrier.toState = ResourceState::ColorOutput;
+                cmdList->ResourceBarrier(1, &barrier);
+
+                cmdList->BeginRenderPass(renderPass, frameBuffer, &clearValue);
+                {
+                    RHI::ScissorState scissor{};
+                    scissor.x = scissor.y = 0;
+                    scissor.width = swapChain->GetWidth();
+                    scissor.height = swapChain->GetHeight();
+                    cmdList->SetScissors(1, &scissor);
+
+                    RHI::ViewportState viewport{};
+                    viewport.x = viewport.y = 0;
+                    viewport.minDepth = 0; viewport.maxDepth = 1;
+                    viewport.width = scissor.width;
+                    viewport.height = scissor.height;
+                    cmdList->SetViewports(1, &viewport);
+
+                    cmdList->BindPipelineState(pipeline);
+
+                    cmdList->SetShaderResourceGroups({ perSceneSrg });
+                    cmdList->CommitShaderResources();
+
+                    cmdList->BindVertexBuffers(0, 1, &vertexBufferView);
+
+                    cmdList->DrawLinear(RHI::DrawLinearArguments{
+                        .instanceCount = 1,
+                        .firstInstance = 0,
+                        .vertexCount = numVertices,
+                        .vertexOffset = 0
+                        });
+                }
+                cmdList->EndRenderPass();
+
+                barrier.resource = swapChain;
+                barrier.fromState = ResourceState::ColorOutput;
+                barrier.toState = ResourceState::Present;
+                cmdList->ResourceBarrier(1, &barrier);
+            }
+            cmdList->End();
+
+            cmdQueue->Submit(submission);
+
+            frameIndex = (frameIndex + 1) % kNumFrames;
+            totalFrames++;
+        };
+
+    // Exposed Tick
+    app->AddTickHandler(renderLoop);
     
     while (!IsEngineRequestingExit())
     {
@@ -396,88 +483,7 @@ TEST(RHI, Triangle)
 
 		// - Render Loop -
 
-        if (frameDoneValue[frameIndex] != 0)
-        {
-            graphicsFence->WaitCPU(frameDoneValue[frameIndex]);
-        }
-
-        bool imageAcquired = swapChain->AcquireNextImage();
-        if (!imageAcquired)
-        {
-            continue;
-        }
-        
-        uint64_t done = graphicsFence->NextSignalValue();
-        frameDoneValue[frameIndex] = done;
-        
-        RHI::CommandQueueSubmission submission{};
-        submission.numCommandLists = 1;
-        submission.commandLists = &cmdLists[frameIndex];
-        
-        submission.signalFence = graphicsFence;
-        submission.signalFenceValue = done;
-        
-        submission.numPresentSwapChains = 1;
-        submission.presentSwapChains = &swapChain;
-        
-        auto cmdList = cmdLists[frameIndex];
-        
-        cmdList->Begin();
-        {
-            AttachmentClearValue clearValue{};
-            clearValue.clearValue = Vec4(0, 0, 0, 1);
-
-            RHI::ResourceBarrierDescriptor barrier{};
-
-            barrier.resource = swapChain;
-            barrier.fromState = ResourceState::Undefined;
-			barrier.toState = ResourceState::ColorOutput;
-			cmdList->ResourceBarrier(1, &barrier);
-            
-            cmdList->BeginRenderPass(renderPass, frameBuffer, &clearValue);
-            {
-                RHI::ScissorState scissor{};
-                scissor.x = scissor.y = 0;
-                scissor.width = swapChain->GetWidth();
-                scissor.height = swapChain->GetHeight();
-                cmdList->SetScissors(1, &scissor);
-                
-                RHI::ViewportState viewport{};
-                viewport.x = viewport.y = 0;
-                viewport.minDepth = 0; viewport.maxDepth = 1;
-                viewport.width = scissor.width;
-                viewport.height = scissor.height;
-                cmdList->SetViewports(1, &viewport);
-                
-                cmdList->BindPipelineState(pipeline);
-                
-                cmdList->SetShaderResourceGroups({ perSceneSrg });
-                cmdList->CommitShaderResources();
-                
-                cmdList->BindVertexBuffers(0, 1, &vertexBufferView);
-
-                cmdList->DrawLinear(RHI::DrawLinearArguments{
-                    .instanceCount = 1,
-                    .firstInstance = 0,
-                    .vertexCount = numVertices,
-                    .vertexOffset = 0
-                });
-            }
-            cmdList->EndRenderPass();
-
-            barrier.resource = swapChain;
-			barrier.fromState = ResourceState::ColorOutput;
-			barrier.toState = ResourceState::Present;
-			cmdList->ResourceBarrier(1, &barrier);
-        }
-        cmdList->End();
-        
-        cmdQueue->Submit(submission);
-
-        String::IsAlphabet('a');
-        
-        frameIndex = (frameIndex + 1) % kNumFrames;
-        totalFrames++;
+        renderLoop();
     }
     
     // - Cleanup -

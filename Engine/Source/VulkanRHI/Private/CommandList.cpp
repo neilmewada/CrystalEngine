@@ -741,6 +741,8 @@ namespace CE::Vulkan
 		Vulkan::RenderPass* renderPass = (Vulkan::RenderPass*)rhiRenderPass;
 		Vulkan::RenderPassFrameBuffer* frameBuffer = (Vulkan::RenderPassFrameBuffer*)rhiFrameBuffer;
 
+		frameBuffer->RebuildIfNeeded();
+
 		currentPass = renderPass->GetVulkanRenderPass();
 		currentSubpass = 0;
 

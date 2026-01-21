@@ -4,6 +4,45 @@ namespace CE::Vulkan
 {
 	RenderPassFrameBuffer::RenderPassFrameBuffer(Device* device, const RHI::RenderPassFrameBufferDescriptor& desc) : RHI::RenderPassFrameBuffer(desc), device(device)
 	{
+		Init();
+	}
+
+	RenderPassFrameBuffer::~RenderPassFrameBuffer()
+	{
+		Destroy();
+	}
+
+	void RenderPassFrameBuffer::RebuildIfNeeded()
+	{
+		if (swapChainId == 0)
+			return;
+
+		for (int i = 0; i < desc.attachments.GetSize(); i++)
+		{
+			if (!desc.attachments[i].IsValid())
+				continue;
+
+			const auto& frameAttachment = desc.attachments[i];
+
+			if (frameAttachment.GetSwapChain() != nullptr)
+			{
+				SwapChain* swapChain = (SwapChain*)frameAttachment.GetSwapChain();
+
+				if (swapChain->GetSwapChainId() != swapChainId)
+				{
+					Destroy();
+					Init();
+
+					return;
+				}
+			}
+		}
+	}
+
+	void RenderPassFrameBuffer::Init()
+	{
+		swapChainId = 0;
+
 		for (u32 imageIndex = 0; imageIndex < framebuffers.GetSize(); imageIndex++)
 		{
 			FixedArray<VkImageView, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
@@ -27,6 +66,8 @@ namespace CE::Vulkan
 				{
 					SwapChain* swapChain = (SwapChain*)frameAttachment.GetSwapChain();
 					Vulkan::Texture* image = swapChain->GetImage(imageIndex);
+
+					swapChainId = swapChain->GetSwapChainId();
 
 					u32 imageWidth = image->GetWidth();
 					u32 imageHeight = image->GetHeight();
@@ -111,7 +152,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	RenderPassFrameBuffer::~RenderPassFrameBuffer()
+	void RenderPassFrameBuffer::Destroy()
 	{
 		for (u32 imageIndex = 0; imageIndex < framebuffers.GetSize(); imageIndex++)
 		{

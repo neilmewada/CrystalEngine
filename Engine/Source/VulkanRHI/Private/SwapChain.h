@@ -47,6 +47,8 @@ namespace CE::Vulkan
 
 		Vulkan::Texture* GetImage(u32 imageIndex) const { return images[imageIndex]; }
 
+		inline s64 GetSwapChainId() const { return swapChainId; }
+
 	protected:
 
 		void OnWindowResized(PlatformWindow* window, u32 newDrawWidth, u32 newDrawHeight);
@@ -64,6 +66,7 @@ namespace CE::Vulkan
 		u32 currentImageIndex = 0;
 		u32 currentImageAcquiredSemaphoreIndex = 0;
 		bool shouldRebuild = false;
+		s64 swapChainId = 0;
 		
 		StaticArray<VkImageLayout, RHI::Limits::MaxSwapChainImageCount> swapChainInitialImageLayouts{};
 		StaticArray<VkSemaphore, RHI::Limits::MaxSwapChainImageCount> imageAcquiredSemaphores{};

@@ -14,7 +14,12 @@ namespace CE::Vulkan
 		u32 GetWidth() const { return width; }
 		u32 GetHeight() const { return height; }
 
+        void RebuildIfNeeded();
+
     private:
+
+        void Init();
+        void Destroy();
 
         Device* device = nullptr;
 		StaticArray<VkFramebuffer, RHI::Limits::MaxSwapChainImageCount> framebuffers{};
@@ -22,7 +27,7 @@ namespace CE::Vulkan
         u32 width = 0;
         u32 height = 0;
 
-        u32 imageIndex = 0;
+        s64 swapChainId = 0;
     };
     
 } // namespace CE::Vulkan

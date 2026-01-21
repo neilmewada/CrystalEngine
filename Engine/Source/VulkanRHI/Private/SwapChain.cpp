@@ -370,6 +370,8 @@ namespace CE::Vulkan
 		{
 			swapChainInitialImageLayouts[i] = VK_IMAGE_LAYOUT_UNDEFINED;
 		}
+
+		swapChainId = Random::Range((s64)1, NumericLimits<s64>::Max());
 	}
 
 } // namespace CE
