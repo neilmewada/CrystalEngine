@@ -7,7 +7,9 @@ namespace CE::Metal
         : device(device)
         , srgLayout(srgDescriptor.layout)
     {
-        auto shader = (Metal::ShaderModule*)srgDescriptor.shader;
+        this->srgType = srgLayout.srgType;
+        
+        auto shader = (Metal::ShaderModule*)srgDescriptor.shaderHint;
         String defaultEntryPoint = shader->GetDefaultEntryPoint().GetString();
         NSString* defaultEntryPointStr = [[NSString alloc] initWithCString:defaultEntryPoint.GetCString()];
         
