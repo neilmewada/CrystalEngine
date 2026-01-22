@@ -26,6 +26,14 @@ namespace CE::RHI
             }
         }
         
+        RenderPassFrameAttachment(int count, RHI::Texture** textures)
+        {
+            for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+            {
+                this->textures[i] = textures[i];
+            }
+        }
+        
         RenderPassFrameAttachment(RHI::TextureView* textureView)
         {
 			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
@@ -35,6 +43,14 @@ namespace CE::RHI
         }
 
 		RenderPassFrameAttachment(const StaticArray<RHI::TextureView*, RHI::Limits::MaxSwapChainImageCount>& textureViews)
+        {
+            for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+            {
+                this->textureViews[i] = textureViews[i];
+            }
+        }
+        
+        RenderPassFrameAttachment(int count, RHI::TextureView** textureViews)
         {
             for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
             {

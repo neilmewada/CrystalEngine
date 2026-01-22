@@ -17,6 +17,10 @@ namespace CE::Metal
     private:
         
         Device* device = nullptr;
+        
+        u32 numFramesInFlight = 2;
+        
+        friend class FrameGraphExecuter;
     };
     
 } // namespace CE::Metal

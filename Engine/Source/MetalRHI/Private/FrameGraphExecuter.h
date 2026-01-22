@@ -2,6 +2,7 @@
 
 namespace CE::Metal
 {
+    class Scope;
     
     class FrameGraphExecuter : public RHI::FrameGraphExecuter
     {
@@ -20,10 +21,20 @@ namespace CE::Metal
         
         bool ExecuteInternal(const FrameGraphExecuteRequest &executeRequest) override;
         
+        bool ExecuteScope(const RHI::FrameGraphExecuteRequest& executeRequest, Metal::Scope* scope,
+                          HashSet<RHI::ScopeId>& executedScopes,
+                          HashSet<Metal::SwapChain*>& usedSwapChains);
         
     private:
         
         Device* device = nullptr;
+        
+        Metal::FrameGraphCompiler* compiler = nullptr;
+        
+        uint64_t renderingFinishedValues[RHI::Limits::MaxSwapChainImageCount] = {};
+        RHI::Fence* renderingFinishedFence = nullptr;
+        
+        u32 currentSubmissionIndex = 0;
     };
     
 } // namespace CE::Metal

@@ -1071,6 +1071,12 @@ float4 FragMain(PSInput input) : SV_TARGET
                         rebuildFrameGraph = true;
                         return;
                     }
+                    
+                    projectionMatrix = Matrix4x4::PerspectiveProjection((f32)swapChain->GetWidth() / (f32)swapChain->GetHeight(), 60, 0.1f, 1000.0f);
+                    projectionMatrix[1][1] *= gDynamicRHI->GetClipSpaceSignY();
+
+                    viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -5));
+                    viewData.viewProjectionMatrix = projectionMatrix * viewMatrix;
 
 					eulerY += deltaTime;
 					objectData.modelMatrix = Matrix4x4::Translation(Vec3(0, 0, 20)) * Quat::EulerRadians(0, eulerY, 0).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1) * 5);

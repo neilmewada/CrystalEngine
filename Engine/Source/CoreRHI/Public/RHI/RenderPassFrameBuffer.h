@@ -23,6 +23,9 @@ namespace CE::RHI
         
         const RenderPassFrameAttachment& GetAttachment(u32 index) const { return desc.attachments[index]; }
         
+        virtual u32 GetWidth() = 0;
+        virtual u32 GetHeight() = 0;
+        
     protected:
 
         RenderPassFrameBuffer(const RHI::RenderPassFrameBufferDescriptor& desc) : RHIResource(RHI::ResourceType::RenderPassFrameBuffer), desc(desc)
