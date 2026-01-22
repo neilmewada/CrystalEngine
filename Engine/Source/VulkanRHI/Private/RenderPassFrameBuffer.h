@@ -11,8 +11,8 @@ namespace CE::Vulkan
 
 		VkFramebuffer GetHandle(u32 imageIndex) const { return framebuffers[imageIndex]; }
 
-		u32 GetWidth() const { return width; }
-		u32 GetHeight() const { return height; }
+		u32 GetWidth() override { return width; }
+		u32 GetHeight() override { return height; }
 
         void RebuildIfNeeded();
 
