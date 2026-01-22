@@ -19,7 +19,7 @@ namespace CE::Metal
         
         void SetupShaderStages();
         
-        void SetupColorAttachments();
+        void SetupAttachments();
         
         void SetupVertexInput();
         

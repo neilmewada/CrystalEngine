@@ -891,6 +891,7 @@ float4 FragMain(PSInput input) : SV_TARGET
             desc.shaderStages[1].entryPoint = "FragMain";
             desc.shaderStages[1].shaderModule = fragShader;
 
+            desc.name = "DepthPipeline";
             depthPipeline = gDynamicRHI->CreateGraphicsPipeline(desc);
 
 			// Color Pipeline
@@ -914,6 +915,7 @@ float4 FragMain(PSInput input) : SV_TARGET
             });
             desc.subpass = 0;
 
+            desc.name = "ColorPipeline";
 			colorPipeline = gDynamicRHI->CreateGraphicsPipeline(desc);
         }
 

@@ -27,7 +27,7 @@ namespace CE::Metal
         pipelineDescriptor.rasterizationEnabled = YES;
         
         SetupShaderStages();
-        SetupColorAttachments();
+        SetupAttachments();
         SetupVertexInput();
         
         mtlPipeline = [device->GetHandle() newRenderPipelineStateWithDescriptor:pipelineDescriptor error:nil];
@@ -137,8 +137,38 @@ namespace CE::Metal
         return desc;
     }
 
-    void GraphicsPipeline::SetupColorAttachments()
+    void GraphicsPipeline::SetupAttachments()
     {
+        if (pipelineDesc.renderPassLayout.subpasses.IsEmpty())
+        {
+            RHI::RenderPassSubpassLayout subpassLayout{};
+            
+            for (int i = 0; i < pipelineDesc.renderPassLayout.attachmentLayouts.GetSize(); i++)
+            {
+                const RHI::RenderPassAttachmentLayout& attachmentLayout = pipelineDesc.renderPassLayout.attachmentLayouts[i];
+                
+                switch (attachmentLayout.attachmentUsage)
+                {
+                    case RHI::ScopeAttachmentUsage::Color:
+                        subpassLayout.colorAttachments.Add(i);
+                        break;
+                    case RHI::ScopeAttachmentUsage::DepthStencil:
+                        subpassLayout.depthStencilAttachment.Add(i);
+                        break;
+                    case RHI::ScopeAttachmentUsage::Resolve:
+                        subpassLayout.resolveAttachments.Add(i);
+                        break;
+                    case RHI::ScopeAttachmentUsage::SubpassInput:
+                        subpassLayout.subpassInputAttachments.Add(i);
+                        break;
+                    default:
+                        continue;
+                }
+            }
+            
+            pipelineDesc.renderPassLayout.subpasses.Add(subpassLayout);
+        }
+        
         const RenderPassSubpassLayout& subpass = pipelineDesc.renderPassLayout.subpasses[pipelineDesc.subpass];
         
         for (int i = 0; i < subpass.colorAttachments.GetSize(); i++)
@@ -171,7 +201,15 @@ namespace CE::Metal
             const RenderPassAttachmentLayout& attachmentLayout = pipelineDesc.renderPassLayout.attachmentLayouts[attachmentIdx];
             
             pipelineDescriptor.depthAttachmentPixelFormat = ToMtlFormat(attachmentLayout.format);
-            pipelineDescriptor.stencilAttachmentPixelFormat = ToMtlFormat(attachmentLayout.format);
+            
+            if (IsStencilMtlFormat(pipelineDescriptor.depthAttachmentPixelFormat))
+            {
+                pipelineDescriptor.stencilAttachmentPixelFormat = ToMtlFormat(attachmentLayout.format);
+            }
+            else
+            {
+                pipelineDescriptor.stencilAttachmentPixelFormat = MTLPixelFormatInvalid;
+            }
         }
     }
 

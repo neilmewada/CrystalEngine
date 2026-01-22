@@ -131,6 +131,8 @@ namespace CE::Metal
         textureDesc.height = height;
         textureDesc.depth = depth;
         
+        textureDesc.pixelFormat = ToMtlFormat(this->format);
+        
         switch (dimension)
         {
             case RHI::Dimension::Dim2D:
