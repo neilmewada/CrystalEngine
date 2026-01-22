@@ -46,6 +46,8 @@ namespace CE::RHI
         virtual void PostInitialize() = 0;
         virtual void PreShutdown() = 0;
         virtual void Shutdown() = 0;
+
+		virtual void WaitToShutdown() {}
         
         virtual void* GetNativeHandle() = 0;
 

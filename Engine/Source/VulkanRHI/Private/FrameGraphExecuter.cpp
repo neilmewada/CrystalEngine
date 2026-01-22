@@ -636,17 +636,17 @@ namespace CE::Vulkan
 				{
 					commandList->ClearShaderResourceGroups();
 
-					int frameBufferIndex = currentSubmissionIndex;
+					int imageIndex = 0;
 
 					if (currentScope->presentSwapChains.GetSize() == 1)
 					{
-						frameBufferIndex = ((Vulkan::SwapChain*)currentScope->presentSwapChains[0])->currentImageIndex;
+						imageIndex = ((Vulkan::SwapChain*)currentScope->presentSwapChains[0])->currentImageIndex;
 					}
 
 					VkRenderPassBeginInfo beginInfo{};
 					beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 					beginInfo.renderPass = renderPass->GetHandle();
-					FrameBuffer* frameBuffer = currentScope->frameBuffers[frameBufferIndex];
+					FrameBuffer* frameBuffer = currentScope->frameBuffers[currentSubmissionIndex][imageIndex];
 					beginInfo.framebuffer = frameBuffer->GetHandle();
 					beginInfo.clearValueCount = clearValues.GetSize();
 					beginInfo.pClearValues = clearValues.GetData();

@@ -256,7 +256,14 @@ namespace CE::Vulkan
 		gVulkanRHI = nullptr;
 	}
 
-    void* VulkanRHI::GetNativeHandle()
+	void VulkanRHI::WaitToShutdown()
+	{
+		DynamicRHI::WaitToShutdown();
+        
+        vkDeviceWaitIdle(device->GetHandle());
+	}
+
+	void* VulkanRHI::GetNativeHandle()
     {
         return vkInstance;
     }

@@ -33,10 +33,10 @@ namespace CE
     {
     public:
 
-        TVector2() : x(0), y(0)
+        constexpr TVector2() : x(0), y(0)
         {}
 
-        TVector2(T x, T y) : x(x), y(y)
+        constexpr TVector2(T x, T y) : x(x), y(y)
         {}
 
         TVector2(TVector3<T> vec3);
@@ -248,13 +248,13 @@ namespace CE
     {
     public:
 
-        TVector3() : x(0), y(0), z(0)
+        constexpr TVector3() : x(0), y(0), z(0)
         {}
 
-        TVector3(T x, T y) : x(x), y(y), z(0)
+        constexpr TVector3(T x, T y) : x(x), y(y), z(0)
         {}
 
-        TVector3(T x, T y, T z) : x(x), y(y), z(z)
+        constexpr TVector3(T x, T y, T z) : x(x), y(y), z(z)
         {}
 
         TVector3(TVector2<T> vec2);
@@ -469,16 +469,16 @@ namespace CE
     {
     public:
 
-        TVector4() : x(0), y(0), z(0), w(0)
+        constexpr TVector4() : x(0), y(0), z(0), w(0)
         {}
 
-        TVector4(T x, T y) : x(x), y(y), z(0), w(0)
+        constexpr TVector4(T x, T y) : x(x), y(y), z(0), w(0)
         {}
 
-        TVector4(T x, T y, T z) : x(x), y(y), z(z), w(0)
+        constexpr TVector4(T x, T y, T z) : x(x), y(y), z(z), w(0)
         {}
 
-		TVector4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w)
+		constexpr TVector4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w)
 		{}
 
         TVector4(TVector2<T> vec2);

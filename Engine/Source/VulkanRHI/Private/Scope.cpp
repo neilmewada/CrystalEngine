@@ -28,11 +28,13 @@ namespace CE::Vulkan
         }
         renderPass = nullptr;
 
-		for (auto frameBuffer : frameBuffers)
+		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 		{
-			delete frameBuffer;
+			for (int j = 0; j < RHI::Limits::MaxSwapChainImageCount; j++)
+			{
+				delete frameBuffers[i][j]; frameBuffers[i][j] = nullptr;
+			}
 		}
-		frameBuffers.Clear();
         
 		DestroySyncObjects();
 
@@ -47,24 +49,27 @@ namespace CE::Vulkan
 
 		DestroySyncObjects();
 
-		//delete passShaderResourceGroup;
-		//passShaderResourceGroup = nullptr;
-		//delete subpassShaderResourceGroup;
-		//subpassShaderResourceGroup = nullptr;
-
-		for (auto frameBuffer : frameBuffers)
+		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 		{
-			delete frameBuffer;
+			for (int j = 0; j < RHI::Limits::MaxSwapChainImageCount; j++)
+			{
+				delete frameBuffers[i][j]; frameBuffers[i][j] = nullptr;
+			}
 		}
-		frameBuffers.Clear();
 
 		auto frameGraph = compileRequest.frameGraph;
 
 		u32 imageCount = Math::Clamp<u32>(compileRequest.numFramesInFlight, 1, RHI::Limits::MaxSwapChainImageCount);
+		Vulkan::SwapChain* presentSwapChain = nullptr;
 
 		if (frameGraph->GetSwapChainCount() > 0)
 		{
 			imageCount = ((Vulkan::SwapChain*)frameGraph->GetSwapChain(0))->GetImageCount();
+		}
+
+		if (this->presentSwapChains.GetSize() > 0)
+		{
+			presentSwapChain = (Vulkan::SwapChain*)this->presentSwapChains[0];
 		}
 
 		waitSemaphores.Clear();
@@ -356,9 +361,12 @@ namespace CE::Vulkan
 				return true;
 			}
 
-			for (int i = 0; i < imageCount; i++)
+			for (u32 frameIndex = 0; frameIndex < RHI::Limits::MaxSwapChainImageCount; frameIndex++)
 			{
-				frameBuffers.Add(new FrameBuffer(device, this, i));
+				for (u32 imageIndex = 0; imageIndex < RHI::Limits::MaxSwapChainImageCount; imageIndex++)
+				{
+					frameBuffers[frameIndex][imageIndex] = new FrameBuffer(device, this, frameIndex, imageIndex);
+				}
 			}
 		}
 		else if (IsComputePass())

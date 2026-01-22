@@ -47,6 +47,8 @@ namespace CE::Vulkan
         virtual void PostInitialize() override;
         virtual void PreShutdown() override;
         virtual void Shutdown() override;
+
+        void WaitToShutdown() override;
         
         virtual void* GetNativeHandle() override;
 

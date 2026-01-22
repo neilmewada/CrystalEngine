@@ -53,7 +53,9 @@ namespace CE::Vulkan
 		FixedArray<VkFence, RHI::Limits::MaxSwapChainImageCount> renderFinishedFences{};
 
 		FixedArray<List<VkSemaphore>, RHI::Limits::MaxSwapChainImageCount> waitSemaphores{};
-		FixedArray<FrameBuffer*, RHI::Limits::MaxSwapChainImageCount> frameBuffers{};
+		//FixedArray<FrameBuffer*, RHI::Limits::MaxSwapChainImageCount> frameBuffers{};
+
+		FrameBuffer* frameBuffers[RHI::Limits::MaxSwapChainImageCount][RHI::Limits::MaxSwapChainImageCount] = {};
 
 		List<VkPipelineStageFlags> waitSemaphoreStageFlags{};
 

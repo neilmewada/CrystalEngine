@@ -158,11 +158,7 @@ namespace RenderingTests
         auto scheduler = RHI::FrameScheduler::Get();
 
         scheduler->Compile();
-
-        RHI::TransientMemoryPool* pool = scheduler->GetTransientPool();
-        RHI::MemoryHeap* imageHeap = pool->GetImagePool();
     }
-
 
     void RendererSystem::OnWindowRestored(PlatformWindow* window)
     {
