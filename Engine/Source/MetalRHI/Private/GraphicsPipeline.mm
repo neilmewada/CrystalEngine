@@ -28,6 +28,7 @@ namespace CE::Metal
         
         SetupShaderStages();
         SetupAttachments();
+        SetupDepthStencilState();
         SetupVertexInput();
         
         mtlPipeline = [device->GetHandle() newRenderPipelineStateWithDescriptor:pipelineDescriptor error:nil];
@@ -136,6 +137,71 @@ namespace CE::Metal
         
         return desc;
     }
+    
+    inline MTLCompareFunction ToMtlCompareFunction(RHI::CompareOp compareOp)
+    {
+        switch (compareOp)
+        {
+            case RHI::CompareOp::Never:
+                return MTLCompareFunctionNever;
+            case RHI::CompareOp::Less:
+                return MTLCompareFunctionLess;
+            case RHI::CompareOp::Equal:
+                return MTLCompareFunctionEqual;
+            case RHI::CompareOp::LEqual:
+                return MTLCompareFunctionLessEqual;
+            case RHI::CompareOp::Greater:
+                return MTLCompareFunctionGreater;
+            case RHI::CompareOp::NotEqual:
+                return MTLCompareFunctionNotEqual;
+            case RHI::CompareOp::GEqual:
+                return MTLCompareFunctionGreaterEqual;
+            case RHI::CompareOp::Always:
+                return MTLCompareFunctionAlways;
+        }
+        
+        return MTLCompareFunctionLessEqual;
+    }
+    
+    inline MTLCullMode ToMtlCullMode(RHI::CullMode cullMode)
+    {
+        switch (cullMode)
+        {
+            case RHI::CullMode::Back:
+                return MTLCullModeBack;
+            case RHI::CullMode::Front:
+                return MTLCullModeFront;
+            case RHI::CullMode::All:
+                return MTLCullModeBack;
+        }
+        
+        return MTLCullModeNone;
+    }
+    
+    inline MTLTriangleFillMode ToMtlFillMode(RHI::FillMode fillMode)
+    {
+        switch (fillMode)
+        {
+            case RHI::FillMode::Solid:
+                return MTLTriangleFillModeFill;
+            case RHI::FillMode::Wireframe:
+                return MTLTriangleFillModeLines;
+        }
+        
+        return MTLTriangleFillModeFill;
+    }
+    
+    void GraphicsPipeline::SetupRenderEncoder(id<MTLRenderCommandEncoder> encoder)
+    {
+        if (mtlDepthStencilState != nil)
+        {
+            [encoder setDepthStencilState:mtlDepthStencilState];
+        }
+        
+        [encoder setCullMode:ToMtlCullMode(pipelineDesc.rasterState.cullMode)];
+        
+        [encoder setTriangleFillMode:ToMtlFillMode(pipelineDesc.rasterState.fillMode)];
+    }
 
     void GraphicsPipeline::SetupAttachments()
     {
@@ -211,6 +277,22 @@ namespace CE::Metal
                 pipelineDescriptor.stencilAttachmentPixelFormat = MTLPixelFormatInvalid;
             }
         }
+    }
+    
+    void GraphicsPipeline::SetupDepthStencilState()
+    {
+        if (!pipelineDesc.depthStencilState.depthState.enable)
+        {
+            mtlDepthStencilState = nil;
+            return;
+        }
+        
+        MTLDepthStencilDescriptor* depthStencilDesc = [[MTLDepthStencilDescriptor alloc] init];
+        
+        depthStencilDesc.depthWriteEnabled = pipelineDesc.depthStencilState.depthState.writeEnable;
+        depthStencilDesc.depthCompareFunction = ToMtlCompareFunction(pipelineDesc.depthStencilState.depthState.compareOp);
+        
+        mtlDepthStencilState = [device->GetHandle() newDepthStencilStateWithDescriptor:depthStencilDesc];
     }
 
     void GraphicsPipeline::SetupVertexInput()

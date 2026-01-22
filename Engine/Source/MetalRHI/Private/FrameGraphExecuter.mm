@@ -383,16 +383,6 @@ namespace CE::Metal
                     // TODO: Add transfer pass
                 }
             }
-            
-            if (presentRequired)
-            {
-                for (int i = 0; i < scopeChain.Top()->presentSwapChains.GetSize(); i++)
-                {
-                    auto presentSwapChain = (Metal::SwapChain*)scopeChain.Top()->presentSwapChains[i];
-                    
-                    [cmdList->GetMtlCommandBuffer() presentDrawable:presentSwapChain->GetCurrentDrawable()];
-                }
-            }
         }
         cmdList->End();
         

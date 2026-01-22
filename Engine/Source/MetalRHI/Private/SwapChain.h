@@ -18,6 +18,10 @@ namespace CE::Metal
         
         bool AcquireNextImage() override;
         
+        u32 GetWidth() override;
+        
+        u32 GetHeight() override;
+        
     private:
         
         Device* device = nullptr;

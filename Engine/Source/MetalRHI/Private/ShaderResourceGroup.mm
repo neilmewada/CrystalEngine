@@ -383,6 +383,74 @@ namespace CE::Metal
         return true;
     }
     
+    void ShaderResourceGroup::MtlUseResources(id<MTLComputeCommandEncoder> mtlComputeEncoder, int frameIndex)
+    {
+        for (const auto& [binding, boundBuffers] : boundBuffersBySlot[frameIndex])
+        {
+            for (const RHI::BufferView& bufferView : boundBuffers)
+            {
+                if (Metal::Buffer* buffer = (Metal::Buffer*)bufferView.GetBuffer())
+                {
+                    MTLResourceUsage usage = MTLResourceUsageRead;
+                    
+                    const auto& variableDesc = srgLayout.FindVariable(binding);
+                    if (variableDesc.name.IsValid())
+                    {
+                        switch (variableDesc.type)
+                        {
+                            case RHI::ShaderResourceType::ConstantBuffer:
+                            case RHI::ShaderResourceType::StructuredBuffer:
+                                usage = MTLResourceUsageRead;
+                                break;
+                            case RHI::ShaderResourceType::RWStructuredBuffer:
+                                usage = MTLResourceUsageRead | MTLResourceUsageWrite;
+                                break;
+                        }
+                    }
+                    
+                    [mtlComputeEncoder useResource:buffer->GetMtlBuffer() usage:usage];
+                }
+            }
+        }
+        
+        for (const auto& [binding, boundTextures] : boundTexturesBySlot[frameIndex])
+        {
+            for (const TextureBinding& textureBinding : boundTextures)
+            {
+                MTLResourceUsage usage = MTLResourceUsageSample;
+                
+                const auto& variableDesc = srgLayout.FindVariable(binding);
+                if (variableDesc.name.IsValid())
+                {
+                    switch (variableDesc.type)
+                    {
+                        case RHI::ShaderResourceType::Texture1D:
+                        case RHI::ShaderResourceType::Texture2D:
+                        case RHI::ShaderResourceType::Texture3D:
+                        case RHI::ShaderResourceType::TextureCube:
+                        case RHI::ShaderResourceType::Texture2DArray:
+                            usage = MTLResourceUsageSample;
+                            break;
+                        case RHI::ShaderResourceType::RWTexture2D:
+                        case RHI::ShaderResourceType::RWTexture3D:
+                        case RHI::ShaderResourceType::RWTexture2DArray:
+                            usage = MTLResourceUsageRead | MTLResourceUsageWrite;
+                            break;
+                    }
+                }
+                
+                if (textureBinding.resourceType == RHI::ResourceType::Texture)
+                {
+                    [mtlComputeEncoder useResource:textureBinding.texture->GetMtlTexture() usage:usage];
+                }
+                else if (textureBinding.resourceType == RHI::ResourceType::TextureView)
+                {
+                    [mtlComputeEncoder useResource:textureBinding.textureView->GetMtlTextureView() usage:usage];
+                }
+            }
+        }
+    }
+    
     void ShaderResourceGroup::MtlUseResources(id<MTLRenderCommandEncoder> mtlRenderEncoder, int frameIndex)
     {
         for (const auto& [binding, boundBuffers] : boundBuffersBySlot[frameIndex])

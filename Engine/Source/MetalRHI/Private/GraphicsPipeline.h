@@ -13,6 +13,10 @@ namespace CE::Metal
         
         id<MTLRenderPipelineState> GetMtlPipeline() const { return mtlPipeline; }
         
+        id<MTLDepthStencilState> GetDepthStencilState() const { return mtlDepthStencilState; }
+        
+        void SetupRenderEncoder(id<MTLRenderCommandEncoder> encoder);
+        
     private:
         
         void Create();
@@ -23,11 +27,14 @@ namespace CE::Metal
         
         void SetupVertexInput();
         
+        void SetupDepthStencilState();
+        
         RHI::GraphicsPipelineDescriptor pipelineDesc{};
         
         // - ObjC -
         
         id<MTLRenderPipelineState> mtlPipeline = nil;
+        id<MTLDepthStencilState> mtlDepthStencilState = nil;
         
         MTLRenderPipelineDescriptor* pipelineDescriptor = nil;
     };

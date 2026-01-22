@@ -52,6 +52,7 @@ namespace CE::Metal
         id<MTLBuffer> GetArgumentBuffer(u32 frameIndex) { return argumentBuffers[frameIndex]; }
         
         void MtlUseResources(id<MTLRenderCommandEncoder> mtlRenderEncoder, int frameIndex);
+        void MtlUseResources(id<MTLComputeCommandEncoder> mtlComputeEncoder, int frameIndex);
         
     private:
         

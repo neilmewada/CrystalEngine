@@ -16,9 +16,6 @@ namespace CE::Metal
         
         metalLayer = MetalPlatform::GetCAMetalLayer(window);
         
-        width = metalLayer.drawableSize.width;
-        height = metalLayer.drawableSize.height;
-        
         metalLayer.device = device->GetHandle();
         metalLayer.maximumDrawableCount = desc.imageCount;
         metalLayer.pixelFormat = ToMtlFormat(this->swapChainColorFormat);
@@ -32,12 +29,19 @@ namespace CE::Metal
         // Do nothing
     }
     
+    u32 SwapChain::GetWidth()
+    {
+        return metalLayer.drawableSize.width;
+    }
+    
+    u32 SwapChain::GetHeight()
+    {
+        return metalLayer.drawableSize.height;
+    }
+    
     bool SwapChain::AcquireNextImage()
     {
         curDrawable = [metalLayer nextDrawable];
-        
-        width = metalLayer.drawableSize.width;
-        height = metalLayer.drawableSize.height;
         
         return curDrawable != nil;
     }

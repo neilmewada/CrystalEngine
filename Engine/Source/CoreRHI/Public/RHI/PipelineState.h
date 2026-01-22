@@ -372,6 +372,7 @@ namespace CE::RHI
 		virtual IPipelineLayout* GetPipelineLayout() = 0;
 		
 		inline const RHI::GraphicsPipelineDescriptor& GetGraphicsDescriptor() const { return graphicsDescriptor; }
+        inline const RHI::ComputePipelineDescriptor& GetComputeDescriptor() const { return computeDescriptor; }
 
 	protected:
 		PipelineState() : RHIResource(RHI::ResourceType::PipelineState) {}

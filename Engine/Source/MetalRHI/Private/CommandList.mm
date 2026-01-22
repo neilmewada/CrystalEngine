@@ -416,10 +416,19 @@ namespace CE::Metal
             
             id<MTLBuffer> argumentBuffer = srg->GetArgumentBuffer(currentFrameIndex);
             
-            [mtlRenderEncoder setVertexBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
-            [mtlRenderEncoder setFragmentBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
-            
-            srg->MtlUseResources(mtlRenderEncoder, currentFrameIndex);
+            if (mtlRenderEncoder != nil)
+            {
+                [mtlRenderEncoder setVertexBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
+                [mtlRenderEncoder setFragmentBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
+                
+                srg->MtlUseResources(mtlRenderEncoder, currentFrameIndex);
+            }
+            else if (mtlComputeEncoder != nil)
+            {
+                [mtlComputeEncoder setBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
+                
+                srg->MtlUseResources(mtlComputeEncoder, currentFrameIndex);
+            }
         }
     }
 
@@ -430,12 +439,23 @@ namespace CE::Metal
         if (!boundPipeline)
             return;
         
+        auto metalPipelineState = (Metal::PipelineState*)boundPipeline;
+        
         if (boundPipeline->GetPipelineType() == RHI::PipelineStateType::Graphics)
         {
-            auto metalPipelineState = (Metal::PipelineState*)boundPipeline;
             auto graphicsPipeline = (Metal::GraphicsPipeline*)metalPipelineState->GetPipeline();
             
             [mtlRenderEncoder setRenderPipelineState:graphicsPipeline->GetMtlPipeline()];
+            
+            graphicsPipeline->SetupRenderEncoder(mtlRenderEncoder);
+        }
+        else if (boundPipeline->GetPipelineType() == RHI::PipelineStateType::Compute)
+        {
+            auto computePipeline = (Metal::ComputePipeline*)metalPipelineState->GetPipeline();
+            
+            [mtlComputeEncoder setComputePipelineState:computePipeline->GetMtlPipeline()];
+            
+            // TODO: Compute pipeline
         }
     }
 

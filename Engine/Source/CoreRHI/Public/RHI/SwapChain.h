@@ -34,13 +34,13 @@ namespace CE::RHI
         
         bool IsFrameBufferOnly() const { return frameBufferOnly; }
 
-		inline u32 GetWidth() const { return width; }
-		inline u32 GetHeight() const { return height; }
+        virtual u32 GetWidth() = 0;
+        virtual u32 GetHeight() = 0;
 
-		inline u32 GetPreferredWidth() const { return width; }
-		inline u32 GetPreferredHeight() const { return height; }
+		inline u32 GetPreferredWidth() const { return preferredWidth; }
+		inline u32 GetPreferredHeight() const { return preferredHeight; }
 
-		inline f32 GetAspectRatio() const { return (f32)width / (f32)height; }
+		inline f32 GetAspectRatio() { return (f32)GetWidth() / (f32)GetHeight(); }
 
 		inline RHI::Format GetSwapChainFormat() const { return swapChainColorFormat; }
 
@@ -54,9 +54,6 @@ namespace CE::RHI
         
 		RHI::Format swapChainColorFormat{};
         bool frameBufferOnly = true;
-        
-		u32 width = 0;
-		u32 height = 0;
 
 		u32 preferredWidth = 0;
 		u32 preferredHeight = 0;
