@@ -68,6 +68,9 @@ namespace CE::Metal
                     {
                         format = imageFrameAttachment->GetImageDescriptor().format;
                         sampleCount = imageFrameAttachment->GetImageDescriptor().sampleCount;
+                        
+                        // FIXME: Find a way to create FrameBuffer with transient attachments, because they are allocated after scopes are compiled.
+                        //fbDesc.attachments.Add(RHI::RenderPassFrameAttachment(RHI::Limits::MaxSwapChainImageCount, (RHI::Texture**)imageFrameAttachment->GetRe));
                     }
                     else
                     {

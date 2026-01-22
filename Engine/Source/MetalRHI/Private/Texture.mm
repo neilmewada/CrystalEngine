@@ -4,6 +4,82 @@
 
 namespace CE::Metal
 {
+    MTLTextureDescriptor* ToMtlTextureDescriptor(const RHI::TextureDescriptor& desc)
+    {
+        MTLTextureDescriptor* textureDesc = [[MTLTextureDescriptor alloc] init];
+        
+        textureDesc.width = desc.width;
+        textureDesc.height = desc.height;
+        textureDesc.depth = desc.depth;
+        
+        switch (desc.dimension)
+        {
+            case RHI::Dimension::Dim2D:
+                textureDesc.textureType = MTLTextureType2D;
+                break;
+            case RHI::Dimension::DimCUBE:
+                textureDesc.textureType = MTLTextureTypeCube;
+                break;
+            case RHI::Dimension::Dim3D:
+                textureDesc.textureType = MTLTextureType3D;
+                break;
+            case RHI::Dimension::Dim1D:
+                textureDesc.textureType = MTLTextureType1D;
+                break;
+            case RHI::Dimension::Dim2DArray:
+                textureDesc.textureType = MTLTextureType2DArray;
+                break;
+        }
+        
+        textureDesc.mipmapLevelCount = desc.mipLevels;
+        textureDesc.arrayLength = desc.arrayLayers;
+        
+        textureDesc.sampleCount = desc.sampleCount;
+        
+        switch (desc.defaultHeapType)
+        {
+            case RHI::MemoryHeapType::Default:
+                textureDesc.storageMode = MTLStorageModePrivate;
+                break;
+            case RHI::MemoryHeapType::Upload:
+                textureDesc.cpuCacheMode = MTLCPUCacheModeWriteCombined;
+            case RHI::MemoryHeapType::ReadBack:
+                textureDesc.allowGPUOptimizedContents = NO;
+                textureDesc.storageMode = MTLStorageModeShared;
+                break;
+        }
+        
+#if CE_BUILD_DEBUG
+        textureDesc.hazardTrackingMode = MTLHazardTrackingModeTracked;
+#endif
+        
+        textureDesc.usage = MTLTextureUsageUnknown;
+        
+        if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::ShaderRead))
+        {
+            textureDesc.usage |= MTLTextureUsageShaderRead;
+        }
+        if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::ShaderWrite))
+        {
+            textureDesc.usage |= MTLTextureUsageShaderWrite;
+        }
+        if (EnumHasAnyFlags(desc.bindFlags, RHI::TextureBindFlags::Depth | RHI::TextureBindFlags::Color | RHI::TextureBindFlags::DepthStencil))
+        {
+            textureDesc.usage |= MTLTextureUsageRenderTarget;
+        }
+        
+        return textureDesc;
+    }
+    
+    void MetalRHI::GetTextureMemoryRequirements(const RHI::TextureDescriptor& textureDesc, RHI::ResourceMemoryRequirements& outRequirements)
+    {
+        MTLTextureDescriptor* desc = ToMtlTextureDescriptor(textureDesc);
+        
+        MTLSizeAndAlign req = [device->GetHandle() heapTextureSizeAndAlignWithDescriptor:desc];
+        
+        outRequirements.size = req.size;
+        outRequirements.offsetAlignment = req.align;
+    }
 
     Texture::Texture(Device* device, const RHI::TextureDescriptor& desc)
         : device(device)

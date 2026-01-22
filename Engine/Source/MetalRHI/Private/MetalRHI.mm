@@ -73,12 +73,21 @@ namespace CE::Metal
 
     Array<RHI::Format> MetalRHI::GetAvailableDepthStencilFormats()
     {
-        return {};
+        Array<RHI::Format> result;
+        
+        result.Add(RHI::Format::D32_SFLOAT_S8_UINT);
+        if ([device->GetHandle() isDepth24Stencil8PixelFormatSupported])
+        {
+            result.Add(RHI::Format::D24_UNORM_S8_UINT);
+        }
+        result.Add(RHI::Format::D16_UNORM_S8_UINT);
+        
+        return result;
     }
 
     Array<RHI::Format> MetalRHI::GetAvailableDepthOnlyFormats()
     {
-        return {};
+        return {RHI::Format::D32_SFLOAT, RHI::Format::D16_UNORM};
     }
 
     Array<RHI::CommandQueue*> MetalRHI::GetHardwareQueues(RHI::HardwareQueueClass queueClass)
@@ -118,7 +127,7 @@ namespace CE::Metal
 
     void MetalRHI::DestroyFence(RHI::Fence* fence)
     {
-        
+        delete fence;
     }
 
     RHI::CommandList* MetalRHI::AllocateCommandList(RHI::CommandQueue* associatedQueue, CommandListType commandListType)
@@ -230,17 +239,49 @@ namespace CE::Metal
 
     void MetalRHI::GetBufferMemoryRequirements(const RHI::BufferDescriptor& bufferDesc, RHI::ResourceMemoryRequirements& outRequirements)
     {
-        // TODO
-    }
+        MTLResourceOptions options = MTLResourceCPUCacheModeDefaultCache;
 
-    void MetalRHI::GetTextureMemoryRequirements(const RHI::TextureDescriptor& textureDesc, RHI::ResourceMemoryRequirements& outRequirements)
-    {
-        // TODO
+        switch (bufferDesc.defaultHeapType)
+        {
+            case RHI::MemoryHeapType::Default:  options  = MTLResourceStorageModePrivate; break;
+            case RHI::MemoryHeapType::Upload:   options |= MTLResourceStorageModeShared;  break;
+            case RHI::MemoryHeapType::ReadBack: options |= MTLResourceStorageModeShared;  break;
+        }
+        
+        MTLSizeAndAlign req = [device->GetHandle() heapBufferSizeAndAlignWithLength:bufferDesc.bufferSize options:options];
+        
+        outRequirements.size = req.size;
+        outRequirements.offsetAlignment = req.align;
     }
 
     RHI::ResourceMemoryRequirements MetalRHI::GetCombinedResourceRequirements(u32 count, RHI::ResourceMemoryRequirements* requirementsList, u64* outOffsetsList)
     {
-        return {};
+        if (count == 0)
+            return {};
+        
+        RHI::ResourceMemoryRequirements result{};
+        u64 offset = 0;
+        result.size = requirementsList[0].size;
+        result.offsetAlignment = requirementsList[0].offsetAlignment;
+        if (outOffsetsList)
+            outOffsetsList[0] = offset;
+        offset += requirementsList[0].size;
+
+        for (int i = 1; i < count; i++)
+        {
+            result.offsetAlignment = 0;
+
+            if (offset > 0)
+                offset = Memory::GetAlignedSize(offset, requirementsList[i].offsetAlignment);
+            if (outOffsetsList)
+                outOffsetsList[i] = offset;
+
+            offset += requirementsList[i].size;
+        }
+
+        result.size = offset;
+
+        return result;
     }
 
     RHI::Buffer* MetalRHI::CreateBuffer(const RHI::BufferDescriptor& bufferDesc)
