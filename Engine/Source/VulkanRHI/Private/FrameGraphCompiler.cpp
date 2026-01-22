@@ -278,6 +278,8 @@ namespace CE::Vulkan
 		Vulkan::Scope* current, 
 		HashSet<RHI::ScopeId>& visitedScopes)
 	{
+		ZoneScoped;
+
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 		if (visitedScopes.Exists(current->GetId()))
 			return;
@@ -331,6 +333,8 @@ namespace CE::Vulkan
 
 	void FrameGraphCompiler::CompileBarriers(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
+		ZoneScoped;
+
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 		for (int i = 0; i < visitedScopes.GetSize(); i++)
 		{
@@ -379,6 +383,8 @@ namespace CE::Vulkan
 
 	void FrameGraphCompiler::CompileBarriers(int imageIndex, const RHI::FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current)
 	{
+		ZoneScoped;
+
 		if (current == nullptr)
 			return;
 

@@ -310,10 +310,6 @@ namespace CE::Vulkan
 				Vulkan::Scope* currentScope = scopeChain[scopeIndex];
 				if (currentScope == nullptr)
 					continue;
-				if (currentScope->IsComputePass())
-				{
-					String::IsAlphabet('a');
-				}
 
 				executedScopes.Add(currentScope->id);
 

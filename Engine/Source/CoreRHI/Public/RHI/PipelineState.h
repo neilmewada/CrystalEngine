@@ -202,7 +202,7 @@ namespace CE::RHI
 		bool enable = false;
 
 		FIELD()
-		CompareOp compareOp = CompareOp::Less;
+		CompareOp compareOp = CompareOp::LEqual;
 
 		FIELD()
 		bool testEnable = false;

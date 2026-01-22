@@ -676,7 +676,9 @@ float4 FragMain(PSInput input) : SV_TARGET
             L"-D", L"COMPILE=1",
             L"-D", L"VERTEX=1",
             L"-fspv-preserve-bindings",
-            L"-fspv-preserve-interface"
+            L"-fspv-preserve-interface",
+            L"-fspv-debug=vulkan-with-source",
+            L"-Zi"
             });
         compileInfo.stages.GetLast().outByteCode = &vertBlob;
 
@@ -688,7 +690,9 @@ float4 FragMain(PSInput input) : SV_TARGET
             L"-D", L"COMPILE=1",
             L"-D", L"FRAGMENT=1",
             L"-fspv-preserve-bindings",
-            L"-fspv-preserve-interface"
+            L"-fspv-preserve-interface",
+            L"-fspv-debug=vulkan-with-source",
+            L"-Zi"
             });
         compileInfo.stages.GetLast().outByteCode = &fragBlob;
 
@@ -751,7 +755,7 @@ float4 FragMain(PSInput input) : SV_TARGET
         viewData.viewProjectionMatrix = projectionMatrix * viewMatrix;
 
         ObjectDataConstants objectData{};
-        objectData.modelMatrix = Matrix4x4::Translation(Vec3(0, 0, 10)) * Matrix4x4::Scale(Vec3(1, 1, 1) * 5);
+        objectData.modelMatrix = Matrix4x4::Translation(Vec3(0, 0, 20)) * Matrix4x4::Scale(Vec3(1, 1, 1) * 5);
 
         StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> perViewDataBuffers{};
         StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> perObjectDataBuffers{};
@@ -808,6 +812,7 @@ float4 FragMain(PSInput input) : SV_TARGET
         }
 
         RHI::IndexBufferView indexBufferView{};
+        u32 numIndices = 0;
         {
 	        RHI::BufferDescriptor bufferDesc{};
             bufferDesc.name = "Index Buffer";
@@ -820,6 +825,8 @@ float4 FragMain(PSInput input) : SV_TARGET
             RHI::Buffer* indexBuffer = gDynamicRHI->CreateBuffer(bufferDesc);
             indexBuffer->UploadData(CubeIndices, sizeof(CubeIndices));
 			indexBufferView = RHI::IndexBufferView(indexBuffer, 0, indexBuffer->GetBufferSize(), RHI::IndexFormat::Uint16);
+
+			numIndices = COUNTOF(CubeIndices);
         }
 
         // - Graphics Pipeline -
@@ -834,6 +841,7 @@ float4 FragMain(PSInput input) : SV_TARGET
             desc.depthStencilState.depthState.enable = true;
             desc.depthStencilState.depthState.writeEnable = true;
             desc.depthStencilState.depthState.testEnable = true;
+            desc.depthStencilState.depthState.compareOp = RHI::CompareOp::LEqual;
 
             desc.depthStencilState.stencilState.enable = false;
 
@@ -909,6 +917,54 @@ float4 FragMain(PSInput input) : SV_TARGET
 			colorPipeline = gDynamicRHI->CreateGraphicsPipeline(desc);
         }
 
+		// - Draw List -
+
+        RHI::DrawListContext drawList{};
+        DrawListTagRegistry tagRegistry{};
+        RHI::DrawListTag depthDrawTag = tagRegistry.AcquireTag("depth");
+        RHI::DrawListTag colorDrawTag = tagRegistry.AcquireTag("color");
+
+        RHI::DrawListMask drawListMask{};
+        drawListMask.Set(depthDrawTag);
+        drawListMask.Set(colorDrawTag);
+
+        Ptr<RHI::DrawPacket> cubeDrawPacket;
+        {
+            RHI::DrawPacketBuilder drawPacketBuilder{};
+
+            drawPacketBuilder.SetDebugName("Cube");
+
+            drawPacketBuilder.AddShaderResourceGroup(perObjectSrg);
+
+            drawPacketBuilder.AddDrawItem({
+                .stencilRef = 0,
+                .drawItemTag = depthDrawTag,
+                .indexBufferView = indexBufferView,
+                .vertexBufferViews = vertexBufferViews,
+                .pipelineState = depthPipeline,
+                .drawFilterMask = DrawFilterMask::ALL
+            });
+
+            drawPacketBuilder.AddDrawItem({
+                .stencilRef = 0,
+                .drawItemTag = colorDrawTag,
+                .indexBufferView = indexBufferView,
+                .vertexBufferViews = vertexBufferViews,
+                .pipelineState = colorPipeline,
+                .drawFilterMask = DrawFilterMask::ALL
+            });
+
+            drawPacketBuilder.SetDrawArguments(RHI::DrawIndexedArguments{
+                .instanceCount = 1,
+                .firstInstance = 0,
+                .vertexOffset = 0,
+                .indexCount = numIndices,
+                .firstIndex = 0
+            });
+
+            cubeDrawPacket = drawPacketBuilder.Build();
+        }
+
         // - Frame Scheduler -
 
         RHI::FrameSchedulerDescriptor desc{};
@@ -953,14 +1009,15 @@ float4 FragMain(PSInput input) : SV_TARGET
                     {
 	                    RHI::ImageScopeAttachmentDescriptor depthAttachment{};
                         depthAttachment.attachmentId = kDepthAttachmentId;
+                        depthAttachment.loadStoreAction.clearValueDepth = 1.0f;
                         depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
                         depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
                         depthAttachment.multisampleState.sampleCount = 1;
                         scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::ReadWrite);
                         
-                    	//scheduler->UseShaderResourceGroup(perViewSrg);
-                        //scheduler->UseShaderResourceGroup(perObjectSrg);
+                    	scheduler->UseShaderResourceGroup(perViewSrg);
 						
+                        scheduler->UsePipeline(depthPipeline);
                     }
                     scheduler->EndScope();
 
@@ -979,8 +1036,9 @@ float4 FragMain(PSInput input) : SV_TARGET
 						depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
                         scheduler->UseAttachment(depthAttachment, ScopeAttachmentUsage::DepthStencil, ScopeAttachmentAccess::Read);
 
-                        //scheduler->UseShaderResourceGroup(perViewSrg);
-                        //scheduler->UseShaderResourceGroup(perObjectSrg);
+                        scheduler->UseShaderResourceGroup(perViewSrg);
+
+                        scheduler->UsePipeline(colorPipeline);
 
                         scheduler->PresentSwapChain(swapChain);
                     }
@@ -997,6 +1055,7 @@ float4 FragMain(PSInput input) : SV_TARGET
 
         clock_t prevTime = clock();
         f32 deltaTime = 0;
+        f32 eulerY = 0;
 
         auto renderLoop = [&]
             {
@@ -1005,21 +1064,39 @@ float4 FragMain(PSInput input) : SV_TARGET
                     buildFrameGraph();
                 }
 
-                int frameIndex = scheduler->BeginExecution();
+                u32 frameIndex = scheduler->BeginExecution();
                 {
-                    if (frameIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph)
+                    if ((frameIndex >= RHI::Limits::MaxSwapChainImageCount) || rebuildFrameGraph)
                     {
                         rebuildFrameGraph = true;
                         return;
                     }
 
+					eulerY += deltaTime;
+					objectData.modelMatrix = Matrix4x4::Translation(Vec3(0, 0, 20)) * Quat::EulerRadians(0, eulerY, 0).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1) * 5);
 
+					perViewDataBuffers[frameIndex]->UploadData(&viewData, sizeof(ViewDataConstants));
+					perObjectDataBuffers[frameIndex]->UploadData(&objectData, sizeof(ObjectDataConstants));
+
+                    drawList.Shutdown();
+
+                    drawList.Init(drawListMask);
+
+                    // Add Draw Packets to drawList
+                    drawList.AddDrawPacket(cubeDrawPacket);
+
+                    drawList.Finalize();
+
+                    auto& depthDrawList = drawList.GetDrawListForTag(depthDrawTag);
+                    scheduler->SetScopeDrawList(kDepthPrePassId, &depthDrawList);
+
+					auto& colorDrawList = drawList.GetDrawListForTag(colorDrawTag);
+					scheduler->SetScopeDrawList(kColorPassId, &colorDrawList);
                 }
                 scheduler->EndExecution();
             };
 
 		// - Message Handler -
-
 
         class MessageHandler : public ApplicationMessageHandler
         {
@@ -1067,6 +1144,9 @@ float4 FragMain(PSInput input) : SV_TARGET
 
 		// - Cleanup -
 
+        tagRegistry.ReleaseTag(depthDrawTag);
+        tagRegistry.ReleaseTag(colorDrawTag);
+
 		gDynamicRHI->WaitToShutdown();
         
         delete scheduler;
@@ -1082,6 +1162,7 @@ float4 FragMain(PSInput input) : SV_TARGET
             delete vertexBufferViews[i].GetBuffer();
         }
         delete indexBufferView.GetBuffer();
+        cubeDrawPacket = nullptr;
 
         delete swapChain;
 		delete vertShader; delete fragShader;
