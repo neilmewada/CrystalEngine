@@ -49,6 +49,9 @@ namespace CE::Vulkan
 
 		inline s64 GetSwapChainId() const { return swapChainId; }
 
+		u32 GetWidth() override { return width; }
+		u32 GetHeight() override { return height; }
+
 	protected:
 
 		void OnWindowResized(PlatformWindow* window, u32 newDrawWidth, u32 newDrawHeight);
@@ -61,6 +64,9 @@ namespace CE::Vulkan
 		PlatformWindow* window = nullptr;
 
 		RHI::SwapChainDescriptor desc{};
+
+		u32 width = 0;
+		u32 height = 0;
         
         Array<Vulkan::Texture*> images{};
 		u32 currentImageIndex = 0;
