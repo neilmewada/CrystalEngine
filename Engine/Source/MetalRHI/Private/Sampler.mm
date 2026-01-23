@@ -71,8 +71,8 @@ namespace CE::Metal
         desc.tAddressMode = ToMTLSamplerAddressMode(samplerDesc.addressModeV);
         desc.rAddressMode = ToMTLSamplerAddressMode(samplerDesc.addressModeW);
         
-        desc.maxAnisotropy = samplerDesc.maxAnisotropy;
-        desc.normalizedCoordinates = NO;
+        desc.maxAnisotropy =  samplerDesc.enableAnisotropy ? samplerDesc.maxAnisotropy : 1;
+        desc.normalizedCoordinates = YES;
         
         desc.minFilter = desc.magFilter = ToMTLSamplerMinMagFilter(samplerDesc.samplerFilterMode);
         desc.mipFilter = ToMTLSamplerMipFilter(samplerDesc.samplerFilterMode);

@@ -79,6 +79,7 @@ namespace CE::Metal
         RHI::PipelineState* boundPipeline = nullptr;
         
         StaticArray<Metal::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> boundSRGs{};
+        Metal::Buffer* rootConstantBuffer = nullptr;
         
         Array<MTLViewport> viewportsArray;
         Array<MTLScissorRect> scissorsArray;

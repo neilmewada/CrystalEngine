@@ -12,6 +12,10 @@ namespace CE::RHI
 		PerMaterial,
 		PerObject,
 		PerDraw,
+		
+		//! @brief For internal use only! You should never create a ShaderResourceGroup of SRGType::RootConstant
+		RootConstant,
+		
         COUNT
 	};
 	ENUM_CLASS(SRGType);

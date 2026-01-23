@@ -52,3 +52,6 @@ CompileCS() {
 CompileShader "FusionShader"
 CompileShader "FusionShader2"
 
+# spirv-cross --msl --output FusionShader2.vert.msl --msl-version 20300 --entry VertMain --msl-argument-buffers --msl-decoration-binding FusionShader2.vert.spv
+# spirv-cross --msl --output FusionShader2.frag.msl --msl-version 20300 --entry FragMain --msl-argument-buffers --msl-decoration-binding FusionShader2.frag.spv
+

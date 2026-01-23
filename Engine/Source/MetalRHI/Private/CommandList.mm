@@ -33,10 +33,20 @@ namespace CE::Metal
     {
         this->commandListType = type;
         
+        RHI::BufferDescriptor bufferDesc{};
+        bufferDesc.name = "RootConstants";
+        bufferDesc.bufferSize = device->GetDeviceLimits()->GetMaxRootConstantByteSize();
+        bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+        bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+        bufferDesc.structureByteStride = sizeof(u32);
+        
+        rootConstantBuffer = new Metal::Buffer(device, bufferDesc);
     }
 
     CommandList::~CommandList()
     {
+        delete rootConstantBuffer; rootConstantBuffer = nullptr;
+        
         mtlCommandQueue = nil;
         mtlCommandBuffer = nil;
     }
@@ -339,11 +349,6 @@ namespace CE::Metal
         }
     }
 
-    void CommandList::SetRootConstants(u32 offset, u32 num32BitValues, const void* srcData)
-    {
-        
-    }
-
     void CommandList::SetViewports(u32 count, ViewportState* viewports)
     {
         if (count == 0)
@@ -429,6 +434,35 @@ namespace CE::Metal
                 
                 srg->MtlUseResources(mtlComputeEncoder, currentFrameIndex);
             }
+        }
+        
+        int rootConstantBufferIndex = (int)RHI::SRGType::RootConstant;
+        
+        if (mtlRenderEncoder != nil)
+        {
+            [mtlRenderEncoder setVertexBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:rootConstantBufferIndex];
+            [mtlRenderEncoder setFragmentBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:rootConstantBufferIndex];
+        }
+        else if (mtlComputeEncoder != nil)
+        {
+            [mtlComputeEncoder setBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:rootConstantBufferIndex];
+        }
+    }
+    
+    void CommandList::SetRootConstants(u32 offset, u32 num32BitValues, const void* srcData)
+    {
+        rootConstantBuffer->UploadData({ .dataSize = sizeof(uint32_t) * num32BitValues, .data = srcData });
+        
+        int rootConstantBufferIndex = (int)RHI::SRGType::RootConstant;
+        
+        if (mtlRenderEncoder != nil)
+        {
+            [mtlRenderEncoder setVertexBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:rootConstantBufferIndex];
+            [mtlRenderEncoder setFragmentBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:rootConstantBufferIndex];
+        }
+        else if (mtlComputeEncoder != nil)
+        {
+            [mtlComputeEncoder setBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:rootConstantBufferIndex];
         }
     }
 

@@ -16,6 +16,10 @@ namespace CE
     extern RawData GetFusionShader2Frag();
     extern RawData GetFusionShader2VertJson();
     extern RawData GetFusionShader2FragJson();
+    
+    extern RawData GetFusionShader2VertMsl();
+    extern RawData GetFusionShader2FragMsl();
+
 
     FusionApplication::FusionApplication()
     {
@@ -445,6 +449,12 @@ namespace CE
     {
         RawData vertexShader = GetFusionShader2Vert();
         RawData fragmentShader = GetFusionShader2Frag();
+        
+        if (gDynamicRHI->GetGraphicsBackend() == RHI::GraphicsBackend::Metal)
+        {
+            vertexShader = GetFusionShader2VertMsl();
+            fragmentShader = GetFusionShader2FragMsl();
+        }
 
         String vertexShaderJson = (char*)GetFusionShader2VertJson().data;
         String fragmentShaderJson = (char*)GetFusionShader2FragJson().data;
@@ -467,11 +477,13 @@ namespace CE
         variantDesc.moduleDesc[0].byteSize = vertexShader.dataSize;
         variantDesc.moduleDesc[0].stage = ShaderStage::Vertex;
         variantDesc.moduleDesc[0].name = "VertMain";
+        variantDesc.moduleDesc[0].defaultEntryPoint = "VertMain";
 
         variantDesc.moduleDesc[1].byteCode = fragmentShader.data;
         variantDesc.moduleDesc[1].byteSize = fragmentShader.dataSize;
         variantDesc.moduleDesc[1].stage = ShaderStage::Fragment;
         variantDesc.moduleDesc[1].name = "FragMain";
+        variantDesc.moduleDesc[1].defaultEntryPoint = "FragMain";
 
         RHI::SRGVariableDescriptor perViewData{};
         perViewData.name = "_PerViewData";

@@ -280,6 +280,7 @@ namespace CE::Metal
             return true;
         }
         
+        boundSamplersBySlot[imageIndex][bindingSlot].Resize(1);
         boundSamplersBySlot[imageIndex][bindingSlot][0] = (Metal::Sampler*)sampler;
         
         needsFlush = true;

@@ -44,11 +44,13 @@ namespace CE::Metal
             
             if (shaderStageDesc.shaderModule->GetShaderStage() == ShaderStage::Vertex)
             {
-                pipelineDescriptor.vertexFunction = [shaderModule->GetMtlLibrary() newFunctionWithName:entryPoint];
+                id<MTLFunction> vertFunc = [shaderModule->GetMtlLibrary() newFunctionWithName:entryPoint];
+                pipelineDescriptor.vertexFunction = vertFunc;
             }
             else if (shaderStageDesc.shaderModule->GetShaderStage() == ShaderStage::Fragment)
             {
-                pipelineDescriptor.fragmentFunction = [shaderModule->GetMtlLibrary() newFunctionWithName:entryPoint];
+                id<MTLFunction> fragFunc = [shaderModule->GetMtlLibrary() newFunctionWithName:entryPoint];
+                pipelineDescriptor.fragmentFunction = fragFunc;
             }
         }
     }

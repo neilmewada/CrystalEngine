@@ -23,7 +23,8 @@ namespace CE::Metal
         mtlLibrary = [device->GetHandle() newLibraryWithSource:source options:options error:&error];
         if (error)
         {
-            CE_LOG(Info, All, "ShaderModule MTLLibrary failed!");
+            String message = [error description].cString;
+            CE_LOG(Error, All, "ShaderModule MTLLibrary failed!\n{}", message);
             return;
         }
     }
