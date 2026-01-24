@@ -174,7 +174,6 @@ namespace CE::RPI
 				RHI::ShaderResourceGroupDescriptor drawSrgDesc{};
 				drawSrgDesc.name = "SRG_PerDraw";
 				drawSrgDesc.layout = drawSrgLayout;
-				drawSrgDesc.shaderHint = variant->GetShaderModule(RHI::ShaderStage::Vertex);
 
 				perDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(drawSrgDesc);
 				perDrawSrgs.Add(perDrawSrg);

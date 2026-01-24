@@ -134,7 +134,6 @@ namespace CE::RPI
 			RHI::ShaderResourceGroupDescriptor sceneSrgDesc{};
 			sceneSrgDesc.name = "SRG_PerScene";
 			sceneSrgDesc.layout = RPISystem::Get().GetSceneSrgLayout();
-			sceneSrgDesc.shaderHint = RPISystem::Get().GetSrgShaderHint()->GetShaderModule(RHI::ShaderStage::Vertex);
 
 			shaderResourceGroup = gDynamicRHI->CreateShaderResourceGroup(sceneSrgDesc);
 

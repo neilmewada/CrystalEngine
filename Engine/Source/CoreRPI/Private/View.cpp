@@ -33,7 +33,6 @@ namespace CE::RPI
 			RHI::ShaderResourceGroupDescriptor viewSrgDesc{};
 			viewSrgDesc.name = "SRG_PerView";
 			viewSrgDesc.layout = RPISystem::Get().GetViewSrgLayout();
-			viewSrgDesc.shaderHint = RPISystem::Get().GetSrgShaderHint()->GetShaderModule(RHI::ShaderStage::Vertex);
 
 			view->shaderResourceGroup = gDynamicRHI->CreateShaderResourceGroup(viewSrgDesc);
 

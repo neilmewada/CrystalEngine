@@ -54,7 +54,6 @@ namespace CE
         RHI::ShaderResourceGroupDescriptor perDrawSrgDesc{};
 		perDrawSrgDesc.name = "FImageAtlas SRG_PerDraw";
     	perDrawSrgDesc.layout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerDraw);
-        perDrawSrgDesc.shaderHint = fusionShader->GetDefaultVariant()->GetShaderModule(RHI::ShaderStage::Vertex);
 
         textureSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawSrgDesc);
 

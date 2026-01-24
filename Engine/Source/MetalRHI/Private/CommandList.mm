@@ -87,6 +87,9 @@ namespace CE::Metal
         MTLRenderPassDescriptor* originalRpDesc = curRenderPass->GetSubpass(curSubpass);
         
         MTLRenderPassDescriptor* rpDesc = [originalRpDesc copy];
+        defer(&) {
+            [rpDesc release];
+        };
         
         auto frameBuffer = (Metal::RenderPassFrameBuffer*)rhiFrameBuffer;
         
@@ -419,18 +422,18 @@ namespace CE::Metal
             if (!srg)
                 continue;
             
-            id<MTLBuffer> argumentBuffer = srg->GetArgumentBuffer(currentFrameIndex);
+            //id<MTLBuffer> argumentBuffer = srg->GetArgumentBuffer(currentFrameIndex);
+            srg->CommitResources(this);
             
             if (mtlRenderEncoder != nil)
             {
-                [mtlRenderEncoder setVertexBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
-                [mtlRenderEncoder setFragmentBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
-                
+                //[mtlRenderEncoder setVertexBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
+                //[mtlRenderEncoder setFragmentBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
                 srg->MtlUseResources(mtlRenderEncoder, currentFrameIndex);
             }
             else if (mtlComputeEncoder != nil)
             {
-                [mtlComputeEncoder setBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
+                //[mtlComputeEncoder setBuffer:argumentBuffer offset:0 atIndex:(int)srg->GetSRGType()];
                 
                 srg->MtlUseResources(mtlComputeEncoder, currentFrameIndex);
             }

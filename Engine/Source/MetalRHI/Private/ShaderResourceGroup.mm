@@ -5,22 +5,11 @@ namespace CE::Metal
     
     ShaderResourceGroup::ShaderResourceGroup(Device* device, const RHI::ShaderResourceGroupDescriptor& srgDescriptor)
         : device(device)
-        , srgLayout(srgDescriptor.layout)
     {
-        this->srgType = srgLayout.srgType;
+        this->srgLayout = srgDescriptor.layout;
+        this->srgType = srgDescriptor.layout.srgType;
         
-        auto shader = (Metal::ShaderModule*)srgDescriptor.shaderHint;
-        String defaultEntryPoint = shader->GetDefaultEntryPoint().GetString();
-        NSString* defaultEntryPointStr = [[NSString alloc] initWithCString:defaultEntryPoint.GetCString()];
-        
-        id<MTLFunction> function = [shader->GetMtlLibrary() newFunctionWithName:defaultEntryPointStr];
-        
-        NSUInteger setNumber = (u32)srgLayout.srgType;
-        
-        encoders = [[NSMutableArray<id<MTLArgumentEncoder>> alloc] init];
-        argumentBuffers = [[NSMutableArray<id<MTLBuffer>> alloc] init];
-        
-        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        /*for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
         {
             [encoders addObject:[function newArgumentEncoderWithBufferIndex:setNumber]];
             [argumentBuffers addObject:[device->GetHandle() newBufferWithLength:encoders[i].encodedLength options:MTLResourceStorageModeShared]];
@@ -31,7 +20,7 @@ namespace CE::Metal
             argumentBuffers[i].label = bufferLabel;
             
             [encoders[i] setArgumentBuffer:argumentBuffers[i] offset:0];
-        }
+        }*/
         
         bindingSlotsByVariableName.Clear();
         
@@ -45,8 +34,7 @@ namespace CE::Metal
 
     ShaderResourceGroup::~ShaderResourceGroup()
     {
-        encoders = nil;
-        argumentBuffers = nil;
+        
     }
 
     bool ShaderResourceGroup::HasVariable(const Name& variableName)
@@ -519,56 +507,135 @@ namespace CE::Metal
             }
         }
     }
-
-    void ShaderResourceGroup::Compile()
+    
+    void ShaderResourceGroup::CommitResources(Metal::CommandList* cmdList)
     {
-        if (isCompiled)
+        if (!cmdList->boundPipeline)
             return;
         
-        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        int setNumber = (int)srgType;
+        int frameIndex = cmdList->currentFrameIndex;
+        
+        if (cmdList->boundPipeline->IsGraphicsPipeline())
         {
-            for (const auto& [binding, boundBuffers] : boundBuffersBySlot[i])
+            auto graphicsPipeline = (Metal::GraphicsPipeline*)((Metal::PipelineState*)cmdList->boundPipeline)->GetPipeline();
+            
+            id<MTLArgumentEncoder> vertEncoder = graphicsPipeline->vertEncodersBySetNumber[setNumber];
+            if (vertEncoder != nil)
+            {
+                if (argBufVS[setNumber][frameIndex] == nil)
+                {
+                    argBufVS[setNumber][frameIndex] = [device->GetHandle() newBufferWithLength:vertEncoder.encodedLength options:MTLResourceStorageModeShared];
+                }
+                
+                [vertEncoder setArgumentBuffer:argBufVS[setNumber][frameIndex] offset:0];
+            }
+            
+            id<MTLArgumentEncoder> fragEncoder = graphicsPipeline->fragEncodersBySetNumber[setNumber];
+            if (fragEncoder != nil)
+            {
+                if (argBufFS[setNumber][frameIndex] == nil)
+                {
+                    argBufFS[setNumber][frameIndex] = [device->GetHandle() newBufferWithLength:fragEncoder.encodedLength options:MTLResourceStorageModeShared];
+                }
+                
+                [fragEncoder setArgumentBuffer:argBufFS[setNumber][frameIndex] offset:0];
+            }
+            
+            for (const auto& [binding, boundBuffers] : boundBuffersBySlot[frameIndex])
             {
                 int idx = 0;
                 for (const RHI::BufferView& bufferView : boundBuffers)
                 {
                     if (Metal::Buffer* buffer = (Metal::Buffer*)bufferView.GetBuffer())
                     {
-                        [encoders[i] setBuffer:buffer->GetMtlBuffer() offset:bufferView.GetByteOffset() atIndex:(binding + idx)];
+                        if (vertEncoder)
+                        {
+                            [vertEncoder setBuffer:buffer->GetMtlBuffer() offset:bufferView.GetByteOffset() atIndex:(binding + idx)];
+                        }
+                        if (fragEncoder)
+                        {
+                            [fragEncoder setBuffer:buffer->GetMtlBuffer() offset:bufferView.GetByteOffset() atIndex:(binding + idx)];
+                        }
                     }
                     idx++;
                 }
             }
             
-            for (const auto& [binding, boundTextures] : boundTexturesBySlot[i])
+            for (const auto& [binding, boundTextures] : boundTexturesBySlot[frameIndex])
             {
                 int idx = 0;
                 for (const TextureBinding& textureBinding : boundTextures)
                 {
                     if (textureBinding.resourceType == RHI::ResourceType::Texture)
                     {
-                        [encoders[i] setTexture:textureBinding.texture->GetMtlTexture() atIndex:(binding + idx)];
+                        if (vertEncoder)
+                        {
+                            [vertEncoder setTexture:textureBinding.texture->GetMtlTexture() atIndex:(binding + idx)];
+                        }
+                        if (fragEncoder)
+                        {
+                            [fragEncoder setTexture:textureBinding.texture->GetMtlTexture() atIndex:(binding + idx)];
+                        }
                     }
                     else if (textureBinding.resourceType == RHI::ResourceType::TextureView)
                     {
-                        [encoders[i] setTexture:textureBinding.textureView->GetMtlTextureView() atIndex:(binding + idx)];
+                        if (vertEncoder)
+                        {
+                            [vertEncoder setTexture:textureBinding.textureView->GetMtlTextureView() atIndex:(binding + idx)];
+                        }
+                        if (fragEncoder)
+                        {
+                            [fragEncoder setTexture:textureBinding.textureView->GetMtlTextureView() atIndex:(binding + idx)];
+                        }
                     }
                     idx++;
                 }
             }
             
-            for (const auto& [binding, boundSamplers] : boundSamplersBySlot[i])
+            for (const auto& [binding, boundSamplers] : boundSamplersBySlot[frameIndex])
             {
                 int idx = 0;
                 for (Metal::Sampler* samplerState : boundSamplers)
                 {
-                    [encoders[i] setSamplerState:samplerState->GetMtlSamplerState() atIndex:(binding + idx)];
+                    if (vertEncoder)
+                    {
+                        [vertEncoder setSamplerState:samplerState->GetMtlSamplerState() atIndex:(binding + idx)];
+                    }
+                    if (fragEncoder)
+                    {
+                        [fragEncoder setSamplerState:samplerState->GetMtlSamplerState() atIndex:(binding + idx)];
+                    }
                     idx++;
                 }
             }
+            
+            id<MTLRenderCommandEncoder> renderEncoder = cmdList->mtlRenderEncoder;
+            
+            for (int i = 0; i < (int)RHI::SRGType::COUNT; i++)
+            {
+                if (argBufVS[i][frameIndex] != nil)
+                {
+                    [renderEncoder setVertexBuffer:argBufVS[i][frameIndex] offset:0 atIndex:i];
+                }
+                if (argBufFS[i][frameIndex] != nil)
+                {
+                    [renderEncoder setFragmentBuffer:argBufFS[i][frameIndex] offset:0 atIndex:i];
+                }
+            }
         }
+        else if (cmdList->boundPipeline->IsComputePipeline())
+        {
+            
+        }
+    }
+
+    void ShaderResourceGroup::Compile()
+    {
+        if (isCompiled)
+            return;
         
-        isCompiled = true;
+        isCompiled = false;
     }
 
     void ShaderResourceGroup::FlushBindings()
@@ -583,3 +650,4 @@ namespace CE::Metal
     }
     
 } // namespace CE::Metal
+

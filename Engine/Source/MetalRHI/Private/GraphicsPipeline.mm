@@ -13,7 +13,11 @@ namespace CE::Metal
 
     GraphicsPipeline::~GraphicsPipeline()
     {
-        
+        for (int i = 0; i < vertEncodersBySetNumber.size(); i++)
+        {
+            vertEncodersBySetNumber[i] = nil;
+            fragEncodersBySetNumber[i] = nil;
+        }
     }
 
     void GraphicsPipeline::Create()
@@ -36,6 +40,12 @@ namespace CE::Metal
 
     void GraphicsPipeline::SetupShaderStages()
     {
+        for (int i = 0; i < vertEncodersBySetNumber.size(); i++)
+        {
+            vertEncodersBySetNumber[i] = nil;
+            fragEncodersBySetNumber[i] = nil;
+        }
+        
         for (const auto& shaderStageDesc : pipelineDesc.shaderStages)
         {
             NSString* entryPoint = [NSString stringWithCString:shaderStageDesc.entryPoint.GetCString()];
@@ -46,11 +56,49 @@ namespace CE::Metal
             {
                 id<MTLFunction> vertFunc = [shaderModule->GetMtlLibrary() newFunctionWithName:entryPoint];
                 pipelineDescriptor.vertexFunction = vertFunc;
+                
+                for (const auto& srgLayout : pipelineDesc.srgLayouts)
+                {
+                    int setNumber = (int)srgLayout.srgType;
+                    
+                    bool hasVertexStage = false;
+                    
+                    for (const auto& var : srgLayout.variables)
+                    {
+                        if (EnumHasFlag(var.shaderStages, RHI::ShaderStage::Vertex))
+                        {
+                            hasVertexStage = true;
+                            break;
+                        }
+                    }
+                    
+                    if (hasVertexStage)
+                        vertEncodersBySetNumber[setNumber] = [vertFunc newArgumentEncoderWithBufferIndex:setNumber];
+                }
             }
             else if (shaderStageDesc.shaderModule->GetShaderStage() == ShaderStage::Fragment)
             {
                 id<MTLFunction> fragFunc = [shaderModule->GetMtlLibrary() newFunctionWithName:entryPoint];
                 pipelineDescriptor.fragmentFunction = fragFunc;
+                
+                for (const auto& srgLayout : pipelineDesc.srgLayouts)
+                {
+                    int setNumber = (int)srgLayout.srgType;
+                    
+                    bool hasFragmentStage = false;
+                    
+                    for (const auto& var : srgLayout.variables)
+                    {
+                        if (EnumHasFlag(var.shaderStages, RHI::ShaderStage::Fragment))
+                        {
+                            hasFragmentStage = true;
+                            break;
+                        }
+                    }
+                    
+                    if (hasFragmentStage)
+                        fragEncodersBySetNumber[setNumber] = [fragFunc newArgumentEncoderWithBufferIndex:setNumber];
+                }
             }
         }
     }

@@ -2,7 +2,8 @@
 
 namespace CE::Metal
 {
-
+    class CommandList;
+    
     class ShaderResourceGroup : public RHI::ShaderResourceGroup
     {
     public:
@@ -49,10 +50,10 @@ namespace CE::Metal
         
         void FlushBindings() override;
         
-        id<MTLBuffer> GetArgumentBuffer(u32 frameIndex) { return argumentBuffers[frameIndex]; }
-        
         void MtlUseResources(id<MTLRenderCommandEncoder> mtlRenderEncoder, int frameIndex);
         void MtlUseResources(id<MTLComputeCommandEncoder> mtlComputeEncoder, int frameIndex);
+        
+        void CommitResources(Metal::CommandList* cmdList);
         
     private:
         
@@ -69,9 +70,9 @@ namespace CE::Metal
         
         bool failed = false;
         bool needsFlush = true;
+        bool needsMtlCompile = true;
         
         Device* device = nullptr;
-        RHI::ShaderResourceGroupLayout srgLayout;
         
         HashMap<Name, BindingSlotId> bindingSlotsByVariableName{};
         
@@ -79,8 +80,9 @@ namespace CE::Metal
         StaticArray<HashMap<BindingSlotId, List<TextureBinding>>, RHI::Limits::MaxSwapChainImageCount> boundTexturesBySlot{};
         StaticArray<HashMap<BindingSlotId, List<Metal::Sampler*>>, RHI::Limits::MaxSwapChainImageCount> boundSamplersBySlot{};
         
-        NSMutableArray<id<MTLArgumentEncoder>>* encoders;
-        NSMutableArray<id<MTLBuffer>>* argumentBuffers;
+        id<MTLBuffer> argBufVS[8][RHI::Limits::MaxSwapChainImageCount];
+        id<MTLBuffer> argBufFS[8][RHI::Limits::MaxSwapChainImageCount];
+        id<MTLBuffer> argBufCS[8][RHI::Limits::MaxSwapChainImageCount];
     };
     
 } // namespace CE::Metal

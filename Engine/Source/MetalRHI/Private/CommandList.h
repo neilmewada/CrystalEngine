@@ -83,6 +83,8 @@ namespace CE::Metal
         
         Array<MTLViewport> viewportsArray;
         Array<MTLScissorRect> scissorsArray;
+        
+        friend class ShaderResourceGroup;
     };
     
 } // namespace CE::Metal

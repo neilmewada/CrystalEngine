@@ -200,10 +200,6 @@ namespace CE::RHI
     {
         Name name = "ShaderResourceGroup";
         RHI::ShaderResourceGroupLayout layout{};
-        
-        /// You need to pass a shader module to create a shader resource group, just for the setup.
-        /// The shader module does not need to be active after the initialization.
-        RHI::ShaderModule* shaderHint = nullptr;
     };
     
 } // namespace CE::RHI

@@ -67,7 +67,6 @@ namespace CE
 			RHI::ShaderResourceGroupDescriptor textureSrgDesc{};
 			textureSrgDesc.name = GetName().GetString() + " Texture SRG";
 			textureSrgDesc.layout = shader->GetSrgLayout(RHI::SRGType::PerDraw);
-			textureSrgDesc.shaderHint = shader->GetShaderModule(RHI::ShaderStage::Vertex);
 
             textureSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(textureSrgDesc);
         }

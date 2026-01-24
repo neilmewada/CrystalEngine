@@ -562,7 +562,6 @@ namespace CE::RPI
                 RHI::ShaderResourceGroupDescriptor srgDesc{};
                 srgDesc.name = "SRG_PerMaterial";
 				srgDesc.layout = srgLayout;
-                srgDesc.shaderHint = currentShaderVariant->GetShaderModule(RHI::ShaderStage::Vertex);
 
 				shaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
 				

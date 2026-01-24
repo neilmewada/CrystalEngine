@@ -45,12 +45,10 @@ namespace CE
         RHI::ShaderResourceGroupDescriptor perViewSrgDesc{};
         perViewSrgDesc.name = "Fusion SRG_PerView";
         perViewSrgDesc.layout = shaderVariant->GetSrgLayout(RHI::SRGType::PerView);
-        perViewSrgDesc.shaderHint = shaderVariant->GetShaderModule(RHI::ShaderStage::Vertex);
 
         RHI::ShaderResourceGroupDescriptor perObjectSrgDesc{};
 		perObjectSrgDesc.name = "Fusion SRG_PerObject";
 		perObjectSrgDesc.layout = shaderVariant->GetSrgLayout(RHI::SRGType::PerObject);
-		perObjectSrgDesc.shaderHint = shaderVariant->GetShaderModule(RHI::ShaderStage::Vertex);
 
         numFrames = RHI::FrameScheduler::Get()->GetFramesInFlight();
 

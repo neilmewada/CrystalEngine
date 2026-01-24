@@ -83,7 +83,6 @@ namespace CE
         RHI::ShaderResourceGroupDescriptor fontSrgDesc{};
         fontSrgDesc.name = "Font SRG (SRG_PerMaterial)";
         fontSrgDesc.layout = fusionShader2->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerMaterial);
-		fontSrgDesc.shaderHint = fusionShader2->GetDefaultVariant()->GetShaderModule(RHI::ShaderStage::Fragment);
 
         fontSrg2 = RHI::gDynamicRHI->CreateShaderResourceGroup(fontSrgDesc);
 

@@ -49,14 +49,12 @@ namespace CE::RPI
 		RHI::ShaderResourceGroupDescriptor perViewSrgDesc{};
 		perViewSrgDesc.name = "SRG_PerView";
 		perViewSrgDesc.layout = drawShaderVariant->GetSrgLayout(RHI::SRGType::PerView);
-		perViewSrgDesc.shaderHint = drawShaderVariant->GetShaderModule(RHI::ShaderStage::Vertex);
 
 		perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgDesc);
 
 		RHI::ShaderResourceGroupDescriptor perDrawSrgDesc{};
 		perDrawSrgDesc.name = "SRG_PerDraw";
 		perDrawSrgDesc.layout = drawShaderVariant->GetSrgLayout(RHI::SRGType::PerDraw);
-		perDrawSrgDesc.shaderHint = perViewSrgDesc.shaderHint;
 
 		drawItemSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawSrgDesc);
 

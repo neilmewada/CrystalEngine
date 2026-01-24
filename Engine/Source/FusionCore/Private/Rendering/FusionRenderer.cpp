@@ -26,12 +26,10 @@ namespace CE
 		RHI::ShaderResourceGroupDescriptor perDrawSrgDesc{};
 		perDrawSrgDesc.name = "Fusion SRG_PerDraw";
 		perDrawSrgDesc.layout = FusionApplication::Get()->perDrawSrgLayout;
-		perDrawSrgDesc.shaderHint = fusionShader->GetDefaultVariant()->GetShaderModule(RHI::ShaderStage::Vertex);
 
 		RHI::ShaderResourceGroupDescriptor perViewSrgDesc{};
 		perViewSrgDesc.name = "Fusion SRG_PerView";
 		perViewSrgDesc.layout = FusionApplication::Get()->perViewSrgLayout;
-		perViewSrgDesc.shaderHint = perDrawSrgDesc.shaderHint;
 
 		drawItemSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawSrgDesc);
 		perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgDesc);

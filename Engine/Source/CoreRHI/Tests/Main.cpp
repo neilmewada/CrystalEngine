@@ -246,7 +246,6 @@ float4 FragMain(PSInput input) : SV_TARGET
             RHI::ShaderResourceGroupDescriptor perViewSrgDesc{};
             perViewSrgDesc.name = "SRG_PerView";
             perViewSrgDesc.layout = perViewSrgLayout;
-            perViewSrgDesc.shaderHint = vertShader;
 
             perViewSrg = gDynamicRHI->CreateShaderResourceGroup(perViewSrgDesc);
         }
@@ -258,7 +257,6 @@ float4 FragMain(PSInput input) : SV_TARGET
             RHI::ShaderResourceGroupDescriptor perObjectSrgDesc{};
             perObjectSrgDesc.name = "SRG_PerObject";
             perObjectSrgDesc.layout = perObjectSrgLayout;
-            perObjectSrgDesc.shaderHint = vertShader;
 
             perObjectSrg = gDynamicRHI->CreateShaderResourceGroup(perObjectSrgDesc);
         }
@@ -505,9 +503,10 @@ float4 FragMain(PSInput input) : SV_TARGET
                         cmdList->BindPipelineState(pipeline);
 
                         cmdList->SetShaderResourceGroups({ perViewSrg, perObjectSrg });
-                        cmdList->CommitShaderResources();
 
                         cmdList->BindVertexBuffers(0, 1, &vertexBufferView);
+                        
+                        cmdList->CommitShaderResources();
 
                         cmdList->DrawLinear(RHI::DrawLinearArguments{
                             .instanceCount = 1,
@@ -729,7 +728,6 @@ float4 FragMain(PSInput input) : SV_TARGET
             RHI::ShaderResourceGroupDescriptor perViewSrgDesc{};
             perViewSrgDesc.name = "SRG_PerView";
             perViewSrgDesc.layout = perViewSrgLayout;
-            perViewSrgDesc.shaderHint = vertShader;
 
             perViewSrg = gDynamicRHI->CreateShaderResourceGroup(perViewSrgDesc);
         }
@@ -741,7 +739,6 @@ float4 FragMain(PSInput input) : SV_TARGET
             RHI::ShaderResourceGroupDescriptor perObjectSrgDesc{};
             perObjectSrgDesc.name = "SRG_PerObject";
             perObjectSrgDesc.layout = perObjectSrgLayout;
-            perObjectSrgDesc.shaderHint = vertShader;
 
             perObjectSrg = gDynamicRHI->CreateShaderResourceGroup(perObjectSrgDesc);
         }
