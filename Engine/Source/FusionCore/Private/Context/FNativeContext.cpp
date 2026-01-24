@@ -553,8 +553,7 @@ namespace CE
 	Vec2 FNativeContext::GlobalToScreenSpacePosition(Vec2 pos)
 	{
 #if PLATFORM_MAC
-		const f32 scaling = 96.0f / 72.0f / FusionApplication::Get()->GetDefaultScalingFactor(); // Mac input fix
-		return platformWindow->GetWindowPosition().ToVec2() + pos / scaling;
+		return platformWindow->GetWindowPosition().ToVec2() + pos;
 #else
 		return platformWindow->GetWindowPosition().ToVec2() + pos * GetScaling();
 #endif
@@ -563,8 +562,7 @@ namespace CE
 	Vec2 FNativeContext::ScreenToGlobalSpacePosition(Vec2 pos)
 	{
 #if PLATFORM_MAC
-		const f32 scaling = 96.0f / 72.0f / FusionApplication::Get()->GetDefaultScalingFactor(); // Mac input fix
-		return (pos - platformWindow->GetWindowPosition().ToVec2()) * scaling;
+		return (pos - platformWindow->GetWindowPosition().ToVec2());
 #else
 		return (pos - platformWindow->GetWindowPosition().ToVec2()) / GetScaling();
 #endif
@@ -615,10 +613,7 @@ namespace CE
 		if (!window->IsBorderless() || IsPopupWindow())
 			return false;
 
-#if PLATFORM_MAC
-		f32 macScaling = 96.0f / 72.0f / FusionApplication::Get()->GetDefaultScalingFactor(); // Mac input fix
-		position *= macScaling;
-#else
+#if !PLATFORM_MAC
 		position /= GetScaling();
 #endif
 
