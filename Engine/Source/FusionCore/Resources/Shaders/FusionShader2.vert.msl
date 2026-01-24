@@ -104,7 +104,7 @@ struct VertMain_in
     int in_var_TEXCOORD2 [[attribute(4)]];
 };
 
-vertex VertMain_out VertMain(VertMain_in in [[stage_in]], constant spvDescriptorSetBuffer1& spvDescriptorSet1 [[buffer(1)]], constant spvDescriptorSetBuffer5& spvDescriptorSet5 [[buffer(5)]], constant type_PushConstant_RootConstants& _RootConstants [[buffer(6)]], uint gl_InstanceIndex [[instance_id]])
+vertex VertMain_out VertMain(VertMain_in in [[stage_in]], constant spvDescriptorSetBuffer1& spvDescriptorSet1 [[buffer(1)]], constant spvDescriptorSetBuffer5& spvDescriptorSet5 [[buffer(5)]], constant type_PushConstant_RootConstants& _RootConstants [[buffer(7)]], uint gl_InstanceIndex [[instance_id]])
 {
     VertMain_out out = {};
     float4 _348 = float4(in.in_var_POSITION, 0.0, 1.0) * (*spvDescriptorSet5._Objects)._m0[gl_InstanceIndex].transform;

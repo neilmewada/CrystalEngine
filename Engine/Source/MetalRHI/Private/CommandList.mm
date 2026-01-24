@@ -524,6 +524,26 @@ namespace CE::Metal
         NSUInteger indexStride = indexType == MTLIndexTypeUInt32 ? 4 : 2;
         Metal::Buffer* indexBuffer = (Metal::Buffer*)indexBufferView.GetBuffer();
         
+        if (boundPipeline->IsGraphicsPipeline())
+        {
+            const auto& rootConstantLayout = boundPipeline->GetGraphicsDescriptor().rootConstantLayout;
+            RHI::ShaderStage rootContantStages = boundPipeline->GetGraphicsDescriptor().rootConstantShaderStages;
+            
+            if (rootConstantLayout.NotEmpty())
+            {
+                const int bufferIndex = (int)RHI::SRGType::RootConstant;
+                
+                if (EnumHasFlag(rootContantStages, RHI::ShaderStage::Vertex))
+                {
+                    [mtlRenderEncoder setVertexBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:bufferIndex];
+                }
+                if (EnumHasFlag(rootContantStages, RHI::ShaderStage::Fragment))
+                {
+                    [mtlRenderEncoder setFragmentBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:bufferIndex];
+                }
+            }
+        }
+        
         [mtlRenderEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
                                      indexCount:args.indexCount
                                       indexType:indexType

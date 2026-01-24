@@ -80,6 +80,8 @@ namespace CE::Metal
         desc.lodMinClamp = 0.0f;
         desc.lodMaxClamp = FLT_MAX;
         
+        desc.supportArgumentBuffers = YES;
+        
         sampler = [device->GetHandle() newSamplerStateWithDescriptor:desc];
 		
         if (sampler == nil)

@@ -576,6 +576,11 @@ namespace CE
 
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD2");
         variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Int);
+        
+        ShaderTagEntry ztestOff{};
+        ztestOff.key = "ZTest";
+        ztestOff.value = "Off";
+        variantDesc.tags.Add(ztestOff);
 
         ShaderTagEntry cullMode{};
         cullMode.key = "Cull";

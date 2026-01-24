@@ -2,7 +2,8 @@
 
 namespace CE::Metal
 {
-
+    class GraphicsPipeline;
+    
     class PipelineLayout : public RHI::IPipelineLayout
     {
     public:
