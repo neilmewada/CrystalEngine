@@ -417,10 +417,10 @@ namespace CE::Metal
                     pipelineDescriptor.vertexDescriptor.attributes[location].format = MTLVertexFormatUInt4;
                     break;
                 case RHI::VertexAttributeDataType::Char4:
-                    pipelineDescriptor.vertexDescriptor.attributes[location].format = MTLVertexFormatChar4;
+                    pipelineDescriptor.vertexDescriptor.attributes[location].format = MTLVertexFormatChar4Normalized;
                     break;
                 case RHI::VertexAttributeDataType::UChar4:
-                    pipelineDescriptor.vertexDescriptor.attributes[location].format = MTLVertexFormatUChar4;
+                    pipelineDescriptor.vertexDescriptor.attributes[location].format = MTLVertexFormatUChar4Normalized;
                     break;
             }
         }

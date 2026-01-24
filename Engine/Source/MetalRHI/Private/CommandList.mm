@@ -454,7 +454,7 @@ namespace CE::Metal
     
     void CommandList::SetRootConstants(u32 offset, u32 num32BitValues, const void* srcData)
     {
-        rootConstantBuffer->UploadData({ .dataSize = sizeof(uint32_t) * num32BitValues, .data = srcData });
+        rootConstantBuffer->UploadData({ .dataSize = sizeof(uint32_t) * num32BitValues, .data = srcData, .startOffsetInBuffer = offset });
         
         int rootConstantBufferIndex = (int)RHI::SRGType::RootConstant;
         

@@ -261,14 +261,16 @@ namespace CE
 
 		u32 w = 0; u32 h = 0;
 		platformWindow->GetDrawableWindowSize(&w, &h);
+        
+        f32 scaling = GetScaling();
 
-		f32 screenWidth = w / GetScaling();
-		f32 screenHeight = h / GetScaling();
+		f32 screenWidth = w / scaling;
+		f32 screenHeight = h / scaling;
 		
 		viewConstants.viewMatrix = Matrix4x4::Identity();
 
 		viewConstants.projectionMatrix =
-			Matrix4x4::Scale(Vec3(1.0f / screenWidth * 2, 1.0f / screenHeight * 2, 1)) *
+			Matrix4x4::Scale(Vec3(1.0f / screenWidth * 2, 1.0f / screenHeight * 2 * gDynamicRHI->GetClipSpaceSignY(), 1)) *
 			Matrix4x4::Translation(Vec3(-screenWidth * 0.5f, -screenHeight * 0.5f, 0));
 
 		viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix * viewConstants.viewMatrix;
@@ -283,7 +285,9 @@ namespace CE
 
 	f32 FNativeContext::GetScaling() const
 	{
-        //return 1.0f;
+#if PLATFORM_MAC
+        return 1.0f;
+#endif
 		return (f32)windowDpi / 96.0f * scaleFactor;
 	}
 
