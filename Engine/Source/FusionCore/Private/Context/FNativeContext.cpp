@@ -286,7 +286,7 @@ namespace CE
 	f32 FNativeContext::GetScaling() const
 	{
 #if PLATFORM_MAC
-        return 1.0f;
+        return 1.0f; // You do not need to set custom scaling for mac
 #endif
 		return (f32)windowDpi / 96.0f * scaleFactor;
 	}
