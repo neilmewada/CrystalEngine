@@ -20,11 +20,13 @@ namespace CE
     extern RawData GetFusionShader2VertMsl();
     extern RawData GetFusionShader2FragMsl();
 
-
 	extern RawData GetFusionSDFGlyphGenVert();
 	extern RawData GetFusionSDFGlyphGenFrag();
 	extern RawData GetFusionSDFGlyphGenVertJson();
 	extern RawData GetFusionSDFGlyphGenFragJson();
+    
+    extern RawData GetFusionSDFGlyphGenVertMsl();
+    extern RawData GetFusionSDFGlyphGenFragMsl();
 
     FusionApplication::FusionApplication()
     {
@@ -631,6 +633,12 @@ namespace CE
     {
         RawData vertexShader = GetFusionSDFGlyphGenVert();
 		RawData fragmentShader = GetFusionSDFGlyphGenFrag();
+        
+        if (gDynamicRHI->GetGraphicsBackend() == RHI::GraphicsBackend::Metal)
+        {
+            vertexShader = GetFusionSDFGlyphGenVertMsl();
+            fragmentShader = GetFusionSDFGlyphGenFragMsl();
+        }
 
 		String vertexShaderJson = (char*)GetFusionSDFGlyphGenVertJson().data;
 		String fragmentShaderJson = (char*)GetFusionSDFGlyphGenFragJson().data;
@@ -695,6 +703,11 @@ namespace CE
 
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");
         variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
+        
+        ShaderTagEntry zTestOff{};
+        zTestOff.key = "ZTest";
+        zTestOff.value = "Off";
+        variantDesc.tags.Add(zTestOff);
 
 		sdfGlyphShader = new RPI::Shader();
         sdfGlyphShader->AddVariant(variantDesc);

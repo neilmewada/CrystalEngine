@@ -58,16 +58,6 @@ namespace CE::Metal
         
         RHI::DeviceLimits* GetDeviceLimits() override;
         
-        RHI::RenderTarget* CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout) override;
-        
-        void DestroyRenderTarget(RHI::RenderTarget* renderTarget) override;
-        
-        RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::TextureView*>& imageAttachments, u32 imageIndex = 0) override;
-        
-        RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::Texture*> &imageAttachments, u32 imageIndex = 0) override;
-        
-        void DestroyRenderTargetBuffer(RHI::RenderTargetBuffer* renderTargetBuffer) override;
-        
         RHI::RenderPass* CreateRenderPass(const RHI::RenderPassLayout& rpLayout) override;
         void DestroyRenderPass(RHI::RenderPass* renderPass) override;
         

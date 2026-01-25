@@ -17,7 +17,6 @@
 #include "ShaderModule.h"
 
 #include "SwapChain.h"
-#include "RenderTarget.h"
 #include "RenderPass.h"
 #include "RenderPassFrameBuffer.h"
 #include "Pipeline.h"

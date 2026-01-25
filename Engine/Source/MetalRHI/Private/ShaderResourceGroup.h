@@ -72,6 +72,7 @@ namespace CE::Metal
         bool needsFlush = true;
         bool needsMtlCompile = true;
         
+        Name name;
         Device* device = nullptr;
         
         HashMap<Name, BindingSlotId> bindingSlotsByVariableName{};

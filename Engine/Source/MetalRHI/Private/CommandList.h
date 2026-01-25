@@ -17,12 +17,6 @@ namespace CE::Metal
         
         void End() override;
         
-        void BeginRenderTarget(RHI::RenderTarget* renderTarget, RHI::RenderTargetBuffer* renderTargetBuffer, RHI::AttachmentClearValue* clearValuesPerAttachment) override;
-        
-        void EndRenderTarget() override;
-        
-        void RenderTargetNextSubPass() override;
-        
         bool BeginRenderPass(RHI::RenderPass* renderPass, RHI::RenderPassFrameBuffer* frameBuffer, RHI::AttachmentClearValue* clearValuesPerAttachment) override;
         
         void RenderPassNextSubpass() override;

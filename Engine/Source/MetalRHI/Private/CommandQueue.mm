@@ -18,12 +18,6 @@ namespace CE::Metal
         mtlQueue = nil;
     }
 
-    bool CommandQueue::Execute(u32 count, RHI::CommandList** commandLists, RHI::Fence* fence)
-    {
-        // Never use this
-        return false;
-    }
-
     bool CommandQueue::Submit(const CommandQueueSubmission& submission)
     {
         if (submission.numCommandLists == 0 || submission.commandLists == nullptr)

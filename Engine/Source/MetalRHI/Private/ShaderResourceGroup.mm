@@ -8,19 +8,7 @@ namespace CE::Metal
     {
         this->srgLayout = srgDescriptor.layout;
         this->srgType = srgDescriptor.layout.srgType;
-        
-        /*for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
-        {
-            [encoders addObject:[function newArgumentEncoderWithBufferIndex:setNumber]];
-            [argumentBuffers addObject:[device->GetHandle() newBufferWithLength:encoders[i].encodedLength options:MTLResourceStorageModeShared]];
-            
-            String bufferLabelString = srgDescriptor.name.GetString();
-            NSString* bufferLabel = [[NSString alloc] initWithCString:bufferLabelString.GetCString()];
-            
-            argumentBuffers[i].label = bufferLabel;
-            
-            [encoders[i] setArgumentBuffer:argumentBuffers[i] offset:0];
-        }*/
+        this->name = srgDescriptor.name;
         
         bindingSlotsByVariableName.Clear();
         

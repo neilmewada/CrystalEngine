@@ -81,6 +81,8 @@ struct spvDescriptorSetBuffer5
 {
     const device type_StructuredBuffer_ObjectData* _Objects [[id(0)]];
     const device type_StructuredBuffer_ClipRect* _ClipRects [[id(1)]];
+    const device type_StructuredBuffer_DrawData* _DrawData [[id(2)]];
+    const device type_StructuredBuffer_GradientKey* _GradientKeys [[id(3)]];
 };
 
 struct VertMain_out

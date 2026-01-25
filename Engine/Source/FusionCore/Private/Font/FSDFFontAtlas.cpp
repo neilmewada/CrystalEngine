@@ -60,6 +60,8 @@ namespace CE
             .loadActionStencil = AttachmentLoadAction::DontCare,
             .storeActionStencil = AttachmentStoreAction::DontCare
         });
+        rpLayout.subpasses.Add({});
+        rpLayout.subpasses.GetLast().colorAttachments.Add(0);
 
 		sdfRenderTarget = RHI::gDynamicRHI->CreateRenderPass(rpLayout);
 

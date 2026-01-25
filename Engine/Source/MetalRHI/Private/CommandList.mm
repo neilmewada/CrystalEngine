@@ -61,20 +61,6 @@ namespace CE::Metal
     {
         // Do nothing
     }
-
-    void CommandList::BeginRenderTarget(RHI::RenderTarget* renderTarget, RHI::RenderTargetBuffer* renderTargetBuffer, RHI::AttachmentClearValue* clearValuesPerAttachment)
-    {
-        
-    }
-
-    void CommandList::EndRenderTarget()
-    {
-    }
-
-    void CommandList::RenderTargetNextSubPass()
-    {
-        
-    }
     
     bool CommandList::BeginRenderPass(RHI::RenderPass* renderPass, RHI::RenderPassFrameBuffer* rhiFrameBuffer, RHI::AttachmentClearValue* clearValuesPerAttachment)
     {

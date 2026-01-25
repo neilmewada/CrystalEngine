@@ -172,31 +172,6 @@ namespace CE::Metal
         return device->GetDeviceLimits();
     }
 
-    RHI::RenderTarget* MetalRHI::CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout)
-    {
-        return new Metal::RenderTarget(device, rtLayout);
-    }
-
-    void MetalRHI::DestroyRenderTarget(RHI::RenderTarget* renderTarget)
-    {
-        delete renderTarget;
-    }
-
-    RHI::RenderTargetBuffer* MetalRHI::CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::TextureView*>& imageAttachments, u32 imageIndex)
-    {
-        return nullptr;
-    }
-
-    RHI::RenderTargetBuffer* MetalRHI::CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::Texture*>& imageAttachments, u32 imageIndex)
-    {
-        return nullptr;
-    }
-
-    void MetalRHI::DestroyRenderTargetBuffer(RHI::RenderTargetBuffer* renderTargetBuffer)
-    {
-        delete renderTargetBuffer;
-    }
-
     RHI::RenderPass* MetalRHI::CreateRenderPass(const RHI::RenderPassLayout& rpLayout)
     {
         return new Metal::RenderPass(device, rpLayout);
@@ -371,19 +346,81 @@ namespace CE::Metal
 
     u64 MetalRHI::GetShaderStructMemberAlignment(const RHI::ShaderStructMember& member)
     {
-        // TODO
-        return 0;
+        u64 alignment = 0;
+
+        switch (member.dataType)
+        {
+            case RHI::ShaderStructMemberType::UInt:
+            case RHI::ShaderStructMemberType::Int:
+            case RHI::ShaderStructMemberType::Float:
+                return sizeof(u32); // 4 byte
+            case RHI::ShaderStructMemberType::Float2:
+                return sizeof(f32) * 2; // 8 bytes
+            case RHI::ShaderStructMemberType::Float3:
+            case RHI::ShaderStructMemberType::Float4:
+            case RHI::ShaderStructMemberType::Float4x4:
+                return sizeof(f32) * 4; // 16 bytes
+            case RHI::ShaderStructMemberType::Struct:
+                alignment = 0;
+                for (const auto& nestedMember : member.nestedMembers)
+                {
+                    alignment = Math::Max(alignment, GetShaderStructMemberAlignment(nestedMember));
+                }
+                return alignment;
+        }
+
+        return alignment;
     }
 
     u64 MetalRHI::GetShaderStructMemberSize(const RHI::ShaderStructMember& member)
     {
-        // TODO
+        switch (member.dataType)
+        {
+            case RHI::ShaderStructMemberType::Float:
+            case RHI::ShaderStructMemberType::UInt:
+            case RHI::ShaderStructMemberType::Int:
+                return sizeof(u32) * member.arrayCount;
+            case RHI::ShaderStructMemberType::Float2:
+                return sizeof(Vec2) * member.arrayCount;
+            case RHI::ShaderStructMemberType::Float3:
+            case RHI::ShaderStructMemberType::Float4:
+                return sizeof(Vec4) * member.arrayCount;
+            case RHI::ShaderStructMemberType::Float4x4:
+                return sizeof(Matrix4x4);
+            case RHI::ShaderStructMemberType::Struct:
+            {
+                u64 structAlignment = GetShaderStructMemberAlignment(member);
+                u64 offset = 0;
+                for (const auto& nestedMember : member.nestedMembers)
+                {
+                    u64 alignment = GetShaderStructMemberAlignment(nestedMember);
+                    if (offset > 0)
+                        offset = Memory::GetAlignedSize(offset, alignment);
+                    offset += GetShaderStructMemberSize(nestedMember);
+                }
+                offset = Memory::GetAlignedSize(offset, structAlignment);
+                return offset;
+            }
+            break;
+        }
+
         return 0;
     }
 
     void MetalRHI::GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets)
     {
+        outOffsets.Clear();
+
+        u64 offset = 0;
         
+        for (const auto& member : members)
+        {
+            u64 alignment = GetShaderStructMemberAlignment(member);
+            if (offset > 0)
+                offset = Memory::GetAlignedSize(offset, alignment);
+            outOffsets.Add(offset);
+            offset += GetShaderStructMemberSize(member);
+        }
     }
 
 }

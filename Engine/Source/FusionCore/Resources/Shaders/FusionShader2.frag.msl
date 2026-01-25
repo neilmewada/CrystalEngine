@@ -73,6 +73,11 @@ struct type_PushConstant_RootConstants
     uint clipRectIndices[24];
 };
 
+struct spvDescriptorSetBuffer1
+{
+    constant type_PerViewData* _PerViewData [[id(0)]];
+};
+
 struct spvDescriptorSetBuffer4
 {
     texture2d<float> _FontAtlas [[id(0)]];
@@ -81,6 +86,7 @@ struct spvDescriptorSetBuffer4
 
 struct spvDescriptorSetBuffer5
 {
+    const device type_StructuredBuffer_ObjectData* _Objects [[id(0)]];
     const device type_StructuredBuffer_ClipRect* _ClipRects [[id(1)]];
     const device type_StructuredBuffer_DrawData* _DrawData [[id(2)]];
     const device type_StructuredBuffer_GradientKey* _GradientKeys [[id(3)]];
@@ -107,7 +113,7 @@ struct FragMain_in
     int in_var_TEXCOORD5 [[user(locn5)]];
 };
 
-fragment FragMain_out FragMain(FragMain_in in [[stage_in]], constant spvDescriptorSetBuffer4& spvDescriptorSet4 [[buffer(4)]], constant spvDescriptorSetBuffer5& spvDescriptorSet5 [[buffer(5)]], constant spvDescriptorSetBuffer6& spvDescriptorSet6 [[buffer(6)]], constant type_PushConstant_RootConstants& _RootConstants [[buffer(7)]], float4 gl_FragCoord [[position]])
+fragment FragMain_out FragMain(FragMain_in in [[stage_in]], constant spvDescriptorSetBuffer1& spvDescriptorSet1 [[buffer(1)]], constant spvDescriptorSetBuffer4& spvDescriptorSet4 [[buffer(4)]], constant spvDescriptorSetBuffer5& spvDescriptorSet5 [[buffer(5)]], constant spvDescriptorSetBuffer6& spvDescriptorSet6 [[buffer(6)]], constant type_PushConstant_RootConstants& _RootConstants [[buffer(7)]], float4 gl_FragCoord [[position]])
 {
     FragMain_out out = {};
     float4 _672 = in.in_var_TEXCOORD2;
