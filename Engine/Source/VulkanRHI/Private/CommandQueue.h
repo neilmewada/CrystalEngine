@@ -47,8 +47,6 @@ namespace CE::Vulkan
 			return commandPool;
 		}
 
-        virtual bool Execute(u32 count, RHI::CommandList** commandLists, RHI::Fence* fence = nullptr) override;
-
         bool Submit(u32 count, VkSubmitInfo* submitInfos, VkFence fence);
 
         bool Submit(const CommandQueueSubmission& submission) override;

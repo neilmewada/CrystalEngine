@@ -22,42 +22,6 @@ namespace CE::Vulkan
 		
 	}
 
-	bool CommandQueue::Execute(u32 count, RHI::CommandList** commandLists, RHI::Fence* fence)
-	{
-		if (count == 0)
-			return true;
-
-		SubmitInfo info{};
-		info.commandBuffers.Resize(count);
-
-		for (int i = 0; i < count; i++)
-		{
-			if (commandLists[i] == nullptr)
-				return false;
-
-			info.commandBuffers[i] = ((Vulkan::CommandList*)commandLists[i])->GetCommandBuffer();
-		}
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = info.commandBuffers.GetSize();
-		submitInfo.pCommandBuffers = info.commandBuffers.GetData();
-
-		submissionMutex.Lock();
-		if (fence != nullptr)
-		{
-			auto submitFence = ((Vulkan::Fence*)fence)->GetHandle();
-			vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
-		}
-		else
-		{
-			vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
-		}
-		submissionMutex.Unlock();
-		
-		return true;
-	}
-
 	bool CommandQueue::Submit(u32 count, VkSubmitInfo* submitInfos, VkFence fence)
 	{
 		if (count == 0)
@@ -261,7 +225,10 @@ namespace CE::Vulkan
 		submitInfo.commandBufferCount = commandBuffers.GetSize();
 		submitInfo.pCommandBuffers = commandBuffers.GetData();
 
+		submissionMutex.Lock();
 		VkResult result = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+		submissionMutex.Unlock();
+
 		if (result != VK_SUCCESS)
 		{
 			return false;

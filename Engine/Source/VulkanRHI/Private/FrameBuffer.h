@@ -7,7 +7,7 @@ namespace CE::Vulkan
 	class RenderTarget;
 	class Texture;
 
-	class FrameBuffer : public RHI::RenderTargetBuffer
+	class FrameBuffer
 	{
 	public:
 

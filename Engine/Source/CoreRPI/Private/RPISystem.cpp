@@ -161,11 +161,11 @@ namespace CE::RPI
         brdfLutTexture = new RPI::Texture(rpiDesc);
         RHI::Texture* brdfLut = brdfLutTexture->GetRhiTexture();
 
-        RHI::RenderTarget* brdfLutRT = nullptr;
-        RHI::RenderTargetBuffer* brdfLutRTB = nullptr;
+        RHI::RenderPass* brdfLutRT = nullptr;
+        RHI::RenderPassFrameBuffer* brdfLutRTB = nullptr;
         {
-            RHI::RenderTargetLayout rtLayout{};
-            RHI::RenderAttachmentLayout colorAttachment{};
+            RHI::RenderPassLayout rtLayout{};
+            RHI::RenderPassAttachmentLayout colorAttachment{};
             colorAttachment.attachmentId = "BRDF LUT";
             colorAttachment.format = RHI::Format::R8G8_UNORM;
             colorAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
@@ -174,8 +174,8 @@ namespace CE::RPI
             colorAttachment.multisampleState.sampleCount = 1;
             rtLayout.attachmentLayouts.Add(colorAttachment);
 
-            brdfLutRT = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
-            brdfLutRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(brdfLutRT, { brdfLut });
+            brdfLutRT = RHI::gDynamicRHI->CreateRenderPass(rtLayout);
+            brdfLutRTB = RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ brdfLutRT, { brdfLut } });
         }
 
         defer(&)
@@ -204,7 +204,7 @@ namespace CE::RPI
 
             cmdList->ClearShaderResourceGroups();
 
-            cmdList->BeginRenderTarget(brdfLutRT, brdfLutRTB, &clearValue);
+            cmdList->BeginRenderPass(brdfLutRT, brdfLutRTB, &clearValue);
             {
                 RHI::ViewportState viewportState{};
                 viewportState.x = viewportState.y = 0;
@@ -226,7 +226,7 @@ namespace CE::RPI
 
                 cmdList->DrawLinear(fullscreenQuadArgs);
             }
-            cmdList->EndRenderTarget();
+            cmdList->EndRenderPass();
 
             barrier.resource = brdfLut;
             barrier.fromState = RHI::ResourceState::ColorOutput;

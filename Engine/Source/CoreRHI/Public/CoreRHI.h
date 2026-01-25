@@ -23,8 +23,6 @@
 #include "RHI/Sampler.h"
 
 #include "RHI/AttachmentDefines.h"
-#include "RHI/RenderTarget.h"
-#include "RHI/RenderTargetBuffer.h"
 #include "RHI/RenderPass.h"
 #include "RHI/RenderPassFrameAttachment.h"
 #include "RHI/RenderPassFrameBuffer.h"

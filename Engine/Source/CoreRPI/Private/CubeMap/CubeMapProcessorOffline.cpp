@@ -382,21 +382,21 @@ namespace CE::RPI
 		}
 
 		/////////////////////////////////////////////
-		// - Render Targets & RTBs -
+		// - Render Targets & FBs -
 
 		RHI::RenderPass* hdrRenderPass = nullptr;
 		RHI::TextureView* cubeMapRTVs[6] = {};
-		RHI::RenderPassFrameBuffer* cubeMapRTBs[6] = {};
+		RHI::RenderPassFrameBuffer* cubeMapFBs[6] = {};
 		RHI::TextureView* irradianceCubeMapRTVs[6] = {};
-		RHI::RenderPassFrameBuffer* irradianceCubeMapRTBs[6] = {};
+		RHI::RenderPassFrameBuffer* irradianceCubeMapFBs[6] = {};
 
-		// Input HDRI MipMap RTBs
+		// Input HDRI MipMap FBs
 		Array<RPI::Texture*> hdriMapMipViews{};
-		Array<RHI::RenderPassFrameBuffer*> hdriMapRTBs{};
+		Array<RHI::RenderPassFrameBuffer*> hdriMapFBs{};
 
 		// Specular Convolution
 		Array<RHI::TextureView*> specularConvolutionRTVs{};
-		Array<RHI::RenderPassFrameBuffer*> specularConvolutionRTBs{};
+		Array<RHI::RenderPassFrameBuffer*> specularConvolutionFBs{};
 		
 		StaticArray<Array<RHI::TextureView*>, 6> cubeMapRTVMips{};
 		StaticArray<Array<RHI::RenderPassFrameBuffer*>, 6> cubeMapRTBMips{};
@@ -429,11 +429,11 @@ namespace CE::RPI
 				viewDesc.format = cubeMap->GetFormat();
 
 				cubeMapRTVs[i] = RHI::gDynamicRHI->CreateTextureView(viewDesc);
-				cubeMapRTBs[i] = RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { cubeMapRTVs[i] } });
+				cubeMapFBs[i] = RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { cubeMapRTVs[i] } });
 
 				viewDesc.texture = diffuseIrradianceCubeMap;
 				irradianceCubeMapRTVs[i] = RHI::gDynamicRHI->CreateTextureView(viewDesc);
-				irradianceCubeMapRTBs[i] = RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { irradianceCubeMapRTVs[i] } });
+				irradianceCubeMapFBs[i] = RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { irradianceCubeMapRTVs[i] } });
 			}
 
 			for (int mip = 0; mip < hdriMap->GetMipLevelCount(); mip++)
@@ -449,7 +449,7 @@ namespace CE::RPI
 
 				RHI::TextureView* textureView = RHI::gDynamicRHI->CreateTextureView(viewDesc);
 				hdriMapMipViews.Add(new RPI::Texture(textureView));
-				hdriMapRTBs.Add(RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { textureView } }));
+				hdriMapFBs.Add(RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { textureView } }));
 			}
 
 			if (computeSpecularConvolution)
@@ -466,7 +466,7 @@ namespace CE::RPI
 					viewDesc.format = specularConvolution->GetFormat();
 
 					specularConvolutionRTVs.Add(RHI::gDynamicRHI->CreateTextureView(viewDesc));
-					specularConvolutionRTBs.Add(RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { specularConvolutionRTVs.Top() } }));
+					specularConvolutionFBs.Add(RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ hdrRenderPass, { specularConvolutionRTVs.Top() } }));
 				}
 
 				for (int face = 0; face < 6; face++)
@@ -540,9 +540,9 @@ namespace CE::RPI
 				}
 
 				delete irradianceCubeMapRTVs[i];
-				delete irradianceCubeMapRTBs[i];
+				delete irradianceCubeMapFBs[i];
 				delete cubeMapRTVs[i];
-				delete cubeMapRTBs[i];
+				delete cubeMapFBs[i];
 			}
 
 			for (auto mipMapRpi : specularConvolutionMipMaps)
@@ -553,13 +553,13 @@ namespace CE::RPI
 			for (int i = 0; i < hdriMapMipViews.GetSize(); i++)
 			{
 				delete hdriMapMipViews[i];
-				delete hdriMapRTBs[i];
+				delete hdriMapFBs[i];
 			}
 
 			for (int i = 0; i < specularConvolutionRTVs.GetSize(); i++)
 			{
 				delete specularConvolutionRTVs[i];
-				delete specularConvolutionRTBs[i];
+				delete specularConvolutionFBs[i];
 			}
 
 			delete grayscaleRenderTarget;
@@ -787,7 +787,7 @@ namespace CE::RPI
 			// Convert equirectangular HDR flat image to HDR CubeMap
 			for (int i = 0; i < 6; i++)
 			{
-				cmdList->BeginRenderPass(hdrRenderPass, cubeMapRTBs[i], &clearValue);
+				cmdList->BeginRenderPass(hdrRenderPass, cubeMapFBs[i], &clearValue);
 
 				RHI::ViewportState viewportState{};
 				viewportState.x = viewportState.y = 0;
@@ -1246,7 +1246,7 @@ namespace CE::RPI
 
 				for (int i = 0; i < 6; i++)
 				{
-					cmdList->BeginRenderPass(hdrRenderPass, irradianceCubeMapRTBs[i], &clearValue);
+					cmdList->BeginRenderPass(hdrRenderPass, irradianceCubeMapFBs[i], &clearValue);
 
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;
@@ -1313,7 +1313,7 @@ namespace CE::RPI
 			for (int i = 1; i < hdriMap->GetMipLevelCount(); i++)
 			{
 				// Generate mip level 'i'
-				cmdList->BeginRenderPass(hdrRenderPass, hdriMapRTBs[i], &clearValue);
+				cmdList->BeginRenderPass(hdrRenderPass, hdriMapFBs[i], &clearValue);
 				RHI::ViewportState viewportState{};
 				viewportState.x = viewportState.y = 0;
 				viewportState.width = hdriMap->GetWidth(i);
@@ -1364,7 +1364,7 @@ namespace CE::RPI
 
 				for (int mip = 1; mip < specularConvolution->GetMipLevelCount(); mip++)
 				{
-					cmdList->BeginRenderPass(hdrRenderPass, specularConvolutionRTBs[mip], &clearValue);
+					cmdList->BeginRenderPass(hdrRenderPass, specularConvolutionFBs[mip], &clearValue);
 
 					RHI::ViewportState viewportState{};
 					viewportState.x = viewportState.y = 0;

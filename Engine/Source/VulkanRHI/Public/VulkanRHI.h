@@ -105,13 +105,6 @@ namespace CE::Vulkan
 
         virtual RHI::DeviceLimits* GetDeviceLimits() override;
 
-        virtual RHI::RenderTarget* CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout) override;
-        virtual void DestroyRenderTarget(RHI::RenderTarget* renderTarget) override;
-
-        virtual RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::TextureView*>& imageAttachments, u32 imageIndex = 0) override;
-        virtual RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::Texture*>& imageAttachments, u32 imageIndex = 0) override;
-        virtual void DestroyRenderTargetBuffer(RHI::RenderTargetBuffer* renderTargetBuffer) override;
-
 		virtual RHI::SwapChain* CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc) override;
 		virtual void DestroySwapChain(RHI::SwapChain* swapChain) override;
 

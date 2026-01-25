@@ -121,13 +121,6 @@ namespace CE::RHI
 
 		virtual void Begin() = 0;
 		virtual void End() = 0;
-
-        CE_DEPRECATED("BeginRenderTarget is deprecated! Use BeginRenderPass instead.")
-		virtual void BeginRenderTarget(RenderTarget* renderTarget, RenderTargetBuffer* renderTargetBuffer, AttachmentClearValue* clearValuesPerAttachment) = 0;
-        
-        virtual void RenderTargetNextSubPass() = 0;
-        
-		virtual void EndRenderTarget() = 0;
         
         virtual bool BeginRenderPass(RenderPass* renderPass, RenderPassFrameBuffer* frameBuffer, AttachmentClearValue* clearValuesPerAttachment) = 0;
         

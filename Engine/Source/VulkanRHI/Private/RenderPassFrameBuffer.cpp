@@ -99,8 +99,8 @@ namespace CE::Vulkan
 				{
 					Vulkan::TextureView* textureView = (Vulkan::TextureView*)frameAttachment.GetTextureView(imageIndex);
 
-					u32 imageWidth = textureView->GetTexture()->GetWidth();
-					u32 imageHeight = textureView->GetTexture()->GetHeight();
+					u32 imageWidth = textureView->GetWidth();
+					u32 imageHeight = textureView->GetHeight();
 
 					if (width == 0 || height == 0)
 					{

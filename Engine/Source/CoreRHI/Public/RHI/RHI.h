@@ -112,13 +112,6 @@ namespace CE::RHI
         // - Resources -
 
 		virtual RHI::DeviceLimits* GetDeviceLimits() = 0;
-
-		virtual RHI::RenderTarget* CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout) = 0;
-		virtual void DestroyRenderTarget(RHI::RenderTarget* renderTarget) = 0;
-
-		virtual RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::TextureView*>& imageAttachments, u32 imageIndex = 0) = 0;
-		virtual RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::Texture*>& imageAttachments, u32 imageIndex = 0) = 0;
-		virtual void DestroyRenderTargetBuffer(RHI::RenderTargetBuffer* renderTargetBuffer) = 0;
         
         virtual RHI::RenderPass* CreateRenderPass(const RHI::RenderPassLayout& rpLayout) = 0;
         virtual void DestroyRenderPass(RHI::RenderPass* renderPass) = 0;

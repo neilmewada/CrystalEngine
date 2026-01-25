@@ -681,61 +681,6 @@ namespace CE::Vulkan
 		vkEndCommandBuffer(commandBuffer);
 	}
 
-	void CommandList::BeginRenderTarget(RHI::RenderTarget* rhiRenderTarget, RHI::RenderTargetBuffer* renderTargetBuffer, RHI::AttachmentClearValue* clearValuesPerAttachment)
-	{
-		if (rhiRenderTarget == nullptr || renderTargetBuffer == nullptr)
-			return;
-
-		Vulkan::RenderTarget* renderTarget = (Vulkan::RenderTarget*)rhiRenderTarget;
-		Vulkan::FrameBuffer* framebuffer = (Vulkan::FrameBuffer*)renderTargetBuffer;
-		currentPass = renderTarget->renderPass;
-		currentSubpass = 0;
-
-		u32 attachmentCount = renderTarget->GetAttachmentCount();
-
-		FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
-		for (int i = 0; i < attachmentCount; i++)
-		{
-			auto attachmentUsage = renderTarget->renderPass->GetAttachmentUsage(i);
-			
-			VkClearValue clearValue;
-			memset(&clearValue, 0, sizeof(clearValue));
-
-			switch (attachmentUsage)
-			{
-			case ScopeAttachmentUsage::Color:
-			case ScopeAttachmentUsage::Resolve:
-				memcpy(clearValue.color.float32, clearValuesPerAttachment[i].clearValue.xyzw, sizeof(f32[4]));
-				break;
-			case ScopeAttachmentUsage::DepthStencil:
-				clearValue.depthStencil.depth = clearValuesPerAttachment[i].clearValueDepth;
-				clearValue.depthStencil.stencil = clearValuesPerAttachment[i].clearValueStencil;
-				break;
-			}
-
-			clearValues.Add(clearValue);
-		}
-
-		VkRenderPassBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		beginInfo.clearValueCount = attachmentCount;
-		beginInfo.pClearValues = clearValues.GetData();
-		
-		beginInfo.renderPass = renderTarget->renderPass->GetHandle();
-		beginInfo.framebuffer = framebuffer->GetHandle();
-
-		beginInfo.renderArea.offset = { 0, 0 };
-		beginInfo.renderArea.extent.width = framebuffer->GetWidth();
-		beginInfo.renderArea.extent.height = framebuffer->GetHeight();
-		
-		vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
-	}
-
-    void CommandList::RenderTargetNextSubPass()
-    {
-        vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
-    }
-
     bool CommandList::BeginRenderPass(RHI::RenderPass* rhiRenderPass, RHI::RenderPassFrameBuffer* rhiFrameBuffer, AttachmentClearValue* clearValuesPerAttachment)
     {
 		Vulkan::RenderPass* renderPass = (Vulkan::RenderPass*)rhiRenderPass;
@@ -804,15 +749,10 @@ namespace CE::Vulkan
 
     void CommandList::EndRenderPass()
     {
-		vkCmdEndRenderPass(commandBuffer);
-    }
-
-    void CommandList::EndRenderTarget()
-	{
 		currentPass = nullptr;
 		currentSubpass = 0;
 
 		vkCmdEndRenderPass(commandBuffer);
-	}
+    }
 
 } // namespace CE::Vulkan

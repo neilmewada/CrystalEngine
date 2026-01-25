@@ -35,6 +35,20 @@ namespace CE::RHI
         inline int GetBaseArrayLayer() const { return baseArrayLayer; }
         inline int GetArrayLayerCount() const { return arrayLayerCount; }
 
+        inline u32 GetWidth() const
+        {
+            if (texture == nullptr)
+                return 0;
+            return texture->GetWidth(baseMipLevel);
+		}
+
+        inline u32 GetHeight() const
+        {
+            if (texture == nullptr)
+                return 0;
+            return texture->GetHeight(baseMipLevel);
+        }
+
     protected:
 
         TextureView() : RHIResource(ResourceType::TextureView)
