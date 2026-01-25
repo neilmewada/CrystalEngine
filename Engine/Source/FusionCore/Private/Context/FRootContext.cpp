@@ -96,16 +96,7 @@ namespace CE
 		}
 
 		Ref<FWidget> hoveredWidget = nativeContext->HitTest(mousePos);
-
-    	if (hoveredWidget != nullptr)
-        {
-            //CE_LOG(Info, All, "[{}]: {}", hoveredWidget->GetClass()->GetTypeName(), hoveredWidget->GetName());
-            if (hoveredWidget->IsOfType<FButton>())
-            {
-                String::IsAlphabet('a');
-            }
-        }
-
+        
 		if (!hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top() != hoveredWidget &&
 			(hoveredWidget == nullptr || !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top().Get())))
 		{

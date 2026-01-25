@@ -33,19 +33,16 @@ namespace CE::Metal
     {
         this->commandListType = type;
         
-        RHI::BufferDescriptor bufferDesc{};
-        bufferDesc.name = "RootConstants";
-        bufferDesc.bufferSize = device->GetDeviceLimits()->GetMaxRootConstantByteSize();
-        bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
-        bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
-        bufferDesc.structureByteStride = sizeof(u32);
-        
-        rootConstantBuffer = new Metal::Buffer(device, bufferDesc);
+        rootConstantBufferByteSize = device->GetDeviceLimits()->GetMaxRootConstantByteSize();
     }
 
     CommandList::~CommandList()
     {
-        delete rootConstantBuffer; rootConstantBuffer = nullptr;
+        for (int i = 0; i < rootConstantBuffers.GetSize(); i++)
+        {
+            delete rootConstantBuffers[i];
+        }
+        rootConstantBuffers.Clear();
         
         mtlCommandQueue = nil;
         mtlCommandBuffer = nil;
@@ -57,6 +54,7 @@ namespace CE::Metal
         
         curRenderPass = nil;
         curSubpass = 0;
+        currentRootConstantBufferIdx = -1;
     }
 
     void CommandList::End()
@@ -441,19 +439,35 @@ namespace CE::Metal
         
         int rootConstantBufferIndex = (int)RHI::SRGType::RootConstant;
         
-        if (mtlRenderEncoder != nil)
+        if (mtlRenderEncoder != nil && currentRootConstantBufferIdx >= 0)
         {
-            [mtlRenderEncoder setVertexBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:rootConstantBufferIndex];
-            [mtlRenderEncoder setFragmentBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:rootConstantBufferIndex];
+            [mtlRenderEncoder setVertexBuffer:rootConstantBuffers[currentRootConstantBufferIdx]->GetMtlBuffer() offset:0 atIndex:rootConstantBufferIndex];
+            [mtlRenderEncoder setFragmentBuffer:rootConstantBuffers[currentRootConstantBufferIdx]->GetMtlBuffer() offset:0 atIndex:rootConstantBufferIndex];
         }
-        else if (mtlComputeEncoder != nil)
+        else if (mtlComputeEncoder != nil && currentRootConstantBufferIdx >= 0)
         {
-            [mtlComputeEncoder setBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:rootConstantBufferIndex];
+            [mtlComputeEncoder setBuffer:rootConstantBuffers[currentRootConstantBufferIdx]->GetMtlBuffer() offset:0 atIndex:rootConstantBufferIndex];
         }
     }
     
     void CommandList::SetRootConstants(u32 offset, u32 num32BitValues, const void* srcData)
     {
+        currentRootConstantBufferIdx++;
+        
+        while (rootConstantBuffers.GetSize() <= currentRootConstantBufferIdx)
+        {
+            RHI::BufferDescriptor bufferDesc{};
+            bufferDesc.name = "RootConstants";
+            bufferDesc.bufferSize = device->GetDeviceLimits()->GetMaxRootConstantByteSize();
+            bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+            bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+            bufferDesc.structureByteStride = sizeof(u32);
+            
+            rootConstantBuffers.Add(new Metal::Buffer(device, bufferDesc));
+        }
+        
+        Metal::Buffer* rootConstantBuffer = rootConstantBuffers[currentRootConstantBufferIdx];
+        
         rootConstantBuffer->UploadData({ .dataSize = sizeof(uint32_t) * num32BitValues, .data = srcData, .startOffsetInBuffer = offset });
         
         int rootConstantBufferIndex = (int)RHI::SRGType::RootConstant;
@@ -533,13 +547,13 @@ namespace CE::Metal
             {
                 const int bufferIndex = (int)RHI::SRGType::RootConstant;
                 
-                if (EnumHasFlag(rootContantStages, RHI::ShaderStage::Vertex))
+                if (EnumHasFlag(rootContantStages, RHI::ShaderStage::Vertex) && currentRootConstantBufferIdx >= 0)
                 {
-                    [mtlRenderEncoder setVertexBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:bufferIndex];
+                    [mtlRenderEncoder setVertexBuffer:rootConstantBuffers[currentRootConstantBufferIdx]->GetMtlBuffer() offset:0 atIndex:bufferIndex];
                 }
-                if (EnumHasFlag(rootContantStages, RHI::ShaderStage::Fragment))
+                if (EnumHasFlag(rootContantStages, RHI::ShaderStage::Fragment) && currentRootConstantBufferIdx >= 0)
                 {
-                    [mtlRenderEncoder setFragmentBuffer:rootConstantBuffer->GetMtlBuffer() offset:0 atIndex:bufferIndex];
+                    [mtlRenderEncoder setFragmentBuffer:rootConstantBuffers[currentRootConstantBufferIdx]->GetMtlBuffer() offset:0 atIndex:bufferIndex];
                 }
             }
         }
@@ -568,7 +582,15 @@ namespace CE::Metal
 
     void CommandList::Dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ)
     {
+        if (!boundPipeline)
+            return;
+        if (!boundPipeline->IsComputePipeline())
+            return;
         
+        const auto& computePipelineDesc = boundPipeline->GetComputeDescriptor();
+        Vec3i threadSize = computePipelineDesc.invocationSize;
+        
+        [mtlComputeEncoder dispatchThreads:MTLSizeMake(groupCountX, groupCountY, groupCountZ) threadsPerThreadgroup:MTLSizeMake(threadSize.x, threadSize.y, threadSize.z)];
     }
 
     void CommandList::CopyTextureRegion(const BufferToTextureCopy& region)

@@ -343,7 +343,7 @@ namespace CE::RHI
 
 	struct ComputePipelineDescriptor : PipelineDescriptor
 	{
-
+        Vec3i invocationSize;
 	};
 
 	class IPipelineLayout

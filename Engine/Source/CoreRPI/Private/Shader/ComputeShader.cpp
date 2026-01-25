@@ -18,6 +18,7 @@ namespace CE::RPI
             }
         };
         pipelineDesc.srgLayouts = desc.reflectionInfo.srgLayouts;
+        pipelineDesc.invocationSize = desc.reflectionInfo.invocationSize;
 
         computePipelineState = RHI::gDynamicRHI->CreateComputePipeline(pipelineDesc);
     }
