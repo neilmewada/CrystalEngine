@@ -314,6 +314,8 @@ namespace CE
         imageAtlas->Flush(imageIndex);
 
         rootContext->SetDrawPackets(drawList);
+
+        fontManager->WaitForFlush();
     }
 
     Ref<FWindow> FusionApplication::CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height, 

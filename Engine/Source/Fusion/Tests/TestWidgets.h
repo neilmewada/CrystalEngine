@@ -79,9 +79,9 @@ namespace WidgetTests
     };
 
     CLASS()
-    class SceneTreeViewModel : public FAbstractItemModel
+    class SceneTreeViewModel : public FTreeViewModel
     {
-        CE_CLASS(SceneTreeViewModel, FAbstractItemModel)
+        CE_CLASS(SceneTreeViewModel, FTreeViewModel)
     public:
 
         virtual ~SceneTreeViewModel();

@@ -235,7 +235,9 @@ namespace CE::Vulkan
 
 		for (int i = queuedDestroySets.GetSize() - 1; i >= 0; i--)
 		{
-			if (queuedDestroySets[i]->usageCount <= 0)
+			queuedDestroySets[i]->frameCounter += 1;
+
+			if (queuedDestroySets[i]->usageCount <= 0 && queuedDestroySets[i]->frameCounter > (int)RHI::Limits::MaxSwapChainImageCount)
 			{
 				delete queuedDestroySets[i];
 				queuedDestroySets.RemoveAt(i);
@@ -253,8 +255,8 @@ namespace CE::Vulkan
 		}
 	}
 
-    ShaderResourceGroup::ShaderResourceGroup(Device* device, const RHI::ShaderResourceGroupLayout& srgLayout)
-		: device(device)
+    ShaderResourceGroup::ShaderResourceGroup(Device* device, const RHI::ShaderResourceGroupLayout& srgLayout, const String& name)
+		: device(device), name(name)
     {
 		this->srgType = srgLayout.srgType;
 		this->srgLayout = srgLayout;
@@ -917,9 +919,9 @@ namespace CE::Vulkan
 			}
 
 			if (dynamicArrayName.IsValid())
-				descriptorSets[i] = new DescriptorSet(device, setLayout, srgLayout, dynamicArraySize);
+				descriptorSets[i] = new DescriptorSet(device, setLayout, srgLayout, dynamicArraySize, name);
 			else
-				descriptorSets[i] = new DescriptorSet(device, setLayout, srgLayout);
+				descriptorSets[i] = new DescriptorSet(device, setLayout, srgLayout, name);
 		}
 
 		UpdateBindings();

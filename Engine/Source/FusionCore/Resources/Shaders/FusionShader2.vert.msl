@@ -10,6 +10,8 @@ struct type_PerViewData
     float4x4 projectionMatrix;
     float4 viewPosition;
     float2 pixelResolution;
+    float farPlane;
+    float nearPlane;
 };
 
 struct ObjectData
@@ -56,7 +58,6 @@ struct GradientKey
 {
     float4 color;
     float position;
-    char _m0_final_padding[12];
 };
 
 struct type_StructuredBuffer_GradientKey
@@ -80,8 +81,6 @@ struct spvDescriptorSetBuffer5
 {
     const device type_StructuredBuffer_ObjectData* _Objects [[id(0)]];
     const device type_StructuredBuffer_ClipRect* _ClipRects [[id(1)]];
-    const device type_StructuredBuffer_DrawData* _DrawData [[id(2)]];
-    const device type_StructuredBuffer_GradientKey* _GradientKeys [[id(3)]];
 };
 
 struct VertMain_out
@@ -107,24 +106,24 @@ struct VertMain_in
 vertex VertMain_out VertMain(VertMain_in in [[stage_in]], constant spvDescriptorSetBuffer1& spvDescriptorSet1 [[buffer(1)]], constant spvDescriptorSetBuffer5& spvDescriptorSet5 [[buffer(5)]], constant type_PushConstant_RootConstants& _RootConstants [[buffer(7)]], uint gl_InstanceIndex [[instance_id]])
 {
     VertMain_out out = {};
-    float4 _348 = float4(in.in_var_POSITION, 0.0, 1.0) * (*spvDescriptorSet5._Objects)._m0[gl_InstanceIndex].transform;
-    float2 _350 = _348.xy;
-    float4 _358 = float4(_348.xy, 0.0, 1.0);
-    float2 _404;
+    float4 _359 = float4(in.in_var_POSITION, 0.0, 1.0) * (*spvDescriptorSet5._Objects)._m0[gl_InstanceIndex].transform;
+    float2 _361 = _359.xy;
+    float4 _369 = float4(_359.xy, 0.0, 1.0);
+    float2 _415;
     if (_RootConstants.numClipRects > 0u)
     {
-        _404 = (_358 * (*spvDescriptorSet5._ClipRects)._m0[_RootConstants.clipRectIndices[0]].clipRectTransform).xy;
+        _415 = (_369 * (*spvDescriptorSet5._ClipRects)._m0[_RootConstants.clipRectIndices[0]].clipRectTransform).xy;
     }
     else
     {
-        _404 = _350;
+        _415 = _361;
     }
-    out.gl_Position = _358 * (*spvDescriptorSet1._PerViewData).viewProjectionMatrix;
-    out.out_var_TEXCOORD0 = _350;
+    out.gl_Position = _369 * (*spvDescriptorSet1._PerViewData).viewProjectionMatrix;
+    out.out_var_TEXCOORD0 = _361;
     out.out_var_TEXCOORD1 = in.in_var_TEXCOORD0;
     out.out_var_TEXCOORD2 = in.in_var_COLOR0;
     out.out_var_TEXCOORD3 = in.in_var_TEXCOORD1;
-    out.out_var_TEXCOORD4 = _404;
+    out.out_var_TEXCOORD4 = _415;
     out.out_var_TEXCOORD5 = in.in_var_TEXCOORD2;
     return out;
 }

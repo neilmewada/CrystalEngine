@@ -997,11 +997,6 @@ namespace CE::Vulkan
 			queueFamilyIndex);
 	}
 
-	void Device::FreeCommandBuffers(VkCommandPool pool, u32 count, VkCommandBuffer* buffers)
-	{
-
-	}
-
 	Array<RHI::CommandQueue*> Device::GetHardwareQueues(RHI::HardwareQueueClass queueClass)
 	{
 		Array<RHI::CommandQueue*> result{};

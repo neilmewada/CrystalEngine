@@ -49,8 +49,8 @@ namespace CE
         pages.Add(String::Format("Page {}", pages.GetSize()));
         SetPages(pages);
 
-        RHI::RenderTargetLayout rtLayout{};
-        rtLayout.attachmentLayouts.Add({
+        RHI::RenderPassLayout rpLayout{};
+        rpLayout.attachmentLayouts.Add({
             .attachmentId = "ColorOutput",
             .attachmentUsage = ScopeAttachmentUsage::Color,
             .format = Format::R8_UNORM,
@@ -61,7 +61,7 @@ namespace CE
             .storeActionStencil = AttachmentStoreAction::DontCare
         });
 
-		sdfRenderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+		sdfRenderTarget = RHI::gDynamicRHI->CreateRenderPass(rpLayout);
 
         for (int i = 0; i < flushRequiredPerImage.GetSize(); ++i)
         {
@@ -71,7 +71,7 @@ namespace CE
         RPI::Shader* fusionShader2 = FusionApplication::Get()->GetFusionShader2();
 
         const RHI::ShaderResourceGroupLayout& materialSrgLayout = fusionShader2->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerMaterial);
-        fontSrg2 = RHI::gDynamicRHI->CreateShaderResourceGroup(materialSrgLayout);
+        fontSrg2 = RHI::gDynamicRHI->CreateShaderResourceGroup({ .name = "FSDFFontAtlas SRG", .layout = materialSrgLayout });
 
         AddGlyphs(initInfo.characterSet);
 
@@ -99,17 +99,17 @@ namespace CE
         delete fontSrg2; fontSrg2 = nullptr;
 
         RHI::gDynamicRHI->DestroyFence(fence); fence = nullptr;
-        RHI::gDynamicRHI->DestroyRenderTarget(sdfRenderTarget); sdfRenderTarget = nullptr;
+        RHI::gDynamicRHI->DestroyRenderPass(sdfRenderTarget); sdfRenderTarget = nullptr;
     }
 
     void FSDFFontAtlas::UpdateAtlas(bool wait)
     {
-        if (workSubmitted && !fence->IsSignalled())
+        fence->RefreshCompletedValue();
+
+        if (workSubmitted && fence->GetCompletedValue() < fenceSignalValue)
             return;
 
         workSubmitted = false;
-
-        fence->Reset();
 
     	atlasUpdateRequired = false;
 
@@ -167,10 +167,11 @@ namespace CE
         sdfGenMaterial->SetPropertyValue("_Spread", SDFSpread);
         sdfGenMaterial->FlushProperties();
 
-        frameBuffer = RHI::gDynamicRHI->CreateRenderTargetBuffer(sdfRenderTarget, { atlasTexture->GetRhiTexture() });
+        frameBuffer = RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ sdfRenderTarget, { atlasTexture->GetRhiTexture() } });
 
         RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
         cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
+        cmdList->SetDebugLabel("FSDFFontAtlas CommandList");
 
         const auto& fullScreenQuad = RPISystem::Get().GetFullScreenQuad();
         DrawLinearArguments fullScreenQuadArgs = RPISystem::Get().GetFullScreenQuadDrawArgs();
@@ -187,7 +188,7 @@ namespace CE
 
             AttachmentClearValue clear{};
             clear.clearValue = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
-            cmdList->BeginRenderTarget(sdfRenderTarget, frameBuffer, &clear);
+            cmdList->BeginRenderPass(sdfRenderTarget, frameBuffer, &clear);
             {
                 RHI::ViewportState viewport{};
                 viewport.x = viewport.y = 0;
@@ -219,7 +220,7 @@ namespace CE
 
                 cmdList->DrawLinear(fullScreenQuadArgs);
             }
-            cmdList->EndRenderTarget();
+            cmdList->EndRenderPass();
 
             barrier.resource = sourceImage->GetRhiTexture();
             barrier.fromState = ResourceState::FragmentShaderResource;
@@ -244,11 +245,21 @@ namespace CE
         cmdList->End();
 
         workSubmitted = true;
-        queue->Execute(1, &cmdList, fence);
+
+        RHI::CommandQueueSubmission submission{};
+        submission.numCommandLists = 1;
+        submission.commandLists = &cmdList;
+
+        submission.signalFenceValue = fence->NextSignalValue();
+		submission.signalFence = fence;
+
+        fenceSignalValue = submission.signalFenceValue;
+
+        queue->Submit(submission);
 
         if (wait)
         {
-            fence->WaitForFence();
+            fence->WaitCPU(fenceSignalValue);
 
             workSubmitted = false;
         }
@@ -258,8 +269,12 @@ namespace CE
     {
         ZoneScoped;
 
-        if (workSubmitted && fence->IsSignalled())
+        fence->RefreshCompletedValue();
+
+        if (workSubmitted && fence->GetCompletedValue() >= fenceSignalValue)
         {
+            workSubmitted = false;
+
             delete oldAtlasTexture; oldAtlasTexture = nullptr;
             delete frameBuffer; frameBuffer = nullptr;
             delete sourceImage; sourceImage = nullptr;
@@ -270,8 +285,6 @@ namespace CE
 
             RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
             cmdList = nullptr;
-
-            fence->Reset();
         }
         else if (workSubmitted)
         {
@@ -289,6 +302,12 @@ namespace CE
         }
 
 		flushRequiredPerImage[imageIndex] = false;
+    }
+
+    void FSDFFontAtlas::WaitForFlush()
+    {
+        fence->WaitCPU(fenceSignalValue);
+        workSubmitted = false;
     }
 
     FFontGlyphInfo FSDFFontAtlas::FindOrAddGlyph(u32 charCode, bool isBold, bool isItalic)

@@ -12,6 +12,8 @@ namespace CE::Vulkan
 
 		virtual ~CommandList();
 
+		void SetDebugLabel(const String& label) override;
+
 		inline u32 GetQueueFamilyIndex() const { return queueFamilyIndex; }
 
 		inline VkCommandPool GetCommandPool() const { return pool; }

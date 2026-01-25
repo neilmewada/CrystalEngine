@@ -10,6 +10,8 @@ struct type_PerViewData
     float4x4 projectionMatrix;
     float4 viewPosition;
     float2 pixelResolution;
+    float farPlane;
+    float nearPlane;
 };
 
 struct ObjectData
@@ -71,11 +73,6 @@ struct type_PushConstant_RootConstants
     uint clipRectIndices[24];
 };
 
-struct spvDescriptorSetBuffer1
-{
-    constant type_PerViewData* _PerViewData [[id(0)]];
-};
-
 struct spvDescriptorSetBuffer4
 {
     texture2d<float> _FontAtlas [[id(0)]];
@@ -84,7 +81,6 @@ struct spvDescriptorSetBuffer4
 
 struct spvDescriptorSetBuffer5
 {
-    const device type_StructuredBuffer_ObjectData* _Objects [[id(0)]];
     const device type_StructuredBuffer_ClipRect* _ClipRects [[id(1)]];
     const device type_StructuredBuffer_DrawData* _DrawData [[id(2)]];
     const device type_StructuredBuffer_GradientKey* _GradientKeys [[id(3)]];
@@ -111,110 +107,114 @@ struct FragMain_in
     int in_var_TEXCOORD5 [[user(locn5)]];
 };
 
-fragment FragMain_out FragMain(FragMain_in in [[stage_in]], constant spvDescriptorSetBuffer1& spvDescriptorSet1 [[buffer(1)]], constant spvDescriptorSetBuffer4& spvDescriptorSet4 [[buffer(4)]], constant spvDescriptorSetBuffer5& spvDescriptorSet5 [[buffer(5)]], constant spvDescriptorSetBuffer6& spvDescriptorSet6 [[buffer(6)]], constant type_PushConstant_RootConstants& _RootConstants [[buffer(7)]], float4 gl_FragCoord [[position]])
+fragment FragMain_out FragMain(FragMain_in in [[stage_in]], constant spvDescriptorSetBuffer4& spvDescriptorSet4 [[buffer(4)]], constant spvDescriptorSetBuffer5& spvDescriptorSet5 [[buffer(5)]], constant spvDescriptorSetBuffer6& spvDescriptorSet6 [[buffer(6)]], constant type_PushConstant_RootConstants& _RootConstants [[buffer(7)]], float4 gl_FragCoord [[position]])
 {
     FragMain_out out = {};
-    float4 _604 = in.in_var_TEXCOORD2;
-    uint3 _630 = uint3(spvDescriptorSet6._Texture.get_width(), spvDescriptorSet6._Texture.get_height(), spvDescriptorSet6._Texture.get_array_size());
-    float _647;
-    _647 = -1.0;
-    float _648;
-    for (int _650 = 0; uint(_650) < min(_RootConstants.numClipRects, 24u); _647 = _648, _650++)
+    float4 _672 = in.in_var_TEXCOORD2;
+    uint3 _698 = uint3(spvDescriptorSet6._Texture.get_width(), spvDescriptorSet6._Texture.get_height(), spvDescriptorSet6._Texture.get_array_size());
+    float _715;
+    _715 = -1.0;
+    float _716;
+    for (int _718 = 0; uint(_718) < min(_RootConstants.numClipRects, 24u); _715 = _716, _718++)
     {
-        int _673 = int(_RootConstants.clipRectIndices[_650]);
-        float2 _701;
-        if (_650 == 0)
+        int _741 = int(_RootConstants.clipRectIndices[_718]);
+        float2 _769;
+        if (_718 == 0)
         {
-            _701 = in.in_var_TEXCOORD4;
+            _769 = in.in_var_TEXCOORD4;
         }
         else
         {
-            _701 = (float4(in.in_var_TEXCOORD0, 0.0, 1.0) * (*spvDescriptorSet5._ClipRects)._m0[uint(_673)].clipRectTransform).xy;
+            _769 = (float4(in.in_var_TEXCOORD0, 0.0, 1.0) * (*spvDescriptorSet5._ClipRects)._m0[uint(_741)].clipRectTransform).xy;
         }
-        uint _709 = uint(_673);
-        float2 _735 = abs(_701 - float2((*spvDescriptorSet5._ClipRects)._m0[_709].clipRectSize.x * 0.5, (*spvDescriptorSet5._ClipRects)._m0[_709].clipRectSize.y * 0.5)) - ((*spvDescriptorSet5._ClipRects)._m0[_709].clipRectSize * 0.5);
-        float _751 = length(precise::max(_735, float2(0.0))) + precise::min(precise::max(_735.x, _735.y), 0.0);
-        if (_751 > 0.0)
+        uint _777 = uint(_741);
+        float2 _803 = abs(_769 - float2((*spvDescriptorSet5._ClipRects)._m0[_777].clipRectSize.x * 0.5, (*spvDescriptorSet5._ClipRects)._m0[_777].clipRectSize.y * 0.5)) - ((*spvDescriptorSet5._ClipRects)._m0[_777].clipRectSize * 0.5);
+        float _819 = length(precise::max(_803, float2(0.0))) + precise::min(precise::max(_803.x, _803.y), 0.0);
+        if (_819 > 0.0)
         {
             discard_fragment();
         }
-        _648 = precise::max(_647, _751);
+        _716 = precise::max(_715, _819);
     }
-    int _770 = (in.in_var_TEXCOORD3);
-    float4 _1444;
-    switch (_770)
+    int _838 = (in.in_var_TEXCOORD3);
+    float4 _1652;
+    switch (_838)
     {
         case 1:
         {
-            _1444 = float4(_604.xyz, _604.w * spvDescriptorSet4._FontAtlas.sample(spvDescriptorSet4._FontAtlasSampler, in.in_var_TEXCOORD1).x);
-            break;
-        }
-        case 9:
-        {
-            uint _812 = uint(in.in_var_TEXCOORD5);
-            float _878 = (dot((in.in_var_TEXCOORD1 * 2.0) - float2(1.0), float2(cos((*spvDescriptorSet5._DrawData)._m0[_812].userAngle), sin((*spvDescriptorSet5._DrawData)._m0[_812].userAngle))) * 0.5) + 0.5;
-            float4 _1012;
-            int _885 = (*spvDescriptorSet5._DrawData)._m0[_812].index;
-            for (;;)
-            {
-                if (_885 <= (*spvDescriptorSet5._DrawData)._m0[_812].endIndex)
-                {
-                    bool _910;
-                    if (_885 == (*spvDescriptorSet5._DrawData)._m0[_812].index)
-                    {
-                        _910 = _878 < (*spvDescriptorSet5._GradientKeys)._m0[uint(_885)].position;
-                    }
-                    else
-                    {
-                        _910 = false;
-                    }
-                    bool _920;
-                    if (!_910)
-                    {
-                        _920 = _885 == (*spvDescriptorSet5._DrawData)._m0[_812].endIndex;
-                    }
-                    else
-                    {
-                        _920 = true;
-                    }
-                    if (_920)
-                    {
-                        _1012 = _604 * (*spvDescriptorSet5._GradientKeys)._m0[uint(_885)].color;
-                        break;
-                    }
-                    else
-                    {
-                        uint _938 = uint(_885);
-                        bool _960;
-                        if (_878 >= (*spvDescriptorSet5._GradientKeys)._m0[_938].position)
-                        {
-                            _960 = _878 <= (*spvDescriptorSet5._GradientKeys)._m0[uint(_885 + 1)].position;
-                        }
-                        else
-                        {
-                            _960 = false;
-                        }
-                        if (_960)
-                        {
-                            uint _972 = uint(_885 + 1);
-                            _1012 = _604 * mix((*spvDescriptorSet5._GradientKeys)._m0[_938].color, (*spvDescriptorSet5._GradientKeys)._m0[_972].color, float4(fast::clamp((_878 - (*spvDescriptorSet5._GradientKeys)._m0[_938].position) / ((*spvDescriptorSet5._GradientKeys)._m0[_972].position - (*spvDescriptorSet5._GradientKeys)._m0[_938].position), 0.0, 1.0)));
-                            break;
-                        }
-                    }
-                    _885++;
-                    continue;
-                }
-                else
-                {
-                    _1012 = _604;
-                    break;
-                }
-            }
-            _1444 = _1012;
+            _1652 = float4(_672.xyz, _672.w * spvDescriptorSet4._FontAtlas.sample(spvDescriptorSet4._FontAtlasSampler, in.in_var_TEXCOORD1).x);
             break;
         }
         case 2:
         {
+            uint _881 = uint(in.in_var_TEXCOORD5);
+            uint2 _945 = uint2(spvDescriptorSet4._FontAtlas.get_width(), spvDescriptorSet4._FontAtlas.get_height());
+            _1652 = mix(float4(_672.xyz, 0.0), _672, float4(fast::clamp((precise::max(0.5 * dot(float2(20.0) / float2(float(_945.x), float(_945.y)), float2(1.0) / fwidth(in.in_var_TEXCOORD1)), 1.0) * (spvDescriptorSet4._FontAtlas.sample(spvDescriptorSet4._FontAtlasSampler, in.in_var_TEXCOORD1).x - 0.519999980926513671875)) + 0.519999980926513671875, 0.0, 1.0)));
+            break;
+        }
+        case 10:
+        {
+            uint _1020 = uint(in.in_var_TEXCOORD5);
+            float _1086 = (dot((in.in_var_TEXCOORD1 * 2.0) - float2(1.0), float2(cos((*spvDescriptorSet5._DrawData)._m0[_1020].userAngle), sin((*spvDescriptorSet5._DrawData)._m0[_1020].userAngle))) * 0.5) + 0.5;
+            float4 _1220;
+            int _1093 = (*spvDescriptorSet5._DrawData)._m0[_1020].index;
+            for (;;)
+            {
+                if (_1093 <= (*spvDescriptorSet5._DrawData)._m0[_1020].endIndex)
+                {
+                    bool _1118;
+                    if (_1093 == (*spvDescriptorSet5._DrawData)._m0[_1020].index)
+                    {
+                        _1118 = _1086 < (*spvDescriptorSet5._GradientKeys)._m0[uint(_1093)].position;
+                    }
+                    else
+                    {
+                        _1118 = false;
+                    }
+                    bool _1128;
+                    if (!_1118)
+                    {
+                        _1128 = _1093 == (*spvDescriptorSet5._DrawData)._m0[_1020].endIndex;
+                    }
+                    else
+                    {
+                        _1128 = true;
+                    }
+                    if (_1128)
+                    {
+                        _1220 = _672 * (*spvDescriptorSet5._GradientKeys)._m0[uint(_1093)].color;
+                        break;
+                    }
+                    else
+                    {
+                        uint _1146 = uint(_1093);
+                        bool _1168;
+                        if (_1086 >= (*spvDescriptorSet5._GradientKeys)._m0[_1146].position)
+                        {
+                            _1168 = _1086 <= (*spvDescriptorSet5._GradientKeys)._m0[uint(_1093 + 1)].position;
+                        }
+                        else
+                        {
+                            _1168 = false;
+                        }
+                        if (_1168)
+                        {
+                            uint _1180 = uint(_1093 + 1);
+                            _1220 = _672 * mix((*spvDescriptorSet5._GradientKeys)._m0[_1146].color, (*spvDescriptorSet5._GradientKeys)._m0[_1180].color, float4(fast::clamp((_1086 - (*spvDescriptorSet5._GradientKeys)._m0[_1146].position) / ((*spvDescriptorSet5._GradientKeys)._m0[_1180].position - (*spvDescriptorSet5._GradientKeys)._m0[_1146].position), 0.0, 1.0)));
+                            break;
+                        }
+                    }
+                    _1093++;
+                    continue;
+                }
+                else
+                {
+                    _1220 = _672;
+                    break;
+                }
+            }
+            _1652 = _1220;
+            break;
         }
         case 3:
         {
@@ -225,212 +225,215 @@ fragment FragMain_out FragMain(FragMain_in in [[stage_in]], constant spvDescript
         case 5:
         {
         }
+        case 6:
+        {
+        }
+        case 9:
+        {
+            uint _1228 = uint(in.in_var_TEXCOORD5);
+            float2 _1276 = (((*spvDescriptorSet5._DrawData)._m0[_1228].rectSize - (*spvDescriptorSet5._DrawData)._m0[_1228].brushSize) * (*spvDescriptorSet5._DrawData)._m0[_1228].brushPos) / (*spvDescriptorSet5._DrawData)._m0[_1228].rectSize;
+            float2 _1290 = (in.in_var_TEXCOORD1 - _1276) / ((_1276 + ((*spvDescriptorSet5._DrawData)._m0[_1228].brushSize / (*spvDescriptorSet5._DrawData)._m0[_1228].rectSize)) - _1276);
+            bool _1304;
+            if (!(_838 == 3))
+            {
+                _1304 = _838 == 9;
+            }
+            else
+            {
+                _1304 = true;
+            }
+            bool _1348;
+            if (_1304)
+            {
+                float _1310 = _1290.x;
+                bool _1322;
+                if (!(_1310 < 0.0))
+                {
+                    _1322 = _1310 > 1.0;
+                }
+                else
+                {
+                    _1322 = true;
+                }
+                bool _1334;
+                if (!_1322)
+                {
+                    _1334 = _1290.y < 0.0;
+                }
+                else
+                {
+                    _1334 = true;
+                }
+                bool _1346;
+                if (!_1334)
+                {
+                    _1346 = _1290.y > 1.0;
+                }
+                else
+                {
+                    _1346 = true;
+                }
+                _1348 = _1346;
+            }
+            else
+            {
+                _1348 = false;
+            }
+            float4 _1598;
+            if (_1348)
+            {
+                float4 _1355 = _672;
+                _1355.w = 0.0;
+                _1598 = _1355;
+            }
+            else
+            {
+                bool _1380;
+                if (_838 == 4)
+                {
+                    float _1366 = _1290.y;
+                    bool _1378;
+                    if (!(_1366 < 0.0))
+                    {
+                        _1378 = _1366 > 1.0;
+                    }
+                    else
+                    {
+                        _1378 = true;
+                    }
+                    _1380 = _1378;
+                }
+                else
+                {
+                    _1380 = false;
+                }
+                float4 _1595;
+                if (_1380)
+                {
+                    float4 _1387 = _672;
+                    _1387.w = 0.0;
+                    _1595 = _1387;
+                }
+                else
+                {
+                    bool _1412;
+                    if (_838 == 5)
+                    {
+                        float _1398 = _1290.x;
+                        bool _1410;
+                        if (!(_1398 < 0.0))
+                        {
+                            _1410 = _1398 > 1.0;
+                        }
+                        else
+                        {
+                            _1410 = true;
+                        }
+                        _1412 = _1410;
+                    }
+                    else
+                    {
+                        _1412 = false;
+                    }
+                    float4 _1592;
+                    if (_1412)
+                    {
+                        float4 _1419 = _672;
+                        _1419.w = 0.0;
+                        _1592 = _1419;
+                    }
+                    else
+                    {
+                        float _1424 = _1290.x;
+                        float2 _1459;
+                        if (_1424 < 0.0)
+                        {
+                            float2 _1439 = _1290;
+                            _1439.x = 1.0 - fmod(abs(_1424), 1.0);
+                            _1459 = _1439;
+                        }
+                        else
+                        {
+                            float2 _1456;
+                            if (_1424 > 1.0)
+                            {
+                                float2 _1452 = _1290;
+                                _1452.x = fmod(_1424, 1.0);
+                                _1456 = _1452;
+                            }
+                            else
+                            {
+                                _1456 = _1290;
+                            }
+                            _1459 = _1456;
+                        }
+                        float2 _1497;
+                        if (_1459.y < 0.0)
+                        {
+                            float2 _1477 = _1459;
+                            _1477.y = 1.0 - fmod(abs(_1459.y), 1.0);
+                            _1497 = _1477;
+                        }
+                        else
+                        {
+                            float2 _1494;
+                            if (_1459.y > 1.0)
+                            {
+                                float2 _1490 = _1459;
+                                _1490.y = fmod(_1459.y, 1.0);
+                                _1494 = _1490;
+                            }
+                            else
+                            {
+                                _1494 = _1459;
+                            }
+                            _1497 = _1494;
+                        }
+                        float _1502 = 1.0 / float(_698.x);
+                        float _1506 = 1.0 / float(_698.y);
+                        float2 _1516 = (*spvDescriptorSet5._DrawData)._m0[_1228].uvMin + (_1497 * ((*spvDescriptorSet5._DrawData)._m0[_1228].uvMax - (*spvDescriptorSet5._DrawData)._m0[_1228].uvMin));
+                        float _1530 = fast::clamp(_1516.x, (*spvDescriptorSet5._DrawData)._m0[_1228].uvMin.x + _1502, (*spvDescriptorSet5._DrawData)._m0[_1228].uvMax.x - _1502);
+                        float _1542 = fast::clamp(_1516.y, (*spvDescriptorSet5._DrawData)._m0[_1228].uvMin.y + _1506, (*spvDescriptorSet5._DrawData)._m0[_1228].uvMax.y - _1506);
+                        float4 _1589;
+                        if (_838 == 9)
+                        {
+                            _1589 = _672 * float4(spvDescriptorSet4._FontAtlas.sample(spvDescriptorSet4._FontAtlasSampler, float2(_1530, _1542)).xxx, 1.0);
+                        }
+                        else
+                        {
+                            float3 _1577 = float3(_1530, _1542, float((*spvDescriptorSet5._DrawData)._m0[_1228].index));
+                            _1589 = _672 * spvDescriptorSet6._Texture.sample(spvDescriptorSet6._TextureSampler, _1577.xy, uint(rint(_1577.z)));
+                        }
+                        _1592 = _1589;
+                    }
+                    _1595 = _1592;
+                }
+                _1598 = _1595;
+            }
+            _1652 = _1598;
+            break;
+        }
         case 8:
         {
-            uint _1020 = uint(in.in_var_TEXCOORD5);
-            float2 _1068 = (((*spvDescriptorSet5._DrawData)._m0[_1020].rectSize - (*spvDescriptorSet5._DrawData)._m0[_1020].brushSize) * (*spvDescriptorSet5._DrawData)._m0[_1020].brushPos) / (*spvDescriptorSet5._DrawData)._m0[_1020].rectSize;
-            float2 _1082 = (in.in_var_TEXCOORD1 - _1068) / ((_1068 + ((*spvDescriptorSet5._DrawData)._m0[_1020].brushSize / (*spvDescriptorSet5._DrawData)._m0[_1020].rectSize)) - _1068);
-            bool _1096;
-            if (!(_770 == 2))
-            {
-                _1096 = _770 == 8;
-            }
-            else
-            {
-                _1096 = true;
-            }
-            bool _1140;
-            if (_1096)
-            {
-                float _1102 = _1082.x;
-                bool _1114;
-                if (!(_1102 < 0.0))
-                {
-                    _1114 = _1102 > 1.0;
-                }
-                else
-                {
-                    _1114 = true;
-                }
-                bool _1126;
-                if (!_1114)
-                {
-                    _1126 = _1082.y < 0.0;
-                }
-                else
-                {
-                    _1126 = true;
-                }
-                bool _1138;
-                if (!_1126)
-                {
-                    _1138 = _1082.y > 1.0;
-                }
-                else
-                {
-                    _1138 = true;
-                }
-                _1140 = _1138;
-            }
-            else
-            {
-                _1140 = false;
-            }
-            float4 _1390;
-            if (_1140)
-            {
-                float4 _1147 = _604;
-                _1147.w = 0.0;
-                _1390 = _1147;
-            }
-            else
-            {
-                bool _1172;
-                if (_770 == 3)
-                {
-                    float _1158 = _1082.y;
-                    bool _1170;
-                    if (!(_1158 < 0.0))
-                    {
-                        _1170 = _1158 > 1.0;
-                    }
-                    else
-                    {
-                        _1170 = true;
-                    }
-                    _1172 = _1170;
-                }
-                else
-                {
-                    _1172 = false;
-                }
-                float4 _1387;
-                if (_1172)
-                {
-                    float4 _1179 = _604;
-                    _1179.w = 0.0;
-                    _1387 = _1179;
-                }
-                else
-                {
-                    bool _1204;
-                    if (_770 == 4)
-                    {
-                        float _1190 = _1082.x;
-                        bool _1202;
-                        if (!(_1190 < 0.0))
-                        {
-                            _1202 = _1190 > 1.0;
-                        }
-                        else
-                        {
-                            _1202 = true;
-                        }
-                        _1204 = _1202;
-                    }
-                    else
-                    {
-                        _1204 = false;
-                    }
-                    float4 _1384;
-                    if (_1204)
-                    {
-                        float4 _1211 = _604;
-                        _1211.w = 0.0;
-                        _1384 = _1211;
-                    }
-                    else
-                    {
-                        float _1216 = _1082.x;
-                        float2 _1251;
-                        if (_1216 < 0.0)
-                        {
-                            float2 _1231 = _1082;
-                            _1231.x = 1.0 - fmod(abs(_1216), 1.0);
-                            _1251 = _1231;
-                        }
-                        else
-                        {
-                            float2 _1248;
-                            if (_1216 > 1.0)
-                            {
-                                float2 _1244 = _1082;
-                                _1244.x = fmod(_1216, 1.0);
-                                _1248 = _1244;
-                            }
-                            else
-                            {
-                                _1248 = _1082;
-                            }
-                            _1251 = _1248;
-                        }
-                        float2 _1289;
-                        if (_1251.y < 0.0)
-                        {
-                            float2 _1269 = _1251;
-                            _1269.y = 1.0 - fmod(abs(_1251.y), 1.0);
-                            _1289 = _1269;
-                        }
-                        else
-                        {
-                            float2 _1286;
-                            if (_1251.y > 1.0)
-                            {
-                                float2 _1282 = _1251;
-                                _1282.y = fmod(_1251.y, 1.0);
-                                _1286 = _1282;
-                            }
-                            else
-                            {
-                                _1286 = _1251;
-                            }
-                            _1289 = _1286;
-                        }
-                        float _1294 = 1.0 / float(_630.x);
-                        float _1298 = 1.0 / float(_630.y);
-                        float2 _1308 = (*spvDescriptorSet5._DrawData)._m0[_1020].uvMin + (_1289 * ((*spvDescriptorSet5._DrawData)._m0[_1020].uvMax - (*spvDescriptorSet5._DrawData)._m0[_1020].uvMin));
-                        float _1322 = fast::clamp(_1308.x, (*spvDescriptorSet5._DrawData)._m0[_1020].uvMin.x + _1294, (*spvDescriptorSet5._DrawData)._m0[_1020].uvMax.x - _1294);
-                        float _1334 = fast::clamp(_1308.y, (*spvDescriptorSet5._DrawData)._m0[_1020].uvMin.y + _1298, (*spvDescriptorSet5._DrawData)._m0[_1020].uvMax.y - _1298);
-                        float4 _1381;
-                        if (_770 == 8)
-                        {
-                            _1381 = _604 * float4(spvDescriptorSet4._FontAtlas.sample(spvDescriptorSet4._FontAtlasSampler, float2(_1322, _1334)).xxx, 1.0);
-                        }
-                        else
-                        {
-                            float3 _1369 = float3(_1322, _1334, float((*spvDescriptorSet5._DrawData)._m0[_1020].index));
-                            _1381 = _604 * spvDescriptorSet6._Texture.sample(spvDescriptorSet6._TextureSampler, _1369.xy, uint(rint(_1369.z)));
-                        }
-                        _1384 = _1381;
-                    }
-                    _1387 = _1384;
-                }
-                _1390 = _1387;
-            }
-            _1444 = _1390;
+            float3 _1612 = float3(in.in_var_TEXCOORD1, float(max(in.in_var_TEXCOORD5, 0)));
+            float3 _1622 = _672.xyz * spvDescriptorSet6._Texture.sample(spvDescriptorSet6._TextureSampler, _1612.xy, uint(rint(_1612.z))).xyz;
+            _1652 = float4(_1622.x, _1622.y, _1622.z, _672.w);
             break;
         }
         case 7:
         {
-            float3 _1404 = float3(in.in_var_TEXCOORD1, float(max(in.in_var_TEXCOORD5, 0)));
-            float3 _1414 = _604.xyz * spvDescriptorSet6._Texture.sample(spvDescriptorSet6._TextureSampler, _1404.xy, uint(rint(_1404.z))).xyz;
-            _1444 = float4(_1414.x, _1414.y, _1414.z, _604.w);
-            break;
-        }
-        case 6:
-        {
-            float3 _1427 = float3(in.in_var_TEXCOORD1, 0.0);
-            float3 _1437 = _604.xyz * spvDescriptorSet6._Texture.sample(spvDescriptorSet6._TextureSampler, _1427.xy, uint(rint(_1427.z))).xyz;
-            _1444 = float4(_1437.x, _1437.y, _1437.z, _604.w);
+            float3 _1635 = float3(in.in_var_TEXCOORD1, 0.0);
+            float3 _1645 = _672.xyz * spvDescriptorSet6._Texture.sample(spvDescriptorSet6._TextureSampler, _1635.xy, uint(rint(_1635.z))).xyz;
+            _1652 = float4(_1645.x, _1645.y, _1645.z, _672.w);
             break;
         }
         default:
         {
-            _1444 = _604;
+            _1652 = _672;
             break;
         }
     }
-    out.out_var_SV_TARGET = float4(_1444.xyz, _1444.w * fast::clamp(-_647, 0.0, 1.0));
+    out.out_var_SV_TARGET = float4(_1652.xyz, _1652.w * fast::clamp(-_715, 0.0, 1.0));
     return out;
 }
 

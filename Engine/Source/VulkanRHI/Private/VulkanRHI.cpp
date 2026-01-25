@@ -460,7 +460,7 @@ namespace CE::Vulkan
 
 	RHI::ShaderResourceGroup* VulkanRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupDescriptor& srgDescriptor)
 	{
-		return new Vulkan::ShaderResourceGroup(device, srgDescriptor.layout);
+		return new Vulkan::ShaderResourceGroup(device, srgDescriptor.layout, srgDescriptor.name.GetString());
 	}
 
 	void VulkanRHI::DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup)

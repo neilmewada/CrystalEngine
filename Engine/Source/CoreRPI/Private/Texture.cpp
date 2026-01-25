@@ -400,8 +400,16 @@ namespace CE::RPI
 		}
         cmdList->End();
 
-        queue->Execute(1, &cmdList, fence);
-        fence->WaitForFence();
+		RHI::CommandQueueSubmission submission{};
+        submission.numCommandLists = 1;
+		submission.commandLists = &cmdList;
+
+        submission.signalFenceValue = fence->NextSignalValue();
+		submission.signalFence = fence;
+
+        queue->Submit(submission);
+
+        fence->WaitCPU(submission.signalFenceValue);
 
     	RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
         delete fence;

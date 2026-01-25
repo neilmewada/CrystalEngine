@@ -139,7 +139,7 @@ namespace WidgetTests
 	                                Flipped(!Flipped());
                                     ((FTextButton*)button)->Text(Flipped() ? "SDF, PNG" : "PNG, SDF");
 
-                                    Ref<FLabel> label = (Ref<FLabel>)CastTo<FVerticalStack>(button->GetParent())->GetChild(0);
+                                    Ref<FLabel> label = CastTo<FLabel>(CastTo<FVerticalStack>(button->GetParent())->GetChild(0));
                                     label->FontSize(label->FontSize() + 0.5f);
                                 }),
 

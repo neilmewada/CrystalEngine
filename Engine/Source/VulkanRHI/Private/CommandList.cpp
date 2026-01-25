@@ -28,6 +28,11 @@ namespace CE::Vulkan
 		vkFreeCommandBuffers(device->GetHandle(), pool, 1, &commandBuffer);
 	}
 
+	void CommandList::SetDebugLabel(const String& label)
+	{
+		device->SetObjectDebugName((uint64_t)commandBuffer, VK_OBJECT_TYPE_COMMAND_BUFFER, label.GetCString());
+	}
+
 	void CommandList::SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup*>& srgs)
 	{
 		for (auto rhiSrg : srgs)

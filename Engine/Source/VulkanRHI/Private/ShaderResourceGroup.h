@@ -70,7 +70,7 @@ namespace CE::Vulkan
 	{
 	public:
 
-		ShaderResourceGroup(Device* device, const RHI::ShaderResourceGroupLayout& srgLayout);
+		ShaderResourceGroup(Device* device, const RHI::ShaderResourceGroupLayout& srgLayout, const String& name = "");
 
 		virtual ~ShaderResourceGroup();
 
@@ -137,7 +137,8 @@ namespace CE::Vulkan
 
 		u32 currentImageIndex = 0;
 		int setNumber = -1;
-		//DescriptorSet* descriptorSet = nullptr;
+		String name = "";
+
 		StaticArray<DescriptorSet*, RHI::Limits::MaxSwapChainImageCount> descriptorSets{};
 		VkDescriptorSetLayout setLayout = nullptr;
 

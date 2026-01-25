@@ -23,6 +23,7 @@ static void WindowTestBegin()
 {
     gProjectName = MODULE_NAME;
     gProjectPath = PlatformDirectories::GetLaunchDir();
+    gIsEngineRequestingExit = false;
 
     ModuleManager::Get().LoadModule("Core");
     ModuleManager::Get().LoadModule("CoreApplication");

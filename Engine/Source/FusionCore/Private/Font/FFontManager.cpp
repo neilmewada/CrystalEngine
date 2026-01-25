@@ -301,4 +301,13 @@ namespace CE
         }
     }
 
+    void FFontManager::WaitForFlush()
+    {
+        ZoneScoped;
+
+        for (auto [fontName, atlas] : sdfFontAtlases)
+        {
+            atlas->WaitForFlush();
+		}
+    }
 } // namespace CE
