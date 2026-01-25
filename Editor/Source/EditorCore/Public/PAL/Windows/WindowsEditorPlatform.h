@@ -18,6 +18,8 @@ namespace CE::Editor
 
 		static Color GetScreenPixel(Vec2i screenPos);
 
+		static bool OpenPathInFileExplorer(const IO::Path& path);
+
 	};
 
 	typedef WindowsEditorPlatform EditorPlatform;

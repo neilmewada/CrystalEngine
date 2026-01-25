@@ -11,6 +11,8 @@ namespace CE
 
 	void Prefs::LoadPrefsJson()
 	{
+		ZoneScoped;
+
 		prefsJson.Clear();
 
 		for (const auto& [prefsName, classes] : prefsClasses)
@@ -49,6 +51,8 @@ namespace CE
 
 	void Prefs::SavePrefsJson()
 	{
+		ZoneScoped;
+
 		for (const auto& [prefsName, classes] : prefsClasses)
 		{
 			if (!prefsName.IsValid())
@@ -91,6 +95,8 @@ namespace CE
 
 	void Prefs::LoadPrefs(Object* object)
 	{
+		ZoneScoped;
+
 		if (!object)
 			return;
 
@@ -127,6 +133,8 @@ namespace CE
 
 	void Prefs::SavePrefs(Object* object)
 	{
+		ZoneScoped;
+
 		if (!object)
 			return;
 
@@ -158,6 +166,8 @@ namespace CE
 	
 	void Prefs::SerializeField(const Ptr<FieldType>& field, void* instance, JValue& parent)
 	{
+		ZoneScoped;
+
 		const String& fieldName = field->GetName().GetString();
 		TypeId fieldTypeId = field->GetDeclarationTypeId();
 
@@ -259,6 +269,8 @@ namespace CE
 
 	void Prefs::DeserializeField(const Ptr<FieldType>& field, void* instance, JValue& parent, int index)
 	{
+		ZoneScoped;
+
 		const String& fieldName = field->GetName().GetString();
 		TypeId fieldTypeId = field->GetDeclarationTypeId();
 

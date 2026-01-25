@@ -510,9 +510,9 @@ namespace CE::RPI
     void Material::FlushProperties()
     {
         if (shaderResourceGroup == nullptr)
-            RecreateShaderResourceGroup();
-        if (shaderResourceGroup == nullptr)
             return;
+
+        LockGuard guard{ MaterialSystem::Get().GetMaterialsMutex() };
 
         for (int imageIndex = 0; imageIndex < RHI::Limits::MaxSwapChainImageCount; imageIndex++)
         {
@@ -521,16 +521,6 @@ namespace CE::RPI
 
         shaderResourceGroup->FlushBindings();
     }
-
-	void Material::Compile()
-	{
-		if (shaderResourceGroup)
-		{
-            FlushProperties();
-            
-			shaderResourceGroup->Compile();
-		}
-	}
 
 	void Material::RecreateShaderResourceGroup()
 	{

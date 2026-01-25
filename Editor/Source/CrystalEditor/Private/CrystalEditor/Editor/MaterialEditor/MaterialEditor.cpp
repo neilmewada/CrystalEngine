@@ -11,49 +11,23 @@ namespace CE::Editor
 
     void MaterialEditor::Construct()
     {
+        ZoneScoped;
+
         Super::Construct();
 
         Title("Material");
 
-        (*content)
-        .Child(
-            FAssignNew(FSplitBox, rootSplitBox)
-            .Direction(FSplitDirection::Horizontal)
-            .HAlign(HAlign::Fill)
-            .VAlign(VAlign::Fill)
-            (
-                FNew(FSplitBox)
-                .Direction(FSplitDirection::Vertical)
-                .VAlign(VAlign::Fill)
-                .FillRatio(0.6f)
-                (
-                    FAssignNew(EditorMinorDockspace, center)
-                    .DockTabs(
-                        FAssignNew(EditorViewportTab, viewportTab)
+        minorDockspace->AddDockWindow(
+            FAssignNew(EditorViewportTab, viewportTab)
+        );
 
-                    )
-                    .HAlign(HAlign::Fill)
-                    .FillRatio(0.6f),
+        viewportTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Right,
+            FAssignNew(MaterialDetailsTab, detailsTab)
+        );
 
-                    FAssignNew(EditorMinorDockspace, bottom)
-                    .DockTabs(
-                        FAssignNew(AssetBrowser, assetBrowserTab)
-
-                    )
-                    .HAlign(HAlign::Fill)
-                    .FillRatio(0.4f)
-                ),
-
-                FAssignNew(EditorMinorDockspace, right)
-                .DockTabs(
-                    FAssignNew(MaterialDetailsTab, detailsTab)
-
-                )
-                .HAlign(HAlign::Fill)
-                .FillRatio(0.4f)
-            )
-        )
-    	.Padding(Vec4(0, 5, 0, 0));
+        viewportTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Bottom,
+            FAssignNew(AssetBrowser, assetBrowserTab)
+        );
 
         toolBar->Content(
             EditorToolBar::NewImageButton("/Editor/Assets/Icons/Save")
@@ -129,7 +103,7 @@ namespace CE::Editor
                 skyboxMaterial->SetShader(skyboxShader.Get());
                 skyboxMeshComponent->SetMaterial(skyboxMaterial.Get(), 0, 0);
 
-                skyboxMaterial->SetProperty("_CubeMap", skybox.Get());
+                skyboxMaterial->SetProperty("_CubeMap", MaterialTextureValue(skybox.Get()));
                 skyboxMaterial->ApplyProperties();
             }
         }
@@ -137,6 +111,7 @@ namespace CE::Editor
         // For debugging only
         viewportScene->GetRpiScene()->SetName("MaterialScene");
 
+		// Always need to add the scene and its corresponding viewport to the engine
         gEngine->AddScene(viewportScene.Get());
         gEditor->AddRenderViewport(viewportTab->GetViewport());
     }
@@ -145,16 +120,13 @@ namespace CE::Editor
     {
         Super::OnBeginDestroy();
 
-        if (viewportScene)
-        {
-            //viewportScene->BeginDestroy();
-        }
     }
 
     void MaterialEditor::OnAssetUnloaded(Uuid bundleUuid)
     {
         if (targetMaterial == nullptr)
             return;
+
         Ref<Bundle> materialBundle = targetMaterial->GetBundle();
 
         if (!materialBundle || materialBundle->GetUuid() != bundleUuid)
@@ -213,18 +185,21 @@ namespace CE::Editor
         return targetObject.IsValid() && targetObject->IsOfType<CE::Material>();
     }
 
-    bool MaterialEditor::OpenEditor(Ref<Object> targetObject)
+    bool MaterialEditor::OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle)
     {
         if (!targetObject)
             return false;
         if (!targetObject->IsOfType<CE::Material>())
             return false;
 
-        Ref<CE::Material> material = (Ref<CE::Material>)targetObject;
+		Super::OpenEditor(targetObject, bundle);
+
+        Ref<CE::Material> material = Object::CastTo<CE::Material>(targetObject);
         if (this->targetMaterial == material)
             return true;
 
         this->targetMaterial = material;
+		this->bundle = bundle;
         SetMaterial(material);
 
         return true;
@@ -243,7 +218,7 @@ namespace CE::Editor
 
         if (auto existingEditor = materialEditorsBySourceAssetUuid[assetData->assetUuid].Lock())
         {
-            crystalEditorWindow->SelectTab(existingEditor.Get());
+            crystalEditorWindow->SelectActiveEditor(existingEditor);
             existingEditor->SetMaterial(material);
             return existingEditor;
         }
@@ -253,8 +228,8 @@ namespace CE::Editor
 
         editor->SetMaterial(material);
 
-        crystalEditorWindow->AddDockTab(editor.Get());
-        crystalEditorWindow->SelectTab(editor.Get());
+        crystalEditorWindow->GetDockspace()->AddDockWindow(editor);
+        crystalEditorWindow->SelectActiveEditor(editor);
 
         return editor;
     }
@@ -272,27 +247,6 @@ namespace CE::Editor
     void MaterialEditor::SaveChanges()
     {
         Super::SaveChanges();
-
-        if (!targetMaterial)
-            return;
-
-        Ref<Bundle> bundle = targetMaterial->GetBundle();
-        if (!bundle)
-            return;
-
-        if (bundle->IsTransient())
-            return;
-
-        BundleSaveResult result = Bundle::SaveToDisk(bundle);
-
-        if (result != BundleSaveResult::Success)
-        {
-            CE_LOG(Error, All, "Failed to save material to disk! Error in Bundle::SaveToDisk(); ErrorCode: {}", (int)result);
-        }
-        else
-        {
-            SetAssetDirty(false);
-        }
     }
 
     void MaterialEditor::SetMaterial(Ref<CE::Material> material)
@@ -306,13 +260,11 @@ namespace CE::Editor
             title = bundle->GetName().GetString();
         }
 
-        Title(title);
-
         sphereMeshComponent->SetMaterial(material.Get(), 0, 0);
 
         detailsTab->SetupEditor(material);
 
-        UpdateDockspaceTabWell();
+        Title(title);
     }
 }
 

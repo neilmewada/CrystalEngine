@@ -49,20 +49,20 @@ Schema table stores the layout of each object and struct that is serialized in t
 | | | | |
 |  |  | **<-- Entry #0 -->** |  |
 | +0C | 4B | `xx xx xx xx` | Size of 1-st schema entry in bytes. (including this field) |
-| +10 | 1B | `00/01` | 0 = Class ; 1 = Struct |
-| +11 | \0 | `/Code/Core.CE::SomeClass\0` | Full type name of the class or struct |
-| +xx | 4B | `00 00 00 00` | Class/Struct Version (Unused) |
-| +04 | 4B | n1 | Number of fields |
+| +10 | 1B | `00/01` | 0 = Class ; 1 = Struct ; 2 = Opaque POD ; |
+| +11 | \0 | `/Code/Core.CE::SomeClass\0` | Full type name of the class or struct or Opaque POD |
+| +xx | 4B | `00 00 00 00` | Class/Struct Version (Unused) (Removed for OpaquePOD) |
+| +04 | 4B | n1 | Number of fields (Removed for OpaquePOD) |
 |  |  | Field #0 |  |
-| +08 | \0 | `fieldName0` | Name of the field as in C++ |
-| +xx | 1B | `xx` | [Field Type](#field-type) byte. Indicates the field's data type. |
-| +xx | 4B | 0-based index into [Schema Table](#schema-table) | (**Optional_1**) Present only if [Field Type](#field-type) byte requires.  |
-| +xx | 1B | `xx` Underlying [Field Type](#field-type) byte | (**Optional_2**) Present only if [Field Type](#field-type) byte requires. |
+| +08 | \0 | `fieldName0` | Name of the field as in C++ (Removed for OpaquePOD) |
+| +xx | 1B | `xx` | [Field Type](#field-type) byte. Indicates the field's data type. (Removed for OpaquePOD) |
+| +xx | 4B | 0-based index into [Schema Table](#schema-table) | (**Optional_1**) Present only if [Field Type](#field-type) byte requires. (Removed for OpaquePOD) |
+| +xx | 1B | `xx` Underlying [Field Type](#field-type) byte | (**Optional_2**) Present only if [Field Type](#field-type) byte requires. (Removed for OpaquePOD) |
 |  |  | Field #1 |  |
-| +xx | \0 | `fieldName1` | Name of the field as in C++ |
-| +xx | 1B | `xx` | [Field Type](#field-type) byte. Indicates the field's data type. |
-| +xx | 4B | 0-based index into [Schema Table](#schema-table) | (**Optional_1**) Present only if [Field Type](#field-type) byte requires.  |
-| +xx | 1B | `xx` Underlying [Field Type](#field-type) byte | (**Optional_2**) Present only if [Field Type](#field-type) byte requires. |
+| +xx | \0 | `fieldName1` | Name of the field as in C++ (Removed for OpaquePOD) |
+| +xx | 1B | `xx` | [Field Type](#field-type) byte. Indicates the field's data type. (Removed for OpaquePOD) |
+| +xx | 4B | 0-based index into [Schema Table](#schema-table) | (**Optional_1**) Present only if [Field Type](#field-type) byte requires. (Removed for OpaquePOD) |
+| +xx | 1B | `xx` Underlying [Field Type](#field-type) byte | (**Optional_2**) Present only if [Field Type](#field-type) byte requires. (Removed for OpaquePOD) |
 | | | | |
 | | | | |
 |  |  | **<-- Entry #1 -->** |  |

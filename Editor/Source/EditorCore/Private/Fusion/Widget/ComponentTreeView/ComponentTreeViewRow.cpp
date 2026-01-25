@@ -15,6 +15,8 @@ namespace CE::Editor
         FBrush testImage = FBrush("/Engine/Resources/Icons/Warning");
         FBrush arrowImage = FBrush("/Engine/Resources/Icons/CaretDown");
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         Child(
             FAssignNew(FHorizontalStack, content)
             .Gap(5)
@@ -41,7 +43,7 @@ namespace CE::Editor
 
                 FAssignNew(FLabel, label)
                 .Text("Label")
-                .FontSize(11)
+                .FontSize(fontSize + 1)
             )
         );
     }

@@ -24,5 +24,6 @@
 
 // Assets
 #include "Asset/Asset.h"
+#include "Asset/DataAsset.h"
 #include "Asset/AssetPath.h"
 

@@ -15,6 +15,8 @@ namespace CE::Editor
         static Array<IO::Path> ShowMultiFileSelectionDialog(const IO::Path& defaultPath, const Array<FileType>& fileTypes) { return {}; }
 
         static IO::Path GetEditorExecutablePath();
+
+        static bool OpenPathInFileExplorer(const IO::Path& path);
     };
 
     typedef LinuxEditorPlatform EditorPlatform;

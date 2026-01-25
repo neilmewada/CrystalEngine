@@ -18,6 +18,12 @@ namespace CE
 
         virtual ~FTreeViewModel();
 
+    protected:
+
+        virtual void OnTreeViewAssigned() {}
+
+        WeakRef<FTreeView> treeView;
+
         friend class FTreeView;
     };
 

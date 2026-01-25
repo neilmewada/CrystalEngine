@@ -41,7 +41,7 @@ namespace CE::Widgets
                 RPI::Texture* icon = CApplication::Get()->LoadImage(itemStyle.icon);
                 if (icon)
                 {
-                    painter->SetBrush(CBrush(Color::White()));
+                    painter->SetBrush(CBrush(Colors::White));
 
                     painter->DrawTexture(Rect::FromSize(size.x + itemStyle.decorationRect.min.x,
                         itemStyle.padding.top + itemStyle.decorationRect.min.y, 

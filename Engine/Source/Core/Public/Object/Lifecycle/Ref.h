@@ -154,11 +154,11 @@ namespace CE
         }
 
         //! @brief This will cast type from T to U
-        template<class U> requires TIsBaseClassOf<Object, U>::Value and (not std::is_same_v<T, U>)
+        /*template<class U> requires TIsBaseClassOf<Object, U>::Value and (not std::is_same_v<T, U>)
         explicit operator Ref<U>() const
         {
             return Ref<U>((U*)Get());
-        }
+        }*/
         
         ~Ref()
         {

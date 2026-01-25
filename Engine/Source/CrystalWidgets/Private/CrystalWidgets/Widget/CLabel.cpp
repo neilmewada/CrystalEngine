@@ -72,7 +72,7 @@ namespace CE::Widgets
         if (computedStyle.properties.KeyExists(CStylePropertyType::FontSize))
             fontSize = computedStyle.properties[CStylePropertyType::FontSize].single;
 
-        Color color = Color::White();
+        Color color = Colors::White;
 
         if (computedStyle.properties.KeyExists(CStylePropertyType::Foreground))
             color = computedStyle.properties[CStylePropertyType::Foreground].color;

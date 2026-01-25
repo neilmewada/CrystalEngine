@@ -559,7 +559,7 @@ namespace CE
 		return true;
 	}
 
-	bool CMImage::EncodeToPNG(const IO::Path& path)
+	bool CMImage::EncodeToPNG(const IO::Path& path) const
 	{
 		String pathString = path.GetString();
 

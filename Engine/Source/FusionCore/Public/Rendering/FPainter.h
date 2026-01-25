@@ -19,12 +19,14 @@ namespace CE
         void SetBrush(const FBrush& brush);
         void SetFont(const FFont& font);
 
+        void SetFontSize(u32 fontSize);
+
+        FFont GetFont();
+
         const FFont& GetCurrentFont();
 
         void PushOpacity(f32 opacity);
         void PopOpacity();
-
-        void SetItemTransform(const Matrix4x4& transform);
 
         void PushChildCoordinateSpace(const Matrix4x4& coordinateTransform);
         void PushChildCoordinateSpace(const Vec2& translation);
@@ -61,6 +63,10 @@ namespace CE
         bool DrawLine(const Vec2& startPos, const Vec2& endPos);
 
         Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+        Vec2 DrawSDFText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+
+        Vec2 DrawTextCached(Uuid cacheId, const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+		void ResetTextCache(Uuid cacheId);
 
         bool IsCulled(Vec2 pos, Vec2 quadSize);
 

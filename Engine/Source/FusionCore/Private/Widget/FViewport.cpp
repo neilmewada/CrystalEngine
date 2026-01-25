@@ -105,6 +105,11 @@ namespace CE
     {
         ZoneScoped;
 
+        if (GetContext() == nullptr)
+        {
+	        return;
+        }
+
         if (currentSize.x <= 0 || currentSize.y <= 0)
         {
             currentSize = Vec2i(512, 512);
@@ -132,6 +137,8 @@ namespace CE
         textureDescriptor.texture.depth = 1;
         textureDescriptor.texture.dimension = Dimension::Dim2DArray;
 
+        scene->SetPrimaryViewportSize(Vec2i(textureDescriptor.texture.width, textureDescriptor.texture.height));
+
 	    RHI::TextureViewDescriptor textureViewDescriptor{};
 	    textureViewDescriptor.format = textureDescriptor.texture.format;
 	    textureViewDescriptor.arrayLayerCount = 1;
@@ -153,6 +160,11 @@ namespace CE
             textureDescriptor.texture.name = GetName().GetString() + " FrameBuffer " + i;
             frames[i] = new RPI::Texture(textureDescriptor);
 
+			// Ensure the texture is in the correct state
+            {
+                frames[i]->TransitionResourceTo(RHI::ResourceState::Undefined, RHI::ResourceState::FragmentShaderResource);
+            }
+
             textureViewDescriptor.texture = frames[i]->GetRhiTexture();
             frameViews[i] = gDynamicRHI->CreateTextureView(textureViewDescriptor);
         }
@@ -169,7 +181,7 @@ namespace CE
 
         MarkDirty();
 
-        m_OnFrameBufferRecreated();
+        m_OnFrameBufferRecreated.Broadcast();
     }
 
     void FViewport::OnPaint(FPainter* painter)
@@ -185,5 +197,11 @@ namespace CE
         }
     }
 
+    void FViewport::OnSceneChanged()
+    {
+	    Super::OnSceneChanged();
+
+        RecreateFrameBuffer();
+    }
 }
 

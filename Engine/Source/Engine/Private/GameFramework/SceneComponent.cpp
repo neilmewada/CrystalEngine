@@ -89,6 +89,57 @@ namespace CE
 		return attachedComponents.Exists([&](SceneComponent* comp) { return comp == component; });
 	}
 
+	Vec3 SceneComponent::GetPosition()
+	{
+		return globalPosition;
+	}
+
+	Quat SceneComponent::GetRotation()
+	{
+		if (!parentComponent)
+		{
+			return Quat::EulerDegrees(localEulerAngles);
+		}
+
+		Vec3 translation;
+		Quat parentGlobalRotation;
+		Vec3 scale;
+
+    	parentComponent->transform.Decompose(translation, parentGlobalRotation, scale);
+
+		return parentGlobalRotation * Quat::EulerDegrees(localEulerAngles);
+	}
+
+	void SceneComponent::SetPosition(Vec3 pos)
+	{
+		globalPosition = pos;
+
+		if (!parentComponent)
+		{
+			SetLocalPosition(pos);
+			return;
+		}
+
+		Matrix4x4 parentTransformInverse = parentComponent->transform.GetInverse();
+		Vec3 newLocalPos = parentTransformInverse * Vec4(pos.x, pos.y, pos.z, 1.0f);
+
+		SetLocalPosition(newLocalPos);
+	}
+
+	void SceneComponent::SetRotation(Quat worldRotation)
+	{
+		if (!parentComponent)
+		{
+			SetLocalEulerAngles(worldRotation.ToEulerDegrees());
+			return;
+		}
+
+		Quat parentGlobalRot = parentComponent->transform.GetRotation();
+		Quat localRot = parentGlobalRot.GetInversed() * worldRotation;
+
+		SetLocalEulerAngles(localRot.ToEulerDegrees());
+	}
+
 	void SceneComponent::OnSubobjectDetached(Object* subobject)
 	{
 		Super::OnSubobjectDetached(subobject);
@@ -123,6 +174,8 @@ namespace CE
 
 		if (transformFields.Exists(fieldName))
 		{
+			OnTransformFieldEdited(fieldName);
+
 			SetDirty();
 		}
 	}

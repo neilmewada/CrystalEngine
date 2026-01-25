@@ -86,7 +86,7 @@ Shader "UI/SDF Text Generator"
                 uint w; uint h;
                 _FontAtlas.GetDimensions(w, h);
 
-                int spread = _Spread; // = 7;
+                const int spread = _Spread; // = 7;
                 const float stepSize = 0.1;
                 uint basePixelState = GetPixelState(input.uv, w, h);
                 float maxPossibleSqrDistance = spread * spread + spread * spread;

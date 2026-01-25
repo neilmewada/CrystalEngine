@@ -23,7 +23,9 @@ namespace CE
 
         // - Public API -
 
-        FFusionContext* GetContext();
+        Ref<FFusionContext> GetContext();
+
+        Ref<FNativeContext> GetNativeContext();
 
         virtual void CalculateIntrinsicSize();
 
@@ -114,6 +116,8 @@ namespace CE
 
         virtual FWidget* HitTest(Vec2 localMousePos);
 
+        FWidget* SelfHitTest(Vec2 localMousePos);
+
         virtual bool ChildExistsRecursive(FWidget* child) { return this == child; }
 
         virtual bool ParentExistsRecursive(FWidget* parent);
@@ -125,6 +129,8 @@ namespace CE
         virtual bool SupportsKeyboardEvents() const { return false; }
 
     	virtual bool SupportsDragEvents() const { return false; }
+
+		virtual bool SupportsDropTarget() const { return false; }
 
         virtual bool SupportsFocusEvents() const { return false; }
 
@@ -210,7 +216,7 @@ namespace CE
     private:  // - Fields -
 
         FIELD()
-        FFusionContext* context = nullptr;
+        WeakRef<FFusionContext> context = nullptr;
 
         FIELD()
         WeakRef<FWidget> parent = nullptr;
@@ -244,6 +250,7 @@ namespace CE
 
         FUSION_LAYOUT_PROPERTY(bool, Enabled);
         FUSION_LAYOUT_PROPERTY(bool, WindowDragHitTest);
+        FUSION_LAYOUT_PROPERTY(bool, IgnoreHitTest);
         FUSION_LAYOUT_PROPERTY(bool, Visible);
 
         FUSION_LAYOUT_PROPERTY(f32, MinWidth);

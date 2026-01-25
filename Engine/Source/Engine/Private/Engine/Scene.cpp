@@ -14,6 +14,8 @@ namespace CE
 
 			sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 			rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();
+
+			physicsScene = CreateObject<PhysicsScene>(this, "PhysicsScene");
 		}
 	}
 
@@ -30,6 +32,11 @@ namespace CE
 		delete rpiScene; rpiScene = nullptr;
 	}
 
+	void CE::Scene::OnAfterConstruct()
+	{
+		Super::OnAfterConstruct();
+	}
+
 	void CE::Scene::OnBeginPlay()
 	{
 		if (isPlaying)
@@ -41,10 +48,20 @@ namespace CE
 		{
 			actor->OnBeginPlay();
 		}
+
+		if (physicsScene)
+		{
+			physicsScene->SetSimulationEnabled(isPlaying);
+		}
 	}
 
 	void CE::Scene::Tick(f32 delta)
 	{
+		if (rpiScene)
+		{
+			rpiScene->SetName(GetName());
+		}
+
 		for (Actor* actor : actors)
 		{
 			if (!actor->IsSelfEnabled())
@@ -53,21 +70,12 @@ namespace CE
 			actor->Tick(delta);
 		}
 
-		const auto& viewports = rendererSubsystem->GetAllViewports();
-
 		for (CameraComponent* camera : cameras)
 		{
 			if (!camera->IsEnabledInHierarchy())
 				continue;
 
-			for (FGameWindow* viewport : viewports)
-			{
-				if (viewport->GetScene() == rpiScene)
-				{
-					camera->windowSize = viewport->GetComputedSize().ToVec2i();
-					break;
-				}
-			}
+			camera->windowSize = rpiScene->GetPrimaryViewportSize();
 
 			camera->TickCamera();
 		}
@@ -75,6 +83,11 @@ namespace CE
 		for (CE::RenderPipeline* renderPipeline : renderPipelines)
 		{
 			renderPipeline->Tick();
+		}
+
+		if (physicsScene)
+		{
+			physicsScene->Tick(delta);
 		}
 	}
 
@@ -179,11 +192,6 @@ namespace CE
 	{
 		if (!actor)
 			return;
-
-		for (ISceneCallbacks* callbacks : sceneCallbacks)
-		{
-			callbacks->OnSceneHierarchyUpdated(this);
-		}
 		
 		std::function<void(SceneComponent*)> recursivelyAddSceneComponents = [&](SceneComponent* sceneComponent)
         {
@@ -250,6 +258,11 @@ namespace CE
 
 		recursivelyAdd(actor);
 
+		for (ISceneCallbacks* callbacks : sceneCallbacks)
+		{
+			callbacks->OnSceneHierarchyUpdated(this);
+		}
+
 		if (isPlaying && !actor->hasBegunPlaying)
 		{
 			actor->OnBeginPlay();
@@ -260,11 +273,6 @@ namespace CE
 	{
 		if (!actor)
 			return;
-
-		for (ISceneCallbacks* callbacks : sceneCallbacks)
-		{
-			callbacks->OnSceneHierarchyUpdated(this);
-		}
         
 		std::function<void(SceneComponent*)> recursivelyRemoveSceneComponents = [&](SceneComponent* sceneComponent)
         {
@@ -339,6 +347,11 @@ namespace CE
         };
 		
 		recursivelyRemove(actor);
+
+		for (ISceneCallbacks* callbacks : sceneCallbacks)
+		{
+			callbacks->OnSceneHierarchyUpdated(this);
+		}
 	}
 
 	void CE::Scene::RegisterSceneComponent(SceneComponent* sceneComponent)
@@ -389,6 +402,12 @@ namespace CE
 
 			rpiScene->AddView("DirectionalLightShadow", directionalLight->GetRpiView());
 		}
+		else if (sceneComponent->IsOfType<LocalLightComponent>())
+		{
+			auto localLight = static_cast<LocalLightComponent*>(sceneComponent);
+
+
+		}
 	}
 
 	void CE::Scene::OnSceneComponentDetached(SceneComponent* sceneComponent)
@@ -398,6 +417,12 @@ namespace CE
 			auto directionalLight = static_cast<DirectionalLightComponent*>(sceneComponent);
 
 			rpiScene->RemoveView("DirectionalLightShadow", directionalLight->GetRpiView());
+		}
+		else if (sceneComponent->IsOfType<LocalLightComponent>())
+		{
+			auto localLight = static_cast<LocalLightComponent*>(sceneComponent);
+
+
 		}
 	}
 

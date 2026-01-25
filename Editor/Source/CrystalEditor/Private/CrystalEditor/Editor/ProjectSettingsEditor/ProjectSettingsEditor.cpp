@@ -21,7 +21,7 @@ namespace CE::Editor
         ToolBarEnabled(true);
         MenuBarEnabled(false);
 
-        Content(
+        Child(
             FNew(FSplitBox)
             .Direction(FSplitDirection::Horizontal)
             .SplitterBackground(Color::RGBA(10, 10, 10))
@@ -67,10 +67,12 @@ namespace CE::Editor
 
     	settingsClasses = Settings::GetAllSettingsClasses();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         left->AddChild(
             FNew(FTextButton)
             .Text("All Settings")
-            .FontSize(11)
+            .FontSize(fontSize + 1)
             .Cursor(SystemCursor::Hand)
             .OnClicked(FUNCTION_BINDING(this, ShowAllSettings))
             .ClipChildren(true)
@@ -86,7 +88,7 @@ namespace CE::Editor
             left->AddChild(
                 FNew(FTextButton)
                 .Text(clazz->GetDisplayName())
-                .FontSize(11)
+                .FontSize(fontSize + 1)
                 .Cursor(SystemCursor::Hand)
                 .OnClicked([this, index]
                 {
@@ -115,10 +117,10 @@ namespace CE::Editor
         if (instance == nullptr)
         {
             FAssignNewOwned(ProjectSettingsEditor, instance, editor);
-            editor->AddDockTab(instance);
+            editor->GetDockspace()->AddDockWindow(instance);
         }
 
-        editor->SelectTab(instance);
+        editor->SelectActiveEditor(instance);
 
         return instance;
     }

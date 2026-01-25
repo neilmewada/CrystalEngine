@@ -58,6 +58,8 @@ namespace CE
 
         void Reserve(SIZE_T totalElementCapacity)
         {
+            ZoneScoped;
+
 	        if (capacity < totalElementCapacity)
 	        {
                 T* newData = new T[totalElementCapacity];
@@ -74,6 +76,8 @@ namespace CE
 
         void Free()
         {
+            ZoneScoped;
+
 	        if (data != nullptr)
 	        {
                 if constexpr (CallDestructor)
@@ -92,11 +96,15 @@ namespace CE
 
         void Grow()
         {
+            ZoneScoped;
+
             Reserve(capacity + GrowthIncrement);
         }
 
         void Insert(const T& item)
         {
+            ZoneScoped;
+
 	        if (data == nullptr || count >= capacity)
 	        {
                 Grow();
@@ -107,6 +115,8 @@ namespace CE
 
         void InsertRange(int numItems, const T& value = {})
         {
+            ZoneScoped;
+
 	        while (data == nullptr || this->count + numItems >= capacity)
 	        {
                 Grow();
@@ -120,6 +130,8 @@ namespace CE
 
         void RemoveAll()
         {
+            ZoneScoped;
+
             if constexpr (CallDestructor)
 	        {
 		        for (int i = 0; i < count; ++i)
@@ -132,6 +144,8 @@ namespace CE
 
         void RemoveAt(SIZE_T index)
         {
+            ZoneScoped;
+
             if (count == 0 || index >= count)
                 return;
 

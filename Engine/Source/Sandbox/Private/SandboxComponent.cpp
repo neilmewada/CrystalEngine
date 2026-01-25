@@ -17,11 +17,18 @@ namespace CE
     {
         AssetManager* assetManager = AssetManager::Get();
 
-        Ref<TextureCube> skybox = assetManager->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
+        Ref<TextureCube> skybox = assetManager->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_day");
         Ref<CE::Shader> standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
         Ref<CE::Shader> skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
 
-		CE::Scene* scene = GetScene();
+		CE::Scene* scene = GetScene().Get();
+		scene->SetSkyboxCubeMap(skybox.Get());
+
+		Ref<CE::StaticMesh> sponzaMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Engine/Assets/Sponza/NewSponza_Main_Yup_003");
+		for (int i = 0; i < sponzaMesh->GetBuiltinMaterialCount(); i++)
+		{
+			sponzaMesh->GetBuiltinMaterial(i)->SetShader(standardShader);
+		}
 
 		// - Textures & Materials -
 
@@ -93,7 +100,7 @@ namespace CE
 		// - Camera -
 
 		CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
-		camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 2));
+		camera->GetCameraComponent()->SetLocalPosition(Vec3(0, -2, -2));
 		scene->AddActor(camera);
 
 		cameraComponent = camera->GetCameraComponent();
@@ -114,7 +121,7 @@ namespace CE
 			skyboxMaterial->SetShader(skyboxShader.Get());
 			skyboxMeshComponent->SetMaterial(skyboxMaterial, 0, 0);
 
-			skyboxMaterial->SetProperty("_CubeMap", skybox.Get());
+			skyboxMaterial->SetProperty("_CubeMap", MaterialTextureValue(skybox.Get()));
 			skyboxMaterial->ApplyProperties();
 		}
 
@@ -129,17 +136,17 @@ namespace CE
 			meshComponent->SetMaterial(aluminiumMaterial, 0, 0);
 		}
 
-		// - Ground -
-
-		StaticMeshActor* groundMesh = CreateObject<StaticMeshActor>(scene, "GroundPlane");
-		scene->AddActor(groundMesh);
-		{
-			StaticMeshComponent* meshComponent = groundMesh->GetMeshComponent();
-			meshComponent->SetStaticMesh(cubeMesh);
-			meshComponent->SetLocalPosition(Vec3(0, -0.75f, 5));
-			meshComponent->SetLocalScale(Vec3(5, 0.05f, 5));
-			meshComponent->SetMaterial(woodMaterial, 0, 0);
-		}
+		// - Sponza -
+		StaticMeshActor* sponzaActor = CreateObject<StaticMeshActor>(scene, "SponzaMesh");
+		scene->AddActor(sponzaActor);
+        {
+			StaticMeshComponent* meshComponent = sponzaActor->GetMeshComponent();
+			meshComponent->SetName("DebugMeshComponent");
+			meshComponent->SetStaticMesh(sponzaMesh);
+			meshComponent->SetLocalPosition(Vec3(0, 0, 0));
+			meshComponent->SetLocalEulerAngles(Vec3(-90, 0, 0));
+			meshComponent->SetLocalScale(Vec3(1, 1, 1) * 0.01f);
+        }
 
 		// - Sun -
 
@@ -149,9 +156,10 @@ namespace CE
 			sunLight = sunActor->GetDirectionalLightComponent();
 
 			sunLight->SetLocalPosition(Vec3(0, 0, 0));
-			sunLight->SetLocalEulerAngles(Vec3(30, 0, 0));
-			sunLight->SetIntensity(20.0f);
-			sunLight->SetLightColor(Color::White());
+			sunLight->SetLocalEulerAngles(Vec3(70, 10, 0));
+			sunLight->SetIntensity(50.0f);
+			sunLight->SetLightColor(Colors::White);
+			sunLight->SetShadowDistance(25);
 		}
     }
 
@@ -161,7 +169,51 @@ namespace CE
 
 		elapsedTime += delta;
 
-		cameraComponent->SetLocalEulerAngles(Vec3(0, 0, elapsedTime * 15));
+		float forwardMotor = 0;
+		float rightwardMotor = 0;
+		float upwardMotor = 0;
+		float eulerMotor = 0;
+
+		if (InputManager::IsKeyHeld(KeyCode::W))
+		{
+			forwardMotor += 1;
+		}
+		if (InputManager::IsKeyHeld(KeyCode::S))
+		{
+			forwardMotor -= 1;
+		}
+		if (InputManager::IsKeyHeld(KeyCode::A))
+		{
+			rightwardMotor -= 1;
+		}
+		if (InputManager::IsKeyHeld(KeyCode::D))
+		{
+			rightwardMotor += 1;
+		}
+		if (InputManager::IsKeyHeld(KeyCode::Q))
+		{
+			if (InputManager::IsKeyHeld(KeyCode::LShift))
+				eulerMotor -= 1;
+			else
+				upwardMotor += 1;
+		}
+		if (InputManager::IsKeyHeld(KeyCode::E))
+		{
+			if (InputManager::IsKeyHeld(KeyCode::LShift))
+				eulerMotor += 1;
+			else
+				upwardMotor -= 1;
+		}
+
+		Vec3 pos = cameraComponent->GetPosition();
+		pos += cameraComponent->GetForwardVector() * forwardMotor * cameraMoveSpeed * delta;
+		pos += cameraComponent->GetRightwardVector() * rightwardMotor * cameraMoveSpeed * delta;
+		pos += cameraComponent->GetUpwardVector() * upwardMotor * cameraMoveSpeed * delta;
+		cameraComponent->SetPosition(pos);
+
+		Vec3 euler = cameraComponent->GetLocalEulerAngles();
+		euler.y += eulerMotor * cameraRotateSpeed * delta;
+		cameraComponent->SetLocalEulerAngles(euler);
 	}
 
 } // namespace CE

@@ -16,7 +16,7 @@ namespace CE::RPI
         Texture(RHI::Texture* texture, const RHI::SamplerDescriptor& samplerDesc = {});
         Texture(RHI::TextureView* textureView, const RHI::SamplerDescriptor& samplerDesc = {});
         Texture(const CMImage& sourceImage, const RHI::SamplerDescriptor& samplerDesc = {});
-        Texture(const Array<CMImage>& sourceImageMips, const RHI::SamplerDescriptor& samplerDesc = {});
+        Texture(const Name& imageName, const Array<CMImage>& sourceImageMips, const RHI::SamplerDescriptor& samplerDesc = {});
 
         virtual ~Texture();
 
@@ -33,6 +33,8 @@ namespace CE::RPI
         u32 GetHeight() const { return height; }
 
         u32 GetDepth() const { return depth; }
+
+        void TransitionResourceTo(RHI::ResourceState fromState, RHI::ResourceState toState);
 
     protected:
 

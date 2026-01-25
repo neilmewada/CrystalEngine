@@ -239,8 +239,7 @@ namespace CE::RPI
 
 		for (const auto& range : parallelRanges)
 		{
-			// ReSharper disable once CppDFAMemoryLeak
-			Job* jobFunction = new JobFunction([&range, imageIndex, &packet](Job* job)
+			Job* jobFunction = new JobFunction([&range, imageIndex, &packet](Job*)
 				{
 					for (View* view : packet.views)
 					{

@@ -25,9 +25,13 @@ namespace CE
 
         void SetProperty(const Name& name, const Ref<CE::Texture>& value, const Vec2& offset = Vec2(0, 0), const Vec2& scaling = Vec2(1, 1)) override;
 
+        void SetProperty(const Name& name, const MaterialTextureValue& textureValue) override;
+
         RPI::Material* GetRpiMaterial() override;
 
         void OnAfterDeserialize() override;
+
+        void MarkDirty() override;
 
         void ApplyProperties() override;
 

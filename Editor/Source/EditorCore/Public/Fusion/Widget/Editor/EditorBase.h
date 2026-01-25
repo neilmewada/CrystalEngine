@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS(Abstract)
-    class EDITORCORE_API EditorBase : public EditorDockTab, IAssetRegistryListener
+    class EDITORCORE_API EditorBase : public EditorDockWindow, IAssetRegistryListener
     {
-        CE_CLASS(EditorBase, EditorDockTab)
+        CE_CLASS(EditorBase, EditorDockWindow)
     protected:
 
         EditorBase();
@@ -16,7 +16,10 @@ namespace CE::Editor
 
         void OnBeginDestroy() override;
 
-        void OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName) override;
+        void OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName, const CE::Name& newPath) override;
+
+        virtual void ConstructMenuBar() {}
+        virtual void ConstructToolBar() {}
 
     public: // - Public API -
 
@@ -24,7 +27,7 @@ namespace CE::Editor
 
         bool SupportsKeyboardEvents() const override { return true; }
 
-        virtual bool OpenEditor(Ref<Object> targetObject) { return false; }
+        virtual bool OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle);
 
         virtual void OnEditorOpened(Ref<Object> targetObject);
 
@@ -43,11 +46,12 @@ namespace CE::Editor
         void SetAssetDirty(bool dirty);
 
         FUNCTION()
-        virtual void SaveChanges() {}
+        virtual void SaveChanges();
 
     protected: // - Internal -
 
-        Ref<EditorHistory> history = nullptr;
+        Ref<EditorHistory> history;
+        Ref<Bundle> bundle;
         Uuid bundleUuid;
 
         bool isAssetDirty = false;

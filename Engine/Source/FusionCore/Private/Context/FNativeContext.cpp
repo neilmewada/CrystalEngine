@@ -18,6 +18,11 @@ namespace CE
 		}
 	}
 
+	void FNativeContext::OnAfterConstruct()
+	{
+		Super::OnAfterConstruct();
+	}
+
 	FNativeContext* FNativeContext::Create(PlatformWindow* platformWindow, const String& name, FFusionContext* parentContext)
 	{
 		ZoneScoped;
@@ -32,7 +37,7 @@ namespace CE
 			return nullptr;
 		}
 
-		FNativeContext* nativeContext = CreateObject<FNativeContext>(outer, name);
+		FNativeContext* nativeContext = CreateObject<FNativeContext>(outer, FixObjectName(name));
 		nativeContext->platformWindow = platformWindow;
 		nativeContext->windowDpi = platformWindow->GetWindowDpi();
 		nativeContext->scaleFactor = FusionApplication::Get()->GetDefaultScalingFactor();
@@ -77,6 +82,7 @@ namespace CE
 
 		//renderer = CreateObject<FusionRenderer>(this, "FusionRenderer");
 		renderer2 = CreateObject<FusionRenderer2>(this, "FusionRenderer2");
+		renderer2->SetDebugName(GetName());
 
 		UpdateViewConstants();
 
@@ -302,11 +308,21 @@ namespace CE
 
 			if (renderer2)
 			{
-				renderer2->multisampling.sampleCount = sampleCount;
+				renderer2->multisampling.sampleCount = (u16)sampleCount;
 			}
 
 			FusionApplication::Get()->RequestFrameGraphUpdate();
 		}
+	}
+
+	int FNativeContext::GetZOrder()
+	{
+		return platformWindow->GetZOrder();
+	}
+
+	void FNativeContext::SetContextFocus()
+	{
+		platformWindow->RaiseWindow();
 	}
 
 	bool FNativeContext::IsFocused() const
@@ -325,7 +341,13 @@ namespace CE
 
 		Super::TickInput();
 
-		
+		if (updateWindowPos)
+		{
+			updateWindowPos = false;
+
+			platformWindow->SetWindowPosition(windowPosToSet);
+			windowPosToSet = {};
+		}
 	}
 
 	void FNativeContext::DoLayout()
@@ -606,6 +628,24 @@ namespace CE
 			return false;
 
 		return platformWindow->IsMinimized();
+	}
+
+	void FNativeContext::SetWindowPosition(Vec2i newPos)
+	{
+		windowPosToSet = newPos;
+		updateWindowPos = true;
+	}
+
+	Vec2i FNativeContext::GetWindowSize()
+	{
+		f32 scaling = PlatformApplication::Get()->GetSystemDpi() / 96.0f;
+#if PLATFORM_MAC
+		scaling = 1;
+#elif PLATFORM_LINUX
+		scaling *= FusionApplication::Get()->defaultScalingFactor;
+#endif
+		
+		return (platformWindow->GetWindowSize() / scaling).ToVec2i();
 	}
 
 	bool FNativeContext::WindowDragHitTest(PlatformWindow* window, Vec2 position)

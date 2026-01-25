@@ -627,6 +627,64 @@ namespace CE::Vulkan
 					}
 				}
 
+				if (!shouldNotExecuteAtAll)
+				{
+					Vulkan::Scope* currentSubPassScope = currentScope;
+					HashSet<RHI::AttachmentID> initializedAttachmentIds{};
+
+					while (currentSubPassScope != nullptr)
+					{
+						for (auto scopeAttachment : currentSubPassScope->attachments)
+						{
+							if (!scopeAttachment->IsBufferAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
+								!scopeAttachment->GetFrameAttachment()->IsBufferAttachment())
+								continue;
+
+							RHI::BufferScopeAttachment* bufferScopeAttachment = (RHI::BufferScopeAttachment*)scopeAttachment;
+							RHI::BufferFrameAttachment* bufferFrameAttachment = (RHI::BufferFrameAttachment*)scopeAttachment->GetFrameAttachment();
+
+							RHI::RHIResource* resource = bufferFrameAttachment->GetResource(currentSubmissionIndex);
+
+							if (resource == nullptr)
+								continue;
+							if (resource->GetResourceType() != RHI::ResourceType::Buffer)
+								continue;
+							if (initializedAttachmentIds.Exists(bufferFrameAttachment->GetId()))
+								continue;
+
+							initializedAttachmentIds.Add(bufferFrameAttachment->GetId());
+
+							Vulkan::Buffer* buffer = (Vulkan::Buffer*)resource;
+							if (buffer->GetBuffer() == VK_NULL_HANDLE)
+								continue;
+
+							const auto& bufferLoadStore = bufferScopeAttachment->GetLoadStoreAction();
+
+							if (bufferLoadStore.loadAction == AttachmentLoadAction::Clear)
+							{
+								vkCmdFillBuffer(cmdBuffer, buffer->GetBuffer(), 0, buffer->GetBufferSize(), bufferLoadStore.clearValueBuffer);
+
+								VkBufferMemoryBarrier bufferBarrier{};
+								bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+								bufferBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+								bufferBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+								bufferBarrier.srcQueueFamilyIndex = bufferBarrier.dstQueueFamilyIndex = currentScope->queue->GetFamilyIndex();
+								bufferBarrier.buffer = buffer->GetBuffer();
+								bufferBarrier.offset = 0;
+								bufferBarrier.size = buffer->GetBufferSize();
+
+								vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+									0,
+									0, nullptr,
+									1, &bufferBarrier,
+									0, nullptr);
+							}
+						}
+
+						currentSubPassScope = (Vulkan::Scope*)currentSubPassScope->nextSubPass;
+					}
+				}
+
 				// Graphics operation
 				if (!shouldNotExecuteAtAll && currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
 				{
@@ -681,9 +739,13 @@ namespace CE::Vulkan
 								}
 
 								if (currentScope->passShaderResourceGroup)
+								{
 									commandList->SetShaderResourceGroup(currentScope->passShaderResourceGroup);
+								}
 								if (currentScope->subpassShaderResourceGroup)
+								{
 									commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
+								}
 
 								const auto& drawItemProperties = drawList->GetDrawItem(i);
 								const RHI::DrawItem* drawItem = drawItemProperties.item;
@@ -728,12 +790,12 @@ namespace CE::Vulkan
 										commandList->SetRootConstants(0, (u32)drawItem->rootConstantSize / 4, drawItem->rootConstants);
 									}
 									
-									if (drawItem->arguments.type == RHI::DrawArgumentsType::DrawArgumentsIndexed)
+									if (drawItem->arguments.type == DrawArgumentsIndexed)
 									{
 										commandList->BindIndexBuffer(*drawItem->indexBufferView);
 										commandList->DrawIndexed(drawItem->arguments.indexedArgs);
 									}
-									else if (drawItem->arguments.type == RHI::DrawArgumentsType::DrawArgumentsLinear)
+									else if (drawItem->arguments.type == DrawArgumentsLinear)
 									{
 										commandList->DrawLinear(drawItem->arguments.linearArgs);
 									}
@@ -814,7 +876,6 @@ namespace CE::Vulkan
 				{
 					commandList->ClearShaderResourceGroups();
 
-					// TODO: Add compute pass
 					RHI::PipelineState* pipelineToUse = nullptr;
 
 					for (RHI::PipelineState* pipeline : currentScope->usePipelines)
@@ -839,7 +900,7 @@ namespace CE::Vulkan
 						if (currentScope->subpassShaderResourceGroup)
 							commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
 
-						commandList->CommitShaderResources();;
+						commandList->CommitShaderResources();
 
 						commandList->Dispatch(Math::Max((u32)1, currentScope->groupCountX),
 							Math::Max((u32)1, currentScope->groupCountY),
@@ -848,7 +909,107 @@ namespace CE::Vulkan
 				}
 				else if (currentScope->queueClass == RHI::HardwareQueueClass::Transfer)
 				{
-					// TODO: Add transfer pass
+					// TODO: Finish the transfer pass
+
+					commandList->ClearShaderResourceGroups();
+
+					if (currentScope->readAttachments.NotEmpty() && currentScope->writeAttachments.NotEmpty())
+					{
+						ScopeAttachment* fromAttachment = currentScope->readAttachments[0];
+						ScopeAttachment* toAttachment = currentScope->writeAttachments[0];
+
+						if (fromAttachment->IsImageAttachment() && toAttachment->IsImageAttachment())
+						{
+							RHI::RHIResource* fromResource = fromAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
+							RHI::RHIResource* toResource = toAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
+
+							if (fromResource != nullptr && toResource != nullptr &&
+								fromResource->GetResourceType() == RHI::ResourceType::Texture &&
+								toResource->GetResourceType() == RHI::ResourceType::Texture)
+							{
+								Vulkan::Texture* fromImage = (Vulkan::Texture*)fromResource;
+								Vulkan::Texture* toImage = (Vulkan::Texture*)toResource;
+								if (fromImage->GetImage() != VK_NULL_HANDLE && toImage->GetImage() != VK_NULL_HANDLE)
+								{
+									for (int mip = 0; mip < fromImage->GetMipLevelCount(); mip++)
+									{
+										if (fromImage->GetSampleCount() == toImage->GetSampleCount())
+										{
+											VkImageCopy copyRegion{};
+											copyRegion.srcOffset = { 0, 0, 0 };
+											copyRegion.srcSubresource.baseArrayLayer = 0;
+											copyRegion.srcSubresource.layerCount = fromImage->GetArrayLayerCount();
+											copyRegion.srcSubresource.mipLevel = mip;
+											copyRegion.srcSubresource.aspectMask = fromImage->aspectMask;
+
+											copyRegion.dstOffset = { 0, 0, 0 };
+											copyRegion.dstSubresource.baseArrayLayer = 0;
+											copyRegion.dstSubresource.layerCount = toImage->GetArrayLayerCount();
+											copyRegion.dstSubresource.mipLevel = mip;
+											copyRegion.dstSubresource.aspectMask = toImage->aspectMask;
+
+											copyRegion.extent.width = Math::Max<u32>(1, fromImage->GetWidth(mip));
+											copyRegion.extent.height = Math::Max<u32>(1, fromImage->GetHeight(mip));
+											copyRegion.extent.depth = Math::Max<u32>(1, fromImage->GetDepth(mip));
+
+											vkCmdCopyImage(cmdBuffer,
+												fromImage->GetImage(), fromImage->curImageLayout,
+												toImage->GetImage(), toImage->curImageLayout,
+												1, &copyRegion);
+										}
+										else if (fromImage->GetSampleCount() > 1 && toImage->GetSampleCount() == 1)
+										{
+											VkImageResolve resolveRegion{};
+											resolveRegion.srcOffset = { 0, 0, 0 };
+											resolveRegion.srcSubresource.baseArrayLayer = 0;
+											resolveRegion.srcSubresource.layerCount = fromImage->GetArrayLayerCount();
+											resolveRegion.srcSubresource.mipLevel = mip;
+											resolveRegion.srcSubresource.aspectMask = fromImage->aspectMask;
+
+											resolveRegion.dstOffset = { 0, 0, 0 };
+											resolveRegion.dstSubresource.baseArrayLayer = 0;
+											resolveRegion.dstSubresource.layerCount = toImage->GetArrayLayerCount();
+											resolveRegion.dstSubresource.mipLevel = mip;
+											resolveRegion.dstSubresource.aspectMask = toImage->aspectMask;
+
+											resolveRegion.extent.width = Math::Max<u32>(1, fromImage->GetWidth(mip));
+											resolveRegion.extent.height = Math::Max<u32>(1, fromImage->GetHeight(mip));
+											resolveRegion.extent.depth = Math::Max<u32>(1, fromImage->GetDepth(mip));
+
+											vkCmdResolveImage(cmdBuffer, fromImage->GetImage(), fromImage->curImageLayout,
+												toImage->GetImage(), toImage->curImageLayout,
+												1, &resolveRegion);
+										}
+									}
+								}
+							}
+						}
+						else if (fromAttachment->IsBufferAttachment() && toAttachment->IsBufferAttachment())
+						{
+							RHI::RHIResource* fromResource = fromAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
+							RHI::RHIResource* toResource = toAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
+
+							if (fromResource != nullptr && toResource != nullptr &&
+								fromResource->GetResourceType() == RHI::ResourceType::Buffer &&
+								toResource->GetResourceType() == RHI::ResourceType::Buffer)
+							{
+								Vulkan::Buffer* fromBuffer = (Vulkan::Buffer*)fromResource;
+								Vulkan::Buffer* toBuffer = (Vulkan::Buffer*)toResource;
+								if (fromBuffer->GetBuffer() != VK_NULL_HANDLE && toBuffer->GetBuffer() != VK_NULL_HANDLE)
+								{
+									VkBufferCopy copyRegion{};
+									copyRegion.srcOffset = 0;
+									copyRegion.dstOffset = 0;
+									copyRegion.size = Math::Min(fromBuffer->GetBufferSize(), toBuffer->GetBufferSize());
+
+									vkCmdCopyBuffer(cmdBuffer,
+										fromBuffer->GetBuffer(),
+										toBuffer->GetBuffer(),
+										1, &copyRegion);
+								}
+							}
+						}
+					}
 				}
 
 				// Execute compiled pipeline barriers (exit barriers)
@@ -898,7 +1059,7 @@ namespace CE::Vulkan
 					imageBarrier.srcQueueFamilyIndex = image->curFamilyIndex;
 					imageBarrier.dstQueueFamilyIndex = presentQueue->GetFamilyIndex();
 					imageBarrier.image = image->image;
-					imageBarrier.oldLayout = image->curImageLayout;//VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					imageBarrier.oldLayout = image->curImageLayout;
 					imageBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 					imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 					imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
@@ -1007,6 +1168,8 @@ namespace CE::Vulkan
 				presentInfo.pImageIndices = imageIndices.GetData();
 				presentInfo.waitSemaphoreCount = 1;
 				presentInfo.pWaitSemaphores = &signallingScope->signalSemaphores[currentSubmissionIndex][0];
+
+				LockGuard guard{ presentQueue->GetMutex() };
 
 				result = vkQueuePresentKHR(presentQueue->GetHandle(), &presentInfo);
 			}

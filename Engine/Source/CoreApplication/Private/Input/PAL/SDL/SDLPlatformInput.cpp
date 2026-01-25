@@ -47,6 +47,9 @@ namespace CE
             return;
 
         auto app = PlatformApplication::Get();
+        if (app == nullptr || app->GetMainWindow() == nullptr)
+			return;
+
         InputManager& input = InputManager::Get();
         SDL_Window* window = (SDL_Window*)app->GetMainWindow()->GetUnderlyingHandle();
 
@@ -64,7 +67,7 @@ namespace CE
             windowId = event->key.windowID;
             if (keyStates[(KeyCode)event->key.keysym.sym])
             {
-                keyStatesDelayed[(KeyCode)event->key.keysym.sym] = true;
+                keyStatesDelayed[(KeyCode)event->key.keysym.sym] = { .state = true, .lastEnabledTime = curTime };
             }
             else
             {
@@ -80,7 +83,7 @@ namespace CE
                 stateChangesThisTick[(KeyCode)event->key.keysym.sym] = false;
             }
             keyStates[(KeyCode)event->key.keysym.sym] = false;
-            keyStatesDelayed[(KeyCode)event->key.keysym.sym] = false;
+            keyStatesDelayed[(KeyCode)event->key.keysym.sym] = { .state = false, .lastEnabledTime = 0};
             modifierStates = (KeyModifier)event->key.keysym.mod;
             break;
         case SDL_MOUSEBUTTONDOWN:
@@ -127,6 +130,9 @@ namespace CE
 
     void SDLPlatformInput::Tick()
     {
+        auto now = std::chrono::high_resolution_clock::now();
+        curTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
+
         InputManager& input = InputManager::Get();
         auto app = PlatformApplication::Get();
 
@@ -144,6 +150,7 @@ namespace CE
         input.globalMousePosition = globalMousePosition;
         input.mouseDelta = globalMousePosition - prevMousePosition;
         input.wheelDelta = wheelDelta;
+        input.curTime = curTime;
 
         // Reset temp values
         prevMousePosition = globalMousePosition;

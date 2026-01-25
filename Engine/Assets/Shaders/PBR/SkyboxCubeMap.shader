@@ -23,12 +23,7 @@ Shader "PBR/Standard"
 
             HLSLPROGRAM
             
-            #include "Core/Macros.hlsli"
-            #include "Core/SceneData.hlsli"
-            #include "Core/ViewData.hlsli"
-            #include "Core/ObjectData.hlsli"
-
-            #include "Core/Gamma.hlsli"
+            #include "OpaqueIncludes.hlsli"
 
             struct VSInput
             {

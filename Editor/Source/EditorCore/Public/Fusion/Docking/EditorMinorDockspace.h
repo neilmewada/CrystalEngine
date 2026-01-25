@@ -2,64 +2,26 @@
 
 namespace CE::Editor
 {
-    class EditorDockTabItem;
-
     CLASS()
-    class EDITORCORE_API EditorMinorDockspace : public FStyledWidget
+    class EDITORCORE_API EditorMinorDockspace : public EditorDockspace
     {
-        CE_CLASS(EditorMinorDockspace, FStyledWidget)
-    public:
-
-        // - Public API -
-
-        void AddDockTab(EditorDockTab* tab);
-        void RemoveDockTab(EditorDockTab* tab);
-        void UpdateTabWell();
-
-        void SelectTab(EditorDockTabItem* tabItem);
-        void SelectTab(EditorDockTab* tab);
-
-        FVerticalStack* GetRootBox() const { return rootBox; }
-
-        int GetTabItemCount() const { return tabItems.GetSize(); }
-        EditorDockTabItem* GetTabItem(int index) const { return tabItems[index]; }
-
+        CE_CLASS(EditorMinorDockspace, EditorDockspace)
     protected:
 
         EditorMinorDockspace();
 
         void Construct() override;
 
-    private:
+    public: // - Public API -
 
-        FVerticalStack* rootBox = nullptr;
-        FStyledWidget* titleBar = nullptr;
-        FHorizontalStack* tabWell = nullptr;
-        FStyledWidget* content = nullptr;
 
-        Array<Ref<EditorDockTab>> dockedEditors;
-        Array<EditorDockTabItem*> tabItems;
-        int selectedTab = -1;
+    protected: // - Internal -
+
 
     public: // - Fusion Properties - 
 
-        FUSION_PROPERTY_WRAPPER2(Background, titleBar, TitleBarBackground);
-
-        template<typename... TArgs> requires TMatchAllBaseClass<EditorDockTab, TArgs...>::Value and (sizeof...(TArgs) > 0)
-        Self& DockTabs(TArgs&... dockTabs)
-        {
-            std::initializer_list<EditorDockTab*> list = { &dockTabs... };
-
-            for (EditorDockTab* dockTab : list)
-            {
-                AddDockTab(dockTab);
-            }
-
-            return *this;
-        }
 
         FUSION_WIDGET;
-        friend class EditorMinorDockspaceStyle;
     };
     
 }

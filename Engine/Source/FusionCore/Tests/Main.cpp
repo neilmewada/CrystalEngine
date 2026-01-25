@@ -253,7 +253,7 @@ static void RemoveRect()
 
 static void DoRectPacking(FusionRenderer2* renderer)
 {
-	renderer->SetBrush(Color::Black());
+	renderer->SetBrush(Colors::Black);
 	renderer->SetPen(FPen());
 
 	renderer->PushChildCoordinateSpace(Vec2(0, 40));
@@ -273,18 +273,18 @@ static void DoRectPacking(FusionRenderer2* renderer)
 				
 				if (node->child[0] != nullptr || node->child[1] != nullptr)
 				{
-					renderer->SetPen(FPen(Color::Red(), 1.5f));
+					renderer->SetPen(FPen(Colors::Red, 1.5f));
 					renderer->StrokeRect(node->rect);
 				}
 				else
 				{
-					renderer->SetPen(FPen(Color::White().WithAlpha(0.8f), 1));
+					renderer->SetPen(FPen(Colors::White.WithAlpha(0.8f), 1));
 					renderer->StrokeRect(Rect(node->rect.left + 1, node->rect.top + 1, node->rect.right - 1, node->rect.bottom - 1));
 				}
 			});
 
-		renderer->SetPen(FPen(Color::White()));
-		renderer->DrawText(String::Format("Area: {}", root->usedArea), Vec2(100, 100));
+		renderer->SetPen(FPen(Colors::White));
+		renderer->DrawSDFText(String::Format("Area: {}", root->usedArea), Vec2(100, 100));
 	}
 	renderer->PopChildCoordinateSpace();
 }
@@ -339,11 +339,11 @@ TEST(FusionCore, Rendering)
 			auto windowCloseBtn = CreateObject<FCustomButtonStyle>(rootStyle, "WindowWindowClose");
 			rootStyle->Add("Button.WindowClose", windowCloseBtn);
 
-			windowCloseBtn->background = Color::Clear();
+			windowCloseBtn->background = Colors::Clear;
 			windowCloseBtn->hoveredBackground = Color::RGBA(161, 57, 57);
 			windowCloseBtn->hoveredBackground = Color::RGBA(196, 43, 28);
 			windowCloseBtn->pressedBackground = Color::RGBA(178, 43, 30);
-			windowCloseBtn->borderColor = Color::Clear();
+			windowCloseBtn->borderColor = Colors::Clear;
 			windowCloseBtn->borderWidth = 0.0f;
 			windowCloseBtn->cornerRadius = Vec4();
 			windowCloseBtn->contentMoveY = 0;
@@ -351,10 +351,10 @@ TEST(FusionCore, Rendering)
 			auto windowControlBtn = CreateObject<FCustomButtonStyle>(rootStyle, "WindowControlButton");
 			rootStyle->Add("Button.WindowControl", windowControlBtn);
 
-			windowControlBtn->background = Color::Clear();
+			windowControlBtn->background = Colors::Clear;
 			windowControlBtn->hoveredBackground = Color::RGBA(58, 58, 58);
 			windowControlBtn->pressedBackground = Color::RGBA(48, 48, 48);
-			windowControlBtn->borderColor = Color::Clear();
+			windowControlBtn->borderColor = Colors::Clear;
 			windowControlBtn->borderWidth = 0.0f;
 			windowControlBtn->cornerRadius = Vec4();
 			windowControlBtn->contentMoveY = 0;
@@ -388,9 +388,9 @@ TEST(FusionCore, Rendering)
 			auto primaryComboBoxItem = CreateObject<FComboBoxItemStyle>(rootStyle, "PrimaryComboBoxItemStyle");
 			rootStyle->Add("ComboBoxItem.Primary", primaryComboBoxItem);
 
-			primaryComboBoxItem->background = Color::Clear();
+			primaryComboBoxItem->background = Colors::Clear;
 			primaryComboBoxItem->hoverBackground = Color::RGBA(0, 112, 224);
-			primaryComboBoxItem->selectedBackground = Color::Clear();
+			primaryComboBoxItem->selectedBackground = Colors::Clear;
 			primaryComboBoxItem->selectedShape = FShapeType::RoundedRect;
 			primaryComboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
 			primaryComboBoxItem->selectedBorderColor = primaryComboBoxItem->hoverBackground.GetFillColor();
@@ -437,7 +437,7 @@ TEST(FusionCore, Rendering)
 			auto menuBarStyle = CreateObject<FMenuBarStyle>(rootStyle, "MenuBarStyle");
 			rootStyle->Add("MenuBar.Primary", menuBarStyle);
 
-			menuBarStyle->background = Color::Black();
+			menuBarStyle->background = Colors::Black;
 			menuBarStyle->itemPadding = Vec4(5, 5, 5, 5);
 			menuBarStyle->itemHoverBackground = Color::RGBA(0, 112, 224);
 
@@ -459,9 +459,9 @@ TEST(FusionCore, Rendering)
 			auto comboBoxItem = CreateObject<FComboBoxItemStyle>(rootStyle, "ComboBoxItem");
 			rootStyle->Add("ComboBoxItem", comboBoxItem);
 
-			comboBoxItem->background = Color::Clear();
+			comboBoxItem->background = Colors::Clear;
 			comboBoxItem->hoverBackground = Color::RGBA(0, 112, 224);
-			comboBoxItem->selectedBackground = Color::Clear();
+			comboBoxItem->selectedBackground = Colors::Clear;
 			comboBoxItem->selectedShape = FShapeType::RoundedRect;
 			comboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
 			comboBoxItem->selectedBorderColor = Color::RGBA(0, 112, 224);

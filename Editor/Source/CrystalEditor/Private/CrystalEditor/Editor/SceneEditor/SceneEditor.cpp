@@ -22,13 +22,65 @@ namespace CE::Editor
         assetBrowser->BrowseToAsset(path);
     }
 
+    bool SceneEditor::OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle)
+    {
+        ZoneScoped;
+
+    	if (!targetObject || !bundle)
+            return false;
+        if (!CanEdit(targetObject))
+            return false;
+
+        Ref<CE::Scene> scene = CastTo<CE::Scene>(targetObject);
+        if (!scene)
+            return false;
+
+        if (!OpenScene(scene))
+        {
+	        return false;
+        }
+
+    	Super::OpenEditor(targetObject, bundle);
+        return true;
+    }
+
+    bool SceneEditor::OpenScene(Ref<CE::Scene> scene)
+    {
+        ZoneScoped;
+
+        if (!scene)
+            return false;
+        if (!scene->GetRpiScene())
+            return false;
+
+        if (targetScene.IsValid() && targetScene->GetOuter() == this)
+        {
+            targetScene->BeginDestroy();
+        }
+
+        targetScene = scene;
+
+        EditorViewport* viewport = viewportTab->GetViewport();
+        viewport->SetScene(scene->GetRpiScene());
+        viewport->RecreateFrameBuffer();
+
+        sceneOutlinerTab->SetScene(scene.Get());
+        detailsTab->SetSelectedActor(nullptr);
+        
+        return true;
+    }
+
     SceneEditor::SceneEditor()
     {
+        m_CanBeUndocked = false;
 
+        addActorContextMenu = CreateDefaultSubobject<EditorMenuPopup>("AddActorMenu");
     }
 
     void SceneEditor::LoadSandboxScene()
     {
+        ZoneScoped;
+
         CE::Scene* scene = CreateObject<CE::Scene>(this, "SandboxScene");
         sandboxScene = scene;
 
@@ -90,6 +142,13 @@ namespace CE::Editor
                 woodMaterial->ApplyProperties();
             }
 
+			CE::Material* arrowMaterial = CreateObject<CE::Material>(scene, "ArrowMaterial");
+            arrowMaterial->SetShader(standardShader.Get());
+            {
+                arrowMaterial->SetProperty("_Albedo", Colors::White);
+                arrowMaterial->ApplyProperties();
+			}
+
             StaticMesh* sphereMesh = CreateObject<StaticMesh>(scene, "SphereMesh");
             {
                 RPI::ModelAsset* sphereModel = CreateObject<RPI::ModelAsset>(sphereMesh, "SphereModel");
@@ -139,15 +198,6 @@ namespace CE::Editor
                 {
                     const RPI::ModelLodSubMesh& subMesh = lodAsset->GetSubMesh(i);
                     Ref<CE::Material> builtinMaterial = carMesh->GetBuiltinMaterial(subMesh.materialIndex);
-                    //builtinMaterial->SetShader(standardShader);
-
-                    //builtinMaterial->SetProperty("_AlbedoTex", plasticAlbedoTex);
-                    //builtinMaterial->SetProperty("_NormalTex", plasticNormalTex);
-                    //builtinMaterial->SetProperty("_MetallicTex", plasticMetallicTex);
-                    //builtinMaterial->SetProperty("_RoughnessTex", plasticRoughnessTex);
-                    //builtinMaterial->ApplyProperties();
-
-                    //meshComponent->SetMaterial(aluminumMaterial, 0, i);
                     meshComponent->SetMaterial(builtinMaterial.Get(), 0, subMesh.materialIndex);
                 }
             }
@@ -181,9 +231,40 @@ namespace CE::Editor
                 StaticMeshComponent* meshComponent = groundActor->GetMeshComponent();
                 meshComponent->SetStaticMesh(cubeMesh);
                 meshComponent->SetLocalPosition(Vec3(0, -1, 5));
-                meshComponent->SetLocalScale(Vec3(10, 0.1f, 10));
+                meshComponent->SetLocalScale(Vec3(50, 0.1f, 50));
                 meshComponent->SetMaterial(woodMaterial, 0, 0);
             }
+
+            if (true)
+            {
+                carActor->SetEnabled(false);
+                chairActor->SetEnabled(false);
+            }
+
+            if (false)
+	        {
+		        if (Ref<StaticMesh> arrowMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Engine/Assets/Models/SM_Editor_Arrow"))
+		        {
+		        	StaticMeshActor* arrowActor = CreateObject<StaticMeshActor>(scene, "ArrowMesh");
+		        	scene->AddActor(arrowActor);
+			        {
+		        		StaticMeshComponent* meshComponent = arrowActor->GetMeshComponent();
+		        		meshComponent->SetStaticMesh(arrowMesh);
+		        		meshComponent->SetLocalPosition(Vec3(0, 0, 5));
+		        		meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
+		        		meshComponent->SetLocalScale(Vec3(1, 1, 1));
+		        		meshComponent->SetMaterial(arrowMaterial, 0, 0);
+			        }
+		        }
+	        }
+
+            CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
+            scene->AddActor(camera);
+
+            CameraComponent* cameraComponent = camera->GetCameraComponent();
+            cameraComponent->SetLocalPosition(Vec3(0, 5, -5));
+            cameraComponent->SetLocalEulerAngles(Vec3(35, 0, 0));
+            cameraComponent->SetFieldOfView(60);
 
             DirectionalLight* lightActor = CreateObject<DirectionalLight>(scene, "Sun");
             scene->AddActor(lightActor);
@@ -191,15 +272,40 @@ namespace CE::Editor
                 DirectionalLightComponent* directionalLight = lightActor->GetDirectionalLightComponent();
                 directionalLight->SetLocalEulerAngles(Vec3(30, 0, 0));
                 directionalLight->SetIntensity(10);
-                directionalLight->SetLightColor(Color::White());
+                directionalLight->SetLightColor(Colors::White);
             }
 
-            CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
-            camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 0));
-            scene->AddActor(camera);
+            lightActor->SetEnabled(false);
 
-            CameraComponent* cameraComponent = camera->GetCameraComponent();
-            cameraComponent->SetFieldOfView(60);
+            constexpr int NumLights = 9;
+            constexpr std::array<Vec3, NumLights> LightPos = { Vec3(-2, 0, -2), Vec3(0, 0, -2), Vec3(2, 0, -2),
+	            Vec3(-2, 0, 0), Vec3(0, 0, 0), Vec3(2, 0, 0),
+	            Vec3(-2, 0, 2), Vec3(0, 0, 2), Vec3(2, 0, 2) };
+            constexpr std::array<Color, NumLights> LightColors = { Colors::Red, Colors::Green, Colors::Blue,
+                Colors::Yellow, Colors::Cyan, Colors::Magenta,
+				Colors::White, Colors::Orange, Colors::Purple };
+			constexpr float Separation = 3.0f;
+			constexpr Vec2i LightGrid = Vec2i(16, 16);
+			int lightIndex = 0;
+            int curLight = 0;
+
+            for (int x = -LightGrid.x / 2; x <= LightGrid.x / 2; ++x)
+            {
+                for (int y = -LightGrid.y / 2; y <= LightGrid.y / 2; ++y)
+                {
+                    PointLight* pointLight = CreateObject<PointLight>(scene, String::Format("PointLight_{}", curLight++));
+                    scene->AddActor(pointLight);
+                    {
+                        Ref<PointLightComponent> pointLightComponent = pointLight->GetPointLightComponent();
+                        pointLightComponent->SetLocalPosition(Vec3(x * Separation, -0.5f, y * Separation + 5));
+                        pointLightComponent->SetRange(2.0f);
+                        pointLightComponent->SetLightColor(LightColors[lightIndex]);
+                        pointLightComponent->SetIntensity(25);
+                    }
+
+					lightIndex = (lightIndex + 1) % NumLights;
+                }
+			}
 
             StaticMeshActor* skyboxActor = CreateObject<StaticMeshActor>(scene, "SkyboxActor");
             scene->AddActor(skyboxActor);
@@ -215,7 +321,7 @@ namespace CE::Editor
                 skyboxMaterial->SetShader(skyboxShader.Get());
                 skyboxMeshComponent->SetMaterial(skyboxMaterial, 0, 0);
 
-                skyboxMaterial->SetProperty("_CubeMap", skybox.Get());
+                skyboxMaterial->SetProperty("_CubeMap", MaterialTextureValue(skybox.Get()));
                 skyboxMaterial->ApplyProperties();
             }
 
@@ -240,19 +346,26 @@ namespace CE::Editor
         Title(scene->GetName().GetString());
     }
 
+    void SceneEditor::LoadEmptyScene()
+    {
+        Ref<CE::Scene> scene = CreateObject<CE::Scene>(this, "UntitledScene");
+
+        OpenScene(scene);
+    }
+
     void SceneEditor::Construct()
     {
+        ZoneScoped;
+
         Super::Construct();
 
         Title("Scene Editor");
 
         gEngine->GetSceneSubsystem()->AddCallbacks(this);
 
-        ConstructMenuBar();
         ConstructDockspaces();
-
-        LoadSandboxScene();
-
+    	LoadSandboxScene();
+        //LoadEmptyScene();
     }
 
     void SceneEditor::OnBeginDestroy()
@@ -275,9 +388,10 @@ namespace CE::Editor
 
     }
 
-
-    void SceneEditor::OnSelectionChanged(FItemSelectionModel* selectionModel)
+    void SceneEditor::OnActorSelectionChanged(FItemSelectionModel* selectionModel)
     {
+        ZoneScoped;
+
         const auto& selection = selectionModel->GetSelection();
 
         Array<Actor*> selectedActors{};
@@ -293,7 +407,6 @@ namespace CE::Editor
 
         if (selectedActors.NotEmpty())
         {
-            // TODO: Create and set object editor
             detailsTab->SetSelectedActor(selectedActors.GetLast());
         }
         else
@@ -302,79 +415,100 @@ namespace CE::Editor
         }
     }
 
+    void SceneEditor::OnClickPlay()
+    {
+        return;
+
+        gEngine->GetSceneSubsystem()->PlayActiveScene();
+        sandboxScene->GetPhysicsScene()->SetSimulationEnabled(true);
+
+        playButton->Enabled(false);
+        pauseButton->Enabled(true);
+        stopButton->Enabled(true);
+    }
+
+    void SceneEditor::OnClickPause()
+    {
+        return;
+
+        sandboxScene->GetPhysicsScene()->SetSimulationEnabled(false);
+
+        playButton->Enabled(true);
+        pauseButton->Enabled(false);
+        stopButton->Enabled(true);
+    }
+
+    void SceneEditor::OnClickStop()
+    {
+        return;
+
+        // TODO: Restore scene to original state
+
+        playButton->Enabled(true);
+        pauseButton->Enabled(false);
+        stopButton->Enabled(false);
+    }
+
+    void SceneEditor::OnClickAddActorMenuButton()
+    {
+        if (!GetContext())
+            return;
+
+        //addActorContextMenu->ClosePopup();
+        addActorContextMenu->DestroyAllItems();
+
+        (*addActorContextMenu)
+            .Content(
+                FNew(FMenuItemSeparator)
+                .Title("BASIC"),
+
+                EditorMenuPopup::NewMenuItem()
+                .Text("Actor")
+                .OnClick([this]
+                {
+	                if (targetScene)
+	                {
+                        Ref<Actor> actor = CreateObject<Actor>(targetScene.Get(), "EmptyActor");
+                        targetScene->AddActor(actor.Get());
+	                }
+                }),
+
+                FNew(FMenuItemSeparator)
+                .Title("SHAPES"),
+
+                EditorMenuPopup::NewMenuItem()
+                .Text("Sphere")
+            );
+
+        Vec2 popupPos = addActorButton->GetGlobalPosition() + Vec2(0, addActorButton->GetComputedSize().y);
+
+        GetContext()->PushLocalPopup(addActorContextMenu.Get(), popupPos, Vec2(), addActorButton->GetComputedSize());
+    }
+
     void SceneEditor::ConstructDockspaces()
     {
-        (*content)
-        .Child(
-            FAssignNew(FSplitBox, rootSplitBox)
-            .Direction(FSplitDirection::Horizontal)
-            .HAlign(HAlign::Fill)
-            .VAlign(VAlign::Fill)
-            (
-                FNew(FSplitBox)
-                .Direction(FSplitDirection::Vertical)
-                .VAlign(VAlign::Fill)
-                .FillRatio(0.75f)
-                (
-                    FAssignNew(EditorMinorDockspace, center)
-                    .DockTabs(
-                        FAssignNew(EditorViewportTab, viewportTab)
+        ZoneScoped;
 
-                    )
-                    .HAlign(HAlign::Fill)
-                    .FillRatio(0.6f),
+        minorDockspace->AddDockWindow(
+            FAssignNew(EditorViewportTab, viewportTab)
+        );
 
-                    FAssignNew(EditorMinorDockspace, bottom)
-                    .DockTabs(
-                        FAssignNew(AssetBrowser, assetBrowser),
+        auto rootSplit = minorDockspace->GetRootSplit();
 
-                        FNew(EditorMinorDockTab)
-                        .Title("Logs")
-                        .Content(
-                            FNew(FVerticalStack)
-                            (
-                                FNew(FTextButton)
-                                .Text("Print Fusion Memory FootPrint")
-                                .OnClicked([]
-                                {
-                                    u64 footprint = FusionApplication::Get()->ComputeMemoryFootprint();
-                                    CE_LOG(Info, All, "Memory Footprint: {} KB", footprint / 1024);
-                                })
-                            )
-                        )
+        viewportTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Right,
+            FAssignNew(SceneOutlinerTab, sceneOutlinerTab),
+            0.35f
+        );
 
-                    )
-                    .HAlign(HAlign::Fill)
-                    .FillRatio(0.4f)
-                ),
+        sceneOutlinerTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Bottom,
+			FAssignNew(ActorDetailsTab, detailsTab),
+            0.65f
+        );
 
-                FNew(FSplitBox)
-                .Direction(FSplitDirection::Vertical)
-                .VAlign(VAlign::Fill)
-                .FillRatio(0.25f)
-                (
-                    FAssignNew(EditorMinorDockspace, rightTop)
-                    .DockTabs(
-                        FAssignNew(SceneOutlinerTab, sceneOutlinerTab)
-
-                    )
-                    .HAlign(HAlign::Fill)
-                    .FillRatio(0.3f),
-
-                    FAssignNew(EditorMinorDockspace, rightBottom)
-                    .DockTabs(
-                        FAssignNew(DetailsTab, detailsTab),
-
-                        FNew(EditorMinorDockTab)
-                        .Title("History")
-
-                    )
-                    .HAlign(HAlign::Fill)
-                    .FillRatio(0.7f)
-                )
-            )
-        )
-    	.Padding(Vec4(0, 5, 0, 0));
+        viewportTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Bottom,
+			FAssignNew(AssetBrowser, assetBrowser),
+            0.4f
+        );
 
         detailsTab->SetOwnerEditor(this);
         sceneOutlinerTab->SetOwnerEditor(this);
@@ -382,11 +516,15 @@ namespace CE::Editor
 
         viewportTab->GetViewport()->SetName("SceneEditorViewport");
 
-        sceneOutlinerTab->treeView->SelectionModel()->OnSelectionChanged(FUNCTION_BINDING(this, OnSelectionChanged));
+        sceneOutlinerTab->treeView->SelectionModel()->OnSelectionChanged(FUNCTION_BINDING(this, OnActorSelectionChanged));
     }
 
     void SceneEditor::ConstructMenuBar()
     {
+        ZoneScoped;
+
+        Super::ConstructMenuBar();
+
         (*menuBar)
             .Content(
                 FNew(FMenuItem)
@@ -502,6 +640,13 @@ namespace CE::Editor
                                 .OnClick([this]
                                 {
                                     FusionFontAtlasWindow::Show();
+                                }),
+
+                                FNew(FMenuItem)
+                                .Text("Fusion SDF Font Atlas")
+                                .OnClick([this]
+                                {
+                                    FusionSDFFontAtlasWindow::Show();
                                 })
                             )
                         )
@@ -534,5 +679,37 @@ namespace CE::Editor
             ;
     }
 
+    void SceneEditor::ConstructToolBar()
+    {
+        ZoneScoped;
+
+        Super::ConstructToolBar();
+
+        (*toolBar)
+        .Content(
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/Save")
+            .OnClicked(FUNCTION_BINDING(this, SaveChanges)),
+
+            EditorToolBar::NewSeparator(),
+
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/AddObject")
+            .Assign(addActorButton)
+            .OnClicked(FUNCTION_BINDING(this, OnClickAddActorMenuButton))/*,
+
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/Play")
+            .Assign(playButton)
+            .OnClicked(FUNCTION_BINDING(this, OnClickPlay)),
+
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/Pause")
+            .Assign(pauseButton)
+            .OnClicked(FUNCTION_BINDING(this, OnClickPause))
+            .Enabled(false),
+
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/Stop")
+            .Assign(stopButton)
+            .OnClicked(FUNCTION_BINDING(this, OnClickStop))
+            .Enabled(false)*/
+		);
+    }
 }
 

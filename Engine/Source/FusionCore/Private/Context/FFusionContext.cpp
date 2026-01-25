@@ -47,8 +47,10 @@ namespace CE
 
 			owningWidget->CalculateIntrinsicSize();
 
+			Vec2 availSize = GetAvailableSize();
+
 			owningWidget->computedPosition = Vec2();
-			owningWidget->computedSize = availableSize;
+			owningWidget->computedSize = availSize;
 			
 			owningWidget->PlaceSubWidgets();
 
@@ -74,13 +76,13 @@ namespace CE
 				if (!popup->positionFound)
 				{
 					Rect popupRect = Rect::FromSize(popup->computedPosition, popup->computedSize);
-					if (popupRect.max.y > availableSize.y) // Popup outside bottom
+					if (popupRect.max.y > availSize.y) // Popup outside bottom
 					{
 						popup->computedPosition.y -= popup->computedSize.y + popup->controlSize.y;
 					}
-					if (popupRect.max.x > availableSize.x)
+					if (popupRect.max.x > availSize.x)
 					{
-						popup->computedPosition.x -= popupRect.max.x - availableSize.x;
+						popup->computedPosition.x -= popupRect.max.x - availSize.x * availableSizeMultiplier.x;
 					}
 					popup->initialPos = popup->computedPosition;
 
@@ -98,13 +100,18 @@ namespace CE
 
 	void FFusionContext::DoPaint()
 	{
-
+		ZoneScoped;
 	}
 
 	void FFusionContext::TickInput()
 	{
 		ZoneScoped;
 
+	}
+
+	int FFusionContext::GetZOrder()
+	{
+		return NumericLimits<int>::Max();
 	}
 
 	FFusionContext* FFusionContext::GetRootContext() const
@@ -159,9 +166,18 @@ namespace CE
 		}
 	}
 
-	bool FFusionContext::ParentContextExistsRecursive(FFusionContext* parent) const
+	Vec2 FFusionContext::GetAvailableSize() const
 	{
-		if (parent == parentContext)
+		if (IsGhosted())
+		{
+			return ghostedAvailableSize * availableSizeMultiplier;
+		}
+		return availableSize * availableSizeMultiplier;
+	}
+
+	bool FFusionContext::ParentContextExistsRecursive(Ref<FFusionContext> parent) const
+	{
+		if (parent == parentContext.Get())
 			return true;
 
 		if (!parentContext)
@@ -193,6 +209,11 @@ namespace CE
 			return true;
 
 		return true;
+	}
+
+	void FFusionContext::SetContextFocus()
+	{
+
 	}
 
 	bool FFusionContext::IsRootContext() const
@@ -288,6 +309,8 @@ namespace CE
 		popup->positionFound = false;
 		popup->controlSize = controlSize;
 
+		popup->SetContextRecursively(this);
+
 		MarkLayoutDirty();
 
 		GetRootContext()->SetFocusWidget(popup);
@@ -309,7 +332,7 @@ namespace CE
 
 		if (popup->isNativePopup)
 		{
-			FFusionContext* popupContext = popup->GetContext();
+			Ref<FFusionContext> popupContext = popup->GetContext();
 			if (popupContext)
 			{
 				popupContext->QueueDestroy();
@@ -386,6 +409,8 @@ namespace CE
 		{
 			FusionApplication::Get()->GetRootContext()->SetFocusWidget(focusWidget);
 		}
+
+		SetContextFocus();
 	}
 
 	bool FFusionContext::IsPopupWindow() const
@@ -403,20 +428,62 @@ namespace CE
 		return pos;
 	}
 
-	FWidget* FFusionContext::HitTest(Vec2 mousePosition)
+	FWidget* FFusionContext::HitTest(Vec2 mousePosition, bool requireFocus)
 	{
 		FWidget* hoveredWidget;
 
 		Vec2 screenPos = GlobalToScreenSpacePosition(mousePosition);
 
-		for (int i = childContexts.GetSize() - 1; i >= 0; --i)
-		{
-			FFusionContext* context = childContexts[i].Get();
+		Array<Ref<FFusionContext>> contexts = childContexts;
 
-			if (context->IsNativeContext())
+		if (!requireFocus)
+		{
+			contexts.Sort([&](Ref<FFusionContext> lhs, Ref<FFusionContext> rhs)
+				{
+					return lhs->GetZOrder() > rhs->GetZOrder();
+				});
+
+			int minZOrder = NumericLimits<int>::Max();
+
+			for (Ref<FFusionContext> context : contexts)
 			{
-				FNativeContext* nativeContext = static_cast<FNativeContext*>(context);
-				
+				if (context->IsGhosted())
+					continue;
+				minZOrder = Math::Min(minZOrder, context->GetZOrder());
+			}
+
+			if (minZOrder == NumericLimits<int>::Max() || GetZOrder() < minZOrder)
+			{
+				Rect windowRect = Rect::FromSize(Vec2(), GetAvailableSize());
+				if (windowRect.Contains(mousePosition))
+				{
+					for (int i = localPopupStack.GetSize() - 1; i >= 0; --i)
+					{
+						hoveredWidget = localPopupStack[i]->HitTest(mousePosition);
+						if (hoveredWidget || localPopupStack[i]->m_BlockInteraction)
+						{
+							return hoveredWidget;
+						}
+					}
+
+					if (owningWidget)
+					{
+						hoveredWidget = owningWidget->HitTest(mousePosition);
+						if (hoveredWidget)
+						{
+							return hoveredWidget;
+						}
+					}
+				}
+			}
+		}
+
+		for (int i = contexts.GetSize() - 1; i >= 0; --i)
+		{
+			Ref<FFusionContext> context = contexts[i];
+			if (context->IsGhosted())
+			{
+				continue;
 			}
 
 			hoveredWidget = context->HitTest(context->ScreenToGlobalSpacePosition(screenPos));
@@ -430,8 +497,10 @@ namespace CE
 				}
 			}
 
-			if (!context->IsFocused())
+			if (requireFocus && !context->IsFocused())
+			{
 				continue;
+			}
 
 			if (hoveredWidget)
 			{
@@ -439,16 +508,18 @@ namespace CE
 			}
 		}
 
-		Rect windowRect = Rect::FromSize(Vec2(), GetAvailableSize());
-		if (!windowRect.Contains(mousePosition))
-			return nullptr;
-
-		for (int i = localPopupStack.GetSize() - 1; i >= 0; --i)
 		{
-			hoveredWidget = localPopupStack[i]->HitTest(mousePosition);
-			if (hoveredWidget || localPopupStack[i]->m_BlockInteraction)
+			Rect windowRect = Rect::FromSize(Vec2(), GetAvailableSize());
+			if (!windowRect.Contains(mousePosition))
+				return nullptr;
+
+			for (int i = localPopupStack.GetSize() - 1; i >= 0; --i)
 			{
-				return hoveredWidget;
+				hoveredWidget = localPopupStack[i]->HitTest(mousePosition);
+				if (hoveredWidget || localPopupStack[i]->m_BlockInteraction)
+				{
+					return hoveredWidget;
+				}
 			}
 		}
 

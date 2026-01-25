@@ -30,7 +30,11 @@ namespace CE
 
     public:
 
-        
+        FIELD(EditAnywhere, Category = "Sandbox")
+        float cameraMoveSpeed = 10.0f;
+
+        FIELD(EditAnywhere, Category = "Sandbox")
+        float cameraRotateSpeed = 100.0f;
     };
     
 } // namespace CE

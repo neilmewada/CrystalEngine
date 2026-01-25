@@ -63,7 +63,7 @@ namespace CE
 
         FModelIndex CreateIndex(u32 row, u32 column, const Variant& data = Variant());
 
-        virtual FModelIndex GetParent(const FModelIndex& index) { return FModelIndex(); }
+        virtual FModelIndex GetParent(const FModelIndex& index) = 0;
 
         virtual FModelIndex GetIndex(u32 row, u32 column, const FModelIndex& parent = {}) = 0;
 

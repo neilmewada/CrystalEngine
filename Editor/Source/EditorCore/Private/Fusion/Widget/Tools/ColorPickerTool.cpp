@@ -64,9 +64,11 @@ namespace CE::Editor
 
         Super::Construct();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         const char* colorLabels[4] = { "R", "G", "B", "A" };
-        Color basicColors[4] = { Color::Red(), Color::Green(), Color::Blue(), Color::White() };
-        Color startColors[4] = { Color::Black(), Color::Black(), Color::Black(), Color::Clear() };
+        Color basicColors[4] = { Colors::Red, Colors::Green, Colors::Blue, Colors::White };
+        Color startColors[4] = { Colors::Black, Colors::Black, Colors::Black, Colors::Clear };
         ColorComponentField* colorFields[4] = { nullptr, nullptr, nullptr, nullptr };
 
         const char* hsvLabels[3] = { "H", "S", "V" };
@@ -104,7 +106,7 @@ namespace CE::Editor
                     .VAlign(VAlign::Top)
                     (
                         FNew(FLabel)
-                        .FontSize(10)
+                        .FontSize(fontSize)
                         .Text("Old"),
 
                         FAssignNew(ColorPickerPreview, previewOld)
@@ -118,7 +120,7 @@ namespace CE::Editor
                         .Height(32),
 
                         FNew(FLabel)
-                        .FontSize(10)
+                        .FontSize(fontSize)
                         .Text("New"),
 
                         FNew(FButton)
@@ -142,7 +144,7 @@ namespace CE::Editor
                     .FillRatio(0.5f)
                     .VAlign(VAlign::Top)
                     (
-                        FForEach { 4, [this, &colorLabels, &colorFields, &startColors, &basicColors]
+                        FForEach { 4, [this, &colorLabels, &colorFields, &startColors, &basicColors, fontSize]
                         	(int index) -> FWidget&
                             {
                                 return FNew(FHorizontalStack)
@@ -151,7 +153,7 @@ namespace CE::Editor
                                 .HAlign(HAlign::Fill)
                                 (
                                     FNew(FLabel)
-                                    .FontSize(12)
+                                    .FontSize(fontSize + 2)
                                     .Text(colorLabels[index]),
 
                                     FAssignNew(ColorComponentField, colorFields[index])
@@ -192,7 +194,7 @@ namespace CE::Editor
                     .FillRatio(0.5f)
                     .VAlign(VAlign::Top)
                     (
-                        FForEach{ 3, [this, &hsvLabels, &hsvFields, &hueGradient]
+                        FForEach{ 3, [this, &hsvLabels, &hsvFields, &hueGradient, fontSize]
                             (int index) -> FWidget&
                             {
                                 return FNew(FHorizontalStack)
@@ -201,7 +203,7 @@ namespace CE::Editor
                                 .HAlign(HAlign::Fill)
                                 (
                                     FNew(FLabel)
-                                    .FontSize(12)
+                                    .FontSize(fontSize + 2)
                                     .Text(hsvLabels[index]),
 
                                     FAssignNew(ColorComponentField, hsvFields[index])
@@ -242,11 +244,11 @@ namespace CE::Editor
                         .HAlign(HAlign::Right)
                         (
                             FNew(FLabel)
-                            .FontSize(10)
+                            .FontSize(fontSize)
                             .Text("Hex"),
 
                             FAssignNew(FTextInput, hexInput)
-                            .FontSize(10)
+                            .FontSize(fontSize)
                             .Text(FormatHex(value.ToU32()))
                             .OnTextEdited([this](FTextInput*)
                             {
@@ -265,12 +267,14 @@ namespace CE::Editor
 					FNew(FTextButton)
                     .Text("Ok")
                     .TextHAlign(HAlign::Center)
+                    .FontSize(fontSize)
                     .OnClicked(FUNCTION_BINDING(this, OnClickOk))
                     .Width(60),
 
                     FNew(FTextButton)
                     .Text("Cancel")
                     .TextHAlign(HAlign::Center)
+                    .FontSize(fontSize)
                     .OnClicked(FUNCTION_BINDING(this, OnClickCancel))
                     .Width(60)
                 )
@@ -506,7 +510,7 @@ namespace CE::Editor
         {
             lock->history = history;
 
-            FNativeContext* nativeContext = static_cast<FNativeContext*>(lock->GetContext());
+            Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(lock->GetContext());
             PlatformWindow* window = nativeContext->GetPlatformWindow();
             window->SetAlwaysOnTop(true);
             window->Show();
@@ -521,19 +525,19 @@ namespace CE::Editor
             .windowFlags = PlatformWindowFlags::Utility | PlatformWindowFlags::DestroyOnClose | PlatformWindowFlags::SkipTaskbar
         };
 
-        Ref<ColorPickerTool> colorPickerTool = (Ref<ColorPickerTool>)FusionApplication::Get()->CreateNativeWindow(
+        Ref<ColorPickerTool> colorPickerTool = Object::CastTo<ColorPickerTool>(FusionApplication::Get()->CreateNativeWindow(
             "ColorPickerTool", "Color Picker Tool",
             450, 535,
-            Self::StaticClass(), info);
+            Self::StaticClass(), info));
 
         colorPickerTool->history = history;
 
-        PlatformWindow* platformWindow = static_cast<FNativeContext*>(colorPickerTool->GetContext())->GetPlatformWindow();
+        PlatformWindow* platformWindow = CastTo<FNativeContext>(colorPickerTool->GetContext())->GetPlatformWindow();
         platformWindow->SetAlwaysOnTop(true);
 
         platformWindow->Show();
 
-        colorPickerTool->SetColor(Color::White());
+        colorPickerTool->SetColor(Colors::White);
         return colorPickerTool;
     }
 }

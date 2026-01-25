@@ -12,9 +12,11 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        ConstructMinorDockWindow();
+
         (*this)
 		.Title("Details")
-		.Content(
+		.Child(
 		    FNew(FScrollBox)
             .VerticalScroll(true)
             .HorizontalScroll(false)
@@ -43,7 +45,7 @@ namespace CE::Editor
 
         if (material)
         {
-            auto ownerEditor = GetOwnerEditor();
+            Ref<EditorBase> ownerEditor = GetOwnerEditor();
             editor = ObjectEditorRegistry::Get().Create(material.Get(), ownerEditor->GetHistory());
 
             editor->ExpandAll(true, true);

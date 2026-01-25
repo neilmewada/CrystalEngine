@@ -41,6 +41,8 @@ namespace CE
 
         void OnPaint(FPainter* painter) override;
 
+        void OnSceneChanged() override;
+
         Vec2i currentSize = Vec2i(0, 0);
 
         StaticArray<RPI::Texture*, RHI::Limits::MaxSwapChainImageCount> frames{};

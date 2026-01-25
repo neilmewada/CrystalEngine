@@ -12,6 +12,8 @@ namespace CE::RPI
 
 		void Update(u32 imageIndex);
 
+		auto& GetMaterialsMutex() { return materialsMutex; }
+
 	private:
 
 		MaterialSystem() = default;

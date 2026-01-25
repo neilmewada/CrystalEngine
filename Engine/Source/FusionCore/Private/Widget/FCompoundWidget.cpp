@@ -16,6 +16,11 @@ namespace CE
         if (!m_Child || !m_Child->Enabled())
             return;
 
+        if (GetName() == "DebugTreeView")
+        {
+            String::IsAlphabet('a');
+        }
+
         m_Child->CalculateIntrinsicSize();
 
         Vec2 childSize = m_Child->GetIntrinsicSize();
@@ -34,7 +39,7 @@ namespace CE
         if (!m_Child || !m_Child->Enabled())
             return;
 
-        if (GetName() == "ExpandableSectionContent")
+        if (GetName() == "DebugTreeView")
         {
             String::IsAlphabet('a');
         }
@@ -101,6 +106,8 @@ namespace CE
 
     void FCompoundWidget::OnPaint(FPainter* painter)
     {
+        ZoneScoped;
+
 	    Super::OnPaint(painter);
 
         if (!isCulled && m_Child && m_Child->Enabled() && m_Child->Visible())

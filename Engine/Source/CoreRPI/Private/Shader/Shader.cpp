@@ -33,7 +33,7 @@ namespace CE::RPI
 		return Name();
 	}
 
-	RPI::ShaderVariant* Shader::AddVariant(const ShaderVariantDescriptor2& variantDesc)
+	RPI::ShaderVariant* Shader::AddVariant(const ShaderVariantDescriptor& variantDesc)
 	{
 		ShaderVariant* variant = new ShaderVariant(variantDesc);
 		variants.Add(variant);

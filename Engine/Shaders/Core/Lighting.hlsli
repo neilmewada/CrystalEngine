@@ -1,53 +1,39 @@
 #ifndef __LIGHTING_HLSL__
 #define __LIGHTING_HLSL__
 
-#define MAX_DIRECTIONAL_LIGHTS 8
-
 #include "PBR/BRDF.hlsli"
+#include "LightingData.hlsli"
 
 #if FRAGMENT
 
-struct DirectionalLight
-{
-    float4x4 lightSpaceMatrix;
-    float4 direction;
-    float4 colorAndIntensity;
-    float temperature;
-    uint shadow;
-};
-
-struct PointLight
-{
-    float4 position;
-    float4 colorAndIntensity;
-    float radius;
-    float attenuation;
-};
-
-cbuffer _DirectionalLightsArray : SRG_PerScene(b0)
-{
-    DirectionalLight _DirectionalLights[MAX_DIRECTIONAL_LIGHTS];
-};
-
-StructuredBuffer<PointLight> _PointLights : SRG_PerScene(t1);
-
-cbuffer _LightData : SRG_PerScene(b2)
-{
-    float4 ambient;
-    uint totalDirectionalLights;
-    uint totalPointLights;
-};
-
-SamplerState _ShadowMapSampler : SRG_PerScene(s3);
-
 // - Per Pass -
+
 Texture2D<float> _DirectionalShadowMap : SRG_PerPass(t0);
 
-TextureCube<float4> _Skybox : SRG_PerScene(t5);
-SamplerState _DefaultSampler : SRG_PerScene(s6);
-TextureCube<float4> _SkyboxIrradiance : SRG_PerScene(t7);
-SamplerState _SkyboxSampler : SRG_PerScene(s8);
-Texture2D<float2> _BrdfLut : SRG_PerScene(s9);
+// index into _LocalLights
+StructuredBuffer<uint> _LightIndexPool : SRG_PerPass(t1);
+
+// {offset, count}
+StructuredBuffer<uint2> _TileHeaders : SRG_PerPass(t2);
+
+Texture2DMS<float> _DepthMap : SRG_PerPass(t3);
+
+inline float sqr(float x)
+{
+    return x * x;
+}
+
+float AttenuateCusp(float distance, float radius, float max_intensity, float falloff)
+{
+    float s = distance / radius;
+
+    if (s >= 1.0)
+        return 0.0;
+
+    float s2 = sqr(s);
+
+    return max_intensity * sqr(1 - s2) / (1 + falloff * s);
+}
 
 float CalculateDirectionalShadow(in float4 lightSpacePos, in float NdotL)
 {

@@ -133,7 +133,7 @@ namespace CE
                 self->AddToken(TK_PERIOD, curLine, ".");
                 break;
             case '#':
-                self->AddToken(TK_POUNDSIGN, curLine);
+                self->AddToken(TK_POUNDSIGN, curLine, "#");
                 break;
             case ':':
                 if (cursor < length - 1 && source[cursor + 1] == ':')
@@ -147,13 +147,13 @@ namespace CE
                 }
                 break;
             case ';':
-                self->AddToken(TK_SEMICOLON, curLine);
+                self->AddToken(TK_SEMICOLON, curLine, ";");
                 break;
             case ',':
-                self->AddToken(TK_COMMA, curLine);
+                self->AddToken(TK_COMMA, curLine, ",");
                 break;
             case '\\':
-                self->AddToken(TK_BACKSLASH, curLine);
+                self->AddToken(TK_BACKSLASH, curLine, "\\");
                 break;
             case '/':
             {
@@ -265,7 +265,7 @@ namespace CE
                 }
                 else if (c == '&')
                 {
-                    self->AddToken(TK_AMPERSAND, curLine);
+                    self->AddToken(TK_AMPERSAND, curLine, "&");
                 }
                 else // |
                 {

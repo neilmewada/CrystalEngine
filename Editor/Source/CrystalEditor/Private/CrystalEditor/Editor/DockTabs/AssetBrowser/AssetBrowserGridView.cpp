@@ -3,6 +3,7 @@
 namespace CE::Editor
 {
     static constexpr f32 MinContextMenuWidth = 200;
+    static constexpr Vec4 ContextMenuPadding = Vec4(2, 10, 2, 10);
 
     AssetBrowserGridView::AssetBrowserGridView()
     {
@@ -13,7 +14,7 @@ namespace CE::Editor
     {
         Super::Construct();
 
-
+        contextMenu->ContentPadding(ContextMenuPadding);
     }
 
     void AssetBrowserGridView::DeselectAll()
@@ -21,6 +22,11 @@ namespace CE::Editor
         for (AssetBrowserItem* item : items)
         {
             item->Deselect();
+        }
+
+        if (Ref<AssetBrowser> assetBrowser = m_Owner.Lock())
+        {
+            assetBrowser->OnItemSelectionUpdated();
         }
     }
 
@@ -30,12 +36,16 @@ namespace CE::Editor
         {
             item->Select();
         }
+
+        if (Ref<AssetBrowser> assetBrowser = m_Owner.Lock())
+        {
+            assetBrowser->OnItemSelectionUpdated();
+        }
     }
 
     void AssetBrowserGridView::SetCurrentDirectory(const CE::Name& directory)
     {
         this->currentPath = directory;
-
     }
 
     int AssetBrowserGridView::GetSelectedItemCount()
@@ -103,6 +113,13 @@ namespace CE::Editor
                 AddChild(
                     FAssignNew(AssetBrowserItem, item)
                     .Owner(this)
+                    .OnSelect([this](FSelectableButton* button)
+                    {
+	                    if (Ref<AssetBrowser> assetBrowser = m_Owner.Lock())
+                        {
+                            assetBrowser->OnItemSelectionUpdated();
+						}
+                    })
                     .OnDoubleClick([this](FSelectableButton* button)
                     {
                         if (auto registry = AssetRegistry::Get())
@@ -179,7 +196,9 @@ namespace CE::Editor
         if (!currentPath.GetString().StartsWith("/Game/Assets"))
             return;
 
-        Ref<EditorMenuPopup> contextMenu = BuildNoSelectionContextMenu();
+        contextMenu->ClosePopup();
+
+        BuildNoSelectionContextMenu();
 
         GetContext()->PushLocalPopup(contextMenu.Get(), globalMousePos, Vec2());
     }
@@ -190,7 +209,8 @@ namespace CE::Editor
         if (selectedItems.IsEmpty())
             return;
 
-        //Ref<EditorMenuPopup> contextMenu = CreateObject<EditorMenuPopup>(this, "ContextMenu");
+        contextMenu->ClosePopup();
+
         contextMenu->QueueDestroyAllItems();
 
         contextMenu->MinWidth(MinContextMenuWidth);
@@ -236,7 +256,6 @@ namespace CE::Editor
 
     Ref<EditorMenuPopup> AssetBrowserGridView::BuildNoSelectionContextMenu()
     {
-        //Ref<EditorMenuPopup> contextMenu = CreateObject<EditorMenuPopup>(this, "ContextMenu");
         contextMenu->QueueDestroyAllItems();
 
         contextMenu->AutoClose(true);
@@ -269,7 +288,18 @@ namespace CE::Editor
             }),
 
             FNew(FMenuItemSeparator)
-            .Title("NEW"),
+            .Title("BASIC ASSETS"),
+
+            NewMenuItem()
+            .Text("Scene")
+            .Icon(FBrush("/Editor/Assets/Icons/Scene"))
+            .OnClick([this]
+            {
+                if (auto owner = m_Owner.Lock())
+                {
+                    owner->CreateNewAsset<CE::Scene>();
+                }
+            }),
 
             NewMenuItem()
             .Text("Material")
@@ -280,6 +310,41 @@ namespace CE::Editor
                 {
                     owner->CreateNewAsset<CE::Material>();
                 }
+            }),
+
+            FNew(FMenuItemSeparator)
+            .Title("ADVANCED ASSETS"),
+
+            NewMenuItem()
+            .Text("Physics")
+            .SubMenu(
+                FNew(EditorMenuPopup)
+                .Content(
+                    NewMenuItem()
+                    .Text("Physics Material")
+                    .Icon(FBrush("/Editor/Assets/Icons/Bounce"))
+                    .OnClick([this]
+                    {
+                        if (auto owner = m_Owner.Lock())
+                        {
+                            owner->CreateNewAsset<CE::PhysicsMaterial>();
+                        }
+                    })
+                )
+                .ContentPadding(ContextMenuPadding)
+                .MinWidth(MinContextMenuWidth)
+                .As<EditorMenuPopup>()
+            ),
+
+            FNew(FMenuItemSeparator)
+            .Title("MISC"),
+
+			NewMenuItem()
+            .Text("Open in " + PlatformMisc::GetSystemFileExplorerDisplayName())
+            .Icon(FBrush("/Editor/Assets/Icons/OpenFolder"))
+            .OnClick([this]
+            {
+                EditorPlatform::OpenPathInFileExplorer(Bundle::GetAbsoluteDirectoryPath(currentPath));
             })
         );
 
@@ -296,6 +361,9 @@ namespace CE::Editor
         bool canBeModified = true;
         bool homogenousTypes = true;
         PathTreeNodeType itemType = (PathTreeNodeType)-1;
+        CE::Name fullPath = selectedItems[0]->GetFullPath();
+        bool isDirectory = selectedItems[0]->IsDirectory();
+		IO::Path absolutePath = isDirectory ? Bundle::GetAbsoluteDirectoryPath(fullPath) : Bundle::GetAbsoluteBundlePath(fullPath);
 
         for (AssetBrowserItem* item : selectedItems)
         {
@@ -349,17 +417,33 @@ namespace CE::Editor
             );
         }
 
+        contextMenu
+        .Content(
+            FNew(FMenuItemSeparator)
+            .Title("MISC"),
+
+            NewMenuItem()
+            .Text("Open in " + PlatformMisc::GetSystemFileExplorerDisplayName())
+            .Icon(FBrush("/Editor/Assets/Icons/OpenFolder"))
+            .OnClick([this, absolutePath]
+            {
+                EditorPlatform::OpenPathInFileExplorer(absolutePath);
+            })
+        );
+
         return true;
     }
 
     FMenuItem& AssetBrowserGridView::NewMenuItem()
     {
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         return 
         FNew(FMenuItem)
         //.Text("New Folder")
         .IconEnabled(true)
         //.Icon(FBrush("/Editor/Assets/Icons/NewFolder"))
-        .FontSize(9)
+        .FontSize(fontSize)
         .ContentPadding(Vec4(5, -2, 5, -2));
     }
 

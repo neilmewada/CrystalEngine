@@ -28,6 +28,8 @@ namespace CE
 
 		virtual u32 GetLodSubMeshCount(u32 lodIndex) { return 1; }
 
+		virtual int GetLodSubMeshMaterialIndex(u32 lodIndex, u32 subMeshIndex) { return 0; }
+
 		RPI::CustomMaterialMap GetRpiMaterialMap();
 
 		Ref<MaterialInterface> GetMaterial(u32 subMeshIndex = 0);
@@ -46,10 +48,12 @@ namespace CE
 
 		void OnFieldEdited(const Name& fieldName) override;
 
+		void OnFieldChanged(const Name& fieldName) override;
+
 	protected:
 
 		//! @brief Materials per LOD mesh
-		FIELD(EditAnywhere, Category = "Materials", ArrayEditorMode = "Static", ArrayElementName = "LOD {}")
+		FIELD(EditAnywhere, Category = "Materials", ArrayEditorMode = "Static", ArrayElementName = "LOD {}", ArrayElementTypeName = "")
         Array<LodMaterial> materialsPerLod{};
 
 

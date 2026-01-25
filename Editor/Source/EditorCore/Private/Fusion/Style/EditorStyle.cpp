@@ -69,11 +69,11 @@ namespace CE::Editor
 		clearButton->background = 
 			clearButton->hoveredBackground =
 			clearButton->pressedBackground = 
-			clearButton->disabledBackground = Color::Clear();
+			clearButton->disabledBackground = Colors::Clear;
 		clearButton->cornerRadius = Vec4(0, 0, 0, 0);
 		clearButton->borderColor = 
 			clearButton->hoveredBorderColor =
-			clearButton->pressedBorderColor = Color::Clear();
+			clearButton->pressedBorderColor = Colors::Clear;
 		clearButton->borderWidth = 0.0f;
 		clearButton->contentMoveY = 0;
 
@@ -86,16 +86,16 @@ namespace CE::Editor
 		underlineButton->background =
 			underlineButton->hoveredBackground =
 			underlineButton->pressedBackground =
-			underlineButton->disabledBackground = Color::Clear();
+			underlineButton->disabledBackground = Colors::Clear;
 		underlineButton->cornerRadius = Vec4();
 		underlineButton->borderColor =
 			underlineButton->hoveredBorderColor =
-			underlineButton->pressedBorderColor = Color::Clear();
+			underlineButton->pressedBorderColor = Colors::Clear;
 		underlineButton->borderWidth = 0.0f;
 		underlineButton->contentMoveY = 0;
 
-		underlineButton->underline = FPen(Color::White(), 1, FPenStyle::DottedLine);
-		underlineButton->hoverUnderline = FPen(Color::White(), 1, FPenStyle::SolidLine);
+		underlineButton->underline = FPen(Colors::White, 1, FPenStyle::DottedLine);
+		underlineButton->hoverUnderline = FPen(Colors::White, 1, FPenStyle::SolidLine);
 		underlineButton->pressedUnderline = FPen();
 
 		if (!highlightedButton)
@@ -129,11 +129,11 @@ namespace CE::Editor
 			Add("Button.WindowClose", windowCloseButton);
 		}
 
-		windowCloseButton->background = Color::Clear();
+		windowCloseButton->background = Colors::Clear;
 		windowCloseButton->hoveredBackground = Color::RGBA(161, 57, 57);
 		windowCloseButton->hoveredBackground = Color::RGBA(196, 43, 28);
 		windowCloseButton->pressedBackground = Color::RGBA(178, 43, 30);
-		windowCloseButton->borderColor = Color::Clear();
+		windowCloseButton->borderColor = Colors::Clear;
 		windowCloseButton->borderWidth = 0.0f;
 		windowCloseButton->cornerRadius = Vec4();
 		windowCloseButton->contentMoveY = 0;
@@ -144,10 +144,10 @@ namespace CE::Editor
 			Add("Button.WindowControl", windowControlButton);
 		}
 
-		windowControlButton->background = Color::Clear();
+		windowControlButton->background = Colors::Clear;
 		windowControlButton->hoveredBackground = Color::RGBA(58, 58, 58);
 		windowControlButton->pressedBackground = Color::RGBA(48, 48, 48);
-		windowControlButton->borderColor = Color::Clear();
+		windowControlButton->borderColor = Colors::Clear;
 		windowControlButton->borderWidth = 0.0f;
 		windowControlButton->cornerRadius = Vec4();
 		windowControlButton->contentMoveY = 0;
@@ -197,9 +197,9 @@ namespace CE::Editor
 			Add(comboBoxItem);
 		}
 
-		comboBoxItem->background = Color::Clear();
+		comboBoxItem->background = Colors::Clear;
 		comboBoxItem->hoverBackground = highlightColor;
-		comboBoxItem->selectedBackground = Color::Clear();
+		comboBoxItem->selectedBackground = Colors::Clear;
 		comboBoxItem->selectedShape = FShapeType::RoundedRect;
 		comboBoxItem->shapeCornerRadius = Vec4(1, 1, 1, 1) * 3;
 		comboBoxItem->selectedBorderColor = highlightColor;
@@ -288,10 +288,10 @@ namespace CE::Editor
 			Add("Button.Icon", iconButton);
 		}
 
-		iconButton->background = iconButton->disabledBackground = Color::Clear();
+		iconButton->background = iconButton->disabledBackground = Colors::Clear;
 		iconButton->hoveredBackground = Color::RGBA(255, 255, 255, 60);
 		iconButton->pressedBackground = Color::RGBA(255, 255, 255, 30);
-		iconButton->borderColor = Color::Clear();
+		iconButton->borderColor = Colors::Clear;
 		iconButton->borderWidth = 0;
 		iconButton->cornerRadius = Vec4(1, 1, 1, 1) * 4;
 
@@ -301,10 +301,10 @@ namespace CE::Editor
 			Add("Button.CircleIcon", circleIconButton);
 		}
 
-		circleIconButton->background = circleIconButton->disabledBackground = Color::Clear();
+		circleIconButton->background = circleIconButton->disabledBackground = Colors::Clear;
 		circleIconButton->hoveredBackground = Color::RGBA(255, 255, 255, 60);
 		circleIconButton->pressedBackground = Color::RGBA(255, 255, 255, 30);
-		circleIconButton->borderColor = Color::Clear();
+		circleIconButton->borderColor = Colors::Clear;
 		circleIconButton->borderWidth = 0;
 		circleIconButton->backgroundShape = FShapeType::Circle;
 
@@ -326,6 +326,9 @@ namespace CE::Editor
 
 		GetDefaultWidget<EditorMenuPopup>()
 			.Style(menuPopup->GetName());
+		
+		GetDefaultWidget<AddComponentMenu>()
+			.Style(menuPopup->GetName());
 
     	GetDefaultWidget<AssetSelectionPopup>()
     		.Style(menuPopup->GetName());
@@ -336,7 +339,7 @@ namespace CE::Editor
 			Add(menuBar);
 		}
 
-		menuBar->background = Color::Black();
+		menuBar->background = Colors::Black;
 		menuBar->itemPadding = Vec4(5, 5, 5, 5);
 		menuBar->itemHoverBackground = highlightColor;
 
@@ -370,7 +373,7 @@ namespace CE::Editor
 		projectBrowserTabView->tabItemShape = FRoundedRectangle(5, 5, 0, 0);
 
     	projectBrowserTabView->containerBackground = projectBrowserTabView->tabItemActiveBackground;
-		projectBrowserTabView->containerBorderColor = Color::Clear();
+		projectBrowserTabView->containerBorderColor = Colors::Clear;
 		projectBrowserTabView->containerBorderWidth = 0.0f;
 
 		if (!projectBrowserWindow)
@@ -391,12 +394,12 @@ namespace CE::Editor
 		projectBrowserListView->borderWidth = 1.0f;
 		projectBrowserListView->borderColor = Color::RGBA(56, 56, 56);
 
-		projectBrowserListView->itemBackground = Color::Clear();
+		projectBrowserListView->itemBackground = Colors::Clear;
 		projectBrowserListView->hoveredItemBackground = highlightColor;
 		projectBrowserListView->selectedItemBackground = highlightColor;
 
 		projectBrowserListView->itemBorderWidth = 0.0f;
-		projectBrowserListView->itemBorderColor = Color::Clear();
+		projectBrowserListView->itemBorderColor = Colors::Clear;
 
     }
 
@@ -420,34 +423,25 @@ namespace CE::Editor
 		GetDefaultWidget<EditorDockspace>()
 			.Style(editorDockspace->GetName());
 
-		if (!editorMinorDockspace)
+		if (!editorMajorDockWindow)
 		{
-			editorMinorDockspace = CreateObject<EditorMinorDockspaceStyle>(this, "EditorMinorDockspace");
-			Add(editorMinorDockspace);
+			editorMajorDockWindow = CreateObject<FStyledWidgetStyle>(this, "EditorMajorDockWindow");
+			editorMajorDockWindow->background = Color::RGBA(26, 26, 26);
+			Add(editorMajorDockWindow);
 		}
 
-		GetDefaultWidget<EditorMinorDockspace>()
-			.Style(editorMinorDockspace->GetName());
+		GetDefaultWidget<EditorDockWindow>()
+			.Style(editorMajorDockWindow->GetName());
 
-		if (!editorDockTab)
+		if (!editorMinorDockWindow)
 		{
-			editorDockTab = CreateObject<EditorDockTabStyle>(this, "EditorDockTab");
-			Add(editorDockTab);
+			editorMinorDockWindow = CreateObject<FStyledWidgetStyle>(this, "EditorMinorDockWindow");
+			editorMinorDockWindow->background = Color::RGBA(36, 36, 36);
+			Add(editorMinorDockWindow);
 		}
 
-		editorDockTab->background = Color::RGBA(26, 26, 26);
-
-		GetDefaultWidget<EditorDockTab>()
-			.Style(editorDockTab->GetName());
-
-		if (!editorMinorDockTab)
-		{
-			editorMinorDockTab = CreateObject<EditorDockTabStyle>(this, "EditorMinorDockTab");
-			Add(editorMinorDockTab);
-		}
-
-		GetDefaultWidget<EditorMinorDockTab>()
-			.Style(editorMinorDockTab->GetName());
+		//GetDefaultWidget<EditorDockWindow>()
+		//	.Style(editorMinorDockWindow->GetName());
 
 		if (!editorToolBar)
 		{
@@ -456,7 +450,7 @@ namespace CE::Editor
 		}
 
 		editorToolBar->background = Color::RGBA(36, 36, 36);
-		editorToolBar->borderColor = Color::Clear();
+		editorToolBar->borderColor = Colors::Clear;
 		editorToolBar->borderWidth = 0.0f;
 
 		GetDefaultWidget<EditorToolBar>()
@@ -469,14 +463,14 @@ namespace CE::Editor
 		}
 
 		editorMenuBar->background = editorToolBar->background;
-		editorMenuBar->borderColor = Color::Clear();
+		editorMenuBar->borderColor = Colors::Clear;
 		editorMenuBar->borderWidth = 0.0f;
 
-    	editorMenuBar->itemBackground = Color::Clear();
+    	editorMenuBar->itemBackground = Colors::Clear;
     	editorMenuBar->itemHoverBackground = Color::RGBA(64, 64, 64);
 		editorMenuBar->itemActiveBackground = highlightColor;
-		editorMenuBar->itemBorderColor = Color::Clear();
-		editorMenuBar->itemHoverBorderColor = Color::Clear();
+		editorMenuBar->itemBorderColor = Colors::Clear;
+		editorMenuBar->itemHoverBorderColor = Colors::Clear;
 		editorMenuBar->itemPadding = Vec4(2, 1, 2, 1) * 5;
 		
 		GetDefaultWidget<EditorMenuBar>()
@@ -508,11 +502,11 @@ namespace CE::Editor
 			Add("Button.DetailsRow", detailsRow);
 		}
 
-		detailsRow->background = detailsRow->disabledBackground = Color::Clear();
+		detailsRow->background = detailsRow->disabledBackground = Colors::Clear;
 		detailsRow->hoveredBackground = detailsRow->pressedBackground = Color::RGBA(47, 47, 47);
 		detailsRow->cornerRadius = Vec4();
 		detailsRow->contentMoveY = 0;
-		detailsRow->borderColor = Color::Clear();
+		detailsRow->borderColor = Colors::Clear;
 		detailsRow->borderWidth = 0;
 
     	if (!objectEditorField)

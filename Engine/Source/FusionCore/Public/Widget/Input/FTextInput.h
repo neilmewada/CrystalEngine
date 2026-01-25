@@ -137,7 +137,7 @@ namespace CE
 
         FHorizontalStack* GetContentStack() const { return contentStack; }
 
-        void StartEditing(bool selectAll);
+        void StartEditing(bool selectAll, bool cursorAtEnd = false);
         void StopEditing(bool restoreOriginal = false);
 
         void HandleEvent(FEvent* event) override;

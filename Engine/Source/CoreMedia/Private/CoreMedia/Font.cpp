@@ -83,8 +83,10 @@ namespace CE
 				pen_y += ((face->size->metrics.height >> 6) + 1) + padding;
 			}
 
-			for (int row = 0; row < bmp->rows; ++row) {
-				for (int col = 0; col < bmp->width; ++col) {
+			for (int row = 0; row < bmp->rows; ++row) 
+			{
+				for (int col = 0; col < bmp->width; ++col) 
+				{
 					int x = pen_x + col;
 					int y = pen_y + row;
 					pixels[y * tex_width + x] = bmp->buffer[row * bmp->pitch + col];

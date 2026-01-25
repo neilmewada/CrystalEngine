@@ -1,0 +1,27 @@
+{
+    "entryPoints" : [
+        {
+            "name" : "VertMain",
+            "mode" : "vert"
+        }
+    ],
+    "inputs" : [
+        {
+            "type" : "vec4",
+            "name" : "in.var.POSITION",
+            "location" : 0
+        },
+        {
+            "type" : "vec2",
+            "name" : "in.var.TEXCOORD0",
+            "location" : 1
+        }
+    ],
+    "outputs" : [
+        {
+            "type" : "vec2",
+            "name" : "out.var.TEXCOORD0",
+            "location" : 0
+        }
+    ]
+}

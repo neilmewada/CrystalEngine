@@ -29,6 +29,22 @@ namespace CE
 		platformInput->Tick();
 	}
 
+	bool InputManager::IsKeyHeldDelayed(KeyCode key)
+	{
+		if (!Get().keyStatesDelayed.KeyExists(key))
+		{
+			return false;
+		}
+
+		if (Get().curTime - Get().keyStatesDelayed[key].lastEnabledTime < 25)
+		{
+			return false;
+		}
+
+		Get().keyStatesDelayed[key].lastEnabledTime = Get().curTime;
+		return Get().keyStatesDelayed[key].state;
+	}
+
 	void InputManager::ProcessInputEvents(void* nativeEvent)
 	{
 		platformInput->ProcessInputEvent(nativeEvent);

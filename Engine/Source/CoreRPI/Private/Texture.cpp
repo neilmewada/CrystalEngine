@@ -24,6 +24,17 @@ namespace CE::RPI
 
         texture = RHI::gDynamicRHI->CreateTexture(desc.texture);
 
+		RHI::TextureViewDescriptor viewDesc{};
+		viewDesc.arrayLayerCount = desc.texture.arrayLayers;
+		viewDesc.mipLevelCount = desc.texture.mipLevels;
+        viewDesc.baseMipLevel = 0;
+		viewDesc.baseArrayLayer = 0;
+		viewDesc.dimension = desc.texture.dimension;
+		viewDesc.format = desc.texture.format;
+		viewDesc.texture = texture;
+
+		//textureView = RHI::gDynamicRHI->CreateTextureView(viewDesc);
+
         samplerState = RPISystem::Get().FindOrCreateSampler(desc.samplerDesc);
 
         if (desc.source == nullptr)
@@ -117,13 +128,13 @@ namespace CE::RPI
         UploadData(data, dataSize);
     }
 
-    Texture::Texture(const Array<CMImage>& sourceImageMips, const RHI::SamplerDescriptor& samplerDesc)
+    Texture::Texture(const Name& imageName, const Array<CMImage>& sourceImageMips, const RHI::SamplerDescriptor& samplerDesc)
     {
         if (sourceImageMips.IsEmpty())
             return;
 
         RHI::TextureDescriptor desc{};
-        desc.name = "CMImage";
+        desc.name = imageName;
         desc.bindFlags = RHI::TextureBindFlags::ShaderRead;
         desc.mipLevels = sourceImageMips.GetSize();
         desc.arrayLayers = 1;
@@ -371,4 +382,28 @@ namespace CE::RPI
         delete uploadFence;
     }
 
+    void Texture::TransitionResourceTo(RHI::ResourceState fromState, RHI::ResourceState toState)
+    {
+		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+        RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue, CommandListType::Direct);
+		RHI::Fence* fence = RHI::gDynamicRHI->CreateFence(false);
+
+        cmdList->Begin();
+		{
+            RHI::ResourceBarrierDescriptor barrier;
+            barrier.resource = texture;
+            barrier.fromState = fromState;
+            barrier.toState = toState;
+            barrier.subresourceRange = RHI::SubresourceRange::All();
+
+            cmdList->ResourceBarrier(1, &barrier);
+		}
+        cmdList->End();
+
+        queue->Execute(1, &cmdList, fence);
+        fence->WaitForFence();
+
+    	RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
+        delete fence;
+    }
 } // namespace CE::RPI

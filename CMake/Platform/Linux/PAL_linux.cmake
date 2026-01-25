@@ -49,9 +49,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     add_compile_definitions(COMPILER_CLANG=1)
 
 else()
-    message(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER_ID} not supported in ${PAL_PLATFORM_NAME}. Only clang is supported on linux!")
+    message(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER_ID} not supported in ${PAL_PLATFORM_NAME}. Please install clang on linux!")
 endif()
-
 
 
 ce_set(PAL_PLATFORM_IS_64_BIT 1)

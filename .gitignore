@@ -5,6 +5,7 @@ ThirdParty/*
 !ThirdParty/*.cmake
 !ThirdParty/cmake
 !ThirdParty/vendor
+Engine/Assets/Sponza/*
 
 # Prerequisites
 *.d

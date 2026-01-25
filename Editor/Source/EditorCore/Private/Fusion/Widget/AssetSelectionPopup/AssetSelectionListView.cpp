@@ -19,6 +19,8 @@ namespace CE::Editor
 
     FListViewRow& AssetSelectionListView::GenerateRow()
     {
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         return
         FNew(FListViewRow)
         .Child(
@@ -30,10 +32,11 @@ namespace CE::Editor
             .Padding(Vec4(10, 0, 10, 0))
             (
                 FNew(FLabel)
-                .Text("Title"),
+                .Text("Title")
+                .FontSize(fontSize),
 
                 FNew(FLabel)
-                .FontSize(8)
+                .FontSize(fontSize - 2)
                 .Text("Path")
                 .Foreground(Color::RGBA(255, 255, 255, 140))
             )

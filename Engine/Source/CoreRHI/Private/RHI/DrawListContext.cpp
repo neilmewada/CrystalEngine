@@ -72,6 +72,8 @@ namespace CE::RHI
 
 	void DrawListContext::AddDrawItem(DrawItemProperties drawItem, DrawListTag drawListTag)
 	{
+		ZoneScoped;
+
 		DrawListsByTag& threadDrawListsByTag = this->threadDrawListsByTag.GetStorage();
 		threadDrawListsByTag[drawListTag].AddDrawItem(drawItem);
 		threadDrawListsByTag[drawListTag].listTag = drawListTag;
@@ -79,6 +81,8 @@ namespace CE::RHI
 
 	void DrawListContext::Finalize()
 	{
+		ZoneScoped;
+
 		for (int i = 0; i < mergedDrawListsByTag.GetSize(); i++)
 		{
 			mergedDrawListsByTag[i].Clear();

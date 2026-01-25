@@ -5,7 +5,9 @@ namespace CE
 
     EditorDockspaceStyle::EditorDockspaceStyle()
     {
-        
+        background = Color::RGBA(26, 26, 26);
+
+        tabWellStyle = CreateDefaultSubobject<FDockTabWellStyle>("DockTabWell");
     }
 
     EditorDockspaceStyle::~EditorDockspaceStyle()
@@ -20,41 +22,9 @@ namespace CE
 
     void EditorDockspaceStyle::MakeStyle(FWidget& widget)
     {
-        EditorDockspace& dockspace = widget.As<EditorDockspace>();
+		Super::MakeStyle(widget);
 
-        dockspace
-			.Background(background)
-			.BorderColor(borderColor)
-			.BorderWidth(borderWidth)
-			.TitleBarBackground(titleBarBackground)
-    	;
-
-        dockspace.GetProjectLabelParent()->Background(projectLabelBackground);
-
-        for (int i = 0; i < dockspace.GetTabItemCount(); ++i)
-        {
-            EditorDockTabItem& tab = *dockspace.GetTabItem(i);
-
-            FBrush bg = inactiveTabBackground;
-            Color tabBorder = inactiveTabBorder;
-
-            if (tab.IsActive())
-            {
-	            bg = activeTabBackground;
-                tabBorder = activeTabBorder;
-            }
-            else if (tab.IsHovered())
-            {
-                bg = hoveredTabBackground;
-                tabBorder = hoveredTabBorder;
-            }
-
-            tab
-				.Background(bg)
-				.Border(tabBorder, tabBorderWidth)
-				.CornerRadius(tabCornerRadius)
-        	;
-        }
+        
     }
     
 } // namespace CE

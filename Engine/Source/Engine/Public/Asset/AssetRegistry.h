@@ -7,6 +7,7 @@ namespace CE
 		class AssetImporter;
 		class EditorAssetManager;
 		class EditorAssetManager;
+		class EditorBase;
 	}
 #endif
 
@@ -16,13 +17,13 @@ namespace CE
 	{
 		virtual ~IAssetRegistryListener() {}
 
-		virtual void OnAssetImported(const Name& bundleName, const Name& sourcePath = "") {}
+		virtual void OnAssetImported(const Name& bundlePath, const Name& sourcePath = "") {}
 
 		virtual void OnAssetUnloaded(Uuid bundleUuid) {}
 
 		virtual void OnAssetDeleted(const Name& bundlePath) {}
 
-		virtual void OnAssetRenamed(Uuid bundleUuid, const Name& oldName, const Name& newName) {}
+		virtual void OnAssetRenamed(Uuid bundleUuid, const Name& oldName, const Name& newName, const Name& newPath) {}
 
 		virtual void OnDirectoryRenamed(const Name& oldPath, const Name& newPath) {}
 
@@ -98,6 +99,8 @@ namespace CE
 
 		void OnAssetImported(const IO::Path& bundleAbsolutePath, const Name& sourcePath = "");
 
+		void OnAssetUpdated(const Name& bundlePath);
+
 		void OnDirectoryCreated(const IO::Path& absolutePath);
 
 		void OnDirectoryRenamed(const Name& originalPath, const Name& newName);
@@ -132,6 +135,7 @@ namespace CE
 		friend class CE::Editor::EditorAssetManager;
 		friend class CE::Editor::AssetImporter;
 		friend class CE::Editor::EditorAssetManager;
+		friend class CE::Editor::EditorBase;
 #endif
 		IO::FileWatcher fileWatcher{};
 		IO::WatchID fileWatchID = 0;

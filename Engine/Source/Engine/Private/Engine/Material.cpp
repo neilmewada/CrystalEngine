@@ -308,6 +308,29 @@ namespace CE
         propertyMap[name] = prop;
     }
 
+    void CE::Material::SetProperty(const Name& name, const MaterialTextureValue& textureValue)
+    {
+        valuesModified = true;
+
+        if (propertyMap.KeyExists(name))
+        {
+            properties.RemoveFirst([&](const MaterialProperty& prop) { return prop.name == name; });
+        }
+
+        MaterialProperty prop{};
+        prop.name = name;
+        prop.textureValue = textureValue;
+        prop.propertyType = MaterialPropertyType::Texture;
+
+        properties.Add(prop);
+        propertyMap[name] = prop;
+    }
+
+    void CE::Material::MarkDirty()
+    {
+        valuesModified = true;
+    }
+
     void CE::Material::ApplyProperties()
     {
         if (material == nullptr)
@@ -356,6 +379,21 @@ namespace CE
                     {
                         material->SetPropertyValue(prop.name, builtinTexture);
                         material->SetPropertyValue(prop.name.GetString() + "Transform", Vec4(prop.textureValue.offset, prop.textureValue.scaling));
+                    }
+                    else if (Ref<Bundle> bundle = GetBundle())
+                    {
+                        IO::Path curPath = bundle->GetBundlePath().GetString();
+                        curPath = curPath.GetParentPath();
+
+                        String curPathStr = curPath.GetString().Replace({ '\\' }, '/') + "/" + prop.textureValue.textureName.GetString();
+                        if (Ref<CE::Texture2D> texture = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Texture2D>(curPathStr))
+                        {
+	                        if (RPI::Texture* rpiTexture = texture->GetRpiTexture())
+	                        {
+                                material->SetPropertyValue(prop.name, rpiTexture);
+                                material->SetPropertyValue(prop.name.GetString() + "Transform", Vec4(prop.textureValue.offset, prop.textureValue.scaling));
+	                        }
+                        }
                     }
                 }
                 break;

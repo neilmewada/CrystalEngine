@@ -4,23 +4,6 @@ namespace CE::Editor
 {
     static constexpr const char OperationName[] = "Delete Array Element";
 
-    static HashSet<TypeId> serializableOpaqueTypes = {
-        TYPEID(u8), TYPEID(s8),
-        TYPEID(u16), TYPEID(s16),
-        TYPEID(u32), TYPEID(s32),
-        TYPEID(u64), TYPEID(s64),
-        TYPEID(f32), TYPEID(f64),
-        TYPEID(Uuid),
-        TYPEID(String), TYPEID(CE::Name),
-        TYPEID(Vec2), TYPEID(Vec2i),
-        TYPEID(Vec3), TYPEID(Vec3i),
-        TYPEID(Vec4), TYPEID(Vec4i),
-        TYPEID(Color),
-        TYPEID(ClassType), TYPEID(StructType),
-        TYPEID(EnumType),
-        TYPEID(SubClassType<>)
-    };
-
     ArrayPropertyEditor::ArrayPropertyEditor()
     {
 
@@ -77,13 +60,15 @@ namespace CE::Editor
     {
         right->DestroyAllChildren();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         auto printError = [&](const String& msg)
             {
                 right->AddChild(
                     FNew(FLabel)
-                    .FontSize(10)
+                    .FontSize(fontSize)
                     .Text("Error: " + msg)
-                    .Foreground(Color::Red())
+                    .Foreground(Colors::Red)
                 );
             };
 
@@ -176,7 +161,8 @@ namespace CE::Editor
         (*right)
         .Gap(10)
         (
-            FAssignNew(FLabel, countLabel),
+            FAssignNew(FLabel, countLabel)
+            .FontSize(fontSize),
 
             FNew(FImageButton)
             .Image(addIcon)
@@ -273,7 +259,7 @@ namespace CE::Editor
 	    {
             const Array<u8>& arrayValue = field->GetFieldValue<Array<u8>>(instance);
             auto arrayInstance = (void*)arrayValue.GetData();
-            String arrayElementFieldPath = String::Format("{}[{}]", field->GetName(), i);
+            String arrayElementFieldPath = String::Format("{}[{}]", relativeFieldPath, i);
 	        String fieldNameFormat = "Index {}";
 
             if (i >= elementEditors.GetSize())
@@ -282,6 +268,26 @@ namespace CE::Editor
                 PropertyEditor* propertyEditor = PropertyEditorRegistry::Get()->Create(arrayElements[i], objectEditor);
 
                 propertyEditor->SetIndentationLevel(GetIndentationLevel() + 1);
+
+                Ref<Object> elementTarget = target;
+                if (TypeInfo* underlyingType = field->GetUnderlyingType())
+                {
+	                if (underlyingType->IsObject())
+	                {
+		                if (field->IsStrongRefCounted())
+		                {
+                            elementTarget = field->GetArrayElementValueAt<Ref<Object>>(i, instance);
+		                }
+                        else if (field->IsWeakRefCounted())
+                        {
+                            elementTarget = field->GetArrayElementValueAt<WeakRef<Object>>(i, instance).Lock();
+                        }
+                        else
+                        {
+                            elementTarget = field->GetArrayElementValueAt<Object*>(i, instance);
+                        }
+	                }
+                }
 
                 propertyEditor->InitTarget({ target }, arrayElementFieldPath);
 
@@ -443,7 +449,7 @@ namespace CE::Editor
                         arrayField->InsertArrayElement(instance);
                         operation->SetArrayIndex(arrayField->GetArraySize(instance) - 1);
 
-                        target->OnFieldChanged(arrayField->GetName());
+                        target->OnFieldChanged(arrayFieldPath);
 
                         return true;
                     }
@@ -472,7 +478,7 @@ namespace CE::Editor
 
                         arrayField->DeleteArrayElement(instance, index);
 
-                        target->OnFieldChanged(arrayField->GetName());
+                        target->OnFieldChanged(arrayFieldPath);
 
                         return true;
                     }

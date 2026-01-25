@@ -85,6 +85,31 @@ namespace CE
             return Impl.contains(key);
         }
 
+        inline auto Find(const KeyType& key)
+        {
+            return Impl.find(key);
+		}
+
+        inline auto Begin()
+        {
+            return Impl.begin();
+        }
+
+        inline auto End()
+        {
+            return Impl.end();
+        }
+
+        inline auto Begin() const
+        {
+            return Impl.begin();
+		}
+
+        inline auto End() const
+        {
+            return Impl.end();
+        }
+
         inline ValueType& operator[](const KeyType& key)
         {
             return Impl[key];
@@ -139,9 +164,6 @@ namespace CE
 
         inline const auto begin() const { return Impl.begin(); }
         inline const auto end() const { return Impl.end(); }
-
-        inline auto Begin() { return begin(); }
-        inline auto End() { return end(); }
 
     private:
         ankerl::unordered_dense::map<KeyType, ValueType, HashFunc<KeyType>> Impl;

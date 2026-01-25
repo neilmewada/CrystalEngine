@@ -24,6 +24,7 @@ static void CERegisterModuleTypes()
 {
     CE_REGISTER_TYPES(
 		VariantTests::VariantStruct,
+		BundleTests::PODSample,
         BundleTests::WritingTestObj1,
 		BundleTests::WritingTestObj2,
 		BundleTests::MyTextureDescriptor,
@@ -50,6 +51,7 @@ static void CEDeregisterModuleTypes()
 {
     CE_DEREGISTER_TYPES(
 		VariantTests::VariantStruct,
+		BundleTests::PODSample,
         BundleTests::WritingTestObj1,
         BundleTests::WritingTestObj2,
 		BundleTests::MyMaterial,
@@ -563,6 +565,16 @@ TEST(Containers, Variant)
 	}
 	testObject->BeginDestroy(); testObject = nullptr;
 
+	// Ref
+	{
+		Ref<Object> test = CreateObject<Object>(nullptr, "TestObj");
+
+		Variant variant = test;
+		Ref<Object> testVal = variant.GetValue<Ref<Object>>();
+
+		EXPECT_EQ(testVal, test);
+	}
+
 	// Struct
 	{
 		VariantStruct testStruct{};
@@ -637,6 +649,64 @@ bool Vec4Equals(const Vec4& lhs, const Vec4& rhs)
 		Math::Abs(lhs.y - rhs.y) <= epsilon &&
 			Math::Abs(lhs.z - rhs.z) <= epsilon &&
 				Math::Abs(lhs.w - rhs.w) <= epsilon;
+}
+
+TEST(Containers, Math)
+{
+	TEST_BEGIN;
+
+	// 1. Vector
+	{
+		constexpr Vec4 vec = Vec4(1, 2, 3, 4);
+		static_assert(vec.x == 1);
+		static_assert(vec.y == 2);
+		static_assert(vec.z == 3);
+		static_assert(vec.w == 4);
+
+		constexpr Vec4 copy = vec;
+		static_assert(copy.x == 1);
+		static_assert(copy.y == 2);
+		static_assert(copy.z == 3);
+		static_assert(copy.w == 4);
+
+		constexpr Vec4 addition = Vec4(1, 2, 3, 4) + Vec4(1, 2, 3, 4);
+		static_assert(addition.x == 1*2);
+		static_assert(addition.y == 2*2);
+		static_assert(addition.z == 3*2);
+		static_assert(addition.w == 4*2);
+
+		constexpr float dot = Vec4::Dot(Vec4(1, 1, 1, 1), Vec4(1, 1, 1, 1));
+		static_assert(dot == 4);
+	}
+
+	// 2. Color
+	{
+		constexpr Color c = Color(0, 1, 0, 1);
+		static_assert(c.r == 0);
+		static_assert(c.g == 1);
+		static_assert(c.b == 0);
+		static_assert(c.a == 1);
+
+		constexpr Color copy = c;
+		static_assert(copy.r == 0);
+		static_assert(copy.g == 1);
+		static_assert(copy.b == 0);
+		static_assert(copy.a == 1);
+
+		constexpr Color c2 = Color::RGBA(0, 255, 255, 255);
+		static_assert(c2.r == 0);
+		static_assert(c2.g == 1);
+		static_assert(c2.b == 1);
+		static_assert(c2.a == 1);
+
+		constexpr Color clear = Colors::Clear;
+		static_assert(clear.r == 0);
+		static_assert(clear.g == 0);
+		static_assert(clear.b == 0);
+		static_assert(clear.a == 0);
+	}
+
+	TEST_END;
 }
 
 TEST(Containers, Matrix)
@@ -3378,6 +3448,18 @@ TEST(Bundle, Basic)
 
 	IO::Path bundlePath = PlatformDirectories::GetLaunchDir() / "BasicTestBundle.casset";
 
+	// 0. Basic checks
+	{
+		EXPECT_FALSE(TYPE(CE::String)->HasCustomPODSerialization());
+    	EXPECT_TRUE(TYPE(PODSample)->HasCustomPODSerialization());
+
+		Ptr<FieldType> opaquePodField = WritingTestObj2::StaticClass()->FindField("opaquePod");
+		EXPECT_NE(opaquePodField, nullptr);
+		EXPECT_TRUE(opaquePodField->IsPODField());
+		EXPECT_TRUE(opaquePodField->GetDeclarationType()->IsPOD());
+		EXPECT_TRUE(opaquePodField->GetDeclarationType()->HasCustomPODSerialization());
+	}
+
 	// 1. Write
     {
 	    Ref<Bundle> bundle = CreateObject<Bundle>(nullptr, "BasicTestBundle");
@@ -3386,6 +3468,7 @@ TEST(Bundle, Basic)
     	EXPECT_EQ(testObject->GetOuter(), bundle);
 
 		testObject->testStruct.obj1Ptr = nullptr;
+		testObject->opaquePod.value = 1234;
 		testObject->objectArray.Add(bundle);
 		testObject->value = 123;
 		testObject->testStruct.obj1Ptr = nullptr;
@@ -3416,7 +3499,8 @@ TEST(Bundle, Basic)
     	EXPECT_EQ(testObject->GetSubObjectCount(), 0);
     	EXPECT_EQ(testObject->GetOuter(), bundle);
 
-    	EXPECT_EQ(testObject->value, 123);
+		EXPECT_EQ(testObject->value, 123);
+		EXPECT_EQ(testObject->opaquePod.value, 1234);
     	EXPECT_EQ(testObject->objectArray.GetSize(), 1);
     	EXPECT_EQ(testObject->objectArray[0], bundle);
     	EXPECT_EQ(testObject->testStruct.owner, bundle);

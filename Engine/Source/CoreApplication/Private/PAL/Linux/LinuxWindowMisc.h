@@ -12,6 +12,8 @@ namespace CE
 
         static void SetupBorderlessWindow(SDLPlatformWindow* window, bool borderless) {}
 
+        static int GetWindowZOrder(SDLPlatformWindow* window);
+
     };
 
     typedef LinuxWindowMisc PlatformWindowMisc;

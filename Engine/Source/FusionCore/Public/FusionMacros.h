@@ -27,6 +27,7 @@
 		PropertyType m_##PropertyName = {};\
 	public:\
 		Self& PropertyName(PropertyType const& value) {\
+			ZoneScoped;\
 			if constexpr (TEquitable<PropertyType>::Value)\
 			{\
 				if (TEquitable<PropertyType>::AreEqual(this->m_##PropertyName, value))\
@@ -39,7 +40,7 @@
 			DirtyFunc;}\
 			return *this;\
 		}\
-		const auto& PropertyName() const { return this->m_##PropertyName; }
+		auto PropertyName() const { return this->m_##PropertyName; }
 
 #define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkLayoutDirty())
 
@@ -49,9 +50,11 @@
 	__FUSION_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
 	PropertyBinding<PropertyType> m_##PropertyName##Binding{};\
 	void Update_##PropertyName(CE::Object* modifyingObject = nullptr) {\
+		ZoneScoped;\
 		if (m_##PropertyName##Binding.read.IsBound() && this != modifyingObject) PropertyName(m_##PropertyName##Binding.read());\
 	}\
 	Self& Bind_##PropertyName(const PropertyBindingRequest<PropertyType>& request) {\
+		ZoneScoped;\
 		m_##PropertyName##Binding.read = request.read;\
 		m_##PropertyName##Binding.write = request.write;\
 		request.onModifiedExternally.Bind(FUNCTION_BINDING(this, Update_##PropertyName));\
@@ -62,11 +65,6 @@
 #define FUSION_DATA_PROPERTY(PropertyType, PropertyName, ...) __FUSION_DATA_PROPERTY(PropertyType, PropertyName, MarkDirty())
 
 #define FUSION_DATA_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_DATA_PROPERTY(PropertyType, PropertyName, MarkLayoutDirty())
-
-#define BIND_PROPERTY(modelPtr, propertyName, getter, setter) {\
-		getter, setter,\
-		modelPtr->On##propertyName##Updated()\
-	}
 
 #define BIND_PROPERTY_RW(modelPtr, propertyName) CE::PropertyBindingRequest<std::remove_cvref_t<TFunctionTraits<decltype(&std::remove_cvref_t<decltype(*modelPtr)>::Get##propertyName)>::ReturnType>>(\
 	FUNCTION_BINDING(model, Get##propertyName),\
@@ -83,7 +81,7 @@
 		PropertyType m_##PropertyName = {};\
 		FUSION_EVENT(ScriptEvent<void(Object*)>, On##PropertyName##Updated)\
 	public:\
-		const auto& Get##PropertyName() const { return m_##PropertyName; }\
+		auto Get##PropertyName() const { return m_##PropertyName; }\
 		void Set##PropertyName(const PropertyType& value, Object* modifyingObject = nullptr) {\
 			m_##PropertyName = value; m_On##PropertyName##Updated(modifyingObject);\
 			thread_local const CE::Name propName = #PropertyName;\
@@ -98,7 +96,7 @@
 		WrappingVariable->PropertyName(value);\
 		return *this;\
 	}\
-	const auto& PropertyName() const { return WrappingVariable->PropertyName(); }
+	auto PropertyName() const { return WrappingVariable->PropertyName(); }
 
 #define FUSION_PROPERTY_WRAPPER2(PropertyName, WrappingVariable, WrappedPropertyName)\
 	Self& WrappedPropertyName(const __WRAPPED_PROP_TYPE(PropertyName, WrappingVariable)& value) {\
@@ -106,7 +104,7 @@
 		WrappingVariable->PropertyName(value);\
 		return *this;\
 	}\
-	const auto& WrappedPropertyName() const { return WrappingVariable->PropertyName(); }
+	auto WrappedPropertyName() const { return WrappingVariable->PropertyName(); }
 
 #define FUSION_DATA_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\
 	FUSION_PROPERTY_WRAPPER(PropertyName, WrappingVariable)\

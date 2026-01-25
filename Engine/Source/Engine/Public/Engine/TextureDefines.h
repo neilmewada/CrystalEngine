@@ -41,6 +41,8 @@ namespace CE
 
 	ENGINE_API RHI::Format ToRHIFormat(CE::TextureFormat format, bool isSrgb = false);
 
+	ENGINE_API CE::TextureFormat ToTextureFormat(CMImageFormat format);
+
 	/// Texture source data format
 	ENUM()
 	enum class TextureSourceCompressionFormat

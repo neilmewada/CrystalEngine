@@ -17,12 +17,18 @@ namespace CE::Editor
 
         void SetActor(Actor* actor);
 
+        void Update();
+
         void SelectItem(ComponentTreeItem* item);
 
         void Expand(ComponentTreeViewRow* expandRow);
         void Collapse(ComponentTreeViewRow* collapseRow);
 
         void ToggleExpand(ComponentTreeViewRow* row);
+
+        ComponentTreeItem* GetSelectedItem() const { return selectedItem; }
+
+        Ref<ComponentTreeItem> GetActorItem() const { return actorItem; }
 
     public: // - Fusion Properties - 
 
@@ -38,6 +44,7 @@ namespace CE::Editor
         HashSet<ComponentTreeItem*> expandedItems;
 
         ComponentTreeItem* selectedItem = nullptr;
+        Ref<ComponentTreeItem> actorItem;
 
         FUSION_WIDGET;
         friend class ComponentTreeViewStyle;

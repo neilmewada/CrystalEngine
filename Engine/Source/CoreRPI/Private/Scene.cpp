@@ -72,6 +72,7 @@ namespace CE::RPI
 	{
 		AddFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
 		AddFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
+		AddFeatureProcessor<RPI::LocalLightFeatureProcessor>();
 	}
 
 	void Scene::AddView(SceneViewTag viewTag, ViewPtr view)
@@ -125,7 +126,7 @@ namespace CE::RPI
 		return viewsByTag[viewTag].views;
 	}
 
-	void Scene::Simulate(f32 currentTime)
+	void Scene::Simulate(f32 currentTime, u32 imageIndex)
 	{
 		ZoneScoped;
 
@@ -219,7 +220,7 @@ namespace CE::RPI
 
 		for (FeatureProcessor* fp : featureProcessors)
 		{
-			fp->Simulate({});
+			fp->Simulate({ .imageIndex = imageIndex });
 		}
 	}
 
@@ -258,8 +259,6 @@ namespace CE::RPI
 
 		for (RenderPipeline* renderPipeline : renderPipelines)
 		{
-			//View* targetView = renderPipeline->view;
-
 			renderPipeline->GetPassTree()->IterateRecursively([&](Pass* pass)
 				{
 					if (!pass || pass->IsParentPass())
@@ -354,7 +353,7 @@ namespace CE::RPI
 					const auto& inputOutputBindings = pass->GetInputOutputBindings();
 					const auto& outputBindings = pass->GetOutputBindings();
 
-					DrawListTag drawListTag = pass->GetDrawListTag();
+					RHI::DrawListTag drawListTag = pass->GetDrawListTag();
 					SceneViewTag viewTag = pass->GetViewTag();
 					if (!drawListTag.IsValid())
 						return;
@@ -386,8 +385,8 @@ namespace CE::RPI
 							Ptr<PassAttachment> attachment = binding.GetOriginalAttachment();
 							if (attachment == nullptr)
 								return;
-							if (attachment->attachmentDescriptor.type == AttachmentType::Image &&
-								(binding.attachmentUsage == ScopeAttachmentUsage::Color || binding.attachmentUsage == ScopeAttachmentUsage::DepthStencil))
+							if (attachment->attachmentDescriptor.type == RHI::AttachmentType::Image &&
+								(binding.attachmentUsage == RHI::ScopeAttachmentUsage::Color || binding.attachmentUsage == RHI::ScopeAttachmentUsage::DepthStencil))
 							{
 								const RPI::ImageAttachmentDescriptor& attachmentDesc = attachment->attachmentDescriptor.imageDesc;
 

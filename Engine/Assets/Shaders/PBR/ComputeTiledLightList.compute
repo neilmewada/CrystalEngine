@@ -1,0 +1,195 @@
+#pragma kernel CSMain
+
+// SRG includes
+#include "Core/Macros.hlsli"
+#include "Core/ViewData.hlsli"
+#include "Core/LightingData.hlsli"
+#include "Core/SceneData.hlsli"
+
+// --------------------------- Resources --------------------------------------
+
+// NDC constants for Vulkan
+// vulkan ndc, minDepth = 0.0, maxDepth = 1.0
+static const float2 ndc_upper_left = float2(-1.0, -1.0);
+static const float2 ndc_lower_right = float2(1.0, 1.0);
+static const float ndc_near_plane = 0.0;
+static const float ndc_far_plane = 1.0;
+static const float min_depth = 0.0;
+static const float max_depth = 1.0;
+
+// Light index pool - stores indices into _LocalLights array
+RWStructuredBuffer<uint> _LightIndexPool : SRG_PerPass(u1);
+
+// Tile headers - stores {offset, count} for each tile
+RWStructuredBuffer<uint2> _TileHeaders : SRG_PerPass(u2);
+
+// Pool allocator - atomic counter for managing light index pool
+RWStructuredBuffer<uint> _PoolAlloc : SRG_PerPass(u3);
+
+Texture2D<float> _DepthMap : SRG_PerPass(t4);
+
+// --------------------------- Frustum helpers --------------------------------
+
+struct TileFrustumVS 
+{ 
+    float4 planes[6]; // plane.xyzw = (n.xyz, d); dot(n,P) + d = 0
+    float3 points[8]; // 0-3 near 4-7 far; order: topLeft, topRight, bottomRight, bottomLeft
+};
+
+inline float3 ScreenToWorldSpace(float2 screenPos, float ndcZ, in float4x4 invViewProj)
+{
+    float2 ndcXY = screenPos / pixelResolution * 2.0 - 1.0;
+
+    float4 clip = float4(ndcXY, ndcZ, 1);
+    float4 worldH = mul(clip, invViewProj);
+    return worldH.xyz / worldH.w;
+}
+
+inline float3 ScreenToViewSpace(float2 screenPos, float ndcZ, in float4x4 invProj)
+{
+    float2 ndcXY = screenPos / pixelResolution * 2.0 - 1.0;
+
+    float4 clip = float4(ndcXY, ndcZ, 1);
+    float4 viewH = mul(clip, invProj);
+    return viewH.xyz / viewH.w;
+}
+
+inline float3 NDCToViewSpace(float2 ndcXY, float ndcZ, in float4x4 invProj)
+{
+    float4 clip = float4(ndcXY, ndcZ, 1);
+    float4 viewH = mul(clip, invProj);
+    return viewH.xyz / viewH.w;
+}
+
+float4 MakePlane(float3 a, float3 b, float3 c)
+{
+    float3 n = normalize(cross(b - a, c - a));
+    float d = -dot(n, a);
+    return float4(n, d);
+}
+
+bool IsCollided(LocalLightData light, TileFrustumVS frustum)
+{
+    float3 lightPosWS = light.worldPosAndRange.xyz;
+    float4 lightPosVS = mul(float4(lightPosWS, 1.0), viewMatrix);
+    lightPosVS /= lightPosVS.w;
+
+    const float range = light.worldPosAndRange.w;
+
+    for (int i = 0; i < 4; ++i)
+    {
+        if (dot(lightPosVS.xyz, frustum.planes[i].xyz) + frustum.planes[i].w < -range)
+		{
+			return false;
+		}
+    }
+
+    return true;
+}
+
+TileFrustumVS CreateTileFrustumVS(uint2 tilePos, in float4x4 invProj)
+{
+    const uint width = (uint)pixelResolution.x;
+    const uint height = (uint)pixelResolution.y;
+    const uint tilesX = (width + tileSizeX - 1) / tileSizeX;
+    const uint tilesY = (height + tileSizeY - 1) / tileSizeY;
+    //const uint tileId = ty * tilesX + tx;
+
+    TileFrustumVS fr;
+    
+    float2 pBase = float2(tilePos * uint2(tileSizeX, tileSizeY));
+
+    // NDC coordinates range: [-1, 1]
+    float2 p00 = pBase / pixelResolution.xy * 2.0f - 1.0f;
+    float2 p10 = float2(pBase.x + tileSizeX, pBase.y) / pixelResolution.xy * 2.0f - 1.0f;
+    float2 p01 = float2(pBase.x, pBase.y + tileSizeY) / pixelResolution.xy * 2.0f - 1.0f;
+    float2 p11 = float2(pBase.x + tileSizeX, pBase.y + tileSizeY) / pixelResolution.xy * 2.0f - 1.0f;
+
+    float3 topLeftFront = NDCToViewSpace(p00, 0.0, invProj);
+    float3 topLeftBack = NDCToViewSpace(p00, 1.0, invProj);
+    float3 topRightFront = NDCToViewSpace(p10, 0.0, invProj);
+    float3 topRightBack = NDCToViewSpace(p10, 1.0, invProj);
+    float3 bottomLeftFront = NDCToViewSpace(p01, 0.0, invProj);
+    float3 bottomLeftBack = NDCToViewSpace(p01, 1.0, invProj);
+    float3 bottomRightFront = NDCToViewSpace(p11, 0.0, invProj);
+    float3 bottomRightBack = NDCToViewSpace(p11, 1.0, invProj);
+
+    // fr.planes = left, top, right, bottom, front, back
+    fr.planes[0] = MakePlane(topLeftFront, topLeftBack, bottomLeftFront);
+    fr.planes[1] = MakePlane(topLeftFront, topRightFront, topRightBack);
+    fr.planes[2] = MakePlane(topRightFront, bottomRightFront, topRightBack);
+    fr.planes[3] = MakePlane(bottomLeftFront, bottomLeftBack, bottomRightFront);
+
+    fr.planes[4] = MakePlane(topRightFront, topLeftFront, bottomLeftFront); // front
+    fr.planes[5] = MakePlane(topRightBack, bottomRightBack, topLeftBack); // back
+
+    fr.points[0] = topLeftFront;
+    fr.points[1] = topRightFront;
+    fr.points[2] = bottomRightFront;
+    fr.points[3] = bottomLeftFront;
+    fr.points[4] = topLeftBack;
+    fr.points[5] = topRightBack;
+    fr.points[6] = bottomRightBack;
+    fr.points[7] = bottomLeftBack;
+
+    return fr;
+}
+
+// Main compute shader
+[numthreads(8, 8, 1)]
+void CSMain(uint3 dtid : SV_DispatchThreadID)
+{
+    // Derive tiling from current render target size
+    const uint width = (uint)pixelResolution.x;
+    const uint height = (uint)pixelResolution.y;
+    const uint tilesX = (width + tileSizeX - 1) / tileSizeX;
+    const uint tilesY = (height + tileSizeY - 1) / tileSizeY;
+
+    // Map global thread to tile coordinates
+    const uint tx = dtid.x;
+    const uint ty = dtid.y;
+
+    // Out-of-bounds threads (when tilesX/Y not multiples of 8)
+    if (tx >= tilesX || ty >= tilesY) return;
+
+    // Linear tile ID for headers/pool addressing
+    const uint tileId = ty * tilesX + tx;
+
+    // Get inverse view-projection matrix
+    //float4x4 invViewProj = inverse(viewProjectionMatrix);
+    const float4x4 invProj = inverse(projectionMatrix);
+
+    // Build this tile's frustum
+    TileFrustumVS fr = CreateTileFrustumVS(uint2(tx, ty), invProj);
+
+    // Pass 1: Count how many lights overlap this tile
+    uint count = 0;
+
+    for (uint i = 0; i < totalLocalLights; ++i)
+    {
+        if (IsCollided(_LocalLights[i], fr)) 
+            count++;
+    }
+
+    // Reserve a contiguous slice in the global pool
+    uint base = 0;
+    if (count > 0) 
+        InterlockedAdd(_PoolAlloc[0], count, base);
+
+    // Clamp to capacity if needed
+    if (base + count > lightIndexPoolCapacity)
+        count = (base < lightIndexPoolCapacity) ? (lightIndexPoolCapacity - base) : 0;
+
+    // Write per-tile header {offset, count}
+    _TileHeaders[tileId] = uint2(base, count);
+
+    // Pass 2: Fill the actual light indices
+    uint write = 0;
+    for (uint i = 0; i < totalLocalLights && write < count; ++i)
+    {
+        if (IsCollided(_LocalLights[i], fr))
+        {
+            _LightIndexPool[base + write++] = i; // index into _LocalLights
+        }
+    }
+}

@@ -14,6 +14,7 @@ namespace CE::Editor
 
         Child(
             FAssignNew(FStackBox, contentBox)
+            .Gap(5.0f)
             .Direction(FStackBoxDirection::Horizontal)
             .VAlign(VAlign::Fill)
             .HAlign(HAlign::Left)
@@ -32,6 +33,15 @@ namespace CE::Editor
         .Padding(Vec4(1, 1, 1, 1) * 8)
         .As<FImageButton>();
     }
-    
+
+    FWidget& EditorToolBar::NewSeparator()
+    {
+        return
+        FNewOwned(FStyledWidget, GetTransient(MODULE_NAME))
+        .Background(Color::RGBA(21, 21, 21))
+        .Width(1.0f)
+		.VAlign(VAlign::Fill)
+        ;
+    }
 }
 

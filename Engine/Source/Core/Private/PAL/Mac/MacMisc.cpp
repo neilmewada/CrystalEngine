@@ -27,5 +27,9 @@ namespace CE
 #endif
     }
 
+    String MacMisc::GetSystemFileExplorerDisplayName()
+    {
+        return "Finder";
+    }
 } // namespace CE
 

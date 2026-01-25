@@ -20,4 +20,9 @@ namespace CE::Editor
 	{
 		return CE::Shader::StaticClass();
 	}
+
+	Color ShaderAssetDefinition::GetColorTag()
+	{
+		return Color(0.7f, 0.4f, 1.0f, 1.0f);
+	}
 } // namespace CE::Editor

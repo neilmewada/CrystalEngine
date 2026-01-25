@@ -44,7 +44,8 @@ namespace CE::RHI
         None,
         Buffer,
         Texture,
-        SwapChain
+        SwapChain,
+        TextureView
     };
 
     struct FontDesc
@@ -194,6 +195,7 @@ namespace CE::RHI
 	ENUM_CLASS(Format);
 
     CORERHI_API u32 GetBitsPerPixelForFormat(RHI::Format format);
+    CORERHI_API u32 GetBitDepthForFormat(RHI::Format format);
     CORERHI_API u32 GetNumChannelsForFormat(RHI::Format format);
 
 	ENUM(Flags)

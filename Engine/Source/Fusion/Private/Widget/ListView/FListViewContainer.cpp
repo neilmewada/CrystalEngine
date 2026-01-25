@@ -340,8 +340,8 @@ namespace CE
                 rowWidget->isAlternate = rowIndex % 2 != 0;
                 rowWidget->isSelected = listView->selectedRows.Exists(rowIndex);
 
-                auto ctx = GetContext();
-                rowWidget->SetContextRecursively(ctx);
+                Ref<FFusionContext> ctx = GetContext();
+                rowWidget->SetContextRecursively(ctx.Get());
                 rowWidget->ApplyStyleRecursively();
 
                 rowWidget->Enabled(true);

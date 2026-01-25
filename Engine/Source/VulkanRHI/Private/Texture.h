@@ -48,12 +48,6 @@ namespace CE::Vulkan
         
         inline VkImageLayout GetCurrentImageLayout() const { return curImageLayout; }
 
-    protected:
-
-        void CopyPixelsFromBuffer(Buffer* srcBuffer);
-
-		void CopyPixelsToBuffer(Buffer* dstBuffer);
-
     private:
 
 		void Init(const RHI::TextureDescriptor& desc);

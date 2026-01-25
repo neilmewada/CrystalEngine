@@ -8,6 +8,8 @@ namespace CE
 
 		CORE_API Object* CreateObjectInternal(const ObjectCreateParams& params)
 		{
+			ZoneScoped;
+
 			if (params.objectClass == nullptr || !params.objectClass->CanBeInstantiated() || !params.objectClass->IsObject())
 				return nullptr;
 

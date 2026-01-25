@@ -18,6 +18,8 @@ namespace CE::Vulkan
         Device* device = nullptr;
         VkImageView imageView = nullptr;
         VkImageAspectFlags aspectMask{};
+
+        friend class CommandList;
     };
     
 } // namespace CE::Vulkan

@@ -73,9 +73,9 @@ namespace CE::Vulkan
 			vkSubmits.Add(submitInfo);
 		}
 
-		submissionMutex.Lock();
+		LockGuard guard{ submissionMutex };
+
 		vkQueueSubmit(queue, count, vkSubmits.GetData(), fence);
-		submissionMutex.Unlock();
 
 		return true;
 	}

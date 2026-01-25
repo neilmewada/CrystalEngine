@@ -3,9 +3,9 @@
 namespace CE
 {
     CLASS()
-    class CRYSTALEDITOR_API SceneTreeViewModel : public FAbstractItemModel
+    class CRYSTALEDITOR_API SceneTreeViewModel : public FTreeViewModel
     {
-        CE_CLASS(SceneTreeViewModel, FAbstractItemModel)
+        CE_CLASS(SceneTreeViewModel, FTreeViewModel)
     public:
 
         virtual ~SceneTreeViewModel();
@@ -19,6 +19,8 @@ namespace CE
         bool IsReady() override { return scene != nullptr; }
 
         FModelIndex GetIndex(u32 row, u32 column, const FModelIndex& parent) override;
+
+        FModelIndex GetParent(const FModelIndex& index) override;
 
         FModelIndex FindIndex(Actor* actor);
 

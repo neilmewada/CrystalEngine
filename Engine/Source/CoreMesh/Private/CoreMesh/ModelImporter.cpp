@@ -76,18 +76,23 @@ namespace CE
 				material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
 				outMat.diffuse = ToVec4(color);
 
+				color = aiColor3D(0.f, 0.f, 0.f);
 				material->Get(AI_MATKEY_COLOR_SPECULAR, color);
 				outMat.specular = ToVec4(color);
 
+				color = aiColor3D(0.f, 0.f, 0.f);
 				material->Get(AI_MATKEY_COLOR_EMISSIVE, color);
 				outMat.emissive = ToVec4(color);
 
+				color = aiColor3D(0.f, 0.f, 0.f);
 				material->Get(AI_MATKEY_COLOR_AMBIENT, color);
 				outMat.ambient = ToVec4(color);
 
+				color = aiColor3D(0.f, 0.f, 0.f);
 				material->Get(AI_MATKEY_COLOR_TRANSPARENT, color);
 				outMat.transparent = ToVec4(color);
 
+				color = aiColor3D(0.f, 0.f, 0.f);
 				material->Get(AI_MATKEY_COLOR_REFLECTIVE, color);
 				outMat.reflective = ToVec4(color);
 
@@ -95,41 +100,53 @@ namespace CE
 				material->Get(AI_MATKEY_REFLECTIVITY, floatValue);
 				outMat.reflectivity = floatValue;
 
+				floatValue = 0;
 				material->Get(AI_MATKEY_SHININESS, floatValue);
 				outMat.shininess = floatValue;
 
+				floatValue = 1;
 				material->Get(AI_MATKEY_OPACITY, floatValue);
 				outMat.opacity = floatValue;
 
+				floatValue = 1;
 				material->Get(AI_MATKEY_METALLIC_FACTOR, floatValue);
-				outMat.metallicFactor = floatValue;
+				outMat.metallicFactor = Math::Clamp01(floatValue);
 
+				floatValue = 1;
 				material->Get(AI_MATKEY_ROUGHNESS_FACTOR, floatValue);
-				outMat.roughnessFactor = floatValue;
+				outMat.roughnessFactor = 1.0f; // Note: There's some issue with roughness from assimp. It returns a negative number for sponza scene.
 
+				floatValue = 0;
 				material->Get(AI_MATKEY_ANISOTROPY_FACTOR, floatValue);
 				outMat.anisotropyFactor = floatValue;
 
 				aiString map{};
-				material->Get(AI_MATKEY_TEXTURE_DIFFUSE(i), map);
+				material->GetTexture(aiTextureType_DIFFUSE, 0, &map);
 				outMat.diffuseMap = map.C_Str();
 
-				material->Get(AI_MATKEY_TEXTURE(aiTextureType_AMBIENT_OCCLUSION, i), map);
+				map = "";
+				material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &map);
 				outMat.ambientOcclussionMap = map.C_Str();
 
-				material->Get(AI_MATKEY_TEXTURE_EMISSIVE(i), map);
+				map = "";
+				material->GetTexture(aiTextureType_EMISSIVE, 0, &map);
 				outMat.emissiveMap = map.C_Str();
-				
-				material->Get(AI_MATKEY_TEXTURE_NORMALS(i), map);
+
+				map = "";
+				int count = material->GetTextureCount(aiTextureType_NORMALS);
+				material->GetTexture(aiTextureType_NORMALS, 0, &map);
 				outMat.normalMap = map.C_Str();
 
-				material->Get(AI_MATKEY_TEXTURE_HEIGHT(i), map);
+				map = "";
+				material->GetTexture(aiTextureType_HEIGHT, 0, &map);
 				outMat.heightMap = map.C_Str();
-				
-				material->Get(AI_MATKEY_TEXTURE(aiTextureType_METALNESS, i), map);
+
+				map = "";
+				material->GetTexture(aiTextureType_METALNESS, 0, &map);
 				outMat.metallicMap = map.C_Str();
 
-				material->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE_ROUGHNESS, i), map);
+				map = "";
+				material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &map);
 				outMat.roughnessMap = map.C_Str();
 			}
 		}

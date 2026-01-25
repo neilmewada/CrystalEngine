@@ -524,6 +524,8 @@ namespace CE
         if (child)
         {
             Vec2 translation = child->Translation();
+			Vec2 original = translation;
+
             if (isHorizontalScrollVisible)
             {
                 translation.y = -value * (child->computedSize.y - (computedSize.y - scrollBarSection));
@@ -534,7 +536,10 @@ namespace CE
             }
             child->Translation(translation);
 
-            m_OnScrollValueChanged(this);
+            if (original != translation)
+            {
+                m_OnScrollValueChanged(this);
+            }
         }
         return *this;
     }
@@ -610,6 +615,7 @@ namespace CE
         if (child && isHorizontalScrollVisible)
         {
             Vec2 translation = child->Translation();
+			Vec2 original = translation;
             if (isVerticalScrollVisible)
             {
                 translation.x = -value * (child->computedSize.x - (computedSize.x - scrollBarSection));
@@ -620,7 +626,10 @@ namespace CE
             }
             child->Translation(translation);
 
-            m_OnScrollValueChanged(this);
+            if (original != translation)
+            {
+	            m_OnScrollValueChanged(this);
+            }
         }
         return *this;
     }

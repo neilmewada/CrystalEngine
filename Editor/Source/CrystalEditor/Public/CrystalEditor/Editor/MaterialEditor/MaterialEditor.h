@@ -24,7 +24,7 @@ namespace CE::Editor
 
         bool CanEdit(Ref<Object> targetObject) const override;
 
-        bool OpenEditor(Ref<Object> targetObject) override;
+        bool OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle) override;
 
         static Ref<MaterialEditor> Open(const CE::Name& materialAssetPath);
 

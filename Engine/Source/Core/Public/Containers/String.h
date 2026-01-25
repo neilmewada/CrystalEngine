@@ -364,7 +364,7 @@ namespace CE
 				s64 value = 0;
 				if (TryParseInteger(string, value))
 				{
-					outValue = StaticCast<T>(value);
+					outValue = static_cast<T>(value);
 					return true;
 				}
 				return false;
@@ -374,7 +374,7 @@ namespace CE
 				T value = 0;
 				if (TryParseFloat(string, value))
 				{
-					outValue = StaticCast<T>(value);
+					outValue = static_cast<T>(value);
 					return true;
 				}
 				return false;

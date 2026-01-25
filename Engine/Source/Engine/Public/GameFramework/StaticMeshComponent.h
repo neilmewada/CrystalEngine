@@ -13,9 +13,11 @@ namespace CE
 
 		~StaticMeshComponent();
 
-		virtual u32 GetLodCount() const override;
+		u32 GetLodCount() const override;
 
-		virtual u32 GetLodSubMeshCount(u32 lodIndex) override;
+		u32 GetLodSubMeshCount(u32 lodIndex) override;
+
+		int GetLodSubMeshMaterialIndex(u32 lodIndex, u32 subMeshIndex) override;
 
 		void SetStaticMesh(Ref<StaticMesh> staticMesh);
         

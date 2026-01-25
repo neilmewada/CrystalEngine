@@ -6,7 +6,7 @@ namespace CE
     FContainerWidget::FContainerWidget()
     {
         m_ClipChildren = false;
-        m_DebugColor = Color::Clear();
+        m_DebugColor = Colors::Clear;
     }
 
     Ref<FWidget> FContainerWidget::FindChildByName(const CE::Name& name, SubClass<FWidget> widgetClass)
@@ -119,6 +119,14 @@ namespace CE
         {
             children.Remove(child);
             children.InsertAt(index, child);
+        }
+    }
+
+    void FContainerWidget::RemoveChildAt(int index)
+    {
+        if (index < 0 || index >= children.GetSize())
+        {
+            RemoveChild(children[index].Get());
         }
     }
 

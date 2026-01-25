@@ -19,7 +19,7 @@ namespace CE::Editor
         void MakeStyle(FWidget& widget) override;
 
         FIELD()
-        FBrush rowBackground = Color::Clear();
+        FBrush rowBackground = Colors::Clear;
 
         FIELD()
         FBrush rowAlternateBackground = Color::RGBA(21, 21, 21);

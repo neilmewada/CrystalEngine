@@ -12,6 +12,10 @@ namespace CE
 
         FImage* GetIcon() const { return icon; }
 
+        void StartEditing();
+
+        Ref<FTreeViewRow> GetRow() { return row.Lock(); }
+
     protected:
 
         FTreeViewCell();
@@ -23,8 +27,10 @@ namespace CE
         FLabel* label = nullptr;
         FHorizontalStack* contentStack = nullptr;
 
-    public: // - Fusion Properties -
+        Ref<FTextInput> textInput;
+        WeakRef<FTreeViewRow> row;
 
+    public: // - Fusion Properties -
 
         FUSION_PROPERTY_WRAPPER(Text, label);
         FUSION_PROPERTY_WRAPPER(FontSize, label);
@@ -42,12 +48,14 @@ namespace CE
         Self& IconHeight(f32 value);
 
         FUSION_EVENT(ScriptDelegate<void()>, OnToggleExpansion);
+        FUSION_EVENT(ScriptDelegate<void(FTreeViewCell&, const String&)>, OnLabelEdited);
 
         bool ArrowExpanded();
         Self& ArrowExpanded(bool expanded);
 
         FUSION_WIDGET;
         friend class FTreeViewContainer;
+        friend class FTreeViewRow;
     };
     
 }

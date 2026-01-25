@@ -53,14 +53,21 @@ namespace CE
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
         Vec2 CalculateCharacterOffsets(Array<Vec2>& outOffsets, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+        Vec2 CalculateSDFCharacterOffsets(Array<Vec2>& outOffsets, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+
         Vec2 CalculateTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+        Vec2 CalculateSDFTextQuads(Array<Rect>& outQuads, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
+
         void CalculateUnderlinePositions(Array<Rect>& outLines, const String& text, const FFont& font, f32 width = 0, FWordWrap wordWrap = FWordWrap::Normal);
 
         FFontMetrics GetFontMetrics(const FFont& font);
+        FFontMetrics GetSDFFontMetrics(const FFont& font);
 
         u64 ComputeMemoryFootprint() override;
 
         // - State API -
+
+        void SetDebugName(const CE::Name& name);
 
         void Begin();
         void End();
@@ -117,6 +124,10 @@ namespace CE
         bool StrokeCircle(const Vec2& center, f32 radius, bool antiAliased = true);
 
         Vec2 DrawText(const String& text, Vec2 textPos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+        Vec2 DrawSDFText(const String& text, Vec2 textPos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+
+        Vec2 DrawSDFTextCached(Uuid cacheId, const String& text, Vec2 textPos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+        void ResetSDFTextCache(Uuid cacheId);
 
         void DrawViewport(const Rect& rect, FViewport* viewport);
 
@@ -130,6 +141,7 @@ namespace CE
         {
             DRAW_Geometry = 0,
             DRAW_Text,
+            DRAW_SDFText,
             DRAW_TextureNoTile,
             DRAW_TextureTileX,
             DRAW_TextureTileY,
@@ -144,6 +156,7 @@ namespace CE
         // - Internal Draw API -
 
         void DrawTextInternal(const Rect* quads, char* text, int length, const FFont& font, Vec2 textPos);
+        void DrawSDFTextInternal(const Rect* quads, char* text, int length, const FFont& font, Vec2 textPos);
 
         int CalculateNumCircleSegments(float radius) const;
 
@@ -279,7 +292,7 @@ namespace CE
         {
             Vec2 position;
             Vec2 uv;
-            u32 color = Color::White().ToU32();
+            u32 color = Colors::White.ToU32();
             FDrawType drawType = DRAW_Geometry;
             int index = -1;
         };
@@ -331,10 +344,22 @@ namespace CE
 
         StaticArray<bool, MaxImageCount> quadUpdatesRequired{};
 
+        // - Cache -
+
+        struct FTextCacheEntry
+        {
+            Uuid cacheId;
+            Vec2 finalSize;
+            Array<Rect> quads;
+		};
+
+		HashMap<Uuid, FTextCacheEntry> sdfTextCache;
+
         // - Setup -
 
         RHI::DrawListTag drawListTag = RHI::DrawListTag::NullValue;
 
+		CE::Name debugName;
         u32 numFrames = 0;
         int curImageIndex = 0;
         bool pixelPerfect = true;

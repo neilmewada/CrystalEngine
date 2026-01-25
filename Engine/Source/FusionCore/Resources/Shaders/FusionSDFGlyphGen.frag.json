@@ -1,0 +1,59 @@
+{
+    "entryPoints" : [
+        {
+            "name" : "FragMain",
+            "mode" : "frag"
+        }
+    ],
+    "types" : {
+        "_55" : {
+            "name" : "type._MaterialData",
+            "members" : [
+                {
+                    "name" : "_Spread",
+                    "type" : "int",
+                    "offset" : 0
+                }
+            ]
+        }
+    },
+    "inputs" : [
+        {
+            "type" : "vec2",
+            "name" : "in.var.TEXCOORD0",
+            "location" : 0
+        }
+    ],
+    "outputs" : [
+        {
+            "type" : "vec4",
+            "name" : "out.var.SV_TARGET",
+            "location" : 0
+        }
+    ],
+    "separate_images" : [
+        {
+            "type" : "texture2D",
+            "name" : "_FontAtlas",
+            "set" : 4,
+            "binding" : 0
+        }
+    ],
+    "separate_samplers" : [
+        {
+            "type" : "sampler",
+            "name" : "_FontAtlasSampler",
+            "set" : 4,
+            "binding" : 1
+        }
+    ],
+    "ubos" : [
+        {
+            "type" : "_55",
+            "name" : "type._MaterialData",
+            "block_size" : 4,
+            "set" : 4,
+            "binding" : 2
+        }
+    ]
+}

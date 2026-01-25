@@ -45,7 +45,7 @@ namespace CE
         Child(
             FAssignNew(FLabel, label)
             .FontSize(14)
-            .Foreground(Color::White())
+            .Foreground(Colors::White)
         );
     }
 

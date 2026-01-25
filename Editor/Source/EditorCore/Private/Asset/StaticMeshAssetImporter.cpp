@@ -26,6 +26,25 @@ namespace CE::Editor
 		};
 	}
 
+	Array<Name> StaticMeshAssetImportJob::PrepareProductAssetDependencies()
+	{
+		return Super::PrepareProductAssetDependencies();
+	}
+
+	inline String FixTextureFileName(const String& fileName)
+    {
+		if (fileName.IsEmpty())
+			return "";
+
+		String fixedName = fileName.Replace({ '\\' }, '/');
+
+		if (fixedName.EndsWith(".png") || fixedName.EndsWith(".jpg"))
+			fixedName = fixedName.GetSubstring(0, fixedName.GetLength() - 4);
+		if (fixedName.EndsWith(".jpeg"))
+			fixedName = fixedName.GetSubstring(0, fixedName.GetLength() - 5);
+
+		return fixedName;
+    }
 
     bool StaticMeshAssetImportJob::ProcessAsset(const Ref<Bundle>& bundle)
     {
@@ -44,7 +63,7 @@ namespace CE::Editor
 
 			if (object->IsOfType<StaticMesh>())
 			{
-				Ref<StaticMesh> staticMesh = static_cast<Ref<StaticMesh>>(object);
+				Ref<StaticMesh> staticMesh = Object::CastTo<StaticMesh>(object);
 				meshUuid = staticMesh->GetUuid();
 
 				if (staticMesh->GetSubObjectCount() >= 1 &&
@@ -127,12 +146,35 @@ namespace CE::Editor
 
 			material->SetShader(standardShader);
 
+			String diffuseMap = FixTextureFileName(materials[i].diffuseMap);
+			String normalMap = FixTextureFileName(materials[i].normalMap);
+			String roughnessMap = FixTextureFileName(materials[i].roughnessMap);
+			String metallicMap = FixTextureFileName(materials[i].metallicMap);
+
 			material->SetProperty("_Albedo", Color(materials[i].diffuse));
 			material->SetProperty("_Metallic", materials[i].metallicFactor);
 			material->SetProperty("_Roughness", materials[i].roughnessFactor);
 			material->SetProperty("_NormalStrength", 1.0f);
 
-			// TODO: Implement textures
+			if (diffuseMap.NotEmpty())
+			{
+				material->SetProperty("_AlbedoTex", MaterialTextureValue(diffuseMap));
+			}
+
+			if (normalMap.NotEmpty())
+			{
+				material->SetProperty("_NormalTex", MaterialTextureValue(normalMap));
+			}
+
+			if (roughnessMap.NotEmpty())
+			{
+				material->SetProperty("_RoughnessTex", MaterialTextureValue(roughnessMap));
+			}
+
+			if (metallicMap.NotEmpty())
+			{
+				material->SetProperty("_MetallicTex", MaterialTextureValue(metallicMap));
+			}
 
 			staticMesh->builtinMaterials.Add(material);
 		}

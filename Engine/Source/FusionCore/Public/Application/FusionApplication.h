@@ -14,11 +14,24 @@ namespace CE
     class FGameWindow;
     class FWindow;
 
+    struct FusionRawImageData
+    {
+		RHI::TextureView* textureView = nullptr;
+		RHI::ShaderResourceGroup* textureSrg = nullptr;
+
+        bool IsValid() const
+        {
+            return textureView != nullptr && textureSrg != nullptr;
+		}
+    };
+
     struct IFusionAssetLoader
     {
         virtual ~IFusionAssetLoader() = default;
 
         virtual RHI::Texture* LoadTextureAtPath(const Name& path) = 0;
+
+        virtual FusionRawImageData LoadRawTextureAtPath(const Name& path) = 0;
 
         virtual CMImage LoadImageAssetAtPath(const Name& path) = 0;
 
@@ -27,6 +40,7 @@ namespace CE
     struct FusionInitInfo
     {
         IFusionAssetLoader* assetLoader = nullptr;
+        ScriptDelegate<void(void)> rebuildFrameGraphMethod;
     };
 
     CLASS(Config = Engine)
@@ -64,8 +78,11 @@ namespace CE
         SystemCursor GetCursor();
         void PopCursor();
 
+        void DispatchOnMainThread(const Delegate<void(void)>& execute);
+
         CMImage LoadImageAsset(const Name& assetPath);
         int LoadImageResource(const IO::Path& resourcePath, const Name& imageName);
+        FusionRawImageData LoadRawTextureAtPath(const Name& path);
 
         int FindOrCreateSampler(const RHI::SamplerDescriptor& samplerDesc);
 
@@ -76,6 +93,8 @@ namespace CE
         void Tick();
 
         void RequestFrameGraphUpdate();
+
+        void RebuildFrameGraph();
 
         RPI::Shader* GetFusionShader() const { return fusionShader; }
         RPI::Shader* GetFusionShader2() const { return fusionShader2; }
@@ -100,16 +119,26 @@ namespace CE
             const SubClass<FWindow>& windowClass, 
             const PlatformWindowInfo& info = {});
 
-        template<typename TWindow> requires TIsBaseClassOf<FWindow, TWindow>::Value
+        template<typename TWindow> requires TIsBaseClassOf<FWindow, TWindow>::Value and (!TIsSameType<FWindow, TWindow>::Value)
         Ref<TWindow> CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height,
+            SubClass<TWindow> windowClass,
             const PlatformWindowInfo& info = {})
         {
-            return (Ref<TWindow>)CreateNativeWindow(windowName, title, width, height, TWindow::StaticClass(), info);
+            if (windowClass == nullptr)
+            {
+                windowClass = TWindow::StaticClass();
+			}
+            return Object::CastTo<TWindow>(CreateNativeWindow(windowName, title, width, height, static_cast<SubClass<FWindow>>(windowClass.GetClassType()), info));
+        }
+
+        template<typename TWindow> requires TIsBaseClassOf<FWindow, TWindow>::Value and (!TIsSameType<FWindow, TWindow>::Value)
+        Ref<TWindow> CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height,
+                                        const PlatformWindowInfo& info = {})
+        {
+            return Object::CastTo<TWindow>(CreateNativeWindow(windowName, title, width, height, TWindow::StaticClass(), info));
         }
 
         ScriptEvent<void(FGameWindow*)> onRenderViewportDestroyed;
-
-        ScriptEvent<void(void)> onFrameGraphUpdateRequested;
 
     protected:
 
@@ -127,10 +156,17 @@ namespace CE
 
         void InitializeShader2();
 
+        void InitializeSDFGlyphShader();
+
         void PrepareDrawList();
 
         int curImageIndex = 0;
         bool isExposed = false;
+
+        SharedMutex mainThreadDispatcherLock;
+        Array<Delegate<void(void)>> mainThreadDispatcher;
+
+        ScriptDelegate<void(void)> rebuildFrameGraphMethod;
 
         FIELD()
         Ref<FRootContext> rootContext = nullptr;
@@ -167,6 +203,7 @@ namespace CE
 
         RPI::Shader* fusionShader = nullptr;
         RPI::Shader* fusionShader2 = nullptr;
+		RPI::Shader* sdfGlyphShader = nullptr;
         RHI::ShaderResourceGroupLayout perViewSrgLayout{};
         RHI::ShaderResourceGroupLayout perDrawSrgLayout{};
         RHI::ShaderResourceGroupLayout perObjectSrgLayout{};
@@ -188,6 +225,7 @@ namespace CE
         friend class FTimer;
         friend class Engine;
         friend class FGameWindow;
+		friend class FFontManager;
     };
     
 } // namespace CE

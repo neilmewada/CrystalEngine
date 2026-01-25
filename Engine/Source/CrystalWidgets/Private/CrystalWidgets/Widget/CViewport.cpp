@@ -108,7 +108,7 @@ namespace CE::Widgets
             extraSize = Vec2(rootPadding.left + rootPadding.right, rootPadding.top + rootPadding.bottom);
         }
 
-        painter->SetBrush(CBrush(Color::White()));
+        painter->SetBrush(CBrush(Colors::White));
 
         painter->DrawFrameBuffer(Rect::FromSize(position, size.ToVec2() + extraSize), frames);
 

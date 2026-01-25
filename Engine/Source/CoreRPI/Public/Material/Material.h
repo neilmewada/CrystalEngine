@@ -35,12 +35,8 @@ namespace CE::RPI
 		Shader* GetCurrentShader();
 
 		//ShaderVariant* GetCurrentOpaqueShader();
-        
-        void FlushProperties(u32 imageIndex);
 
 		void FlushProperties();
-
-		void Compile();
         
         bool IsCompiled() const
         {
@@ -78,6 +74,8 @@ namespace CE::RPI
 
 	private:
 
+		void FlushProperties(u32 imageIndex);
+
 		void RecreateShaderResourceGroup();
 		
 		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
@@ -103,6 +101,8 @@ namespace CE::RPI
 		friend class MaterialInstance;
 		friend class MaterialInterface;
 		friend class CE::Material;
+		friend class MaterialSystem;
+		friend class Renderer2D;
 	};
     
 } // namespace CE::RPI

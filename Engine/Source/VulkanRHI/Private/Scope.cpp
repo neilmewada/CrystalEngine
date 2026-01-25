@@ -72,6 +72,8 @@ namespace CE::Vulkan
 			presentSwapChain = (Vulkan::SwapChain*)this->presentSwapChains[0];
 		}
 
+		imageCount = Math::Min(imageCount, RHI::Limits::MaxSwapChainImageCount);
+
 		waitSemaphores.Clear();
 
 		// Render Finished semaphores & fences

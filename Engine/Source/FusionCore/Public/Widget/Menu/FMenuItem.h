@@ -30,10 +30,13 @@ namespace CE
 
         void HandleEvent(FEvent* event) override;
 
+        void OnAttachedToParent(FWidget* parent) override;
+
         FWidget* menuOwner = nullptr;
 
-        Ref<FLabel> label = nullptr;
-        Ref<FImage> icon = nullptr;
+        Ref<FLabel> label;
+        Ref<FImage> icon;
+        Ref<FImage> arrow;
 
         Ref<FHorizontalStack> content;
 

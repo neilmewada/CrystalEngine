@@ -17,7 +17,7 @@ namespace CE::Editor
         if (splitBox)
         {
             (*splitBox)
-                .SplitterHoverBackground(Color::Clear())
+                .SplitterHoverBackground(Colors::Clear)
                 .SplitterBackground(Color::RGBA(26, 26, 26))
                 .SplitterSize(4.0f)
                 .SplitterDrawRatio(0.25f)
@@ -28,6 +28,8 @@ namespace CE::Editor
     void PropertyEditor::ConstructDefaultEditor()
     {
         FBrush caretDown = FBrush("/Engine/Resources/Icons/CaretDown");
+
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
 
         Child(
             FAssignNew(FVerticalStack, contentStack)
@@ -51,7 +53,7 @@ namespace CE::Editor
                         }
                     })
                     .Direction(FSplitDirection::Horizontal)
-                    .SplitterHoverBackground(Color::Clear())
+                    .SplitterHoverBackground(Colors::Clear)
                     .SplitterBackground(Color::RGBA(26, 26, 26))
                     .SplitterSize(4.0f)
                     .SplitterDrawRatio(0.25f)
@@ -77,7 +79,7 @@ namespace CE::Editor
 
                             FAssignNew(FLabel, fieldNameLabel)
                             .Text("Field Name")
-                            .FontSize(10)
+                            .FontSize(fontSize)
                         ),
 
                         FAssignNew(FHorizontalStack, right)
@@ -261,13 +263,15 @@ namespace CE::Editor
     {
         right->DestroyAllChildren();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         auto printError = [&](const String& msg)
         {
             right->AddChild(
                 FNew(FLabel)
-                .FontSize(10)
+                .FontSize(fontSize)
                 .Text("Error: " + msg)
-                .Foreground(Color::Red())
+                .Foreground(Colors::Red)
             );
         };
 
@@ -364,6 +368,11 @@ namespace CE::Editor
 
         if (fieldDeclType->IsStruct()) // - Struct Editor -
         {
+            if (fieldName == "primitives")
+            {
+                String::IsAlphabet('a');
+            }
+
             StructType* structType = (StructType*)fieldDeclType;
             String structTypeName = structType->GetName().GetString();
             if (hasStructTypeNameOverride)
@@ -373,7 +382,7 @@ namespace CE::Editor
 
             right->AddChild(
                 FNew(FLabel)
-                .FontSize(10)
+                .FontSize(fontSize)
                 .Text(structTypeName)
                 .Name("StructTypeLabel")
             );

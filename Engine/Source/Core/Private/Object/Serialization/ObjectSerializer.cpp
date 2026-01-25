@@ -7,39 +7,11 @@
 
 namespace CE
 {
-    static HashMap<TypeId, u8> FieldTypeBytes{
-        { 0, 0 },
-        { TYPEID(u8), 1 },
-		{ TYPEID(u16), 2 },
-		{ TYPEID(u32), 3 },
-		{ TYPEID(u64), 4 },
-		{ TYPEID(s8), 5 },
-		{ TYPEID(s16), 6 },
-		{ TYPEID(s32), 7 },
-		{ TYPEID(s64), 8 },
-		{ TYPEID(f32), 9 },
-		{ TYPEID(f64), 10 },
-		{ TYPEID(b8), 11 },
-        { TYPEID(String), 12 }, { TYPEID(Name), 12 }, { TYPEID(IO::Path), 12 },
-        { TYPEID(Vec2), 13 },
-        { TYPEID(Vec3), 14 },
-        { TYPEID(Vec4), 15 },
-        { TYPEID(Color), 15 },
-        { TYPEID(Vec2i), 16 },
-        { TYPEID(Vec3i), 17 },
-        { TYPEID(Vec4i), 18 },
-        { TYPEID(BinaryBlob), 0x16 },
-        { TYPEID(Object), 0x17 },
-        { TYPEID(ScriptDelegate<>), 0x18 },
-        { TYPEID(ScriptEvent<>), 0x19 },
-        { TYPEID(Uuid), 0x1B },
-        { TYPEID(ObjectMap), 0x1C }
-    };
-
     static constexpr u8 ObjectArrayFieldType = 0x13;
     static constexpr u8 StructArrayFieldType = 0x14;
     static constexpr u8 SimpleArrayFieldType = 0x15;
     static constexpr u8 StructFieldType = 0x1A;
+	static constexpr u8 OpaquePODFieldType = 0x1D; // Used for opaque types that are not serialized directly, but rather through a custom SerializePOD & DeserializePOD function
 
     static HashSet<u8> Optional1Requirement = { StructFieldType, StructArrayFieldType };
     static HashSet<u8> Optional2Requirement = { SimpleArrayFieldType };
@@ -219,16 +191,24 @@ namespace CE
                 u32 entryByteSize = 0;
                 *stream >> entryByteSize;
 
-                u8 struct1_class0 = 0; // 0 if class ; 1 if struct
-                *stream >> struct1_class0;
-
-                entry.isStruct = struct1_class0 == 1;
-                entry.isClass = !entry.isStruct;
+				u8 opaquePod2_struct1_class0 = 0; // 0 if class ; 1 if struct ; 2 if opaque POD type
+                *stream >> opaquePod2_struct1_class0;
 
                 String typeName = "";
                 *stream >> typeName;
 
                 entry.fullTypeName = typeName;
+
+                if (opaquePod2_struct1_class0 == 2) // Opaque POD type
+                {
+                    entry.isOpaquePOD = true;
+					entry.isStruct = entry.isClass = false;
+
+                    continue;
+                }
+
+                entry.isStruct = opaquePod2_struct1_class0 == 1;
+                entry.isClass = !entry.isStruct;
 
                 u32 classVersion = 0;
                 *stream >> classVersion;
@@ -464,17 +444,25 @@ namespace CE
 
         Array<ClassType*> schemaClasses;
         Array<StructType*> schemaStructs;
+		Array<TypeInfo*> opaquePodTypes;
 
-        bundle->FetchAllSchemaTypes(schemaClasses, schemaStructs);
+        bundle->FetchAllSchemaTypes(schemaClasses, schemaStructs, opaquePodTypes);
 
-        Array<StructType*> schemaTypes;
-        HashMap<StructType*, u32> schemaTypeToIndex;
+        Array<TypeInfo*> schemaTypes;
+        HashMap<TypeInfo*, u32> schemaTypeToIndex;
 
         for (ClassType* schemaClass : schemaClasses)
         {
             schemaTypes.Add(schemaClass);
         }
-        schemaTypes.AddRange(schemaStructs);
+        for (StructType* schemaStruct : schemaStructs)
+        {
+			schemaTypes.Add(schemaStruct);
+        }
+        for (TypeInfo* opaquePodType : opaquePodTypes)
+        {
+			schemaTypes.Add(opaquePodType);
+        }
 
         for (int i = 0; i < schemaTypes.GetSize(); ++i)
         {
@@ -530,11 +518,6 @@ namespace CE
 
         u8 isCooked = 0;
         *stream << isCooked;
-
-        if (bundle->sourceAssetRelativePath.IsValid())
-        {
-            String::IsAlphabet('a');
-        }
 
         // Added in v3.1 spec
         *stream << bundle->sourceAssetRelativePath.GetString();
@@ -637,11 +620,16 @@ namespace CE
             return true;
         }
 
+        if (field->IsPODField() && field->HasCustomPODSerialization())
+        {
+            return true;
+        }
+
         return false;
     }
 
-    void Bundle::SerializeSchemaTable(const Ref<Bundle>& bundle, Stream* stream, const Array<StructType*>& schemaTypes,
-        const HashMap<StructType*, u32>& schemaTypeToIndex)
+    void Bundle::SerializeSchemaTable(const Ref<Bundle>& bundle, Stream* stream, const Array<TypeInfo*>& schemaTypes,
+        const HashMap<TypeInfo*, u32>& schemaTypeToIndex)
     {
         u64 tableSize_Location = stream->GetCurrentPosition();
         *stream << (u64)0; // Placeholder
@@ -651,7 +639,7 @@ namespace CE
 
         for (int i = 0; i < schemaTypes.GetSize(); ++i)
         {
-            StructType* schemaType = schemaTypes[i];
+            TypeInfo* schemaType = schemaTypes[i];
 
             u64 entrySize_Location = stream->GetCurrentPosition();
             *stream << (u32)0;
@@ -660,34 +648,49 @@ namespace CE
             {
                 *stream << (u8)0; // 0 = Class
             }
-            else
+			else if (schemaType->IsStruct())
             {
                 *stream << (u8)1; // 1 = Struct
             }
-
-            *stream << schemaType->GetTypeName().GetString();
-
-            *stream << (u32)0; // Class/struct version (unused)
-
-            Array<Ptr<FieldType>> serializedFields;
-
-            for (int j = 0; j < schemaType->GetFieldCount(); ++j)
+            else if (schemaType->IsPOD())
             {
-                Ptr<FieldType> field = schemaType->GetFieldAt(j);
-
-                if (IsFieldSerialized(field, schemaType))
-                {
-                    serializedFields.Add(field);
-                }
+				*stream << (u8)2; // 2 = POD type
             }
 
-            *stream << (u32)serializedFields.GetSize();
+            if (schemaType->IsStruct() || schemaType->IsClass())
+	        {
+				StructType* structType = (StructType*)schemaType;
 
-            for (int j = 0; j < serializedFields.GetSize(); ++j)
+		        *stream << structType->GetTypeName().GetString();
+
+            	*stream << (u32)0; // Class/struct version (unused)
+
+            	Array<Ptr<FieldType>> serializedFields;
+
+            	for (int j = 0; j < structType->GetFieldCount(); ++j)
+            	{
+            		Ptr<FieldType> field = structType->GetFieldAt(j);
+
+            		if (IsFieldSerialized(field, structType))
+            		{
+            			serializedFields.Add(field);
+            		}
+            	}
+
+            	*stream << (u32)serializedFields.GetSize();
+
+            	for (int j = 0; j < serializedFields.GetSize(); ++j)
+            	{
+            		*stream << serializedFields[j]->GetName().GetString();
+
+            		SerializeFieldSchema(serializedFields[j], stream, schemaTypeToIndex);
+            	}
+	        }
+            else // Opaque POD
             {
-                *stream << serializedFields[j]->GetName().GetString();
+				*stream << schemaType->GetTypeName().GetString();
 
-                SerializeFieldSchema(serializedFields[j], stream, schemaTypeToIndex);
+				// Opaque PODs do not have fields, so we write 0 fields
             }
 
             u64 curLocation = stream->GetCurrentPosition();
@@ -707,10 +710,11 @@ namespace CE
     }
 
     void Bundle::SerializeFieldSchema(const Ptr<FieldType>& field, Stream* stream,
-                                      const HashMap<StructType*, u32>& schemaTypeToIndex)
+                                      const HashMap<TypeInfo*, u32>& schemaTypeToIndex)
     {
         TypeId fieldTypeId = field->GetDeclarationTypeId();
         u8 typeByte = 0;
+		TypeInfo* declType = field->GetDeclarationType();
 
         if (field->IsObjectField())
         {
@@ -732,7 +736,7 @@ namespace CE
             typeByte = StructFieldType;
             *stream << typeByte;
 
-            *stream << (u32)schemaTypeToIndex.Get((StructType*)field->GetDeclarationType());
+            *stream << (u32)schemaTypeToIndex.Get((StructType*)declType);
         }
         else if (field->IsArrayField())
         {
@@ -772,6 +776,11 @@ namespace CE
 
                 throw SerializationException(msg);
             }
+        }
+        else if (declType && declType->IsPOD() && declType->HasCustomPODSerialization())
+        {
+	        typeByte = OpaquePODFieldType;
+            *stream << typeByte;
         }
         else
         {
@@ -866,11 +875,6 @@ namespace CE
         if (field != nullptr)
         {
             fieldTypeId = field->GetTypeId();
-
-            if (field->GetName() == "texture" && field->IsWeakRefCounted() && target != nullptr)
-            {
-                String::IsAlphabet('a');
-            }
         }
 
         u64 unsignedInteger = 0;
@@ -1394,6 +1398,30 @@ namespace CE
 
                 break;
             }
+        case OpaquePODFieldType:
+            {
+				TypeInfo* podType = nullptr;
+				void* podInstance = nullptr;
+
+				s64 startPos = stream->GetCurrentPosition();
+
+            	u16 byteSize = 0;
+				*stream >> byteSize;
+
+				s64 endPos = startPos + (s64)byteSize;
+
+	            if (field != nullptr && field->IsPODField() && field->GetDeclarationType()->HasCustomPODSerialization())
+	            {
+                    podType = field->GetDeclarationType();
+                    podInstance = field->GetFieldInstance(instance);
+
+                    field->GetDeclarationType()->DeserializePOD(podInstance, stream);
+	            }
+
+                stream->Seek(endPos);
+				
+	            break;
+            }
         }
 
         if (field != nullptr && fieldSchema.typeByte >= 0x01 && fieldSchema.typeByte <= 0x08)
@@ -1479,17 +1507,11 @@ namespace CE
     void ObjectSerializer::SerializeField(const Ptr<FieldType>& field, void* instance, Stream* stream)
     {
         TypeId fieldTypeId = field->GetDeclarationTypeId();
+        TypeInfo* declType = field->GetDeclarationType();
 
         if (field->IsObjectField())
         {
-            if (field->GetName() == "texture" && field->IsWeakRefCounted())
-            {
-                Ref<Object> obj = field->GetFieldValue<WeakRef<Object>>(instance).Lock();
-
-                String::IsAlphabet('a');
-            }
-
-            Object* object = nullptr;
+        	Object* object = nullptr;
 	        if (field->IsStrongRefCounted())
 	        {
                 object = field->GetFieldValue<Ref<Object>>(instance).Get();
@@ -1688,6 +1710,21 @@ namespace CE
                     }
                 }
             }
+        }
+        else if (field->IsPODField() && declType->HasCustomPODSerialization())
+        {
+			void* fieldInstance = field->GetFieldInstance(instance);
+
+            s64 oldPos = stream->GetCurrentPosition();
+			*stream << (u16)0; // Number of bytes written for the Opaque POD type, including this header.
+
+        	declType->SerializePOD(fieldInstance, stream);
+
+			s64 curPos = stream->GetCurrentPosition();
+
+            stream->Seek(oldPos, SeekMode::Begin);
+            *stream << (u16)(curPos - oldPos);
+			stream->Seek(curPos, SeekMode::Begin);
         }
         else if (field->IsStructField())
         {

@@ -58,7 +58,7 @@ namespace CE::Widgets
 
 		if (colorMap)
 		{
-			CBrush brush = CBrush(Color::White());
+			CBrush brush = CBrush(Colors::White);
 			painter->SetBrush(brush);
 
 			painter->DrawTexture(Rect::FromSize(pos, size), colorMap);

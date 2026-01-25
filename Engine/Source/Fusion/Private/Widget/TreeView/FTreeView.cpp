@@ -43,6 +43,14 @@ namespace CE
                     FAssignNew(FScrollBox, scrollBox)
                     .VerticalScroll(true)
                     .HorizontalScroll(false)
+                    .OnScrollValueChanged([this](FScrollBox*)
+                    {
+                        container->OnModelUpdate();
+                    })
+                    .OnBackgroundClicked([this](FScrollBox*)
+                    {
+                        ClearSelection();
+                    })
                     .Child(
                         FAssignNew(FTreeViewContainer, container)
                         .TreeView(this)
@@ -61,6 +69,11 @@ namespace CE
         container->ExpandRow(index, recursive);
     }
 
+    void FTreeView::ExpandAllRows()
+    {
+        container->ExpandAllRows();
+    }
+
     void FTreeView::OnFusionPropertyModified(const CE::Name& propertyName)
     {
 	    Super::OnFusionPropertyModified(propertyName);
@@ -70,7 +83,29 @@ namespace CE
 
         if (propertyName == model)
         {
+            if (m_Model)
+            {
+                m_Model->treeView = this;
+                m_Model->OnTreeViewAssigned();
+            }
             MarkLayoutDirty();
+        }
+    }
+
+    void FTreeView::OnRowRightClicked(FTreeViewRow& row, Vec2 mousePos)
+    {
+        SelectRow(row.GetIndex(), false);
+
+        if (!m_RowContextMenuDelegate.IsBound())
+            return;
+
+        if (Ref<FFusionContext> context = GetContext())
+        {
+            Ref<FMenuPopup> popup = &m_RowContextMenuDelegate.Invoke(row);
+            if (popup.IsNull())
+                return;
+
+            context->PushLocalPopup(popup.Get(), mousePos);
         }
     }
 
@@ -95,6 +130,11 @@ namespace CE
         container->OnModelUpdate();
     }
 
+    Ref<FTreeViewRow> FTreeView::FindRow(const FModelIndex& index)
+    {
+        return container->FindRow(index);
+    }
+
     void FTreeView::SelectRow(const FModelIndex& index)
     {
         m_SelectionModel->Select(index);
@@ -102,5 +142,52 @@ namespace CE
         ApplyStyle();
     }
 
+    void FTreeView::DeselectRow(const FModelIndex& index)
+    {
+        m_SelectionModel->Deselect(index);
+
+        ApplyStyle();
+    }
+
+    void FTreeView::ClearSelection()
+    {
+        m_SelectionModel->ClearSelection();
+
+        ApplyStyle();
+    }
+
+    void FTreeView::SelectRow(const FModelIndex& index, bool isCtrlKey)
+    {
+        if (m_SelectionModel->selectionMode == FSelectionMode::None)
+        {
+            ClearSelection();
+            return;
+        }
+
+        if (m_SelectionModel->selectionMode == FSelectionMode::Single)
+        {
+            SelectRow(index);
+            return;
+        }
+
+        // Multi-selection mode...
+
+        if (!isCtrlKey)
+        {
+            ClearSelection();
+            SelectRow(index);
+        }
+        else
+        {
+	        if (m_SelectionModel->IsSelected(index))
+	        {
+                DeselectRow(index);
+	        }
+            else
+            {
+                SelectRow(index);
+            }
+        }
+    }
 }
 

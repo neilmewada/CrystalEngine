@@ -31,6 +31,8 @@ namespace CE
 
     FStyle* FStyleSet::FindStyle(const Name& styleName)
     {
+        ZoneScoped;
+
         if (styles.KeyExists(styleName) && styles[styleName] != nullptr)
         {
             return styles[styleName];

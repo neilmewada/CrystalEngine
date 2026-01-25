@@ -16,6 +16,8 @@
 
 #define CE_NO_MOVE(Class) Class(Class&&) = delete; Class& operator=(Class&&) = delete;
 
+#define CE_NO_COPY_MOVE(Class) CE_NO_COPY(Class) CE_NO_MOVE(Class)
+
 #define CE_STATIC_CLASS(Class) Class() = delete; ~Class() = delete;
 
 #define CE_SINGLETON_CLASS(Class) Class(Class& Copy) = delete; Class operator=(Class& copy) = delete;
@@ -50,6 +52,4 @@
 #ifndef NULL
 #define NULL 0
 #endif
-
-#define StaticCast static_cast
 

@@ -114,6 +114,28 @@ namespace BundleTests
 	class WritingTestObj1;
 	class WritingTestObj2;
 
+	struct PODSample
+	{
+	public:
+
+		void SerializePOD(Stream* stream)
+		{
+			*stream << value;
+		}
+
+		void DeserializePOD(Stream* stream)
+		{
+			*stream >> value;
+		}
+
+		u16 value = 0;
+	};
+
+	inline void Example()
+	{
+		
+	}
+
 	STRUCT()
 	struct WritingTestStructBase
 	{
@@ -178,6 +200,9 @@ namespace BundleTests
 
 		FIELD()
 		WritingTestStruct1 testStruct{};
+
+		FIELD()
+		PODSample opaquePod{};
 
 		FIELD()
 		Array<WritingTestStruct2> arrayOfStruct;
@@ -282,6 +307,9 @@ namespace BundleTests
 	};
 
 }
+
+CE_RTTI_POD(, BundleTests, PODSample)
+CE_RTTI_POD_IMPL(BundleTests, PODSample)
 
 CE_RTTI_ENUM(, BundleTests, FilterMode,
 	CE_ATTRIBS(),
@@ -675,6 +703,7 @@ CE_RTTI_CLASS(, BundleTests, WritingTestObj2,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(testStruct)
+		CE_FIELD(opaquePod)
 		CE_FIELD(arrayOfStruct)
         CE_FIELD(objectArray)
         CE_FIELD(value)

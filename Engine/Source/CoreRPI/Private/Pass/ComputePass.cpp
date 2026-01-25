@@ -114,7 +114,7 @@ namespace CE::RPI
                         }
                         else if (sourceAttachment->IsBufferAttachment())
                         {
-
+							// TODO: Handle buffer attachment size source
                         }
                     }
                 }
@@ -153,7 +153,7 @@ namespace CE::RPI
                 scheduler->UseShaderResourceGroup(sceneSrg);
             }
 
-            scheduler->UsePassSrgLayout(shader->GetPassSrgLayout());;
+            scheduler->UsePassSrgLayout(shader->GetPassSrgLayout());
         }
         scheduler->EndScope();
     }

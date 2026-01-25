@@ -33,7 +33,7 @@ namespace CE
         FBrush background = Color::RGBA(26, 26, 26);
 
         FIELD()
-        FBrush rowBackground = Color::Clear();
+        FBrush rowBackground = Colors::Clear;
 
         FIELD()
         FBrush rowAlternateBackground = Color::RGBA(21, 21, 21);

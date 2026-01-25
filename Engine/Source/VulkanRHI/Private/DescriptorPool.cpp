@@ -12,6 +12,8 @@ namespace CE::Vulkan
 
     DescriptorPool::~DescriptorPool()
     {
+		LockGuard guard{ vkPoolMutex };
+
         for (VkDescriptorPool pool : descriptorPools)
         {
             vkDestroyDescriptorPool(device->GetHandle(), pool, VULKAN_CPU_ALLOCATOR);
@@ -43,6 +45,7 @@ namespace CE::Vulkan
 
 		VkDescriptorPool pool = nullptr;
 
+		LockGuard guard{ vkPoolMutex };
 		auto result = vkCreateDescriptorPool(device->GetHandle(), &info, VULKAN_CPU_ALLOCATOR, &pool);
 		if (result != VK_SUCCESS)
 		{
@@ -61,13 +64,20 @@ namespace CE::Vulkan
 		allocInfo.pSetLayouts = setLayouts.GetData();
 
 		if (descriptorPools.IsEmpty())
+		{
 			Increment(Math::Max(incrementSize, numDescriptorSets));
+		}
+
 		allocInfo.descriptorPool = descriptorPools.GetLast();
 
 		List<VkDescriptorSet> sets = List<VkDescriptorSet>(numDescriptorSets);
 
-		VkResult result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
-		int counter = 0;
+		VkResult result = VK_SUCCESS;
+
+		{
+			LockGuard guard{ vkPoolMutex };
+			result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
+		}
 
 		if (result == VK_ERROR_OUT_OF_POOL_MEMORY ||
 			result == VK_ERROR_FRAGMENTED_POOL)
@@ -77,12 +87,16 @@ namespace CE::Vulkan
 			{
 				Increment(Math::Max(incrementSize, numDescriptorSets));
 				allocInfo.descriptorPool = descriptorPools.GetLast();
+
+				LockGuard guard{ vkPoolMutex };
 				result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
 			}
 
 			for (int i = descriptorPools.GetSize() - 1; i >= 0 && result != VK_SUCCESS; i--)
 			{
 				allocInfo.descriptorPool = descriptorPools[i];
+
+				LockGuard guard{ vkPoolMutex };
 				result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
 			}
 
@@ -94,6 +108,8 @@ namespace CE::Vulkan
 			for (int i = descriptorPools.GetSize() - 1; i >= 0 && result != VK_SUCCESS; i--)
 			{
 				allocInfo.descriptorPool = descriptorPools[i];
+
+				LockGuard guard{ vkPoolMutex };
 				result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
 			}
 		}
@@ -125,13 +141,19 @@ namespace CE::Vulkan
 		allocInfo.pNext = &setCount;
 
 		if (descriptorPools.IsEmpty())
+		{
 			Increment(Math::Max(incrementSize, numDescriptorSets));
+		}
 		allocInfo.descriptorPool = descriptorPools.GetLast();
 
 		List<VkDescriptorSet> sets = List<VkDescriptorSet>(numDescriptorSets);
 
-		VkResult result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
-		int counter = 0;
+		VkResult result = VK_SUCCESS;
+
+		{
+			LockGuard guard{ vkPoolMutex };
+			result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
+		}
 
 		if (result == VK_ERROR_OUT_OF_POOL_MEMORY)
 		{
@@ -140,12 +162,16 @@ namespace CE::Vulkan
 			{
 				Increment(Math::Max(incrementSize, numDescriptorSets));
 				allocInfo.descriptorPool = descriptorPools.GetLast();
+
+				LockGuard guard{ vkPoolMutex };
 				result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
 			}
 
 			for (int i = descriptorPools.GetSize() - 1; i >= 0 && result != VK_SUCCESS; i--)
 			{
 				allocInfo.descriptorPool = descriptorPools[i];
+
+				LockGuard guard{ vkPoolMutex };
 				result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
 			}
 
@@ -157,6 +183,8 @@ namespace CE::Vulkan
 			for (int i = descriptorPools.GetSize() - 1; i >= 0 && result != VK_SUCCESS; i--)
 			{
 				allocInfo.descriptorPool = descriptorPools[i];
+
+				LockGuard guard{ vkPoolMutex };
 				result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
 			}
 		}
@@ -175,6 +203,8 @@ namespace CE::Vulkan
 	{
 		if (sets.IsEmpty())
 			return;
+
+		LockGuard guard{ vkPoolMutex };
 
 		for (int i = descriptorPools.GetSize() - 1; i >= 0; i--)
 		{
@@ -206,7 +236,8 @@ namespace CE::Vulkan
 		info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;// | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
         
         VkDescriptorPool pool = nullptr;
-        
+
+		LockGuard guard{ vkPoolMutex };
         auto result = vkCreateDescriptorPool(device->GetHandle(), &info, VULKAN_CPU_ALLOCATOR, &pool);
         if (result != VK_SUCCESS)
         {

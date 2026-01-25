@@ -96,7 +96,7 @@ namespace CE
 		// Encodes raw image pixel data to PNG format
 		static bool EncodePNG(const CMImage& source, Stream* outStream, CMImageFormat pixelFormat, u32 bitDepth = 8);
 
-		bool EncodeToPNG(const IO::Path& path);
+		bool EncodeToPNG(const IO::Path& path) const;
 
         // - Public API -
 

@@ -3,7 +3,7 @@
 namespace CE::RPI
 {
 
-	ShaderVariant::ShaderVariant(const ShaderVariantDescriptor2& desc)
+	ShaderVariant::ShaderVariant(const ShaderVariantDescriptor& desc)
 		: reflectionInfo(desc.reflectionInfo)
 	{
 		variantId = 0;
@@ -69,6 +69,19 @@ namespace CE::RPI
 		}
 		
 		pipelineDesc.srgLayouts = desc.reflectionInfo.srgLayouts;
+		for (auto& srgLayout : pipelineDesc.srgLayouts)
+		{
+			if (srgLayout.srgType != RHI::SRGType::PerScene &&
+				srgLayout.srgType != RHI::SRGType::PerView)
+			{
+				continue;
+			}
+
+			for (auto& variable : srgLayout.variables)
+			{
+				variable.shaderStages |= RHI::ShaderStage::Compute;
+			}
+		}
 
 		pipelineDesc.multisampleState.sampleCount = 1;
 
@@ -149,44 +162,44 @@ namespace CE::RPI
 
 				switch (vertexAttrib.dataType)
 				{
-				case VertexAttributeDataType::Float:
+				case RHI::VertexAttributeDataType::Float:
 					inputSlotDesc.stride += sizeof(f32);
 					offset += sizeof(f32);
 					break;
-				case VertexAttributeDataType::Float2:
+				case RHI::VertexAttributeDataType::Float2:
 					inputSlotDesc.stride += sizeof(Vec2);
 					offset += sizeof(Vec2);
 					break;
-				case VertexAttributeDataType::Float4:
+				case RHI::VertexAttributeDataType::Float4:
 					inputSlotDesc.stride += sizeof(Vec4);
 					offset += sizeof(Vec4);
 					break;
-				case VertexAttributeDataType::Int:
+				case RHI::VertexAttributeDataType::Int:
 					inputSlotDesc.stride += sizeof(int);
 					offset += sizeof(int);
 					break;
-				case VertexAttributeDataType::Int2:
+				case RHI::VertexAttributeDataType::Int2:
 					inputSlotDesc.stride += sizeof(Vec2i);
 					offset += sizeof(Vec2i);
 					break;
-				case VertexAttributeDataType::Int4:
+				case RHI::VertexAttributeDataType::Int4:
 					inputSlotDesc.stride += sizeof(Vec4i);
 					offset += sizeof(Vec4i);
 					break;
-				case VertexAttributeDataType::UInt:
+				case RHI::VertexAttributeDataType::UInt:
 					inputSlotDesc.stride += sizeof(u32);
 					offset += sizeof(u32);
 					break;
-				case VertexAttributeDataType::UInt2:
+				case RHI::VertexAttributeDataType::UInt2:
 					inputSlotDesc.stride += sizeof(Vec2i);
 					offset += sizeof(Vec2i);
 					break;
-				case VertexAttributeDataType::UInt4:
+				case RHI::VertexAttributeDataType::UInt4:
 					inputSlotDesc.stride += sizeof(Vec4i);
 					offset += sizeof(Vec4i);
 					break;
-				case VertexAttributeDataType::Char4:
-				case VertexAttributeDataType::UChar4:
+				case RHI::VertexAttributeDataType::Char4:
+				case RHI::VertexAttributeDataType::UChar4:
 					inputSlotDesc.stride += sizeof(u32);
 					offset += sizeof(u32);
 					break;
@@ -217,35 +230,35 @@ namespace CE::RPI
 
 				switch (vertexAttrib.dataType)
 				{
-				case VertexAttributeDataType::Float:
+				case RHI::VertexAttributeDataType::Float:
 					inputSlotDesc.stride = sizeof(float);
 					break;
-				case VertexAttributeDataType::Float2:
+				case RHI::VertexAttributeDataType::Float2:
 					inputSlotDesc.stride = sizeof(Vec2);
 					break;
-				case VertexAttributeDataType::Float4:
+				case RHI::VertexAttributeDataType::Float4:
 					inputSlotDesc.stride = sizeof(Vec4);
 					break;
-				case VertexAttributeDataType::Int:
+				case RHI::VertexAttributeDataType::Int:
 					inputSlotDesc.stride = sizeof(int);
 					break;
-				case VertexAttributeDataType::Int2:
+				case RHI::VertexAttributeDataType::Int2:
 					inputSlotDesc.stride = sizeof(Vec2i);
 					break;
-				case VertexAttributeDataType::Int4:
+				case RHI::VertexAttributeDataType::Int4:
 					inputSlotDesc.stride = sizeof(Vec4i);
 					break;
-				case VertexAttributeDataType::UInt:
+				case RHI::VertexAttributeDataType::UInt:
 					inputSlotDesc.stride = sizeof(u32);
 					break;
-				case VertexAttributeDataType::UInt2:
+				case RHI::VertexAttributeDataType::UInt2:
 					inputSlotDesc.stride = sizeof(Vec2i);
 					break;
-				case VertexAttributeDataType::UInt4:
+				case RHI::VertexAttributeDataType::UInt4:
 					inputSlotDesc.stride = sizeof(Vec4i);
 					break;
-				case VertexAttributeDataType::Char4:
-				case VertexAttributeDataType::UChar4:
+				case RHI::VertexAttributeDataType::Char4:
+				case RHI::VertexAttributeDataType::UChar4:
 					inputSlotDesc.stride = sizeof(u32);
 					break;
 				default:
@@ -281,7 +294,7 @@ namespace CE::RPI
 		// Default RenderPass Attachment Layout
 		RHI::RenderPassAttachmentLayout colorAttachment{};
 		colorAttachment.format = RHI::Format::R8G8B8A8_UNORM;
-		colorAttachment.attachmentUsage = ScopeAttachmentUsage::Color;
+		colorAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
 		colorAttachment.attachmentId = "Color";
 		colorAttachment.multisampleState.sampleCount = 1;
 		colorAttachment.loadAction = AttachmentLoadAction::Clear;
@@ -291,19 +304,19 @@ namespace CE::RPI
 		RHI::RenderPassAttachmentLayout depthStencilAttachment{};
 		depthStencilAttachment.attachmentId = "DepthStencil";
 		depthStencilAttachment.format = RHI::gDynamicRHI->GetAvailableDepthStencilFormats()[0];
-		depthStencilAttachment.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
+		depthStencilAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::DepthStencil;
 		depthStencilAttachment.multisampleState.sampleCount = 1;
-		depthStencilAttachment.loadAction = AttachmentLoadAction::Load;
-		depthStencilAttachment.storeAction = AttachmentStoreAction::Store;
+		depthStencilAttachment.loadAction = RHI::AttachmentLoadAction::Load;
+		depthStencilAttachment.storeAction = RHI::AttachmentStoreAction::Store;
 		if (pipelineDesc.depthStencilState.depthState.enable)
 		{
 			if (pipelineDesc.depthStencilState.depthState.writeEnable)
 			{
-				depthStencilAttachment.loadAction = AttachmentLoadAction::Clear;
+				depthStencilAttachment.loadAction = RHI::AttachmentLoadAction::Clear;
 			}
 			else if (pipelineDesc.depthStencilState.depthState.testEnable)
 			{
-				depthStencilAttachment.loadAction = AttachmentLoadAction::Load;
+				depthStencilAttachment.loadAction = RHI::AttachmentLoadAction::Load;
 			}
 
 			pipelineDesc.renderPassLayout.attachmentLayouts.Add(depthStencilAttachment);

@@ -136,6 +136,7 @@
         "cwctype": "cpp",
         "print": "cpp",
         "source_location": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "expected": "cpp"
     }
 }

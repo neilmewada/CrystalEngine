@@ -24,6 +24,8 @@ namespace CE::Editor
 
         virtual Self& BindField(const Ref<Object>& target, const CE::Name& relativeFieldPath);
 
+		const CE::Name& GetRelativeFieldPath() const { return relativeFieldPath; }
+
         virtual Self& UnbindField();
 
         bool IsBound() const { return isBound; }

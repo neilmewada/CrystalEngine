@@ -30,6 +30,8 @@ namespace CE::Editor
 
         const CE::Name& GetItemName() const { return itemName; }
 
+		const String& GetSubtitleText() const { return subtitleLabel->Text(); }
+
         bool IsDirectory() const { return isDirectory; }
 
         bool IsReadOnly() const { return isReadOnly; }
@@ -44,6 +46,7 @@ namespace CE::Editor
         Ref<FLabel> subtitleLabel;
         Ref<FStyledWidget> icon;
         Ref<FStyledWidget> iconBg;
+		Ref<FStyledWidget> colorTag;
 
         Ref<FVerticalStack> stackBox;
 

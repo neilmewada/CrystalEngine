@@ -9,6 +9,7 @@ enum FDrawType : int
 {
     DRAW_Geometry = 0,
     DRAW_Text,
+    DRAW_SDFText,
     DRAW_TextureNoTile,
     DRAW_TextureTileX,
     DRAW_TextureTileY,
@@ -138,6 +139,31 @@ float SDFClipRect(in float2 p, in float2 shapePos, in float2 shapeSize)
     return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 }
 
+float4 RenderSDFText(float4 color, float2 uv, float2 itemSize, uint bold, float4 uvBounds)
+{
+    uint w; uint h;
+    _FontAtlas.GetDimensions(w, h);
+    //float2 origSize = float2(uvBounds.zw - uvBounds.xy) * float2(w, h);
+
+    //float numerator = max(itemSize.x, itemSize.y) * 0.5;
+    //float denominator = max(origSize.x, origSize.y) * 0.5;
+
+    const float pxRange = 20.0;
+
+    float2 unitRange = float2(pxRange, pxRange) / float2(w, h);
+    float2 screenTexSize = float2(1.0, 1.0) / fwidth(uv);
+
+    const float threshold = bold == 0 ? 0.52 : 0.40;
+
+    //float screenPxRange = numerator / denominator * pxRange;
+    float screenPxRange = max(0.5 * dot(unitRange, screenTexSize), 1.0);
+
+    float sdf = _FontAtlas.Sample(_FontAtlasSampler, uv).r;
+    float screenPxDistance = screenPxRange * (sdf - threshold);
+    float opacity = clamp(screenPxDistance + threshold, 0.0, 1.0);
+    return lerp(float4(color.rgb, 0), color, opacity);
+}
+
 float4 FragMain(PSInput input) : SV_TARGET
 {
 	float4 color = input.color;
@@ -173,6 +199,12 @@ float4 FragMain(PSInput input) : SV_TARGET
             float alpha = _FontAtlas.Sample(_FontAtlasSampler, inputUV).r;
 			color = float4(input.color.rgb, input.color.a * alpha);
 		}
+        break;
+    case DRAW_SDFText: // SDF font glyph
+        {
+            const DrawData drawData = _DrawData[input.index];
+            color = RenderSDFText(color, inputUV, drawData.rectSize, 0, float4(drawData.uvMin, drawData.uvMax));
+        }
         break;
     case DRAW_LinearGradient:
 	    {

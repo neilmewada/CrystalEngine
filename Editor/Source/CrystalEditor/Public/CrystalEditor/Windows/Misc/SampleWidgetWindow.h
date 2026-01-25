@@ -17,7 +17,10 @@ namespace CE::Editor
 
     public: // Model properties
 
+        // For the ComboBox
         MODEL_PROPERTY(Array<String>, ItemList);
+
+        // For the TextInput
         MODEL_PROPERTY(String, Text);
 
     };

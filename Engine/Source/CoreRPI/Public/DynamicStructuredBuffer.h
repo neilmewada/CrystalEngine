@@ -6,7 +6,7 @@ namespace CE::RPI
 	/**
      * @brief A structured buffer that can be dynamically resized with CPU data access.
      */
-    template <typename TStruct> requires std::is_class_v<TStruct>
+    template <typename TStruct>
     class DynamicStructuredBuffer
     {
     public:
@@ -49,11 +49,11 @@ namespace CE::RPI
 
     };
 
-    template <typename TStruct> requires std::is_class_v<TStruct>
+    template <typename TStruct>
     DynamicStructuredBuffer<TStruct>::DynamicStructuredBuffer()
     {}
 
-    template <typename TStruct> requires std::is_class_v<TStruct>
+    template <typename TStruct>
     void DynamicStructuredBuffer<TStruct>::Init(const Name& name, u64 initialNumElements, u32 imageCount)
     {
         if (IsInitialized())
@@ -80,7 +80,7 @@ namespace CE::RPI
         }
     }
 
-    template <typename TStruct> requires std::is_class_v<TStruct>
+    template <typename TStruct>
     void DynamicStructuredBuffer<TStruct>::Shutdown()
     {
         if (!IsInitialized())
@@ -106,7 +106,7 @@ namespace CE::RPI
         imageCount = 0;
     }
 
-    template <typename TStruct> requires std::is_class_v<TStruct>
+    template <typename TStruct>
     RHI::Buffer* DynamicStructuredBuffer<TStruct>::GetBuffer(u32 imageIndex) const
     {
         for (int i = (int)imageIndex; i >= 0; --i)
@@ -117,7 +117,7 @@ namespace CE::RPI
         return nullptr;
     }
 
-    template <typename TStruct> requires std::is_class_v<TStruct>
+    template <typename TStruct>
     u64 DynamicStructuredBuffer<TStruct>::GetElementCount() const
     {
         auto buffer = GetBuffer(0);
@@ -126,7 +126,7 @@ namespace CE::RPI
         return buffer->GetBufferSize() / StructSize;
     }
 
-    template <typename TStruct> requires std::is_class_v<TStruct>
+    template <typename TStruct>
     void DynamicStructuredBuffer<TStruct>::GrowToFit(u32 totalElementCount)
     {
         if (totalElementCount <= GetElementCount())
@@ -168,13 +168,13 @@ namespace CE::RPI
         onResizeCallback.Broadcast();
     }
 
-    template <typename TStruct> requires std::is_class_v<TStruct>
+    template <typename TStruct>
     void DynamicStructuredBuffer<TStruct>::Map(u32 imageIndex, u64 startOffset, u64 size, void** outPtr)
     {
         buffers[imageIndex]->Map(startOffset, size, outPtr);
     }
 
-    template <typename TStruct> requires std::is_class_v<TStruct>
+    template <typename TStruct>
     void DynamicStructuredBuffer<TStruct>::Unmap(u32 imageIndex)
     {
         buffers[imageIndex]->Unmap();

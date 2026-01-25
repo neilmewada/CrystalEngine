@@ -7,7 +7,7 @@ namespace CE
 	static HashSet<Ref<Object>> gRootObjects{};
 	static SharedMutex gRootObjectsMutex{};
 
-	SharedMutex ObjectListener::mutex{};
+	SharedRecursiveMutex ObjectListener::mutex{};
 	HashMap<Uuid, Array<IObjectUpdateListener*>> ObjectListener::listeners{};
 
 	void ObjectListener::AddListener(Uuid target, IObjectUpdateListener* listener)
@@ -47,6 +47,25 @@ namespace CE
 		for (IObjectUpdateListener* listener : listenerArray)
 		{
 			listener->OnObjectFieldChanged(object, fieldName);
+		}
+	}
+
+	void ObjectListener::TriggerEdit(Uuid object, const Name& fieldName)
+	{
+		Array<IObjectUpdateListener*> listenerArray;
+
+		{
+			LockGuard lock{ mutex };
+
+			if (!listeners.KeyExists(object))
+				return;
+
+			listenerArray = listeners[object];
+		}
+
+		for (IObjectUpdateListener* listener : listenerArray)
+		{
+			listener->OnObjectFieldEdited(object, fieldName);
 		}
 	}
 
@@ -857,7 +876,10 @@ namespace CE
 
     void Object::OnFieldEdited(const Name& fieldName)
     {
+		if (EnumHasFlag(objectFlags, OF_InsideConstructor))
+			return;
 
+		ObjectListener::TriggerEdit(GetUuid(), fieldName);
     }
 
     Object* Object::CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags)
@@ -983,7 +1005,7 @@ namespace CE
 					}
 				}
 			}
-			else if (field->IsObjectField()) // Deep copy object fields
+			else if (field->IsObjectField()) // Deep copy or shallow copy object fields
 			{
 				Object* objectToCopy = nullptr;
 
@@ -1351,6 +1373,8 @@ namespace CE
 
 	void Object::OnAfterConstructInternal()
 	{
+		ZoneScoped;
+
 		// The parent should not be pending!
 		if (outer != nullptr && EnumHasFlag(outer->objectFlags, OF_SubobjectPending))
 		{

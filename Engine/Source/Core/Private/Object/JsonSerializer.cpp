@@ -39,7 +39,7 @@ namespace CE
 			WriteNext(stream);
 		}
 
-		if (stream->IsAsciiMode())
+		if (stream->IsBinaryMode())
 		{
 			stream->Write('\0');
 		}

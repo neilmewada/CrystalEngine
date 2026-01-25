@@ -35,6 +35,11 @@ namespace CE
         return Uuid(gUniformDistribution(gRandomEngine), gUniformDistribution(gRandomEngine));
     }
 
+    Uuid Uuid::New()
+    {
+        return Random();
+    }
+
     Uuid Uuid::Null()
     {
         return Uuid(0, 0);

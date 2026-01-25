@@ -3,8 +3,12 @@
 namespace CE
 {
 
+	static SIZE_T gWidgetCounter = 0;
+
     FWidget::FWidget()
     {
+        gWidgetCounter++;
+
         m_Scale = Vec2(1, 1);
         m_Anchor = Vec2(0.5f, 0.5f);
         m_MaxHeight = NumericLimits<f32>::Infinity();
@@ -16,16 +20,33 @@ namespace CE
 
     FWidget::~FWidget()
     {
-        
+        gWidgetCounter--;
     }
 
-    FFusionContext* FWidget::GetContext()
+    Ref<FFusionContext> FWidget::GetContext()
     {
         if (!context && parent)
         {
             context = parent->GetContext();
         }
-        return context;
+        return context.Lock();
+    }
+
+    Ref<FNativeContext> FWidget::GetNativeContext()
+    {
+        Ref<FFusionContext> context = GetContext();
+        if (!context)
+            return nullptr;
+
+        while (context != nullptr)
+        {
+            if (context->IsOfType<FNativeContext>())
+                return CastTo<FNativeContext>(context);
+
+            context = context->GetParentContext();
+        }
+
+        return nullptr;
     }
 
     void FWidget::OnPaint(FPainter* painter)
@@ -116,7 +137,24 @@ namespace CE
     {
         ZoneScoped;
 
-        if (!Enabled())
+        if (!Enabled() || m_IgnoreHitTest)
+            return nullptr;
+
+        Vec2 rectPos = computedPosition + m_Translation;
+        Vec2 rectSize = computedSize;
+
+        localMousePos = mouseTransform * Vec4(localMousePos.x, localMousePos.y, 0, 1);
+
+        Rect rect = Rect::FromSize(rectPos, rectSize);
+
+        return rect.Contains(localMousePos) ? this : nullptr;
+    }
+
+    FWidget* FWidget::SelfHitTest(Vec2 localMousePos)
+    {
+        ZoneScoped;
+
+        if (!Enabled() || m_IgnoreHitTest)
             return nullptr;
 
         Vec2 rectPos = computedPosition + m_Translation;
@@ -179,7 +217,7 @@ namespace CE
     {
         ZoneScoped;
 
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (context)
         {
             context->SetFocusWidget(this);
@@ -190,7 +228,7 @@ namespace CE
     {
         ZoneScoped;
 
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (IsFocused() && context)
         {
             context->SetFocusWidget(parent.Get());
@@ -341,7 +379,7 @@ namespace CE
 
     void FWidget::OnPostComputeLayout()
     {
-
+        ZoneScoped;
     }
 
     bool FWidget::AddChild(FWidget* child)
@@ -431,7 +469,7 @@ namespace CE
 
     void FWidget::MarkLayoutDirty()
     {
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (context)
         {
             context->MarkLayoutDirty();
@@ -440,7 +478,7 @@ namespace CE
 
     void FWidget::MarkDirty()
     {
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (context)
         {
             context->MarkDirty();
@@ -503,7 +541,7 @@ namespace CE
         m_Style = nullptr;
         this->styleKey = styleKey;
 
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (!context)
             return *this;
 

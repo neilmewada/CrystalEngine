@@ -15,6 +15,8 @@ namespace CE::RPI
 	
     void RasterPass::ProduceScopes(RHI::FrameScheduler* scheduler)
     {
+        ZoneScoped;
+
         Name scopeId = GetScopeId();
         
         scheduler->BeginScope(scopeId);

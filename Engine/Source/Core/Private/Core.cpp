@@ -111,6 +111,7 @@ namespace CE
             Object,
             Bundle,
 			Asset,
+            DataAsset,
 			ResourceManager,
 			Resource,
 			Settings

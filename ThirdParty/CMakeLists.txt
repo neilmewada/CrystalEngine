@@ -16,6 +16,7 @@ include(sdl.cmake)
 include(cpptrace.cmake)
 include(Findispctexturecompressor.cmake)
 include(tracy.cmake)
+include(JoltPhysics.cmake)
 
 # Linux packages
 # libxxhash-dev 

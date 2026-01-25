@@ -83,17 +83,17 @@ void SampleWidgetWindow::Construct()
             .Name("DebugSplitBox")
             (
                 FNew(FStyledWidget)
-                .Background(Color::Yellow())
+                .Background(Colors::Yellow)
                 .Height(25)
                 .FillRatio(0.25f),
 
                 FNew(FStyledWidget)
-                .Background(Color::Green())
+                .Background(Colors::Green)
                 .Height(25)
                 .FillRatio(0.25f),
 
                 FNew(FStyledWidget)
-                .Background(Color::Cyan())
+                .Background(Colors::Cyan)
                 .Height(25)
                 .FillRatio(0.5f)
             ),
@@ -110,7 +110,7 @@ void SampleWidgetWindow::Construct()
                 .Text("This is overlay text")
                 .FontSize(18)
                 .Bold(true)
-                .Foreground(Color::Black())
+                .Foreground(Colors::Black)
                 .HAlign(HAlign::Center)
             ),
 

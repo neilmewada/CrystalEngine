@@ -9,6 +9,8 @@
 // Platform
 #include "PAL/Common/EditorPlatform.h"
 
+#include "Editor/EditorConfigs.h"
+
 // Project
 #include "Project/CrystalProject.h"
 #include "Project/ProjectManager.h"
@@ -18,11 +20,20 @@
 #include "Asset/AssetDefinitionRegistry.h"
 #include "Asset/AssetImporter.h"
 
+// Thumbnails
+#include "Asset/Thumbnail/ThumbnailSystem.h"
+#include "Asset/Thumbnail/AssetThumbnailGen.h"
+#include "Asset/Thumbnail/TextureAssetThumbnailGen.h"
+#include "Asset/Thumbnail/MaterialAssetThumbnailGen.h"
+
 // Assets
 #include "Asset/ShaderAssetDefinition.h"
 #include "Asset/ShaderAssetImporter.h"
 #include "Asset/ComputeShaderAssetDefinition.h"
 #include "Asset/ComputeShaderAssetImporter.h"
+#include "Asset/SceneAssetDefinition.h"
+#include "Asset/MaterialAssetDefinition.h"
+#include "Asset/PhysicsMaterialAssetDefinition.h"
 #include "Asset/TextureAssetDefinition.h"
 #include "Asset/TextureAssetImporter.h"
 #include "Asset/StaticMeshDefinition.h"
@@ -38,8 +49,6 @@
 /// Widgets
 
 #include "Fusion/Style/EditorDockspaceStyle.h"
-#include "Fusion/Style/EditorMinorDockspaceStyle.h"
-#include "Fusion/Style/EditorDockTabStyle.h"
 #include "Fusion/Style/EditorMenuBarStyle.h"
 #include "Fusion/Style/EditorStyle.h"
 
@@ -67,6 +76,10 @@
 #include "Fusion/Widget/Editor/EditorViewport.h"
 #include "Fusion/Widget/Editor/EditorWindow.h"
 
+#include "Fusion/Widget/AddComponentMenu/AddComponentTreeViewModel.h"
+#include "Fusion/Widget/AddComponentMenu/AddComponentTreeView.h"
+#include "Fusion/Widget/AddComponentMenu/AddComponentMenu.h"
+
 #include "Fusion/Widget/AssetSelectionPopup/AssetSelectionListViewModel.h"
 #include "Fusion/Widget/AssetSelectionPopup/AssetSelectionListView.h"
 #include "Fusion/Widget/AssetSelectionPopup/AssetSelectionPopup.h"
@@ -76,10 +89,12 @@
 #include "Fusion/Widget/ComponentTreeView/ComponentTreeView.h"
 #include "Fusion/Widget/ComponentTreeView/ComponentTreeViewStyle.h"
 
-// Docking
 #include "Fusion/Docking/EditorDockspace.h"
-#include "Fusion/Docking/EditorDockTabItem.h"
-#include "Fusion/Docking/EditorDockTab.h"
+#include "Fusion/Docking/EditorMajorDockspace.h"
+#include "Fusion/Docking/EditorMajorDockspaceWindow.h"
+#include "Fusion/Docking/EditorMinorDockspace.h"
+#include "Fusion/Docking/EditorMinorDockspaceWindow.h"
+#include "Fusion/Docking/EditorDockWindow.h"
 #include "Fusion/Widget/Editor/EditorBase.h"
 
 #include "Editor/AssetEditorRegistry.h"

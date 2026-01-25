@@ -11,6 +11,7 @@ namespace CE::RPI
 
     			if (attachmentBinding.attachment != nullptr && attachmentBinding.attachment->lifetime == RHI::AttachmentLifetimeType::Transient)
     			{
+					// Check if the attachment already exists in the database, we don't want to re-create it.
                     if (attachmentDatabase.FindFrameAttachment(attachmentBinding.attachment->name) != nullptr)
                         return;
 
@@ -26,8 +27,9 @@ namespace CE::RPI
     					bufferDescriptor.bindFlags = attachmentDescriptor.bufferDesc.bindFlags;
     					bufferDescriptor.bufferSize = attachmentDescriptor.bufferDesc.byteSize;
     					bufferDescriptor.defaultHeapType = RHI::MemoryHeapType::Default;
+						bufferDescriptor.structureByteStride = bufferDescriptor.bufferSize;
 
-    					//attachmentDatabase.EmplaceFrameAttachment(attachment->attachmentId, bufferDescriptor);
+    					attachmentDatabase.EmplaceFrameAttachment(attachment->attachmentId, bufferDescriptor);
     				}
     					break;
     				case RHI::AttachmentType::Image:

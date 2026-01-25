@@ -11,6 +11,7 @@ namespace CE::Editor
         // - Public API -
 
         static FImageButton& NewImageButton(const CE::Name& imagePath);
+        static FWidget& NewSeparator();
 
     protected:
 

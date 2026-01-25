@@ -26,7 +26,14 @@ namespace CE
 
     void FGameWindow::SetScene(RPI::Scene* scene)
     {
+        if (this->scene == scene)
+            return;
+
         this->scene = scene;
+
+        FusionApplication::Get()->RebuildFrameGraph();
+
+        OnSceneChanged();
     }
 
     bool FGameWindow::IsEmbeddedViewport() const

@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_114" : {
+        "_128" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -42,7 +42,7 @@
                 }
             ]
         },
-        "_117" : {
+        "_131" : {
             "name" : "ObjectData",
             "members" : [
                 {
@@ -54,12 +54,12 @@
                 }
             ]
         },
-        "_116" : {
+        "_130" : {
             "name" : "type.StructuredBuffer.ObjectData",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_117",
+                    "type" : "_131",
                     "array" : [
                         0
                     ],
@@ -71,7 +71,7 @@
                 }
             ]
         },
-        "_120" : {
+        "_134" : {
             "name" : "ClipRect",
             "members" : [
                 {
@@ -88,12 +88,12 @@
                 }
             ]
         },
-        "_119" : {
+        "_133" : {
             "name" : "type.StructuredBuffer.ClipRect",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_120",
+                    "type" : "_134",
                     "array" : [
                         0
                     ],
@@ -105,7 +105,7 @@
                 }
             ]
         },
-        "_123" : {
+        "_137" : {
             "name" : "DrawData",
             "members" : [
                 {
@@ -155,12 +155,12 @@
                 }
             ]
         },
-        "_122" : {
+        "_136" : {
             "name" : "type.StructuredBuffer.DrawData",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_123",
+                    "type" : "_137",
                     "array" : [
                         0
                     ],
@@ -172,7 +172,7 @@
                 }
             ]
         },
-        "_126" : {
+        "_140" : {
             "name" : "GradientKey",
             "members" : [
                 {
@@ -187,12 +187,12 @@
                 }
             ]
         },
-        "_125" : {
+        "_139" : {
             "name" : "type.StructuredBuffer.GradientKey",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_126",
+                    "type" : "_140",
                     "array" : [
                         0
                     ],
@@ -204,7 +204,7 @@
                 }
             ]
         },
-        "_128" : {
+        "_142" : {
             "name" : "type.PushConstant.RootConstants",
             "members" : [
                 {
@@ -301,7 +301,7 @@
     ],
     "ssbos" : [
         {
-            "type" : "_116",
+            "type" : "_130",
             "name" : "type.StructuredBuffer.ObjectData",
             "readonly" : true,
             "block_size" : 0,
@@ -309,7 +309,7 @@
             "binding" : 0
         },
         {
-            "type" : "_119",
+            "type" : "_133",
             "name" : "type.StructuredBuffer.ClipRect",
             "readonly" : true,
             "block_size" : 0,
@@ -317,7 +317,7 @@
             "binding" : 1
         },
         {
-            "type" : "_122",
+            "type" : "_136",
             "name" : "type.StructuredBuffer.DrawData",
             "readonly" : true,
             "block_size" : 0,
@@ -325,7 +325,7 @@
             "binding" : 2
         },
         {
-            "type" : "_125",
+            "type" : "_139",
             "name" : "type.StructuredBuffer.GradientKey",
             "readonly" : true,
             "block_size" : 0,
@@ -335,7 +335,7 @@
     ],
     "ubos" : [
         {
-            "type" : "_114",
+            "type" : "_128",
             "name" : "type._PerViewData",
             "block_size" : 216,
             "set" : 1,
@@ -344,7 +344,7 @@
     ],
     "push_constants" : [
         {
-            "type" : "_128",
+            "type" : "_142",
             "name" : "_RootConstants",
             "push_constant" : true
         }

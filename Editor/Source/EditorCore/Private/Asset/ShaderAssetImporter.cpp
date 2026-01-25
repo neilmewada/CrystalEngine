@@ -104,6 +104,7 @@ namespace CE::Editor
 					L"-D", L"COMPILE=1",
 					L"-D", L"VERTEX=1",
 					L"-fspv-preserve-bindings",
+					L"-fspv-debug=vulkan-with-source"
 					});
 
 				ShaderCompiler::ErrorCode result = compiler.BuildSpirv(passEntry.source.GetDataPtr(), (u32)passEntry.source.GetDataSize(), buildConfig, vertBlob->byteCode, vertexExtraArgs);
@@ -136,6 +137,7 @@ namespace CE::Editor
 					L"-D", L"COMPILE=1",
 					L"-D", L"FRAGMENT=1",
 					L"-fspv-preserve-bindings",
+					L"-fspv-debug=vulkan-with-source"
 					});
 
 				result = compiler.BuildSpirv(passEntry.source.GetDataPtr(), (u32)passEntry.source.GetDataSize(), buildConfig, fragBlob->byteCode, fragmentExtraArgs);

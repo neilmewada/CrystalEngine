@@ -107,6 +107,10 @@ namespace CE
 
         virtual void SetProperty(const Name& name, const Ref<CE::Texture>& value, const Vec2& offset = Vec2(0, 0), const Vec2& scaling = Vec2(1, 1)) = 0;
 
+        virtual void SetProperty(const Name& name, const MaterialTextureValue& textureValue) = 0;
+
+        virtual void MarkDirty() = 0;
+
         virtual void ApplyProperties() = 0;
 
         virtual void SetCustomPass(u32 passIndex) = 0;

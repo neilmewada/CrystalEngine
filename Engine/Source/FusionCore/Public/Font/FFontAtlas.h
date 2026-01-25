@@ -99,7 +99,7 @@ namespace CE
 
             HashMap<u32, HashMap<CharCode, FFontGlyphInfo>> glyphsByFontSize;
 
-            bool FindInsertionPoint(Vec2i glyphSize, int& outX, int& outY);
+            bool TryInsertGlyphRect(Vec2i glyphSize, int& outX, int& outY);
         };
 
         struct alignas(16) FGlyphData
@@ -121,7 +121,6 @@ namespace CE
         bool atlasUpdateRequired = false;
 
         RPI::Texture* atlasTexture = nullptr;
-        //RHI::ShaderResourceGroup* fontSrg = nullptr;
         RHI::ShaderResourceGroup* fontSrg2 = nullptr;
 
         FFontMetrics metrics{};

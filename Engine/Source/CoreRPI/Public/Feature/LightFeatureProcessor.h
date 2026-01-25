@@ -5,8 +5,12 @@ namespace CE::RPI
 	struct alignas(16) LightConstants
 	{
 		Vec4 ambientColor{};
-		u32 totalDirectionalLights;
-		u32 totalPointLights;
+		u32 totalDirectionalLights = 0;
+		u32 totalLocalLights = 0;
+		u32 tileSizeX = 16;
+		u32 tileSizeY = 16;
+		u32 lightsPerTile = 0;
+		u32 lightIndexPoolCapacity = 0;
 	};
 
 	CLASS(Abstract)

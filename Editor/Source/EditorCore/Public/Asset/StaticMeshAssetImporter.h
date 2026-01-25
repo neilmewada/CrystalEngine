@@ -34,6 +34,8 @@ namespace CE::Editor
 
 		}
 
+		Array<Name> PrepareProductAssetDependencies() override;
+
 		virtual bool ProcessAsset(const Ref<Bundle>& bundle) override;
 
 	private:

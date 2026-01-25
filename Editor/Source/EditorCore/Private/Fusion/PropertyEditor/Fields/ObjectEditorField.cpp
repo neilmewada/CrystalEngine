@@ -15,6 +15,8 @@ namespace CE::Editor
         constexpr f32 height = 50;
         constexpr f32 cornerRadius = 5;
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         FBrush assetCircle = FBrush("/Editor/Assets/Icons/DoubleCircle", Color::RGBHex(0xd9d9d9));
 
         FBrush useAsset = FBrush("/Editor/Assets/Icons/SelectFile");
@@ -35,12 +37,31 @@ namespace CE::Editor
                 .VAlign(VAlign::Fill)
                 .HAlign(HAlign::Fill)
                 (
-                    FNew(FStyledWidget) // Thumbnail
-                    .Background(Color::Black())
-                    .CornerRadius(Vec4(1, 1, 1, 1) * cornerRadius)
+                    FNew(FOverlayStack)
+                    .ContentHAlign(HAlign::Center)
+                    .ContentVAlign(VAlign::Center)
                     .Width(height)
                     .Height(height)
-                    .Margin(Vec4(0, 0, 7.5f, 0)),
+                    .Margin(Vec4(0, 0, 7.5f, 0))
+                    (
+                        FNew(FStyledWidget)
+                        .Background(Colors::Black)
+                        .CornerRadius(Vec4(1, 1, 1, 1) * cornerRadius)
+                        .Width(height)
+                        .Height(height),
+
+                        FAssignNew(FImage, thumbnail)
+                        .Background(Colors::Cyan)
+                        .Width(38)
+                        .Height(38),
+
+                        FAssignNew(FStyledWidget, colorTag)
+                        .Background(Colors::Clear)
+                        .CornerRadius(Vec4(0, 0, 1, 1) * 2.0f)
+                        .Height(2.0f)
+                        .VAlign(VAlign::Bottom)
+                        .HAlign(HAlign::Fill)
+                    ),
 
                     FNew(FVerticalStack)
                     .Gap(2)
@@ -69,7 +90,7 @@ namespace CE::Editor
                                     FAssignNew(FLabel, valueLabel)
                                     .Text("[None]")
                                     .WordWrap(FWordWrap::NoWrap)
-                                    .FontSize(10)
+                                    .FontSize(fontSize)
                                     .HAlign(HAlign::Fill)
                                 ),
 
@@ -138,6 +159,18 @@ namespace CE::Editor
             registered = true;
 
             AssetRegistry::Get()->AddRegistryListener(this);
+			ThumbnailSystem::Get()->AddThumbnailListener(this);
+        }
+
+        TypeInfo* typeInfo = GetTypeInfo(fieldDeclId);
+        if (!typeInfo || !typeInfo->IsClass())
+            return;
+
+		ClassType* classType = (ClassType*)typeInfo;
+
+        if (AssetDefinition* assetDef = AssetDefinitionRegistry::Get()->FindAssetDefinition(classType))
+        {
+			colorTag->Background(assetDef->GetColorTag());
         }
     }
 
@@ -150,10 +183,11 @@ namespace CE::Editor
             registered = false;
 
             AssetRegistry::Get()->RemoveRegistryListener(this);
+			ThumbnailSystem::Get()->RemoveThumbnailListener(this);
         }
     }
 
-    void ObjectEditorField::OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName)
+    void ObjectEditorField::OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName, const CE::Name& newPath)
     {
         if (Ref<Object> object = curValue.Lock())
         {
@@ -196,6 +230,11 @@ namespace CE::Editor
         }
     }
 
+    void ObjectEditorField::OnThumbnailsUpdated(const Array<CE::Name>& assetPaths)
+    {
+        UpdateValue();
+    }
+
     bool ObjectEditorField::CanBind(FieldType* field)
     {
         TypeInfo* fieldDeclType = field->GetDeclarationType();
@@ -230,7 +269,7 @@ namespace CE::Editor
         {
             popup->QueueDestroy();
         });
-
+        
         popup->OnAssetSelected([this] (AssetData* assetData)
         {
             SelectAsset(assetData);
@@ -308,6 +347,7 @@ namespace CE::Editor
             else
             {
                 field->SetFieldValue<Ref<Object>>(instance, asset);
+                target->OnFieldEdited(relativeFieldPath);
             }
         }
         else if (field->IsWeakRefCounted())
@@ -322,6 +362,7 @@ namespace CE::Editor
             else
             {
                 field->SetFieldValue<WeakRef<Object>>(instance, asset);
+                target->OnFieldEdited(relativeFieldPath);
             }
         }
         else
@@ -336,6 +377,7 @@ namespace CE::Editor
             else
             {
                 field->SetFieldValue<Object*>(instance, asset.Get());
+                target->OnFieldEdited(relativeFieldPath);
             }
         }
 
@@ -377,6 +419,8 @@ namespace CE::Editor
 
         curValue = value;
 
+        thumbnail->Background(Colors::Clear);
+
         if (value == nullptr)
         {
             valueLabel->Text("[None]");
@@ -384,10 +428,27 @@ namespace CE::Editor
         }
         else
         {
-            Ref<Bundle> bundle = value->GetBundle();
+        	Ref<Bundle> bundle = value->GetBundle();
             if (bundle && !bundle->IsTransient())
             {
                 valueLabel->Text(bundle->GetName().GetString());
+
+            	CE::Name bundlePath = bundle->GetBundlePath();
+				CE::Name thumbnailPath = ThumbnailSystem::GetThumbnailPath(bundlePath);
+				IO::Path thumbnailAbsolutePath = Bundle::GetAbsoluteBundlePath(thumbnailPath);
+                if (thumbnailAbsolutePath.Exists())
+                {
+                    FBrush thumbnailBrush = FBrush(thumbnailPath);
+                    thumbnail->Background(thumbnailBrush);
+                }
+                else
+                {
+                    ClassType* assetClass = value->GetClass();
+                    if (AssetDefinition* assetDef = AssetDefinitionRegistry::Get()->FindAssetDefinition(assetClass))
+                    {
+                        thumbnail->Background(FBrush(assetDef->GetIconPath()));
+                    }
+				}
 
                 curObjectFullPath = bundle->GetBundlePath();
             }

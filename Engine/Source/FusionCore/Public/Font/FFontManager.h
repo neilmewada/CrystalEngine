@@ -22,9 +22,13 @@ namespace CE
 		bool RegisterFont(const Name& fontName, const Array<CharRange>& characterSets, 
 			Stream* regularFontFile, Stream* italicFontFile = nullptr, Stream* boldFontFile = nullptr, Stream* boldItalicFontFile = nullptr);
 
+		bool RegisterSDFFont(const Name& fontName, const Array<CharRange>& characterSets,
+			Stream* regularFontFile, Stream* italicFontFile = nullptr, Stream* boldFontFile = nullptr, Stream* boldItalicFontFile = nullptr);
+
 		bool DeregisterFont(const Name& fontName);
 
 		FFontAtlas* FindFont(const Name& fontName);
+		Ref<FSDFFontAtlas> FindSDFFont(const Name& fontName);
 
 		template<typename Func>
 		void IterateFontAtlases(const Func& func)
@@ -45,9 +49,12 @@ namespace CE
 		bool LoadFontFace(Stream* ttfFile, FT_Face& outFace, u8** outData);
 
 		HashMap<Name, FFontAtlas*> fontAtlases;
+		HashMap<Name, Ref<FSDFFontAtlas>> sdfFontAtlases;
 
 		FT_Library ft = nullptr;
 
+		friend class FFontAtlas;
+		friend class FSDFFontAtlas;
 	};
 
 } // namespace CE

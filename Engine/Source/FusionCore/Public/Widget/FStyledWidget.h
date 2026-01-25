@@ -25,8 +25,6 @@ namespace CE
         //! @brief Called before the content is being painted but after the background and border of this widget.
         virtual void OnPaintContent(FPainter* painter) {}
 
-        virtual void OnPaintContentOverlay(FPainter* painter) {}
-
         void OnAttachedToParent(FWidget* parent) override;
 
     protected: // - Fusion Fields -
@@ -55,6 +53,8 @@ namespace CE
         FUSION_PROPERTY(Color, BorderColor);
         FUSION_PROPERTY(f32, BorderWidth);
         FUSION_PROPERTY(FPenStyle, BorderStyle);
+
+        FUSION_EVENT(FPaintEvent, OnPaintContentOverlay);
 
         Self& Border(const Color& borderColor, f32 borderWidth = 1.0f)
         {

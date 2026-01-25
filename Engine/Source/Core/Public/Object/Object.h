@@ -161,6 +161,16 @@ namespace CE
 			return (TClass*)instance;
 		}
 
+    	template<typename TClass> requires TIsBaseClassOf<CE::Object, TClass>::Value
+		static Ref<TClass> CastTo(Ref<Object> instance)
+		{
+			if (instance == nullptr || !instance->IsOfType<TClass>())
+			{
+				return nullptr;
+			}
+			return (TClass*)instance.Get();
+		}
+
         virtual u64 ComputeMemoryFootprint();
 
 		Name GetPathInBundle();
@@ -226,17 +236,16 @@ namespace CE
 				return nullptr;
 			return (TClass*)CreateDefaultSubobject(classType, name, flags | OF_DefaultSubobject);
 		}
-		
-		void LoadDefaults();
-
-        void ConfigParseStruct(const String& value, void* instance, StructType* structType);
-        
-        void ConfigParseField(const String& value, void* instance, const Ptr<FieldType>& field);
         
         virtual void OnAfterConfigLoad() {}
 
-
 	private:
+
+        void LoadDefaults();
+
+        void ConfigParseStruct(const String& value, void* instance, StructType* structType);
+
+        void ConfigParseField(const String& value, void* instance, const Ptr<FieldType>& field);
 
         void UnbindAllEvents();
 

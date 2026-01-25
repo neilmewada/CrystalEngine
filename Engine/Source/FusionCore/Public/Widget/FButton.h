@@ -33,8 +33,6 @@ namespace CE
 
         void HandleEvent(FEvent* event) override;
 
-        void OnPaintContentOverlay(FPainter* painter) override;
-
         bool SupportsMouseEvents() const override { return true; }
 
         bool SupportsKeyboardEvents() const override { return true; }
@@ -44,6 +42,8 @@ namespace CE
     protected: // - Internal Methods -
 
         void SetState(FButtonState newState);
+
+        void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
         virtual void OnClick() {}
         virtual void OnDoubleClick() {}

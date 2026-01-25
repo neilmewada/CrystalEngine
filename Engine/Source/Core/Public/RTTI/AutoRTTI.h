@@ -45,7 +45,7 @@ enum AttributeSpecifiers
 	//! @brief Indicates that the field is editable anywhere.
 	EditAnywhere,
 
-	//! @brief This makes the field visible, but not editable.
+	//! @brief This makes the field or button visible anywhere, but not editable.
 	VisibleAnywhere,
 
 	//! @brief Indicates that the field is read-only.

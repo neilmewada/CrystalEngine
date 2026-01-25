@@ -23,6 +23,8 @@ namespace CE
 
         void SetScene(CE::Scene* scene);
 
+        void Tick(float deltaTime) override;
+
     private:
 
         FGameWindow* gameWindow = nullptr;

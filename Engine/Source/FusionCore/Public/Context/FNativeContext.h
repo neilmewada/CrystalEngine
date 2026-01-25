@@ -22,6 +22,8 @@ namespace CE
 
 		virtual ~FNativeContext();
 
+		void OnAfterConstruct() override;
+
 		static FNativeContext* Create(PlatformWindow* platformWindow, const String& name, FFusionContext* parentContext = nullptr);
 
 		PlatformWindow* GetPlatformWindow() const { return platformWindow; }
@@ -32,6 +34,10 @@ namespace CE
 
 		int GetMultisamplingCount() const { return sampleCount; }
 		void SetMultisamplingCount(int msaa);
+
+		int GetZOrder() override;
+
+		void SetContextFocus() override;
 
 		bool IsFocused() const override;
 
@@ -69,6 +75,11 @@ namespace CE
 		bool IsMaximized();
 		bool IsMinimized();
 
+		void SetWindowPosition(Vec2i newPos);
+
+		//! @brief Returns the window size in Fusion units. This does not directly equal to the native window size because of DPI scaling.
+		Vec2i GetWindowSize();
+
 	protected:
 
 		bool WindowDragHitTest(PlatformWindow* window, Vec2 position);
@@ -101,6 +112,8 @@ namespace CE
 		Array<ImageScopeAttachmentDescriptor> shaderReadOnlyAttachmentDependencies;
 		Array<ImageScopeAttachmentDescriptor> shaderWriteAttachmentDependencies;
 
+		Vec2i windowPosToSet;
+		bool updateWindowPos = false;
 		
 		FusionRenderer2* renderer2 = nullptr;
 		FPainter* painter = nullptr;

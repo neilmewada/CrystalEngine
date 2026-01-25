@@ -17,7 +17,7 @@ namespace CE::RHI
         int arrayLayerCount = 1;
     };
     
-    class CORERHI_API TextureView : public RHI::RHIResource
+    class CORERHI_API TextureView : public RHI::RHIResource, public IDeviceObject
     {
     public:
 
@@ -51,10 +51,10 @@ namespace CE::RHI
 
     protected:
 
-        TextureView() : RHIResource(ResourceType::TextureView)
+		TextureView() : RHIResource(ResourceType::TextureView), IDeviceObject(DeviceObjectType::TextureView)
         {}
 
-        TextureView(const TextureViewDescriptor& desc) : RHIResource(ResourceType::TextureView)
+        TextureView(const TextureViewDescriptor& desc) : RHIResource(ResourceType::TextureView), IDeviceObject(DeviceObjectType::TextureView)
             , texture(desc.texture)
             , format(desc.format)
             , dimension(desc.dimension)

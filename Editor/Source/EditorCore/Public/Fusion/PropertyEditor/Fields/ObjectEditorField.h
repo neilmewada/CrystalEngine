@@ -4,7 +4,7 @@ namespace CE::Editor
 {
 
     CLASS()
-    class EDITORCORE_API ObjectEditorField : public EditorField, IAssetRegistryListener
+    class EDITORCORE_API ObjectEditorField : public EditorField, IAssetRegistryListener, IThumbnailSystemListener
     {
         CE_CLASS(ObjectEditorField, EditorField)
     protected:
@@ -17,11 +17,13 @@ namespace CE::Editor
 
         void OnBeginDestroy() override;
 
-        void OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName) override;
+        void OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName, const CE::Name& newPath) override;
 
         void OnAssetDeleted(const CE::Name& bundlePath) override;
 
         void OnDirectoryRenamed(const CE::Name& oldPath, const CE::Name& newPath) override;
+
+        void OnThumbnailsUpdated(const Array<CE::Name>& assetPaths) override;
 
     public: // - Public API -
 
@@ -45,7 +47,8 @@ namespace CE::Editor
         void UpdateValue() override;
 
         Ref<FLabel> valueLabel;
-
+        Ref<FStyledWidget> thumbnail;
+        Ref<FStyledWidget> colorTag;
 
         bool registered = false;
 

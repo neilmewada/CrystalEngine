@@ -209,11 +209,11 @@ namespace RenderingTests
         FGradient gradient = FGradient();
         gradient.angle = 90;
         gradient.stops = {
-            FGradientKey(0.00f, Color::Red()),
-            FGradientKey(0.25f, Color::Yellow()),
-            FGradientKey(0.50f, Color::Green()),
-            FGradientKey(0.75f, Color::Cyan()),
-            FGradientKey(1.00f, Color::Blue()),
+            FGradientKey(0.00f, Colors::Red),
+            FGradientKey(0.25f, Colors::Yellow),
+            FGradientKey(0.50f, Colors::Green),
+            FGradientKey(0.75f, Colors::Cyan),
+            FGradientKey(1.00f, Colors::Blue),
         };
 	}
 
@@ -225,7 +225,7 @@ namespace RenderingTests
         timer->OnTimeOut(FUNCTION_BINDING(this, OnTimeOut));
         timer->Start(16);
 
-        FBrush transparentPattern = FBrush("/Engine/Resources/Icons/TransparentPattern", Color::White());
+        FBrush transparentPattern = FBrush("/Engine/Resources/Icons/TransparentPattern", Colors::White);
         transparentPattern.SetBrushTiling(FBrushTiling::TileXY);
         transparentPattern.SetBrushSize(Vec2(16, 16));
 
@@ -234,11 +234,11 @@ namespace RenderingTests
         FGradient gradient = FGradient();
         gradient.angle = 0;
         gradient.stops = {
-            FGradientKey(0.00f, Color::Red()),
-            FGradientKey(0.25f, Color::Yellow()),
-            FGradientKey(0.50f, Color::Green()),
-            FGradientKey(0.75f, Color::Cyan()),
-            FGradientKey(1.00f, Color::Blue()),
+            FGradientKey(0.00f, Colors::Red),
+            FGradientKey(0.25f, Colors::Yellow),
+            FGradientKey(0.50f, Colors::Green),
+            FGradientKey(0.75f, Colors::Cyan),
+            FGradientKey(1.00f, Colors::Blue),
         };
 
         FBrush gradientBrush = FBrush(gradient);
@@ -385,17 +385,17 @@ namespace RenderingTests
                         .Angle(0)
                         (
 							FNew(FStyledWidget)
-                            .Background(Color::Yellow())
+                            .Background(Colors::Yellow)
                             .Height(25)
                             .FillRatio(0.25f),
 
                             FNew(FStyledWidget)
-                            .Background(Color::Green())
+                            .Background(Colors::Green)
                             .Height(25)
                             .FillRatio(0.5f),
 
                             FNew(FStyledWidget)
-                            .Background(Color::Cyan())
+                            .Background(Colors::Cyan)
                             .Height(25)
                             .FillRatio(0.25f)
                         ),

@@ -4,6 +4,7 @@ namespace CE
 {
     typedef Delegate<f32(const FModelIndex&)> FRowHeightDelegate;
     typedef Delegate<FTreeViewRow&()> FGenerateTreeViewRowDelegate;
+    DECLARE_SCRIPT_DELEGATE(FTreeViewRowContextMenuDelegate, FMenuPopup&, FTreeViewRow& row);
 
     CLASS()
     class FUSION_API FTreeView : public FStyledWidget
@@ -17,11 +18,18 @@ namespace CE
 
         FStyledWidget* GetHeaderContainer() const { return headerContainer; }
 
+        Ref<FTreeViewRow> FindRow(const FModelIndex& index);
         void SelectRow(const FModelIndex& index);
+        void DeselectRow(const FModelIndex& index);
+        void ClearSelection();
+
+        void SelectRow(const FModelIndex& index, bool isCtrlKey);
 
         bool SupportsFocusEvents() const override { return true; }
 
         void ExpandRow(const FModelIndex& index, bool recursive);
+
+        void ExpandAllRows();
 
     protected:
 
@@ -30,6 +38,8 @@ namespace CE
         void Construct() override;
 
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
+
+        void OnRowRightClicked(FTreeViewRow& row, Vec2 mousePos);
 
         FStyledWidget* headerContainer = nullptr;
         FStyledWidget* containerStyle = nullptr;
@@ -55,8 +65,8 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(float, ScrollBarWidth);
         FUSION_LAYOUT_PROPERTY(float, ScrollBarMargin);
 
-        FUSION_PROPERTY(FAbstractItemModel*, Model);
-        FUSION_PROPERTY(FItemSelectionModel*, SelectionModel);
+        FUSION_PROPERTY(Ref<FTreeViewModel>, Model);
+        FUSION_PROPERTY(Ref<FItemSelectionModel>, SelectionModel);
 
         FUSION_PROPERTY(int, ExpandableColumn);
         FUSION_LAYOUT_PROPERTY(bool, AutoHeight);
@@ -65,6 +75,8 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(FRowHeightDelegate, RowHeightDelegate);
 
         FUSION_LAYOUT_PROPERTY(FGenerateTreeViewRowDelegate, GenerateRowDelegate);
+
+        FUSION_PROPERTY(FTreeViewRowContextMenuDelegate, RowContextMenuDelegate);
 
         FUSION_PROPERTY_WRAPPER(VerticalScroll, scrollBox);
         FUSION_PROPERTY_WRAPPER(HorizontalScroll, scrollBox);
@@ -76,6 +88,7 @@ namespace CE
         FUSION_WIDGET;
         friend class FTreeViewContainer;
         friend class FTreeViewStyle;
+        friend class FTreeViewRow;
     };
     
 }

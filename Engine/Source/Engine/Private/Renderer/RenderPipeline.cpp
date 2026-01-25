@@ -42,6 +42,7 @@ namespace CE
 
         renderPipeline->passTree->Clear();
 
+		// - Pipeline Output -
         RPI::PassImageAttachmentDesc pipelineOutputDesc{};
         pipelineOutputDesc.name = "PipelineOutput";
         pipelineOutputDesc.lifetime = RHI::AttachmentLifetimeType::External;

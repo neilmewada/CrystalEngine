@@ -26,4 +26,14 @@ namespace CE::Editor
 		return "/Editor/Assets/Icons/AssetIcons/Texture";
 	}
 
+	SubClass<AssetThumbnailGen> TextureAssetDefinition::GetThumbnailGeneratorClass()
+	{
+		return TextureAssetThumbnailGen::StaticClass();
+	}
+
+	Color TextureAssetDefinition::GetColorTag()
+	{
+		return Color(1.0f, 0.9f, 0.3f, 1.0f);
+	}
+
 } // namespace CE::Editor

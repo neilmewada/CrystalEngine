@@ -87,6 +87,8 @@ namespace CE::RHI
 
 	DrawPacket* DrawPacketBuilder::Build()
 	{
+		ZoneScoped;
+
 		if (drawRequests.GetSize() == 0)
 			return nullptr;
 

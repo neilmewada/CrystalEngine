@@ -511,7 +511,7 @@ namespace CE::Widgets
                         Vec2 tabTitleSize = painter->CalculateTextSize(dockWindow->GetTitle());
 
                         pen.SetWidth(0.0f);
-                        pen.SetColor(Color::Clear());
+                        pen.SetColor(Colors::Clear);
                         brush.SetColor(Color::RGBA8(36, 36, 36));
                         if (i != selectedTab)
                             brush.SetColor(bgColor);
@@ -529,7 +529,7 @@ namespace CE::Widgets
                         {
                             painter->DrawRoundedRect(tabRect, Vec4(5, 5, 0, 0));
 
-                            pen.SetColor(Color::White());
+                            pen.SetColor(Colors::White);
                             painter->SetPen(pen);
 
                             painter->DrawText(dockWindow->GetTitle(), tabRect + Rect(15, tabRect.GetSize().height / 2 - tabTitleSize.height / 2, 0, 0));
@@ -554,7 +554,7 @@ namespace CE::Widgets
                         Vec2 tabTitleSize = painter->CalculateTextSize(dockWindow->GetTitle());
 
                         pen.SetWidth(0.0f);
-                        pen.SetColor(Color::Clear());
+                        pen.SetColor(Colors::Clear);
                         brush.SetColor(Color::RGBA8(36, 36, 36));
                         if (i != selectedTab)
                             brush.SetColor(bgColor);
@@ -566,7 +566,7 @@ namespace CE::Widgets
                         {
                             painter->DrawRoundedRect(tabRect, Vec4(5, 5, 0, 0));
 
-                            pen.SetColor(Color::White());
+                            pen.SetColor(Colors::White);
                             painter->SetPen(pen);
 
                             painter->DrawText(dockWindow->GetTitle(), tabRect + Rect(15, tabRect.GetSize().height / 2 - tabTitleSize.height / 2, 0, 0));

@@ -13,8 +13,11 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         Child(
 			FAssignNew(FTextInput, input)
+            .FontSize(fontSize)
             .OnTextEditingFinished(FUNCTION_BINDING(this, OnFinishEdit))
             .OnTextEdited(FUNCTION_BINDING(this, OnTextFieldEdited))
             .OnBeforeTextPaint(FUNCTION_BINDING(this, OnPaintBeforeText))
@@ -87,7 +90,7 @@ namespace CE::Editor
 
                 event->Consume(this);
             }
-            else if (event->type == FEventType::MousePress)
+            else if (event->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left)
             {
                 event->Consume(this);
 
@@ -113,7 +116,7 @@ namespace CE::Editor
         {
             FDragEvent* drag = static_cast<FDragEvent*>(event);
 
-	        if (event->type == FEventType::DragBegin)
+	        if (event->type == FEventType::DragBegin && drag->buttons == MouseButtonMask::Left)
             {
                 if (!input->IsEditing())
                 {
@@ -139,7 +142,7 @@ namespace CE::Editor
                     drag->Consume(this);
                 }
             }
-            else if (event->type == FEventType::DragMove)
+            else if (event->type == FEventType::DragMove && drag->buttons == MouseButtonMask::Left)
             {
                 if (isDragging)
                 {
@@ -191,6 +194,11 @@ namespace CE::Editor
         }
 
 	    Super::HandleEvent(event);
+    }
+
+    bool NumericEditorField::IsEditing()
+    {
+        return input->IsEditing();
     }
 
     FWidget* NumericEditorField::HitTest(Vec2 localMousePos)

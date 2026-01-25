@@ -30,6 +30,9 @@ namespace CE
 
 		CMImage GetCMImage();
 
+		static Ref<CE::Texture2D> Create(Ref<Object> outer, const String& name, const CMImage& sourceImage, 
+			TextureAddressMode addressModeU = TextureAddressMode::ClampToBorder, TextureAddressMode addressModeV = TextureAddressMode::ClampToBorder);
+
 	protected:
 
 		FIELD()
@@ -37,6 +40,10 @@ namespace CE
 
 		FIELD()
 		u32 arrayCount = 1;
+
+	public:
+
+		CE_PROPERTY(ColorSpace, colorSpace);
 
 #if PAL_TRAIT_BUILD_EDITOR
 		friend class CE::Editor::TextureAssetImportJob;

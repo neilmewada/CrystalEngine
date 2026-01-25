@@ -149,6 +149,34 @@ namespace CE::RPI
 
             RegisterTemplate(resolvePass);
         }
+
+        // - Texture to Texture Copy Pass -
+        {
+            CopyPass* copyPass = CreateObject<CopyPass>(transient, "CopyPass");
+
+			PassSlot inputSlot{};
+            inputSlot.name = "Input";
+            inputSlot.slotType = PassSlotType::Input;
+            inputSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Copy;
+            inputSlot.dimensions = { RHI::Dimension::Dim2D };
+            inputSlot.formats = {};
+            inputSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+            inputSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+
+            PassSlot outputSlot{};
+            outputSlot.name = "Output";
+            outputSlot.slotType = PassSlotType::Output;
+            outputSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Copy;
+            outputSlot.dimensions = { RHI::Dimension::Dim2D };
+            outputSlot.formats = {};
+            outputSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+            outputSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+
+            copyPass->AddSlot(inputSlot);
+            copyPass->AddSlot(outputSlot);
+
+            RegisterTemplate(copyPass);
+        }
     }
 
     void PassSystem::Shutdown()

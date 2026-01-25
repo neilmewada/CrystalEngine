@@ -54,4 +54,40 @@ namespace CE
         return dpi;
     }
 
+    int LinuxWindowMisc::GetWindowZOrder(SDLPlatformWindow* window)
+    {
+        if (window == nullptr)
+            return -1;
+        
+        SDL_Window* sdlWindow = (SDL_Window*)window->GetUnderlyingHandle();
+        if (sdlWindow == nullptr)
+            return -1;
+
+        SDL_SysWMinfo wmInfo;
+        SDL_VERSION(&wmInfo.version);
+        if (!SDL_GetWindowWMInfo(sdlWindow, &wmInfo)) 
+            return -1;
+
+        Display* display = wmInfo.info.x11.display;
+        ::Window target = wmInfo.info.x11.window;
+
+        ::Window root, parent;
+        ::Window* children;
+        unsigned int nchildren;
+
+        if (XQueryTree(display, DefaultRootWindow(display), &root, &parent, &children, &nchildren)) 
+        {
+            // children[0] is bottom, children[n-1] is top
+            for (int i = 0; i < (int)nchildren; ++i) 
+            {
+                if (children[i] == target) {
+                    int zOrder = static_cast<int>(nchildren - 1 - i); // 0 = front, highest = back
+                    XFree(children);
+                    return zOrder;
+                }
+            }
+            XFree(children);
+        }
+    }
+
 }

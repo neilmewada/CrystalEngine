@@ -26,6 +26,8 @@ namespace CE::Editor
         
         ProjectManager* projectManager = ProjectManager::Get();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         recentProjectsModel = CreateObject<RecentProjectsListModel>(this, "RecentProjectsListModel");
         newProjectModel = CreateObject<NewProjectListModel>(this, "NewProjectListModel");
 
@@ -93,6 +95,7 @@ namespace CE::Editor
 
                                 FNew(FTextButton)
                                 .Text("...")
+                                .FontSize(fontSize)
                                 .OnClicked([this]
                                 {
                                     String openLocation = EditorPlatform::ShowFileSelectionDialog(defaultOpenProjectLocation, fileTypes)
@@ -114,7 +117,7 @@ namespace CE::Editor
                             .HAlign(HAlign::Fill)
                             (
                                 FAssignNew(FStyledWidget, recentWarningWidget)
-                                .Border(Color::Red(), 0.75f)
+                                .Border(Colors::Red, 0.75f)
                                 .BackgroundShape(FRoundedRectangle(2.5f))
                                 .Child(
                                     FNew(FHorizontalStack)
@@ -122,7 +125,7 @@ namespace CE::Editor
                                     .ContentVAlign(VAlign::Center)
                                     (
                                         FNew(FImage)
-                                        .Background(FBrush("/Engine/Resources/Icons/Warning", Color::Red()))
+                                        .Background(FBrush("/Engine/Resources/Icons/Warning", Colors::Red))
                                         .Width(11)
                                         .Height(11)
                                         .HAlign(HAlign::Center)
@@ -139,7 +142,7 @@ namespace CE::Editor
                                 FAssignNew(FTextButton, openButton)
                                 .TextHAlign(HAlign::Center)
                                 .Text("Open")
-                                .FontSize(10)
+                                .FontSize(fontSize)
                                 .OnClicked([this]
                                 {
                                     OpenProject();
@@ -149,7 +152,7 @@ namespace CE::Editor
                                 FNew(FTextButton)
                                 .TextHAlign(HAlign::Center)
                                 .Text("Cancel")
-                                .FontSize(10)
+                                .FontSize(fontSize)
                                 .OnClicked([this]
                                 {
                                     CloseWindow();
@@ -200,6 +203,7 @@ namespace CE::Editor
 
                                 FNew(FTextButton)
                                 .Text("...")
+                                .FontSize(fontSize)
                                 .OnClicked([this]
                                 {
                                     String newLocation = EditorPlatform::ShowSelectDirectoryDialog(defaultNewProjectLocation)
@@ -235,7 +239,7 @@ namespace CE::Editor
                             .HAlign(HAlign::Fill)
                             (
 								FAssignNew(FStyledWidget, newWarningWidget)
-                                .Border(Color::Red(), 0.75f)
+                                .Border(Colors::Red, 0.75f)
                                 .BackgroundShape(FRoundedRectangle(2.5f))
                                 .Child(
 									FNew(FHorizontalStack)
@@ -243,7 +247,7 @@ namespace CE::Editor
                                     .ContentVAlign(VAlign::Center)
                                     (
 										FNew(FImage)
-                                        .Background(FBrush("/Engine/Resources/Icons/Warning", Color::Red()))
+                                        .Background(FBrush("/Engine/Resources/Icons/Warning", Colors::Red))
                                         .Width(11)
                                         .Height(11)
                                         .HAlign(HAlign::Center)
@@ -260,7 +264,7 @@ namespace CE::Editor
                                 FAssignNew(FTextButton, createButton)
                                 .TextHAlign(HAlign::Center)
                                 .Text("Create")
-                                .FontSize(10)
+                                .FontSize(fontSize)
                                 .OnClicked([this]
                                 {
                                     CreateProject();
@@ -270,7 +274,7 @@ namespace CE::Editor
                                 FNew(FTextButton)
                                 .TextHAlign(HAlign::Center)
                                 .Text("Cancel")
-                                .FontSize(10)
+                                .FontSize(fontSize)
                                 .OnClicked([this]
                                 {
                                     CloseWindow();

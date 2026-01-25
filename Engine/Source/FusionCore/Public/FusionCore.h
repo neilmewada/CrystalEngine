@@ -38,7 +38,8 @@ namespace RenderingTests
     friend class FStyleManager;\
     friend class FusionRenderer;\
     friend class FPainter;\
-    friend class FScrollBox;
+    friend class FScrollBox;\
+    friend class FReorderableStack;
 
 namespace CE
 {
@@ -51,6 +52,7 @@ namespace CE
 #include "FusionDefines.h"
 #include "Exception/FusionException.h"
 #include "Font/FFontAtlas.h"
+#include "Font/FSDFFontAtlas.h"
 #include "Font/FFontManager.h"
 
 #include "Event/FEvent.h"
@@ -84,6 +86,9 @@ namespace CE
 #include "Style/FCheckboxStyle.h"
 #include "Style/FStyledWidgetStyle.h"
 #include "Style/FScrollBoxStyle.h"
+#include "Style/FDockTabWellStyle.h"
+#include "Style/FDockspaceStyle.h"
+#include "Style/FDockingGuideStyle.h"
 #include "Style/FStyleSet.h"
 #include "Style/FStyleManager.h"
 
@@ -100,6 +105,8 @@ namespace CE
 #include "Widget/Layout/FOverlayStack.h"
 #include "Widget/Layout/FSplitBox.h"
 #include "Widget/Layout/FScrollBox.h"
+#include "Widget/Layout/FReorderableStackItem.h"
+#include "Widget/Layout/FReorderableStack.h"
 
 #include "Widget/FPopup.h"
 #include "Widget/FImage.h"
@@ -123,6 +130,17 @@ namespace CE
 
 #include "Window/FTitleBar.h"
 #include "Window/FWindow.h"
+#include "Window/FWindowControlButton.h"
+#include "Window/FToolWindow.h"
 #include "Window/FGameWindow.h"
 #include "Widget/FViewport.h"
 
+#include "Widget/Docking/FDockTabWell.h"
+#include "Widget/Docking/FDockingHint.h"
+#include "Widget/Docking/FDockingGuide.h"
+#include "Widget/Docking/FDockspace.h"
+#include "Widget/Docking/FDockspaceSplitView.h"
+#include "Widget/Docking/FDockWindow.h"
+#include "Widget/Docking/FDockTabItem.h"
+
+#include "Window/FDockspaceWindow.h"

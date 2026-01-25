@@ -33,7 +33,11 @@ namespace CE
 		bool ComponentExistsRecursive(SceneComponent* component);
 		bool ComponentExists(SceneComponent* component);
 
-		Vec3 GetPosition() const { return globalPosition; }
+		Vec3 GetPosition();
+		Quat GetRotation();
+
+		void SetPosition(Vec3 globalPosition);
+		void SetRotation(Quat globalRotation);
 
 		void OnBeginPlay() override;
 
@@ -53,7 +57,9 @@ namespace CE
 
 		SceneComponent* GetAttachedComponent(u32 index) const { return attachedComponents[index]; }
 
-		SceneComponent* GetParentComponent() const { return parentComponent; }
+		SceneComponent* GetParentComponent() const { return parentComponent.Get(); }
+
+		virtual void OnAttachedToScene(Ref<CE::Scene> scene) {}
 
     protected:
 
@@ -62,6 +68,8 @@ namespace CE
 		void OnFieldChanged(const Name& fieldName) override;
 
 		void OnFieldEdited(const Name& fieldName) override;
+
+		virtual void OnTransformFieldEdited(const Name& fieldName) {}
 
 		bool IsTransformUpdated() const { return transformUpdated; }
 
@@ -80,7 +88,7 @@ namespace CE
 		Array<SceneComponent*> attachedComponents{};
 
 		FIELD(ReadOnly)
-		SceneComponent* parentComponent = nullptr;
+		WeakRef<SceneComponent> parentComponent = nullptr;
 
 		FIELD(EditAnywhere, Category = "Transform", DisplayName = "Position", CategoryOrder = "-1")
 		Vec3 localPosition{};

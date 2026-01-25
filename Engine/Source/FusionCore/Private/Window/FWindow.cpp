@@ -28,14 +28,19 @@ namespace CE
 
     PlatformWindow* FWindow::GetPlatformWindow()
     {
-        FFusionContext* context = GetContext();
+        Ref<FFusionContext> context = GetContext();
         if (context == nullptr)
             return nullptr;
         if (!context->IsOfType<FNativeContext>())
             return nullptr;
 
-        FNativeContext* nativeContext = static_cast<FNativeContext*>(context);
+        Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(context);
         return nativeContext->GetPlatformWindow();
+    }
+
+    void FWindow::SetWindowContent(FWidget& content)
+    {
+        Child(content);
     }
 
     void FWindow::OnPaint(FPainter* painter)

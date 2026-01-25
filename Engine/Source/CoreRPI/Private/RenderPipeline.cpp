@@ -46,6 +46,8 @@ namespace CE::RPI
 	
     void RenderPipeline::ImportScopeProducers(RHI::FrameScheduler* scheduler)
     {
+		ZoneScoped;
+
 		Array<RHI::IScopeProducer*> scopeProducers;
 
 		std::function<void(Pass*)> addScopesRecursively = [&](Pass* currentPass)

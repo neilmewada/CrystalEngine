@@ -19,7 +19,7 @@ namespace CE
 	}
 
 	FBrush::FBrush()
-		: fillColor(Color::Clear())
+		: fillColor(Colors::Clear)
 		, imageName(Name())
 		, tiling(FBrushTiling::None)
 		, brushStyle(FBrushStyle::None)
@@ -47,7 +47,7 @@ namespace CE
 	}
 
 	FBrush::FBrush(const FGradient& gradient, const Color& tintColor)
-		: fillColor(Color::White())
+		: fillColor(Colors::White)
 		, gradient(gradient)
 		, brushStyle(FBrushStyle::Gradient)
 		, imageFit(FImageFit::Fill)

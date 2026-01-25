@@ -38,21 +38,33 @@ namespace CE
 
     void FTreeViewRow::HandleEvent(FEvent* event)
     {
-        if (event->IsMouseEvent())
+        if (event->IsMouseEvent() && treeView)
         {
             FMouseEvent* mouseEvent = static_cast<FMouseEvent*>(event);
 
-            if (mouseEvent->type == FEventType::MousePress && mouseEvent->IsLeftButton())
+            if (mouseEvent->type == FEventType::MousePress && mouseEvent->sender == this)
             {
-                treeView->SelectRow(index);
-
-                if (mouseEvent->isDoubleClick && mouseEvent->sender == this)
+                if (mouseEvent->IsLeftButton())
                 {
-                    int col = treeView->ExpandableColumn();
-                    if (col >= 0 && col < GetCellCount() && GetCell(col)->ArrowVisible())
+                    bool isCtrl = EnumHasFlag(mouseEvent->keyModifiers, KeyModifier::Ctrl);
+#if PLATFORM_MAC
+                    isCtrl = EnumHasFlag(mouseEvent->keyModifiers, KeyModifier::Cmd);
+#endif
+
+                    treeView->SelectRow(index, isCtrl);
+
+                    if (mouseEvent->isDoubleClick)
                     {
-                        GetCell(col)->OnToggleExpansion().Invoke();
+                        int col = treeView->ExpandableColumn();
+                        if (col >= 0 && col < GetCellCount() && GetCell(col)->ArrowVisible())
+                        {
+                            GetCell(col)->OnToggleExpansion().Invoke();
+                        }
                     }
+                }
+                else if (mouseEvent->IsRightButton() && !mouseEvent->isDoubleClick)
+                {
+                    treeView->OnRowRightClicked(*this, mouseEvent->mousePosition);
                 }
             }
             else if (mouseEvent->type == FEventType::MouseEnter)

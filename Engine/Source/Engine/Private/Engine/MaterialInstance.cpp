@@ -139,6 +139,24 @@ namespace CE
         propertyMap[name] = prop;
     }
 
+    void MaterialInstance::SetProperty(const Name& name, const MaterialTextureValue& textureValue)
+    {
+        valuesModified = true;
+
+        if (propertyMap.KeyExists(name))
+        {
+            properties.RemoveFirst([&](const MaterialProperty& prop) { return prop.name == name; });
+        }
+
+        MaterialProperty prop{};
+        prop.name = name;
+        prop.textureValue = textureValue;
+        prop.propertyType = MaterialPropertyType::Texture;
+
+        properties.Add(prop);
+        propertyMap[name] = prop;
+    }
+
     RPI::Material* MaterialInstance::GetRpiMaterial()
     {
         return materialOverride;
@@ -161,6 +179,11 @@ namespace CE
         {
             materialOverride = new RPI::Material(baseMaterial->GetRpiMaterial()->GetShaderCollection());
         }
+    }
+
+    void MaterialInstance::MarkDirty()
+    {
+        valuesModified = true;
     }
 
     void MaterialInstance::ApplyProperties()

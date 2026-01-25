@@ -25,6 +25,8 @@ namespace CE::Vulkan
     private:
         
         Device* device = nullptr;
+
+		SharedMutex vkPoolMutex{};
         List<VkDescriptorPool> descriptorPools{};
         
         u32 initialSize = 128;

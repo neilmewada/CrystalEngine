@@ -391,6 +391,11 @@ namespace CE
 					(((ClassOrStruct*)instance)->*funcPtr)( ((params.begin() + Is)->GetValue<Args>())... );
 					returnValue = CE::Variant();
 				}
+				else if constexpr (std::is_reference_v<ReturnType>)
+				{
+					auto& value = (((ClassOrStruct*)instance)->*funcPtr)(((params.begin() + Is)->GetValue<Args>())...);
+					returnValue = CE::Variant(value);
+				}
 				else
 				{
 					auto value = (((ClassOrStruct*)instance)->*funcPtr)( ((params.begin() + Is)->GetValue<Args>())... );
@@ -419,6 +424,11 @@ namespace CE
 				{
 					(((ClassOrStruct*)instance)->*funcPtr)( ((params.begin() + Is)->GetValue<Args>())... );
 					returnValue = CE::Variant();
+				}
+				else if constexpr (std::is_reference_v<ReturnType>)
+				{
+					auto& value = (((ClassOrStruct*)instance)->*funcPtr)(((params.begin() + Is)->GetValue<Args>())...);
+					returnValue = CE::Variant(value);
 				}
 				else
 				{
@@ -650,7 +660,8 @@ namespace CE
 		}
 
         Array<TypeId> GetDerivedClassesTypeId() const;
-        Array<ClassType*> GetDerivedClasses() const;
+		Array<ClassType*> GetDerivedClasses() const;
+		Array<ClassType*> GetDirectDerivedClasses() const;
 
 	private:
 

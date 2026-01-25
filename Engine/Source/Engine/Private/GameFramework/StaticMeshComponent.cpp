@@ -42,6 +42,15 @@ namespace CE
 	    return Super::GetLodSubMeshCount(lodIndex);
     }
 
+    int StaticMeshComponent::GetLodSubMeshMaterialIndex(u32 lodIndex, u32 subMeshIndex)
+    {
+        if (staticMesh)
+        {
+            return staticMesh->GetLodSubMeshMaterialIndex(lodIndex, subMeshIndex);
+        }
+	    return Super::GetLodSubMeshMaterialIndex(lodIndex, subMeshIndex);
+    }
+
     void StaticMeshComponent::SetStaticMesh(Ref<StaticMesh> staticMesh)
     {
         this->staticMesh = staticMesh;
@@ -56,6 +65,8 @@ namespace CE
                 for (int i = 0; i < staticMesh->GetBuiltinMaterialCount(); ++i)
                 {
                     lodMaterial.materials.Add(staticMesh->GetBuiltinMaterial(i));
+                    lodMaterial.materials.GetLast()->MarkDirty();
+                    lodMaterial.materials.GetLast()->ApplyProperties();
                 }
             }
 

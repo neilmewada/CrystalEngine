@@ -6,8 +6,6 @@
 namespace CE
 {
 
-    
-
 	Quat::Quat() : w(1), x(0), y(0), z(0)
 	{
 	}
@@ -106,6 +104,9 @@ namespace CE
 	Quat Quat::GetNormalized()
 	{
 		float mag = sqrtf(w * w + x * x + y * y + z * z);
+		if (mag == 0.0f)
+			return Quat(0, 0, 0, 1); // Identity quaternion fallback
+
 		return Quat(w / mag, x / mag, y / mag, z / mag);
 	}
 

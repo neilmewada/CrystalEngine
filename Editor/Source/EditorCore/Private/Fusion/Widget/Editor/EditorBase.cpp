@@ -5,12 +5,16 @@ namespace CE::Editor
 
     EditorBase::EditorBase()
     {
-
+        m_AllowedDockspaces = FDockspaceFilter().WithDockTypeMask(FDockTypeMask::Major);
     }
 
     void EditorBase::Construct()
     {
+        ZoneScoped;
+
 	    Super::Construct();
+
+        ConstructMajorDockWindow();
 
         history = CreateObject<EditorHistory>(this, "EditorHistory");
 
@@ -18,6 +22,16 @@ namespace CE::Editor
         {
             SetAssetDirty(true);
         });
+
+        ConstructMenuBar();
+        ConstructToolBar();
+
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
+        if (menuBar)
+        {
+            menuBar->SetFontSizeRecursively(fontSize);
+        }
     }
 
     void EditorBase::HandleEvent(FEvent* event)
@@ -30,7 +44,7 @@ namespace CE::Editor
             {
                 KeyModifier ctrlMod = KeyModifier::Ctrl;
 #if PLATFORM_MAC
-                ctrlMod = KeyModifier::Gui;
+                ctrlMod = KeyModifier::Cmd;
 #endif
 
                 if (EnumHasFlag(keyEvent->modifiers, ctrlMod))
@@ -73,13 +87,19 @@ namespace CE::Editor
         AssetRegistry::Get()->RemoveRegistryListener(this);
     }
 
-    void EditorBase::OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName)
+    void EditorBase::OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName, const CE::Name& newPath)
     {
         if (this->bundleUuid == bundleUuid)
         {
             Title(newName.GetString());
-            UpdateDockspaceTabWell();
         }
+    }
+
+    bool EditorBase::OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle)
+    {
+		this->bundle = bundle;
+
+        return true;
     }
 
     void EditorBase::OnEditorOpened(Ref<Object> targetObject)
@@ -103,9 +123,48 @@ namespace CE::Editor
     void EditorBase::SetAssetDirty(bool dirty)
     {
         isAssetDirty = dirty;
-        ShowAsterisk(isAssetDirty);
 
-        UpdateDockspaceTabWell();
+        String title = Title();
+
+        if (isAssetDirty != title.EndsWith("*"))
+        {
+	        if (isAssetDirty)
+            {
+                title += "*";
+            }
+            else
+            {
+                title.RemoveAt(title.GetLength() - 1);
+            }
+
+			Title(title);
+        }
+
     }
+
+    void EditorBase::SaveChanges()
+    {
+        ZoneScoped;
+
+        if (!bundle)
+            return;
+
+        if (bundle->IsTransient())
+            return;
+
+        BundleSaveResult result = Bundle::SaveToDisk(bundle);
+
+        if (result != BundleSaveResult::Success)
+        {
+            CE_LOG(Error, All, "Failed to save material to disk! Error in Bundle::SaveToDisk(); ErrorCode: {}", (int)result);
+        }
+        else
+        {
+            SetAssetDirty(false);
+
+			AssetRegistry::Get()->OnAssetUpdated(bundle->GetBundlePath());
+        }
+    }
+
 }
 

@@ -35,6 +35,10 @@ namespace CE
 
         void ExpandRow(const FModelIndex& index, bool recursive = true);
 
+        void ExpandAllRows();
+
+        Ref<FTreeViewRow> FindRow(const FModelIndex& index);
+
     protected:
 
         FTreeViewContainer();
@@ -54,9 +58,13 @@ namespace CE
         }
 
         using TreeViewRowList = StableDynamicArray<FTreeViewRow*, 64, false>;
+        using TreeViewHashMap = HashMap<FModelIndex, FTreeViewRow*>;
+		using TreeViewGlobalRowIndexCache = HashMap<int, FModelIndex>;
 
         FTreeView* treeView = nullptr;
         TreeViewRowList children;
+        TreeViewHashMap rowCache;
+		TreeViewGlobalRowIndexCache globalRowIndexCache;
         HashSet<FModelIndex> expandedRows;
         Vec2 modelUpdateComputedSize;
         f32 totalRowHeight = 0;

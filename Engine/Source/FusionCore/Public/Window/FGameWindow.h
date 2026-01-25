@@ -29,6 +29,8 @@ namespace CE
 
         void OnBeginDestroy() override;
 
+        virtual void OnSceneChanged() {}
+
         RPI::Scene* scene = nullptr;
 
         RHI::DrawListContext drawList{};

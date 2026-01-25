@@ -4,9 +4,9 @@ namespace CE
 {
 
     CLASS()
-    class FUSIONCORE_API FWindow : public FCompoundWidget
+    class FUSIONCORE_API FWindow : public FStyledWidget
     {
-        CE_CLASS(FWindow, FCompoundWidget)
+        CE_CLASS(FWindow, FStyledWidget)
     public:
 
         FWindow();
@@ -17,6 +17,13 @@ namespace CE
         void HideWindow();
 
         PlatformWindow* GetPlatformWindow();
+
+        virtual void SetWindowContent(FWidget& content);
+
+        void SetWindowContent(Ref<FWidget> content)
+        {
+            SetWindowContent(*content);
+        }
 
     protected:
 

@@ -21,6 +21,11 @@ namespace CE
     extern RawData GetFusionShader2FragMsl();
 
 
+	extern RawData GetFusionSDFGlyphGenVert();
+	extern RawData GetFusionSDFGlyphGenFrag();
+	extern RawData GetFusionSDFGlyphGenVertJson();
+	extern RawData GetFusionSDFGlyphGenFragJson();
+
     FusionApplication::FusionApplication()
     {
         fontManager = CreateDefaultSubobject<FFontManager>("FontManager");
@@ -55,11 +60,13 @@ namespace CE
     void FusionApplication::Initialize(const FusionInitInfo& initInfo)
     {
         assetLoader = initInfo.assetLoader;
+        rebuildFrameGraphMethod = initInfo.rebuildFrameGraphMethod;
         systemDpi = PlatformApplication::Get()->GetSystemDpi();
 
         PlatformApplication::Get()->AddMessageHandler(this);
 
         InitializeShader2();
+        InitializeSDFGlyphShader();
 
         fontManager->Init();
         imageAtlas->Init();
@@ -121,6 +128,7 @@ namespace CE
     {
         delete fusionShader; fusionShader = nullptr;
         delete fusionShader2; fusionShader2 = nullptr;
+        delete sdfGlyphShader; sdfGlyphShader = nullptr;
     }
 
     void FusionApplication::RegisterViewport(FViewport* viewport)
@@ -163,6 +171,13 @@ namespace CE
         }
     }
 
+    void FusionApplication::DispatchOnMainThread(const Delegate<void()>& execute)
+    {
+		LockGuard guard{ mainThreadDispatcherLock };
+
+        mainThreadDispatcher.Add(execute);
+    }
+
     CMImage FusionApplication::LoadImageAsset(const Name& assetPath)
     {
         if (!assetPath.IsValid() || !assetLoader)
@@ -187,6 +202,11 @@ namespace CE
         }
 
         return 0;
+    }
+
+    FusionRawImageData FusionApplication::LoadRawTextureAtPath(const Name& path)
+    {
+        return assetLoader->LoadRawTextureAtPath(path);
     }
 
     int FusionApplication::FindOrCreateSampler(const RHI::SamplerDescriptor& samplerDesc)
@@ -224,6 +244,20 @@ namespace CE
     void FusionApplication::Tick()
     {
         ZoneScoped;
+
+        {
+            mainThreadDispatcherLock.Lock();
+
+            auto dispatchQueue = mainThreadDispatcher;
+            mainThreadDispatcher.Clear();
+
+            mainThreadDispatcherLock.Unlock();
+
+        	for (const auto& execute : dispatchQueue)
+            {
+                execute.InvokeIfValid();
+            }
+        }
 
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {
@@ -274,6 +308,8 @@ namespace CE
 
     void FusionApplication::FlushDrawPackets(DrawListContext& drawList, u32 imageIndex)
     {
+        ZoneScoped;
+
         fontManager->Flush(imageIndex);
         imageAtlas->Flush(imageIndex);
 
@@ -281,8 +317,8 @@ namespace CE
     }
 
     Ref<FWindow> FusionApplication::CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height, 
-        const SubClass<FWindow>& windowClass, 
-        const PlatformWindowInfo& info)
+                                                       const SubClass<FWindow>& windowClass, 
+                                                       const PlatformWindowInfo& info)
     {
         if (windowClass == nullptr || !windowClass->CanBeInstantiated())
             return nullptr;
@@ -350,18 +386,21 @@ namespace CE
 
     void FusionApplication::RequestFrameGraphUpdate()
     {
-        onFrameGraphUpdateRequested.Broadcast();
+        RebuildFrameGraph();
+    }
+
+    void FusionApplication::RebuildFrameGraph()
+    {
+        if (rebuildFrameGraphMethod.IsBound())
+        {
+	        rebuildFrameGraphMethod.Invoke();
+        }
     }
 
     // - Application Callbacks -
 
     void FusionApplication::QueueDestroy(Object* object)
     {
-        if (Thread::GetCurrentThreadId() != gMainThreadId)
-        {
-            String::IsAlphabet('a');
-        }
-
         destructionQueue.Add({ .object = object, .frameCounter = 0 });
     }
 
@@ -460,7 +499,7 @@ namespace CE
         JsonSerializer::Deserialize2(vertexShaderJson, vertexReflection);
         JsonSerializer::Deserialize2(fragmentShaderJson, fragmentReflection);
 
-        RPI::ShaderVariantDescriptor2 variantDesc{};
+        RPI::ShaderVariantDescriptor variantDesc{};
         variantDesc.interleaveVertexData = true;
         variantDesc.shaderName = "FusionShader";
         variantDesc.entryPoints.Resize(2);
@@ -586,5 +625,77 @@ namespace CE
         fusionShader2->AddVariant(variantDesc);
     }
 
+    void FusionApplication::InitializeSDFGlyphShader()
+    {
+        RawData vertexShader = GetFusionSDFGlyphGenVert();
+		RawData fragmentShader = GetFusionSDFGlyphGenFrag();
+
+		String vertexShaderJson = (char*)GetFusionSDFGlyphGenVertJson().data;
+		String fragmentShaderJson = (char*)GetFusionSDFGlyphGenFragJson().data;
+
+        JValue vertexReflection{};
+        JValue fragmentReflection{};
+
+        JsonSerializer::Deserialize2(vertexShaderJson, vertexReflection);
+        JsonSerializer::Deserialize2(fragmentShaderJson, fragmentReflection);
+
+        RPI::ShaderVariantDescriptor variantDesc{};
+        variantDesc.interleaveVertexData = true;
+        variantDesc.shaderName = "FusionSDFGlyphGen";
+        variantDesc.entryPoints.Resize(2);
+        variantDesc.entryPoints[0] = "VertMain";
+        variantDesc.entryPoints[1] = "FragMain";
+
+        variantDesc.moduleDesc.Resize(2);
+        variantDesc.moduleDesc[0].byteCode = vertexShader.data;
+        variantDesc.moduleDesc[0].byteSize = vertexShader.dataSize;
+        variantDesc.moduleDesc[0].stage = ShaderStage::Vertex;
+        variantDesc.moduleDesc[0].name = "VertMain";
+
+        variantDesc.moduleDesc[1].byteCode = fragmentShader.data;
+        variantDesc.moduleDesc[1].byteSize = fragmentShader.dataSize;
+        variantDesc.moduleDesc[1].stage = ShaderStage::Fragment;
+        variantDesc.moduleDesc[1].name = "FragMain";
+
+        RHI::SRGVariableDescriptor fontGlyph{};
+        fontGlyph.name = "_FontAtlas";
+        fontGlyph.bindingSlot = (u32)fragmentReflection["separate_images"][0]["binding"].GetNumberValue();
+        fontGlyph.shaderStages = ShaderStage::Fragment;
+        fontGlyph.type = ShaderResourceType::Texture2D;
+
+		RHI::SRGVariableDescriptor fontGlyphSampler{};
+		fontGlyphSampler.name = "_FontAtlasSampler";
+		fontGlyphSampler.bindingSlot = (u32)fragmentReflection["separate_samplers"][0]["binding"].GetNumberValue();
+		fontGlyphSampler.shaderStages = ShaderStage::Fragment;
+		fontGlyphSampler.type = ShaderResourceType::SamplerState;
+
+        RHI::SRGVariableDescriptor cbuffer{};
+        cbuffer.name = "_MaterialData";
+        cbuffer.bindingSlot = (u32)fragmentReflection["ubos"][0]["binding"].GetNumberValue();
+        {
+            RHI::ShaderStructMember member{};
+            member.name = "_Spread";
+            member.dataType = ShaderStructMemberType::Int;
+            cbuffer.structMembers.Add(member);
+        }
+        cbuffer.shaderStages = ShaderStage::Fragment;
+        cbuffer.type = ShaderResourceType::ConstantBuffer;
+
+        variantDesc.reflectionInfo.FindOrAdd(SRGType::PerMaterial)
+            .TryAdd(fontGlyph)
+            .TryAdd(fontGlyphSampler)
+    		.TryAdd(cbuffer);
+
+        variantDesc.interleaveVertexData = false;
+
+        variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float4);
+
+        variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
+
+		sdfGlyphShader = new RPI::Shader();
+        sdfGlyphShader->AddVariant(variantDesc);
+    }
 } // namespace CE
 

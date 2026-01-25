@@ -222,6 +222,12 @@ namespace CE
                 rows[3][0], rows[3][1], rows[3][2], rows[3][3]);
         }
 
+        Quat ToQuat() const;
+
+        void Decompose(Vec3& outTranslation, Quat& outRotation, Vec3& outScale) const;
+
+        Quat GetRotation() const;
+
     private:
         /// Function to get determinant of mat[p][q]
         static void GetCofactor(const Matrix4x4& mat, Matrix4x4& cofactor, s32 p, s32 q, s32 n);

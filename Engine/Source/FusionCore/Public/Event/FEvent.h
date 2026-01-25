@@ -60,10 +60,10 @@ namespace CE
         FEventDirection direction = FEventDirection::BottomToTop;
 
         FIELD()
-        FWidget* sender = nullptr;
+        Ref<FWidget> sender = nullptr;
 
         FIELD()
-        FWidget* consumer = nullptr;
+        Ref<FWidget> consumer = nullptr;
 
         bool isConsumed : 1 = false;
 
@@ -75,7 +75,7 @@ namespace CE
             isConsumed = stopPropagation = false;
         }
 
-        void Consume(FWidget* consumer)
+        void Consume(Ref<FWidget> consumer)
         {
             if (isConsumed)
                 return;
@@ -84,7 +84,7 @@ namespace CE
             isConsumed = true;
         }
 
-        void ConsumeAndStopPropagation(FWidget* consumer)
+        void ConsumeAndStopPropagation(Ref<FWidget> consumer)
         {
             Consume(consumer);
             stopPropagation = true;
@@ -143,10 +143,10 @@ namespace CE
     public:
 
         FIELD()
-        FWidget* parentWidget = nullptr; // The widget that the topMostWidget was attached to or detached from.
+        Ref<FWidget> parentWidget = nullptr; // The widget that the topMostWidget was attached to or detached from.
 
         FIELD()
-        FWidget* topMostWidget = nullptr; // The top-most widget that was attached/detached.
+        Ref<FWidget> topMostWidget = nullptr; // The top-most widget that was attached/detached.
 
     };
 
@@ -213,7 +213,10 @@ namespace CE
     public:
 
         FIELD()
-        FWidget* draggedWidget = nullptr;
+        Ref<FWidget> draggedWidget = nullptr;
+
+		FIELD()
+		Ref<FWidget> dropTarget = nullptr;
 
     };
 
@@ -232,7 +235,7 @@ namespace CE
         bool gotFocus = false;
 
         FIELD()
-        FWidget* focusedWidget = nullptr;
+        Ref<FWidget> focusedWidget = nullptr;
 
     };
 
@@ -261,7 +264,7 @@ namespace CE
         FNativeEvent() {}
 
         FIELD()
-        FNativeContext* nativeContext = nullptr;
+        Ref<FNativeContext> nativeContext = nullptr;
 
 
     };

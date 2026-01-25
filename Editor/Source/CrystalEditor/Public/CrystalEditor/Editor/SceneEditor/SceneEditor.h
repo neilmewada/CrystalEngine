@@ -10,13 +10,11 @@ namespace CE::Editor
 
         // - Public API -
 
-        bool CanBeClosed() const override { return false; }
-
         ClassType* GetTargetObjectType() const override;
 
         bool AllowMultipleInstances() const override { return false; }
 
-        Ref<Object> GetTargetObject() const override { return sandboxScene; }
+        Ref<Object> GetTargetObject() const override { return targetScene; }
 
         bool CanEdit(Ref<Object> targetObject) const override;
 
@@ -24,11 +22,15 @@ namespace CE::Editor
 
         void BrowseToAsset(const CE::Name& path) override;
 
+        bool OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle) override;
+
     protected:
 
         SceneEditor();
 
         void LoadSandboxScene();
+
+        void LoadEmptyScene();
 
         void Construct() override;
 
@@ -39,13 +41,30 @@ namespace CE::Editor
         void OnAssetUnloaded(Uuid bundleUuid) override;
 
         FUNCTION()
-        void OnSelectionChanged(FItemSelectionModel* selectionModel);
+        void OnActorSelectionChanged(FItemSelectionModel* selectionModel);
+
+        // - ToolBar Controls -
+
+        FUNCTION()
+        void OnClickPlay();
+
+        FUNCTION()
+        void OnClickPause();
+
+        FUNCTION()
+        void OnClickStop();
+
+        FUNCTION()
+        void OnClickAddActorMenuButton();
 
         FSplitBox* rootSplitBox = nullptr;
 
     private:
 
-        void ConstructMenuBar();
+        bool OpenScene(Ref<CE::Scene> scene);
+
+        void ConstructMenuBar() override;
+        void ConstructToolBar() override;
         void ConstructDockspaces();
 
         EditorMinorDockspace* rightTop = nullptr;
@@ -53,16 +72,25 @@ namespace CE::Editor
         EditorMinorDockspace* center = nullptr;
         EditorMinorDockspace* bottom = nullptr;
 
-        EditorViewportTab* viewportTab = nullptr;
-
-        SceneOutlinerTab* sceneOutlinerTab = nullptr;
-
+        Ref<EditorViewportTab> viewportTab = nullptr;
+        Ref<SceneOutlinerTab> sceneOutlinerTab = nullptr;
         Ref<AssetBrowser> assetBrowser;
+        Ref<ActorDetailsTab> detailsTab = nullptr;
 
-        DetailsTab* detailsTab = nullptr;
+        // Toolbar
+        Ref<FImageButton> playButton;
+        Ref<FImageButton> pauseButton;
+        Ref<FImageButton> stopButton;
+
+        Ref<FImageButton> addActorButton;
+
+        // Context Menus
+        Ref<EditorMenuPopup> addActorContextMenu;
 
         // Sandbox
         Ref<CE::Scene> sandboxScene = nullptr;
+
+        Ref<CE::Scene> targetScene;
 
     public: // - Fusion Properties - 
 

@@ -5,12 +5,14 @@ namespace CE
 
     FLabel::FLabel()
     {
-        m_Foreground = Color::White();
+        m_Foreground = Colors::White;
     }
 
     void FLabel::CalculateIntrinsicSize()
     {
-		FFusionContext* context = GetContext();
+        ZoneScoped;
+
+        Ref<FFusionContext> context = GetContext();
         if (!context)
         {
             Super::CalculateIntrinsicSize();
@@ -41,6 +43,8 @@ namespace CE
 
     void FLabel::OnPaint(FPainter* painter)
     {
+        ZoneScoped;
+
 	    Super::OnPaint(painter);
 
         painter->SetFont(m_Font);
@@ -53,7 +57,13 @@ namespace CE
             size.x = 0;
         }
 
-        painter->DrawText(m_Text, Vec2(), size, m_WordWrap);
+        if (textCacheDirty)
+        {
+	        textCacheDirty = false;
+            painter->ResetTextCache(GetUuid());
+        }
+
+        painter->DrawTextCached(GetUuid(), m_Text, Vec2(), size, m_WordWrap);
 
         if (m_Underline.GetStyle() != FPenStyle::None && m_Underline.GetColor().a > 0.001f && 
             !m_Text.IsEmpty())
@@ -77,6 +87,20 @@ namespace CE
         }
     }
 
+    void FLabel::OnFusionPropertyModified(const CE::Name& propertyName)
+    {
+	    Super::OnFusionPropertyModified(propertyName);
+
+        static const HashSet<CE::Name> textProperties = {
+        	"Font","Text", "WordWrap", "Underline"
+        };
+
+        if (textProperties.Exists(propertyName))
+        {
+			textCacheDirty = true;
+		}
+    }
+
     FLabel::Self& FLabel::FontFamily(const CE::Name& fontFamily)
     {
         FFont copy = m_Font;
@@ -84,7 +108,7 @@ namespace CE
         return Font(copy);
     }
 
-    FLabel::Self& FLabel::FontSize(int fontSize)
+    FLabel::Self& FLabel::FontSize(f32 fontSize)
     {
         FFont copy = m_Font;
         copy.SetFontSize(fontSize);
@@ -105,22 +129,22 @@ namespace CE
         return Font(copy);
     }
 
-    const CE::Name& FLabel::FontFamily()
+    CE::Name FLabel::FontFamily()
     {
         return m_Font.GetFamily();
     }
 
-    const int& FLabel::FontSize()
+    f32 FLabel::FontSize()
     {
         return m_Font.GetFontSize();
     }
 
-    const bool& FLabel::Bold()
+    bool FLabel::Bold()
     {
         return m_Font.IsBold();
     }
 
-    const bool& FLabel::Italic()
+    bool FLabel::Italic()
     {
         return m_Font.IsItalic();
     }

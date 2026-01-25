@@ -70,6 +70,9 @@ namespace CE
 	private:
 
 		// - Fields -
+
+		Array<Ref<SceneRenderer>> sceneRenderers;
+		Array<Ref<SceneRenderer>> awaitingSceneRenderers;
 		
 		FIELD()
 		SceneSubsystem* sceneSubsystem = nullptr;
@@ -89,6 +92,7 @@ namespace CE
 
 		RHI::DrawListContext drawList{};
 
+		bool temporaryScenesPresent = false;
 		bool rebuildFrameGraph = true;
 		bool recompileFrameGraph = true;
 

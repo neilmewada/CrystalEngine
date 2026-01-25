@@ -15,20 +15,20 @@ namespace CE::RPI
         if (!flags.initialized)
             return;
 
-        view = nullptr;
+        shadowView = nullptr;
         flags.initialized = false;
     }
 
     void DirectionalLightInstance::UpdateSrgs(u32 imageIndex)
     {
-        PerViewConstants& constants = view->GetViewConstants();
+        PerViewConstants& constants = shadowView->GetViewConstants();
         constants.projectionMatrix = projectionMatrix;
         constants.viewMatrix = viewMatrix;
         constants.viewProjectionMatrix = viewProjectionMatrix;
         constants.viewPosition = viewPosition;
         constants.pixelResolution = pixelResolution.ToVec2();
-
-        view->UpdateSrg(imageIndex);
+        
+        shadowView->UpdateSrg(imageIndex);
     }
 
     DirectionalLightFeatureProcessor::DirectionalLightFeatureProcessor()
@@ -58,7 +58,6 @@ namespace CE::RPI
     {
         DirectionalLightHandle handle = lightInstances.Insert({});
         handle->scene = GetScene();
-        
 
         return handle;
     }

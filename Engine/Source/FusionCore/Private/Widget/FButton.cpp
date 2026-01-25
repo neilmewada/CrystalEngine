@@ -93,6 +93,10 @@ namespace CE
                 }
                 event->Consume(this);
             }
+            else if (mouseEvent->type == FEventType::MousePress && mouseEvent->buttons == MouseButtonMask::Left)
+            {
+                
+            }
             else if (mouseEvent->type == FEventType::MouseRelease && mouseEvent->buttons == MouseButtonMask::Left)
             {
                 if (EnumHasFlag(buttonState, FButtonState::Pressed))
@@ -115,12 +119,6 @@ namespace CE
 	    Super::HandleEvent(event);
     }
 
-    void FButton::OnPaintContentOverlay(FPainter* painter)
-    {
-	    Super::OnPaintContentOverlay(painter);
-
-    }
-
     void FButton::SetState(FButtonState newState)
     {
         if (buttonState == newState)
@@ -133,6 +131,21 @@ namespace CE
         if (m_Style && !IsDefaultInstance())
         {
             m_Style->MakeStyle(*this);
+        }
+    }
+
+    void FButton::OnFusionPropertyModified(const CE::Name& propertyName)
+    {
+	    Super::OnFusionPropertyModified(propertyName);
+
+        static const CE::Name enabledProperty = "Enabled";
+
+        if (propertyName == enabledProperty)
+        {
+            if (!Enabled())
+            {
+                SetState(FButtonState::Default);
+            }
         }
     }
 

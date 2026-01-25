@@ -31,6 +31,10 @@ namespace CE
 
         RPI::DirectionalLightHandle lightHandle{};
         RPI::ViewPtr rpiView = nullptr;
+
+    public:
+
+        CE_PROPERTY(ShadowDistance, shadowDistance);
     };
     
 } // namespace CE

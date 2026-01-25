@@ -32,6 +32,8 @@ namespace CE
 
         virtual String GetTitle() = 0;
 
+        virtual int GetZOrder() = 0;
+
         virtual void Show() = 0;
         virtual void Hide() = 0;
 
@@ -56,7 +58,7 @@ namespace CE
         virtual void SetAlwaysOnTop(bool alwaysOnTop) = 0;
 		virtual void SetResizable(bool resizable) = 0;
         virtual void SetBorderless(bool borderless) = 0;
-        virtual void SetInputFocus() = 0;
+        virtual void RaiseWindow() = 0;
 
         virtual bool IsBorderless() = 0;
         virtual bool IsMinimized() = 0;

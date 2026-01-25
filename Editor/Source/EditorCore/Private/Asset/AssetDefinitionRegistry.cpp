@@ -2,10 +2,14 @@
 
 namespace CE::Editor
 {
+    static WeakRef<AssetDefinitionRegistry> instance;
+
     AssetDefinitionRegistry::AssetDefinitionRegistry()
     {
         if (!IsDefaultInstance())
         {
+            instance = this;
+
             classRegHandle = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(MemberDelegate(&Self::OnClassRegistered, this));
 			classDeregHandle = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(MemberDelegate(&Self::OnClassDeregistered, this));
 
@@ -33,7 +37,12 @@ namespace CE::Editor
 		}
     }
 
-	AssetDefinition* AssetDefinitionRegistry::FindAssetDefinition(const String& sourceExtension)
+    Ref<AssetDefinitionRegistry> AssetDefinitionRegistry::Get()
+	{
+        return instance.Lock();
+    }
+
+    AssetDefinition* AssetDefinitionRegistry::FindAssetDefinition(const String& sourceExtension)
 	{
 		for (auto assetDef : assetDefinitions)
 		{
@@ -62,7 +71,17 @@ namespace CE::Editor
         return nullptr;
 	}
 
-	void AssetDefinitionRegistry::OnClassRegistered(ClassType* classType)
+    void AssetDefinitionRegistry::OnBeginDestroy()
+    {
+        Super::OnBeginDestroy();
+
+        if (this == instance.Get())
+        {
+            instance = nullptr;
+		}
+    }
+
+    void AssetDefinitionRegistry::OnClassRegistered(ClassType* classType)
     {
         if (!classType)
             return;

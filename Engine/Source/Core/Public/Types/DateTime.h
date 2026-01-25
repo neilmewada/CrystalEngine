@@ -53,6 +53,8 @@ namespace CE
         String ToString() const;
         static DateTime Parse(const String& input);
 
+        bool operator<(const DateTime& rhs) const;
+
     private:
 
         struct PackedDateTime

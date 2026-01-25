@@ -9,7 +9,7 @@ namespace CE
 		m_SplitterDrawRatio = 1.0f;
 		m_SplitterSize = 5.0f;
 		m_SplitterHoverBackground = Color::RGBA(255, 255, 255, 120);
-		m_SplitterBackground = Color::Clear();
+		m_SplitterBackground = Colors::Clear;
 		m_Direction = FSplitDirection::Horizontal;
     }
 

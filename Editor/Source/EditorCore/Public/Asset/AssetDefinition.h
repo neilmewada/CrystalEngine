@@ -3,6 +3,7 @@
 namespace CE::Editor
 {
     class AssetImporter;
+    class AssetThumbnailGen;
 
     /// Asset Definition base class. Each asset type must have an asset definition class.
     CLASS(Abstract)
@@ -26,6 +27,10 @@ namespace CE::Editor
         virtual CE::Name GetIconPath();
 
     	virtual String GetTypeDisplayName();
+
+        virtual SubClass<AssetThumbnailGen> GetThumbnailGeneratorClass();
+
+        virtual Color GetColorTag();
         
     protected:
         

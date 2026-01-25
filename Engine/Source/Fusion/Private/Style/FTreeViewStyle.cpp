@@ -20,6 +20,8 @@ namespace CE
 
     void FTreeViewStyle::MakeStyle(FWidget& widget)
     {
+        ZoneScoped;
+
         FTreeView& treeView = widget.As<FTreeView>();
 
         treeView

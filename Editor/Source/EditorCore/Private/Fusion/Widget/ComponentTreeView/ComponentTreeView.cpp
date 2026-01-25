@@ -40,7 +40,7 @@ namespace CE::Editor
         rows.Clear();
 
         this->actor = actor;
-        ComponentTreeItem* actorItem = CreateObject<ComponentTreeItem>(this, actor->GetName().GetString());
+        actorItem = CreateObject<ComponentTreeItem>(this, actor->GetName().GetString());
         actorItem->actor = actor;
 
         ComponentTreeViewRow* actorRow = nullptr;
@@ -50,12 +50,12 @@ namespace CE::Editor
             ;
 
         actorRow->owner = this;
-        actorRow->item = actorItem;
+        actorRow->item = actorItem.Get();
         actorRow->parentRow = nullptr;
 
         content->AddChild(actorRow);
         rows.Add(actorRow);
-        items.Add(actorItem);
+        items.Add(actorItem.Get());
         
         SceneComponent* sceneComponent = actor->GetRootComponent();
 
@@ -127,7 +127,12 @@ namespace CE::Editor
 
         scrollBox->NormalizedScrollY(0);
 
-        SelectItem(actorItem);
+        SelectItem(actorItem.Get());
+    }
+
+    void ComponentTreeView::Update()
+    {
+        SetActor(actor);
     }
 
     void ComponentTreeView::SelectItem(ComponentTreeItem* item)

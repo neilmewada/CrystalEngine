@@ -31,6 +31,22 @@ namespace CE
         menuItems.Clear();
     }
 
+    void FMenuPopup::SetFontSizeRecursively(f32 fontSize)
+    {
+        for (WeakRef<FMenuItem> menuItemRef : menuItems)
+        {
+            if (Ref<FMenuItem> menuItem = menuItemRef.Lock())
+            {
+                menuItem->FontSize(fontSize);
+
+                if (menuItem->subMenu)
+                {
+                    menuItem->subMenu->SetFontSizeRecursively(fontSize);
+                }
+            }
+        }
+    }
+
     void FMenuPopup::HandleEvent(FEvent* event)
     {
         if (event->type == FEventType::FocusChanged)
@@ -39,7 +55,7 @@ namespace CE
 
             if (focusEvent->LostFocus() && AutoClose())
             {
-                FWidget* focusedWidget = focusEvent->focusedWidget;
+                Ref<FWidget> focusedWidget = focusEvent->focusedWidget;
 
                 if (focusedWidget != nullptr)
                 {
@@ -58,7 +74,7 @@ namespace CE
                         while (parentPopup)
                         {
                             // Do not close the parent popup if we are focused on that one now.
-                            if (parentPopup.Get() == focusedWidget)
+                            if (parentPopup == focusedWidget)
                                 break;
 
                             if (!focusedWidget->FocusParentExistsRecursive(parentPopup.Get()))

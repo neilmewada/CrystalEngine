@@ -8,7 +8,7 @@ namespace CE
 	{
 		if (!settingsClass->IsSubclassOf<Settings>() || !settingsClass->CanBeInstantiated())
 			return nullptr;
-		return (Ref<Settings>)GetSettingsBundle()->LoadObject(settingsClass);
+		return Object::CastTo<Settings>(GetSettingsBundle()->LoadObject(settingsClass));
 	}
 
     Ref<Settings> Settings::LoadSettings(ClassType* settingsClass, String settingsName)

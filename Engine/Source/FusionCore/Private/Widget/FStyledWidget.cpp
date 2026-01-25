@@ -18,6 +18,8 @@ namespace CE
 
     void FStyledWidget::OnPaint(FPainter* painter)
     {
+        ZoneScoped;
+
         if (m_Opacity < 0.001f)
             return;
 
@@ -69,7 +71,7 @@ namespace CE
         // Paint child widgets
 	    Super::OnPaint(painter);
 
-        OnPaintContentOverlay(painter);
+        m_OnPaintContentOverlay.Broadcast(painter);
 
         if (m_ClipShape.GetShapeType() != FShapeType::None)
         {

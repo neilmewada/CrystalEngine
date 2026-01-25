@@ -132,7 +132,6 @@ namespace CE
 		listeners.Remove(listener);
 	}
 
-
 	void AssetRegistry::OnAssetImported(const IO::Path& bundleAbsolutePath, const Name& sourcePath)
 	{
 		LockGuard guard{ cacheMutex };
@@ -219,8 +218,6 @@ namespace CE
 			AddAssetEntry(relativePathStr, assetData);
 		}
 
-		Name bundleName = assetData->bundleName;
-
 		load->BeginDestroy();
 		load = nullptr;
 
@@ -228,7 +225,19 @@ namespace CE
 		{
 			if (listener != nullptr)
 			{
-				listener->OnAssetImported(bundleName, sourcePath);
+				listener->OnAssetImported(assetData->bundlePath, sourcePath);
+				listener->OnAssetPathTreeUpdated(cachedPathTree);
+			}
+		}
+	}
+
+	void AssetRegistry::OnAssetUpdated(const Name& bundlePath)
+	{
+		for (IAssetRegistryListener* listener : listeners)
+		{
+			if (listener != nullptr)
+			{
+				listener->OnAssetImported(bundlePath, {});
 				listener->OnAssetPathTreeUpdated(cachedPathTree);
 			}
 		}
@@ -474,7 +483,8 @@ namespace CE
 			if (assetManager->loadedAssetsByPath.KeyExists(originalPath))
 			{
 				bundleLoaded = true;
-				assetManager->loadedAssetsByPath[newPath] = assetManager->loadedAssetsByPath[originalPath];
+				Ref<Bundle> oldBundle = assetManager->loadedAssetsByPath[originalPath];
+				assetManager->loadedAssetsByPath[newPath] = oldBundle;
 				assetManager->loadedAssetsByPath.Remove(originalPath);
 
 				bundle = assetManager->loadedAssetsByPath[newPath];
@@ -529,7 +539,7 @@ namespace CE
 		{
 			if (listener != nullptr)
 			{
-				listener->OnAssetRenamed(bundleUuid, oldName, newName);
+				listener->OnAssetRenamed(bundleUuid, oldName, newName, newPath);
 				listener->OnAssetPathTreeUpdated(cachedPathTree);
 			}
 		}

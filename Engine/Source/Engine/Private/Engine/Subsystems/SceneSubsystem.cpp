@@ -7,6 +7,11 @@ namespace CE
 		
     }
 
+    f32 SceneSubsystem::GetTickPriority() const
+    {
+		return 1;
+    }
+
     void SceneSubsystem::Initialize()
 	{
 		Super::Initialize();
@@ -20,8 +25,6 @@ namespace CE
 
 		// TODO: Implement multi scene support later
 		
-		// Create & set an empty scene by default
-		//activeScene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
 	}
 
 	void SceneSubsystem::PreShutdown()
@@ -43,6 +46,8 @@ namespace CE
 
 	CE::Scene* SceneSubsystem::FindRpiSceneOwner(RPI::Scene* scene)
 	{
+		ZoneScoped;
+
 		if (!scene)
 			return nullptr;
 
@@ -53,6 +58,14 @@ namespace CE
 		{
 			if (otherScene->GetRpiScene() == scene)
 				return otherScene;
+		}
+
+		for (auto sceneRenderer : sceneRenderers)
+		{
+			if (sceneRenderer->GetScene() != nullptr && sceneRenderer->GetScene()->GetRpiScene() == scene)
+			{
+				return sceneRenderer->GetScene().Get();
+			}
 		}
 
 		return nullptr;
@@ -87,6 +100,16 @@ namespace CE
     	otherScenes.Add(scene);
 	}
 
+	void SceneSubsystem::EnqueueSceneRenderer(Ref<SceneRenderer> sceneRenderer)
+	{
+		if (!sceneRenderer.IsValid())
+			return;
+
+		sceneRenderers.Add(sceneRenderer);
+
+		renderer->RebuildFrameGraph();
+	}
+
 	void SceneSubsystem::AddCallbacks(ISceneSubsystemCallbacks* callbacks)
 	{
 		callbackHandlers.Add(callbacks);
@@ -97,17 +120,18 @@ namespace CE
 		callbackHandlers.Remove(callbacks);
 	}
 
+	void SceneSubsystem::PlayActiveScene()
+	{
+		if (isPlaying || !activeScene)
+			return;
+
+		isPlaying = true;
+		activeScene->OnBeginPlay();
+	}
+
 	void SceneSubsystem::Tick(f32 deltaTime)
 	{
 		Super::Tick(deltaTime);
-
-		if (!isPlaying)
-		{
-			isPlaying = true;
-
-			if (activeScene != nullptr)
-				activeScene->OnBeginPlay();
-		}
 		
 		if (activeScene != nullptr)
 		{
@@ -118,11 +142,21 @@ namespace CE
 		{
 			otherScene->Tick(deltaTime);
 		}
+
+		for (auto sceneRenderer : sceneRenderers)
+		{
+			if (Ref<CE::Scene> scene = sceneRenderer->GetScene())
+			{
+				scene->Tick(deltaTime);
+			}
+		}
 	}
 
 	void SceneSubsystem::OnSceneDestroyed(CE::Scene* scene)
 	{
 		otherScenes.Remove(scene);
+
+		sceneRenderers.RemoveAll([&](const Ref<SceneRenderer>& sceneRenderer) { return sceneRenderer.IsValid() && sceneRenderer->GetScene() == scene; });
 
 		if (scene == activeScene)
 		{

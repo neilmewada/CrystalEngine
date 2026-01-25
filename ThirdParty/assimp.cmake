@@ -15,10 +15,11 @@ else()
     set(ASSIMP_BUILD_ZLIB OFF CACHE BOOL "" FORCE)
 endif()
 
+set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
+
 if(PAL_PLATFORM_IS_MAC)
     add_compile_options(-Wno-conversion)
 endif()
-
 
 add_subdirectory(vendor/${PACKAGE_NAME})
 

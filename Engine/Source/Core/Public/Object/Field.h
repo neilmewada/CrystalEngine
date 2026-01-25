@@ -69,6 +69,8 @@ namespace CE
         
         virtual bool IsAssignableTo(CE::TypeId typeId) override;
         virtual bool IsObject() override { return IsAssignableTo(TYPEID(Object)); }
+
+        bool HasCustomPODSerialization() override;
         
 		bool IsPODField();
         bool IsArrayField() const;
@@ -210,8 +212,9 @@ namespace CE
 		template<typename T>
 		const T& GetArrayElementValueAt(u32 index, void* instance) const
 		{
+			thread_local const T def = {};
 			if (!IsArrayField())
-				return {};
+				return def;
 
 			const Array<T>& array = GetFieldValue<Array<T>>(instance);
             return array[index];

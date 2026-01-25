@@ -14,7 +14,7 @@ namespace CE
 	class CORE_API JobCompletion : public Job
 	{
 	public:
-		JobCompletion(JobContext* context = nullptr) : Job(context)
+		JobCompletion(JobContext* context = nullptr) : Job(false, context)
 		{
 
 		}
@@ -26,6 +26,8 @@ namespace CE
 			waitSemaphore.acquire();
 		}
 
+		Delegate<void(void)> onFinish;
+
 	protected:
 
 		void Process() override
@@ -35,6 +37,8 @@ namespace CE
 
 		void Finish() override
 		{
+			onFinish.InvokeIfValid();
+
 			waitSemaphore.release();
 		}
 

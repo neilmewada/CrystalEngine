@@ -69,4 +69,18 @@ namespace CE
 		gEngine->AddRenderViewport(gameWindow);
 	}
 
+	void GameViewportSubsystem::Tick(float deltaTime)
+	{
+		Super::Tick(deltaTime);
+
+		auto mainWindow = PlatformApplication::Get()->GetMainWindow();
+
+		if (scene && mainWindow)
+		{
+			if (RPI::Scene* rpiScene = scene->GetRpiScene())
+			{
+				rpiScene->SetPrimaryViewportSize(mainWindow->GetDrawableWindowSize());
+			}
+		}
+	}
 } // namespace CE

@@ -17,9 +17,38 @@ namespace CE
     {
 	    RPI::CustomMaterialMap materialMap{};
 
+        if (GetName() == "DebugMeshComponent")
+        {
+	        String::IsAlphabet('a');
+        }
+
         for (int lodIndex = 0; lodIndex < GetLodCount(); ++lodIndex)
         {
-	        for (int meshIndex = 0; meshIndex < materialsPerLod[lodIndex].materials.GetSize(); ++meshIndex)
+            for (int meshIndex = 0; meshIndex < GetLodSubMeshCount(lodIndex); meshIndex++)
+            {
+            	int materialIndex = GetLodSubMeshMaterialIndex(lodIndex, meshIndex);
+                if (meshIndex >= 0)
+                {
+                    Ref<MaterialInterface> materialInterface = materialsPerLod[lodIndex].materials[materialIndex];
+                    if (materialInterface.IsNull())
+                    {
+                        materialInterface = gEngine->GetErrorMaterial();
+                    }
+
+                    RPI::Material* material = materialInterface->GetRpiMaterial();
+                    RPI::CustomMaterialId materialId = RPI::CustomMaterialId(lodIndex, meshIndex);
+                    materialMap[materialId] = material;
+                }
+                else
+                {
+                    Ref<MaterialInterface> materialInterface = gEngine->GetErrorMaterial();
+                    RPI::Material* material = materialInterface->GetRpiMaterial();
+                    RPI::CustomMaterialId materialId = RPI::CustomMaterialId(lodIndex, meshIndex);
+                    materialMap[materialId] = material;
+                }
+            }
+
+	        /*for (int meshIndex = 0; meshIndex < materialsPerLod[lodIndex].materials.GetSize(); ++meshIndex)
 	        {
                 Ref<MaterialInterface> materialInterface = materialsPerLod[lodIndex].materials[meshIndex];
 	            if (materialInterface.IsNull())
@@ -34,7 +63,7 @@ namespace CE
 
                 RPI::CustomMaterialId materialId = RPI::CustomMaterialId(lodIndex, meshIndex);
                 materialMap[materialId] = material;
-	        }
+	        }*/
         }
 
         return materialMap;
@@ -107,7 +136,21 @@ namespace CE
     {
 	    Super::OnFieldEdited(fieldName);
 
-        if (fieldName.GetString().Contains("materials"))
+		thread_local String materialsFieldName = "materials";
+
+        if (fieldName.GetString().Contains(materialsFieldName))
+        {
+            SetMaterialDirty(true);
+        }
+    }
+
+    void MeshComponent::OnFieldChanged(const Name& fieldName)
+    {
+	    Super::OnFieldChanged(fieldName);
+
+        thread_local String materialsFieldName = "materials";
+
+        if (fieldName.GetString().Contains(materialsFieldName))
         {
             SetMaterialDirty(true);
         }

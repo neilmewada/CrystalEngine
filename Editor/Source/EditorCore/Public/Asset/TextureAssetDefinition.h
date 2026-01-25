@@ -18,6 +18,10 @@ namespace CE::Editor
 
 		virtual CE::Name GetIconPath() override;
 
+		SubClass<AssetThumbnailGen> GetThumbnailGeneratorClass() override;
+
+		Color GetColorTag() override;
+
 	};
 
 } // namespace CE::Editor

@@ -9,9 +9,9 @@ namespace CE::Editor
 
 
     CLASS(Prefs = Editor)
-    class CRYSTALEDITOR_API AssetBrowser : public EditorMinorDockTab, public IAssetRegistryListener
+    class CRYSTALEDITOR_API AssetBrowser : public EditorDockWindow, public IAssetRegistryListener, public IThumbnailSystemListener
     {
-        CE_CLASS(AssetBrowser, EditorMinorDockTab)
+        CE_CLASS(AssetBrowser, EditorDockWindow)
     protected:
 
         AssetBrowser();
@@ -21,6 +21,8 @@ namespace CE::Editor
         void OnBeginDestroy() override;
 
         void OnAssetPathTreeUpdated(PathTree& pathTree) override;
+
+        void OnThumbnailsUpdated(const Array<CE::Name>& assetPaths) override;
 
     public: // - Public API -
 
@@ -37,6 +39,8 @@ namespace CE::Editor
     protected: // - Internal -
 
         void ImportSourceAssets(const Array<IO::Path>& sourceAssetPaths);
+
+        void OnItemSelectionUpdated();
 
         FUNCTION()
         void OnScrollBoxHandleEvent(FEvent* event);
@@ -82,6 +86,7 @@ namespace CE::Editor
 
         Ref<FHorizontalStack> searchBarStack;
         Ref<FButton> addButton;
+        Ref<FLabel> statusBarLabel;
 
         Ref<AssetBrowserGridViewModel> gridViewModel = nullptr;
         Ref<AssetBrowserGridView> gridView;
@@ -96,6 +101,8 @@ namespace CE::Editor
 
         FIELD(Prefs)
         CE::Name defaultAssetImportPath;
+
+		Ref<TextureAssetThumbnailGen> textureAssetThumbnailGen = nullptr;
 
         FUSION_WIDGET;
         friend class AssetBrowserGridView;

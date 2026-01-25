@@ -186,6 +186,13 @@ namespace CE
 		sceneSubsystem->AddScene(scene);
 	}
 
+	void Engine::EnqueueSceneRenderer(Ref<SceneRenderer> sceneRenderer)
+	{
+		SceneSubsystem* sceneSubsystem = GetSubsystem<SceneSubsystem>();
+
+		sceneSubsystem->EnqueueSceneRenderer(sceneRenderer);
+	}
+
 	CE::Scene* Engine::GetActiveScene()
 	{
 		SceneSubsystem* sceneSubsystem = GetSubsystem<SceneSubsystem>();

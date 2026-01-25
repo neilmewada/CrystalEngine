@@ -24,6 +24,9 @@ namespace CE::Editor
 
         virtual void UpdateTarget(const Array<WeakRef<Object>>& targets, const String& relativeFieldPath);
 
+		const CE::Name& GetFieldName() const { return fieldName; }
+		const CE::Name& GetRelativeFieldPath() const { return relativeFieldPath; }
+
         FHorizontalStack* GetLeft() const { return left; }
         FHorizontalStack* GetRight() const { return right; }
 
@@ -42,6 +45,8 @@ namespace CE::Editor
         void SetIndentationLevel(int value);
 
         FSplitBox* GetSplitBox() const { return splitBox; }
+
+		EditorField* GetEditorField() const { return editorField; }
 
         f32 GetSplitRatio() const;
 

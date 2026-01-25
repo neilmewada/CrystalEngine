@@ -40,6 +40,18 @@ namespace CE
             return lod->GetSubMeshCount();
         }
 
+        u32 GetLodSubMeshMaterialIndex(u32 lodIndex, u32 subMeshIndex)
+        {
+            if (!modelAsset || lodIndex >= modelAsset->GetLodCount())
+                return -1;
+            Ref<ModelLodAsset> lod = modelAsset->GetModelLod(lodIndex);
+            if (lod.IsNull())
+                return -1;
+            if (subMeshIndex < 0 || subMeshIndex >= lod->GetSubMeshCount())
+                return -1;
+            return lod->GetSubMesh(subMeshIndex).materialIndex;
+        }
+
         int GetBuiltinMaterialCount() const { return builtinMaterials.GetSize(); }
 
         Ref<CE::Material> GetBuiltinMaterial(u32 index) const

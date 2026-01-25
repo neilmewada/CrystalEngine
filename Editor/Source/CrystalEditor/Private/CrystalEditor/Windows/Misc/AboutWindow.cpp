@@ -13,8 +13,10 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         titleBar->Height(30);
-        titleBarLabel->FontSize(13);
+        titleBarLabel->FontSize(fontSize + 2);
 
         constexpr auto splashImage = "/Editor/Assets/UI/Splash";
 
@@ -24,9 +26,6 @@ namespace CE::Editor
         splash.SetBrushTiling(FBrushTiling::None);
         splash.SetImageFit(FImageFit::Cover);
         splash.SetBrushPosition(Vec2(0.5f, 0.5f));
-
-        // Factors:
-        // VAlign, HAlign, TileX, TileY, Width, Height
 
         (*this)
 	        .Title("About Crystal Editor")
@@ -41,22 +40,22 @@ namespace CE::Editor
                 .Margin(Vec4(0, 0, 0, 10)),
 
                 FNew(FLabel)
-                .FontSize(13)
+                .FontSize(fontSize + 2)
                 .Text("CrystalEditor")
                 .HAlign(HAlign::Left),
 
                 FNew(FLabel)
-                .FontSize(10)
+                .FontSize(fontSize)
                 .Text("Version: " CE_ENGINE_VERSION_STRING_SHORT " pre-alpha [Build " CE_TOSTRING(CE_VERSION_BUILD) "]")
                 .HAlign(HAlign::Left),
 
                 FNew(FLabel)
-                .FontSize(10)
+                .FontSize(fontSize)
                 .Text("Platform: " + PlatformMisc::GetOSVersionString())
                 .HAlign(HAlign::Left),
 
                 FNew(FLabel)
-                .FontSize(10)
+                .FontSize(fontSize)
                 .Text("Icons by flaticon.com")
                 .HAlign(HAlign::Left)
 	        )
@@ -77,7 +76,7 @@ namespace CE::Editor
     {
         if (instance != nullptr)
         {
-            FNativeContext* nativeContext = static_cast<FNativeContext*>(instance->GetContext());
+            Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(instance->GetContext());
             PlatformWindow* window = nativeContext->GetPlatformWindow();
             window->SetAlwaysOnTop(true);
         	window->Show();

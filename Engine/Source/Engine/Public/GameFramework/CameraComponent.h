@@ -34,9 +34,12 @@ namespace CE
     	
     	void SetRenderPipeline(CE::RenderPipeline* renderPipeline);
     	
-		CE::RenderPipeline* GetRenderPipeline() const { return renderPipeline; }
+		CE::RenderPipeline* GetRenderPipeline() const { return renderPipeline.Get(); }
     	
     protected:
+
+		void OnFieldChanged(const Name& fieldName) override;
+		void OnFieldEdited(const Name& fieldName) override;
 
 		void Tick(f32 delta) override;
 
@@ -50,9 +53,6 @@ namespace CE
 
     	FIELD()
     	CameraType cameraType = CameraType::MainCamera;
-
-		FIELD(EditAnywhere, Category = "Camera")
-		Color clearColor = Color::RGBA(36, 85, 163);
 
 		FIELD(EditAnywhere, Category = "Camera")
 		CameraProjection projection = CameraProjection::Perspective;
@@ -72,15 +72,14 @@ namespace CE
 		FIELD()
 		Vec2i windowSize = Vec2i(0, 0);
 
-    	FIELD()
-    	CE::RenderPipeline* renderPipeline = nullptr;
+    	FIELD(EditAnywhere, Category = "Rendering")
+    	Ref<CE::RenderPipeline> renderPipeline = nullptr;
 
 		RPI::ViewPtr rpiView = nullptr;
 
 	public: // - Accessors -
 
 		CE_PROPERTY(CameraType, cameraType);
-		CE_PROPERTY(ClearColor, clearColor);
 		CE_PROPERTY(Projection, projection);
 		CE_PROPERTY(NearPlane, nearPlane);
 		CE_PROPERTY(FarPlane, farPlane);

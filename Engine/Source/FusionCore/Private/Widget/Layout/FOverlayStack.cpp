@@ -61,8 +61,7 @@ namespace CE
         }
 
         Vec2 origin = Vec2(m_Padding.left, m_Padding.top);
-        f32 crossAxisSize = 0;
-        f32 remainingSize = 0;
+        
         Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right,
             m_Padding.top + m_Padding.bottom);
 

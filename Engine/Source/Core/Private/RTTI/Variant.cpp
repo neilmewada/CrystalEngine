@@ -40,6 +40,7 @@ if (valueTypeId == TYPEID(Type))\
 		IF_HASH(String, StringValue)
 		IF_HASH(Name, nameValue)
 		IF_HASH(IO::Path, pathValue)
+		IF_HASH(Uuid, uuidValue)
 
 		if (valueTypeId == CE::GetTypeId<Matrix4x4>())
 		{

@@ -12,6 +12,8 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         (*this)
         .RightClickSelects(true)
         .Width(80)
@@ -25,9 +27,9 @@ namespace CE::Editor
             .VAlign(VAlign::Fill)
             (
                 FAssignNew(FStyledWidget, iconBg)
-                .Background(Color::Black())
+                .Background(Colors::Black)
                 .BackgroundShape(FRoundedRectangle(5, 5, 0, 0))
-                .Height(70)
+                .Height(68)
                 (
                     FAssignNew(FStyledWidget, icon)
                     .Background(FBrush("/Editor/Assets/Icons/Folder_Large"))
@@ -37,6 +39,10 @@ namespace CE::Editor
                     .VAlign(VAlign::Center)
                 ),
 
+                FAssignNew(FStyledWidget, colorTag)
+                .Background(Colors::Cyan)
+                .Height(2.5f),
+
                 FAssignNew(FCompoundWidget, titleLabelParent)
                 .ClipChildren(true)
                 .HAlign(HAlign::Fill)
@@ -45,9 +51,9 @@ namespace CE::Editor
                 (
                     FAssignNew(FLabel, titleLabel)
                     .Text("Asset")
-                    .FontSize(9)
+                    .FontSize(fontSize - 0.5f)
                     .WordWrap(FWordWrap::Normal)
-                    .Foreground(Color::White())
+                    .Foreground(Colors::White)
                     .HAlign(HAlign::Left)
                     .VAlign(VAlign::Bottom)
                     .Margin(Vec4(2.5f, 0, 2.5f, 0))
@@ -56,7 +62,7 @@ namespace CE::Editor
 
                 FAssignNew(FTextInput, titleInput)
                 .Text("Asset")
-                .FontSize(9)
+                .FontSize(fontSize - 0.5f)
                 .OnTextEditingFinished(FUNCTION_BINDING(this, OnTextEditingFinished))
                 .Validator([this](const String& in) -> bool
                 {
@@ -80,8 +86,8 @@ namespace CE::Editor
 
                 FAssignNew(FLabel, subtitleLabel)
                 .Text("Asset Type")
-                .FontSize(7)
-                .Foreground(Color::White().WithAlpha(0.5f))
+                .FontSize(fontSize - 2)
+                .Foreground(Colors::White.WithAlpha(0.5f))
                 .HAlign(HAlign::Left)
                 .VAlign(VAlign::Bottom)
                 .Margin(Vec4(2.5f, 0, 0, 0))
@@ -150,7 +156,8 @@ namespace CE::Editor
         titleLabel->HAlign(isDirectory ? HAlign::Center : HAlign::Left);
         titleLabel->Margin(isDirectory ? Vec4() : Vec4(2.5f, 0, 2.5f, 0));
 
-        iconBg->Background(isDirectory ? Color::Clear() : Color::Black());
+        colorTag->Visible(!isDirectory);
+        iconBg->Background(isDirectory ? Colors::Clear : Colors::Black);
         subtitleLabel->Visible(!isDirectory);
         auto assetData = (AssetData*)node->userData;
 
@@ -163,13 +170,29 @@ namespace CE::Editor
             Array<String> split;
             assetData->assetClassTypeName.GetString().Split({ "::", "." }, split);
 
+            CE::Name thumbnailPath = ThumbnailSystem::GetThumbnailPath(assetData->bundlePath);
+			IO::Path thumbnailAbsolutePath = Bundle::GetAbsoluteBundlePath(thumbnailPath);
+            bool thumbnailFound = false;
+            if (thumbnailAbsolutePath.Exists())
+            {
+				thumbnailFound = true;
+                FBrush thumbnail = FBrush(thumbnailPath);
+                icon->Background(thumbnail);
+                icon->Width(56);
+				icon->Height(56);
+            }
+
             ClassType* assetClass = ClassType::FindClass(assetData->assetClassTypeName);
             if (assetClass != nullptr)
             {
                 AssetDefinition* assetDef = GetAssetDefinitionRegistry()->FindAssetDefinition(assetClass);
                 if (assetDef)
                 {
-                    icon->Background(FBrush(assetDef->GetIconPath()));
+                    if (!thumbnailFound)
+                    {
+	                    icon->Background(FBrush(assetDef->GetIconPath()));
+                    }
+                    colorTag->Background(assetDef->GetColorTag());
                 }
             }
 
@@ -194,7 +217,7 @@ namespace CE::Editor
 
         titleLabelParent->Enabled(false);
 
-        titleInput->StartEditing(true);
+        titleInput->StartEditing(true, true);
         titleInput->Focus();
     }
 

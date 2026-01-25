@@ -722,8 +722,15 @@ namespace CE
         for (int i = 0; i < superTypeIds.GetSize(); i++)
         {
             auto type = GetTypeInfo(superTypeIds[i]);
+            if (type == nullptr)
+            {
+                superTypesCached = false;
+            }
+
             if (type == nullptr || !type->IsClass())
-                continue;
+            {
+	            continue;
+            }
 
 			superClasses.Add((ClassType*)type);
         }
@@ -914,6 +921,29 @@ namespace CE
         return result;
     }
 
+    Array<ClassType*> ClassType::GetDirectDerivedClasses() const
+    {
+        auto typeIdArray = GetDerivedClassesTypeId();
+
+        Array<ClassType*> result{};
+
+        for (int i = 0; i < typeIdArray.GetSize(); i++)
+        {
+            auto type = GetTypeInfo(typeIdArray[i]);
+            if (type == nullptr || !type->IsClass())
+                continue;
+            ClassType* clazz = (ClassType*)type;
+            if (clazz->GetSuperClassCount() == 0)
+                continue;
+
+        	if (clazz->GetSuperType(0) == GetTypeId())
+            {
+	            result.Add((ClassType*)type);
+            }
+        }
+
+        return result;
+    }
 } // namespace CE
 
 CE_RTTI_TYPEINFO_IMPL(CE, StructType)

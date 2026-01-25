@@ -2,6 +2,15 @@
 
 namespace CE
 {
+    namespace Internal
+    {
+        struct KeyStateDelayed
+        {
+            bool state = false;
+            u64 lastEnabledTime = 0;
+        };
+    }
+
     class PlatformInput;
 
     class COREAPPLICATION_API InputManager : public ApplicationMessageHandler
@@ -51,10 +60,7 @@ namespace CE
             return Get().keyStates.KeyExists(key) && Get().keyStates[key];
         }
 
-        static bool IsKeyHeldDelayed(KeyCode key)
-        {
-            return Get().keyStatesDelayed.KeyExists(key) && Get().keyStatesDelayed[key];
-        }
+        static bool IsKeyHeldDelayed(KeyCode key);
 
         static bool IsKeyUp(KeyCode key)
         {
@@ -104,9 +110,10 @@ namespace CE
         Vec2i mousePosition{};
         Vec2i mouseDelta{};
         Vec2 wheelDelta{};
+        u64 curTime = 0;
 
         HashMap<KeyCode, bool> keyStates{};
-        HashMap<KeyCode, bool> keyStatesDelayed{};
+        HashMap<KeyCode, Internal::KeyStateDelayed> keyStatesDelayed{};
         HashMap<MouseButton, int> mouseButtonStates{};
 
         // Per-Tick changes

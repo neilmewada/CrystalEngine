@@ -87,7 +87,7 @@ namespace CE::Editor
                 .HAlign(HAlign::Fill)
                 (
                     FAssignNew(FStyledWidget, background)
-                    .Background(Color::Black())
+                    .Background(Colors::Black)
                     .VAlign(VAlign::Fill)
                     .HAlign(HAlign::Fill),
 
@@ -119,7 +119,7 @@ namespace CE::Editor
     {
         if (Ref<FusionFontAtlasWindow> lock = instance.Lock())
         {
-            FNativeContext* nativeContext = static_cast<FNativeContext*>(lock->GetContext());
+            Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(lock->GetContext());
             PlatformWindow* window = nativeContext->GetPlatformWindow();
             window->Show();
             return lock;
@@ -133,11 +133,11 @@ namespace CE::Editor
             .windowFlags = PlatformWindowFlags::DestroyOnClose
         };
 
-        Ref<FusionFontAtlasWindow> window = (Ref<FusionFontAtlasWindow>)FusionApplication::Get()->CreateNativeWindow(
+        Ref<FusionFontAtlasWindow> window = Object::CastTo<FusionFontAtlasWindow>(FusionApplication::Get()->CreateNativeWindow(
             "FusionFontAtlasWindow", 
             "Fusion Font Atlas",
             800, 600,
-            Self::StaticClass(), info);
+            Self::StaticClass(), info));
 
         instance = window;
 

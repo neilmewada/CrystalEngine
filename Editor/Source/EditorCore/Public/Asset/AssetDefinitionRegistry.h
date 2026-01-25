@@ -13,6 +13,8 @@ namespace CE::Editor
         AssetDefinitionRegistry();
         ~AssetDefinitionRegistry();
 
+		static Ref<AssetDefinitionRegistry> Get();
+
 		AssetDefinition* FindAssetDefinition(const String& sourceExtension);
 
         AssetDefinition* FindAssetDefinition(const SubClass<Asset>& assetClass);
@@ -22,6 +24,8 @@ namespace CE::Editor
         AssetDefinition* GetAssetDefinition(int index) { return assetDefinitions[index]; }
         
     protected:
+
+        void OnBeginDestroy() override;
         
     private:
         

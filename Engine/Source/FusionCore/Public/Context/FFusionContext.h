@@ -30,6 +30,8 @@ namespace CE
 
         virtual void TickInput();
 
+        virtual int GetZOrder();
+
         FFusionContext* GetRootContext() const;
 
         void SetProjectionMatrix(const Matrix4x4& mat) { this->projectionMatrix = mat; }
@@ -42,20 +44,20 @@ namespace CE
 
         virtual void OnWidgetDestroyed(FWidget* widget);
 
-        Vec2 GetAvailableSize() const { return availableSize; }
-
-        void SetAvailableSize(Vec2 value) { availableSize = value; }
+        Vec2 GetAvailableSize() const;
 
         virtual f32 GetScaling() const { return 1.0f; }
 
         bool IsLayoutDirty() const { return layoutDirty; }
 
-        FFusionContext* GetParentContext() const { return parentContext; }
+        Ref<FFusionContext> GetParentContext() const { return parentContext.Lock(); }
 
-        bool ParentContextExistsRecursive(FFusionContext* parent) const;
+        bool ParentContextExistsRecursive(Ref<FFusionContext> parent) const;
 
         virtual bool IsFocused() const;
         virtual bool IsShown() const;
+
+        virtual void SetContextFocus();
 
         bool IsRootContext() const;
 
@@ -79,6 +81,12 @@ namespace CE
 
         bool ShouldClearScreen() const { return clearScreen; }
 
+		bool IsGhosted() const { return ghosted; }
+
+		void SetGhosted(bool ghosted) { this->ghosted = ghosted; }
+
+        void SetGhostedAvailableSize(Vec2 size) { this->ghostedAvailableSize = size; }
+
         void SetClearScreen(bool set);
 
         void SetClearColor(const Color& color);
@@ -96,7 +104,7 @@ namespace CE
 
         //! @brief Performs a hit-test and returns the bottom-most widget that is under the mouse position.
         //! @param mousePosition The position of mouse in context-space coordinates. i.e. native window space coords for FNativeContext
-        virtual FWidget* HitTest(Vec2 mousePosition);
+        virtual FWidget* HitTest(Vec2 mousePosition, bool requireFocus = true);
 
         // - Rendering / FrameGraph -
 
@@ -120,7 +128,7 @@ namespace CE
         Array<Ref<FFusionContext>> childContexts{};
 
         FIELD()
-        FFusionContext* parentContext = nullptr;
+        WeakRef<FFusionContext> parentContext = nullptr;
 
         //! @brief Widget can be owned by a FusionContext directly, or by a native window!
         FIELD()
@@ -136,11 +144,12 @@ namespace CE
         b8 clearScreen = true;
 
         FIELD()
-        Color clearColor = Color::Clear();
+        Color clearColor = Colors::Clear;
 
         FIELD()
         f32 scaleFactor = 1.0f;
 
+        bool ghosted = false;
         bool layoutDirty = true;
         bool dirty = true;
         bool isDestroyed = false;
@@ -150,6 +159,9 @@ namespace CE
         WeakRef<FWidget> widgetToFocus = nullptr;
 
         Vec2 availableSize{};
+		Vec2 availableSizeMultiplier = Vec2(1.0f, 1.0f);
+
+        Vec2 ghostedAvailableSize{};
 
         Matrix4x4 projectionMatrix = Matrix4x4::Identity();
         RPI::PerViewConstants viewConstants{};
@@ -159,7 +171,9 @@ namespace CE
         KeyModifier keyModifierStates{};
         BitSet<128> keyPressStates{};
 
-        WeakRef<FWidget> draggedWidget = nullptr;
+        Ref<FWidget> draggedWidget = nullptr;
+        Ref<FWidget> curDropTarget = nullptr;
+
         WeakRef<FWidget> prevHoveredWidget = nullptr;
         StaticArray<WeakRef<FWidget>, 6> widgetsPressedPerMouseButton{};
 

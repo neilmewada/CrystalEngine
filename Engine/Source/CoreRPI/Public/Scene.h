@@ -65,7 +65,7 @@ namespace CE::RPI
 
 		const SceneViewsByTag& GetViews() const { return viewsByTag; }
 
-		void Simulate(f32 currentTime);
+		void Simulate(f32 currentTime, u32 imageIndex);
 
 		void PrepareRender(f32 currentTime, u32 imageIndex);
 
@@ -82,6 +82,11 @@ namespace CE::RPI
 		void SetSkyboxCubeMap(RPI::Texture* skyboxCubeMap, RPI::Texture* skyboxIrradiance);
 
 		void SetName(const Name& name) { this->name = name; }
+
+		// For internal use only!
+		void SetPrimaryViewportSize(Vec2i size) { primaryViewportSize = size; }
+
+		Vec2i GetPrimaryViewportSize() const { return primaryViewportSize; }
 
 	private:
 
@@ -116,6 +121,8 @@ namespace CE::RPI
 
 		/// @brief A hash map of all views owned by this scene accessed by their respective tags.
 		SceneViewsByTag viewsByTag{};
+
+		Vec2i primaryViewportSize;
 
 		friend class MeshDrawPacket;
 

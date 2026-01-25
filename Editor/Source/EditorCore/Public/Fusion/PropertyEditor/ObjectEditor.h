@@ -21,6 +21,8 @@ namespace CE::Editor
 
         void OnObjectFieldChanged(Uuid objectUuid, const CE::Name& fieldName) override;
 
+        void OnObjectFieldEdited(Uuid objectUuid, const CE::Name& fieldName) override;
+
         void SetSplitRatioInternal(f32 ratio, FSplitBox* excluding = nullptr);
 
     public:

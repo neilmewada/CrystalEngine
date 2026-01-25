@@ -62,4 +62,19 @@ namespace CE
         [nsWindow setShowsToolbarButton:YES];
     }
 
+    int MacWindowMisc::GetWindowZOrder(SDLPlatformWindow* window)
+    {
+        SDL_SysWMinfo wmInfo;
+        SDL_VERSION(&wmInfo.version);
+        if (!SDL_GetWindowWMInfo(window->GetSdlHandle(), &wmInfo))
+            return -1;
+
+        NSWindow* nsWindow = wmInfo.info.cocoa.window;
+
+        NSArray* windows = [NSApp orderedWindows];
+        NSInteger zOrder = [windows indexOfObject:nsWindow];
+
+        return zOrder;
+    }
+
 } // namespace CE

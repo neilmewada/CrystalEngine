@@ -54,6 +54,8 @@ namespace CE
         bool hidden = false;
         // -1 means automatic, 0 means first display.
         int displayIndex = -1;
+        bool openCentered = true;
+        Vec2i openPos = Vec2i();
         PlatformWindowFlags windowFlags = PlatformWindowFlags::DestroyOnClose;
     };
 
@@ -72,6 +74,8 @@ namespace CE
         virtual u32 GetSystemDpi() = 0;
 
         virtual f32 GetSystemDpiScaling() = 0;
+
+		virtual bool SetMouseCapture(bool capture) = 0;
 
         virtual void AddMessageHandler(ApplicationMessageHandler* handler)
         {
