@@ -274,6 +274,7 @@ namespace RenderingTests
 		void OnWindowMinimized(PlatformWindow* window) override;
 		void OnWindowCreated(PlatformWindow* window) override;
 		void OnWindowExposed(PlatformWindow* window) override;
+        void OnWindowShown(PlatformWindow* window) override;
 
 	private:
 

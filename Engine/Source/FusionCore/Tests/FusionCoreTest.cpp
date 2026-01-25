@@ -194,6 +194,11 @@ namespace RenderingTests
     {
         rebuildFrameGraph = recompileFrameGraph = true;
     }
+    
+    void RendererSystem::OnWindowShown(PlatformWindow* window)
+    {
+        rebuildFrameGraph = recompileFrameGraph = true;
+    }
 
 #pragma endregion
 
@@ -465,5 +470,7 @@ namespace RenderingTests
             OnWindowRestored(window);
         }
     }
+    
 
 }
+

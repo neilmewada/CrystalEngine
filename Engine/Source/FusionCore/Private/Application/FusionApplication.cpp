@@ -225,11 +225,6 @@ namespace CE
     {
         ZoneScoped;
 
-        if (Thread::GetCurrentThreadId() != gMainThreadId)
-        {
-            String::IsAlphabet('a');
-        }
-
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {
             if (destructionQueue[i].frameCounter >= RHI::Limits::MaxSwapChainImageCount)
