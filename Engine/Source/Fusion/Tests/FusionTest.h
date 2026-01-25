@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Fusion.h"
-#include "VulkanRHI.h"
 
 using namespace CE;
 

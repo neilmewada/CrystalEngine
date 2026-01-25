@@ -1,6 +1,12 @@
 
 #include "Fusion.h"
-#include "VulkanRHI.h"
+
+#if PAL_TRAIT_VULKAN_SUPPORTED
+#   include "VulkanRHI.h"
+#endif
+#if PAL_TRAIT_METAL_SUPPORTED
+#   include "MetalRHI.h"
+#endif
 
 #include "FusionTest.h"
 
@@ -34,7 +40,12 @@ static void TestBegin(bool gui)
 	ModuleManager::Get().LoadModule("CoreMedia");
 	ModuleManager::Get().LoadModule("CoreShader");
 	ModuleManager::Get().LoadModule("CoreRHI");
-	ModuleManager::Get().LoadModule("VulkanRHI");
+#if PAL_TRAIT_VULKAN_SUPPORTED
+    ModuleManager::Get().LoadModule("VulkanRHI");
+#endif
+#if PAL_TRAIT_METAL_SUPPORTED
+    ModuleManager::Get().LoadModule("MetalRHI");
+#endif
 	ModuleManager::Get().LoadModule("CoreRPI");
 	ModuleManager::Get().LoadModule("FusionCore");
 	ModuleManager::Get().LoadModule("Fusion");
@@ -71,7 +82,11 @@ static void TestBegin(bool gui)
 		InputManager::Get().Initialize(app);
 	}
 
+#if PAL_TRAIT_VULKAN_SUPPORTED
 	RHI::gDynamicRHI = new Vulkan::VulkanRHI();
+#elif PAL_TRAIT_METAL_SUPPORTED
+    RHI::gDynamicRHI = new Metal::MetalRHI();
+#endif
 
 	RHI::gDynamicRHI->Initialize();
 	RHI::gDynamicRHI->PostInitialize();
@@ -150,7 +165,12 @@ static void TestEnd(bool gui)
 	ModuleManager::Get().UnloadModule("CoreRPI");
 	ModuleManager::Get().UnloadModule("FusionCore");
 	ModuleManager::Get().UnloadModule("Fusion");
-	ModuleManager::Get().UnloadModule("VulkanRHI");
+#if PAL_TRAIT_VULKAN_SUPPORTED
+    ModuleManager::Get().UnloadModule("VulkanRHI");
+#endif
+#if PAL_TRAIT_METAL_SUPPORTED
+    ModuleManager::Get().UnloadModule("MetalRHI");
+#endif
 	ModuleManager::Get().UnloadModule("CoreRHI");
 	ModuleManager::Get().UnloadModule("CoreShader");
 	ModuleManager::Get().UnloadModule("CoreMedia");
