@@ -5,7 +5,7 @@
 
 namespace CE::Vulkan
 {
-    class VulkanDevice;
+    class Device;
 
     class CommandQueue : public RHI::CommandQueue
     {
@@ -19,7 +19,7 @@ namespace CE::Vulkan
             List<VkPipelineStageFlags> waitDstStageMask{};
         };
 
-        CommandQueue(VulkanDevice* device, u32 familyIndex, u32 queueIndex, RHI::HardwareQueueClassMask queueMask, VkQueue queue, bool presentSupported);
+        CommandQueue(Device* device, u32 familyIndex, u32 queueIndex, RHI::HardwareQueueClassMask queueMask, VkQueue queue, bool presentSupported);
         virtual ~CommandQueue();
 
 		inline VkQueue GetHandle() const
@@ -47,10 +47,10 @@ namespace CE::Vulkan
 			return commandPool;
 		}
 
-        virtual bool Execute(u32 count, RHI::CommandList** commandLists, RHI::Fence* fence = nullptr) override;
-
         bool Submit(u32 count, VkSubmitInfo* submitInfos, VkFence fence);
 
+        bool Submit(const CommandQueueSubmission& submission) override;
+        
 		SharedMutex& GetMutex() { return submissionMutex; }
 
     private:
@@ -63,14 +63,14 @@ namespace CE::Vulkan
 
         SharedMutex submissionMutex{};
 
-        VulkanDevice* device;
+        Device* device;
         u32 familyIndex;
         u32 queueIndex;
         VkQueue queue;
 		bool presentSupported = false;
 		VkCommandPool commandPool = nullptr;
 
-        friend class VulkanDevice;
+        friend class Device;
         friend class FrameGraphExecuter;
     };
     

@@ -11,7 +11,7 @@ namespace CE::Vulkan
         
         ~DescriptorPool();
 
-        void Init(VulkanDevice* device, u32 initialPoolSize = 128, u32 poolSizeIncrement = 128);
+        void Init(Device* device, u32 initialPoolSize = 128, u32 poolSizeIncrement = 128);
         
 		List<VkDescriptorSet> Allocate(u32 numDescriptorSets, const List<VkDescriptorSetLayout>& setLayouts, VkDescriptorPool& outPool);
 
@@ -23,9 +23,10 @@ namespace CE::Vulkan
         void Increment(u32 size);
         
     private:
+        
+        Device* device = nullptr;
 
 		SharedMutex vkPoolMutex{};
-        VulkanDevice* device = nullptr;
         List<VkDescriptorPool> descriptorPools{};
         
         u32 initialSize = 128;

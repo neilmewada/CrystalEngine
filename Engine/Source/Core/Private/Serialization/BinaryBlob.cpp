@@ -21,6 +21,9 @@ namespace CE
 
 	BinaryBlob& BinaryBlob::operator=(const BinaryBlob& copy)
 	{
+        if (this == &copy)
+            return *this;
+        
 		Free();
 
 		if (copy.IsValid())
@@ -46,6 +49,22 @@ namespace CE
 		move.data = nullptr;
 		move.dataSize = 0;
 	}
+
+    BinaryBlob& BinaryBlob::operator=(BinaryBlob&& move) noexcept
+    {
+        if (this == &move)
+            return *this;
+        
+        flags = move.flags;
+        data = move.data;
+        dataSize = move.dataSize;
+
+        move.flags = BLOB_None;
+        move.data = nullptr;
+        move.dataSize = 0;
+        
+        return *this;
+    }
 
 	void BinaryBlob::Free()
 	{

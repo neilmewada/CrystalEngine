@@ -20,7 +20,6 @@ namespace CE
 
     }
 
-
 	ShaderReflector::ErrorCode ShaderReflector::ReflectSpirv(const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection, const String& entryPointStr)
 	{
 #if PLATFORM_DESKTOP

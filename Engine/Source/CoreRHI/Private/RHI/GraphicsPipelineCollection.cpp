@@ -10,15 +10,15 @@ namespace CE::RHI
         
         u32 subpass = desc.subpass;
 
-        if (desc.renderTarget != nullptr)
+        if (desc.renderPassHint != nullptr)
         {
-            desc.renderTarget->GetAttachmentFormats(variant.colorFormats, variant.depthStencilFormat, subpass);
+            desc.renderPassHint->GetAttachmentFormats(variant.colorFormats, variant.depthStencilFormat, subpass);
         }
         else
         {
-            if (desc.rtLayout.subpasses.IsEmpty()) // Subpasses are empty => assume that there's only 1 subpass with all the attachments.
+            if (desc.renderPassLayout.subpasses.IsEmpty()) // Subpasses are empty => assume that there's only 1 subpass with all the attachments.
             {
-                for (const auto& attachmentLayout : desc.rtLayout.attachmentLayouts)
+                for (const auto& attachmentLayout : desc.renderPassLayout.attachmentLayouts)
                 {
                     if (attachmentLayout.attachmentUsage == ScopeAttachmentUsage::Color)
                     {
@@ -32,17 +32,17 @@ namespace CE::RHI
             }
             else
             {
-                if (subpass < desc.rtLayout.subpasses.GetSize())
+                if (subpass < desc.renderPassLayout.subpasses.GetSize())
                 {
-                    RHI::RenderTargetSubpassLayout subpassLayout = desc.rtLayout.subpasses[subpass];
+                    const RHI::RenderPassSubpassLayout& subpassLayout = desc.renderPassLayout.subpasses[subpass];
                     for (u32 attachmentIndex : subpassLayout.colorAttachments)
                     {
-                        variant.colorFormats.Add(desc.rtLayout.attachmentLayouts[attachmentIndex].format);
+                        variant.colorFormats.Add(desc.renderPassLayout.attachmentLayouts[attachmentIndex].format);
                     }
 
                     if (subpassLayout.depthStencilAttachment.GetSize() > 0)
                     {
-                        variant.depthStencilFormat = desc.rtLayout.attachmentLayouts[subpassLayout.depthStencilAttachment[0]].format;
+                        variant.depthStencilFormat = desc.renderPassLayout.attachmentLayouts[subpassLayout.depthStencilAttachment[0]].format;
                     }
                 }
                 else
@@ -63,11 +63,11 @@ namespace CE::RHI
     {
         LockGuard<SharedMutex> lock{ mutex };
 
-        for (auto renderTarget : renderTargets)
+        for (auto renderTarget : renderPasses)
         {
             delete renderTarget;
         }
-        renderTargets.Clear();
+        renderPasses.Clear();
 
         for (const auto& [variant, pipeline] : pipelineCollection)
         {
@@ -95,24 +95,24 @@ namespace CE::RHI
             RHI::GraphicsPipelineDescriptor desc = this->desc;
             desc.multisampleState.sampleCount = variant.sampleState.sampleCount;
 
-            if (desc.renderTarget != nullptr)
+            if (desc.renderPassHint != nullptr)
             {
-                RHI::RenderTarget* newRenderTarget = desc.renderTarget->Clone(variant.colorFormats, variant.depthStencilFormat, desc.subpass);
-                desc.renderTarget = newRenderTarget;
+                RHI::RenderPass* newRenderTarget = desc.renderPassHint->Clone(variant.colorFormats, variant.depthStencilFormat, desc.subpass);
+                desc.renderPassHint = newRenderTarget;
 
                 pipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(desc);
 
                 mutex.Lock();
-                renderTargets.Add(newRenderTarget);
+                renderPasses.Add(newRenderTarget);
                 pipelineCollection[variant] = pipeline;
                 mutex.Unlock();
             }
             else
             {
-                if (desc.rtLayout.subpasses.IsEmpty()) // Subpasses are empty => assume that there's only 1 subpass with all the attachments.
+                if (desc.renderPassLayout.subpasses.IsEmpty()) // Subpasses are empty => assume that there's only 1 subpass with all the attachments.
                 {
                     int colorIdx = 0;
-                    for (auto& attachmentLayout : desc.rtLayout.attachmentLayouts)
+                    for (auto& attachmentLayout : desc.renderPassLayout.attachmentLayouts)
                     {
                         attachmentLayout.multisampleState = desc.multisampleState;
 
@@ -130,9 +130,9 @@ namespace CE::RHI
                 }
                 else
                 {
-                    if (desc.subpass < desc.rtLayout.subpasses.GetSize())
+                    if (desc.subpass < desc.renderPassLayout.subpasses.GetSize())
                     {
-                        RHI::RenderTargetSubpassLayout subpassLayout = desc.rtLayout.subpasses[desc.subpass];
+                        const RHI::RenderPassSubpassLayout& subpassLayout = desc.renderPassLayout.subpasses[desc.subpass];
                         int colorIdx = 0;
                         for (u32 attachmentIndex : subpassLayout.colorAttachments)
                         {
@@ -140,12 +140,12 @@ namespace CE::RHI
                                 break;
                             RHI::Format format = variant.colorFormats[colorIdx++];
                             if (format != RHI::Format::Undefined)
-                                desc.rtLayout.attachmentLayouts[attachmentIndex].format = format;
+                                desc.renderPassLayout.attachmentLayouts[attachmentIndex].format = format;
                         }
 
                         if (subpassLayout.depthStencilAttachment.GetSize() > 0 && variant.depthStencilFormat != RHI::Format::Undefined)
                         {
-                            desc.rtLayout.attachmentLayouts[subpassLayout.depthStencilAttachment[0]].format = variant.depthStencilFormat;
+                            desc.renderPassLayout.attachmentLayouts[subpassLayout.depthStencilAttachment[0]].format = variant.depthStencilFormat;
                         }
                     }
                     else

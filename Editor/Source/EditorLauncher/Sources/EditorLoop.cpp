@@ -80,7 +80,6 @@ void EditorLoop::LoadStartupCoreModules()
 	// Load Startup Modules
 	ModuleManager::Get().LoadModule("Core");
 	ModuleManager::Get().LoadModule("CoreApplication");
-	ModuleManager::Get().LoadModule("CoreInput");
 
 	// Settings module
 	ModuleManager::Get().LoadModule("CoreSettings");
@@ -432,7 +431,6 @@ void EditorLoop::Shutdown()
 	ModuleManager::Get().UnloadModule("CoreSettings");
 
 	// Unload most important modules at last
-	ModuleManager::Get().UnloadModule("CoreInput");
 	ModuleManager::Get().UnloadModule("CoreApplication");
 	ModuleManager::Get().UnloadModule("Core");
 

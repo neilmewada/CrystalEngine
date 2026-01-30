@@ -6,7 +6,7 @@
 
 namespace CE::Vulkan
 {
-	SwapChain::SwapChain(VulkanRHI* rhi, VulkanDevice* device, PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
+	SwapChain::SwapChain(VulkanRHI* rhi, Device* device, PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
 		: rhi(rhi), device(device), window(window), desc(desc)
 	{
 		this->desc.preferredFormats.AddRange({ RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM });
@@ -26,18 +26,47 @@ namespace CE::Vulkan
 		Create();
 
 		windowResizeCallback = PlatformApplication::Get()->onWindowDrawableSizeChanged.AddDelegateInstance(MemberDelegate(&SwapChain::OnWindowResized, this));
+
+		for (int i = 0; i < renderFinishedSemaphores.GetSize(); i++)
+		{
+			VkSemaphoreCreateInfo semaphoreCI{};
+			semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+			semaphoreCI.pNext = nullptr;
+
+			VkSemaphore semaphore = nullptr;
+			vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &semaphore);
+			renderFinishedSemaphores[i] = semaphore;
+
+			VkSemaphore imageAcquired = nullptr;
+			vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &imageAcquired);
+			imageAcquiredSemaphores[i] = imageAcquired;
+		}
 	}
 
 	SwapChain::~SwapChain()
 	{
 		vkDeviceWaitIdle(device->GetHandle());
 
-		// Delete images
-		for (auto image : images)
+		for (int i = 0; i < images.GetSize(); i++)
 		{
-			delete image;
+			delete images[i];
 		}
 		images.Clear();
+
+		for (int i = 0; i < renderFinishedSemaphores.GetSize(); i++)
+		{
+			if (imageAcquiredSemaphores[i] != nullptr)
+			{
+				vkDestroySemaphore(device->GetHandle(), imageAcquiredSemaphores[i], VULKAN_CPU_ALLOCATOR);
+				imageAcquiredSemaphores[i] = nullptr;
+			}
+
+			if (renderFinishedSemaphores[i] != nullptr)
+			{
+				vkDestroySemaphore(device->GetHandle(), renderFinishedSemaphores[i], VULKAN_CPU_ALLOCATOR);
+				renderFinishedSemaphores[i] = nullptr;
+			}
+		}
 
 		if (swapChain != nullptr)
 		{
@@ -69,6 +98,34 @@ namespace CE::Vulkan
 		}
 
 		Create();
+	}
+
+	bool SwapChain::AcquireNextImage()
+	{
+		if (shouldRebuild)
+		{
+			RebuildSwapChain();
+			shouldRebuild = false;
+		}
+
+		VkSemaphoreCreateInfo semaphoreCI{};
+		semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+		semaphoreCI.pNext = nullptr;
+
+		currentImageAcquiredSemaphoreIndex = (currentImageAcquiredSemaphoreIndex + 1) % imageAcquiredSemaphores.GetSize();
+
+		VkResult result = vkAcquireNextImageKHR(device->GetHandle(), swapChain, NumericLimits<uint64_t>::Max(), imageAcquiredSemaphores[currentImageAcquiredSemaphoreIndex], nullptr, &currentImageIndex);
+
+		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+		{
+			if (result == VK_ERROR_OUT_OF_DATE_KHR)
+			{
+				RebuildSwapChain();
+			}
+			return false;
+		}
+
+		return true;
 	}
 
 	void SwapChain::OnWindowResized(PlatformWindow* window, u32 newDrawWidth, u32 newDrawHeight)
@@ -292,6 +349,8 @@ namespace CE::Vulkan
 		}
 		images.Clear();
 
+		int idx = 0;
+
 		// Create new images
 		for (VkImage swapChainImage : swapChainImages)
 		{
@@ -305,14 +364,22 @@ namespace CE::Vulkan
 			imageDesc.sampleCount = 1;
 			imageDesc.bindFlags = RHI::TextureBindFlags::Color;
 
-			Vulkan::Texture* image = new Vulkan::Texture(device, swapChainImage, imageDesc, VK_IMAGE_LAYOUT_UNDEFINED);
+			Vulkan::Texture* image = new Vulkan::Texture(device, swapChainImage, imageDesc, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 			images.Add(image);
+
+			String imageName = String::Format("SwapChain Image {}", idx);
+
+			device->SetObjectDebugName((uint64_t)image->GetImage(), VK_OBJECT_TYPE_IMAGE, imageName.GetCString());
+
+			idx++;
 		}
 
 		for (int i = 0; i < swapChainInitialImageLayouts.GetSize(); i++)
 		{
 			swapChainInitialImageLayouts[i] = VK_IMAGE_LAYOUT_UNDEFINED;
 		}
+
+		swapChainId = Random::Range((s64)1, NumericLimits<s64>::Max());
 	}
 
 } // namespace CE

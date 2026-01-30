@@ -19,12 +19,12 @@ namespace CE::Vulkan
 	class RenderPassCache;
     class DeviceLimits;
 
-    class VulkanDevice
+    class Device
     {
-        CE_NO_COPY(VulkanDevice)
+        CE_NO_COPY(Device)
     public:
-        VulkanDevice(VkInstance instance, VulkanRHI* vulkanRhi);
-        ~VulkanDevice();
+        Device(VkInstance instance, VulkanRHI* vulkanRhi);
+        ~Device();
 
         INLINE bool IsInitialized() const
         {
@@ -61,7 +61,7 @@ namespace CE::Vulkan
 
         // - Getters -
 
-		Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask);
+		Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClass queueClass);
 		Array<RHI::CommandQueue*> AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass);
 
 		inline bool IsUnifiedMemoryArchitecture() const { return isUnifiedMemory; }

@@ -3,7 +3,7 @@
 namespace CE::Vulkan
 {
 
-    TextureView::TextureView(VulkanDevice* device, const RHI::TextureViewDescriptor& desc) : RHI::TextureView(desc), device(device)
+    TextureView::TextureView(Device* device, const RHI::TextureViewDescriptor& desc) : RHI::TextureView(desc), device(device)
     {
         VkImageViewCreateInfo imageViewCI{};
         imageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

@@ -9,7 +9,7 @@ namespace CE::Vulkan
 	{
 	public:
 
-		FrameGraphCompiler(VulkanDevice* device);
+		FrameGraphCompiler(Device* device);
 		virtual ~FrameGraphCompiler();
 
 		void CompileScopesInternal(const RHI::FrameGraphCompileRequest& compileRequest) override;
@@ -29,7 +29,7 @@ namespace CE::Vulkan
 
 		void CompileBarriers(int imageIndex, const RHI::FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current);
 
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
 
 		StaticArray<List<VkSemaphore>, RHI::Limits::MaxSwapChainImageCount> imageAcquiredSemaphores{};
         StaticArray<List<VkFence>, RHI::Limits::MaxSwapChainImageCount> imageAcquiredFences{};

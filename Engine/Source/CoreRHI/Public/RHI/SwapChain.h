@@ -14,57 +14,46 @@ namespace CE::RHI
 
 		//! @brief Array of preferred image formats to use.
 		Array<RHI::Format> preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM, };
-
+        
 		u32 preferredWidth = 0;
 		u32 preferredHeight = 0;
 
+        //! @brief When set to true, the SwapChain can only be used as a color attachment, or as a transfer destination, i.e. SwapChain will become a Write-Only resource.
+        bool frameBufferOnly = true;
+        
 		bool useMailboxMode = false;
 	};
     
-	class CORERHI_API SwapChain : public RHIResource
+	class CORERHI_API SwapChain : public RHIResource, public IDeviceObject
 	{
 	protected:
-		SwapChain() : RHIResource(ResourceType::SwapChain)
+		SwapChain() : RHIResource(ResourceType::SwapChain), IDeviceObject(DeviceObjectType::SwapChain)
 		{}
 
 	public:
+        
+        bool IsFrameBufferOnly() const { return frameBufferOnly; }
 
-		inline u32 GetCurrentImageIndex() const
-		{
-			return currentImageIndex;
-		}
+        virtual u32 GetWidth() = 0;
+        virtual u32 GetHeight() = 0;
 
-		inline Texture* GetCurrentImage() const
-		{
-			return images[currentImageIndex];
-		}
+		inline u32 GetPreferredWidth() const { return preferredWidth; }
+		inline u32 GetPreferredHeight() const { return preferredHeight; }
 
-		inline Texture* GetImage(u32 index) const { return images[index]; }
-
-		inline u32 GetImageCount() const { return images.GetSize(); }
-
-		inline u32 GetWidth() const { return width; }
-		inline u32 GetHeight() const { return height; }
-
-		inline u32 GetPreferredWidth() const { return width; }
-		inline u32 GetPreferredHeight() const { return height; }
-
-		inline f32 GetAspectRatio() const { return (f32)width / (f32)height; }
+		inline f32 GetAspectRatio() { return (f32)GetWidth() / (f32)GetHeight(); }
 
 		inline RHI::Format GetSwapChainFormat() const { return swapChainColorFormat; }
 
 		virtual PlatformWindow* GetNativeWindow() = 0;
+        
+        virtual bool AcquireNextImage() = 0;
 
 		virtual void Rebuild() = 0;
 
 	protected:
-
-		Array<Texture*> images{};
+        
 		RHI::Format swapChainColorFormat{};
-
-		u32 currentImageIndex = 0;
-		u32 width = 0;
-		u32 height = 0;
+        bool frameBufferOnly = true;
 
 		u32 preferredWidth = 0;
 		u32 preferredHeight = 0;

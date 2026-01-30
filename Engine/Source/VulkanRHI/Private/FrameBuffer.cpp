@@ -3,7 +3,7 @@
 namespace CE::Vulkan
 {
 
-	FrameBuffer::FrameBuffer(VulkanDevice* device, Scope* scope, u32 imageIndex)
+	FrameBuffer::FrameBuffer(Device* device, Scope* scope, u32 frameIndex, u32 imageIndex)
 		: device(device)
 		, imageIndex(imageIndex)
 	{
@@ -40,7 +40,20 @@ namespace CE::Vulkan
 				}
 
 				RHI::ImageScopeAttachment* imageScopeAttachment = (RHI::ImageScopeAttachment*)attachment;
-				RHI::RHIResource* resource = imageScopeAttachment->GetFrameAttachment()->GetResource(imageIndex);
+				RHI::RHIResource* resource = nullptr;
+
+				if (frameAttachment->IsSwapChainAttachment())
+				{
+					auto swapChainAttachment = (RHI::SwapChainFrameAttachment*)frameAttachment;
+					auto vulkanSwapChain = (Vulkan::SwapChain*)swapChainAttachment->GetSwapChain();
+
+					resource = vulkanSwapChain->GetImage(imageIndex);
+				}
+				else
+				{
+					resource = frameAttachment->GetResource(frameIndex);
+				}
+
 				if (!resource)
 					continue;
 
@@ -98,8 +111,6 @@ namespace CE::Vulkan
 		framebufferCI.height = height;
 		
 		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, VULKAN_CPU_ALLOCATOR, &frameBuffer);
-
-		renderTarget = new Vulkan::RenderTarget(device, scope->renderPass);
 	}
 
 	FrameBuffer::~FrameBuffer()
@@ -109,13 +120,11 @@ namespace CE::Vulkan
 			vkDestroyFramebuffer(device->GetHandle(), frameBuffer, VULKAN_CPU_ALLOCATOR);
 			frameBuffer = nullptr;
 		}
-
-		delete renderTarget; renderTarget = nullptr;
 		
 		device = nullptr;
 	}
 
-	FrameBuffer::FrameBuffer(VulkanDevice* device, const Array<Vulkan::Texture*>& images, RenderPass* renderPass, u32 imageIndex)
+	FrameBuffer::FrameBuffer(Device* device, const Array<Vulkan::Texture*>& images, VulkanRenderPass* renderPass, u32 imageIndex)
 		: device(device), imageIndex(imageIndex)
 	{
 		FixedArray<VkImageView, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
@@ -155,11 +164,9 @@ namespace CE::Vulkan
 		framebufferCI.pAttachments = attachments.GetData();
 
 		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, VULKAN_CPU_ALLOCATOR, &frameBuffer);
-
-		renderTarget = new RenderTarget(device, renderPass);
 	}
 
-	FrameBuffer::FrameBuffer(VulkanDevice* device, const Array<Vulkan::TextureView*>& imageViews, RenderPass* renderPass, u32 imageIndex)
+	FrameBuffer::FrameBuffer(Device* device, const Array<Vulkan::TextureView*>& imageViews, VulkanRenderPass* renderPass, u32 imageIndex)
 		: device(device), imageIndex(imageIndex)
 	{
 		FixedArray<VkImageView, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
@@ -206,8 +213,6 @@ namespace CE::Vulkan
 		framebufferCI.pAttachments = attachments.GetData();
 
 		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, VULKAN_CPU_ALLOCATOR, &frameBuffer);
-
-		renderTarget = new RenderTarget(device, renderPass);
 	}
 
 } // namespace CE::Vulkan

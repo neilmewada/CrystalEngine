@@ -40,13 +40,20 @@ namespace CE
         whitePixelUV = FusionApplication::Get()->GetImageAtlas()->GetWhitePixelUV();
         transparentPixelUV = FusionApplication::Get()->GetImageAtlas()->GetTransparentPixelUV();
 
-        auto perObjectSrgLayout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerObject);
-        auto perViewSrgLayout = fusionShader->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerView);
+        auto shaderVariant = fusionShader->GetDefaultVariant();
+
+        RHI::ShaderResourceGroupDescriptor perViewSrgDesc{};
+        perViewSrgDesc.name = "Fusion SRG_PerView";
+        perViewSrgDesc.layout = shaderVariant->GetSrgLayout(RHI::SRGType::PerView);
+
+        RHI::ShaderResourceGroupDescriptor perObjectSrgDesc{};
+		perObjectSrgDesc.name = "Fusion SRG_PerObject";
+		perObjectSrgDesc.layout = shaderVariant->GetSrgLayout(RHI::SRGType::PerObject);
 
         numFrames = RHI::FrameScheduler::Get()->GetFramesInFlight();
 
-        perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
-        perObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perObjectSrgLayout);
+        perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgDesc);
+        perObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perObjectSrgDesc);
 
         objectDataBuffer.Init("ObjectData", initialObjectCount, numFrames);
         clipRectBuffer.Init("ClipRects", initialClipRectCount, numFrames);

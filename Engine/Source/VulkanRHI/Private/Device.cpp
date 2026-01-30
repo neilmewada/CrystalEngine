@@ -12,18 +12,18 @@ namespace CE::Vulkan
 		pool.Init(((VulkanRHI*)gDynamicRHI)->GetDevice(), 64, 64);
 	}
 
-	VulkanDevice::VulkanDevice(VkInstance instance, VulkanRHI* vulkanRhi)
+	Device::Device(VkInstance instance, VulkanRHI* vulkanRhi)
 		: instance(instance), vulkanRhi(vulkanRhi), threadedDescriptorPool(ThreadLocalContext<DescriptorPool>(InitDescriptorPool))
 	{
 		
 	}
 
-	VulkanDevice::~VulkanDevice()
+	Device::~Device()
 	{
 
 	}
 
-	void VulkanDevice::Initialize()
+	void Device::Initialize()
 	{
 		// Check if a main window exists, otherwise initialize in offscreen mode
 		auto mainWindow = VulkanPlatform::GetMainPlatformWindow();
@@ -66,7 +66,7 @@ namespace CE::Vulkan
 		CE_LOG(Info, All, "Vulkan device initialized");
 	}
 
-	void VulkanDevice::PreShutdown()
+	void Device::PreShutdown()
 	{
 		isInitialized = false;
 
@@ -89,7 +89,7 @@ namespace CE::Vulkan
 		queues.Clear();
 	}
 
-	void VulkanDevice::Shutdown()
+	void Device::Shutdown()
 	{
 		delete deviceLimits; deviceLimits = nullptr;
 
@@ -109,13 +109,13 @@ namespace CE::Vulkan
 		CE_LOG(Info, All, "Vulkan device shutdown");
 	}
 
-	DescriptorPool* VulkanDevice::GetDescriptorPool()
+	DescriptorPool* Device::GetDescriptorPool()
 	{
 		return &threadedDescriptorPool.GetStorage();
 		//return descriptorPool;
 	}
 
-	const Array<RHI::Format>& VulkanDevice::GetAvailableDepthStencilFormats()
+	const Array<RHI::Format>& Device::GetAvailableDepthStencilFormats()
 	{
 		if (availableDepthStencilFormats.IsEmpty())
 		{
@@ -136,7 +136,7 @@ namespace CE::Vulkan
 		return availableDepthStencilFormats;
 	}
 
-	const Array<RHI::Format>& VulkanDevice::GetAvailableDepthOnlyFormats()
+	const Array<RHI::Format>& Device::GetAvailableDepthOnlyFormats()
 	{
 		if (availableDepthOnlyFormats.IsEmpty())
 		{
@@ -157,7 +157,7 @@ namespace CE::Vulkan
 		return availableDepthOnlyFormats;
 	}
 
-	void VulkanDevice::SetObjectDebugName(uint64_t objectHandle, VkObjectType objectType, const char* objectName)
+	void Device::SetObjectDebugName(uint64_t objectHandle, VkObjectType objectType, const char* objectName)
 	{
 		if (setDebugUtilsObjectName)
 		{
@@ -171,7 +171,7 @@ namespace CE::Vulkan
 
 	}
 
-	void VulkanDevice::SelectGpu()
+	void Device::SelectGpu()
 	{
 		// Fetch all available physical devices
 		u32 physicalDeviceCount = 0;
@@ -225,7 +225,7 @@ namespace CE::Vulkan
 		CE_LOG(Info, All, "Selected {} as the target GPU", gpuProperties.deviceName);
 	}
 
-	void VulkanDevice::InitGpu()
+	void Device::InitGpu()
 	{
 		// Fetch memory properties
 		vkGetPhysicalDeviceMemoryProperties(gpu, &memoryProperties);
@@ -386,18 +386,19 @@ namespace CE::Vulkan
 		deviceFeaturesToUse.textureCompressionBC = VK_TRUE;
 #endif
 
-		// Descriptor Indexing features
-		VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};
-		descriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
-
-		// Enable non-uniform indexing
-		descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
-		descriptorIndexingFeatures.runtimeDescriptorArray = VK_TRUE;
-		descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = VK_TRUE;
-		descriptorIndexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
-
 #if PLATFORM_DESKTOP
-		deviceCI.pNext = &descriptorIndexingFeatures;
+		VkPhysicalDeviceVulkan12Features vulkan12Features{};
+		vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+		vulkan12Features.pNext = nullptr;
+		vulkan12Features.timelineSemaphore = VK_TRUE;
+
+		vulkan12Features.descriptorIndexing = VK_TRUE;
+		vulkan12Features.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+		vulkan12Features.runtimeDescriptorArray = VK_TRUE;
+		vulkan12Features.descriptorBindingVariableDescriptorCount = VK_TRUE;
+		vulkan12Features.descriptorBindingPartiallyBound = VK_TRUE;
+
+		deviceCI.pNext = &vulkan12Features;
 #endif
 
 		deviceCI.pEnabledFeatures = &deviceFeaturesToUse;
@@ -441,7 +442,7 @@ namespace CE::Vulkan
 		deviceLimits = new Vulkan::DeviceLimits(this);
 	}
 
-	void VulkanDevice::FetchQueues(VkPhysicalDevice gpu)
+	void Device::FetchQueues(VkPhysicalDevice gpu)
 	{
 		for (int familyIdx = 0; familyIdx < queueFamilyProperties.GetSize(); familyIdx++)
 		{
@@ -506,7 +507,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	bool VulkanDevice::QueryGpu(u32 gpuIndex)
+	bool Device::QueryGpu(u32 gpuIndex)
 	{
 		u32 physicalDeviceCount = 0;
 		vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
@@ -559,7 +560,7 @@ namespace CE::Vulkan
 		return true;
 	}
 
-	VulkanQueueFamilies VulkanDevice::GetQueueFamilies(VkPhysicalDevice gpu)
+	VulkanQueueFamilies Device::GetQueueFamilies(VkPhysicalDevice gpu)
 	{
 		VulkanQueueFamilies queueFamilies{};
 
@@ -631,7 +632,7 @@ namespace CE::Vulkan
 		return queueFamilies;
 	}
 
-	VkDeviceSize VulkanDevice::GetPhysicalDeviceLocalMemory(VkPhysicalDevice gpu)
+	VkDeviceSize Device::GetPhysicalDeviceLocalMemory(VkPhysicalDevice gpu)
 	{
 		// Determine the available pDevice local memory.
 		VkPhysicalDeviceMemoryProperties memoryProps;
@@ -649,7 +650,7 @@ namespace CE::Vulkan
 		return 0;
 	}
 
-	SurfaceSupportInfo VulkanDevice::FetchSurfaceSupportInfo(VkPhysicalDevice gpu)
+	SurfaceSupportInfo Device::FetchSurfaceSupportInfo(VkPhysicalDevice gpu)
 	{
 		SurfaceSupportInfo surfaceSupport = {};
 
@@ -683,12 +684,12 @@ namespace CE::Vulkan
 		return surfaceSupport;
 	}
 
-	void VulkanDevice::WaitUntilIdle()
+	void Device::WaitUntilIdle()
 	{
 		vkDeviceWaitIdle(device);
 	}
 
-	VkFormat VulkanDevice::FindSupportedFormat(const Array<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+	VkFormat Device::FindSupportedFormat(const Array<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 	{
 		for (const auto& format : candidates)
 		{
@@ -707,7 +708,7 @@ namespace CE::Vulkan
 		return VK_FORMAT_UNDEFINED;
 	}
 
-	VkSurfaceFormatKHR VulkanDevice::FindAutoColorFormat()
+	VkSurfaceFormatKHR Device::FindAutoColorFormat()
 	{
 		bool formatSelected = false;
 		const auto& surfaceFormats = surfaceSupport.surfaceFormats;
@@ -749,7 +750,7 @@ namespace CE::Vulkan
 		return surfaceFormats[0];
 	}
 
-	bool VulkanDevice::CheckSurfaceFormatSupport(VkFormat format)
+	bool Device::CheckSurfaceFormatSupport(VkFormat format)
 	{
 		const auto& surfaceFormats = surfaceSupport.surfaceFormats;
 
@@ -764,7 +765,7 @@ namespace CE::Vulkan
 		return false;
 	}
 
-	s32 VulkanDevice::FindMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties)
+	s32 Device::FindMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties)
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties(gpu, &memProperties);
@@ -780,7 +781,7 @@ namespace CE::Vulkan
 		return -1;
 	}
 
-	VkImageView VulkanDevice::CreateImageView(VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags)
+	VkImageView Device::CreateImageView(VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags)
 	{
 		VkImageViewCreateInfo imageViewCI{};
 		imageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -811,7 +812,7 @@ namespace CE::Vulkan
 		return imageView;
 	}
 
-	int VulkanDevice::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, 
+	int Device::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, 
 		const VkImageSubresourceRange& subresource,
 		VkImageAspectFlags aspectMask)
 	{
@@ -863,7 +864,7 @@ namespace CE::Vulkan
 			return -1;
 		}
 
-		destinationStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		destinationStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
 		switch (newLayout)
 		{
@@ -883,7 +884,6 @@ namespace CE::Vulkan
 			destinationStage = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			break;
 		case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
-			barrier.srcAccessMask |= VK_ACCESS_TRANSFER_READ_BIT;
 			barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 			break;
 		case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
@@ -941,7 +941,7 @@ namespace CE::Vulkan
 		return primaryGraphicsQueue->GetFamilyIndex();
 	}
 
-	VkCommandBuffer VulkanDevice::BeginSingleUseCommandBuffer()
+	VkCommandBuffer Device::BeginSingleUseCommandBuffer()
 	{
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -961,12 +961,12 @@ namespace CE::Vulkan
 		return commandBuffer;
 	}
 
-	void VulkanDevice::EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer)
+	void Device::EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer)
 	{
         vkEndCommandBuffer(commandBuffer);
 	}
 
-    int VulkanDevice::SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer)
+    int Device::SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer)
     {
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -990,27 +990,28 @@ namespace CE::Vulkan
 		return primaryGraphicsQueue->familyIndex;
     }
 
-	VkCommandPool VulkanDevice::AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, RHI::CommandListType type, u32 queueFamilyIndex)
+	VkCommandPool Device::AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, RHI::CommandListType type, u32 queueFamilyIndex)
 	{
 		return commandAllocator->Allocate(count, outBuffers, 
 			type == RHI::CommandListType::Indirect ? VK_COMMAND_BUFFER_LEVEL_SECONDARY : VK_COMMAND_BUFFER_LEVEL_PRIMARY,
 			queueFamilyIndex);
 	}
 
-	Array<RHI::CommandQueue*> VulkanDevice::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
+	Array<RHI::CommandQueue*> Device::GetHardwareQueues(RHI::HardwareQueueClass queueClass)
 	{
 		Array<RHI::CommandQueue*> result{};
 
 		for (int i = 0; i < queues.GetSize(); i++)
 		{
-			if ((queues[i]->GetQueueMask() & queueMask) == queueMask)
-				result.Add(queues[i]);
+            // FIXME: fix this asap
+			//if ((queues[i]->GetQueueMask() & queueMask) == queueMask)
+			//	result.Add(queues[i]);
 		}
 
 		return result;
 	}
 
-	Array<RHI::CommandQueue*> VulkanDevice::AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass)
+	Array<RHI::CommandQueue*> Device::AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass)
 	{
 		Array<RHI::CommandQueue*> queues{};
 		int queueFamilyCount = queueFamilyProperties.GetSize();

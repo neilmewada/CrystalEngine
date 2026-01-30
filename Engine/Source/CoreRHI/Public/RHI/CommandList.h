@@ -11,6 +11,7 @@ namespace CE::RHI
 	class RenderTarget;
 	class RenderTargetBuffer;
 	struct AttachmentClearValue;
+    class SwapChain;
 
 	enum class CommandListType
 	{
@@ -120,13 +121,16 @@ namespace CE::RHI
 
 		virtual void Begin() = 0;
 		virtual void End() = 0;
+        
+        virtual bool BeginRenderPass(RenderPass* renderPass, RenderPassFrameBuffer* frameBuffer, AttachmentClearValue* clearValuesPerAttachment) = 0;
+        
+        virtual void RenderPassNextSubpass() = 0;
+        
+        virtual void EndRenderPass() = 0;
 
-		virtual void BeginRenderTarget(RenderTarget* renderTarget, RenderTargetBuffer* renderTargetBuffer, AttachmentClearValue* clearValuesPerAttachment) = 0;
-		virtual void EndRenderTarget() = 0;
-
-		inline void SetCurrentImageIndex(u32 imageIndex)
+		inline void SetFrameIndex(u32 frameIndex)
 		{
-			currentImageIndex = imageIndex;
+			this->currentFrameIndex = frameIndex;
 		}
 
 		virtual void ResourceBarrier(u32 count, ResourceBarrierDescriptor* barriers) = 0;
@@ -169,7 +173,7 @@ namespace CE::RHI
 
 	protected:
 
-		u32 currentImageIndex = 0;
+		u32 currentFrameIndex = 0;
 
 		RHI::CommandListType commandListType = RHI::CommandListType::Direct;
 

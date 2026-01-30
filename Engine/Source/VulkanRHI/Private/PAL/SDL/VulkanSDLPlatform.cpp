@@ -1,7 +1,6 @@
 
 #include "PAL/Common/VulkanPlatform.h"
 
-
 namespace CE::Vulkan
 {
 	Vec2i VulkanSDLPlatform::GetScreenSizeForWindow(void* sdlWindowHandle)
@@ -29,6 +28,6 @@ namespace CE::Vulkan
 	{
 		
 	}
-
+	
 } // namespace CE
 

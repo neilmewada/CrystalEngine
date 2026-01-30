@@ -2,13 +2,13 @@
 
 namespace CE::Vulkan
 {
-	class VulkanDevice;
+	class Device;
     
 	class VULKANRHI_API MergedShaderResourceGroup final : public ShaderResourceGroup
 	{
 	public:
 
-		MergedShaderResourceGroup(VulkanDevice* device, u32 srgCount, Vulkan::ShaderResourceGroup** srgs);
+		MergedShaderResourceGroup(Device* device, u32 srgCount, Vulkan::ShaderResourceGroup** srgs);
 
 		~MergedShaderResourceGroup();
 

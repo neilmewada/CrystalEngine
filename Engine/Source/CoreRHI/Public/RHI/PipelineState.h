@@ -202,7 +202,7 @@ namespace CE::RHI
 		bool enable = false;
 
 		FIELD()
-		CompareOp compareOp = CompareOp::Less;
+		CompareOp compareOp = CompareOp::LEqual;
 
 		FIELD()
 		bool testEnable = false;
@@ -327,8 +327,14 @@ namespace CE::RHI
 		DepthStencilState depthStencilState{};
 		MultisampleState multisampleState{};
 
-		RenderTarget* renderTarget = nullptr;
-		RenderTargetLayout rtLayout{};
+        RenderPass* renderPassHint = nullptr;
+        RenderPassLayout renderPassLayout{};
+		
+        CE_DEPRECATED("renderTarget is deprecated. Use renderPass instead.")
+        RenderTarget* renderTarget = nullptr;
+        
+        //CE_DEPRECATED("rtLayout is deprecated. Use renderPassLayout instead.")
+		//RenderTargetLayout rtLayout{};
 
 		u32 subpass = 0;
 
@@ -337,7 +343,7 @@ namespace CE::RHI
 
 	struct ComputePipelineDescriptor : PipelineDescriptor
 	{
-
+        Vec3i invocationSize;
 	};
 
 	class IPipelineLayout
@@ -366,6 +372,7 @@ namespace CE::RHI
 		virtual IPipelineLayout* GetPipelineLayout() = 0;
 		
 		inline const RHI::GraphicsPipelineDescriptor& GetGraphicsDescriptor() const { return graphicsDescriptor; }
+        inline const RHI::ComputePipelineDescriptor& GetComputeDescriptor() const { return computeDescriptor; }
 
 	protected:
 		PipelineState() : RHIResource(RHI::ResourceType::PipelineState) {}

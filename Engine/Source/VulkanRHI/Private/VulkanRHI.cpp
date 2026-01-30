@@ -143,7 +143,7 @@ namespace CE::Vulkan
 
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.apiVersion = VK_API_VERSION_1_1;
+        appInfo.apiVersion = VK_API_VERSION_1_2;
         appInfo.pEngineName = CE_ENGINE_NAME_STRING;
         appInfo.engineVersion = VK_MAKE_VERSION(CE_VERSION_MAJOR, CE_VERSION_MINOR, CE_VERSION_PATCH);
         appInfo.pApplicationName = gProjectName.GetCString();
@@ -224,7 +224,7 @@ namespace CE::Vulkan
 
     void VulkanRHI::PostInitialize()
     {
-        device = new VulkanDevice(vkInstance, this);
+        device = new Device(vkInstance, this);
         device->Initialize();
     }
 
@@ -256,7 +256,14 @@ namespace CE::Vulkan
 		gVulkanRHI = nullptr;
 	}
 
-    void* VulkanRHI::GetNativeHandle()
+	void VulkanRHI::WaitToShutdown()
+	{
+		DynamicRHI::WaitToShutdown();
+        
+        vkDeviceWaitIdle(device->GetHandle());
+	}
+
+	void* VulkanRHI::GetNativeHandle()
     {
         return vkInstance;
     }
@@ -302,9 +309,9 @@ namespace CE::Vulkan
 		return VulkanPlatform::GetScreenSizeForWindow(platformWindowHandle);
 	}
 
-    RHI::Fence* VulkanRHI::CreateFence(bool initiallySignalled)
+    RHI::Fence* VulkanRHI::CreateFence(uint64_t initialValue)
     {
-        return new Vulkan::Fence(device, initiallySignalled);
+        return new Vulkan::Fence(device, initialValue);
     }
 
     void VulkanRHI::DestroyFence(RHI::Fence* fence)
@@ -369,50 +376,6 @@ namespace CE::Vulkan
     RHI::DeviceLimits* VulkanRHI::GetDeviceLimits()
     {
         return device->deviceLimits;
-    }
-
-    RHI::RenderTarget* VulkanRHI::CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout)
-    {
-        return new Vulkan::RenderTarget(device, rtLayout);
-    }
-
-    void VulkanRHI::DestroyRenderTarget(RHI::RenderTarget* renderTarget)
-    {
-        delete renderTarget;
-    }
-
-    RHI::RenderTargetBuffer* VulkanRHI::CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::Texture*>& imageAttachments, u32 imageIndex)
-    {
-        Vulkan::RenderTarget* vkRenderTarget = (Vulkan::RenderTarget*)renderTarget;
-        if (vkRenderTarget == nullptr)
-            return nullptr;
-        Array<Vulkan::Texture*> textures{};
-        textures.Resize(imageAttachments.GetSize());
-        for (int i = 0; i < imageAttachments.GetSize(); i++)
-        {
-            textures[i] = (Vulkan::Texture*)imageAttachments[i];
-        }
-        return new FrameBuffer(device, textures, vkRenderTarget->GetRenderPass(), 0);
-    }
-
-    RHI::RenderTargetBuffer* VulkanRHI::CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, 
-        const Array<RHI::TextureView*>& imageAttachments, u32 imageIndex)
-    {
-        Vulkan::RenderTarget* vkRenderTarget = (Vulkan::RenderTarget*)renderTarget;
-        if (vkRenderTarget == nullptr)
-            return nullptr;
-        Array<Vulkan::TextureView*> textureViews{};
-        textureViews.Resize(imageAttachments.GetSize());
-        for (int i = 0; i < imageAttachments.GetSize(); i++)
-        {
-            textureViews[i] = (Vulkan::TextureView*)imageAttachments[i];
-        }
-        return new FrameBuffer(device, textureViews, vkRenderTarget->GetRenderPass(), 0);
-    }
-
-    void VulkanRHI::DestroyRenderTargetBuffer(RHI::RenderTargetBuffer* renderTargetBuffer)
-    {
-        delete renderTargetBuffer;
     }
 
     RHI::SwapChain* VulkanRHI::CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
@@ -495,9 +458,9 @@ namespace CE::Vulkan
 		delete shaderModule;
 	}
 
-	RHI::ShaderResourceGroup* VulkanRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout)
+	RHI::ShaderResourceGroup* VulkanRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupDescriptor& srgDescriptor)
 	{
-		return new Vulkan::ShaderResourceGroup(device, srgLayout);
+		return new Vulkan::ShaderResourceGroup(device, srgDescriptor.layout, srgDescriptor.name.GetString());
 	}
 
 	void VulkanRHI::DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup)
@@ -520,9 +483,9 @@ namespace CE::Vulkan
         delete pipeline;
     }
 
-	Array<RHI::CommandQueue*> VulkanRHI::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
+	Array<RHI::CommandQueue*> VulkanRHI::GetHardwareQueues(RHI::HardwareQueueClass queueClass)
 	{
-		return device->GetHardwareQueues(queueMask);
+		return device->GetHardwareQueues(queueClass);
 	}
 
     RHI::CommandQueue* VulkanRHI::GetPrimaryGraphicsQueue()
@@ -612,6 +575,26 @@ namespace CE::Vulkan
             outOffsets.Add(offset);
             offset += GetShaderStructMemberSize(member);
         }
+    }
+
+    RHI::RenderPass* VulkanRHI::CreateRenderPass(const RHI::RenderPassLayout& rpLayout)
+    {
+		return new Vulkan::RenderPass(device, rpLayout);
+    }
+
+    void VulkanRHI::DestroyRenderPass(RHI::RenderPass* renderPass)
+    {
+		delete renderPass;
+    }
+
+    RHI::RenderPassFrameBuffer* VulkanRHI::CreateRenderPassFrameBuffer(const RHI::RenderPassFrameBufferDescriptor& descriptor)
+    {
+		return new Vulkan::RenderPassFrameBuffer(device, descriptor);
+    }
+
+    void VulkanRHI::DestroyRenderPassFrameBuffer(RHI::RenderPassFrameBuffer* frameBuffer)
+    {
+        delete frameBuffer;
     }
 
     RHI::ResourceMemoryRequirements VulkanRHI::GetCombinedResourceRequirements(u32 count, RHI::ResourceMemoryRequirements* requirementsList, u64* outOffsetsList)

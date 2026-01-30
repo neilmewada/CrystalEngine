@@ -12,6 +12,10 @@ namespace CE::RHI
 		PerMaterial,
 		PerObject,
 		PerDraw,
+		
+		//! @brief For internal use only! You should never create a ShaderResourceGroup of SRGType::RootConstant
+		RootConstant,
+		
         COUNT
 	};
 	ENUM_CLASS(SRGType);
@@ -130,6 +134,21 @@ namespace CE::RHI
 
 			return empty;
 		}
+        
+        const SRGVariableDescriptor& FindVariable(u32 bindingSlot) const
+        {
+            static SRGVariableDescriptor empty{};
+
+            for (const auto& variable : variables)
+            {
+                if (variable.bindingSlot == bindingSlot)
+                {
+                    return variable;
+                }
+            }
+
+            return empty;
+        }
 
 		Self& TryAdd(const SRGVariableDescriptor& variable)
 		{
@@ -176,6 +195,12 @@ namespace CE::RHI
 		}
 
 	};
+
+    struct CORERHI_API ShaderResourceGroupDescriptor
+    {
+        Name name = "ShaderResourceGroup";
+        RHI::ShaderResourceGroupLayout layout{};
+    };
     
 } // namespace CE::RHI
 

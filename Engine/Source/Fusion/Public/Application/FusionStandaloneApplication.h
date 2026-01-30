@@ -141,6 +141,7 @@ namespace CE
 		void OnWindowMinimized(PlatformWindow* window) override;
 		void OnWindowCreated(PlatformWindow* window) override;
 		void OnWindowExposed(PlatformWindow* window) override;
+        void OnWindowShown(PlatformWindow* window) override;
 
 		HashMap<u64, Vec2i> windowSizesById;
 		RHI::FrameScheduler* scheduler = nullptr;

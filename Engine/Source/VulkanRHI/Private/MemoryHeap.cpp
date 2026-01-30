@@ -2,7 +2,7 @@
 
 namespace CE::Vulkan
 {
-	MemoryHeap::MemoryHeap(VulkanDevice* device, const RHI::MemoryHeapDescriptor& desc)
+	MemoryHeap::MemoryHeap(Device* device, const RHI::MemoryHeapDescriptor& desc)
 		: device(device)
 	{
 		debugName = desc.debugName;

@@ -5,11 +5,12 @@
 namespace CE::RHI
 {
 
-	/// Only Vulkan is supported
+	
     enum class GraphicsBackend
     {
         None,
         Vulkan,
+        Metal
     };
 
     enum class ResourceType
@@ -27,6 +28,8 @@ namespace CE::RHI
 		MemoryHeap,
         RenderTarget,
         RenderTargetBuffer,
+        RenderPass,
+        RenderPassFrameBuffer,
         Viewport,
 		SwapChain,
         DeviceLimits,
@@ -41,6 +44,7 @@ namespace CE::RHI
         None,
         Buffer,
         Texture,
+        SwapChain,
         TextureView
     };
 
@@ -211,7 +215,7 @@ namespace CE::RHI
 		/// @brief Use as depth-only attachment.
 		Depth = BIT(4),
 		/// @brief Use as a subpass input.
-		SubpassInput = BIT(5),
+		SubpassInput = BIT(5)
     };
     ENUM_CLASS_FLAGS(TextureBindFlags);
 
@@ -335,6 +339,7 @@ namespace CE::RHI
 	{
         Name debugName = nullptr;
 		String name = "";
+        String defaultEntryPoint = "";
 		ShaderStage stage = ShaderStage::None;
 		void* byteCode = nullptr;
 		SIZE_T byteSize = 0;

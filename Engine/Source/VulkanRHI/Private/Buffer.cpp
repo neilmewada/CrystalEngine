@@ -61,7 +61,7 @@ namespace CE::Vulkan
 		vkDestroyBuffer(device->GetHandle(), tempBuffer, VULKAN_CPU_ALLOCATOR);
 	}
 
-	Buffer::Buffer(VulkanDevice* device, const RHI::BufferDescriptor& desc)
+	Buffer::Buffer(Device* device, const RHI::BufferDescriptor& desc)
 		: device(device)
 	{
 		name = desc.name;
@@ -139,7 +139,7 @@ namespace CE::Vulkan
 		vkBindBufferMemory(device->GetHandle(), buffer, bufferMemory, 0);
 	}
 
-	Buffer::Buffer(VulkanDevice* device, const RHI::BufferDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc)
+	Buffer::Buffer(Device* device, const RHI::BufferDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc)
 		: device(device)
 		, memoryHeap((Vulkan::MemoryHeap*)memoryDesc.memoryHeap)
 		, memoryOffset(memoryDesc.memoryOffset)

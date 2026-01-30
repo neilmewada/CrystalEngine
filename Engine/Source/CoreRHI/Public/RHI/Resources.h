@@ -17,6 +17,8 @@ namespace CE::RHI
         {
             return resourceType;
         }
+
+        virtual void SetDebugLabel(const String& label) {}
         
     private:
         ResourceType resourceType = ResourceType::None;

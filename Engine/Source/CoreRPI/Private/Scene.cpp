@@ -132,8 +132,11 @@ namespace CE::RPI
 
 		if (shaderResourceGroup == nullptr)
 		{
-			const auto& srgLayout = RPISystem::Get().sceneSrgLayout;
-			shaderResourceGroup = gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+			RHI::ShaderResourceGroupDescriptor sceneSrgDesc{};
+			sceneSrgDesc.name = "SRG_PerScene";
+			sceneSrgDesc.layout = RPISystem::Get().GetSceneSrgLayout();
+
+			shaderResourceGroup = gDynamicRHI->CreateShaderResourceGroup(sceneSrgDesc);
 
 			RHI::BufferDescriptor lightConstantsDesc{};
 			lightConstantsDesc.name = "LightConstants";

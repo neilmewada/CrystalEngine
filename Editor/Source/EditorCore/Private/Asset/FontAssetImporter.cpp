@@ -291,31 +291,31 @@ namespace CE::Editor
 
 		auto queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
 		auto cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
-		auto fence = RHI::gDynamicRHI->CreateFence(false);
+		auto fence = RHI::gDynamicRHI->CreateFence(0);
 
 		const auto& fullScreenQuad = RPISystem::Get().GetFullScreenQuad();
 		auto drawArgs = RPISystem::Get().GetFullScreenQuadDrawArgs();
 
-		RHI::RenderTarget* renderTarget = nullptr;
-		Array<RHI::RenderTargetBuffer*> sdfFontAtlasMipRTBs{};
+		RHI::RenderPass* renderPass = nullptr;
+		Array<RHI::RenderPassFrameBuffer*> sdfFontAtlasMipFrameBuffers{};
 
 		{
-			RHI::RenderTargetLayout rtLayout{};
-			RHI::RenderAttachmentLayout colorAttachment{};
+			RHI::RenderPassLayout rpLayout{};
+			RHI::RenderPassAttachmentLayout colorAttachment{};
 			colorAttachment.attachmentId = "Color";
 			colorAttachment.attachmentUsage = ScopeAttachmentUsage::Color;
 			colorAttachment.format = RHI::Format::R8_UNORM;
 			colorAttachment.multisampleState.sampleCount = 1;
 			colorAttachment.loadAction = AttachmentLoadAction::Clear;
 			colorAttachment.storeAction = AttachmentStoreAction::Store;
-			rtLayout.attachmentLayouts.Add(colorAttachment);
+			rpLayout.attachmentLayouts.Add(colorAttachment);
 
-			renderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+			renderPass = RHI::gDynamicRHI->CreateRenderPass(rpLayout);
 			//renderTargetBuffer = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { sdfFontAtlasMipViews[0] });
 
 			for (int i = 0; i < mipLevels; i++)
 			{
-				sdfFontAtlasMipRTBs.Add(RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { sdfFontAtlasMipViews[i] }));
+				sdfFontAtlasMipFrameBuffers.Add(RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ renderPass, { sdfFontAtlasMipViews[i] } }));
 			}
 		}
 
@@ -323,11 +323,10 @@ namespace CE::Editor
 		{
 			delete cmdList;
 			delete fence;
-			delete renderTarget;
-			//delete renderTargetBuffer;
+			delete renderPass;
 			for (int i = 0; i < mipLevels; i++)
 			{
-				delete sdfFontAtlasMipRTBs[i];
+				delete sdfFontAtlasMipFrameBuffers[i];
 			}
 		};
 
@@ -381,7 +380,7 @@ namespace CE::Editor
 
 			// Render SDF atlas into Mip 0
 
-			cmdList->BeginRenderTarget(renderTarget, sdfFontAtlasMipRTBs[0], &clear);
+			cmdList->BeginRenderPass(renderPass, sdfFontAtlasMipFrameBuffers[0], &clear);
 			{
 				RHI::ViewportState viewport{};
 				viewport.x = viewport.y = 0;
@@ -406,7 +405,7 @@ namespace CE::Editor
 
 				cmdList->DrawLinear(drawArgs);
 			}
-			cmdList->EndRenderTarget();
+			cmdList->EndRenderPass();
 
 			barrier.resource = sdfFontAtlas;
 			barrier.fromState = ResourceState::ColorOutput;
@@ -423,7 +422,7 @@ namespace CE::Editor
 
 			for (int i = 1; i < mipLevels; i++)
 			{
-				cmdList->BeginRenderTarget(renderTarget, sdfFontAtlasMipRTBs[i], &clear);
+				cmdList->BeginRenderPass(renderPass, sdfFontAtlasMipFrameBuffers[i], &clear);
 
 				RHI::ViewportState viewport{};
 				viewport.x = viewport.y = 0;
@@ -448,7 +447,7 @@ namespace CE::Editor
 
 				cmdList->DrawLinear(drawArgs);
 
-				cmdList->EndRenderTarget();
+				cmdList->EndRenderPass();
 
 				barrier.resource = sdfFontAtlas;
 				barrier.fromState = ResourceState::ColorOutput;
@@ -497,8 +496,15 @@ namespace CE::Editor
 		}
 		cmdList->End();
 
-		queue->Execute(1, &cmdList, fence);
-		fence->WaitForFence();
+		RHI::CommandQueueSubmission submission{};
+		submission.numCommandLists = 1;
+		submission.commandLists = &cmdList;
+		submission.signalFence = fence;
+		submission.signalFenceValue = fence->NextSignalValue();
+
+		queue->Submit(submission);
+		
+		fence->WaitCPU(submission.signalFenceValue);
 
 		// - Read data -
 

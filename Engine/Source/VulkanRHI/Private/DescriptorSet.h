@@ -8,8 +8,8 @@ namespace CE::Vulkan
     class DescriptorSet
     {
     public:
-        DescriptorSet(VulkanDevice* device, VkDescriptorSetLayout setLayout, const RHI::ShaderResourceGroupLayout& srgLayout);
-        DescriptorSet(VulkanDevice* device, VkDescriptorSetLayout setLayout, const RHI::ShaderResourceGroupLayout& srgLayout, u32 arrayCount);
+        DescriptorSet(Device* device, VkDescriptorSetLayout setLayout, const RHI::ShaderResourceGroupLayout& srgLayout, const String& name = "");
+        DescriptorSet(Device* device, VkDescriptorSetLayout setLayout, const RHI::ShaderResourceGroupLayout& srgLayout, u32 arrayCount, const String& name = "");
 
         virtual ~DescriptorSet();
 
@@ -17,7 +17,7 @@ namespace CE::Vulkan
 
     private:
 
-        VulkanDevice* device = nullptr;
+        Device* device = nullptr;
 
         RHI::ShaderResourceGroupLayout srgLayout{};
         int setNumber = -1;
@@ -28,6 +28,7 @@ namespace CE::Vulkan
         DescriptorPool* pool = nullptr;
 
         Atomic<int> usageCount = 0;
+        int frameCounter = 0;
 
         bool failed = false;
 

@@ -3,7 +3,7 @@
 namespace CE::Vulkan
 {
 
-	FrameGraphExecuter::FrameGraphExecuter(VulkanDevice* device) : device(device)
+	FrameGraphExecuter::FrameGraphExecuter(Device* device) : device(device)
 	{
 		
 	}
@@ -266,6 +266,8 @@ namespace CE::Vulkan
 			scopeInChain = (Vulkan::Scope*)scopeInChain->next;
 		}
 
+		// We remove swapchain of scopes that have already been executed.
+		// So we are left with a set of swapchains that are going to be used for the first time in current frame in flight.
 		for (const auto& executedScopeId : executedScopes)
 		{
 			Vulkan::Scope* executedScope = (Vulkan::Scope*)frameGraph->scopesById[executedScopeId];
@@ -301,17 +303,13 @@ namespace CE::Vulkan
 
 		commandList->Begin();
 		{
-			commandList->SetCurrentImageIndex(currentSubmissionIndex);
+			commandList->SetFrameIndex(currentSubmissionIndex);
 
 			for (int scopeIndex = 0; scopeIndex < scopeChain.GetSize(); scopeIndex++)
 			{
 				Vulkan::Scope* currentScope = scopeChain[scopeIndex];
 				if (currentScope == nullptr)
 					continue;
-				if (currentScope->IsComputePass())
-				{
-					String::IsAlphabet('a');
-				}
 
 				executedScopes.Add(currentScope->id);
 
@@ -319,7 +317,7 @@ namespace CE::Vulkan
 				commandList->currentSubpass = currentScope->subpassIndex;
 
 				//bool usesSwapChainAttachment = currentScope->swapChainsUsedByAttachments.NotEmpty();
-				RenderPass* renderPass = currentScope->renderPass;
+				VulkanRenderPass* renderPass = currentScope->renderPass;
 				FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
 				HashSet<RHI::AttachmentID> clearedAttachments{};
 
@@ -406,12 +404,26 @@ namespace CE::Vulkan
 							RHI::ImageScopeAttachment* imageScopeAttachment = (RHI::ImageScopeAttachment*)scopeAttachment;
 							RHI::ImageFrameAttachment* imageFrameAttachment = (RHI::ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
 
-							RHI::RHIResource* resource = imageFrameAttachment->GetResource(currentSubmissionIndex);
+							RHI::RHIResource* resource = nullptr;
+
+							if (imageFrameAttachment->IsSwapChainAttachment())
+							{
+								RHI::SwapChainFrameAttachment* swapChainFrameAttachment = (RHI::SwapChainFrameAttachment*)imageFrameAttachment;
+								Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)swapChainFrameAttachment->GetSwapChain();
+
+								//resource = swapChain->GetImage(currentSubmissionIndex);
+								resource = swapChain->GetImage(swapChain->GetCurrentImageIndex());
+							}
+							else
+							{
+								resource = imageFrameAttachment->GetResource(currentSubmissionIndex);
+							}
+
 							if (resource == nullptr)
 								continue;
 							if (initializedAttachmentIds.Exists(imageFrameAttachment->GetId()))
 								continue;
-							if (resource->GetResourceType() != RHI::ResourceType::Buffer && resource->GetResourceType() != RHI::ResourceType::Texture &&
+							if (resource->GetResourceType() != RHI::ResourceType::Texture &&
 								resource->GetResourceType() != RHI::ResourceType::TextureView)
 								continue;
 
@@ -678,10 +690,17 @@ namespace CE::Vulkan
 				{
 					commandList->ClearShaderResourceGroups();
 
+					int imageIndex = 0;
+
+					if (currentScope->presentSwapChains.GetSize() == 1)
+					{
+						imageIndex = ((Vulkan::SwapChain*)currentScope->presentSwapChains[0])->currentImageIndex;
+					}
+
 					VkRenderPassBeginInfo beginInfo{};
 					beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 					beginInfo.renderPass = renderPass->GetHandle();
-					FrameBuffer* frameBuffer = currentScope->frameBuffers[currentSubmissionIndex];
+					FrameBuffer* frameBuffer = currentScope->frameBuffers[currentSubmissionIndex][imageIndex];
 					beginInfo.framebuffer = frameBuffer->GetHandle();
 					beginInfo.clearValueCount = clearValues.GetSize();
 					beginInfo.pClearValues = clearValues.GetData();
@@ -1027,7 +1046,9 @@ namespace CE::Vulkan
 			{
 				for (int i = 0; i < scopeChain.Top()->presentSwapChains.GetSize(); i++)
 				{
-					Vulkan::Texture* image = (Vulkan::Texture*)scopeChain.Top()->presentSwapChains[i]->GetCurrentImage();
+                    auto presentSwapChain = (Vulkan::SwapChain*)scopeChain.Top()->presentSwapChains[i];
+                    
+					Vulkan::Texture* image = presentSwapChain->GetCurrentImage();
 					if (image->curFamilyIndex < 0)
 						image->curFamilyIndex = presentQueue->GetFamilyIndex();
 
@@ -1120,7 +1141,6 @@ namespace CE::Vulkan
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandList->commandBuffer;
 		
-		//result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentSubmissionIndex]);
 		bool success = scope->queue->Submit(1, &submitInfo, scope->renderFinishedFences[currentSubmissionIndex]);
 
 		if (presentRequired && scopeChain.Top()->presentSwapChains.NotEmpty())
@@ -1130,12 +1150,13 @@ namespace CE::Vulkan
 
 			for (int i = 0; i < scopeChain.Top()->presentSwapChains.GetSize(); i++)
 			{
-				VkSwapchainKHR swapchainKhr = ((Vulkan::SwapChain*)scopeChain.Top()->presentSwapChains[i])->GetHandle();
+				Vulkan::SwapChain* presentSwapChain = (Vulkan::SwapChain*)scopeChain.Top()->presentSwapChains[i];
+				VkSwapchainKHR swapchainKhr = presentSwapChain->GetHandle();
 				if (swapchainKhr == nullptr)
 					continue;
 
 				swapchainKhrs.Add(swapchainKhr);
-				imageIndices.Add(scopeChain.Top()->presentSwapChains[i]->GetCurrentImageIndex());
+				imageIndices.Add(presentSwapChain->GetCurrentImageIndex());
 			}
 
 			if (!swapchainKhrs.IsEmpty())

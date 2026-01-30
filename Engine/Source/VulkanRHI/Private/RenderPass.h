@@ -1,109 +1,33 @@
 #pragma once
 
-#include "VulkanRHIPrivate.h"
-
-namespace CE
-{
-	template<>
-	inline SIZE_T GetHash<VkSubpassDependency>(const VkSubpassDependency& value)
-	{
-		SIZE_T hash = GetHash(value.srcSubpass);
-		CombineHash(hash, value.dstSubpass);
-		CombineHash(hash, value.srcStageMask);
-		CombineHash(hash, value.dstStageMask);
-		CombineHash(hash, value.srcAccessMask);
-		CombineHash(hash, value.dstAccessMask);
-		CombineHash(hash, value.dependencyFlags);
-		return hash;
-	}
-}
-
 namespace CE::Vulkan
 {
-    class Scope;
 
-	class RenderPass final
-	{
-	public:
+	class VULKANRHI_API RenderPass : public RHI::RenderPass
+    {
+    public:
+        RenderPass(Device* device, const RHI::RenderPassLayout& rpLayout);
 
-		struct AttachmentBinding
-		{
-			RHI::AttachmentID attachmentId{};
-			RHI::Format format = RHI::Format::Undefined;
-			RHI::AttachmentLoadStoreAction loadStoreAction{};
-			VkImageLayout initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			VkImageLayout finalLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			RHI::MultisampleState multisampleState{};
+        ~RenderPass();
 
-			SIZE_T GetHash() const;
-		};
+        RHI::RenderPass* Clone(const Array<RHI::Format>& newColorFormats, RHI::Format depthStencilFormat,
+	        u32 subpassSelection) override;
 
-		struct SubPassAttachment
-		{
-			u32 attachmentIndex = u32(-1);
-			VkImageLayout imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        RHI::RenderPass* Clone(MultisampleState msaa, const Array<RHI::Format>& newColorFormats,
+	        RHI::Format depthStencilFormat, u32 subpassSelection) override;
 
-			inline bool IsValid() const { return attachmentIndex != u32(-1); }
+        void GetAttachmentFormats(Array<RHI::Format>& outColorFormats, RHI::Format& outDepthStencilFormat,
+	        u32 subpassSelection) override;
 
-			SIZE_T GetHash() const;
-		};
+        VkRenderPass GetHandle() const { return renderPass->GetHandle(); }
 
-		struct SubPassDescriptor
-		{
-			FixedArray<SubPassAttachment, RHI::Limits::Pipeline::MaxColorAttachmentCount> colorAttachments{};
-			FixedArray<SubPassAttachment, RHI::Limits::Pipeline::MaxColorAttachmentCount> resolveAttachments{};
-			FixedArray<SubPassAttachment, RHI::Limits::Pipeline::MaxColorAttachmentCount> subpassInputAttachments{};
-			FixedArray<u32, RHI::Limits::Pipeline::MaxColorAttachmentCount> preserveAttachments{};
-			FixedArray<SubPassAttachment, 1> depthStencilAttachment{};
+		VulkanRenderPass* GetVulkanRenderPass() const { return renderPass; }
 
-			SIZE_T GetHash() const;
-		};
+    private:
 
-		struct Descriptor
-		{
-			Name name;
-			FixedArray<AttachmentBinding, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
-			FixedArray<SubPassDescriptor, RHI::Limits::Pipeline::MaxSubPassCount> subpasses{};
-			Array<VkSubpassDependency> dependencies{};
+		Device* device = nullptr;
 
-			void CompileDependencies();
-
-			SIZE_T GetHash() const;
-		};
-
-		RenderPass(VulkanDevice* device, const Descriptor& desc);
-		virtual ~RenderPass();
-
-		static void BuildDescriptor(Vulkan::Scope* pass, Descriptor& outDescriptor);
-
-		static void BuildDescriptor(const RHI::RenderTargetLayout& rtLayout, Descriptor& outDescriptor);
-
-		RHI::ScopeAttachmentUsage GetAttachmentUsage(u32 attachmentIndex);
-
-		inline const Descriptor& GetDescriptor() const { return desc; }
-
-		inline VkRenderPass GetHandle() const { return renderPass; }
-
-		inline SIZE_T GetHash() const { return hash; }
-		
-	private:
-		VkRenderPass renderPass = nullptr;
-		VulkanDevice* device = nullptr;
-
-		Descriptor desc{};
-
-		SIZE_T hash = 0;
-
-		friend class RenderPassCache;
-		friend class GraphicsPipeline;
-		friend class FrameGraphExecuter;
-		friend class FrameGraphCompiler;
-		friend class Scope;
-	};
-
-	VkSampleCountFlagBits GetSampleCountFlagBits(int sampleCount);
-	VkAttachmentLoadOp RHIAttachmentLoadActionToVk(RHI::AttachmentLoadAction loadAction);
-	VkAttachmentStoreOp RHIAttachmentStoreActionToVk(RHI::AttachmentStoreAction storeAction);
-
-
-} // namespace CE
+        VulkanRenderPass* renderPass = nullptr;
+    };
+    
+} // namespace CE::Vulkan

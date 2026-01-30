@@ -2,7 +2,7 @@
 
 namespace CE::Vulkan
 {
-	DeviceLimits::DeviceLimits(VulkanDevice* device)
+	DeviceLimits::DeviceLimits(Device* device)
 	{
 		EnumType* formatEnum = GetStaticEnum<RHI::Format>();
 

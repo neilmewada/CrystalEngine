@@ -100,7 +100,7 @@ namespace CE::Vulkan
         return {};
     }
 
-    GraphicsPipeline::GraphicsPipeline(VulkanDevice* device, const RHI::GraphicsPipelineDescriptor& desc)
+    GraphicsPipeline::GraphicsPipeline(Device* device, const RHI::GraphicsPipelineDescriptor& desc)
         : Pipeline(device, desc)
         , desc(desc)
     {
@@ -115,9 +115,9 @@ namespace CE::Vulkan
 
         auto rpCache = device->GetRenderPassCache();
 
-        if (desc.renderTarget != nullptr)
+        if (desc.renderPassHint != nullptr)
         {
-            renderPass = ((Vulkan::RenderTarget*)desc.renderTarget)->GetRenderPass();
+            renderPass = ((Vulkan::RenderPass*)desc.renderPassHint)->GetVulkanRenderPass();
             if (renderPass)
             {
                 FindOrCompile(renderPass, desc.subpass);
@@ -125,9 +125,9 @@ namespace CE::Vulkan
         }
         else
         {
-            RenderPass::Descriptor rpDesc{};
+            VulkanRenderPass::Descriptor rpDesc{};
             rpDesc.name = name;
-            RenderPass::BuildDescriptor(desc.rtLayout, rpDesc);
+            VulkanRenderPass::BuildDescriptor(desc.renderPassLayout, rpDesc);
             renderPass = rpCache->FindOrCreate(rpDesc);
             if (renderPass)
             {
@@ -157,7 +157,7 @@ namespace CE::Vulkan
         pipelinesByHash.Clear();
     }
 
-    VkPipeline GraphicsPipeline::FindOrCompile(RenderPass* renderPass, u32 subpass, u32 numViewports, u32 numScissors)
+    VkPipeline GraphicsPipeline::FindOrCompile(VulkanRenderPass* renderPass, u32 subpass, u32 numViewports, u32 numScissors)
     {
         if (renderPass == nullptr || subpass >= RHI::Limits::Pipeline::MaxSubPassCount)
             return nullptr;
@@ -183,7 +183,7 @@ namespace CE::Vulkan
         return CompileInternal(renderPass, subpass, numViewports, numScissors);
     }
 
-    VkPipeline GraphicsPipeline::CompileInternal(RenderPass* renderPass, u32 subpass, u32 numViewports, u32 numScissors)
+    VkPipeline GraphicsPipeline::CompileInternal(VulkanRenderPass* renderPass, u32 subpass, u32 numViewports, u32 numScissors)
     {
         VkGraphicsPipelineCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -362,10 +362,10 @@ namespace CE::Vulkan
             colorBlendAttachments.Add(colorBlendAttachment);
         }
 
-        if (desc.renderTarget != nullptr)
+        if (desc.renderPassHint != nullptr)
         {
-            Vulkan::RenderTarget* rt = (Vulkan::RenderTarget*)desc.renderTarget;
-            RenderPass* rp = rt->GetRenderPass();
+            Vulkan::RenderPass* renderPassHint = (Vulkan::RenderPass*)desc.renderPassHint;
+            VulkanRenderPass* rp = renderPassHint->GetVulkanRenderPass();
 
             u32 numColorTargets = rp->desc.subpasses[0].colorAttachments.GetSize();
 
@@ -551,14 +551,14 @@ namespace CE::Vulkan
             case VertexAttributeDataType::UInt4:
                 attrib.format = VK_FORMAT_R32G32B32A32_UINT;
                 break;
-			case VertexAttributeDataType::Undefined:
-				break;
 			case VertexAttributeDataType::Char4:
                 attrib.format = VK_FORMAT_R8G8B8A8_SNORM;
 				break;
 			case VertexAttributeDataType::UChar4:
                 attrib.format = VK_FORMAT_R8G8B8A8_UNORM;
 				break;
+            case VertexAttributeDataType::Undefined:
+                break;
             }
 
             vertexInputDescriptions.Add(attrib);

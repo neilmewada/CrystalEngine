@@ -21,7 +21,7 @@ namespace CE
 			ERR_UnsupportedPlatform,
 			ERR_InvalidVertexInputNames,
 		};
-
+        
 		ErrorCode ReflectSpirv(const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection, const String& entryPoint);
 
 		inline ErrorCode Reflect(ShaderBlobFormat shaderFormat, const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection, const String& entryPoint)

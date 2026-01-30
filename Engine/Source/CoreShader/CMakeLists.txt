@@ -28,10 +28,12 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             $<${PAL_PLATFORM_IS_DESKTOP}:ThirdParty::dxcompiler>
             $<${PAL_PLATFORM_IS_DESKTOP}:Vulkan::SPIRV-Tools>
+            #$<${PAL_PLATFORM_IS_DESKTOP}:Vulkan::SPIRV-Cross>
         PUBLIC
             CE::Core
             CE::CoreRHI
-            $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
+            #$<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
+            #$<${PAL_TRAIT_METAL_SUPPORTED}:CE::MetalRHI>
     RUNTIME_DEPENDENCIES
         dxcompiler
         SpirvTools

@@ -35,7 +35,7 @@ namespace CE
 		case TextureFormat::RGBAFloat:
 			return RHI::Format::R32G32B32A32_SFLOAT;
 		case TextureFormat::RGB565:
-			return RHI::Format::R5G6B5_UNORM;
+			return RHI::Format::B5G6R5_UNORM;
 		case TextureFormat::BC1:
 			return isSrgb ? RHI::Format::BC1_RGB_SRGB : Format::BC1_RGB_UNORM;
 		case TextureFormat::BC3:

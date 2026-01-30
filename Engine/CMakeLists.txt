@@ -27,8 +27,13 @@ add_subdirectory(Source/CoreSettings)
 
 # Core Dependencies
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
-add_subdirectory(Source/VulkanRHI)
+    add_subdirectory(Source/VulkanRHI)
 endif()
+
+if(${PAL_TRAIT_METAL_SUPPORTED})
+    add_subdirectory(Source/MetalRHI)
+endif()
+
 
 add_subdirectory(Source/CoreShader)
 

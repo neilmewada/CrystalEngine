@@ -6,7 +6,8 @@ namespace CE
 	ENUM()
 	enum class ShaderBlobFormat
 	{
-		Spirv = 0
+		Spirv = 0,
+		MSL,
 	};
 
 	typedef HashMap<Name, int> VariableBindingMap;

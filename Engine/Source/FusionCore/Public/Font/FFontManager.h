@@ -44,6 +44,8 @@ namespace CE
 		//! @brief Flushes all the changes to GPU
 		void Flush(u32 imageIndex);
 
+		void WaitForFlush();
+
 	private:
 
 		bool LoadFontFace(Stream* ttfFile, FT_Face& outFace, u8** outData);

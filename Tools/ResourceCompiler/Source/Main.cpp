@@ -51,7 +51,7 @@ CE_RTTI_STRUCT_IMPL(, , ResourceStampManifest)
 
 static HashSet<Name> textFileExts = {
 	".txt", ".json", ".xml", ".html", ".css", ".sass", ".scss",
-	".shader", ".hlsl", ".glsl"
+	".shader", ".hlsl", ".glsl", ".msl"
 };
 
 typedef std::chrono::high_resolution_clock Clock;

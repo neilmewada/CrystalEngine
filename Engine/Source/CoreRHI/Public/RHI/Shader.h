@@ -25,11 +25,14 @@ namespace CE::RHI
 
 		inline SIZE_T GetHash() const { return hash; }
 
+        inline const Name& GetDefaultEntryPoint() const { return defaultEntryPoint; }
+        
 	protected:
 
 		Name name{};
 		bool isValid = false;
 		SIZE_T hash = 0;
+        Name defaultEntryPoint{};
 
 		ShaderStage stage{};
 

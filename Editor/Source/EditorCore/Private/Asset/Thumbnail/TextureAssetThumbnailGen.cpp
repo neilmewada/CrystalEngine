@@ -118,8 +118,8 @@ namespace CE::Editor
 					////////////////////////////////////////////////////////////
 					// - Render Targets -
 
-                    RHI::RenderTargetLayout rtLayout{};
-                    RHI::RenderAttachmentLayout colorAttachment{};
+                    RHI::RenderPassLayout rtLayout{};
+                    RHI::RenderPassAttachmentLayout colorAttachment{};
                     colorAttachment.attachmentId = "Color";
                     colorAttachment.format = RHI::Format::R8G8B8A8_UNORM;
                     colorAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
@@ -129,8 +129,8 @@ namespace CE::Editor
                     colorAttachment.storeActionStencil = RHI::AttachmentStoreAction::DontCare;
                     rtLayout.attachmentLayouts.Add(colorAttachment);
 
-                    RHI::RenderTarget* renderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
-                    RHI::RenderTargetBuffer* renderTargetBuffer = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { outTexture });
+                    RHI::RenderPass* renderTarget = RHI::gDynamicRHI->CreateRenderPass(rtLayout);
+                    RHI::RenderPassFrameBuffer* renderTargetBuffer = RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ renderTarget, { outTexture } });
 
                     // Full screen quad
                     Array<RHI::VertexBufferView> fullscreenQuad = RPISystem::Get().GetFullScreenQuad();
@@ -156,7 +156,7 @@ namespace CE::Editor
                         AttachmentClearValue clearValue;
                         clearValue.clearValue = Vec4(0, 0, 0, 0);
 
-                        cmdList->BeginRenderTarget(renderTarget, renderTargetBuffer, &clearValue);
+                        cmdList->BeginRenderPass(renderTarget, renderTargetBuffer, &clearValue);
                         {
                             RHI::ViewportState viewportState{};
                             viewportState.x = viewportState.y = 0;
@@ -183,7 +183,7 @@ namespace CE::Editor
 
                             cmdList->DrawLinear(fullscreenQuadArgs);
                         }
-                        cmdList->EndRenderTarget();
+                        cmdList->EndRenderPass();
 
                         barrier.fromState = ResourceState::ColorOutput;
                         barrier.toState = ResourceState::CopySource;
@@ -213,9 +213,17 @@ namespace CE::Editor
                         cmdList->ResourceBarrier(1, &barrier);
                     }
                     cmdList->End();
+
+                    RHI::CommandQueueSubmission submission{};
+                    submission.numCommandLists = 1;
+					submission.commandLists = &cmdList;
+
+					submission.signalFenceValue = fence->NextSignalValue();
+                    submission.signalFence = fence;
                     
-                    queue->Execute(1, &cmdList, fence);
-                    fence->WaitForFence();
+                    queue->Submit(submission);
+                    
+					fence->WaitCPU(submission.signalFenceValue);
 
                     /////////////////////////////////////////////////////
 					// - Save thumbnail to disk -
@@ -258,8 +266,8 @@ namespace CE::Editor
                     delete blitMaterial;
                     RHI::gDynamicRHI->DestroyTexture(outTexture);
                     RHI::gDynamicRHI->DestroyBuffer(stagingBuffer);
-                    RHI::gDynamicRHI->DestroyRenderTargetBuffer(renderTargetBuffer);
-                    RHI::gDynamicRHI->DestroyRenderTarget(renderTarget);
+                    RHI::gDynamicRHI->DestroyRenderPassFrameBuffer(renderTargetBuffer);
+                    RHI::gDynamicRHI->DestroyRenderPass(renderTarget);
 
                     RHI::gDynamicRHI->DestroyFence(fence);
                     RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);

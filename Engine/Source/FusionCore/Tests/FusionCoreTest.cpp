@@ -116,7 +116,6 @@ namespace RenderingTests
             app->FlushDrawPackets(drawList, curImageIndex);
         }
 
-
         scheduler->EndExecution();
     }
 
@@ -158,11 +157,7 @@ namespace RenderingTests
         auto scheduler = RHI::FrameScheduler::Get();
 
         scheduler->Compile();
-
-        RHI::TransientMemoryPool* pool = scheduler->GetTransientPool();
-        RHI::MemoryHeap* imageHeap = pool->GetImagePool();
     }
-
 
     void RendererSystem::OnWindowRestored(PlatformWindow* window)
     {
@@ -195,6 +190,11 @@ namespace RenderingTests
     }
 
     void RendererSystem::OnWindowExposed(PlatformWindow* window)
+    {
+        rebuildFrameGraph = recompileFrameGraph = true;
+    }
+    
+    void RendererSystem::OnWindowShown(PlatformWindow* window)
     {
         rebuildFrameGraph = recompileFrameGraph = true;
     }
@@ -296,7 +296,7 @@ namespace RenderingTests
                                 FNew(FButton)
                                 .OnClicked([this]
                                     {
-                                        static_cast<FNativeContext*>(GetContext())->Minimize();
+                                        CastTo<FNativeContext>(GetContext())->Minimize();
                                     })
                                 .Padding(Vec4(17, 8, 17, 8))
                                 .Name("WindowMinimizeButton")
@@ -314,7 +314,7 @@ namespace RenderingTests
                                 FNew(FButton)
                                 .OnClicked([this]
                                     {
-                                        FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
+                                        Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext());
                                         if (nativeContext->IsMaximized())
                                         {
                                             nativeContext->Restore();
@@ -440,7 +440,7 @@ namespace RenderingTests
 
     void RenderingTestWidget::OnWindowRestored(PlatformWindow* window)
     {
-        FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
+        Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext());
 
         if (nativeContext->GetPlatformWindow() == window)
         {
@@ -451,7 +451,7 @@ namespace RenderingTests
 
     void RenderingTestWidget::OnWindowMaximized(PlatformWindow* window)
     {
-        FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
+        Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext());
 
         if (nativeContext->GetPlatformWindow() == window)
         {
@@ -462,12 +462,14 @@ namespace RenderingTests
 
     void RenderingTestWidget::OnWindowExposed(PlatformWindow* window)
     {
-        FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
+        Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext());
 
         if (nativeContext->GetPlatformWindow() == window && !window->IsMaximized())
         {
             OnWindowRestored(window);
         }
     }
+    
 
 }
+

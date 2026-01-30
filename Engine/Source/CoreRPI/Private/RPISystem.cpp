@@ -107,6 +107,8 @@ namespace CE::RPI
 		    	if (!variant)
 		    		continue;
 
+                standardShaderSrgHint = variant;
+
 		    	viewSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerView);
 		    	sceneSrgLayout = variant->GetSrgLayout(RHI::SRGType::PerScene);
 
@@ -169,11 +171,11 @@ namespace CE::RPI
         brdfLutTexture = new RPI::Texture(rpiDesc);
         RHI::Texture* brdfLut = brdfLutTexture->GetRhiTexture();
 
-        RHI::RenderTarget* brdfLutRT = nullptr;
-        RHI::RenderTargetBuffer* brdfLutRTB = nullptr;
+        RHI::RenderPass* brdfLutRT = nullptr;
+        RHI::RenderPassFrameBuffer* brdfLutRTB = nullptr;
         {
-            RHI::RenderTargetLayout rtLayout{};
-            RHI::RenderAttachmentLayout colorAttachment{};
+            RHI::RenderPassLayout rtLayout{};
+            RHI::RenderPassAttachmentLayout colorAttachment{};
             colorAttachment.attachmentId = "BRDF LUT";
             colorAttachment.format = RHI::Format::R8G8_UNORM;
             colorAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
@@ -182,8 +184,8 @@ namespace CE::RPI
             colorAttachment.multisampleState.sampleCount = 1;
             rtLayout.attachmentLayouts.Add(colorAttachment);
 
-            brdfLutRT = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
-            brdfLutRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(brdfLutRT, { brdfLut });
+            brdfLutRT = RHI::gDynamicRHI->CreateRenderPass(rtLayout);
+            brdfLutRTB = RHI::gDynamicRHI->CreateRenderPassFrameBuffer({ brdfLutRT, { brdfLut } });
         }
 
         defer(&)
@@ -212,7 +214,7 @@ namespace CE::RPI
 
             cmdList->ClearShaderResourceGroups();
 
-            cmdList->BeginRenderTarget(brdfLutRT, brdfLutRTB, &clearValue);
+            cmdList->BeginRenderPass(brdfLutRT, brdfLutRTB, &clearValue);
             {
                 RHI::ViewportState viewportState{};
                 viewportState.x = viewportState.y = 0;
@@ -234,7 +236,7 @@ namespace CE::RPI
 
                 cmdList->DrawLinear(fullscreenQuadArgs);
             }
-            cmdList->EndRenderTarget();
+            cmdList->EndRenderPass();
 
             barrier.resource = brdfLut;
             barrier.fromState = RHI::ResourceState::ColorOutput;
@@ -243,8 +245,15 @@ namespace CE::RPI
         }
         cmdList->End();
 
-        queue->Execute(1, &cmdList, fence);
-        fence->WaitForFence();
+        RHI::CommandQueueSubmission submission{};
+        submission.numCommandLists = 1;
+        submission.commandLists = &cmdList;
+        submission.signalFence = fence;
+        submission.signalFenceValue = fence->NextSignalValue();
+
+        queue->Submit(submission);
+
+        fence->WaitCPU(submission.signalFenceValue);
 
         RHI::gDynamicRHI->DestroyFence(fence); fence = nullptr;
         RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
@@ -593,8 +602,15 @@ namespace CE::RPI
         }
         cmdList->End();
 
-        queue->Execute(1, &cmdList, fence);
-        fence->WaitForFence();
+        RHI::CommandQueueSubmission submission{};
+        submission.numCommandLists = 1;
+        submission.commandLists = &cmdList;
+        submission.signalFence = fence;
+        submission.signalFenceValue = fence->NextSignalValue();
+
+        queue->Submit(submission);
+
+        fence->WaitCPU(submission.signalFenceValue);
 
         // Cleanup
         RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);

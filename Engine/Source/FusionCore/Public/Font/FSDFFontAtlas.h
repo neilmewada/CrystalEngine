@@ -30,6 +30,8 @@ namespace CE
         //! @brief Flushes all the changes to GPU
         void Flush(u32 imageIndex);
 
+        void WaitForFlush();
+
         FFontGlyphInfo FindOrAddGlyph(u32 charCode, bool isBold, bool isItalic);
 
         RHI::ShaderResourceGroup* GetFontSrg2() const { return fontSrg2; }
@@ -94,7 +96,7 @@ namespace CE
 
         // - Submission Objects -
         RHI::CommandList* cmdList = nullptr;
-        RHI::RenderTargetBuffer* frameBuffer = nullptr;
+        RHI::RenderPassFrameBuffer* frameBuffer = nullptr;
         RPI::Texture* sourceImage = nullptr;
 
         HashMap<CharCode, int> arrayLayerByCharCode;
@@ -109,9 +111,10 @@ namespace CE
         RPI::Texture* atlasTexture = nullptr;
         RHI::ShaderResourceGroup* fontSrg2 = nullptr;
 
-		RHI::RenderTarget* sdfRenderTarget = nullptr;
+		RHI::RenderPass* sdfRenderTarget = nullptr;
         RPI::Material* sdfGenMaterial = nullptr;
         RHI::Fence* fence = nullptr;
+        uint64_t fenceSignalValue = 0;
 
         FFontMetrics metrics{};
 

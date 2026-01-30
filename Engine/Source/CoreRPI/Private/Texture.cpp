@@ -253,8 +253,15 @@ namespace CE::RPI
             }
             commandList->End();
 
-            queue->Execute(1, &commandList, uploadFence);
-            uploadFence->WaitForFence();
+            RHI::CommandQueueSubmission submission{};
+            submission.numCommandLists = 1;
+            submission.commandLists = &commandList;
+            submission.signalFence = uploadFence;
+            submission.signalFenceValue = uploadFence->NextSignalValue();
+
+            queue->Submit(submission);
+
+            uploadFence->WaitCPU(submission.signalFenceValue);
 
             delete stagingBuffer;
             RHI::gDynamicRHI->FreeCommandLists(1, &commandList);
@@ -360,8 +367,15 @@ namespace CE::RPI
         }
         commandList->End();
 
-        queue->Execute(1, &commandList, uploadFence);
-        uploadFence->WaitForFence();
+        RHI::CommandQueueSubmission submission{};
+        submission.numCommandLists = 1;
+        submission.commandLists = &commandList;
+        submission.signalFence = uploadFence;
+        submission.signalFenceValue = uploadFence->NextSignalValue();
+
+        queue->Submit(submission);
+        
+        uploadFence->WaitCPU(submission.signalFenceValue);
 
         delete stagingBuffer;
         RHI::gDynamicRHI->FreeCommandLists(1, &commandList);
@@ -386,8 +400,16 @@ namespace CE::RPI
 		}
         cmdList->End();
 
-        queue->Execute(1, &cmdList, fence);
-        fence->WaitForFence();
+		RHI::CommandQueueSubmission submission{};
+        submission.numCommandLists = 1;
+		submission.commandLists = &cmdList;
+
+        submission.signalFenceValue = fence->NextSignalValue();
+		submission.signalFence = fence;
+
+        queue->Submit(submission);
+
+        fence->WaitCPU(submission.signalFenceValue);
 
     	RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
         delete fence;

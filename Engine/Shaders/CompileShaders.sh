@@ -53,3 +53,9 @@ CompileShader "FusionShader"
 CompileShader "FusionShader2"
 CompileShader "FusionSDFGlyphGen"
 
+# spirv-cross --msl --output FusionShader2.vert.msl --msl-version 20300 --entry VertMain --msl-argument-buffers --msl-decoration-binding FusionShader2.vert.spv
+# spirv-cross --msl --output FusionShader2.frag.msl --msl-version 20300 --entry FragMain --msl-argument-buffers --msl-decoration-binding FusionShader2.frag.spv
+
+# spirv-cross --msl --output FusionSDFGlyphGen.vert.msl --msl-version 20300 --entry VertMain --msl-argument-buffers --msl-decoration-binding FusionSDFGlyphGen.vert.spv
+# spirv-cross --msl --output FusionSDFGlyphGen.frag.msl --msl-version 20300 --entry FragMain --msl-argument-buffers --msl-decoration-binding FusionSDFGlyphGen.frag.spv
+

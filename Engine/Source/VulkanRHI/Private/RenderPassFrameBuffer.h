@@ -1,0 +1,33 @@
+#pragma once
+
+namespace CE::Vulkan
+{
+
+    class VULKANRHI_API RenderPassFrameBuffer : public RHI::RenderPassFrameBuffer
+    {
+    public:
+        RenderPassFrameBuffer(Device* device, const RHI::RenderPassFrameBufferDescriptor& desc);
+        virtual ~RenderPassFrameBuffer();
+
+		VkFramebuffer GetHandle(u32 imageIndex) const { return framebuffers[imageIndex]; }
+
+		u32 GetWidth() override { return width; }
+		u32 GetHeight() override { return height; }
+
+        void RebuildIfNeeded();
+
+    private:
+
+        void Init();
+        void Destroy();
+
+        Device* device = nullptr;
+		StaticArray<VkFramebuffer, RHI::Limits::MaxSwapChainImageCount> framebuffers{};
+
+        u32 width = 0;
+        u32 height = 0;
+
+        s64 swapChainId = 0;
+    };
+    
+} // namespace CE::Vulkan

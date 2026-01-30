@@ -6,6 +6,12 @@ namespace CE::Vulkan
 	class Scope;
 }
 
+namespace CE::Metal
+{
+    class FrameGraphCompiler;
+    class Scope;
+}
+
 namespace CE::RHI
 {
 	class FrameGraph;
@@ -66,6 +72,12 @@ namespace CE::RHI
 		bool UsesAttachment(FrameAttachment* attachment);
 
 		bool UsesAttachment(AttachmentID attachmentId);
+        
+        const auto& GetProducers() const { return producers; }
+        const auto& GetConsumers() const { return consumers; }
+        
+        RHI::Scope* GetPrevSubPass() const { return prevSubPass; }
+        RHI::Scope* GetNextSubPass() const { return nextSubPass; }
 
 		//void SetPassSrgLayout(const RHI::ShaderResourceGroupLayout& layout) { passSrgLayout = layout; }
 
@@ -144,6 +156,8 @@ namespace CE::RHI
         friend class FrameGraphCompiler;
 		friend class CE::Vulkan::FrameGraphCompiler;
 		friend class CE::Vulkan::Scope;
+        friend class CE::Metal::FrameGraphCompiler;
+        friend class CE::Metal::Scope;
 		friend class FrameGraphBuilder;
 		friend class FrameScheduler;
     };

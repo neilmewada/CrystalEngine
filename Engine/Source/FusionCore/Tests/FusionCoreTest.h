@@ -1,7 +1,6 @@
 #pragma once
 
 #include "FusionCore.h"
-#include "VulkanRHI.h"
 
 using namespace CE;
 
@@ -275,6 +274,7 @@ namespace RenderingTests
 		void OnWindowMinimized(PlatformWindow* window) override;
 		void OnWindowCreated(PlatformWindow* window) override;
 		void OnWindowExposed(PlatformWindow* window) override;
+        void OnWindowShown(PlatformWindow* window) override;
 
 	private:
 

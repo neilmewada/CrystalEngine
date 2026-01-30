@@ -37,7 +37,7 @@ namespace CE::Vulkan
 		}
 
 	protected:
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
 		VkPipelineLayout pipelineLayout = nullptr;
 		VkDescriptorSetLayout emptySetLayout = nullptr;
 
@@ -60,7 +60,7 @@ namespace CE::Vulkan
     class Pipeline : public PipelineLayout, public RHI::RHIResource
     {
     public:
-        Pipeline(VulkanDevice* device, const PipelineDescriptor& desc);
+        Pipeline(Device* device, const PipelineDescriptor& desc);
         ~Pipeline();
 
         virtual bool IsGraphicsPipeline() const { return false; }

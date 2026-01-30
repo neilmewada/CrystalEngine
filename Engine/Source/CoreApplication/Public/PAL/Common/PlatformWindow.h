@@ -25,6 +25,8 @@ namespace CE
         virtual void* GetUnderlyingHandle() = 0;
 
 		virtual WindowHandle GetOSNativeHandle() = 0;
+        
+        virtual void* GetViewHandle() { return nullptr; }
 
         virtual u32 GetWindowDpi() = 0;
 

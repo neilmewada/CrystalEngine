@@ -1,6 +1,5 @@
 
 #include "Fusion.h"
-#include "VulkanRHI.h"
 
 #include "FusionTest.h"
 
@@ -42,4 +41,3 @@ TEST(Fusion, MainTest)
 
 	CEDeregisterModuleTypes();
 }
-

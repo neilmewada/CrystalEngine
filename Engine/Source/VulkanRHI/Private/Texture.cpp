@@ -454,7 +454,7 @@ namespace CE::Vulkan
 		device->SetObjectDebugName((uint64_t)imageView, VK_OBJECT_TYPE_IMAGE_VIEW, name.GetCString());
 	}
 
-    Texture::Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc)
+    Texture::Texture(Device* device, const RHI::TextureDescriptor& desc)
         : device(device)
     {
 		this->heapType = desc.defaultHeapType;
@@ -463,7 +463,7 @@ namespace CE::Vulkan
 		PostInit(desc);
     }
 
-	Texture::Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc)
+	Texture::Texture(Device* device, const RHI::TextureDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc)
 		: device(device)
 	{
 		if (memoryDesc.memoryHeap == nullptr)
@@ -494,7 +494,7 @@ namespace CE::Vulkan
 		PostInit(desc);
 	}
 
-	Texture::Texture(VulkanDevice* device, VkImage image, const RHI::TextureDescriptor& desc, VkImageLayout dstLayout)
+	Texture::Texture(Device* device, VkImage image, const RHI::TextureDescriptor& desc, VkImageLayout dstLayout)
 		: device(device)
 		, importedImage(true)
 		, image(image)

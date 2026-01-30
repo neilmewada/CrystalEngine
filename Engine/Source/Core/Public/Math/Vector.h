@@ -477,8 +477,8 @@ namespace CE
 
         constexpr TVector4(T x, T y, T z) : x(x), y(y), z(z), w(0)
         {}
-
-        constexpr TVector4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w)
+        
+		constexpr TVector4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w)
 		{}
 
         TVector4(TVector2<T> vec2);

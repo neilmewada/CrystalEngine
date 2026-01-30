@@ -267,14 +267,16 @@ namespace CE
 
 		u32 w = 0; u32 h = 0;
 		platformWindow->GetDrawableWindowSize(&w, &h);
+        
+        f32 scaling = GetScaling();
 
-		f32 screenWidth = w / GetScaling();
-		f32 screenHeight = h / GetScaling();
+		f32 screenWidth = w / scaling;
+		f32 screenHeight = h / scaling;
 		
 		viewConstants.viewMatrix = Matrix4x4::Identity();
 
 		viewConstants.projectionMatrix =
-			Matrix4x4::Scale(Vec3(1.0f / screenWidth * 2, 1.0f / screenHeight * 2, 1)) *
+			Matrix4x4::Scale(Vec3(1.0f / screenWidth * 2, 1.0f / screenHeight * 2 * gDynamicRHI->GetClipSpaceSignY(), 1)) *
 			Matrix4x4::Translation(Vec3(-screenWidth * 0.5f, -screenHeight * 0.5f, 0));
 
 		viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix * viewConstants.viewMatrix;
@@ -289,6 +291,9 @@ namespace CE
 
 	f32 FNativeContext::GetScaling() const
 	{
+#if PLATFORM_MAC
+        return 1.0f; // You do not need to set custom scaling for mac
+#endif
 		return (f32)windowDpi / 96.0f * scaleFactor;
 	}
 
@@ -570,8 +575,7 @@ namespace CE
 	Vec2 FNativeContext::GlobalToScreenSpacePosition(Vec2 pos)
 	{
 #if PLATFORM_MAC
-		const f32 scaling = 96.0f / 72.0f / FusionApplication::Get()->GetDefaultScalingFactor(); // Mac input fix
-		return platformWindow->GetWindowPosition().ToVec2() + pos / scaling;
+		return platformWindow->GetWindowPosition().ToVec2() + pos;
 #else
 		return platformWindow->GetWindowPosition().ToVec2() + pos * GetScaling();
 #endif
@@ -580,8 +584,7 @@ namespace CE
 	Vec2 FNativeContext::ScreenToGlobalSpacePosition(Vec2 pos)
 	{
 #if PLATFORM_MAC
-		const f32 scaling = 96.0f / 72.0f / FusionApplication::Get()->GetDefaultScalingFactor(); // Mac input fix
-		return (pos - platformWindow->GetWindowPosition().ToVec2()) * scaling;
+		return (pos - platformWindow->GetWindowPosition().ToVec2());
 #else
 		return (pos - platformWindow->GetWindowPosition().ToVec2()) / GetScaling();
 #endif
@@ -650,10 +653,7 @@ namespace CE
 		if (!window->IsBorderless() || IsPopupWindow())
 			return false;
 
-#if PLATFORM_MAC
-		f32 macScaling = 96.0f / 72.0f / FusionApplication::Get()->GetDefaultScalingFactor(); // Mac input fix
-		position *= macScaling;
-#else
+#if !PLATFORM_MAC
 		position /= GetScaling();
 #endif
 

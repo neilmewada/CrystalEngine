@@ -9,7 +9,7 @@ namespace CE::Vulkan
 		using Super = RHI::FrameGraphExecuter;
 		using Self = Vulkan::FrameGraphExecuter;
 
-		FrameGraphExecuter(VulkanDevice* device);
+		FrameGraphExecuter(Device* device);
 		~FrameGraphExecuter() override;
 
 		bool ExecuteInternal(const RHI::FrameGraphExecuteRequest& executeRequest) override;
@@ -27,7 +27,7 @@ namespace CE::Vulkan
 		bool ExecuteScope(const RHI::FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<RHI::ScopeId>& executedScopes, 
 			HashSet<Vulkan::SwapChain*>& usedSwapChains);
 
-		VulkanDevice* device = nullptr;
+		Device* device = nullptr;
 		FrameGraphCompiler* compiler = nullptr;
 
 		u32 currentSubmissionIndex = 0;

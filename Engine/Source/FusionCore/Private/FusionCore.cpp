@@ -45,6 +45,16 @@ namespace CE
     {
         return RawData{ (u8*)Shaders_FusionShader2_frag_json_Data, Shaders_FusionShader2_frag_json_Length };
     }
+    
+    RawData GetFusionShader2VertMsl()
+    {
+        return RawData{ (u8*)Shaders_FusionShader2_vert_msl_Data, Shaders_FusionShader2_vert_msl_Length };
+    }
+
+    RawData GetFusionShader2FragMsl()
+    {
+        return RawData{ (u8*)Shaders_FusionShader2_frag_msl_Data, Shaders_FusionShader2_frag_msl_Length };
+    }
 
     RawData GetFusionSDFGlyphGenVert()
 	{
@@ -64,6 +74,16 @@ namespace CE
     RawData GetFusionSDFGlyphGenFragJson()
     {
         return RawData{ (u8*)Shaders_FusionSDFGlyphGen_frag_json_Data, Shaders_FusionSDFGlyphGen_frag_json_Length };
+    }
+    
+    RawData GetFusionSDFGlyphGenVertMsl()
+    {
+        return RawData{ (u8*)Shaders_FusionSDFGlyphGen_vert_msl_Data, Shaders_FusionSDFGlyphGen_vert_msl_Length };
+    }
+
+    RawData GetFusionSDFGlyphGenFragMsl()
+    {
+        return RawData{ (u8*)Shaders_FusionSDFGlyphGen_frag_msl_Data, Shaders_FusionSDFGlyphGen_frag_msl_Length };
     }
 
     class FusionCoreModule : public CE::Module

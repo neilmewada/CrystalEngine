@@ -11,6 +11,11 @@ namespace CE::RHI
 		frameGraph = new FrameGraph();
         transientMemoryPool = new TransientMemoryPool();
 		numFramesInFlight = descriptor.numFramesInFlight;
+        
+        if (numFramesInFlight == 0 || numFramesInFlight > RHI::Limits::MaxSwapChainImageCount)
+        {
+            numFramesInFlight = RHI::Limits::MaxSwapChainImageCount;
+        }
 
 		compiler = RHI::gDynamicRHI->CreateFrameGraphCompiler();
 		executer = RHI::gDynamicRHI->CreateFrameGraphExecuter();
@@ -58,8 +63,8 @@ namespace CE::RHI
 
 		if (frameGraph->presentSwapChains.NotEmpty())
 		{
-			numFramesInFlight = frameGraph->presentSwapChains[0]->GetImageCount();
-			numFramesInFlight = Math::Min(numFramesInFlight, RHI::Limits::MaxSwapChainImageCount);
+            // FIXME: Fix below line
+			//numFramesInFlight = frameGraph->presentSwapChains[0]->GetImageCount();
 		}
 
         FrameGraphCompileRequest compileRequest{};

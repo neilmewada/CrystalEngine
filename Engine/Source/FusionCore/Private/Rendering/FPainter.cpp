@@ -1,6 +1,11 @@
 #include "FusionCore.h"
 
+// FIXME: SDF text rendering does not work on metal
+#if PAL_TRAIT_VULKAN_SUPPORTED
 #define USE_SDF 1
+#else
+#define USE_SDF 0
+#endif
 
 namespace CE
 {
@@ -244,14 +249,22 @@ namespace CE
 	{
 		ZoneScoped;
 
+#if USE_SDF
 		return renderer2->DrawSDFText(text, pos, size, wordWrap);
+#else
+        return DrawText(text, pos, size, wordWrap);
+#endif
 	}
 
 	Vec2 FPainter::DrawTextCached(Uuid cacheId, const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
 	{
 		ZoneScoped;
 
+#if USE_SDF
 		return renderer2->DrawSDFTextCached(cacheId, text, pos, size, wordWrap);
+#else
+        return DrawText(text, pos, size, wordWrap);
+#endif
 	}
 
 	void FPainter::ResetTextCache(Uuid cacheId)

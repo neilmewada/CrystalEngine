@@ -10,10 +10,15 @@ namespace CE::RHI
         virtual ~DeviceLimits() = default;
 
     public:
-
-        inline bool IsFormatSupported(RHI::Format format, RHI::TextureBindFlags bindFlags)
+        
+        bool IsFormatSupported(RHI::Format format)
         {
-            return (imageFormatSupport[format].bindFlags & bindFlags) == bindFlags;
+            return imageFormatSupport.KeyExists(format) && imageFormatSupport[format].bindFlags != RHI::TextureBindFlags::None;
+        }
+
+        bool IsFormatSupported(RHI::Format format, RHI::TextureBindFlags bindFlags)
+        {
+            return imageFormatSupport.KeyExists(format) && ((imageFormatSupport[format].bindFlags & bindFlags) == bindFlags);
         }
 
         inline bool IsFormatSupported(RHI::Format format, RHI::TextureBindFlags bindFlags, RHI::FilterMode filterMode)
@@ -23,6 +28,8 @@ namespace CE::RHI
 
         inline u64 GetMaxConstantBufferRange() const { return maxConstantBufferRange; }
         inline u64 GetMaxStructuredBufferRange() const { return maxStructuredBufferRange; }
+        
+        inline u32 GetMaxRootConstantByteSize() const { return maxRootConstantByteSize; }
 
         bool IsSparseBindingSupported() const { return sparseBinding; }
 
@@ -60,6 +67,8 @@ namespace CE::RHI
 
         u32 maxConstantBufferRange = 0;
         u32 maxStructuredBufferRange = 0;
+        
+        u32 maxRootConstantByteSize = 256;
 
         bool sparseBinding = false;
         bool sparseResidency2D = false;

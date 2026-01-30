@@ -3,6 +3,7 @@
 namespace CE::RHI
 {
 	class CommandList;
+    class SwapChain;
 
 	enum class HardwareQueueClass
 	{
@@ -29,6 +30,23 @@ namespace CE::RHI
 	};
 	ENUM_CLASS_FLAGS(HardwareQueueClassMask);
 
+    struct CommandQueueSubmission
+    {
+        u32 numCommandLists = 0;
+        RHI::CommandList** commandLists = nullptr;
+        
+        RHI::Fence* waitFence = nullptr;
+        uint64_t waitFenceValue = 0;
+
+		//! @brief The pipeline stage to wait on for the wait fence. If Undefined, wait on all stages. Only used in Vulkan.
+		RHI::ResourceState waitFenceStage = RHI::ResourceState::Undefined;
+        
+        RHI::Fence* signalFence = nullptr;
+        uint64_t signalFenceValue = 0;
+        
+        u32 numPresentSwapChains = 0;
+        RHI::SwapChain** presentSwapChains = nullptr;
+    };
 
 	class CORERHI_API CommandQueue : RHIResource
 	{
@@ -39,22 +57,28 @@ namespace CE::RHI
 		virtual ~CommandQueue() = default;
 
 	public:
+        
+        virtual bool Submit(const CommandQueueSubmission& submission) = 0;
 
 		inline HardwareQueueClassMask GetQueueMask() const
 		{
 			return queueMask;
 		}
+        
+        inline HardwareQueueClass GetQueueClass() const
+        {
+            return queueClass;
+        }
 
 		inline bool SupportsOperation(HardwareQueueClass operationType) const
 		{
 			return (queueMask & (1 << (u32)operationType)) != 0;
 		}
 
-		virtual bool Execute(u32 count, RHI::CommandList** commandLists, RHI::Fence* fence = nullptr) = 0;
-
 	protected:
 
 		HardwareQueueClassMask queueMask{};
+        HardwareQueueClass queueClass{};
 
 	};
     

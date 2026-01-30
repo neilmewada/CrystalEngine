@@ -6,6 +6,10 @@
 #include <SDL_vulkan.h>
 #endif
 
+#if PAL_TRAIT_METAL_SUPPORTED
+#include <SDL_metal.h>
+#endif
+
 #include <SDL_syswm.h>
 
 #include "PAL/Common/PlatformWindowMisc.h"
@@ -17,6 +21,11 @@ namespace CE
 {
 	SDLPlatformWindow::~SDLPlatformWindow()
 	{
+#if PAL_TRAIT_METAL_SUPPORTED
+        SDL_Metal_DestroyView(metalView);
+        metalView = nullptr;
+#endif
+        
 		if (handle != nullptr)
 			SDL_DestroyWindow(handle);
 		handle = nullptr;
@@ -92,7 +101,9 @@ namespace CE
 			flags |= SDL_WINDOW_RESIZABLE;
 		if (isHidden)
 			flags |= SDL_WINDOW_HIDDEN;
-#if PAL_TRAIT_VULKAN_SUPPORTED
+#if PAL_TRAIT_METAL_SUPPORTED
+        flags |= SDL_WINDOW_METAL;
+#elif PAL_TRAIT_VULKAN_SUPPORTED
 		flags |= SDL_WINDOW_VULKAN;
 #endif
 		if (maximised)
@@ -119,6 +130,10 @@ namespace CE
         }
 
 		handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), width, height, flags);
+        
+#if PAL_TRAIT_METAL_SUPPORTED
+        metalView = SDL_Metal_CreateView(handle);
+#endif
 	}
 
 	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info)
@@ -129,8 +144,10 @@ namespace CE
 			flags |= SDL_WINDOW_RESIZABLE;
 		if (info.hidden)
 			flags |= SDL_WINDOW_HIDDEN;
-#if PAL_TRAIT_VULKAN_SUPPORTED
-		flags |= SDL_WINDOW_VULKAN;
+#if PAL_TRAIT_METAL_SUPPORTED
+        flags |= SDL_WINDOW_METAL;
+#elif PAL_TRAIT_VULKAN_SUPPORTED
+        flags |= SDL_WINDOW_VULKAN;
 #endif
 		if (info.maximised)
 			flags |= SDL_WINDOW_MAXIMIZED;
@@ -171,6 +188,10 @@ namespace CE
 		}
 
         handle = SDL_CreateWindow(title.GetCString(), x, y, width, height, flags);
+
+#if PAL_TRAIT_METAL_SUPPORTED
+        metalView = SDL_Metal_CreateView(handle);
+#endif
 	}
 
 	void SDLPlatformWindow::GetWindowSize(u32* outWidth, u32* outHeight)
@@ -318,7 +339,9 @@ namespace CE
 	VkSurfaceKHR SDLPlatformWindow::CreateVulkanSurface(VkInstance instance)
 	{
 		VkSurfaceKHR surface = nullptr;
+#if PAL_TRAIT_VULKAN_SUPPORTED
 		SDL_Vulkan_CreateSurface(handle, instance, &surface);
+#endif
 		return surface;
 	}
 
@@ -358,6 +381,14 @@ namespace CE
 #   error Platform specific window handle not specified for the current platform
 #endif
 	}
+
+    void* SDLPlatformWindow::GetViewHandle()
+    {
+#if PAL_TRAIT_METAL_SUPPORTED
+        return metalView;
+#endif
+        return nullptr;
+    }
 
 	String SDLPlatformWindow::GetTitle()
 	{

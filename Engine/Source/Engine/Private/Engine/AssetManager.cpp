@@ -354,7 +354,7 @@ namespace CE
 			return {};
 
 		RHI::ShaderResourceGroupLayout textureSrgLayout = FusionApplication::Get()->GetFusionShader2()->GetDefaultVariant()->GetSrgLayout(SRGType::PerDraw);
-		RHI::ShaderResourceGroup* textureSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(textureSrgLayout);
+		RHI::ShaderResourceGroup* textureSrg = RHI::gDynamicRHI->CreateShaderResourceGroup({ "AssetManager SRG_PerDraw", textureSrgLayout });
 		if (!textureSrg)
 		{
 			RHI::gDynamicRHI->DestroyTextureView(textureView);

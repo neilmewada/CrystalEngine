@@ -49,7 +49,7 @@ namespace CE::Vulkan
         HashMap<int, Array<CommandQueue*>> queuesByFamily{};
     };
     
-	FrameGraphCompiler::FrameGraphCompiler(VulkanDevice* device) : device(device)
+	FrameGraphCompiler::FrameGraphCompiler(Device* device) : device(device)
 	{
 
 	}
@@ -140,7 +140,7 @@ namespace CE::Vulkan
 
 		if (frameGraph->presentSwapChains.NotEmpty())
 		{
-			imageCount = frameGraph->presentSwapChains[0]->GetImageCount();
+			imageCount = ((Vulkan::SwapChain*)frameGraph->presentSwapChains[0])->GetImageCount();
 			numFramesInFlight = imageCount;
 			presentSwapChains = true;
 		}
@@ -280,6 +280,8 @@ namespace CE::Vulkan
 		Vulkan::Scope* current, 
 		HashSet<RHI::ScopeId>& visitedScopes)
 	{
+		ZoneScoped;
+
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 		if (visitedScopes.Exists(current->GetId()))
 			return;
@@ -331,6 +333,8 @@ namespace CE::Vulkan
 
 	void FrameGraphCompiler::CompileBarriers(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
+		ZoneScoped;
+
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 		for (int i = 0; i < visitedScopes.GetSize(); i++)
 		{
@@ -379,6 +383,8 @@ namespace CE::Vulkan
 
 	void FrameGraphCompiler::CompileBarriers(int imageIndex, const RHI::FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current)
 	{
+		ZoneScoped;
+
 		if (current == nullptr)
 			return;
 

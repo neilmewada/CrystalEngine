@@ -16,11 +16,17 @@ namespace CE
     extern RawData GetFusionShader2Frag();
     extern RawData GetFusionShader2VertJson();
     extern RawData GetFusionShader2FragJson();
+    
+    extern RawData GetFusionShader2VertMsl();
+    extern RawData GetFusionShader2FragMsl();
 
 	extern RawData GetFusionSDFGlyphGenVert();
 	extern RawData GetFusionSDFGlyphGenFrag();
 	extern RawData GetFusionSDFGlyphGenVertJson();
 	extern RawData GetFusionSDFGlyphGenFragJson();
+    
+    extern RawData GetFusionSDFGlyphGenVertMsl();
+    extern RawData GetFusionSDFGlyphGenFragMsl();
 
     FusionApplication::FusionApplication()
     {
@@ -29,7 +35,7 @@ namespace CE
         rootContext = CreateDefaultSubobject<FRootContext>("RootContext");
         imageAtlas = CreateDefaultSubobject<FImageAtlas>("ImageAtlas");
 
-#if PLATFORM_LINUX || PLATFORM_MAC
+#if PLATFORM_LINUX
         defaultScalingFactor = 96.0f / 72.0f;
 #endif
     }
@@ -310,6 +316,8 @@ namespace CE
         imageAtlas->Flush(imageIndex);
 
         rootContext->SetDrawPackets(drawList);
+
+        fontManager->WaitForFlush();
     }
 
     Ref<FWindow> FusionApplication::CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height, 
@@ -479,6 +487,12 @@ namespace CE
     {
         RawData vertexShader = GetFusionShader2Vert();
         RawData fragmentShader = GetFusionShader2Frag();
+        
+        if (gDynamicRHI->GetGraphicsBackend() == RHI::GraphicsBackend::Metal)
+        {
+            vertexShader = GetFusionShader2VertMsl();
+            fragmentShader = GetFusionShader2FragMsl();
+        }
 
         String vertexShaderJson = (char*)GetFusionShader2VertJson().data;
         String fragmentShaderJson = (char*)GetFusionShader2FragJson().data;
@@ -501,11 +515,13 @@ namespace CE
         variantDesc.moduleDesc[0].byteSize = vertexShader.dataSize;
         variantDesc.moduleDesc[0].stage = ShaderStage::Vertex;
         variantDesc.moduleDesc[0].name = "VertMain";
+        variantDesc.moduleDesc[0].defaultEntryPoint = "VertMain";
 
         variantDesc.moduleDesc[1].byteCode = fragmentShader.data;
         variantDesc.moduleDesc[1].byteSize = fragmentShader.dataSize;
         variantDesc.moduleDesc[1].stage = ShaderStage::Fragment;
         variantDesc.moduleDesc[1].name = "FragMain";
+        variantDesc.moduleDesc[1].defaultEntryPoint = "FragMain";
 
         RHI::SRGVariableDescriptor perViewData{};
         perViewData.name = "_PerViewData";
@@ -598,6 +614,11 @@ namespace CE
 
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD2");
         variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Int);
+        
+        ShaderTagEntry ztestOff{};
+        ztestOff.key = "ZTest";
+        ztestOff.value = "Off";
+        variantDesc.tags.Add(ztestOff);
 
         ShaderTagEntry cullMode{};
         cullMode.key = "Cull";
@@ -612,6 +633,12 @@ namespace CE
     {
         RawData vertexShader = GetFusionSDFGlyphGenVert();
 		RawData fragmentShader = GetFusionSDFGlyphGenFrag();
+        
+        if (gDynamicRHI->GetGraphicsBackend() == RHI::GraphicsBackend::Metal)
+        {
+            vertexShader = GetFusionSDFGlyphGenVertMsl();
+            fragmentShader = GetFusionSDFGlyphGenFragMsl();
+        }
 
 		String vertexShaderJson = (char*)GetFusionSDFGlyphGenVertJson().data;
 		String fragmentShaderJson = (char*)GetFusionSDFGlyphGenFragJson().data;
@@ -676,6 +703,11 @@ namespace CE
 
         variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");
         variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
+        
+        ShaderTagEntry zTestOff{};
+        zTestOff.key = "ZTest";
+        zTestOff.value = "Off";
+        variantDesc.tags.Add(zTestOff);
 
 		sdfGlyphShader = new RPI::Shader();
         sdfGlyphShader->AddVariant(variantDesc);

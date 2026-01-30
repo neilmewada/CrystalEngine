@@ -79,7 +79,11 @@ namespace CE
 
         RPI::Shader* fusionShader2 = FusionApplication::Get()->GetFusionShader2();
 
-        fontSrg2 = RHI::gDynamicRHI->CreateShaderResourceGroup(fusionShader2->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerMaterial));
+        RHI::ShaderResourceGroupDescriptor fontSrgDesc{};
+        fontSrgDesc.name = "Font SRG (SRG_PerMaterial)";
+        fontSrgDesc.layout = fusionShader2->GetDefaultVariant()->GetSrgLayout(RHI::SRGType::PerMaterial);
+
+        fontSrg2 = RHI::gDynamicRHI->CreateShaderResourceGroup(fontSrgDesc);
 
         fontSrg2->Bind("_FontAtlas", atlasTexture->GetRhiTexture());
         fontSrg2->Bind("_FontAtlasSampler", atlasTexture->GetSamplerState());

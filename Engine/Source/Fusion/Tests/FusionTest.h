@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Fusion.h"
-#include "VulkanRHI.h"
 
 #include "TestWidgets.h"
 

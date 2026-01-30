@@ -1,0 +1,428 @@
+
+#include "MetalRHI.h"
+#include "MetalRHIPrivate.h"
+
+#include "MetalRHI.private.h"
+
+namespace CE::Metal
+{
+    void MetalRHIModule::StartupModule()
+    {
+        
+    }
+
+    void MetalRHIModule::ShutdownModule()
+    {
+        
+    }
+
+    void MetalRHIModule::RegisterTypes()
+    {
+        
+    }
+
+    void MetalRHI::Initialize()
+    {
+        device = new Device(this);
+        
+        device->Initialize();
+    }
+
+    void MetalRHI::PostInitialize()
+    {
+        
+    }
+
+    void MetalRHI::PreShutdown()
+    {
+        if (device)
+        {
+            device->PreShutdown();
+        }
+    }
+
+    void MetalRHI::Shutdown()
+    {
+        if (device)
+        {
+            device->Shutdown();
+        }
+        
+        delete device; device = nullptr;
+    }
+
+    void* MetalRHI::GetNativeHandle()
+    {
+        return this;
+    }
+
+    RHI::Scope* MetalRHI::CreateScope(const ScopeDescriptor& desc)
+    {
+        return new Metal::Scope(device, desc);
+    }
+
+    RHI::FrameGraphCompiler* MetalRHI::CreateFrameGraphCompiler()
+    {
+        return new Metal::FrameGraphCompiler(device);
+    }
+
+    RHI::FrameGraphExecuter* MetalRHI::CreateFrameGraphExecuter()
+    {
+        return new Metal::FrameGraphExecuter(device);
+    }
+
+    Array<RHI::Format> MetalRHI::GetAvailableDepthStencilFormats()
+    {
+        Array<RHI::Format> result;
+        
+        result.Add(RHI::Format::D32_SFLOAT_S8_UINT);
+        if ([device->GetHandle() isDepth24Stencil8PixelFormatSupported])
+        {
+            result.Add(RHI::Format::D24_UNORM_S8_UINT);
+        }
+        result.Add(RHI::Format::D16_UNORM_S8_UINT);
+        
+        return result;
+    }
+
+    Array<RHI::Format> MetalRHI::GetAvailableDepthOnlyFormats()
+    {
+        return {RHI::Format::D32_SFLOAT, RHI::Format::D16_UNORM};
+    }
+
+    Array<RHI::CommandQueue*> MetalRHI::GetHardwareQueues(RHI::HardwareQueueClass queueClass)
+    {
+        if (queueClass == RHI::HardwareQueueClass::Transfer)
+            return {device->GetTransferQueue()};
+        else if (queueClass == RHI::HardwareQueueClass::Compute)
+            return {device->GetComputeQueue()};
+        
+        return {device->GetPrimaryQueue()};
+    }
+
+    RHI::CommandQueue* MetalRHI::GetPrimaryGraphicsQueue()
+    {
+        return device->GetPrimaryQueue();
+    }
+
+    RHI::CommandQueue* MetalRHI::GetPrimaryTransferQueue()
+    {
+        return device->GetTransferQueue();
+    }
+
+    bool MetalRHI::IsOffscreenOnly()
+    {
+        return false;
+    }
+
+    Vec2i MetalRHI::GetScreenSizeForWindow(void* platformWindowHandle)
+    {
+        return {};
+    }
+
+    RHI::Fence* MetalRHI::CreateFence(uint64_t initialValue)
+    {
+        return new Metal::Fence(device, initialValue);
+    }
+
+    void MetalRHI::DestroyFence(RHI::Fence* fence)
+    {
+        delete fence;
+    }
+
+    RHI::CommandList* MetalRHI::AllocateCommandList(RHI::CommandQueue* associatedQueue, CommandListType commandListType)
+    {
+        if (associatedQueue == nullptr)
+            return nullptr;
+        
+        auto queue = (Metal::CommandQueue*)associatedQueue;
+        id<MTLCommandQueue> mtlQueue = queue->GetMtlQueue();
+        
+        return new Metal::CommandList(device, mtlQueue, commandListType);
+    }
+
+    Array<RHI::CommandList*> MetalRHI::AllocateCommandLists(u32 count, RHI::CommandQueue* associatedQueue, CommandListType commandListType)
+    {
+        if (associatedQueue == nullptr)
+            return {};
+        
+        auto queue = (Metal::CommandQueue*)associatedQueue;
+        id<MTLCommandQueue> mtlQueue = queue->GetMtlQueue();
+        
+        Array<RHI::CommandList*> result{};
+        
+        for (int i = 0; i < count; i++)
+        {
+            result.Add(new Metal::CommandList(device, mtlQueue, commandListType));
+        }
+        
+        return result;
+    }
+
+    void MetalRHI::FreeCommandLists(u32 count, RHI::CommandList** commandLists)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            delete commandLists[i];
+        }
+    }
+
+    RHI::DeviceLimits* MetalRHI::GetDeviceLimits()
+    {
+        return device->GetDeviceLimits();
+    }
+
+    RHI::RenderPass* MetalRHI::CreateRenderPass(const RHI::RenderPassLayout& rpLayout)
+    {
+        return new Metal::RenderPass(device, rpLayout);
+    }
+
+    void MetalRHI::DestroyRenderPass(RHI::RenderPass* renderPass)
+    {
+        delete renderPass;
+    }
+    
+    RHI::RenderPassFrameBuffer* MetalRHI::CreateRenderPassFrameBuffer(const RHI::RenderPassFrameBufferDescriptor& descriptor)
+    {
+        return new Metal::RenderPassFrameBuffer(device, descriptor);
+    }
+    
+    void MetalRHI::DestroyRenderPassFrameBuffer(RHI::RenderPassFrameBuffer* frameBuffer)
+    {
+        delete frameBuffer;
+    }
+    
+    RHI::SwapChain* MetalRHI::CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
+    {
+        return new Metal::SwapChain(device, window, desc);
+    }
+
+    void MetalRHI::DestroySwapChain(RHI::SwapChain* swapChain)
+    {
+        delete swapChain;
+    }
+
+    RHI::MemoryHeap* MetalRHI::AllocateMemoryHeap(const RHI::MemoryHeapDescriptor& desc)
+    {
+        return new Metal::MemoryHeap(device, desc);
+    }
+
+    void MetalRHI::FreeMemoryHeap(RHI::MemoryHeap* memoryHeap)
+    {
+        delete memoryHeap;
+    }
+
+    void MetalRHI::GetBufferMemoryRequirements(const RHI::BufferDescriptor& bufferDesc, RHI::ResourceMemoryRequirements& outRequirements)
+    {
+        MTLResourceOptions options = MTLResourceCPUCacheModeDefaultCache;
+
+        switch (bufferDesc.defaultHeapType)
+        {
+            case RHI::MemoryHeapType::Default:  options  = MTLResourceStorageModePrivate; break;
+            case RHI::MemoryHeapType::Upload:   options |= MTLResourceStorageModeShared;  break;
+            case RHI::MemoryHeapType::ReadBack: options |= MTLResourceStorageModeShared;  break;
+        }
+        
+        MTLSizeAndAlign req = [device->GetHandle() heapBufferSizeAndAlignWithLength:bufferDesc.bufferSize options:options];
+        
+        outRequirements.size = req.size;
+        outRequirements.offsetAlignment = req.align;
+    }
+
+    RHI::ResourceMemoryRequirements MetalRHI::GetCombinedResourceRequirements(u32 count, RHI::ResourceMemoryRequirements* requirementsList, u64* outOffsetsList)
+    {
+        if (count == 0)
+            return {};
+        
+        RHI::ResourceMemoryRequirements result{};
+        u64 offset = 0;
+        result.size = requirementsList[0].size;
+        result.offsetAlignment = requirementsList[0].offsetAlignment;
+        if (outOffsetsList)
+            outOffsetsList[0] = offset;
+        offset += requirementsList[0].size;
+
+        for (int i = 1; i < count; i++)
+        {
+            result.offsetAlignment = 0;
+
+            if (offset > 0)
+                offset = Memory::GetAlignedSize(offset, requirementsList[i].offsetAlignment);
+            if (outOffsetsList)
+                outOffsetsList[i] = offset;
+
+            offset += requirementsList[i].size;
+        }
+
+        result.size = offset;
+
+        return result;
+    }
+
+    RHI::Buffer* MetalRHI::CreateBuffer(const RHI::BufferDescriptor& bufferDesc)
+    {
+        return new Metal::Buffer(device, bufferDesc);
+    }
+
+    RHI::Buffer* MetalRHI::CreateBuffer(const RHI::BufferDescriptor& bufferDesc, const RHI::ResourceMemoryDescriptor& memoryDesc)
+    {
+        return new Metal::Buffer(device, bufferDesc, memoryDesc);
+    }
+
+    void MetalRHI::DestroyBuffer(RHI::Buffer* buffer)
+    {
+        delete buffer;
+    }
+
+    RHI::TextureView* MetalRHI::CreateTextureView(const RHI::TextureViewDescriptor& desc)
+    {
+        return new Metal::TextureView(device, desc);
+    }
+
+    void MetalRHI::DestroyTextureView(RHI::TextureView* textureView)
+    {
+        delete textureView;
+    }
+
+    RHI::Texture* MetalRHI::CreateTexture(const RHI::TextureDescriptor& textureDesc)
+    {
+        return new Metal::Texture(device, textureDesc);
+    }
+
+    RHI::Texture* MetalRHI::CreateTexture(const RHI::TextureDescriptor& textureDesc, const RHI::ResourceMemoryDescriptor& memoryDesc)
+    {
+        return new Metal::Texture(device, textureDesc, memoryDesc);
+    }
+
+    void MetalRHI::DestroyTexture(RHI::Texture* texture)
+    {
+        delete texture;
+    }
+
+    RHI::Sampler* MetalRHI::CreateSampler(const SamplerDescriptor& samplerDesc)
+    {
+        return new Metal::Sampler(device, samplerDesc);
+    }
+
+    void MetalRHI::DestroySampler(RHI::Sampler* sampler)
+    {
+        delete sampler;
+    }
+
+    RHI::ShaderModule* MetalRHI::CreateShaderModule(const RHI::ShaderModuleDescriptor& desc)
+    {
+        return new Metal::ShaderModule(device, desc);
+    }
+
+    void MetalRHI::DestroyShaderModule(RHI::ShaderModule* shaderModule)
+    {
+        delete shaderModule;
+    }
+
+    RHI::ShaderResourceGroup* MetalRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupDescriptor& srgDescriptor)
+    {
+        return new Metal::ShaderResourceGroup(device, srgDescriptor);
+    }
+
+    void MetalRHI::DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup)
+    {
+        delete shaderResourceGroup;
+    }
+
+    RHI::PipelineState* MetalRHI::CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc)
+    {
+        return new Metal::PipelineState(device, desc);
+    }
+
+    RHI::PipelineState* MetalRHI::CreateComputePipeline(const RHI::ComputePipelineDescriptor& desc)
+    {
+        return new Metal::PipelineState(device, desc);
+    }
+
+    void MetalRHI::DestroyPipeline(const RHI::PipelineState* pipeline)
+    {
+        delete pipeline;
+    }
+
+    u64 MetalRHI::GetShaderStructMemberAlignment(const RHI::ShaderStructMember& member)
+    {
+        u64 alignment = 0;
+
+        switch (member.dataType)
+        {
+            case RHI::ShaderStructMemberType::UInt:
+            case RHI::ShaderStructMemberType::Int:
+            case RHI::ShaderStructMemberType::Float:
+                return sizeof(u32); // 4 byte
+            case RHI::ShaderStructMemberType::Float2:
+                return sizeof(f32) * 2; // 8 bytes
+            case RHI::ShaderStructMemberType::Float3:
+            case RHI::ShaderStructMemberType::Float4:
+            case RHI::ShaderStructMemberType::Float4x4:
+                return sizeof(f32) * 4; // 16 bytes
+            case RHI::ShaderStructMemberType::Struct:
+                alignment = 0;
+                for (const auto& nestedMember : member.nestedMembers)
+                {
+                    alignment = Math::Max(alignment, GetShaderStructMemberAlignment(nestedMember));
+                }
+                return alignment;
+        }
+
+        return alignment;
+    }
+
+    u64 MetalRHI::GetShaderStructMemberSize(const RHI::ShaderStructMember& member)
+    {
+        switch (member.dataType)
+        {
+            case RHI::ShaderStructMemberType::Float:
+            case RHI::ShaderStructMemberType::UInt:
+            case RHI::ShaderStructMemberType::Int:
+                return sizeof(u32) * member.arrayCount;
+            case RHI::ShaderStructMemberType::Float2:
+                return sizeof(Vec2) * member.arrayCount;
+            case RHI::ShaderStructMemberType::Float3:
+            case RHI::ShaderStructMemberType::Float4:
+                return sizeof(Vec4) * member.arrayCount;
+            case RHI::ShaderStructMemberType::Float4x4:
+                return sizeof(Matrix4x4);
+            case RHI::ShaderStructMemberType::Struct:
+            {
+                u64 structAlignment = GetShaderStructMemberAlignment(member);
+                u64 offset = 0;
+                for (const auto& nestedMember : member.nestedMembers)
+                {
+                    u64 alignment = GetShaderStructMemberAlignment(nestedMember);
+                    if (offset > 0)
+                        offset = Memory::GetAlignedSize(offset, alignment);
+                    offset += GetShaderStructMemberSize(nestedMember);
+                }
+                offset = Memory::GetAlignedSize(offset, structAlignment);
+                return offset;
+            }
+            break;
+        }
+
+        return 0;
+    }
+
+    void MetalRHI::GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets)
+    {
+        outOffsets.Clear();
+
+        u64 offset = 0;
+        
+        for (const auto& member : members)
+        {
+            u64 alignment = GetShaderStructMemberAlignment(member);
+            if (offset > 0)
+                offset = Memory::GetAlignedSize(offset, alignment);
+            outOffsets.Add(offset);
+            offset += GetShaderStructMemberSize(member);
+        }
+    }
+
+}
+
+CE_IMPLEMENT_MODULE(MetalRHI, CE::Metal::MetalRHIModule)

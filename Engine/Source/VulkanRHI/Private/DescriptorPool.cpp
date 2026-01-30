@@ -21,7 +21,7 @@ namespace CE::Vulkan
         descriptorPools.Clear();
     }
 
-	void DescriptorPool::Init(VulkanDevice* device, u32 initialPoolSize, u32 poolSizeIncrement)
+	void DescriptorPool::Init(Device* device, u32 initialPoolSize, u32 poolSizeIncrement)
 	{
 		this->device = device;
 

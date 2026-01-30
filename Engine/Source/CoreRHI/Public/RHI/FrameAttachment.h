@@ -17,6 +17,8 @@ namespace CE::RHI
 
 		RHIResource* GetResource(int imageIndex);
 		RHIResource* GetResource();
+        
+        RHIResource** GetResourceArray() { return resources.GetData(); }
 
 		virtual bool IsBufferAttachment() const = 0;
 		virtual bool IsImageAttachment() const = 0;

@@ -7,7 +7,7 @@
 namespace CE::Vulkan
 {
 
-    ComputePipeline::ComputePipeline(VulkanDevice* device, const RHI::ComputePipelineDescriptor& desc)
+    ComputePipeline::ComputePipeline(Device* device, const RHI::ComputePipelineDescriptor& desc)
         : Pipeline(device, desc)
         , desc(desc)
     {

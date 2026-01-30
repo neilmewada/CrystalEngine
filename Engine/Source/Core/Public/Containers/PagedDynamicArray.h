@@ -244,7 +244,6 @@ namespace CE
     {
         this_type temp = *this;
         this->operator++();
-        //++this;
         return temp;
     }
 
@@ -508,7 +507,6 @@ namespace CE
     {
         this_type temp = *this;
         this->operator++();
-        //++this;
         return temp;
     }
 
@@ -574,7 +572,6 @@ namespace CE
     {
         this_type temp = *this;
         this->operator++();
-        //++this;
         return temp;
     }
 

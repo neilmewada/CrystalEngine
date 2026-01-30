@@ -2,7 +2,7 @@
 
 namespace CE::Vulkan
 {
-	CommandList::CommandList(VulkanDevice* device, VkCommandBuffer commandBuffer, RHI::CommandListType type, u32 queueFamilyIndex, VkCommandPool pool)
+	CommandList::CommandList(Device* device, VkCommandBuffer commandBuffer, RHI::CommandListType type, u32 queueFamilyIndex, VkCommandPool pool)
 		: device(device)
 		, commandBuffer(commandBuffer)
 		, level(type == RHI::CommandListType::Direct ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY)
@@ -26,6 +26,11 @@ namespace CE::Vulkan
 		}
 
 		vkFreeCommandBuffers(device->GetHandle(), pool, 1, &commandBuffer);
+	}
+
+	void CommandList::SetDebugLabel(const String& label)
+	{
+		device->SetObjectDebugName((uint64_t)commandBuffer, VK_OBJECT_TYPE_COMMAND_BUFFER, label.GetCString());
 	}
 
 	void CommandList::SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup*>& srgs)
@@ -122,7 +127,7 @@ namespace CE::Vulkan
 				{
 					DescriptorSet* descriptorSet = srgsToMerge[setNumber][0]->GetDescriptorSet();
 
-					srgsToMerge[setNumber][0]->currentImageIndex = currentImageIndex;
+					srgsToMerge[setNumber][0]->currentImageIndex = currentFrameIndex;
 					srgsToMerge[setNumber][0]->FlushBindings();
 
 					if (commitedSRGsBySetNumber[setNumber] != nullptr)
@@ -145,7 +150,7 @@ namespace CE::Vulkan
 
 				//if (commitedSRGsBySetNumber[setNumber] != (Vulkan::ShaderResourceGroup*)mergedSrg) // SRG has changed
 				{
-					mergedSrg->currentImageIndex = currentImageIndex;
+					mergedSrg->currentImageIndex = currentFrameIndex;
 					mergedSrg->FlushBindings();
 
 					if (commitedSRGsBySetNumber[setNumber] != nullptr)
@@ -272,10 +277,21 @@ namespace CE::Vulkan
 				continue;
 			
 			RHI::DeviceObjectType resourceType = barrierInfo.resource->GetDeviceObjectType();
-			if (resourceType == RHI::DeviceObjectType::Texture)
+			if (resourceType == RHI::DeviceObjectType::Texture || resourceType == DeviceObjectType::SwapChain)
 			{
-				Vulkan::Texture* texture = (Vulkan::Texture*)barrierInfo.resource;
-				if (texture->GetImage() == nullptr)
+				Vulkan::Texture* texture = nullptr;
+
+				if (resourceType == RHI::DeviceObjectType::Texture)
+				{
+					texture = (Vulkan::Texture*)barrierInfo.resource;
+				}
+				else if (resourceType == DeviceObjectType::SwapChain)
+				{
+					Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)barrierInfo.resource;
+					texture = swapChain->GetCurrentImage();
+				}
+				
+				if (texture == nullptr || texture->GetImage() == nullptr)
 					continue;
 
 				VkImageMemoryBarrier imageBarrier{};
@@ -866,27 +882,36 @@ namespace CE::Vulkan
 		vkEndCommandBuffer(commandBuffer);
 	}
 
-	void CommandList::BeginRenderTarget(RHI::RenderTarget* rhiRenderTarget, RHI::RenderTargetBuffer* renderTargetBuffer, RHI::AttachmentClearValue* clearValuesPerAttachment)
-	{
-		if (rhiRenderTarget == nullptr || renderTargetBuffer == nullptr)
-			return;
+    bool CommandList::BeginRenderPass(RHI::RenderPass* rhiRenderPass, RHI::RenderPassFrameBuffer* rhiFrameBuffer, AttachmentClearValue* clearValuesPerAttachment)
+    {
+		Vulkan::RenderPass* renderPass = (Vulkan::RenderPass*)rhiRenderPass;
+		Vulkan::RenderPassFrameBuffer* frameBuffer = (Vulkan::RenderPassFrameBuffer*)rhiFrameBuffer;
 
-		Vulkan::RenderTarget* renderTarget = (Vulkan::RenderTarget*)rhiRenderTarget;
-		Vulkan::FrameBuffer* framebuffer = (Vulkan::FrameBuffer*)renderTargetBuffer;
-		currentPass = renderTarget->renderPass;
+		frameBuffer->RebuildIfNeeded();
+
+		currentPass = renderPass->GetVulkanRenderPass();
 		currentSubpass = 0;
 
-		u32 attachmentCount = renderTarget->GetAttachmentCount();
+		u32 attachmentCount = renderPass->GetRenderPassLayout().attachmentLayouts.GetSize();
 
 		FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
+
+		u32 frameIndex = this->currentFrameIndex;
+
 		for (int i = 0; i < attachmentCount; i++)
 		{
-			auto attachmentUsage = renderTarget->renderPass->GetAttachmentUsage(i);
-			
+			if (frameBuffer->GetAttachment(i).GetSwapChain() != nullptr) // SwapChain attachment
+			{
+				Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)frameBuffer->GetAttachment(i).GetSwapChain();
+				frameIndex = swapChain->GetCurrentImageIndex();
+			}
+
+			const auto& attachmentLayout = renderPass->GetRenderPassLayout().attachmentLayouts[i];
+
 			VkClearValue clearValue;
 			memset(&clearValue, 0, sizeof(clearValue));
 
-			switch (attachmentUsage)
+			switch (attachmentLayout.attachmentUsage)
 			{
 			case ScopeAttachmentUsage::Color:
 			case ScopeAttachmentUsage::Resolve:
@@ -905,23 +930,30 @@ namespace CE::Vulkan
 		beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		beginInfo.clearValueCount = attachmentCount;
 		beginInfo.pClearValues = clearValues.GetData();
-		
-		beginInfo.renderPass = renderTarget->renderPass->GetHandle();
-		beginInfo.framebuffer = framebuffer->GetHandle();
+
+		beginInfo.renderPass = currentPass->GetHandle();
+		beginInfo.framebuffer = frameBuffer->GetHandle(frameIndex);
 
 		beginInfo.renderArea.offset = { 0, 0 };
-		beginInfo.renderArea.extent.width = framebuffer->GetWidth();
-		beginInfo.renderArea.extent.height = framebuffer->GetHeight();
-		
-		vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
-	}
+		beginInfo.renderArea.extent.width = frameBuffer->GetWidth();
+		beginInfo.renderArea.extent.height = frameBuffer->GetHeight();
 
-	void CommandList::EndRenderTarget()
-	{
+		vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		return true;
+    }
+
+    void CommandList::RenderPassNextSubpass()
+    {
+		vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+    }
+
+    void CommandList::EndRenderPass()
+    {
 		currentPass = nullptr;
 		currentSubpass = 0;
 
 		vkCmdEndRenderPass(commandBuffer);
-	}
+    }
 
 } // namespace CE::Vulkan

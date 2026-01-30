@@ -2,7 +2,7 @@
 
 namespace CE::Vulkan
 {
-    DescriptorSet::DescriptorSet(VulkanDevice* device, VkDescriptorSetLayout setLayout, const RHI::ShaderResourceGroupLayout& srgLayout)
+    DescriptorSet::DescriptorSet(Device* device, VkDescriptorSetLayout setLayout, const RHI::ShaderResourceGroupLayout& srgLayout, const String& name)
 		: device(device)
     {
 		this->srgLayout = srgLayout;
@@ -19,10 +19,12 @@ namespace CE::Vulkan
 		}
 
 		descriptorSet = allocatedSets[0];
+
+		device->SetObjectDebugName((uint64_t)descriptorSet, VK_OBJECT_TYPE_DESCRIPTOR_SET, name.GetCString());
     }
 
-    DescriptorSet::DescriptorSet(VulkanDevice* device, VkDescriptorSetLayout setLayout,
-	    const RHI::ShaderResourceGroupLayout& srgLayout, u32 arrayCount)
+    DescriptorSet::DescriptorSet(Device* device, VkDescriptorSetLayout setLayout,
+	    const RHI::ShaderResourceGroupLayout& srgLayout, u32 arrayCount, const String& name)
 		: device(device)
     {
 		this->srgLayout = srgLayout;
@@ -39,6 +41,8 @@ namespace CE::Vulkan
 		}
 
 		descriptorSet = allocatedSets[0];
+
+		device->SetObjectDebugName((uint64_t)descriptorSet, VK_OBJECT_TYPE_DESCRIPTOR_SET, name.GetCString());
     }
 
     DescriptorSet::~DescriptorSet()

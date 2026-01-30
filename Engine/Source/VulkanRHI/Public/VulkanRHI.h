@@ -11,7 +11,7 @@ typedef VkDebugUtilsMessengerEXT_T* VkDebugUtilsMessengerEXT;
 
 namespace CE::Vulkan
 {
-    class VulkanDevice;
+    class Device;
     class Viewport;
     class GraphicsCommandList;
     class RenderTarget;
@@ -46,6 +46,8 @@ namespace CE::Vulkan
         virtual void PostInitialize() override;
         virtual void PreShutdown() override;
         virtual void Shutdown() override;
+
+        void WaitToShutdown() override;
         
         virtual void* GetNativeHandle() override;
 
@@ -76,7 +78,7 @@ namespace CE::Vulkan
 
 		virtual bool IsOffscreenOnly() override;
 
-		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) override;
+		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClass queueClass) override;
 
         virtual RHI::CommandQueue* GetPrimaryGraphicsQueue() override;
         virtual RHI::CommandQueue* GetPrimaryTransferQueue() override;
@@ -86,7 +88,7 @@ namespace CE::Vulkan
 
         // - Command List -
 
-        virtual RHI::Fence* CreateFence(bool initiallySignalled = false) override;
+        virtual RHI::Fence* CreateFence(uint64_t initialValue) override;
 
         virtual void DestroyFence(RHI::Fence* fence) override;
 
@@ -101,13 +103,6 @@ namespace CE::Vulkan
         // - Resources -
 
         virtual RHI::DeviceLimits* GetDeviceLimits() override;
-
-        virtual RHI::RenderTarget* CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout) override;
-        virtual void DestroyRenderTarget(RHI::RenderTarget* renderTarget) override;
-
-        virtual RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::TextureView*>& imageAttachments, u32 imageIndex = 0) override;
-        virtual RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::Texture*>& imageAttachments, u32 imageIndex = 0) override;
-        virtual void DestroyRenderTargetBuffer(RHI::RenderTargetBuffer* renderTargetBuffer) override;
 
 		virtual RHI::SwapChain* CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc) override;
 		virtual void DestroySwapChain(RHI::SwapChain* swapChain) override;
@@ -138,7 +133,7 @@ namespace CE::Vulkan
 		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDescriptor& desc) override;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) override;
 		
-		virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout) override;
+		virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDescriptor& srgDescriptor) override;
 		virtual void DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup) override;
 
 		// - Pipeline State -
@@ -153,7 +148,12 @@ namespace CE::Vulkan
         virtual u64 GetShaderStructMemberSize(const RHI::ShaderStructMember& member) override;
         virtual void GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets) override;
 
-        inline VulkanDevice* GetDevice() const { return device; }
+        inline Device* GetDevice() const { return device; }
+
+        RHI::RenderPass* CreateRenderPass(const RHI::RenderPassLayout& rpLayout) override;
+        void DestroyRenderPass(RHI::RenderPass* renderPass) override;
+        RHI::RenderPassFrameBuffer* CreateRenderPassFrameBuffer(const RHI::RenderPassFrameBufferDescriptor& descriptor) override;
+        void DestroyRenderPassFrameBuffer(RHI::RenderPassFrameBuffer* frameBuffer) override;
 
     protected:
 
@@ -161,7 +161,7 @@ namespace CE::Vulkan
         VkInstance vkInstance = nullptr;
         VkDebugUtilsMessengerEXT vkMessenger = nullptr;
 
-        VulkanDevice* device = nullptr;
+        Device* device = nullptr;
         Array<const char*> instanceExtensions{};
     };
     

@@ -549,7 +549,11 @@ namespace CE::RPI
 		{
 			if (srgLayout.srgType == RHI::SRGType::PerMaterial)
 			{
-				shaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+                RHI::ShaderResourceGroupDescriptor srgDesc{};
+                srgDesc.name = "SRG_PerMaterial";
+				srgDesc.layout = srgLayout;
+
+				shaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
 				
 				break;
 			}

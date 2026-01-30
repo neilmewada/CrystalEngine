@@ -2,37 +2,53 @@
 
 namespace CE::Vulkan
 {
+    // FIXME: Rewrite the whole fence class
     
-    Fence::Fence(VulkanDevice* device, bool signalled)
-        : device(device)
+    Fence::Fence(Device* device, uint64_t initialValue) : RHI::Fence(initialValue), device(device)
     {
-        VkFenceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-        createInfo.flags = 0;
-        if (signalled)
-            createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+        VkSemaphoreTypeCreateInfo timelineCreateInfo{};
+        timelineCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
+        timelineCreateInfo.pNext = nullptr;
+        timelineCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
+        timelineCreateInfo.initialValue = initialValue;
 
-        vkCreateFence(device->GetHandle(), &createInfo, VULKAN_CPU_ALLOCATOR, &fence);
+        VkSemaphoreCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        createInfo.pNext = &timelineCreateInfo;
+    	createInfo.flags = 0;
+
+        vkCreateSemaphore(device->GetHandle(), &createInfo, VULKAN_CPU_ALLOCATOR, &semaphore);
     }
 
     Fence::~Fence()
     {
-        vkDestroyFence(device->GetHandle(), fence, VULKAN_CPU_ALLOCATOR);
+        vkDestroySemaphore(device->GetHandle(), semaphore, VULKAN_CPU_ALLOCATOR);
     }
 
-    void Fence::Reset()
+    void Fence::RefreshCompletedValue()
     {
-        vkResetFences(device->GetHandle(), 1, &fence);
+        uint64_t value = 0;
+        if (vkGetSemaphoreCounterValue(device->GetHandle(), semaphore, &value) == VK_SUCCESS)
+        {
+            SetCompletedValue(value);
+		}
+
     }
 
-    void Fence::WaitForFence()
+    bool Fence::WaitCPU(uint64_t value, uint64_t timeoutNs)
     {
-        vkWaitForFences(device->GetHandle(), 1, &fence, VK_TRUE, NumericLimits<u64>::Max());
-    }
+        if (GetCompletedValue() >= value)
+            return true;
 
-    bool Fence::IsSignalled()
-    {
-        return vkGetFenceStatus(device->GetHandle(), fence) == VK_SUCCESS;
+        VkSemaphoreWaitInfo waitInfo{};
+        waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+        waitInfo.semaphoreCount = 1;
+        waitInfo.pSemaphores = &semaphore;
+        waitInfo.pValues = &value;
+
+        VkResult result = vkWaitSemaphores(device->GetHandle(), &waitInfo, timeoutNs);
+        RefreshCompletedValue();
+		return result == VK_SUCCESS;
     }
 
 } // namespace CE::Vulkan

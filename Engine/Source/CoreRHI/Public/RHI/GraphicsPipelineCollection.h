@@ -53,7 +53,7 @@ namespace CE::RHI
 
         SharedMutex mutex{};
         HashMap<GraphicsPipelineVariant, RHI::PipelineState*> pipelineCollection{};
-        Array<RHI::RenderTarget*> renderTargets{};
+        Array<RHI::RenderPass*> renderPasses{};
     };
     
 } // namespace CE::RPI

@@ -1,6 +1,11 @@
 #include "Fusion.h"
 
+#if PAL_TRAIT_VULKAN_SUPPORTED
 #include "VulkanRHI.h"
+#endif
+#if PAL_TRAIT_METAL_SUPPORTED
+#include "MetalRHI.h"
+#endif
 
 namespace CE
 {
@@ -23,7 +28,11 @@ namespace CE
 
 	void FusionStandaloneApplication::CreateRHI()
 	{
+#if PAL_TRAIT_VULKAN_SUPPORTED
 		RHI::gDynamicRHI = new Vulkan::VulkanRHI();
+#elif PAL_TRAIT_METAL_SUPPORTED
+        RHI::gDynamicRHI = new Metal::MetalRHI();
+#endif
 	}
 
 	void FusionStandaloneApplication::SetupDefaultStyle()
@@ -541,4 +550,10 @@ namespace CE
 
 		windowSizesById[id] = windowSize; ApplicationMessageHandler::OnWindowExposed(window);
 	}
+    
+    void FusionStandaloneApplication::OnWindowShown(PlatformWindow* window)
+    {
+        RebuildFrameGraph();
+    }
+    
 } // namespace CE

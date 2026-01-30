@@ -2,6 +2,12 @@
 
 class RHI_FrameGraphBuilder_Test;
 
+namespace CE::Metal
+{
+    class FrameGraphCompiler;
+    class FrameGraphExecuter;
+}
+
 namespace CE::Vulkan
 {
 	class FrameGraphCompiler;
@@ -21,6 +27,12 @@ namespace CE::RHI
 		inline u32 GetSwapChainCount() const { return presentSwapChains.GetSize(); }
 
 		inline SwapChain* GetSwapChain(u32 index) const { return presentSwapChains[index]; }
+        
+        const auto& GetPresentSwapChains() const { return presentSwapChains; }
+        
+        const Array<Scope*>& GetProducers() const { return producers; }
+        
+        const Array<Scope*>& GetEndScopes() const { return endScopes; }
 
     private:
 
@@ -101,11 +113,13 @@ namespace CE::RHI
 
         friend class FrameAttachmentDatabase;
 		friend class FrameGraphCompiler;
-		friend class CE::Vulkan::FrameGraphCompiler;
 		friend class FrameGraphBuilder;
 		friend class FrameScheduler;
 		friend class FrameGraphExecuter;
+        friend class CE::Vulkan::FrameGraphCompiler;
 		friend class CE::Vulkan::FrameGraphExecuter;
+        friend class CE::Metal::FrameGraphCompiler;
+        friend class CE::Metal::FrameGraphExecuter;
 		friend class ::RHI_FrameGraphBuilder_Test;
     };
 
