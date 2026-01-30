@@ -1,5 +1,6 @@
 #include "FusionCore.h"
 
+// FIXME: SDF text rendering does not work on metal
 #if PAL_TRAIT_VULKAN_SUPPORTED
 #define USE_SDF 1
 #else
