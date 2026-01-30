@@ -550,4 +550,10 @@ namespace CE
 
 		windowSizesById[id] = windowSize; ApplicationMessageHandler::OnWindowExposed(window);
 	}
+    
+    void FusionStandaloneApplication::OnWindowShown(PlatformWindow* window)
+    {
+        RebuildFrameGraph();
+    }
+    
 } // namespace CE
