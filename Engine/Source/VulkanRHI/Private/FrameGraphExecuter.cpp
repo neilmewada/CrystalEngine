@@ -730,6 +730,11 @@ namespace CE::Vulkan
 						{
 							RHI::DrawList* drawList = currentScope->drawList;
 
+							if (currentScope->usePipelines.NotEmpty())
+							{
+								commandList->BindPipelineState(currentScope->usePipelines.GetLast());
+							}
+
 							// Submit draw items
 							for (int i = 0; drawList != nullptr && i < drawList->GetDrawItemCount(); i++)
 							{

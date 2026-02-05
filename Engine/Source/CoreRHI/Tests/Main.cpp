@@ -42,8 +42,14 @@ static void WindowTestBegin()
     
     InputManager::Get().Initialize(app);
 
+#if PLATFORM_MAC
     gDefaultWindowWidth = 1000;
     gDefaultWindowHeight = 600;
+#else
+	gDefaultWindowWidth = 1280;
+	gDefaultWindowHeight = 900;
+#endif
+
     
     PlatformWindowInfo windowInfo{
         .maximised = false,
@@ -100,6 +106,95 @@ static void WindowTestEnd()
 }
 
 static constexpr u32 kNumFrames = RHI::Limits::MaxSwapChainImageCount;
+
+static constexpr f32 quadVertexData[] = {
+    // Positions
+    -1.0f, -1.0f, 0, 0,
+    1.0f, -1.0f, 0, 0,
+    -1.0f, 1.0f, 0, 0,
+    -1.0f, 1.0f, 0, 0,
+    1.0f, -1.0f, 0, 0,
+    1.0f, 1.0f, 0, 0,
+    // UVs
+    0.0f, 0.0f,
+    1.0f, 0.0f,
+    0.0f, 1.0f,
+    0.0f, 1.0f,
+    1.0f, 0.0f,
+    1.0f, 1.0f,
+};
+
+static std::tuple<RHI::ShaderModule*, RHI::ShaderModule*> CompileGraphicsShader(BinaryBlob& vertBlob, BinaryBlob& fragBlob, ShaderReflection& reflection, const void* data, u32 dataSize)
+{
+    ShaderCompiler compiler{};
+
+    ShaderCompilationInfo compileInfo{};
+    compileInfo.includeSearchPaths.Add(PlatformDirectories::GetLaunchDir() / "Engine/Shaders");
+    compileInfo.outReflection = &reflection;
+
+    compileInfo.stages.Add({});
+    compileInfo.stages.GetLast().entryPoint = "VertMain";
+    compileInfo.stages.GetLast().stage = RHI::ShaderStage::Vertex;
+    compileInfo.stages.GetLast().debugName = "VertMain";
+    compileInfo.stages.GetLast().extraArgs.AddRange({
+        L"-D", L"COMPILE=1",
+        L"-D", L"VERTEX=1",
+        L"-fspv-preserve-bindings",
+        L"-fspv-preserve-interface",
+        L"-fspv-debug=vulkan-with-source",
+        L"-Zi"
+        });
+    compileInfo.stages.GetLast().outByteCode = &vertBlob;
+
+    compileInfo.stages.Add({});
+    compileInfo.stages.GetLast().entryPoint = "FragMain";
+    compileInfo.stages.GetLast().stage = RHI::ShaderStage::Fragment;
+    compileInfo.stages.GetLast().debugName = "FragMain";
+    compileInfo.stages.GetLast().extraArgs.AddRange({
+        L"-D", L"COMPILE=1",
+        L"-D", L"FRAGMENT=1",
+        L"-fspv-preserve-bindings",
+        L"-fspv-preserve-interface",
+        L"-fspv-debug=vulkan-with-source",
+        L"-Zi"
+        });
+    compileInfo.stages.GetLast().outByteCode = &fragBlob;
+
+    auto result = compiler.CompileAuto(data, dataSize, compileInfo);
+    String errorMsg = compiler.GetErrorMessage();
+    EXPECT_EQ(result, ShaderCompiler::ERR_Success);
+
+	if (result != ShaderCompiler::ERR_Success)
+    {
+        std::cout << "Shader compilation failed: " << errorMsg << std::endl;
+    }
+
+    RHI::ShaderModuleDescriptor vertShaderDesc{};
+    vertShaderDesc.name = "Vertex Shader";
+    vertShaderDesc.defaultEntryPoint = "VertMain";
+    vertShaderDesc.stage = RHI::ShaderStage::Vertex;
+    vertShaderDesc.debugName = vertShaderDesc.name;
+    vertShaderDesc.byteCode = vertBlob.GetDataPtr();
+    vertShaderDesc.byteSize = vertBlob.GetDataSize();
+
+    RHI::ShaderModuleDescriptor fragShaderDesc{};
+    fragShaderDesc.name = "Fragment Shader";
+    fragShaderDesc.defaultEntryPoint = "FragMain";
+    fragShaderDesc.stage = RHI::ShaderStage::Fragment;
+    fragShaderDesc.debugName = fragShaderDesc.name;
+    fragShaderDesc.byteCode = fragBlob.GetDataPtr();
+    fragShaderDesc.byteSize = fragBlob.GetDataSize();
+
+    return std::make_tuple(
+        RHI::gDynamicRHI->CreateShaderModule(vertShaderDesc),
+        RHI::gDynamicRHI->CreateShaderModule(fragShaderDesc)
+    );
+}
+
+static auto BuildShaderModules()
+{
+	
+}
 
 namespace RHI_Triangle
 {
@@ -590,7 +685,10 @@ namespace RHI_FrameGraph
         Matrix4x4 modelMatrix;
     };
 
-    constexpr const char RHI_FrameGraph_Shader[] = R"(
+    namespace Shaders
+    {
+
+        constexpr const char RHI_FrameGraph_Shader[] = R"(
 #include "Core/Macros.hlsli"
 
 cbuffer _ViewData : SRG_PerView(b0)
@@ -636,9 +734,74 @@ float4 FragMain(PSInput input) : SV_TARGET
 #endif
 )";
 
+        constexpr char RHI_FrameGraph_SinglePassBlur[] = R"(
+#include "Core/Macros.hlsli"
+
+struct VSInput
+{
+    float3 position : POSITION;
+	float2 uv : TEXCOORD0;
+};
+
+struct PSInput
+{
+    float4 position : SV_POSITION;
+	float2 uv : TEXCOORD0;
+};
+
+#if VERTEX
+
+PSInput VertMain(VSInput input)
+{
+    PSInput o;
+    o.position = float4(input.position, 1.0);
+	o.uv = input.uv;
+    return o;
+}
+#endif
+
+#if FRAGMENT
+
+Texture2D<float4> _InputTexture : SRG_PerPass(t1);
+SamplerState _InputSampler : SRG_PerScene(s0);
+
+float4 SinglePassBlur(float2 uv, float2 texelSize)
+{
+	float4 sum = 0;
+	const int radius = 12;
+
+	for (int i = -radius; i <= radius; i++)
+    {
+        for (int j = -radius; j <= radius; j++)
+        {
+            float2 offset = float2(i, j) * texelSize;
+            sum += _InputTexture.Sample(_InputSampler, uv + offset);
+        }
+    }
+
+	return sum / (radius * 2 + 1) / (radius * 2 + 1);
+}
+
+float4 FragMain(PSInput input) : SV_TARGET
+{
+	uint width, height;
+    _InputTexture.GetDimensions(width, height);
+
+	const float2 uv = input.uv;
+
+    float4 c = _InputTexture.Sample(_InputSampler, uv);
+	c = SinglePassBlur(uv, float2(1.0 / width, 1.0 / height));
+    return float4(c.rgb, c.a);
+}
+
+#endif
+)";
+    }
+
     TEST(RHI, FrameGraph)
     {
         WINDOW_TEST_BEGIN;
+        using namespace RHI_FrameGraph::Shaders;
 
         PlatformApplication* app = PlatformApplication::Get();
         PlatformWindow* mainWindow = app->GetMainWindow();
@@ -658,67 +821,17 @@ float4 FragMain(PSInput input) : SV_TARGET
 
         // - Shader -
 
-        ShaderCompiler compiler{};
-
         ShaderReflection reflection{};
         BinaryBlob vertBlob;
         BinaryBlob fragBlob;
 
-        ShaderCompilationInfo compileInfo{};
-        compileInfo.includeSearchPaths.Add(PlatformDirectories::GetLaunchDir() / "Engine/Shaders");
-        compileInfo.outReflection = &reflection;
+        auto [vertShader, fragShader] = CompileGraphicsShader(vertBlob, fragBlob, reflection, RHI_FrameGraph_Shader, COUNTOF(RHI_FrameGraph_Shader));
 
-        compileInfo.stages.Add({});
-        compileInfo.stages.GetLast().entryPoint = "VertMain";
-        compileInfo.stages.GetLast().stage = RHI::ShaderStage::Vertex;
-        compileInfo.stages.GetLast().debugName = "VertMain";
-        compileInfo.stages.GetLast().extraArgs.AddRange({
-            L"-D", L"COMPILE=1",
-            L"-D", L"VERTEX=1",
-            L"-fspv-preserve-bindings",
-            L"-fspv-preserve-interface",
-            L"-fspv-debug=vulkan-with-source",
-            L"-Zi"
-            });
-        compileInfo.stages.GetLast().outByteCode = &vertBlob;
-
-        compileInfo.stages.Add({});
-        compileInfo.stages.GetLast().entryPoint = "FragMain";
-        compileInfo.stages.GetLast().stage = RHI::ShaderStage::Fragment;
-        compileInfo.stages.GetLast().debugName = "FragMain";
-        compileInfo.stages.GetLast().extraArgs.AddRange({
-            L"-D", L"COMPILE=1",
-            L"-D", L"FRAGMENT=1",
-            L"-fspv-preserve-bindings",
-            L"-fspv-preserve-interface",
-            L"-fspv-debug=vulkan-with-source",
-            L"-Zi"
-            });
-        compileInfo.stages.GetLast().outByteCode = &fragBlob;
-
-        auto result = compiler.CompileAuto(RHI_FrameGraph_Shader, COUNTOF(RHI_FrameGraph_Shader), compileInfo);
-        String errorMsg = compiler.GetErrorMessage();
-        EXPECT_EQ(result, ShaderCompiler::ERR_Success);
-
-        RHI::ShaderModuleDescriptor vertShaderDesc{};
-        vertShaderDesc.name = "Vertex Shader";
-        vertShaderDesc.defaultEntryPoint = "VertMain";
-        vertShaderDesc.stage = RHI::ShaderStage::Vertex;
-        vertShaderDesc.debugName = vertShaderDesc.name;
-        vertShaderDesc.byteCode = vertBlob.GetDataPtr();
-        vertShaderDesc.byteSize = vertBlob.GetDataSize();
-
-        RHI::ShaderModule* vertShader = gDynamicRHI->CreateShaderModule(vertShaderDesc);
-
-        RHI::ShaderModuleDescriptor fragShaderDesc{};
-        fragShaderDesc.name = "Fragment Shader";
-        fragShaderDesc.defaultEntryPoint = "FragMain";
-        fragShaderDesc.stage = RHI::ShaderStage::Fragment;
-        fragShaderDesc.debugName = fragShaderDesc.name;
-        fragShaderDesc.byteCode = fragBlob.GetDataPtr();
-        fragShaderDesc.byteSize = fragBlob.GetDataSize();
-
-        RHI::ShaderModule* fragShader = gDynamicRHI->CreateShaderModule(fragShaderDesc);
+        ShaderReflection blurReflection{};
+        BinaryBlob blurVertBlob;
+        BinaryBlob blurFragBlob;
+        
+        auto [blurVertShader, blurFragShader] = CompileGraphicsShader(blurVertBlob, blurFragBlob, blurReflection, Shaders::RHI_FrameGraph_SinglePassBlur, COUNTOF(Shaders::RHI_FrameGraph_SinglePassBlur));
 
         // - Shader Resources -
 
@@ -744,10 +857,21 @@ float4 FragMain(PSInput input) : SV_TARGET
             perObjectSrg = gDynamicRHI->CreateShaderResourceGroup(perObjectSrgDesc);
         }
 
+        RHI::ShaderResourceGroup* blurPerSceneSrg = nullptr;
+        {
+            const RHI::ShaderResourceGroupLayout& blurPerSceneSrgLayout = blurReflection.srgLayouts[1];
+            RHI::ShaderResourceGroupDescriptor blurPerSceneSrgDesc{};
+            blurPerSceneSrgDesc.name = "Blur SRG_PerScene";
+            blurPerSceneSrgDesc.layout = blurPerSceneSrgLayout;
+            blurPerSceneSrg = gDynamicRHI->CreateShaderResourceGroup(blurPerSceneSrgDesc);
+        }
+
+        RHI::ShaderResourceGroupLayout blurPassSrgLayout = blurReflection.srgLayouts[0];
+
         ViewDataConstants viewData{};
 
         Matrix4x4 projectionMatrix = Matrix4x4::PerspectiveProjection((f32)swapChain->GetWidth() / (f32)swapChain->GetHeight(), 60, 0.1f, 1000.0f);
-		projectionMatrix[1][1] *= gDynamicRHI->GetClipSpaceSignY(); // Metal API needs Y flip
+        projectionMatrix[1][1] *= gDynamicRHI->GetClipSpaceSignY(); // Metal API needs Y flip
 
         Matrix4x4 viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -5));
         viewData.viewProjectionMatrix = projectionMatrix * viewMatrix;
@@ -786,15 +910,30 @@ float4 FragMain(PSInput input) : SV_TARGET
             }
         }
 
+        RHI::Sampler* blurSampler = nullptr;
+
+        {
+			RHI::SamplerDescriptor samplerDesc{};
+			samplerDesc.addressModeU = RHI::SamplerAddressMode::ClampToEdge;
+			samplerDesc.addressModeV = RHI::SamplerAddressMode::ClampToEdge;
+			samplerDesc.addressModeW = RHI::SamplerAddressMode::ClampToEdge;
+			samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
+
+			blurSampler = gDynamicRHI->CreateSampler(samplerDesc);
+
+            blurPerSceneSrg->Bind("_InputSampler", blurSampler);
+        }
+
         perViewSrg->FlushBindings();
         perObjectSrg->FlushBindings();
+        blurPerSceneSrg->FlushBindings();
 
         // - Geometry -
-		
-    	Array<RHI::VertexBufferView> vertexBufferViews{};
+
+        Array<RHI::VertexBufferView> vertexBufferViews{};
         {
             RHI::BufferDescriptor bufferDesc{};
-			bufferDesc.name = "Vertex Buffer";
+            bufferDesc.name = "Vertex Buffer";
             bufferDesc.bindFlags = BufferBindFlags::VertexBuffer;
             bufferDesc.defaultHeapType = MemoryHeapType::Default;
 
@@ -804,7 +943,7 @@ float4 FragMain(PSInput input) : SV_TARGET
             vertexBufferViews.GetLast().GetBuffer()->UploadData(CubeVertices, sizeof(CubeVertices));
 
             bufferDesc.bufferSize = sizeof(CubeVertexColors);
-			bufferDesc.structureByteStride = sizeof(Vec4);
+            bufferDesc.structureByteStride = sizeof(Vec4);
             vertexBufferViews.Add(RHI::VertexBufferView(gDynamicRHI->CreateBuffer(bufferDesc), 0, bufferDesc.bufferSize, bufferDesc.structureByteStride));
             vertexBufferViews.GetLast().GetBuffer()->UploadData(CubeVertexColors, sizeof(CubeVertexColors));
         }
@@ -812,25 +951,68 @@ float4 FragMain(PSInput input) : SV_TARGET
         RHI::IndexBufferView indexBufferView{};
         u32 numIndices = 0;
         {
-	        RHI::BufferDescriptor bufferDesc{};
+            RHI::BufferDescriptor bufferDesc{};
             bufferDesc.name = "Index Buffer";
             bufferDesc.bindFlags = RHI::BufferBindFlags::IndexBuffer;
             bufferDesc.defaultHeapType = RHI::MemoryHeapType::Default;
-            
-        	bufferDesc.bufferSize = sizeof(CubeIndices);
+
+            bufferDesc.bufferSize = sizeof(CubeIndices);
             bufferDesc.structureByteStride = sizeof(u16);
 
             RHI::Buffer* indexBuffer = gDynamicRHI->CreateBuffer(bufferDesc);
             indexBuffer->UploadData(CubeIndices, sizeof(CubeIndices));
-			indexBufferView = RHI::IndexBufferView(indexBuffer, 0, indexBuffer->GetBufferSize(), RHI::IndexFormat::Uint16);
+            indexBufferView = RHI::IndexBufferView(indexBuffer, 0, indexBuffer->GetBufferSize(), RHI::IndexFormat::Uint16);
 
-			numIndices = COUNTOF(CubeIndices);
+            numIndices = COUNTOF(CubeIndices);
         }
+
+		Array<RHI::VertexBufferView> fullScreenQuadVertexBufferView{};
+        RHI::DrawPacket* fullScreenQuadDrawPacket = nullptr;
+        RHI::DrawList fullScreenQuadDrawList;
+        {
+            RHI::BufferDescriptor bufferDesc{};
+            bufferDesc.name = "FullScreenQuad Vertex Buffer";
+            bufferDesc.bindFlags = BufferBindFlags::VertexBuffer;
+            bufferDesc.defaultHeapType = MemoryHeapType::Default;
+            bufferDesc.bufferSize = sizeof(quadVertexData);
+            bufferDesc.structureByteStride = sizeof(quadVertexData);
+
+            RHI::Buffer* vertexBuffer = gDynamicRHI->CreateBuffer(bufferDesc);
+            vertexBuffer->UploadData(quadVertexData, sizeof(quadVertexData));
+
+            fullScreenQuadVertexBufferView.Add(RHI::VertexBufferView(vertexBuffer, 0, sizeof(Vec4) * 6, sizeof(Vec4)));
+            fullScreenQuadVertexBufferView.Add(RHI::VertexBufferView(vertexBuffer, sizeof(Vec4) * 6, sizeof(Vec2) * 6, sizeof(Vec2)));
+
+			RHI::DrawPacketBuilder drawPacketBuilder{};
+
+            drawPacketBuilder.SetDebugName("Full Screen Quad");
+
+            drawPacketBuilder.AddShaderResourceGroup(blurPerSceneSrg);
+
+            drawPacketBuilder.AddDrawItem({
+                .stencilRef = 0,
+                .drawItemTag = 0,
+                .indexBufferView = {},
+                .vertexBufferViews = fullScreenQuadVertexBufferView
+            });
+
+            drawPacketBuilder.SetDrawArguments(RHI::DrawLinearArguments{
+				.instanceCount = 1,
+				.firstInstance = 0,
+				.vertexCount = 6,
+				.vertexOffset = 0
+            });
+
+            fullScreenQuadDrawPacket = drawPacketBuilder.Build();
+
+            fullScreenQuadDrawList.AddDrawItem(&fullScreenQuadDrawPacket->drawItems[0]);
+		}
 
         // - Graphics Pipeline -
 
         RHI::PipelineState* depthPipeline = nullptr;
         RHI::PipelineState* colorPipeline = nullptr;
+		RHI::PipelineState* blurPipeline = nullptr;
         {
             RHI::GraphicsPipelineDescriptor desc{};
 
@@ -853,7 +1035,7 @@ float4 FragMain(PSInput input) : SV_TARGET
                 .format = depthFormat,
                 .loadAction = AttachmentLoadAction::Clear,
                 .storeAction = AttachmentStoreAction::Store,
-            });
+                });
             desc.subpass = 0;
 
             desc.vertexInputSlots.Add({});
@@ -892,7 +1074,7 @@ float4 FragMain(PSInput input) : SV_TARGET
             desc.name = "DepthPipeline";
             depthPipeline = gDynamicRHI->CreateGraphicsPipeline(desc);
 
-			// Color Pipeline
+            // Color Pipeline
 
             desc.depthStencilState.depthState.enable = true;
             desc.depthStencilState.depthState.writeEnable = false;
@@ -914,10 +1096,43 @@ float4 FragMain(PSInput input) : SV_TARGET
             desc.subpass = 0;
 
             desc.name = "ColorPipeline";
-			colorPipeline = gDynamicRHI->CreateGraphicsPipeline(desc);
+            colorPipeline = gDynamicRHI->CreateGraphicsPipeline(desc);
+
+            // Blur Pipeline
+
+            desc.srgLayouts.Clear();
+            desc.srgLayouts.Add(blurPerSceneSrg->GetLayout());
+            desc.srgLayouts.Add(blurPassSrgLayout);
+
+            desc.depthStencilState.depthState.enable = false;
+            desc.depthStencilState.depthState.writeEnable = false;
+            desc.depthStencilState.depthState.testEnable = false;
+
+            desc.vertexInputSlots.Resize(2);
+            desc.vertexInputSlots[0].stride = sizeof(Vec4);
+            desc.vertexInputSlots[1].stride = sizeof(Vec2);
+
+            desc.vertexAttributes.Resize(2);
+            desc.vertexAttributes[0].dataType = RHI::VertexAttributeDataType::Float3;
+            desc.vertexAttributes[1].dataType = RHI::VertexAttributeDataType::Float2;
+
+			desc.shaderStages[0].shaderModule = blurVertShader;
+			desc.shaderStages[1].shaderModule = blurFragShader;
+
+            desc.renderPassLayout.attachmentLayouts.Clear();
+            desc.renderPassLayout.attachmentLayouts.Add(RHI::RenderPassAttachmentLayout{
+                .attachmentUsage = ScopeAttachmentUsage::Color,
+                .format = swapChain->GetSwapChainFormat(),
+                .loadAction = AttachmentLoadAction::Clear,
+                .storeAction = AttachmentStoreAction::Store,
+            });
+            desc.subpass = 0;
+
+			desc.name = "BlurPipeline";
+			blurPipeline = gDynamicRHI->CreateGraphicsPipeline(desc);
         }
 
-		// - Draw List -
+        // - Draw List -
 
         RHI::DrawListContext drawList{};
         DrawListTagRegistry tagRegistry{};
@@ -943,7 +1158,7 @@ float4 FragMain(PSInput input) : SV_TARGET
                 .vertexBufferViews = vertexBufferViews,
                 .pipelineState = depthPipeline,
                 .drawFilterMask = DrawFilterMask::ALL
-            });
+                });
 
             drawPacketBuilder.AddDrawItem({
                 .stencilRef = 0,
@@ -952,7 +1167,7 @@ float4 FragMain(PSInput input) : SV_TARGET
                 .vertexBufferViews = vertexBufferViews,
                 .pipelineState = colorPipeline,
                 .drawFilterMask = DrawFilterMask::ALL
-            });
+                });
 
             drawPacketBuilder.SetDrawArguments(RHI::DrawIndexedArguments{
                 .instanceCount = 1,
@@ -960,7 +1175,7 @@ float4 FragMain(PSInput input) : SV_TARGET
                 .vertexOffset = 0,
                 .indexCount = numIndices,
                 .firstIndex = 0
-            });
+                });
 
             cubeDrawPacket = drawPacketBuilder.Build();
         }
@@ -971,24 +1186,38 @@ float4 FragMain(PSInput input) : SV_TARGET
         desc.numFramesInFlight = 2;
         RHI::FrameScheduler* scheduler = RHI::FrameScheduler::Create(desc);
 
-        constexpr const char* kColorAttachmentId = "SwapChain";
+        constexpr const char* kColorAttachmentId = "ColorOutput";
+        constexpr const char* kSwapChainAttachmentId = "SwapChain";
         constexpr const char* kDepthAttachmentId = "DepthBuffer";
 
-		constexpr const char* kDepthPrePassId = "DepthPrePass";
-		constexpr const char* kColorPassId = "ColorPass";
+        constexpr const char* kDepthPrePassId = "DepthPrePass";
+        constexpr const char* kColorPassId = "ColorPass";
+        constexpr const char* kBlurSinglePassId = "BlurSinglePass";
 
         bool rebuildFrameGraph = true;
 
         auto buildFrameGraph = [&]
             {
-        		scheduler->BeginFrameGraph();
+                scheduler->BeginFrameGraph();
                 {
                     RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
 
-					// 1. Emplace Attachments
+                    // 1. Emplace Attachments
 
-                    attachmentDatabase.EmplaceFrameAttachment(kColorAttachmentId, swapChain);
-
+                    attachmentDatabase.EmplaceFrameAttachment(kSwapChainAttachmentId, swapChain);
+                    attachmentDatabase.EmplaceFrameAttachment(kColorAttachmentId, RHI::ImageDescriptor{
+                        .name = "ColorAttachment",
+                        .width = swapChain->GetWidth(),
+                        .height = swapChain->GetHeight(),
+                        .depth = 1,
+                        .dimension = Dimension::Dim2D,
+                        .format = swapChain->GetSwapChainFormat(),
+                        .mipLevels = 1,
+                        .sampleCount = 1,
+                        .arrayLayers = 1,
+                        .bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead,
+                        .defaultHeapType = MemoryHeapType::Default
+                    });
                     attachmentDatabase.EmplaceFrameAttachment(kDepthAttachmentId, RHI::ImageDescriptor{
                         .name = "DepthTexture",
                         .width = swapChain->GetWidth(),
@@ -1007,38 +1236,61 @@ float4 FragMain(PSInput input) : SV_TARGET
 
                     scheduler->BeginScope(kDepthPrePassId);
                     {
-	                    RHI::ImageScopeAttachmentDescriptor depthAttachment{};
+                        RHI::ImageScopeAttachmentDescriptor depthAttachment{};
                         depthAttachment.attachmentId = kDepthAttachmentId;
                         depthAttachment.loadStoreAction.clearValueDepth = 1.0f;
                         depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
                         depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
                         depthAttachment.multisampleState.sampleCount = 1;
                         scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::ReadWrite);
-                        
-                    	scheduler->UseShaderResourceGroup(perViewSrg);
-						
+
+                        scheduler->UseShaderResourceGroup(perViewSrg);
+
                         scheduler->UsePipeline(depthPipeline);
                     }
                     scheduler->EndScope();
 
                     scheduler->BeginScope(kColorPassId);
                     {
-                        RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-                        swapChainAttachment.attachmentId = kColorAttachmentId;
-                        swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0.2f, 1);
-                        swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-                        swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-                        scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::ReadWrite);
+                        RHI::ImageScopeAttachmentDescriptor colorAttachment{};
+                        colorAttachment.attachmentId = kColorAttachmentId;
+                        colorAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0.2f, 1);
+                        colorAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+                        colorAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+                        scheduler->UseAttachment(colorAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::ReadWrite);
 
-						RHI::ImageScopeAttachmentDescriptor depthAttachment{};
-						depthAttachment.attachmentId = kDepthAttachmentId;
-						depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
-						depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+                        RHI::ImageScopeAttachmentDescriptor depthAttachment{};
+                        depthAttachment.attachmentId = kDepthAttachmentId;
+                        depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                        depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
                         scheduler->UseAttachment(depthAttachment, ScopeAttachmentUsage::DepthStencil, ScopeAttachmentAccess::Read);
 
                         scheduler->UseShaderResourceGroup(perViewSrg);
 
                         scheduler->UsePipeline(colorPipeline);
+                    }
+                    scheduler->EndScope();
+
+                    scheduler->BeginScope(kBlurSinglePassId);
+                    {
+                        RHI::ImageScopeAttachmentDescriptor colorAttachment{};
+                        colorAttachment.shaderInputName = "_InputTexture";
+                        colorAttachment.attachmentId = kColorAttachmentId;
+                        colorAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                        colorAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+                        scheduler->UseAttachment(colorAttachment, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
+
+						RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+						swapChainAttachment.attachmentId = kSwapChainAttachmentId;
+						swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+						swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+                        scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::ReadWrite);
+
+                        scheduler->UseShaderResourceGroup(blurPerSceneSrg);
+
+                        scheduler->UsePassSrgLayout(blurPassSrgLayout);
+
+						scheduler->UsePipeline(blurPipeline);
 
                         scheduler->PresentSwapChain(swapChain);
                     }
@@ -1046,7 +1298,7 @@ float4 FragMain(PSInput input) : SV_TARGET
                 }
                 EXPECT_TRUE(scheduler->EndFrameGraph());
 
-				scheduler->Compile();
+                scheduler->Compile();
 
                 rebuildFrameGraph = false;
             };
@@ -1071,18 +1323,18 @@ float4 FragMain(PSInput input) : SV_TARGET
                         rebuildFrameGraph = true;
                         return;
                     }
-                    
+
                     projectionMatrix = Matrix4x4::PerspectiveProjection((f32)swapChain->GetWidth() / (f32)swapChain->GetHeight(), 60, 0.1f, 1000.0f);
-                    projectionMatrix[1][1] *= gDynamicRHI->GetClipSpaceSignY();
+                    projectionMatrix[1][1] *= (f32)gDynamicRHI->GetClipSpaceSignY();
 
                     viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -5));
                     viewData.viewProjectionMatrix = projectionMatrix * viewMatrix;
 
-					eulerY += deltaTime;
-					objectData.modelMatrix = Matrix4x4::Translation(Vec3(0, 0, 20)) * Quat::EulerRadians(0, eulerY, 0).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1) * 5);
+                    eulerY += deltaTime;
+                    objectData.modelMatrix = Matrix4x4::Translation(Vec3(0, 0, 20)) * Quat::EulerRadians(0, eulerY, 0).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1) * 5);
 
-					perViewDataBuffers[frameIndex]->UploadData(&viewData, sizeof(ViewDataConstants));
-					perObjectDataBuffers[frameIndex]->UploadData(&objectData, sizeof(ObjectDataConstants));
+                    perViewDataBuffers[frameIndex]->UploadData(&viewData, sizeof(ViewDataConstants));
+                    perObjectDataBuffers[frameIndex]->UploadData(&objectData, sizeof(ObjectDataConstants));
 
                     drawList.Shutdown();
 
@@ -1096,24 +1348,27 @@ float4 FragMain(PSInput input) : SV_TARGET
                     auto& depthDrawList = drawList.GetDrawListForTag(depthDrawTag);
                     scheduler->SetScopeDrawList(kDepthPrePassId, &depthDrawList);
 
-					auto& colorDrawList = drawList.GetDrawListForTag(colorDrawTag);
-					scheduler->SetScopeDrawList(kColorPassId, &colorDrawList);
+                    auto& colorDrawList = drawList.GetDrawListForTag(colorDrawTag);
+                    scheduler->SetScopeDrawList(kColorPassId, &colorDrawList);
+
+                    scheduler->SetScopeDrawList(kBlurSinglePassId, &fullScreenQuadDrawList);
                 }
                 scheduler->EndExecution();
             };
 
-		// - Message Handler -
+        // - Message Handler -
 
         class MessageHandler : public ApplicationMessageHandler
         {
         public:
-			MessageHandler(bool& rebuildFrameGraph) : rebuildFrameGraph(rebuildFrameGraph)
-			{}
+            MessageHandler(bool& rebuildFrameGraph) : rebuildFrameGraph(rebuildFrameGraph)
+            {
+            }
 
             void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override
             {
                 rebuildFrameGraph = true;
-			}
+            }
 
             void OnWindowExposed(PlatformWindow* window) override
             {
@@ -1125,7 +1380,7 @@ float4 FragMain(PSInput input) : SV_TARGET
             bool& rebuildFrameGraph;
         };
 
-		MessageHandler msgHandler{rebuildFrameGraph};
+        MessageHandler msgHandler{ rebuildFrameGraph };
 
         app->AddMessageHandler(&msgHandler);
         auto handle = app->AddTickHandler(renderLoop);
@@ -1148,34 +1403,40 @@ float4 FragMain(PSInput input) : SV_TARGET
         app->RemoveTickHandler(handle);
         app->RemoveMessageHandler(&msgHandler);
 
-		// - Cleanup -
+        // - Cleanup -
 
         tagRegistry.ReleaseTag(depthDrawTag);
         tagRegistry.ReleaseTag(colorDrawTag);
 
-		gDynamicRHI->WaitToShutdown();
-        
+        gDynamicRHI->WaitToShutdown();
+
         delete scheduler;
 
-		for (int i = 0; i < kNumFrames; i++)
+        for (int i = 0; i < kNumFrames; i++)
         {
             delete perViewDataBuffers[i];
             delete perObjectDataBuffers[i];
         }
 
-		for (int i = 0; i < vertexBufferViews.GetSize(); i++)
+        delete fullScreenQuadVertexBufferView[0].GetBuffer();
+        fullScreenQuadVertexBufferView.Clear();
+
+        for (int i = 0; i < vertexBufferViews.GetSize(); i++)
         {
             delete vertexBufferViews[i].GetBuffer();
         }
+        vertexBufferViews.Clear();
         delete indexBufferView.GetBuffer();
         cubeDrawPacket = nullptr;
 
         delete swapChain;
-		delete vertShader; delete fragShader;
-        delete perViewSrg; delete perObjectSrg;
-        delete colorPipeline; delete depthPipeline;
+        delete vertShader; delete fragShader;
+        delete blurVertShader; delete blurFragShader;
+        delete perViewSrg; delete perObjectSrg; delete blurPerSceneSrg;
+        delete colorPipeline; delete depthPipeline; delete blurPipeline;
+        delete blurSampler;
+        delete fullScreenQuadDrawPacket;
 
         WINDOW_TEST_END;
     }
-
 }

@@ -135,11 +135,6 @@ namespace CE::Vulkan
 			}
 		}
 
-		if (operation == RHI::ScopeOperation::Compute)
-		{
-			String::IsAlphabet('a');
-		}
-
 		if (IsGraphicsPass())
 		{
 			if (prevSubPass == nullptr && nextSubPass != nullptr)
@@ -222,6 +217,12 @@ namespace CE::Vulkan
 				{
                     RHI::ShaderResourceGroupDescriptor passSrgDesc{};
                     passSrgDesc.layout = passSrgLayout;
+					passSrgDesc.name = "SRG_PerPass [" + this->GetId().GetString() + "]";
+
+					if (passShaderResourceGroup != nullptr)
+					{
+						delete passShaderResourceGroup;
+					}
                     
 					passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(passSrgDesc);
 
@@ -299,6 +300,12 @@ namespace CE::Vulkan
                         
                         RHI::ShaderResourceGroupDescriptor srgDesc{};
                         srgDesc.layout = srgLayout;
+						srgDesc.name = "SRG_PerPass [" + this->GetId().GetString() + "]";
+
+						if (passShaderResourceGroup != nullptr)
+						{
+							delete passShaderResourceGroup;
+						}
                         
 						passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
 

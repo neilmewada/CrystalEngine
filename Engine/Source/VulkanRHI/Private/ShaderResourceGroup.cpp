@@ -338,6 +338,8 @@ namespace CE::Vulkan
 			CE_LOG(Error, All, "Failed to create vulkan descriptor set layout");
 			return;
 		}
+
+		device->SetObjectDebugName((uint64_t)setLayout, VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, name.GetCString());
     }
 
     ShaderResourceGroup::~ShaderResourceGroup()

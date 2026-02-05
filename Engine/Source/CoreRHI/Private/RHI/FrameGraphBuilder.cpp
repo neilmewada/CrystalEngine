@@ -138,8 +138,8 @@ namespace CE::RHI
 	}
 
 	bool FrameGraphBuilder::ExecuteOnlyIf(const Name& variableName, FrameGraphVariableComparison comparisonOp, 
-		const FrameGraphVariable& comparisonValue, 
-		bool shouldClear)
+	                                      const FrameGraphVariable& comparisonValue, 
+	                                      bool shouldClear)
 	{
 		if (!currentScope || !frameGraph)
 			return false;

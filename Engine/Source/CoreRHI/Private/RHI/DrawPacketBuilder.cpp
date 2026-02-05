@@ -76,7 +76,7 @@ namespace CE::RHI
 	{
 		if (drawRequests.GetSize() >= drawRequests.GetCapacity())
 			return;
-		if (request.vertexBufferViews.IsEmpty() || (request.pipelineState == nullptr && request.pipelineCollection == nullptr))
+		if (request.vertexBufferViews.IsEmpty())// || (request.pipelineState == nullptr && request.pipelineCollection == nullptr))
 			return;
 		
         drawListMask.Set(request.drawItemTag);
