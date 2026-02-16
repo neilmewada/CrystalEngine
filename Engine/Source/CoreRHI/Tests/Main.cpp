@@ -796,6 +796,142 @@ float4 FragMain(PSInput input) : SV_TARGET
 
 #endif
 )";
+
+        constexpr char RHI_FrameGraph_HPassBlur[] = R"(
+#include "Core/Macros.hlsli"
+
+struct VSInput
+{
+    float3 position : POSITION;
+	float2 uv : TEXCOORD0;
+};
+
+struct PSInput
+{
+    float4 position : SV_POSITION;
+	float2 uv : TEXCOORD0;
+};
+
+#if VERTEX
+
+PSInput VertMain(VSInput input)
+{
+    PSInput o;
+    o.position = float4(input.position, 1.0);
+	o.uv = input.uv;
+    return o;
+}
+#endif
+
+#if FRAGMENT
+
+Texture2D<float4> _InputTexture : SRG_PerPass(t1);
+SamplerState _InputSampler : SRG_PerScene(s0);
+
+float4 HPassBlur(float2 uv, float2 texelSize)
+{
+	float4 sum = 0;
+	const int radius = 12;
+
+	float sigma = (float)radius / 2.0;
+    float sigma2 = sigma * sigma;
+	float totalWeight = 0;
+
+	for (int i = -radius; i <= radius; i++)
+    {
+        float2 offset = float2(i, 0) * texelSize;
+		float weight = exp(-(float(i * i)) / (2.0 * sigma2));
+
+        sum += _InputTexture.Sample(_InputSampler, uv + offset);
+
+		totalWeight += weight;
+    }
+
+	return sum / totalWeight;
+}
+
+float4 FragMain(PSInput input) : SV_TARGET
+{
+	uint width, height;
+    _InputTexture.GetDimensions(width, height);
+
+	const float2 uv = input.uv;
+
+    float4 c = _InputTexture.Sample(_InputSampler, uv);
+	c = HPassBlur(uv, float2(1.0 / width, 1.0 / height));
+    return float4(c.rgb, c.a);
+}
+
+#endif
+)";
+
+        constexpr char RHI_FrameGraph_VPassBlur[] = R"(
+#include "Core/Macros.hlsli"
+
+struct VSInput
+{
+    float3 position : POSITION;
+	float2 uv : TEXCOORD0;
+};
+
+struct PSInput
+{
+    float4 position : SV_POSITION;
+	float2 uv : TEXCOORD0;
+};
+
+#if VERTEX
+
+PSInput VertMain(VSInput input)
+{
+    PSInput o;
+    o.position = float4(input.position, 1.0);
+	o.uv = input.uv;
+    return o;
+}
+#endif
+
+#if FRAGMENT
+
+Texture2D<float4> _InputTexture : SRG_PerPass(t1);
+SamplerState _InputSampler : SRG_PerScene(s0);
+
+float4 VPassBlur(float2 uv, float2 texelSize)
+{
+	float4 sum = 0;
+	const int radius = 12;
+
+	float sigma = (float)radius / 2.0;
+    float sigma2 = sigma * sigma;
+	float totalWeight = 0;
+
+	for (int i = -radius; i <= radius; i++)
+    {
+        float2 offset = float2(0, i) * texelSize;
+		float weight = exp(-(float(i * i)) / (2.0 * sigma2));
+
+        sum += _InputTexture.Sample(_InputSampler, uv + offset);
+
+		totalWeight += weight;
+    }
+
+	return sum / totalWeight;
+}
+
+float4 FragMain(PSInput input) : SV_TARGET
+{
+	uint width, height;
+    _InputTexture.GetDimensions(width, height);
+
+	const float2 uv = input.uv;
+
+    float4 c = _InputTexture.Sample(_InputSampler, uv);
+	c = VPassBlur(uv, float2(1.0 / width, 1.0 / height));
+    return float4(c.rgb, c.a);
+}
+
+#endif
+)";
     }
 
     TEST(RHI, FrameGraph)
@@ -828,10 +964,16 @@ float4 FragMain(PSInput input) : SV_TARGET
         auto [vertShader, fragShader] = CompileGraphicsShader(vertBlob, fragBlob, reflection, RHI_FrameGraph_Shader, COUNTOF(RHI_FrameGraph_Shader));
 
         ShaderReflection blurReflection{};
-        BinaryBlob blurVertBlob;
-        BinaryBlob blurFragBlob;
+        BinaryBlob blurHVertBlob;
+        BinaryBlob blurHFragBlob;
         
-        auto [blurVertShader, blurFragShader] = CompileGraphicsShader(blurVertBlob, blurFragBlob, blurReflection, Shaders::RHI_FrameGraph_SinglePassBlur, COUNTOF(Shaders::RHI_FrameGraph_SinglePassBlur));
+        auto [blurHVertShader, blurHFragShader] = CompileGraphicsShader(blurHVertBlob, blurHFragBlob, blurReflection, RHI_FrameGraph_HPassBlur, COUNTOF(RHI_FrameGraph_HPassBlur));
+
+        ShaderReflection blurVReflection{};
+		BinaryBlob blurVVertBlob;
+		BinaryBlob blurVFragBlob;
+
+		auto [blurVVertShader, blurVFragShader] = CompileGraphicsShader(blurVVertBlob, blurVFragBlob, blurVReflection, RHI_FrameGraph_VPassBlur, COUNTOF(RHI_FrameGraph_VPassBlur));
 
         // - Shader Resources -
 
@@ -1012,7 +1154,8 @@ float4 FragMain(PSInput input) : SV_TARGET
 
         RHI::PipelineState* depthPipeline = nullptr;
         RHI::PipelineState* colorPipeline = nullptr;
-		RHI::PipelineState* blurPipeline = nullptr;
+		RHI::PipelineState* blurHPipeline = nullptr;
+		RHI::PipelineState* blurVPipeline = nullptr;
         {
             RHI::GraphicsPipelineDescriptor desc{};
 
@@ -1116,8 +1259,8 @@ float4 FragMain(PSInput input) : SV_TARGET
             desc.vertexAttributes[0].dataType = RHI::VertexAttributeDataType::Float3;
             desc.vertexAttributes[1].dataType = RHI::VertexAttributeDataType::Float2;
 
-			desc.shaderStages[0].shaderModule = blurVertShader;
-			desc.shaderStages[1].shaderModule = blurFragShader;
+			desc.shaderStages[0].shaderModule = blurHVertShader;
+			desc.shaderStages[1].shaderModule = blurHFragShader;
 
             desc.renderPassLayout.attachmentLayouts.Clear();
             desc.renderPassLayout.attachmentLayouts.Add(RHI::RenderPassAttachmentLayout{
@@ -1129,7 +1272,12 @@ float4 FragMain(PSInput input) : SV_TARGET
             desc.subpass = 0;
 
 			desc.name = "BlurPipeline";
-			blurPipeline = gDynamicRHI->CreateGraphicsPipeline(desc);
+			blurHPipeline = gDynamicRHI->CreateGraphicsPipeline(desc);
+
+            desc.shaderStages[0].shaderModule = blurVVertShader;
+            desc.shaderStages[1].shaderModule = blurVFragShader;
+
+            blurVPipeline = gDynamicRHI->CreateGraphicsPipeline(desc);
         }
 
         // - Draw List -
@@ -1193,6 +1341,8 @@ float4 FragMain(PSInput input) : SV_TARGET
         constexpr const char* kDepthPrePassId = "DepthPrePass";
         constexpr const char* kColorPassId = "ColorPass";
         constexpr const char* kBlurSinglePassId = "BlurSinglePass";
+        constexpr const char* kBlurHPassId = "BlurHPass";
+        constexpr const char* kBlurVPassId = "BlurVPass";
 
         bool rebuildFrameGraph = true;
 
@@ -1290,7 +1440,7 @@ float4 FragMain(PSInput input) : SV_TARGET
 
                         scheduler->UsePassSrgLayout(blurPassSrgLayout);
 
-						scheduler->UsePipeline(blurPipeline);
+						scheduler->UsePipeline(blurHPipeline);
 
                         scheduler->PresentSwapChain(swapChain);
                     }
@@ -1431,9 +1581,10 @@ float4 FragMain(PSInput input) : SV_TARGET
 
         delete swapChain;
         delete vertShader; delete fragShader;
-        delete blurVertShader; delete blurFragShader;
+        delete blurHVertShader; delete blurHFragShader;
+        delete blurVVertShader; delete blurVFragShader;
         delete perViewSrg; delete perObjectSrg; delete blurPerSceneSrg;
-        delete colorPipeline; delete depthPipeline; delete blurPipeline;
+        delete colorPipeline; delete depthPipeline; delete blurHPipeline; delete blurVPipeline;
         delete blurSampler;
         delete fullScreenQuadDrawPacket;
 
