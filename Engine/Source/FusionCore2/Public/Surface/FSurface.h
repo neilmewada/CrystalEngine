@@ -27,6 +27,7 @@ namespace CE
     protected:
 
         RHI::DrawListTag drawListTag = 0;
+		RHI::ScopeId scopeId;
 
         Array<Ref<FSurface>> childrenSurfaces;
         

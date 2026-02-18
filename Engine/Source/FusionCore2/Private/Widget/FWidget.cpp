@@ -7,6 +7,13 @@ namespace CE
     {
 
     }
-    
+
+    void FWidget::MarkPaintDirty()
+    {
+    }
+
+    void FWidget::MarkLayoutDirty()
+    {
+    }
 } // namespace CE
 

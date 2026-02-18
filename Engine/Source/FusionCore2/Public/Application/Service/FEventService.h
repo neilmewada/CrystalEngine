@@ -3,12 +3,12 @@
 namespace CE
 {
     CLASS()
-    class FUSIONCORE_API FPlatformEventService : public FService
+    class FUSIONCORE_API FEventService : public FService
     {
-        CE_CLASS(FPlatformEventService, FService)
+        CE_CLASS(FEventService, FService)
     protected:
 
-        FPlatformEventService();
+        FEventService();
         
     public:
 
@@ -20,4 +20,4 @@ namespace CE
     
 } // namespace CE
 
-#include "FPlatformEventService.rtti.h"
+#include "FEventService.rtti.h"

@@ -75,7 +75,40 @@ namespace RenderingTests
         RHI::DrawListMask drawListMask{};
         HashSet<RHI::DrawListTag> drawListTags{};
 
+        // - Setup draw list mask
 
+		for (int i = 0; i < application->GetSurfaceCount(); i++)
+        {
+            if (Ref<FSurface> surface = application->GetSurface(i))
+            {
+                surface->GetDrawListMask(drawListMask);
+            }
+        }
+
+        for (int i = 0; i < drawListMask.GetSize(); ++i)
+        {
+            if (drawListMask.Test(i))
+            {
+                drawListTags.Add((u8)i);
+            }
+        }
+
+        // - Enqueue Fusion draw packets
+
+        drawList.Init(drawListMask);
+
+        for (int i = 0; i < application->GetSurfaceCount(); i++)
+        {
+            if (Ref<FSurface> surface = application->GetSurface(i))
+            {
+                // TODO: Implement below method
+				//surface->FlushDrawPackets(drawList, curImageIndex);
+            }
+        }
+
+        drawList.Finalize();
+
+        scheduler->EndExecution();
 	}
 
 	void FusionRendererService::BuildFrameGraph()

@@ -1,5 +1,14 @@
 #pragma once
 
+#define FUSION_TESTS
+
+#define FUSION_FRIENDS FUSION_TESTS\
+    friend class FWidget;\
+	friend class FSurface;\
+	friend class FNativeSurface;
+
+#define FUSION_WIDGET FUSION_FRIENDS
+
 #define FNewOwned(WidgetClass, Parent)\
 	(*CreateObject<WidgetClass>(Parent, #WidgetClass))
 #define FNewOwnedDynamic(WidgetClass, Parent, WidgetDynamicClass)\

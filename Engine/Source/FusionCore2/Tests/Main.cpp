@@ -107,7 +107,7 @@ static void TestBegin(bool gui)
 
 		FApplicationInitInfo initInfo = {};
 		initInfo.services = {
-			GetStaticClass<FPlatformEventService>(),
+			GetStaticClass<FEventService>(),
 			GetStaticClass<FusionRendererService>(),
 		};
 

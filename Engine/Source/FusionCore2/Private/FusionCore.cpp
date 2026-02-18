@@ -23,7 +23,7 @@ namespace CE
 
         virtual void RegisterTypes() override
         {
-
+            CE_REGISTER_TYPES(FAffineTransform);
         }
     };
 }

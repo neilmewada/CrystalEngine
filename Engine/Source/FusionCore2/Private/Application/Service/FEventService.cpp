@@ -3,18 +3,22 @@
 namespace CE
 {
 
-    FPlatformEventService::FPlatformEventService()
+    FEventService::FEventService()
     {
 
     }
 
-    void FPlatformEventService::TickService(FServiceTickPhase tickPhase)
+    void FEventService::TickService(FServiceTickPhase tickPhase)
     {
         if (tickPhase == FServiceTickPhase::PumpPlatformEvents)
         {
             PlatformApplication::Get()->Tick();
             InputManager::Get().Tick();
 		}
+        else if (tickPhase == FServiceTickPhase::DispatchInput)
+        {
+	        
+        }
     }
 } // namespace CE
 

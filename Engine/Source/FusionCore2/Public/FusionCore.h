@@ -5,19 +5,15 @@
 #include "CoreRPI.h"
 
 
-#define FUSION_TESTS
-
-
-#define FUSION_FRIENDS FUSION_TESTS\
-    friend class FWidget;
-
-
 #include "FusionMacros.h"
+
+// Math
+#include "Math/FAffineTransform.h"
 
 // Application
 #include "Application/Service/FService.h"
 #include "Application/FApplication.h"
-#include "Application/Service/FPlatformEventService.h"
+#include "Application/Service/FEventService.h"
 #include "Application/Service/FRenderService.h"
 
 // Surface

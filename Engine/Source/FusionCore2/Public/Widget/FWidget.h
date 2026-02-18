@@ -3,7 +3,7 @@
 namespace CE
 {
     CLASS()
-    class FUSIONCORE_API FWidget : public CE::Object
+    class FUSIONCORE_API FWidget : public Object
     {
         CE_CLASS(FWidget, CE::Object)
     protected:
@@ -12,6 +12,24 @@ namespace CE
         
     public:
 
+        virtual void MarkPaintDirty();
+
+        virtual void MarkLayoutDirty();
+
+    protected:
+
+		virtual void OnFusionPropertyModified(const Name& propertyName) {}
+
+
+    private:
+
+        FIELD()
+		WeakRef<FWidget> parentWidget;
+
+        FIELD()
+		WeakRef<FSurface> parentSurface;
+
+        FUSION_WIDGET;
     };
     
 } // namespace CE
