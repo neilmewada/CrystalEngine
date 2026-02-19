@@ -77,13 +77,7 @@ namespace RenderingTests
 
         // - Setup draw list mask
 
-		for (int i = 0; i < application->GetSurfaceCount(); i++)
-        {
-            if (Ref<FSurface> surface = application->GetSurface(i))
-            {
-                surface->GetDrawListMask(drawListMask);
-            }
-        }
+		UpdateDrawListMask(drawListMask);
 
         for (int i = 0; i < drawListMask.GetSize(); ++i)
         {

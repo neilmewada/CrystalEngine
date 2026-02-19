@@ -14,15 +14,19 @@ namespace CE
         
     public:
 
-		void GetDrawListMask(DrawListMask& drawListMask);
-
         virtual void Initialize() = 0;
 
 		virtual void Shutdown() = 0;
 
+        void GetDrawListMask(DrawListMask& drawListMask);
+
 		void AddChildSurface(Ref<FSurface> childSurface);
 
         bool IsNativeSurface();
+
+		void SetOwningWidget(Ref<FWidget> widget) { owningWidget = widget; }
+
+		Ref<FWidget> GetOwningWidget() const { return owningWidget; }
 
     protected:
 
@@ -32,6 +36,9 @@ namespace CE
         Array<Ref<FSurface>> childrenSurfaces;
         
 		WeakRef<FSurface> parentSurface;
+
+		FIELD()
+		Ref<FWidget> owningWidget;
     };
     
 } // namespace CE

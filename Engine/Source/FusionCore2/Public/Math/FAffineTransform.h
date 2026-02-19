@@ -96,6 +96,8 @@ namespace CE
         // (A * B).TransformPoint(p) == A.TransformPoint(B.TransformPoint(p))
         friend FAffineTransform operator*(const FAffineTransform& A, const FAffineTransform& B)
         {
+            ZoneScoped;
+
             FAffineTransform out;
 
             // Linear part: A.linear * B.linear
@@ -120,6 +122,8 @@ namespace CE
         // Inverse transform (if invertible)
         FAffineTransform Inverse(float epsilon = 1e-8f) const
         {
+            ZoneScoped;
+
             const float det = Determinant();
             if (std::fabs(det) <= epsilon)
             {
@@ -150,6 +154,8 @@ namespace CE
         // Returns the axis-aligned bounding box of a transformed rect (by transforming 4 corners).
         Rect TransformAABB(const Rect& r) const
         {
+            ZoneScoped;
+
             const Vec2 p0 = TransformPoint(Vec2(r.min.x, r.min.y));
             const Vec2 p1 = TransformPoint(Vec2(r.max.x, r.min.y));
             const Vec2 p2 = TransformPoint(Vec2(r.min.x, r.max.y));
@@ -165,6 +171,16 @@ namespace CE
             );
 
             return Rect{ mn, mx };
+        }
+
+        void SerializePOD(Stream* stream)
+        {
+			*stream << m00 << m01 << m10 << m11 << tx << ty;
+        }
+
+        void DeserializePOD(Stream* stream)
+        {
+			*stream >> m00 >> m01 >> m10 >> m11 >> tx >> ty;
         }
     };
     
