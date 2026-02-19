@@ -32,5 +32,74 @@ namespace CE
 		return IsOfType<FNativeSurface>();
     }
 
+    void FSurface::SetOwningWidget(Ref<FWidget> widget)
+    {
+		this->owningWidget = widget;
+		widget->parentSurface = this;
+    }
+
+    void FSurface::AddPendingLayoutRoot(Ref<FWidget> layoutRoot)
+    {
+        if (!layoutRoot)
+            return;
+
+		if (pendingLayoutRootIds.Exists(layoutRoot->GetUuid()))
+            return;
+
+		pendingLayoutRoots.Add(layoutRoot);
+        pendingLayoutRootIds.Add(layoutRoot->GetUuid());
+    }
+
+    void FSurface::TickSurface(f32 deltaTime)
+    {
+		if (!owningWidget)
+            return;
+
+        // - Layout
+
+        try
+        {
+            HashSet<FWidget*> pendingSet;
+            for (auto& root : pendingLayoutRoots)
+                pendingSet.Add(root.Get());
+
+            // Remove any root whose ancestor is also pending
+            pendingLayoutRoots.RemoveAll([&](const Ref<FWidget>& root)
+                {
+                    Ref<FWidget> ancestor = root->GetParentWidget();
+                    while (ancestor != nullptr)
+                    {
+                        if (pendingSet.Exists(ancestor.Get()))
+                            return true;
+                        ancestor = ancestor->GetParentWidget();
+                    }
+                    return false;
+                });
+
+			for (Ref<FWidget> root : pendingLayoutRoots)
+            {
+                // TODO: Do layout
+            }
+        }
+        catch (const Exception& exception)
+        {
+            CE_LOG(Critical, All, "Exception in FSurface::TickSurface on class {}, while calculating Layout. Stack Trace:\n{}", GetClass()->GetName().GetLastComponent(), exception.GetStackTraceString(true));
+        }
+
+        pendingLayoutRootIds.Clear();
+        pendingLayoutRoots.Clear();
+
+        // - Paint
+
+        try
+        {
+			// TODO: Painting logic
+        }
+        catch (const Exception& exception)
+        {
+            CE_LOG(Critical, All, "Exception in FSurface::TickSurface on class {}, while painting. Stack Trace:\n{}", GetClass()->GetName().GetLastComponent(), exception.GetStackTraceString(true));
+        }
+    }
+
 } // namespace CE
 

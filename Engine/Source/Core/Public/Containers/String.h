@@ -39,6 +39,8 @@ namespace CE
         String(Iterator begin, Iterator end);
 
         String(String&& move) noexcept;
+		String& operator=(String&& move) noexcept;
+
         String(const String& copy);
         String& operator=(const String& rhs);
         String& operator=(const std::string& rhs);

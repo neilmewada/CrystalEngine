@@ -12,11 +12,8 @@ namespace CE
 
         FSurface();
         
-    public:
 
-        virtual void Initialize() = 0;
-
-		virtual void Shutdown() = 0;
+    public: // - Public API -
 
         void GetDrawListMask(DrawListMask& drawListMask);
 
@@ -24,14 +21,30 @@ namespace CE
 
         bool IsNativeSurface();
 
-		void SetOwningWidget(Ref<FWidget> widget) { owningWidget = widget; }
+        void SetOwningWidget(Ref<FWidget> widget);
 
 		Ref<FWidget> GetOwningWidget() const { return owningWidget; }
+
+
+    public: // - Layout - 
+
+		void AddPendingLayoutRoot(Ref<FWidget> layoutRoot);
+
+    public: // - Lifecycle -
+
+        virtual void Initialize() = 0;
+
+        virtual void Shutdown() = 0;
+
+        virtual void TickSurface(f32 deltaTime);
 
     protected:
 
         RHI::DrawListTag drawListTag = 0;
 		RHI::ScopeId scopeId;
+
+		HashSet<Uuid> pendingLayoutRootIds;
+		Array<Ref<FWidget>> pendingLayoutRoots;
 
         Array<Ref<FSurface>> childrenSurfaces;
         

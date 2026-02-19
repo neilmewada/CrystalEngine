@@ -8,11 +8,27 @@ namespace CE
 
     }
 
-    void FContainerWidget::Construct()
+    void FContainerWidget::AddChildWidget(Ref<FWidget> childWidget)
     {
-        Super::Construct();
-        
+		if (!children.Exists(childWidget))
+        {
+            children.Add(childWidget);
+            childWidget->parentWidget = this;
+
+            MarkLayoutDirty();
+        }
     }
-    
+
+    void FContainerWidget::RemoveChildWidget(Ref<FWidget> childWidget)
+    {
+        if (children.Exists(childWidget))
+        {
+            children.Remove(childWidget);
+            childWidget->parentWidget = nullptr;
+
+            MarkLayoutDirty();
+		}
+    }
+
 }
 

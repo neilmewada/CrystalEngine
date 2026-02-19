@@ -172,16 +172,28 @@ namespace CE
 
 		inline operator T*() const
 		{
+			if (ptr == nullptr)
+			{
+				throw NullPointerException("The dereferenced IntrusivePtr<T> is NULL.");
+			}
 			return ptr;
 		}
 
 		inline T& operator*() const
 		{
+			if (ptr == nullptr)
+			{
+				throw NullPointerException("The dereferenced IntrusivePtr<T> is NULL.");
+			}
 			return *ptr;
 		}
 
 		inline T* operator->() const
 		{
+			if (ptr == nullptr)
+			{
+				throw NullPointerException("The dereferenced IntrusivePtr<T> is NULL.");
+			}
 			return ptr;
 		}
 

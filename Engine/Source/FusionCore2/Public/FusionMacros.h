@@ -5,6 +5,7 @@
 #define FUSION_FRIENDS FUSION_TESTS\
     friend class FWidget;\
 	friend class FSurface;\
+	friend class FContainerWidget;\
 	friend class FNativeSurface;
 
 #define FUSION_WIDGET FUSION_FRIENDS
@@ -52,7 +53,8 @@
 		auto PropertyName() const { return this->m_##PropertyName; }
 
 #define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkLayoutDirty())
-#define FUSION_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkPaintDirty())
+#define FUSION_PAINT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkPaintDirty())
+#define FUSION_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName)
 
 /*
 #define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkLayoutDirty())

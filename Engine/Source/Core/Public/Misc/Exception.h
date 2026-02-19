@@ -3,6 +3,7 @@
 #include "CoreTypes.h"
 
 #include <exception>
+#include "cpptrace/cpptrace.hpp"
 
 namespace CE
 {
@@ -10,18 +11,35 @@ namespace CE
     class CORE_API Exception : public std::exception
     {
     public:
-        Exception() : message("Unknown error")
-        {}
+        Exception() : message("Unknown error"), stackTrace(cpptrace::generate_trace())
+        {
+	        
+        }
 
-        Exception(const String& message) : message(message)
-        {}
+        Exception(const String& message) : message(message), stackTrace(cpptrace::generate_trace())
+        {
+	        
+        }
 
-        const char* what() const throw () {
+        const char* what() const throw () 
+    	{
             return message.GetCString();
         }
 
+        const cpptrace::stacktrace& GetStackTrace() const
+        {
+            return stackTrace;
+		}
+
+        String GetStackTraceString(bool useColors) const
+        {
+            return std::move(String(stackTrace.to_string(useColors)));
+		}
+
     private:
         String message{};
+
+		cpptrace::stacktrace stackTrace;
     };
 
     class CORE_API ParseFailedException : public Exception

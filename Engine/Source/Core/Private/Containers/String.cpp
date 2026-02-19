@@ -70,6 +70,27 @@ namespace CE
         move.StringLength = 0;
     }
 
+    String& String::operator=(String&& move) noexcept
+    {
+        if (this != &move)
+        {
+            // Free current buffer
+            Free();
+
+            // Move data from 'move'
+            Buffer = move.Buffer;
+            Capacity = move.Capacity;
+            StringLength = move.StringLength;
+
+            // Zero out 'move'
+            move.Buffer = nullptr;
+            move.Capacity = 0;
+            move.StringLength = 0;
+        }
+
+		return *this;
+    }
+
     String::String(const String& copy)
     {
         CopyCString(copy.GetCString(), copy.StringLength);

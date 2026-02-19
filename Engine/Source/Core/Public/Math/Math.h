@@ -59,31 +59,31 @@ namespace CE
             return *(f32*)(&t1);
         }
 
-        static bool ApproxEquals(f32 a, f32 b) { return fpclassify(a - b) == FP_ZERO; }
-        static bool ApproxEquals(f64 a, f64 b) { return fpclassify(a - b) == FP_ZERO; }
-        static bool ApproxEquals(s32 a, s32 b) { return a == b; }
+        static CE_FORCE_INLINE bool ApproxEquals(f32 a, f32 b) { return fpclassify(a - b) == FP_ZERO; }
+        static CE_FORCE_INLINE bool ApproxEquals(f64 a, f64 b) { return fpclassify(a - b) == FP_ZERO; }
+        static CE_FORCE_INLINE bool ApproxEquals(s32 a, s32 b) { return a == b; }
 
         static constexpr f32 Infinity() { return NumericLimits<f32>::Infinity(); }
 
-        CE_INLINE static f32 ToDegrees(f32 radians) { return TO_DEGREES(radians); }
-        CE_INLINE static f32 ToRadians(f32 degrees) { return TO_RADIANS(degrees); }
+        CE_FORCE_INLINE static f32 ToDegrees(f32 radians) { return TO_DEGREES(radians); }
+        CE_FORCE_INLINE static f32 ToRadians(f32 degrees) { return TO_RADIANS(degrees); }
 
-        CE_INLINE static f32 Sin(f32 radians) { return sin(radians); }
-        CE_INLINE static f32 ASin(f32 sine) { return asin(sine); }
+        CE_FORCE_INLINE static f32 Sin(f32 radians) { return sin(radians); }
+        CE_FORCE_INLINE static f32 ASin(f32 sine) { return asin(sine); }
 
-        CE_INLINE static f32 Cos(f32 radians) { return cos(radians); }
-        CE_INLINE static f32 ACos(f32 cosine) { return acos(cosine); }
+        CE_FORCE_INLINE static f32 Cos(f32 radians) { return cos(radians); }
+        CE_FORCE_INLINE static f32 ACos(f32 cosine) { return acos(cosine); }
 
-        CE_INLINE static f32 Tan(f32 radians) { return tan(radians); }
-        CE_INLINE static f32 ATan(f32 tangent) { return atan(tangent); }
+        CE_FORCE_INLINE static f32 Tan(f32 radians) { return tan(radians); }
+        CE_FORCE_INLINE static f32 ATan(f32 tangent) { return atan(tangent); }
 
-        CE_INLINE static f32 Abs(f32 value) { return abs(value); }
-        CE_INLINE static f64 Abs(f64 value) { return abs(value); }
+        CE_FORCE_INLINE static f32 Abs(f32 value) { return abs(value); }
+        CE_FORCE_INLINE static f64 Abs(f64 value) { return abs(value); }
 
-        CE_INLINE static s32 Abs(s32 value) { return abs(value); }
-        CE_INLINE static s64 Abs(s64 value) { return abs(value); }
+        CE_FORCE_INLINE static s32 Abs(s32 value) { return abs(value); }
+        CE_FORCE_INLINE static s64 Abs(s64 value) { return abs(value); }
 
-        CE_INLINE static f32 Sqrt(f32 value) { return sqrt(value); }
+        CE_FORCE_INLINE static f32 Sqrt(f32 value) { return sqrt(value); }
 
         template<typename T1, typename T2>
         INLINE static auto Pow(T1 base, T2 power) { return pow(base, power); }
@@ -116,32 +116,32 @@ namespace CE
             return max;
         }
 
-        static f32 Round(f32 value)
+        CE_FORCE_INLINE static f32 Round(f32 value)
         {
             return std::round(value);
         }
 
-        static f64 Round(f64 value)
+        CE_FORCE_INLINE static f64 Round(f64 value)
         {
             return std::round(value);
         }
 
-        static s32 RoundToInt(f32 value)
+        CE_FORCE_INLINE static s32 RoundToInt(f32 value)
         {
             return std::lround(value);
         }
 
-        static s64 RoundToInt64(f32 value)
+        CE_FORCE_INLINE static s64 RoundToInt64(f32 value)
         {
             return std::llround(value);
         }
 
-        static s32 RoundToInt(f64 value)
+        CE_FORCE_INLINE static s32 RoundToInt(f64 value)
         {
             return std::lround(value);
         }
 
-        static s64 RoundToInt64(f64 value)
+        CE_FORCE_INLINE static s64 RoundToInt64(f64 value)
         {
             return std::llround(value);
         }
@@ -178,7 +178,7 @@ namespace CE
     };
 
 	template<typename T>
-	FORCE_INLINE bool IsNan(T value)
+    CE_FORCE_INLINE bool IsNan(T value)
 	{
 		return std::isnan(value);
 	}

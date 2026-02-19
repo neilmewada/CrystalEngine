@@ -2,6 +2,8 @@
 
 namespace CE
 {
+    // Access properties: left, top, right, bottom
+	using FMargin = Vec4;
 
     struct FUSIONCORE_API FAffineTransform
     {
@@ -112,6 +114,18 @@ namespace CE
 
             return out;
         }
+
+        inline bool operator==(const FAffineTransform& rhs) const
+        {
+            return Math::ApproxEquals(m00, rhs.m00) && Math::ApproxEquals(m01, rhs.m01) &&
+                Math::ApproxEquals(m10, rhs.m10) && Math::ApproxEquals(m11, rhs.m11) &&
+                Math::ApproxEquals(tx, rhs.tx) && Math::ApproxEquals(ty, rhs.ty);
+		}
+
+        inline bool operator!=(const FAffineTransform& rhs) const
+        {
+            return !operator==(rhs);
+		}
 
         FAffineTransform& operator*=(const FAffineTransform& rhs)
         {

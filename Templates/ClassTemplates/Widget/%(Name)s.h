@@ -10,8 +10,6 @@ namespace %(NameSpace)s
 
         %(Name)s();
 
-        void Construct() override;
-
     public: // - Public API -
 
 

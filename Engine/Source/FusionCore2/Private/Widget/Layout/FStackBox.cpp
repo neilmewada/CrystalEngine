@@ -8,11 +8,6 @@ namespace CE
 
     }
 
-    void FStackBox::Construct()
-    {
-        Super::Construct();
-        
-    }
     
 }
 

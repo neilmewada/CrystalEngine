@@ -21,6 +21,9 @@
 #include "Surface/FNativeSurface.h"
 
 // Widget
+#include "Widget/Layout/LayoutTypes.h"
 #include "Widget/FWidget.h"
+#include "Widget/FContainerWidget.h"
+#include "Widget/Layout/FStackBox.h"
 
 
