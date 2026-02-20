@@ -10,7 +10,9 @@ namespace CE
 
         FCompoundWidget();
 
-    public: // - Public API -
+    public: 
+    	
+    	// - Public API -
 
         void SetParentSurfaceRecursive(Ref<FSurface> surface) override;
 
@@ -19,6 +21,14 @@ namespace CE
         Ref<FWidget> GetChild() const { return m_Child; }
 
         void SetChild(Ref<FWidget> child);
+
+
+		// - Layout -
+
+        Vec2 MeasureContent(Vec2 availableSize) override;
+
+		void ArrangeContent(Vec2 finalSize) override;
+
 
     private: // - Internal -
 

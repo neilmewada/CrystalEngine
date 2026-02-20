@@ -8,9 +8,16 @@ namespace CE
 	    None = 0,
         PaintDirty = BIT(0),
 		LayoutDirty = BIT(1),
-		Faulted = BIT(2)
+		Faulted = BIT(2),
+		Disabled = BIT(3),
+		Hidden = BIT(4)
     };
     ENUM_CLASS_FLAGS(FWidgetFlags)
+
+    struct FWidgetBuilder
+    {
+        FWidgetBuilder() {}
+    };
 
     CLASS()
     class FUSIONCORE_API FWidget : public Object
@@ -36,6 +43,10 @@ namespace CE
 
         CE_FORCE_INLINE bool IsFaulted() const { return EnumHasAnyFlags(flags, FWidgetFlags::Faulted); }
 
+		CE_FORCE_INLINE bool IsEnabled() const { return !EnumHasAnyFlags(flags, FWidgetFlags::Disabled); }
+
+		CE_FORCE_INLINE bool IsVisible() const { return !EnumHasAnyFlags(flags, FWidgetFlags::Hidden); }
+
     public:
 
     	// - Layout -
@@ -45,6 +56,8 @@ namespace CE
 		Vec2 GetLayoutSize() const { return layoutSize; }
 
 		void SetLayoutPosition(Vec2 newPosition) { layoutPosition = newPosition; }
+
+		Vec2 GetDesiredSize() const { return desiredSize; }
 
         virtual bool IsLayoutRoot();
 
@@ -105,6 +118,8 @@ namespace CE
         FIELD()
 		Vec2 layoutSize;
 
+        FIELD()
+		Vec2 desiredSize;
 
     public: // - Fusion Properties -
 
@@ -125,8 +140,100 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(CE::HAlign, HAlign);
         FUSION_LAYOUT_PROPERTY(CE::VAlign, VAlign);
 
-        Self& Width(f32 width);
-        Self& Height(f32 height);
+        FUSION_CUSTOM_PROPERTY_SET(f32, Width)
+        {
+            return self
+                .MinWidth(value)
+                .MaxWidth(value);
+        }
+
+        FUSION_CUSTOM_PROPERTY_SET(f32, Height)
+        {
+            return self
+				.MinHeight(value)
+				.MaxHeight(value);
+		}
+
+		FUSION_CUSTOM_PROPERTY_SET(bool, Enabled)
+        {
+			bool isCurrentlyEnabled = !EnumHasAnyFlags(self.flags, FWidgetFlags::Disabled);
+			if (value == isCurrentlyEnabled)
+                return self;
+
+            if (value)
+            {
+                self.flags &= ~FWidgetFlags::Disabled;
+            }
+            else
+            {
+                self.flags |= FWidgetFlags::Disabled;
+			}
+
+			self.MarkLayoutDirty();
+            return self;
+        }
+
+        FUSION_CUSTOM_PROPERTY_GET(bool, Enabled)
+        {
+            return IsEnabled();
+        }
+
+        FUSION_CUSTOM_PROPERTY_SET(bool, Visible)
+        {
+			bool isCurrentlyVisible = !EnumHasAnyFlags(self.flags, FWidgetFlags::Hidden);
+			if (value == isCurrentlyVisible)
+                return self;
+
+			if (value)
+            {
+                self.flags &= ~FWidgetFlags::Hidden;
+            }
+            else
+            {
+                self.flags |= FWidgetFlags::Hidden;
+            }
+            
+            self.MarkPaintDirty();
+            return self;
+        }
+
+        FUSION_CUSTOM_PROPERTY_GET(bool, Visible)
+        {
+            return IsVisible() || !IsEnabled();
+		}
+
+        template<typename TWidget> requires TIsBaseClassOf<FWidget, TWidget>::Value
+        TWidget& As()
+        {
+            TWidget* cast = Object::CastTo<TWidget>(this);
+            if (cast == nullptr)
+            {
+                throw FException(String::Format("FWidget::As(): Cannot cast object ({}) to type {}",
+                    GetName(), GetStaticClass<TWidget>()->GetName()),
+                    this);
+            }
+            return (TWidget&)*cast;
+        }
+
+        template<typename TWidget> requires TIsBaseClassOf<FWidget, TWidget>::Value
+        TWidget& Assign(TWidget*& out)
+        {
+            out = (TWidget*)this;
+            return *out;
+        }
+
+        template<typename TWidget> requires TIsBaseClassOf<FWidget, TWidget>::Value
+        TWidget& Assign(Ref<TWidget>& out)
+        {
+            out = (TWidget*)this;
+            return *out;
+        }
+
+        FUSION_CUSTOM_PROPERTY_SET(String, Name)
+        {
+            self.SetName(value);
+            return self;
+        }
 
     private:
 
@@ -137,6 +244,7 @@ namespace CE
         FUSION_WIDGET;
     };
 
+    
 } // namespace CE
 
 #include "FWidget.rtti.h"

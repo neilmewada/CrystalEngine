@@ -7,6 +7,39 @@ using namespace CE;
 namespace RenderingTests
 {
 	CLASS()
+	class TestWindow : public FCompoundWidget
+	{
+		CE_CLASS(TestWindow, FCompoundWidget)
+	public:
+
+		TestWindow()
+		{
+			
+		}
+
+		void Construct() override
+		{
+			Super::Construct();
+
+			Child(
+				FAssignNew(FVerticalStack, vstack)
+				.HAlign(HAlign::Fill)
+				.VAlign(VAlign::Fill)
+				.Enabled(true)
+				.Visible(true)
+				.Name("RootStack")
+				(
+					FNew(FWidget)
+					.Height(25)
+				)
+			);
+		}
+
+	
+		Ref<FVerticalStack> vstack;
+	};
+
+	CLASS()
 	class FusionRendererService : public FRenderService, public ApplicationMessageHandler
 	{
 		CE_CLASS(FusionRendererService, FRenderService)

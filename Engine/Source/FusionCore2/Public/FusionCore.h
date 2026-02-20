@@ -7,6 +7,9 @@
 
 #include "FusionMacros.h"
 
+// Exception
+#include "Exception/FException.h"
+
 // Math
 #include "Math/FAffineTransform.h"
 

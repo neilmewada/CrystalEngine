@@ -15,7 +15,15 @@ namespace CE
 
         Super::OnAfterConstruct();
 
-        Construct();
+        try
+        {
+            Construct();
+        }
+        catch (const Exception& exception)
+        {
+            CE_LOG(Error, All, "Exception occurred during widget [{}] construction: {}\nStack Trace:\n{}", GetClass()->GetName().GetLastComponent(), exception.what(), exception.GetStackTraceString(true));
+	        flags |= FWidgetFlags::Faulted;
+        }
     }
 
     void FWidget::Construct()
@@ -125,7 +133,8 @@ namespace CE
 
     Vec2 FWidget::MeasureContent(Vec2 availableSize)
     {
-        return GetMinimumContentSize();
+		desiredSize = GetMinimumContentSize();
+        return desiredSize;
     }
 
     void FWidget::ArrangeContent(Vec2 finalSize)
@@ -150,20 +159,6 @@ namespace CE
         {
             parent->DetachChild(this);
         }
-    }
-
-    FWidget::Self& FWidget::Width(f32 width)
-    {
-        return (*this)
-            .MinWidth(width)
-            .MaxWidth(width);
-    }
-
-    FWidget::Self& FWidget::Height(f32 height)
-    {
-        return (*this)
-            .MinHeight(height)
-            .MaxHeight(height);
     }
 
 } // namespace CE

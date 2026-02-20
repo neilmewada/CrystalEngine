@@ -31,6 +31,44 @@ namespace CE
 			return children[index];
 		}
 
+        template<typename... TArgs>
+        struct TValidate_Children : TFalseType
+        {
+        };
+
+        template<typename T>
+        struct TValidate_Children<T> : TBoolConst<TIsBaseClassOf<FWidget, T>::Value or TIsBaseClassOf<FWidgetBuilder, T>::Value>
+        {
+        };
+
+        template<typename TFirst, typename... TRest>
+        struct TValidate_Children<TFirst, TRest...> : TBoolConst<TValidate_Children<TFirst>::Value and TValidate_Children<TRest...>::Value>
+        {
+        };
+
+        template<typename... TArgs> requires TValidate_Children<TArgs...>::Value and (sizeof...(TArgs) > 0)
+        FContainerWidget& operator()(const TArgs&... childWidget)
+        {
+            using TupleType = std::tuple<const TArgs&...>;
+            TupleType args = { childWidget... };
+
+            constexpr_for<0, sizeof...(TArgs), 1>([&](auto i)
+                {
+                    using ArgTypeBase = std::tuple_element_t<i(), TupleType>;
+                    using ArgType = std::remove_cvref_t<ArgTypeBase>;
+                    if constexpr (TIsBaseClassOf<FWidget, ArgType>::Value)
+                    {
+                        this->AddChildWidget(const_cast<ArgType*>(&std::get<i()>(args)));
+                    }
+                    else if constexpr (TIsBaseClassOf<FWidgetBuilder, ArgType>::Value)
+                    {
+                        const_cast<ArgType*>(&std::get<i()>(args))->Build(this);
+                    }
+                });
+
+            return *this;
+        }
+
     protected: // - Internal -
 
         FIELD()
@@ -41,7 +79,7 @@ namespace CE
 
         FUSION_WIDGET;
     };
-    
+
 }
 
 #include "FContainerWidget.rtti.h"

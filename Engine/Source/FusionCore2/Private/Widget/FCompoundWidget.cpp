@@ -65,6 +65,87 @@ namespace CE
         MarkLayoutDirty();
     }
 
+    Vec2 FCompoundWidget::MeasureContent(Vec2 availableSize)
+    {
+        Vec2 baseSize = GetMinimumContentSize();
+
+		if (!m_Child || !m_Child->Enabled())
+        {
+            return desiredSize = ApplyLayoutConstraints(baseSize);
+        }
+
+		FMargin childMargin = m_Child->Margin();
+
+        Vec2 childAvailableSize = Vec2(
+            Math::Max(0.0f, availableSize.x - (childMargin.left + childMargin.right + m_Padding.left + m_Padding.right)),
+            Math::Max(0.0f, availableSize.y - (childMargin.top + childMargin.bottom + m_Padding.top + m_Padding.bottom))
+        );
+
+        Vec2 childSize = m_Child->MeasureContent(childAvailableSize);
+
+        return desiredSize = ApplyLayoutConstraints(Vec2(
+            childSize.x + childMargin.left + childMargin.right + m_Padding.left + m_Padding.right,
+            childSize.y + childMargin.top + childMargin.bottom + m_Padding.top + m_Padding.bottom
+        ));
+    }
+
+    void FCompoundWidget::ArrangeContent(Vec2 finalSize)
+    {
+	    Super::ArrangeContent(finalSize);
+
+		if (!m_Child || !m_Child->Enabled())
+            return;
+
+        FMargin childMargin = m_Child->Margin();
+
+        f32 childAreaWidth = Math::Max(0.0f, finalSize.x - m_Padding.left - m_Padding.right - childMargin.left - childMargin.right);
+        f32 childAreaHeight = Math::Max(0.0f, finalSize.y - m_Padding.top - m_Padding.bottom - childMargin.top - childMargin.bottom);
+
+        Vec2 childPos = Vec2(m_Padding.left + childMargin.left, m_Padding.top + childMargin.top);
+        Vec2 childSize;
+
+	    switch (m_HAlign)
+	    {
+	    case HAlign::Auto:
+	    case HAlign::Fill:
+			childSize.x = childAreaWidth;
+		    break;
+	    case HAlign::Left:
+			childSize.x = m_Child->GetDesiredSize().x;
+		    break;
+	    case HAlign::Center:
+			childSize.x = m_Child->GetDesiredSize().x;
+            childPos.x += (childAreaWidth - childSize.x) / 2.0f;
+		    break;
+	    case HAlign::Right:
+			childSize.x = m_Child->GetDesiredSize().x;
+			childPos.x += childAreaWidth - childSize.x;
+		    break;
+	    }
+
+        switch (m_VAlign)
+        {
+		case VAlign::Auto:
+		case VAlign::Fill:
+			childSize.y = childAreaHeight;
+			break;
+		case VAlign::Top:
+			childSize.y = m_Child->GetDesiredSize().y;
+			break;
+		case VAlign::Center:
+			childSize.y = m_Child->GetDesiredSize().y;
+			childPos.y += (childAreaHeight - childSize.y) / 2.0f;
+			break;
+		case VAlign::Bottom:
+			childSize.y = m_Child->GetDesiredSize().y;
+			childPos.y += childAreaHeight - childSize.y;
+			break;
+        }
+
+		m_Child->SetLayoutPosition(childPos);
+        m_Child->ArrangeContent(childSize);
+    }
+
     FCompoundWidget& FCompoundWidget::Child(FWidget& widget)
     {
         SetChild(&widget);

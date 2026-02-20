@@ -35,27 +35,37 @@
 	protected:\
 		PropertyType m_##PropertyName = {};\
 	public:\
-		Self& PropertyName(PropertyType const& value) {\
+		template<typename TSelf>\
+		TSelf& PropertyName(this TSelf& self, PropertyType const& value) {\
 			ZoneScoped;\
 			if constexpr (TEquitable<PropertyType>::Value)\
 			{\
-				if (TEquitable<PropertyType>::AreEqual(this->m_##PropertyName, value))\
-					return *this;\
+				if (TEquitable<PropertyType>::AreEqual(self.m_##PropertyName, value))\
+					return self;\
 			}\
-			this->m_##PropertyName = value;\
+			self.m_##PropertyName = value;\
 			thread_local const CE::Name nameValue = #PropertyName;\
-			if ((GetFlags() & OF_InsideConstructor) == 0) {\
-				OnFusionPropertyModified(nameValue);\
+			if ((self.GetFlags() & OF_InsideConstructor) == 0) {\
+				 static_cast<CE::FWidget&>(self).OnFusionPropertyModified(nameValue);\
 				DirtyFunc;\
 			}\
-			return *this;\
+			return self;\
 		}\
 		auto PropertyName() const { return this->m_##PropertyName; }
 
-#define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkLayoutDirty())
-#define FUSION_PAINT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkPaintDirty())
-#define FUSION_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName)
+#define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkLayoutDirty())
+#define FUSION_PAINT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
+#define FUSION_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, )
 
+#define FUSION_CUSTOM_PROPERTY_GET(PropertyType, PropertyName) \
+	auto PropertyName()
+
+#define FUSION_CUSTOM_PROPERTY_SET(PropertyType, PropertyName) \
+	template<typename TSelf>\
+	TSelf& PropertyName(this TSelf& self, PropertyType value)
+
+
+// IGNORE THE COMMENTED CODE BELOW, IT'S JUST FOR REFERENCE AND NOT PART OF THE MACROS
 /*
 #define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkLayoutDirty())
 

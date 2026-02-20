@@ -17,5 +17,30 @@ namespace CE
             children[i]->SetParentSurfaceRecursive(surface);
         }
     }
+
+    void FVerticalStack::OnFusionPropertyModified(const CE::Name& propertyName)
+    {
+	    Super::OnFusionPropertyModified(propertyName);
+
+		thread_local const CE::Name stackDirectionName = "StackDirection";
+
+		if (propertyName == stackDirectionName)
+        {
+			m_StackDirection = FStackDirection::Vertical;
+        }
+    }
+
+    void FHorizontalStack::OnFusionPropertyModified(const CE::Name& propertyName)
+    {
+	    Super::OnFusionPropertyModified(propertyName);
+
+        thread_local const CE::Name stackDirectionName = "StackDirection";
+
+        if (propertyName == stackDirectionName)
+        {
+            m_StackDirection = FStackDirection::Horizontal;
+        }
+    }
+
 }
 
