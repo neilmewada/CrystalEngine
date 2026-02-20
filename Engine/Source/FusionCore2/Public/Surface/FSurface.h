@@ -63,6 +63,9 @@ namespace CE
         FIELD()
 		f32 dpiScale = 1.0f;
 
+        FIELD()
+        Vec2i drawableSize;
+
 		FIELD()
 		Ref<FWidget> owningWidget;
     };

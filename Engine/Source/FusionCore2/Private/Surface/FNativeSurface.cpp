@@ -52,6 +52,10 @@ namespace CE
 
         drawListTag = RPI::RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(scopeId);
 
+        Vec2i screenSize = PlatformApplication::Get()->GetScreenSizeForWindow(platformWindow);
+
+		drawableSize = platformWindow->GetDrawableWindowSize();
+
         dpiScale = (f32)platformWindow->GetWindowDpi() / 96.0f;
 
 		PlatformApplication::Get()->AddMessageHandler(this);
@@ -64,7 +68,34 @@ namespace CE
 
     void FNativeSurface::OnWindowDisplayChanged(PlatformWindow* window, int displayIndex)
     {
+        if (window != platformWindow)
+			return;
+
         dpiScale = (f32)platformWindow->GetWindowDpi() / 96.0f;
+    }
+
+    void FNativeSurface::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
+    {
+        if (window != platformWindow)
+            return;
+
+        drawableSize = window->GetDrawableWindowSize();
+    }
+
+    void FNativeSurface::OnWindowRestored(PlatformWindow* window)
+    {
+        if (window != platformWindow)
+            return;
+
+        drawableSize = window->GetDrawableWindowSize();
+    }
+
+    void FNativeSurface::OnWindowMaximized(PlatformWindow* window)
+    {
+        if (window != platformWindow)
+            return;
+
+        drawableSize = window->GetDrawableWindowSize();
     }
 
 } // namespace CE
