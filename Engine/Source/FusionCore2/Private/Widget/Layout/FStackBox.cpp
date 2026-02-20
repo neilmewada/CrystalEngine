@@ -5,7 +5,8 @@ namespace CE
 
     FStackBox::FStackBox()
     {
-
+        m_HAlign = HAlign::Fill;
+        m_VAlign = VAlign::Fill;
     }
 
     void FStackBox::SetParentSurfaceRecursive(Ref<FSurface> surface)
@@ -16,6 +17,16 @@ namespace CE
         {
             children[i]->SetParentSurfaceRecursive(surface);
         }
+    }
+
+    Vec2 FStackBox::MeasureContent(Vec2 availableSize)
+    {
+        return Vec2();
+    }
+
+    void FStackBox::ArrangeContent(Vec2 finalSize)
+    {
+	    
     }
 
     void FVerticalStack::OnFusionPropertyModified(const CE::Name& propertyName)

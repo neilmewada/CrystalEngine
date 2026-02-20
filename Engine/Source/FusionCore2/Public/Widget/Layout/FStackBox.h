@@ -18,15 +18,26 @@ namespace CE
 
         FStackBox();
 
-    public: // - Public API -
+    public: 
+    	
+    	// - Public API -
 
         void SetParentSurfaceRecursive(Ref<FSurface> surface) override;
+
+		// - Layout -
+
+		Vec2 MeasureContent(Vec2 availableSize) override;
+
+        void ArrangeContent(Vec2 finalSize) override;
 
     protected: // - Internal -
 
     public: // - Fusion Properties - 
 
         FUSION_LAYOUT_PROPERTY(FStackDirection, StackDirection);
+		FUSION_LAYOUT_PROPERTY(f32, Spacing);
+        FUSION_LAYOUT_PROPERTY(CE::HAlign, ContentHAlign);
+        FUSION_LAYOUT_PROPERTY(CE::VAlign, ContentVAlign);
 
         FUSION_WIDGET;
     };

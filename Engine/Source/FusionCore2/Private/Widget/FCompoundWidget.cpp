@@ -104,40 +104,40 @@ namespace CE
         Vec2 childPos = Vec2(m_Padding.left + childMargin.left, m_Padding.top + childMargin.top);
         Vec2 childSize;
 
-	    switch (m_HAlign)
+	    switch (m_Child->HAlign())
 	    {
 	    case HAlign::Auto:
 	    case HAlign::Fill:
 			childSize.x = childAreaWidth;
 		    break;
 	    case HAlign::Left:
-			childSize.x = m_Child->GetDesiredSize().x;
+			childSize.x = Math::Min(m_Child->GetDesiredSize().x, childAreaWidth);
 		    break;
 	    case HAlign::Center:
-			childSize.x = m_Child->GetDesiredSize().x;
+			childSize.x = Math::Min(m_Child->GetDesiredSize().x, childAreaWidth);
             childPos.x += (childAreaWidth - childSize.x) / 2.0f;
 		    break;
 	    case HAlign::Right:
-			childSize.x = m_Child->GetDesiredSize().x;
+			childSize.x = Math::Min(m_Child->GetDesiredSize().x, childAreaWidth);
 			childPos.x += childAreaWidth - childSize.x;
 		    break;
 	    }
 
-        switch (m_VAlign)
+        switch (m_Child->VAlign())
         {
 		case VAlign::Auto:
 		case VAlign::Fill:
 			childSize.y = childAreaHeight;
 			break;
 		case VAlign::Top:
-			childSize.y = m_Child->GetDesiredSize().y;
+			childSize.y = Math::Min(m_Child->GetDesiredSize().y, childAreaHeight);
 			break;
 		case VAlign::Center:
-			childSize.y = m_Child->GetDesiredSize().y;
+			childSize.y = Math::Min(m_Child->GetDesiredSize().y, childAreaHeight);
 			childPos.y += (childAreaHeight - childSize.y) / 2.0f;
 			break;
 		case VAlign::Bottom:
-			childSize.y = m_Child->GetDesiredSize().y;
+			childSize.y = Math::Min(m_Child->GetDesiredSize().y, childAreaHeight);
 			childPos.y += childAreaHeight - childSize.y;
 			break;
         }
