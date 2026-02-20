@@ -462,6 +462,22 @@ namespace CE
 				}
 			}
 		}
+		else if (event.window.event == SDL_WINDOWEVENT_DISPLAY_CHANGED)
+		{
+			for (auto window : windowList)
+			{
+				if ((u32)window->GetWindowId() == event.window.windowID) // Found the window
+				{
+					for (ApplicationMessageHandler* handler : messageHandlers)
+					{
+						int displayIndex = event.window.data1; // display index
+
+						handler->OnWindowDisplayChanged(window, displayIndex);
+					}
+					break;
+				}
+			}
+		}
 	}
 
 	void SDLApplication::ProcessInputEvents(SDL_Event& event)

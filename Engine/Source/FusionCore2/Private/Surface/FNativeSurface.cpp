@@ -52,6 +52,8 @@ namespace CE
 
         drawListTag = RPI::RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(scopeId);
 
+        dpiScale = (f32)platformWindow->GetWindowDpi() / 96.0f;
+
 		PlatformApplication::Get()->AddMessageHandler(this);
     }
 
@@ -59,5 +61,11 @@ namespace CE
     {
 		PlatformApplication::Get()->RemoveMessageHandler(this);
     }
+
+    void FNativeSurface::OnWindowDisplayChanged(PlatformWindow* window, int displayIndex)
+    {
+        dpiScale = (f32)platformWindow->GetWindowDpi() / 96.0f;
+    }
+
 } // namespace CE
 

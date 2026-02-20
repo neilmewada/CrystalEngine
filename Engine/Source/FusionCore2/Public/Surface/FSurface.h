@@ -25,6 +25,7 @@ namespace CE
 
 		Ref<FWidget> GetOwningWidget() const { return owningWidget; }
 
+		f32 GetDpiScale() const { return dpiScale; }
 
     public:
 
@@ -58,6 +59,9 @@ namespace CE
         Array<Ref<FSurface>> childrenSurfaces;
         
 		WeakRef<FSurface> parentSurface;
+
+        FIELD()
+		f32 dpiScale = 1.0f;
 
 		FIELD()
 		Ref<FWidget> owningWidget;

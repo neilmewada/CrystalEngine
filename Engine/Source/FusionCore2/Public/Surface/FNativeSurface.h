@@ -22,6 +22,8 @@ namespace CE
 
     protected:
 
+        void OnWindowDisplayChanged(PlatformWindow* window, int displayIndex) override;
+
 		PlatformWindow* platformWindow = nullptr;
     };
     

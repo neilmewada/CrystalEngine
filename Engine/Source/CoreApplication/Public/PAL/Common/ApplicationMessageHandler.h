@@ -36,6 +36,7 @@ namespace CE
         virtual void OnWindowMinimized(PlatformWindow* window) {}
         virtual void OnWindowCreated(PlatformWindow* window) {}
         virtual void OnWindowExposed(PlatformWindow* window) {}
+		virtual void OnWindowDisplayChanged(PlatformWindow* window, int displayIndex) {}
 
     };
     

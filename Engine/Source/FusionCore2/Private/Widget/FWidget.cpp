@@ -133,15 +133,14 @@ namespace CE
 
     Vec2 FWidget::MeasureContent(Vec2 availableSize)
     {
-		desiredSize = GetMinimumContentSize();
-        return desiredSize;
+		return desiredSize = GetMinimumContentSize();
     }
 
     void FWidget::ArrangeContent(Vec2 finalSize)
     {
         ZoneScoped;
 
-		layoutSize = finalSize;
+		layoutSize = ApplyLayoutConstraints(finalSize);
 
         flags &= ~FWidgetFlags::LayoutDirty;
     }

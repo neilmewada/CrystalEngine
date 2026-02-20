@@ -205,6 +205,8 @@ TEST(FusionCore, Rendering)
 
 	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
 
+	Ref<FNativeSurface> nativeSurface = FNativeSurface::Create(mainWindow, "MainWindow", nullptr);
+
 	mainWindow->Show();
 
 	while (!IsEngineRequestingExit())
@@ -216,6 +218,9 @@ TEST(FusionCore, Rendering)
 
 		previousTime = curTime;
 	}
+
+	nativeSurface->BeginDestroy();
+	nativeSurface = nullptr;
 
 	PlatformApplication::Get()->RemoveTickHandler(handle);
 

@@ -134,7 +134,7 @@ namespace CE
         }
 
         dirtyPaintRootIds.Clear();
-        dirtyPaintRoots.Clear();;
+        dirtyPaintRoots.Clear();
     }
 
 } // namespace CE

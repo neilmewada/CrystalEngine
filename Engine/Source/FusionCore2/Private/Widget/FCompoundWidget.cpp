@@ -92,14 +92,15 @@ namespace CE
     void FCompoundWidget::ArrangeContent(Vec2 finalSize)
     {
 	    Super::ArrangeContent(finalSize);
+		// Always use layoutSize from base class, as it has the layout constraints applied.
 
 		if (!m_Child || !m_Child->Enabled())
             return;
 
         FMargin childMargin = m_Child->Margin();
 
-        f32 childAreaWidth = Math::Max(0.0f, finalSize.x - m_Padding.left - m_Padding.right - childMargin.left - childMargin.right);
-        f32 childAreaHeight = Math::Max(0.0f, finalSize.y - m_Padding.top - m_Padding.bottom - childMargin.top - childMargin.bottom);
+        f32 childAreaWidth = Math::Max(0.0f, layoutSize.x - m_Padding.left - m_Padding.right - childMargin.left - childMargin.right);
+        f32 childAreaHeight = Math::Max(0.0f, layoutSize.y - m_Padding.top - m_Padding.bottom - childMargin.top - childMargin.bottom);
 
         Vec2 childPos = Vec2(m_Padding.left + childMargin.left, m_Padding.top + childMargin.top);
         Vec2 childSize;
