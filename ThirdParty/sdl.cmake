@@ -6,35 +6,23 @@ if (TARGET ${TARGET_WITH_NAMESPACE})
 endif()
 
 set(PACKAGE_NAME "sdl")
-set(PACKAGE_VERISON "2.30.1")
-
-if(${PAL_PLATFORM_IS_MAC})
-    set(PACKAGE_VERISON "2.26.5")
-endif()
-
-set(LIB_NAME "SDL2")
+set(PACKAGE_VERISON "3.4.0")
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+set(SDL_TEST_LIBRARY OFF CACHE BOOL "Build the SDL3_test library" FORCE)
 
 add_subdirectory(vendor/${PACKAGE_NAME})
 
-add_library(${TARGET_WITH_NAMESPACE} ALIAS SDL2main)
-target_link_libraries(SDL2main
-    INTERFACE 
-        SDL2
-)
+add_library(${TARGET_WITH_NAMESPACE} ALIAS SDL3-shared)
 
-set_target_properties(SDL2main PROPERTIES FOLDER "ThirdParty")
-set_target_properties(SDL2 PROPERTIES FOLDER "ThirdParty")
-set_target_properties(SDL2_test PROPERTIES FOLDER "ThirdParty")
-set_target_properties(sdl_headers_copy PROPERTIES FOLDER "ThirdParty")
+set_target_properties(SDL3-shared PROPERTIES FOLDER "ThirdParty")
+set_target_properties(SDL_uclibc PROPERTIES FOLDER "ThirdParty")
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 
-
 if(${PAL_PLATFORM_IS_MAC})
-    target_link_libraries(SDL2main
+    target_link_libraries(SDL3-shared
         INTERFACE
             "-framework Cocoa"
             "-framework CoreAudio"

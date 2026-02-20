@@ -27,10 +27,10 @@ namespace CE
         u64 curTime = 0;
 
         u64 windowId = 0;
-        Vec2i globalMousePosition{};
-        Vec2i mousePosition{};
-        Vec2i prevMousePosition{};
-        Vec2i mouseDelta{};
+        Vec2 globalMousePosition{};
+        Vec2 mousePosition{};
+        Vec2 prevGlobalMousePosition{};
+        //Vec2i mouseDelta{};
         Vec2 wheelDelta{};
 
         Array<u64> focusGainedWindows{};

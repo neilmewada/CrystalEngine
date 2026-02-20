@@ -1,6 +1,6 @@
 #include "CoreApplication.h"
 
-#include "SDL.h"
+#include <SDL3/SDL.h>
 
 namespace CE
 {
@@ -27,18 +27,10 @@ namespace CE
 
         SDL_Event* event = (SDL_Event*)nativeEvent;
 
-        if (event->type == SDL_WINDOWEVENT)
-        {
-	        switch (event->window.event)
-	        {
-	        case SDL_WINDOWEVENT_FOCUS_GAINED:
-                focusGainedWindows.Add(event->window.windowID);
-                break;
-	        case SDL_WINDOWEVENT_FOCUS_LOST:
-                focusLostWindows.Add(event->window.windowID);
-                break;
-	        }
-        }
+        if (event->type == SDL_EVENT_WINDOW_FOCUS_GAINED)
+            focusGainedWindows.Add(event->window.windowID);
+        else if (event->type == SDL_EVENT_WINDOW_FOCUS_LOST)
+            focusLostWindows.Add(event->window.windowID);
     }
 
     void SDLPlatformInput::ProcessInputEvent(void* nativeEvent)
@@ -54,7 +46,6 @@ namespace CE
         SDL_Window* window = (SDL_Window*)app->GetMainWindow()->GetUnderlyingHandle();
 
         SDL_Event* event = (SDL_Event*)nativeEvent;
-        mouseDelta = Vec2i(0, 0);
 
         SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
         u32 mouseBtnMask = SDL_GetGlobalMouseState(&globalMousePosition.x, &globalMousePosition.y);
@@ -63,30 +54,30 @@ namespace CE
         
         switch (event->type)
         {
-        case SDL_KEYDOWN:
+        case SDL_EVENT_KEY_DOWN:
             windowId = event->key.windowID;
-            if (keyStates[(KeyCode)event->key.keysym.sym])
+            if (keyStates[(KeyCode)event->key.key])
             {
-                keyStatesDelayed[(KeyCode)event->key.keysym.sym] = { .state = true, .lastEnabledTime = curTime };
+                keyStatesDelayed[(KeyCode)event->key.key] = { .state = true, .lastEnabledTime = curTime };
             }
             else
             {
-                stateChangesThisTick[(KeyCode)event->key.keysym.sym] = true;
+                stateChangesThisTick[(KeyCode)event->key.key] = true;
             }
-            keyStates[(KeyCode)event->key.keysym.sym] = true;
-            modifierStates = (KeyModifier)event->key.keysym.mod;
+            keyStates[(KeyCode)event->key.key] = true;
+            modifierStates = (KeyModifier)event->key.mod;
             break;
-        case SDL_KEYUP:
+        case SDL_EVENT_KEY_UP:
             windowId = event->key.windowID;
-            if (keyStates[(KeyCode)event->key.keysym.sym])
+            if (keyStates[(KeyCode)event->key.key])
             {
-                stateChangesThisTick[(KeyCode)event->key.keysym.sym] = false;
+                stateChangesThisTick[(KeyCode)event->key.key] = false;
             }
-            keyStates[(KeyCode)event->key.keysym.sym] = false;
-            keyStatesDelayed[(KeyCode)event->key.keysym.sym] = { .state = false, .lastEnabledTime = 0};
-            modifierStates = (KeyModifier)event->key.keysym.mod;
+            keyStates[(KeyCode)event->key.key] = false;
+            keyStatesDelayed[(KeyCode)event->key.key] = { .state = false, .lastEnabledTime = 0};
+            modifierStates = (KeyModifier)event->key.mod;
             break;
-        case SDL_MOUSEBUTTONDOWN:
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
             windowId = event->button.windowID;
             if (mouseButtonStates[(MouseButton)event->button.button] != event->button.clicks)
             {
@@ -94,7 +85,7 @@ namespace CE
             }
             mouseButtonStates[(MouseButton)event->button.button] = event->button.clicks;
             break;
-        case SDL_MOUSEBUTTONUP:
+        case SDL_EVENT_MOUSE_BUTTON_UP:
             windowId = event->button.windowID;
             if (mouseButtonStates[(MouseButton)event->button.button] != 0)
             {
@@ -102,11 +93,10 @@ namespace CE
             }
             mouseButtonStates[(MouseButton)event->button.button] = 0;
             break;
-        case SDL_MOUSEMOTION:
+        case SDL_EVENT_MOUSE_MOTION:
             windowId = event->motion.windowID;
-            mouseDelta = Vec2i(event->motion.xrel, event->motion.yrel);
             break;
-        case SDL_MOUSEWHEEL:
+        case SDL_EVENT_MOUSE_WHEEL:
         {
             windowId = event->wheel.windowID;
 #if PLATFORM_MAC
@@ -116,12 +106,12 @@ namespace CE
             f32 flipX = -1.0f, flipY = 1.0f;
 #endif
 
-            wheelDelta = Vec2(event->wheel.preciseX * flipX, event->wheel.preciseY * flipY);
+            wheelDelta = Vec2(event->wheel.x * flipX, event->wheel.y * flipY);
         }
             break;
         }
 
-        if (mouseButtonStates[MouseButton::Left] != 0 && (mouseBtnMask & SDL_BUTTON(SDL_BUTTON_LEFT)) == 0)
+        if (mouseButtonStates[MouseButton::Left] != 0 && (mouseBtnMask & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) == 0)
         {
             mouseButtonStateChanges[MouseButton::Left] = 0;
             mouseButtonStates[MouseButton::Left] = 0;
@@ -148,12 +138,12 @@ namespace CE
         input.windowId = windowId;
         input.mousePosition = mousePosition;
         input.globalMousePosition = globalMousePosition;
-        input.mouseDelta = globalMousePosition - prevMousePosition;
+        input.mouseDelta = globalMousePosition - prevGlobalMousePosition;
         input.wheelDelta = wheelDelta;
         input.curTime = curTime;
 
         // Reset temp values
-        prevMousePosition = globalMousePosition;
+        prevGlobalMousePosition = globalMousePosition;
         wheelDelta = Vec2();
 
         stateChangesThisTick.Clear();

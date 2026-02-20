@@ -54,6 +54,7 @@ namespace CE
 
         Vec2i screenSize = PlatformApplication::Get()->GetScreenSizeForWindow(platformWindow);
 
+		Vec2i windowSize = platformWindow->GetWindowSize();
 		drawableSize = platformWindow->GetDrawableWindowSize();
 
         dpiScale = (f32)platformWindow->GetWindowDpi() / 96.0f;

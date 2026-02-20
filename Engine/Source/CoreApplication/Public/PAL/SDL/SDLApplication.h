@@ -37,6 +37,10 @@ namespace CE
 
         virtual void SetSystemCursor(SystemCursor cursor) override;
 
+        int GetNumDisplays() override;
+
+        DisplayId GetDisplayIdAt(u32 displayIndex) override;
+
         PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true) override;
 
         PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info) override;
@@ -84,7 +88,7 @@ namespace CE
 
         Array<SDLPlatformWindow*> windowList{};
 
-        friend int SDLWindowEventWatch(void* data, SDL_Event* event);
+        friend bool SDLWindowEventWatch(void* data, SDL_Event* event);
 
     private:
 

@@ -90,11 +90,10 @@ namespace CE
 
     	// For internal use only!
     	void SetParentSurface(Ref<FSurface> surface) { parentSurface = surface; }
-
-	protected: // - Callbacks -
+    	
+    	// - Callbacks -
 
 		virtual void OnFusionPropertyModified(const Name& propertyName) {}
-
 
 	private: // - Internal -
 

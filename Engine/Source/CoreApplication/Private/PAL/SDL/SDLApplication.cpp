@@ -1,12 +1,11 @@
 
 #include "CoreApplication.h"
 
-#include <SDL.h>
-#include <SDL_syswm.h>
+#include <SDL3/SDL.h>
 
 namespace CE
 {
-	int SDLWindowEventWatch(void* data, SDL_Event* event);
+	bool SDLWindowEventWatch(void* data, SDL_Event* event);
 
 	SDLApplication* SDLApplication::Get()
 	{
@@ -30,8 +29,6 @@ namespace CE
 		SDL_SetHint(SDL_HINT_APP_NAME, gProjectName.GetCString());
 
 		SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
-		SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "0");
-		SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "0");
 
 #if PLATFORM_MAC
 		SDL_SetHint(SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES, "1");
@@ -41,16 +38,17 @@ namespace CE
 		// Hints for editor window
 		SDL_SetHint("SDL_BORDERLESS_WINDOWED_STYLE", "1");
 		SDL_SetHint("SDL_BORDERLESS_RESIZABLE_STYLE", "1");
-
-		SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
-		SDL_EventState(SDL_DROPTEXT, SDL_ENABLE);
 #endif
 
-		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
+		if (!SDL_Init(SDL_INIT_VIDEO))
 		{
 			CE_LOG(Critical, All, "Failed to initialize SDL Video: {}", SDL_GetError());
 		}
 
+#if PAL_TRAIT_BUILD_EDITOR
+		SDL_SetEventEnabled(SDL_EVENT_DROP_FILE, true);
+		SDL_SetEventEnabled(SDL_EVENT_DROP_TEXT, true);
+#endif
 	}
 
 	void SDLApplication::PreShutdown()
@@ -69,7 +67,7 @@ namespace CE
 		{
 			if (systemCursors[i] != nullptr)
 			{
-				SDL_FreeCursor(systemCursors[i]);
+				SDL_DestroyCursor(systemCursors[i]);
 				systemCursors[i] = nullptr;
 			}
 		}
@@ -99,7 +97,7 @@ namespace CE
 
 	bool SDLApplication::SetMouseCapture(bool capture)
 	{
-		return SDL_CaptureMouse(capture ? SDL_TRUE : SDL_FALSE) == 0;
+		return SDL_CaptureMouse(capture);
 	}
 
 	Rect SDLApplication::GetScreenBounds(int displayIndex)
@@ -117,6 +115,20 @@ namespace CE
 		}
 
 		SDL_SetCursor(systemCursors[(int)cursor]);
+	}
+
+	int SDLApplication::GetNumDisplays()
+	{
+		int count = 0;
+		SDL_GetDisplays(&count);
+		return count;
+	}
+
+	DisplayId SDLApplication::GetDisplayIdAt(u32 displayIndex)
+	{
+		int count = 0;
+		SDL_DisplayID* ids = SDL_GetDisplays(&count);
+		return ids[displayIndex];
 	}
 
 	PlatformWindow* SDLApplication::InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable)
@@ -235,17 +247,18 @@ namespace CE
 	{
 		SDLPlatformWindow* sdlWindow = (SDLPlatformWindow*)window;
 
-		SDL_DisplayMode mode{};
-		int displayIndex = 0;
+		SDL_DisplayID displayId = 0;
 		if (sdlWindow != nullptr)
-			displayIndex = SDL_GetWindowDisplayIndex(sdlWindow->handle);
+			displayId = SDL_GetDisplayForWindow(sdlWindow->handle);
 		
-		if (SDL_GetDesktopDisplayMode(displayIndex, &mode) != 0)
+		const SDL_DisplayMode* mode = SDL_GetDesktopDisplayMode(displayId);
+
+		if (mode == nullptr)
 		{
 			CE_LOG(Error, All, "Failed to get screen size for window. Error: {}", SDL_GetError());
 			return Vec2i();
 		}
-		return Vec2i(mode.w, mode.h);
+		return Vec2i(mode->w, mode->h);
 	}
 
 	Vec2i SDLApplication::GetWindowSize(void* nativeWindowHandle)
@@ -268,9 +281,9 @@ namespace CE
 
 		windowList.Remove(sdlWindow);
 		
-		if (sdlWindow->GetWindowId() == mainWindow->GetWindowId())
+		if (mainWindow && sdlWindow->GetWindowId() == mainWindow->GetWindowId())
 		{
-			SDL_DelEventWatch(SDLWindowEventWatch, mainWindow->handle);
+			SDL_RemoveEventWatch(SDLWindowEventWatch, mainWindow->handle);
 
 			// Destroy all windows (i.e. shutdown application) if main window is destroyed
 			for (int i = windowList.GetSize() - 1; i >= 0; --i)
@@ -311,19 +324,19 @@ namespace CE
 				}
 			}
 
-			if (sdlEvent.type == SDL_QUIT)
+			if (sdlEvent.type == SDL_EVENT_QUIT)
 			{
 				RequestEngineExit("APP_QUIT");
 				break;
 			}
 			
-			if (sdlEvent.type == SDL_WINDOWEVENT)
+			if (sdlEvent.type >= SDL_EVENT_WINDOW_FIRST && sdlEvent.type <= SDL_EVENT_WINDOW_LAST)
 			{
 				ProcessWindowEvents(sdlEvent);
 			}
 			
-			if (sdlEvent.type == SDL_KEYDOWN || sdlEvent.type == SDL_KEYUP ||
-				sdlEvent.type == SDL_MOUSEMOTION || sdlEvent.type == SDL_MOUSEBUTTONDOWN || sdlEvent.type == SDL_MOUSEBUTTONUP || sdlEvent.type == SDL_MOUSEWHEEL)
+			if (sdlEvent.type == SDL_EVENT_KEY_DOWN || sdlEvent.type == SDL_EVENT_KEY_UP ||
+				sdlEvent.type == SDL_EVENT_MOUSE_MOTION || sdlEvent.type == SDL_EVENT_MOUSE_BUTTON_DOWN || sdlEvent.type == SDL_EVENT_MOUSE_BUTTON_UP || sdlEvent.type == SDL_EVENT_MOUSE_WHEEL)
 			{
 				ProcessInputEvents(sdlEvent);
 			}
@@ -352,7 +365,7 @@ namespace CE
 
 	void SDLApplication::ProcessWindowEvents(SDL_Event& event)
 	{
-		if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+		if (event.window.type == SDL_EVENT_WINDOW_RESIZED)
 		{
             if (event.window.windowID == mainWindow->GetWindowId())
             {
@@ -370,7 +383,7 @@ namespace CE
                 }
             }
 		}
-		else if (event.window.event == SDL_WINDOWEVENT_MOVED)
+		else if (event.window.type == SDL_EVENT_WINDOW_MOVED)
 		{
 			for (PlatformWindow* window : windowList)
 			{
@@ -385,7 +398,7 @@ namespace CE
 				}
 			}
 		}
-		else if (event.window.event == SDL_WINDOWEVENT_CLOSE) // Close a specific window
+		else if (event.window.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) // Close a specific window
 		{
 			for (PlatformWindow* window : windowList)
 			{
@@ -406,7 +419,7 @@ namespace CE
 				}
 			}
 		}
-		else if (event.window.event == SDL_WINDOWEVENT_MINIMIZED)
+		else if (event.window.type == SDL_EVENT_WINDOW_MINIMIZED)
 		{
 			for (auto window : windowList)
 			{
@@ -420,7 +433,7 @@ namespace CE
 				}
 			}
 		}
-		else if (event.window.event == SDL_WINDOWEVENT_SHOWN)
+		else if (event.window.type == SDL_EVENT_WINDOW_SHOWN)
 		{
 			for (auto window : windowList)
 			{
@@ -434,7 +447,7 @@ namespace CE
 				}
 			}
 		}
-		else if (event.window.event == SDL_WINDOWEVENT_RESTORED)
+		else if (event.window.type == SDL_EVENT_WINDOW_RESTORED)
 		{
 			for (auto window : windowList)
 			{
@@ -448,7 +461,7 @@ namespace CE
 				}
 			}
 		}
-		else if (event.window.event == SDL_WINDOWEVENT_MAXIMIZED)
+		else if (event.window.type == SDL_EVENT_WINDOW_MAXIMIZED)
 		{
 			for (auto window : windowList)
 			{
@@ -462,7 +475,7 @@ namespace CE
 				}
 			}
 		}
-		else if (event.window.event == SDL_WINDOWEVENT_DISPLAY_CHANGED)
+		else if (event.window.type == SDL_EVENT_WINDOW_DISPLAY_CHANGED)
 		{
 			for (auto window : windowList)
 			{

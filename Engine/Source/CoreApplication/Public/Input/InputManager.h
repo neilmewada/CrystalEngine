@@ -25,17 +25,17 @@ namespace CE
 
         void Tick();
 
-        static Vec2i GetMousePosition()
+        static Vec2 GetMousePosition()
         {
             return Get().mousePosition;
         }
 
-        static Vec2i GetGlobalMousePosition()
+        static Vec2 GetGlobalMousePosition()
         {
             return Get().globalMousePosition;
         }
 
-        static Vec2i GetMouseDelta()
+        static Vec2 GetMouseDelta()
         {
             return Get().mouseDelta;
         }
@@ -106,9 +106,9 @@ namespace CE
         static InputManager instance;
 
         u64 windowId = 0;
-        Vec2i globalMousePosition{};
-        Vec2i mousePosition{};
-        Vec2i mouseDelta{};
+        Vec2 globalMousePosition{};
+        Vec2 mousePosition{};
+        Vec2 mouseDelta{};
         Vec2 wheelDelta{};
         u64 curTime = 0;
 

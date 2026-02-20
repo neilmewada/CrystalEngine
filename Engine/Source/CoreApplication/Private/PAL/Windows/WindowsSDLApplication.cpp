@@ -1,15 +1,9 @@
-
-
 #include "CoreApplication.h"
 
 #include <Windows.h>
-#include <windowsx.h>
-#include <shellscalingapi.h>
 
-#pragma comment(lib, "shcore.lib")
-
-#include <SDL.h>
-#include <SDL_syswm.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_events.h>
 
 namespace CE
 {
@@ -20,8 +14,6 @@ namespace CE
 
     void WindowsSDLApplication::Initialize()
     {
-        SetProcessDPIAware();
-
         Super::Initialize();
     }
 
@@ -35,9 +27,9 @@ namespace CE
 
     }
 
-	int SDLWindowEventWatch(void* data, SDL_Event* event)
+	bool SDLWindowEventWatch(void* data, SDL_Event* event)
 	{
-		if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_EXPOSED)
+		if (event->type == SDL_EVENT_WINDOW_EXPOSED)
 		{
 			auto app = SDLApplication::Get();
 
@@ -59,31 +51,8 @@ namespace CE
 				tickHandler.InvokeIfValid();
 			}
 		}
-		else if (event->syswm.msg != nullptr && event->syswm.type == SDL_SYSWM_WINDOWS)
-		{
-			auto app = SDLApplication::Get();
 
-			for (SDLPlatformWindow* window : app->windowList)
-			{
-				if (window->GetWindowId() == event->window.windowID)
-				{
-					auto windowsEvent = event->syswm.msg->msg.win;
-
-					switch (windowsEvent.msg)
-					{
-					case WM_NCHITTEST:
-					{
-						POINT point = { GET_X_LPARAM(windowsEvent.lParam), GET_Y_LPARAM(windowsEvent.lParam) };
-
-					}
-						break;
-					}
-
-					break;
-				}
-			}
-		}
-		return 0;
+		return true;
 	}
 
 }

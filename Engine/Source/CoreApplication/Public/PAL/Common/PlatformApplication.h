@@ -5,6 +5,7 @@
 namespace CE
 {
     class PlatformWindow;
+    using DisplayId = u32;
 
     typedef MultiCastDelegate<void(PlatformWindow* window, u32 newWidth, u32 newHeight)> WindowResizeDelegate;
 
@@ -38,11 +39,10 @@ namespace CE
     enum class PlatformWindowFlags
     {
         None = 0,
-        SkipTaskbar = BIT(0),
-        ToolTip = BIT(1),
-        PopupMenu = BIT(2),
-        Utility = BIT(3),
-        DestroyOnClose = BIT(4)
+        ToolTip = BIT(0),
+        PopupMenu = BIT(1),
+        Utility = BIT(2),
+        DestroyOnClose = BIT(3)
     };
     ENUM_CLASS_FLAGS(PlatformWindowFlags);
 
@@ -76,6 +76,10 @@ namespace CE
         virtual f32 GetSystemDpiScaling() = 0;
 
 		virtual bool SetMouseCapture(bool capture) = 0;
+
+        virtual int GetNumDisplays() = 0;
+
+		virtual DisplayId GetDisplayIdAt(u32 displayIndex) = 0;
 
         virtual void AddMessageHandler(ApplicationMessageHandler* handler)
         {
@@ -116,8 +120,6 @@ namespace CE
         virtual Rect GetScreenBounds(int displayIndex = 0) = 0;
 
         virtual void SetSystemCursor(SystemCursor cursor) = 0;
-        
-        virtual int GetCurrentDisplayIndex() { return 0; }
 
         virtual PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true) = 0;
 

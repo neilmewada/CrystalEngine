@@ -3,8 +3,7 @@
 
 #include "PAL/Common/PlatformWindowMisc.h"
 
-#include <SDL2/SDL.h>
-#include <SDL_syswm.h>
+#include <SDL3/SDL.h>
 
 #include <Windows.h>
 #include <shellscalingapi.h>
@@ -13,15 +12,7 @@ namespace CE
 {
     static HWND GetHWND(SDL_Window* sdlWindow)
 	{
-        SDL_SysWMinfo wmInfo;
-        SDL_VERSION(&wmInfo.version);
-
-        if (SDL_GetWindowWMInfo(sdlWindow, &wmInfo)) 
-        {
-            return wmInfo.info.win.window;
-        }
-
-        return nullptr;
+		return (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(sdlWindow), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
     }
 
     u32 WindowsWindowMisc::GetDpiForWindow(SDLPlatformWindow* window)

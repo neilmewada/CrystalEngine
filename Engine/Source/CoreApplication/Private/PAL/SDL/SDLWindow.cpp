@@ -1,16 +1,18 @@
 
 #include "CoreApplication.h"
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #if PAL_TRAIT_VULKAN_SUPPORTED
-#include <SDL_vulkan.h>
+#include <SDL3/SDL_vulkan.h>
 #endif
 
 #if PAL_TRAIT_METAL_SUPPORTED
-#include <SDL_metal.h>
+#include <SDL3/SDL_metal.h>
 #endif
 
-#include <SDL_syswm.h>
+#include <SDL3/SDL_system.h>
+
+#include <algorithm>
 
 #include "PAL/Common/PlatformWindowMisc.h"
 
@@ -96,7 +98,7 @@ namespace CE
 
 	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable, bool isHidden, int displayIndex)
 	{
-		u32 flags = SDL_WINDOW_ALLOW_HIGHDPI;
+		u32 flags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
 		if (resizable)
 			flags |= SDL_WINDOW_RESIZABLE;
 		if (isHidden)
@@ -109,27 +111,10 @@ namespace CE
 		if (maximised)
 			flags |= SDL_WINDOW_MAXIMIZED;
 		if (fullscreen)
-			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-        
-        if (displayIndex == -1)
-        {
-            SDLPlatformWindow* mainWindow = (SDLPlatformWindow*)PlatformApplication::Get()->GetMainWindow();
-            if (mainWindow == nullptr)
-            {
-                displayIndex = PlatformApplication::Get()->GetCurrentDisplayIndex();
-            }
-            else
-            {
-                displayIndex = SDL_GetWindowDisplayIndex(mainWindow->handle);
-            }
-        }
-        
-        if (displayIndex < 0)
-        {
-            displayIndex = 0;
-        }
+			flags |= SDL_WINDOW_FULLSCREEN;
 
-		handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), width, height, flags);
+		handle = SDL_CreateWindow(title.GetCString(), width, height, flags);
+		SDL_SetWindowPosition(handle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         
 #if PAL_TRAIT_METAL_SUPPORTED
         metalView = SDL_Metal_CreateView(handle);
@@ -139,7 +124,7 @@ namespace CE
 	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info)
 		: initialFlags(info.windowFlags)
 	{
-		u32 flags = SDL_WINDOW_ALLOW_HIGHDPI;
+		u32 flags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
 		if (info.resizable)
 			flags |= SDL_WINDOW_RESIZABLE;
 		if (info.hidden)
@@ -152,34 +137,16 @@ namespace CE
 		if (info.maximised)
 			flags |= SDL_WINDOW_MAXIMIZED;
 		if (info.fullscreen)
-			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-		if (EnumHasFlag(info.windowFlags, PlatformWindowFlags::SkipTaskbar))
-			flags |= SDL_WINDOW_SKIP_TASKBAR;
+			flags |= SDL_WINDOW_FULLSCREEN;
 		if (EnumHasFlag(info.windowFlags, PlatformWindowFlags::PopupMenu))
 			flags |= SDL_WINDOW_POPUP_MENU;
 		if (EnumHasFlag(info.windowFlags, PlatformWindowFlags::ToolTip))
 			flags |= SDL_WINDOW_TOOLTIP;
 		if (EnumHasFlag(info.windowFlags, PlatformWindowFlags::Utility))
 			flags |= SDL_WINDOW_UTILITY;
-        
-        int displayIndex = info.displayIndex;
-        if (displayIndex == -1)
-        {
-            SDLPlatformWindow* mainWindow = (SDLPlatformWindow*)PlatformApplication::Get()->GetMainWindow();
-            if (mainWindow == nullptr)
-            {
-                displayIndex = PlatformApplication::Get()->GetCurrentDisplayIndex();
-            }
-            else
-            {
-                displayIndex = SDL_GetWindowDisplayIndex(mainWindow->handle);
-            }
-        }
 
-		displayIndex = Math::Max(displayIndex, 0);
-
-		int x = SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex);
-		int y = SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex);
+		int x = SDL_WINDOWPOS_CENTERED;
+		int y = SDL_WINDOWPOS_CENTERED;
 
 		if (!info.openCentered)
 		{
@@ -187,7 +154,8 @@ namespace CE
 			y = info.openPos.y;
 		}
 
-        handle = SDL_CreateWindow(title.GetCString(), x, y, width, height, flags);
+        handle = SDL_CreateWindow(title.GetCString(), width, height, flags);
+		SDL_SetWindowPosition(handle, x, y);
 
 #if PAL_TRAIT_METAL_SUPPORTED
         metalView = SDL_Metal_CreateView(handle);
@@ -226,42 +194,32 @@ namespace CE
 
 	void SDLPlatformWindow::SetAlwaysOnTop(bool alwaysOnTop)
 	{
-		SDL_SetWindowAlwaysOnTop(handle, alwaysOnTop ? SDL_TRUE : SDL_FALSE);
+		SDL_SetWindowAlwaysOnTop(handle, alwaysOnTop);
 	}
 
 	void SDLPlatformWindow::GetDrawableWindowSize(u32* outWidth, u32* outHeight)
 	{
-#if PAL_TRAIT_VULKAN_SUPPORTED
 		int w = 0, h = 0;
-		SDL_Vulkan_GetDrawableSize(handle, &w, &h);
+		SDL_GetWindowSizeInPixels(handle, &w, &h);
 		*outWidth = (u32)w;
 		*outHeight = (u32)h;
-#else
-		GetWindowSize(outWidth, outHeight);
-		return;
-#endif
 	}
 
 	Vec2i SDLPlatformWindow::GetDrawableWindowSize()
 	{
 		int w = 0, h = 0;
-#if PAL_TRAIT_VULKAN_SUPPORTED
-		SDL_Vulkan_GetDrawableSize(handle, &w, &h);
+		SDL_GetWindowSizeInPixels(handle, &w, &h);
 		return Vec2i(w, h);
-#else
-		SDL_GetWindowSize(handle, &w, &h);
-		return Vec2i(w, h);
-#endif
 	}
 
 	void SDLPlatformWindow::SetResizable(bool resizable)
 	{
-		SDL_SetWindowResizable(handle, resizable ? SDL_TRUE : SDL_FALSE);
+		SDL_SetWindowResizable(handle, resizable);
 	}
 
 	void SDLPlatformWindow::SetBorderless(bool borderless)
 	{
-		SDL_SetWindowBordered(handle, borderless ? SDL_FALSE : SDL_TRUE);
+		SDL_SetWindowBordered(handle, !borderless);
 
 		if (borderless)
 		{
@@ -303,7 +261,7 @@ namespace CE
 
 	bool SDLPlatformWindow::IsShown()
 	{
-		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_SHOWN) != 0;
+		return !IsHidden();
 	}
 
 	bool SDLPlatformWindow::IsHidden()
@@ -340,7 +298,7 @@ namespace CE
 	{
 		VkSurfaceKHR surface = nullptr;
 #if PAL_TRAIT_VULKAN_SUPPORTED
-		SDL_Vulkan_CreateSurface(handle, instance, &surface);
+		SDL_Vulkan_CreateSurface(handle, instance, nullptr, &surface);
 #endif
 		return surface;
 	}
@@ -357,29 +315,30 @@ namespace CE
 
 	WindowHandle SDLPlatformWindow::GetOSNativeHandle()
 	{
-        SDL_SysWMinfo wmInfo;
-        SDL_VERSION(&wmInfo.version);
-        SDL_GetWindowWMInfo(handle, &wmInfo);
+		SDL_PropertiesID props = SDL_GetWindowProperties(handle);
 
 #if PLATFORM_WINDOWS
-		return (WindowHandle)wmInfo.info.win.window;
+		return (WindowHandle)SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
 #elif PLATFORM_MAC
-        return (WindowHandle)wmInfo.info.cocoa.window;
+		return (WindowHandle)SDL_GetPointerProperty(props, SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, nullptr);
 #elif PLATFORM_LINUX
 
 #if defined(SDL_VIDEO_DRIVER_X11)
-		if (wmInfo.subsystem == SDL_SYSWM_X11)
-			return wmInfo.info.x11.window;
+		{
+			Window xWindow = (Window)SDL_GetNumberProperty(props, SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
+			if (xWindow)
+				return (WindowHandle)xWindow;
+		}
 #endif
 #if defined(SDL_VIDEO_DRIVER_WAYLAND)
-		if (wmInfo.subsystem == SDL_SYSWM_WAYLAND)
-			return (WindowHandle)wmInfo.info.wl.egl_window;
+		{
+			void* wlWindow = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WAYLAND_EGL_WINDOW_POINTER, nullptr);
+			if (wlWindow)
+				return (WindowHandle)wlWindow;
+		}
+#endif
 #endif
 		return 0;
-
-#else
-#   error Platform specific window handle not specified for the current platform
-#endif
 	}
 
     void* SDLPlatformWindow::GetViewHandle()

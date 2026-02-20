@@ -30,13 +30,37 @@ namespace RenderingTests
 				.Name("RootStack")
 				(
 					FNew(FWidget)
-					.Height(25)
+					.Height(25),
+
+					FNew(FHorizontalStack, hstack)
+					.ContentHAlign(HAlign::Center)
+					.ContentVAlign(VAlign::Center)
+					(
+						FNew(FWidget)
+						.FillRatio(1.0f)
+						.Height(25)
+						.Name("H_1"),
+
+						FNew(FWidget)
+						.FillRatio(2.0f)
+						.Height(30)
+						.Name("H_2"),
+
+						FNew(FWidget)
+						.FillRatio(1.0f)
+						.Height(50)
+						.Name("H_3")
+					),
+
+					FNew(FWidget)
+					.FillRatio(1.0f)
 				)
 			);
 		}
 
 	
 		Ref<FVerticalStack> vstack;
+		Ref<FHorizontalStack> hstack;
 	};
 
 	CLASS()

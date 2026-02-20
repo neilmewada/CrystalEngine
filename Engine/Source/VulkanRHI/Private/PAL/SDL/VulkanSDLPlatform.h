@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SDL.h"
-#include "SDL_vulkan.h"
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_vulkan.h>
 
 #include "vulkan/vulkan.h"
 //#include "vma/vk_mem_alloc.h"
@@ -77,7 +77,7 @@ namespace CE::Vulkan
         static void GetDrawableWindowSize(void* sdlWindow, u32* width, u32* height)
         {
             int w = 0, h = 0;
-            SDL_Vulkan_GetDrawableSize((SDL_Window*)sdlWindow, &w, &h);
+			SDL_GetWindowSizeInPixels((SDL_Window*)sdlWindow, &w, &h);
             *width = (u32)w;
             *height = (u32)h;
         }
