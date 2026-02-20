@@ -15,7 +15,7 @@ namespace CE
 
     public: // - Public API -
 
-        void GetDrawListMask(DrawListMask& drawListMask);
+        void GetDrawListMask(RHI::DrawListMask& drawListMask);
 
 		void AddChildSurface(Ref<FSurface> childSurface);
 
@@ -26,9 +26,15 @@ namespace CE
 		Ref<FWidget> GetOwningWidget() const { return owningWidget; }
 
 
-    public: // - Layout - 
+    public:
+
+        // - Layout -
 
 		void AddPendingLayoutRoot(Ref<FWidget> layoutRoot);
+
+        // - Paint -
+
+        void AddDirtyPaintRoot(Ref<FWidget> paintRoot);
 
     public: // - Lifecycle -
 
@@ -45,6 +51,9 @@ namespace CE
 
 		HashSet<Uuid> pendingLayoutRootIds;
 		Array<Ref<FWidget>> pendingLayoutRoots;
+
+        HashSet<Uuid> dirtyPaintRootIds;
+        Array<Ref<FWidget>> dirtyPaintRoots;
 
         Array<Ref<FSurface>> childrenSurfaces;
         

@@ -9,6 +9,21 @@ namespace CE
         m_MaxWidth = NumericLimits<f32>::Infinity();
     }
 
+    void FWidget::OnAfterConstruct()
+    {
+        ZoneScoped;
+
+        Super::OnAfterConstruct();
+
+        Construct();
+    }
+
+    void FWidget::Construct()
+    {
+        ZoneScoped;
+
+    }
+
     void FWidget::MarkPaintDirty()
     {
         ZoneScoped;
@@ -20,7 +35,23 @@ namespace CE
 
 		if (Ref<FSurface> surface = parentSurface.Lock())
         {
-            // TODO: Mark paint root as dirty
+		    Ref<FWidget> parent = this;
+
+		    while (parent != nullptr)
+		    {
+		        if (parent != this && parent->IsPaintDirty())
+		        {
+		            break;
+		        }
+
+		        if (parent->IsPaintRoot())
+		        {
+		            surface->AddDirtyPaintRoot(parent);
+		            break;
+		        }
+
+		        parent = parent->GetParentWidget();
+		    }
         }
     }
 
@@ -78,6 +109,15 @@ namespace CE
         return false;
     }
 
+    bool FWidget::IsPaintRoot()
+    {
+        const bool isRootWidget = parentWidget.IsNull() && parentSurface.IsValid();
+        if (isRootWidget)
+            return true;
+
+        return false;
+    }
+
     Vec2 FWidget::GetMinimumContentSize()
     {
         return Vec2(m_MinWidth + m_Padding.left + m_Padding.right, m_MinHeight + m_Padding.top + m_Padding.bottom);
@@ -93,6 +133,23 @@ namespace CE
         ZoneScoped;
 
 		layoutSize = finalSize;
+
+        flags &= ~FWidgetFlags::LayoutDirty;
+    }
+
+    void FWidget::SetParentSurfaceRecursive(Ref<FSurface> surface)
+    {
+        ZoneScoped;
+
+        this->parentSurface = surface;
+    }
+
+    void FWidget::DetachFromParent()
+    {
+        if (Ref<FWidget> parent = parentWidget.Lock())
+        {
+            parent->DetachChild(this);
+        }
     }
 
     FWidget::Self& FWidget::Width(f32 width)

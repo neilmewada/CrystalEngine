@@ -24,7 +24,7 @@ namespace CE
 
     protected:
 
-        void UpdateDrawListMask(DrawListMask& drawListMask);
+        void UpdateDrawListMask(RHI::DrawListMask& drawListMask);
 
     };
     

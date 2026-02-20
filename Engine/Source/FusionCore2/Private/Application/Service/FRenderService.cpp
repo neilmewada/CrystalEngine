@@ -20,7 +20,7 @@ namespace CE
         }
     }
 
-    void FRenderService::UpdateDrawListMask(DrawListMask& drawListMask)
+    void FRenderService::UpdateDrawListMask(RHI::DrawListMask& drawListMask)
     {
 		for (int i = 0; i < application->GetSurfaceCount(); i++)
         {

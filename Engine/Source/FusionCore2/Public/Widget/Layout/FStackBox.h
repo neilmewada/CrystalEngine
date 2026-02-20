@@ -20,6 +20,7 @@ namespace CE
 
     public: // - Public API -
 
+        void SetParentSurfaceRecursive(Ref<FSurface> surface) override;
 
     protected: // - Internal -
 

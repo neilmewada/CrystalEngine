@@ -23,6 +23,7 @@
 // Widget
 #include "Widget/Layout/LayoutTypes.h"
 #include "Widget/FWidget.h"
+#include "Widget/FCompoundWidget.h"
 #include "Widget/FContainerWidget.h"
 #include "Widget/Layout/FStackBox.h"
 

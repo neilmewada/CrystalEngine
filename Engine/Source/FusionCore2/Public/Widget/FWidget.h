@@ -19,7 +19,11 @@ namespace CE
     protected:
 
         FWidget();
-        
+
+    	void OnAfterConstruct() override final;
+
+		virtual void Construct();
+
     public: // - Flags -
 
         virtual void MarkPaintDirty();
@@ -32,7 +36,9 @@ namespace CE
 
         CE_FORCE_INLINE bool IsFaulted() const { return EnumHasAnyFlags(flags, FWidgetFlags::Faulted); }
 
-    public:  // - Layout -
+    public:
+
+    	// - Layout -
 
 		Vec2 GetLayoutPosition() const { return layoutPosition; }
 
@@ -42,6 +48,8 @@ namespace CE
 
         virtual bool IsLayoutRoot();
 
+    	virtual bool IsPaintRoot();
+
 		Vec2 GetMinimumContentSize();
 
         Vec2 ApplyLayoutConstraints(Vec2 desiredSize);
@@ -50,6 +58,13 @@ namespace CE
 
         virtual void ArrangeContent(Vec2 finalSize);
 
+    	// - Hierarchy -
+
+    	virtual void SetParentSurfaceRecursive(Ref<FSurface> surface);
+
+    	virtual void DetachChild(Ref<FWidget> child) {}
+
+    	void DetachFromParent();
 
 	public: // - Getters & Setters -
 
@@ -57,6 +72,11 @@ namespace CE
 
 		Ref<FSurface> GetParentSurface() const { return parentSurface.Lock(); }
 
+    	// For internal use only!
+		void SetParentWidget(Ref<FWidget> newParentWidget) { parentWidget = newParentWidget; }
+
+    	// For internal use only!
+    	void SetParentSurface(Ref<FSurface> surface) { parentSurface = surface; }
 
 	protected: // - Callbacks -
 
@@ -116,7 +136,7 @@ namespace CE
 
         FUSION_WIDGET;
     };
-    
+
 } // namespace CE
 
 #include "FWidget.rtti.h"

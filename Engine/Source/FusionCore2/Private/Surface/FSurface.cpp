@@ -8,7 +8,7 @@ namespace CE
 
     }
 
-    void FSurface::GetDrawListMask(DrawListMask& drawListMask)
+    void FSurface::GetDrawListMask(RHI::DrawListMask& drawListMask)
     {
 		if (drawListTag.IsValid())
         {
@@ -35,7 +35,8 @@ namespace CE
     void FSurface::SetOwningWidget(Ref<FWidget> widget)
     {
 		this->owningWidget = widget;
-		widget->parentSurface = this;
+
+		widget->SetParentSurfaceRecursive(this);
     }
 
     void FSurface::AddPendingLayoutRoot(Ref<FWidget> layoutRoot)
@@ -48,6 +49,18 @@ namespace CE
 
 		pendingLayoutRoots.Add(layoutRoot);
         pendingLayoutRootIds.Add(layoutRoot->GetUuid());
+    }
+
+    void FSurface::AddDirtyPaintRoot(Ref<FWidget> paintRoot)
+    {
+        if (!paintRoot)
+            return;
+
+        if (dirtyPaintRootIds.Exists(paintRoot->GetUuid()))
+            return;
+
+        dirtyPaintRoots.Add(paintRoot);
+        dirtyPaintRootIds.Add(paintRoot->GetUuid());
     }
 
     void FSurface::TickSurface(f32 deltaTime)
@@ -93,12 +106,35 @@ namespace CE
 
         try
         {
-			// TODO: Painting logic
+            HashSet<FWidget*> dirtySet;
+            for (auto root : dirtyPaintRoots)
+                dirtySet.Add(root.Get());
+
+            // Remove any root whose ancestor is also pending
+            dirtyPaintRoots.RemoveAll([&](const Ref<FWidget>& root)
+                {
+                    Ref<FWidget> ancestor = root->GetParentWidget();
+                    while (ancestor != nullptr)
+                    {
+                        if (dirtySet.Exists(ancestor.Get()))
+                            return true;
+                        ancestor = ancestor->GetParentWidget();
+                    }
+                    return false;
+                });
+
+            for (Ref<FWidget> root : dirtyPaintRoots)
+            {
+                // TODO: Do paint
+            }
         }
         catch (const Exception& exception)
         {
             CE_LOG(Critical, All, "Exception in FSurface::TickSurface on class {}, while painting. Stack Trace:\n{}", GetClass()->GetName().GetLastComponent(), exception.GetStackTraceString(true));
         }
+
+        dirtyPaintRootIds.Clear();
+        dirtyPaintRoots.Clear();;
     }
 
 } // namespace CE

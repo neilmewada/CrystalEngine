@@ -12,9 +12,13 @@ namespace CE
 
     public: // - Public API -
 
+        void SetParentSurfaceRecursive(Ref<FSurface> surface) override;
+
         void AddChildWidget(Ref<FWidget> childWidget);
     	
     	void RemoveChildWidget(Ref<FWidget> childWidget);
+
+        void DetachChild(Ref<FWidget> child) override;
 
 		int GetChildCount() const { return (int)children.GetSize(); }
 
