@@ -746,6 +746,25 @@ namespace CE
             return !(right < other.left || left > other.right || bottom < other.top || top > other.bottom);
         }
 
+        inline bool IsEmpty() const
+        {
+            return left >= right || top >= bottom;
+		}
+
+		static inline Rect Union(const Rect& a, const Rect& b)
+        {
+			if (a.IsEmpty())
+                return b;
+			if (b.IsEmpty())
+				return a;
+
+            auto xmin = Math::Min({ a.left, a.right, b.left, b.right });
+            auto xmax = Math::Max({ a.left, a.right, b.left, b.right });
+            auto ymin = Math::Min({ a.top, a.bottom, b.top, b.bottom });
+            auto ymax = Math::Max({ a.top, a.bottom, b.top, b.bottom });
+            return Rect(xmin, ymin, xmax, ymax);
+        }
+
         union {
             struct {
                 f32 left, top, right, bottom;

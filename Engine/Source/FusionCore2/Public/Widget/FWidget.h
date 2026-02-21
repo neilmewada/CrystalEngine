@@ -139,21 +139,21 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(CE::HAlign, HAlign);
         FUSION_LAYOUT_PROPERTY(CE::VAlign, VAlign);
 
-        FUSION_CUSTOM_PROPERTY_SET(f32, Width)
+        FUSION_PROPERTY_SET(f32, Width)
         {
             return self
                 .MinWidth(value)
                 .MaxWidth(value);
         }
 
-        FUSION_CUSTOM_PROPERTY_SET(f32, Height)
+        FUSION_PROPERTY_SET(f32, Height)
         {
             return self
 				.MinHeight(value)
 				.MaxHeight(value);
 		}
 
-		FUSION_CUSTOM_PROPERTY_SET(bool, Enabled)
+		FUSION_PROPERTY_SET(bool, Enabled)
         {
 			bool isCurrentlyEnabled = !EnumHasAnyFlags(self.flags, FWidgetFlags::Disabled);
 			if (value == isCurrentlyEnabled)
@@ -172,12 +172,12 @@ namespace CE
             return self;
         }
 
-        FUSION_CUSTOM_PROPERTY_GET(bool, Enabled)
+        FUSION_PROPERTY_GET(bool, Enabled)
         {
             return IsEnabled();
         }
 
-        FUSION_CUSTOM_PROPERTY_SET(bool, Visible)
+        FUSION_PROPERTY_SET(bool, Visible)
         {
 			bool isCurrentlyVisible = !EnumHasAnyFlags(self.flags, FWidgetFlags::Hidden);
 			if (value == isCurrentlyVisible)
@@ -196,7 +196,7 @@ namespace CE
             return self;
         }
 
-        FUSION_CUSTOM_PROPERTY_GET(bool, Visible)
+        FUSION_PROPERTY_GET(bool, Visible)
         {
             return IsVisible() || !IsEnabled();
 		}
@@ -228,7 +228,7 @@ namespace CE
             return *out;
         }
 
-        FUSION_CUSTOM_PROPERTY_SET(String, Name)
+        FUSION_PROPERTY_SET(String, Name)
         {
             self.SetName(value);
             return self;

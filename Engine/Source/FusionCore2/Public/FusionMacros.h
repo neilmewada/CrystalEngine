@@ -57,10 +57,10 @@
 #define FUSION_PAINT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
 #define FUSION_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, )
 
-#define FUSION_CUSTOM_PROPERTY_GET(PropertyType, PropertyName) \
+#define FUSION_PROPERTY_GET(PropertyType, PropertyName) \
 	auto PropertyName()
 
-#define FUSION_CUSTOM_PROPERTY_SET(PropertyType, PropertyName) \
+#define FUSION_PROPERTY_SET(PropertyType, PropertyName) \
 	template<typename TSelf>\
 	TSelf& PropertyName(this TSelf& self, PropertyType value)
 
