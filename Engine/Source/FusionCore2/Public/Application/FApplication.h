@@ -35,7 +35,7 @@ namespace CE
 
 		// - Lifecycle -
 
-		void Initialize(const FApplicationInitInfo& initInfo);
+		bool Initialize(const FApplicationInitInfo& initInfo);
 
         void Tick(f32 deltaTime, bool exposed = false);
 
@@ -66,6 +66,7 @@ namespace CE
 		Ref<FSurface> GetSurface(u32 index) const { return (index < surfaces.GetSize()) ? surfaces[index] : nullptr; }
 
         void AddSurface(Ref<FSurface> surface);
+        void RemoveSurface(Ref<FSurface> surface);
         
     protected:
 

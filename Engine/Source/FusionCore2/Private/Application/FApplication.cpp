@@ -63,30 +63,42 @@ namespace CE
 #endif
     }
 
-    void FApplication::Initialize(const FApplicationInitInfo& initInfo)
+    bool FApplication::Initialize(const FApplicationInitInfo& initInfo)
     {
         ZoneScoped;
 
+		bool hasRenderService = false;
+
         for (const SubClass<FService>& serviceClass : initInfo.services)
         {
-            if (serviceClass == nullptr)
+            if (serviceClass == nullptr || !serviceClass->CanBeInstantiated())
                 continue;
-			if (!serviceClass->CanBeInstantiated())
-                continue;
-
+            
             Ref<FService> service = CreateObject<FService>(this, serviceClass->GetName().GetLastComponent(), OF_NoFlags, serviceClass);
             if (service == nullptr)
                 continue;
 
             service->application = this;
 
+			if (service->IsOfType<FRenderService>())
+            {
+                hasRenderService = true;
+            }
+
             services.Add(service);
 		}
+
+        if (!hasRenderService)
+        {
+            return false;
+        }
 
         for (Ref<FService> service : services)
         {
 			service->OnStart();
         }
+
+        return true;
     }
 
     void FApplication::Tick(f32 deltaTime, bool exposed)
@@ -103,6 +115,11 @@ namespace CE
 		InvokeServiceTick(FServiceTickPhase::DispatchInput);
 
 		InvokeServiceTick(FServiceTickPhase::PreUpdate);
+
+        for (int i = 0; i < surfaces.GetSize(); i++)
+        {
+			surfaces[i]->TickSurface(deltaTime);
+        }
 
 		InvokeServiceTick(FServiceTickPhase::UpdateSurfaces);
 
@@ -155,6 +172,14 @@ namespace CE
             return;
 
 		surfaces.Add(surface);
+    }
+
+    void FApplication::RemoveSurface(Ref<FSurface> surface)
+    {
+		if (surfaces.Remove(surface))
+		{
+			GetService<FRenderService>()->MarkFrameGraphDirty();
+		}
     }
 
     void FApplication::InvokeServiceTick(FServiceTickPhase tickPhase)

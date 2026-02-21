@@ -364,6 +364,11 @@ namespace CE
 		return PlatformWindowMisc::GetDpiForWindow(this);
 	}
 
+	f32 SDLPlatformWindow::GetDpiScaling()
+	{
+		return SDL_GetWindowDisplayScale(handle);
+	}
+
 	void SDLPlatformWindow::Show()
 	{
 		SDL_ShowWindow(handle);

@@ -205,22 +205,33 @@ TEST(FusionCore, Rendering)
 
 	DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
 
-	Ref<FNativeSurface> nativeSurface = FNativeSurface::Create(mainWindow, "MainWindow", nullptr);
-
 	mainWindow->Show();
 
-	while (!IsEngineRequestingExit())
 	{
-		auto curTime = clock();
-		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
+		Ref<FNativeSurface> nativeSurface = FNativeSurface::Create(mainWindow, "MainWindow", nullptr);
+		Ref<TestWindow> testWindow;
 
-		fApp->Tick(deltaTime, false);
+		FAssignNewOwned(TestWindow, testWindow, nativeSurface.Get())
+			.Name("TestWindow")
+			.HAlign(HAlign::Fill)
+			.VAlign(VAlign::Fill);
 
-		previousTime = curTime;
+		nativeSurface->SetOwningWidget(testWindow);
+
+		while (!IsEngineRequestingExit())
+		{
+			auto curTime = clock();
+			deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
+
+			fApp->Tick(deltaTime, false);
+
+			previousTime = curTime;
+		}
+
+		nativeSurface->BeginDestroy();
+		nativeSurface = nullptr;
+		testWindow = nullptr;
 	}
-
-	nativeSurface->BeginDestroy();
-	nativeSurface = nullptr;
 
 	PlatformApplication::Get()->RemoveTickHandler(handle);
 

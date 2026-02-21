@@ -27,6 +27,8 @@ namespace CE
 
         u32 GetWindowDpi() override;
 
+		f32 GetDpiScaling() override;
+
         void Show() override;
 
         void Hide() override;

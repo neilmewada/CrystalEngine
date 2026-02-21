@@ -34,9 +34,25 @@ namespace CE
 
     void FSurface::SetOwningWidget(Ref<FWidget> widget)
     {
-		this->owningWidget = widget;
+		if (owningWidget == widget)
+            return;
 
-		widget->SetParentSurfaceRecursive(this);
+		if (owningWidget)
+        {
+            owningWidget->SetParentSurfaceRecursive(nullptr);
+        }
+
+		owningWidget = widget;
+
+        if (owningWidget)
+		{
+			owningWidget->SetParentSurfaceRecursive(this);
+
+            AddPendingLayoutRoot(owningWidget);
+
+            owningWidget->MarkLayoutDirty();
+            owningWidget->MarkPaintDirty();
+		}
     }
 
     void FSurface::AddPendingLayoutRoot(Ref<FWidget> layoutRoot)
@@ -83,24 +99,42 @@ namespace CE
                     while (ancestor != nullptr)
                     {
                         if (pendingSet.Exists(ancestor.Get()))
-                            return true;
+                        {
+							pendingLayoutRootIds.Remove(root->GetUuid());
+	                        return true;
+                        }
                         ancestor = ancestor->GetParentWidget();
                     }
                     return false;
                 });
 
-			for (Ref<FWidget> root : pendingLayoutRoots)
+			for (int i = pendingLayoutRoots.GetSize() - 1; i >= 0; i--)
             {
-                // TODO: Do layout
+				Ref<FWidget> root = pendingLayoutRoots[i];
+				pendingLayoutRoots.RemoveAt(i);
+				if (!root)
+                    continue;
+
+                pendingLayoutRootIds.Remove(root->GetUuid());
+
+				if (root->IsFaulted())
+                    continue;
+
+				Vec2 availableSize = GetAvailableSize();
+                if (Ref<FWidget> parentWidget = root->GetParentWidget())
+                {
+					availableSize.x = Math::Max(0.0f, parentWidget->GetLayoutSize().x - parentWidget->Padding().left - parentWidget->Padding().right);
+					availableSize.y = Math::Max(0.0f, parentWidget->GetLayoutSize().y - parentWidget->Padding().top - parentWidget->Padding().bottom);
+                }
+                
+				root->MeasureContent(availableSize);
+				root->ArrangeContent(availableSize);
             }
         }
         catch (const Exception& exception)
         {
-            CE_LOG(Critical, All, "Exception in FSurface::TickSurface on class {}, while calculating Layout. Stack Trace:\n{}", GetClass()->GetName().GetLastComponent(), exception.GetStackTraceString(true));
+            CE_LOG(Critical, All, "Exception in FSurface::TickSurface on class {}, while calculating Layout.\n{}", GetClass()->GetName().GetLastComponent(), exception.GetStackTraceString(true));
         }
-
-        pendingLayoutRootIds.Clear();
-        pendingLayoutRoots.Clear();
 
         // - Paint
 
@@ -117,14 +151,27 @@ namespace CE
                     while (ancestor != nullptr)
                     {
                         if (dirtySet.Exists(ancestor.Get()))
-                            return true;
+                        {
+                            dirtyPaintRootIds.Remove(root->GetUuid());
+	                        return true;
+                        }
                         ancestor = ancestor->GetParentWidget();
                     }
                     return false;
                 });
 
-            for (Ref<FWidget> root : dirtyPaintRoots)
+			for (int i = dirtyPaintRoots.GetSize() - 1; i >= 0; i--)
             {
+                Ref<FWidget> root = dirtyPaintRoots[i];
+                dirtyPaintRoots.RemoveAt(i);
+                if (!root)
+                    continue;
+
+                dirtyPaintRootIds.Remove(root->GetUuid());
+
+                if (root->IsFaulted())
+                    continue;
+
                 // TODO: Do paint
             }
         }
@@ -132,9 +179,6 @@ namespace CE
         {
             CE_LOG(Critical, All, "Exception in FSurface::TickSurface on class {}, while painting. Stack Trace:\n{}", GetClass()->GetName().GetLastComponent(), exception.GetStackTraceString(true));
         }
-
-        dirtyPaintRootIds.Clear();
-        dirtyPaintRoots.Clear();
     }
 
 } // namespace CE

@@ -34,6 +34,8 @@ namespace CE
 
         virtual int GetZOrder() = 0;
 
+		virtual f32 GetDpiScaling() = 0;
+
         virtual void Show() = 0;
         virtual void Hide() = 0;
 

@@ -117,13 +117,12 @@ namespace CE
             return;
 
 #if !CE_BUILD_RELEASE // For Non-release builds
-        if (level == LogLevel::Critical)
+        //if (level == LogLevel::Critical)
         {
-            //fullMsg = String::Format("{}\n{} Line {}", message, fileName, line);
-            String fullMessage = String::Format("{}\n{}", message.GetCString(), cpptrace::generate_trace().to_string());
-            Log(level, fullMessage, target);
+            //String fullMessage = String::Format("{}\n{}", message.GetCString(), cpptrace::generate_trace().to_string(true));
+            //Log(level, fullMessage, target);
         }
-        else
+        //else
         {
             Log(level, message, target);
         }

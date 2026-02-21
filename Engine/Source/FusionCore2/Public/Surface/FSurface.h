@@ -27,6 +27,8 @@ namespace CE
 
 		f32 GetDpiScale() const { return dpiScale; }
 
+        Vec2 GetAvailableSize() const { return availableSize; }
+
     public:
 
         // - Layout -
@@ -62,6 +64,9 @@ namespace CE
 
         FIELD()
 		f32 dpiScale = 1.0f;
+
+        FIELD()
+		Vec2 availableSize;
 
         FIELD()
         Vec2i drawableSize;

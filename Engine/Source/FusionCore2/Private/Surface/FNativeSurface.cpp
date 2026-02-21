@@ -33,17 +33,17 @@ namespace CE
             return nullptr;
         }
 
-        FNativeSurface* nativeContext = CreateObject<FNativeSurface>(outer, FixObjectName(name));
-		nativeContext->platformWindow = window;
+        FNativeSurface* nativeSurface = CreateObject<FNativeSurface>(outer, FixObjectName(name));
+		nativeSurface->platformWindow = window;
 
         if (parentSurface)
         {
-			parentSurface->AddChildSurface(nativeContext);
+			parentSurface->AddChildSurface(nativeSurface);
         }
 
-		nativeContext->Initialize();
+		nativeSurface->Initialize();
 
-        return nativeContext;
+        return nativeSurface;
     }
 
     void FNativeSurface::Initialize()
@@ -52,19 +52,36 @@ namespace CE
 
         drawListTag = RPI::RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(scopeId);
 
-        Vec2i screenSize = PlatformApplication::Get()->GetScreenSizeForWindow(platformWindow);
-
-		Vec2i windowSize = platformWindow->GetWindowSize();
-		drawableSize = platformWindow->GetDrawableWindowSize();
-
-        dpiScale = (f32)platformWindow->GetWindowDpi() / 96.0f;
+        UpdateDrawableSize();
 
 		PlatformApplication::Get()->AddMessageHandler(this);
+
+        FApplication::Get()->AddSurface(this);
     }
 
     void FNativeSurface::Shutdown()
     {
+		FApplication::Get()->RemoveSurface(this);
+
+		RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
+
 		PlatformApplication::Get()->RemoveMessageHandler(this);
+    }
+
+    void FNativeSurface::UpdateDrawableSize()
+    {
+        dpiScale = platformWindow->GetDpiScaling();
+		if (dpiScale <= 0)
+            return;
+
+        drawableSize = platformWindow->GetDrawableWindowSize();
+        Vec2 newAvailableSize = drawableSize.ToVec2() / dpiScale;
+        if (newAvailableSize != availableSize && owningWidget)
+        {
+            owningWidget->MarkLayoutDirty();
+            owningWidget->MarkPaintDirty();
+        }
+		availableSize = newAvailableSize;
     }
 
     void FNativeSurface::OnWindowDisplayChanged(PlatformWindow* window, int displayIndex)
@@ -72,7 +89,7 @@ namespace CE
         if (window != platformWindow)
 			return;
 
-        dpiScale = (f32)platformWindow->GetWindowDpi() / 96.0f;
+        UpdateDrawableSize();
     }
 
     void FNativeSurface::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
@@ -80,7 +97,7 @@ namespace CE
         if (window != platformWindow)
             return;
 
-        drawableSize = window->GetDrawableWindowSize();
+        UpdateDrawableSize();
     }
 
     void FNativeSurface::OnWindowRestored(PlatformWindow* window)
@@ -88,7 +105,7 @@ namespace CE
         if (window != platformWindow)
             return;
 
-        drawableSize = window->GetDrawableWindowSize();
+        UpdateDrawableSize();
     }
 
     void FNativeSurface::OnWindowMaximized(PlatformWindow* window)
@@ -96,7 +113,7 @@ namespace CE
         if (window != platformWindow)
             return;
 
-        drawableSize = window->GetDrawableWindowSize();
+        UpdateDrawableSize();
     }
 
 } // namespace CE
