@@ -14,11 +14,18 @@ namespace CE
         
     public:
 
+		// - Lifecycle -
+
 		static FNativeSurface* Create(PlatformWindow* window, const String& name, FSurface* parentSurface);
 
         void Initialize() override;
 
         void Shutdown() override;
+
+
+		// - Frame Graph -
+
+		void EmplaceFrameAttachments() override;
 
     protected:
 

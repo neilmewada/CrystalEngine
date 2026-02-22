@@ -36,6 +36,8 @@ namespace CE
     {
         ZoneScoped;
 
+        // TODO: Update this method
+
 		if (IsPaintDirty())
             return;
 
@@ -102,6 +104,18 @@ namespace CE
         f32 constrainedHeight = Math::Clamp(desiredSize.y, m_MinHeight + m_Padding.top + m_Padding.bottom, m_MaxHeight + m_Padding.top + m_Padding.bottom);
 
 		return Vec2(constrainedWidth, constrainedHeight);
+    }
+
+    void FWidget::SetLayoutPosition(Vec2 newPosition)
+    {
+        ZoneScoped;
+
+		if (layoutPosition == newPosition)
+            return;
+
+		layoutPosition = newPosition;
+
+        MarkPaintDirty();
     }
 
     bool FWidget::IsLayoutRoot()

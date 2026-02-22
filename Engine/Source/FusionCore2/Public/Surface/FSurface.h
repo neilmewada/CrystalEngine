@@ -39,13 +39,20 @@ namespace CE
 
         void AddDirtyPaintRoot(Ref<FWidget> paintRoot);
 
-    public: // - Lifecycle -
+    public: 
+    	
+    	// - Lifecycle -
 
         virtual void Initialize() = 0;
 
         virtual void Shutdown() = 0;
 
         virtual void TickSurface(f32 deltaTime);
+
+
+        // - Frame Graph -
+
+        virtual void EmplaceFrameAttachments() = 0;
 
     protected:
 

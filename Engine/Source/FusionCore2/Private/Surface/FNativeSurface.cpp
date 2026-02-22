@@ -68,6 +68,20 @@ namespace CE
 		PlatformApplication::Get()->RemoveMessageHandler(this);
     }
 
+    void FNativeSurface::EmplaceFrameAttachments()
+    {
+		auto scheduler = RHI::FrameScheduler::Get();
+
+        RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
+
+        
+
+        for (Ref<FSurface> childSurface : childrenSurfaces)
+        {
+			childSurface->EmplaceFrameAttachments();
+        }
+    }
+
     void FNativeSurface::UpdateDrawableSize()
     {
         dpiScale = platformWindow->GetDpiScaling();
@@ -75,12 +89,15 @@ namespace CE
             return;
 
         drawableSize = platformWindow->GetDrawableWindowSize();
+
         Vec2 newAvailableSize = drawableSize.ToVec2() / dpiScale;
+
         if (newAvailableSize != availableSize && owningWidget)
         {
             owningWidget->MarkLayoutDirty();
             owningWidget->MarkPaintDirty();
         }
+
 		availableSize = newAvailableSize;
     }
 

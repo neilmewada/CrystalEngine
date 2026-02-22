@@ -120,6 +120,13 @@ namespace RenderingTests
 
         scheduler->BeginFrameGraph();
         {
+            for (int i = 0; i < application->GetSurfaceCount(); i++)
+            {
+                if (Ref<FSurface> surface = application->GetSurface(i))
+                {
+                    
+                }
+            }
 
         }
         scheduler->EndFrameGraph();

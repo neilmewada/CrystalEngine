@@ -55,7 +55,7 @@ namespace CE
 
 		Vec2 GetLayoutSize() const { return layoutSize; }
 
-		void SetLayoutPosition(Vec2 newPosition) { layoutPosition = newPosition; }
+        void SetLayoutPosition(Vec2 newPosition);
 
 		Vec2 GetDesiredSize() const { return desiredSize; }
 
