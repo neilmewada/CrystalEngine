@@ -33,6 +33,8 @@ namespace CE
             return children[index];
 		}
 
+        bool MarkPaintDirty();
+
     protected:
 
         FIELD()
@@ -48,6 +50,7 @@ namespace CE
 
         Rect globalBounds;
         Rect prevGlobalBounds;
+        bool paintDirty = false;
     };
     
 } // namespace CE

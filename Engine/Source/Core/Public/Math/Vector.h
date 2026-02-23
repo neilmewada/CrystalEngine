@@ -714,16 +714,16 @@ namespace CE
     {
     public:
 
-        Rect() : left(0), top(0), right(0), bottom(0)
+        constexpr Rect() : left(0), top(0), right(0), bottom(0)
         {}
 
-        Rect(const Vec4& vec) : left(vec.left), top(vec.top), right(vec.right), bottom(vec.bottom)
+        constexpr Rect(const Vec4& vec) : left(vec.left), top(vec.top), right(vec.right), bottom(vec.bottom)
         {}
 
-        Rect(const Vec2& min, const Vec2& max) : min(min), max(max)
+        constexpr Rect(const Vec2& min, const Vec2& max) : min(min), max(max)
         {}
 
-        Rect(f32 left, f32 top, f32 right, f32 bottom) : left(left), top(top), right(right), bottom(bottom)
+        constexpr Rect(f32 left, f32 top, f32 right, f32 bottom) : left(left), top(top), right(right), bottom(bottom)
         {}
 
         static Rect FromSize(const Vec2& min, const Vec2& size)
@@ -741,7 +741,7 @@ namespace CE
             return point.x >= min.x && point.y >= min.y && point.x <= max.x && point.y <= max.y;
         }
 
-        bool Overlaps(const Rect& other) const
+        inline bool Overlaps(const Rect& other) const
         {
             return !(right < other.left || left > other.right || bottom < other.top || top > other.bottom);
         }
@@ -764,6 +764,18 @@ namespace CE
             auto ymax = Math::Max({ a.top, a.bottom, b.top, b.bottom });
             return Rect(xmin, ymin, xmax, ymax);
         }
+
+        static inline Rect Intersection(const Rect& a, const Rect& b)
+        {
+			if (!a.Overlaps(b))
+                return Rect();
+
+            auto xmin = Math::Max({ a.left, a.right, b.left, b.right });
+            auto xmax = Math::Min({ a.left, a.right, b.left, b.right });
+            auto ymin = Math::Max({ a.top, a.bottom, b.top, b.bottom });
+            auto ymax = Math::Min({ a.top, a.bottom, b.top, b.bottom });
+            return Rect(xmin, ymin, xmax, ymax);
+		}
 
         union {
             struct {

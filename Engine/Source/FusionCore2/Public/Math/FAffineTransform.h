@@ -59,6 +59,12 @@ namespace CE
             return out;
         }
 
+        bool IsTranslationOnly(float epsilon = 1e-8f) const
+        {
+            return std::fabs(m00 - 1.0f) <= epsilon && std::fabs(m11 - 1.0f) <= epsilon &&
+                std::fabs(m01) <= epsilon && std::fabs(m10) <= epsilon;
+		}
+
         float Determinant() const
         {
             return m00 * m11 - m01 * m10;

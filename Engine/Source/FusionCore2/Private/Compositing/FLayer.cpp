@@ -44,5 +44,10 @@ namespace CE
     {
 		owningWidget = widget;
     }
+
+    bool FLayer::MarkPaintDirty()
+    {
+		paintDirty = true;
+    }
 } // namespace CE
 
