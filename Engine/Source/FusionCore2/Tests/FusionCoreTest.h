@@ -79,6 +79,8 @@ namespace RenderingTests
 
 		void RenderFrame() override;
 
+		int GetCurrentFrameIndex() override { return curImageIndex; }
+
 		void BuildFrameGraph();
 		void CompileFrameGraph();
 

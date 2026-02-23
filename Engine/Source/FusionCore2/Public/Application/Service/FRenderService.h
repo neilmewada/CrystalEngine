@@ -22,6 +22,8 @@ namespace CE
 
 		virtual void RenderFrame() = 0;
 
+        virtual int GetCurrentFrameIndex() = 0;
+
     protected:
 
         void UpdateDrawListMask(RHI::DrawListMask& drawListMask);

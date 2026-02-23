@@ -43,6 +43,11 @@ namespace CE
 
         FIELD()
         WeakRef<FWidget> owningWidget;
+
+        // - Properties -
+
+        Rect globalBounds;
+        Rect prevGlobalBounds;
     };
     
 } // namespace CE
