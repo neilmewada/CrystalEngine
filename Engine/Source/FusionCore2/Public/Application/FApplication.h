@@ -45,6 +45,8 @@ namespace CE
 
 		// - Getters & Setters -
 
+		f32 GetDeltaTime() const { return deltaTime; }
+
 		bool HasService(ClassType* serviceClass) const;
 
         template<typename TService> requires TIsBaseClassOf<FService, TService>::Value

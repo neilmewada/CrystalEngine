@@ -20,7 +20,7 @@ namespace CE
 
         virtual void RenderPrepare() = 0;
 
-		virtual void Render() = 0;
+		virtual void RenderFrame() = 0;
 
     protected:
 

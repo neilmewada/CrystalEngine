@@ -39,7 +39,7 @@ namespace RenderingTests
 		recompileFrameGraph = false;
 	}
 
-	void FusionRendererService::Render()
+	void FusionRendererService::RenderFrame()
 	{
         if (IsEngineRequestingExit())
             return;

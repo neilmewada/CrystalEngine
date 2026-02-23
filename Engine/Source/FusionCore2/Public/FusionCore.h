@@ -17,11 +17,16 @@
 #include "Application/Service/FService.h"
 #include "Application/FApplication.h"
 #include "Application/Service/FEventService.h"
+#include "Application/Service/FAnimationService.h"
 #include "Application/Service/FRenderService.h"
 
 // Surface
 #include "Surface/FSurface.h"
 #include "Surface/FNativeSurface.h"
+
+// Compositing
+#include "Compositing/FLayer.h"
+#include "Compositing/FLayerCompositor.h"
 
 // Widget
 #include "Widget/Layout/LayoutTypes.h"

@@ -34,24 +34,24 @@ namespace CE
 
     void FSurface::SetOwningWidget(Ref<FWidget> widget)
     {
-		if (owningWidget == widget)
+		if (rootWidget == widget)
             return;
 
-		if (owningWidget)
+		if (rootWidget)
         {
-            owningWidget->SetParentSurfaceRecursive(nullptr);
+            rootWidget->SetParentSurfaceRecursive(nullptr);
         }
 
-		owningWidget = widget;
+		rootWidget = widget;
 
-        if (owningWidget)
+        if (rootWidget)
 		{
-			owningWidget->SetParentSurfaceRecursive(this);
+			rootWidget->SetParentSurfaceRecursive(this);
 
-            AddPendingLayoutRoot(owningWidget);
+            AddPendingLayoutRoot(rootWidget);
 
-            owningWidget->MarkLayoutDirty();
-            owningWidget->MarkPaintDirty();
+            rootWidget->MarkLayoutDirty();
+            rootWidget->MarkPaintDirty();
 		}
     }
 
@@ -81,7 +81,7 @@ namespace CE
 
     void FSurface::TickSurface(f32 deltaTime)
     {
-		if (!owningWidget)
+		if (!rootWidget)
             return;
 
         // - Layout

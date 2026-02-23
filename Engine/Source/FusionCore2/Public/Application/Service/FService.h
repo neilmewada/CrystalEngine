@@ -9,8 +9,8 @@ namespace CE
     {
 	    PumpPlatformEvents,
         DispatchInput,
-        PreUpdate,
-        UpdateSurfaces,
+        PreUpdateSurfaces,
+        PostUpdateSurfaces,
 		RenderPrepare,
         Render,
 		PostRender

@@ -109,6 +109,7 @@ static void TestBegin(bool gui)
 		initInfo.services = {
 			GetStaticClass<FEventService>(),
 			GetStaticClass<FusionRendererService>(),
+			GetStaticClass<FAnimationService>()
 		};
 
 		fApp->Initialize(initInfo);

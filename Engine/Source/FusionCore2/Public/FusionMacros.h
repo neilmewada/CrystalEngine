@@ -47,7 +47,8 @@
 			thread_local const CE::Name nameValue = #PropertyName;\
 			if ((self.GetFlags() & OF_InsideConstructor) == 0) {\
 				 static_cast<CE::FWidget&>(self).OnFusionPropertyModified(nameValue);\
-				DirtyFunc;\
+				 self.UpdateLayerOwnership();\
+				 DirtyFunc;\
 			}\
 			return self;\
 		}\

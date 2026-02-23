@@ -16,7 +16,7 @@ namespace CE
         }
 		else if (tickPhase == FServiceTickPhase::Render)
         {
-            Render();
+            RenderFrame();
         }
     }
 

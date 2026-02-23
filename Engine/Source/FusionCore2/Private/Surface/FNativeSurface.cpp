@@ -74,8 +74,6 @@ namespace CE
 
         RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
 
-        
-
         for (Ref<FSurface> childSurface : childrenSurfaces)
         {
 			childSurface->EmplaceFrameAttachments();
@@ -92,10 +90,10 @@ namespace CE
 
         Vec2 newAvailableSize = drawableSize.ToVec2() / dpiScale;
 
-        if (newAvailableSize != availableSize && owningWidget)
+        if (newAvailableSize != availableSize && rootWidget)
         {
-            owningWidget->MarkLayoutDirty();
-            owningWidget->MarkPaintDirty();
+            rootWidget->MarkLayoutDirty();
+            rootWidget->MarkPaintDirty();
         }
 
 		availableSize = newAvailableSize;

@@ -58,7 +58,7 @@ namespace RenderingTests
 			);
 		}
 
-	
+
 		Ref<FVerticalStack> vstack;
 		Ref<FHorizontalStack> hstack;
 	};
@@ -77,7 +77,7 @@ namespace RenderingTests
 
 		void RenderPrepare() override;
 
-		void Render() override;
+		void RenderFrame() override;
 
 		void BuildFrameGraph();
 		void CompileFrameGraph();

@@ -23,7 +23,7 @@ namespace CE
 
         void SetOwningWidget(Ref<FWidget> widget);
 
-		Ref<FWidget> GetOwningWidget() const { return owningWidget; }
+		Ref<FWidget> GetRootWidget() const { return rootWidget; }
 
 		f32 GetDpiScale() const { return dpiScale; }
 
@@ -79,7 +79,7 @@ namespace CE
         Vec2i drawableSize;
 
 		FIELD()
-		Ref<FWidget> owningWidget;
+		Ref<FWidget> rootWidget;
     };
     
 } // namespace CE

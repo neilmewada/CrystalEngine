@@ -10,7 +10,8 @@ namespace CE
 		LayoutDirty = BIT(1),
 		Faulted = BIT(2),
 		Disabled = BIT(3),
-		Hidden = BIT(4)
+		Hidden = BIT(4),
+		ForceOwnLayer = BIT(5)
     };
     ENUM_CLASS_FLAGS(FWidgetFlags)
 
@@ -37,15 +38,15 @@ namespace CE
 
         virtual void MarkLayoutDirty();
 
-		CE_FORCE_INLINE bool IsPaintDirty() const { return EnumHasAnyFlags(flags, FWidgetFlags::PaintDirty); }
+		CE_FORCE_INLINE bool IsPaintDirty() const { return EnumHasAnyFlags(widgetFlags, FWidgetFlags::PaintDirty); }
 
-        CE_FORCE_INLINE bool IsLayoutDirty() const { return EnumHasAnyFlags(flags, FWidgetFlags::LayoutDirty); }
+        CE_FORCE_INLINE bool IsLayoutDirty() const { return EnumHasAnyFlags(widgetFlags, FWidgetFlags::LayoutDirty); }
 
-        CE_FORCE_INLINE bool IsFaulted() const { return EnumHasAnyFlags(flags, FWidgetFlags::Faulted); }
+        CE_FORCE_INLINE bool IsFaulted() const { return EnumHasAnyFlags(widgetFlags, FWidgetFlags::Faulted); }
 
-		CE_FORCE_INLINE bool IsEnabled() const { return !EnumHasAnyFlags(flags, FWidgetFlags::Disabled); }
+		CE_FORCE_INLINE bool IsEnabled() const { return !EnumHasAnyFlags(widgetFlags, FWidgetFlags::Disabled); }
 
-		CE_FORCE_INLINE bool IsVisible() const { return !EnumHasAnyFlags(flags, FWidgetFlags::Hidden); }
+		CE_FORCE_INLINE bool IsVisible() const { return !EnumHasAnyFlags(widgetFlags, FWidgetFlags::Hidden); }
 
     public:
 
@@ -60,8 +61,6 @@ namespace CE
 		Vec2 GetDesiredSize() const { return desiredSize; }
 
         virtual bool IsLayoutRoot();
-
-    	virtual bool IsPaintRoot();
 
 		Vec2 GetMinimumContentSize();
 
@@ -78,6 +77,18 @@ namespace CE
     	virtual void DetachChild(Ref<FWidget> child) {}
 
     	void DetachFromParent();
+
+        // - Layer -
+
+        bool IsPaintRoot();
+
+	protected:
+
+        // - Layer -
+
+        bool ShouldOwnLayer();
+
+		void UpdateLayerOwnership();
 
 	public: // - Getters & Setters -
 
@@ -97,11 +108,18 @@ namespace CE
 
 	private: // - Internal -
 
+		void PromoteToLayerOwner();
+		void DemoteFromLayerOwner();
+        FLayer* FindNearestAncestorLayer();
+
         FIELD()
 		WeakRef<FWidget> parentWidget;
 
         FIELD()
 		WeakRef<FSurface> parentSurface;
+
+        FIELD()
+        Ref<FLayer> ownedLayer;
 
     protected:
 
@@ -136,6 +154,8 @@ namespace CE
 
         FUSION_LAYOUT_PROPERTY(f32, FillRatio);
 
+        FUSION_PAINT_PROPERTY(f32, Opacity);
+
         FUSION_LAYOUT_PROPERTY(CE::HAlign, HAlign);
         FUSION_LAYOUT_PROPERTY(CE::VAlign, VAlign);
 
@@ -155,17 +175,17 @@ namespace CE
 
 		FUSION_PROPERTY_SET(bool, Enabled)
         {
-			bool isCurrentlyEnabled = !EnumHasAnyFlags(self.flags, FWidgetFlags::Disabled);
+			bool isCurrentlyEnabled = !EnumHasAnyFlags(self.widgetFlags, FWidgetFlags::Disabled);
 			if (value == isCurrentlyEnabled)
                 return self;
 
             if (value)
             {
-                self.flags &= ~FWidgetFlags::Disabled;
+                self.widgetFlags &= ~FWidgetFlags::Disabled;
             }
             else
             {
-                self.flags |= FWidgetFlags::Disabled;
+                self.widgetFlags |= FWidgetFlags::Disabled;
 			}
 
 			self.MarkLayoutDirty();
@@ -179,17 +199,17 @@ namespace CE
 
         FUSION_PROPERTY_SET(bool, Visible)
         {
-			bool isCurrentlyVisible = !EnumHasAnyFlags(self.flags, FWidgetFlags::Hidden);
+			bool isCurrentlyVisible = !EnumHasAnyFlags(self.widgetFlags, FWidgetFlags::Hidden);
 			if (value == isCurrentlyVisible)
                 return self;
 
 			if (value)
             {
-                self.flags &= ~FWidgetFlags::Hidden;
+                self.widgetFlags &= ~FWidgetFlags::Hidden;
             }
             else
             {
-                self.flags |= FWidgetFlags::Hidden;
+                self.widgetFlags |= FWidgetFlags::Hidden;
             }
             
             self.MarkPaintDirty();
@@ -238,7 +258,7 @@ namespace CE
 
         // - Internal -
 
-		FWidgetFlags flags = FWidgetFlags::None;
+		FWidgetFlags widgetFlags = FWidgetFlags::None;
 
         FUSION_WIDGET;
     };

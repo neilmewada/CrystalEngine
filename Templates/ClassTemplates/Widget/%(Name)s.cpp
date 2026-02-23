@@ -7,6 +7,13 @@ namespace %(NameSpace)s
     {
 
     }
+
+    void %(Name)s::Construct()
+    {
+        Super::Construct();
+
+        
+    }
     
 }
 

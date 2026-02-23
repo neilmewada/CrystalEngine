@@ -114,14 +114,14 @@ namespace CE
 
 		InvokeServiceTick(FServiceTickPhase::DispatchInput);
 
-		InvokeServiceTick(FServiceTickPhase::PreUpdate);
+		InvokeServiceTick(FServiceTickPhase::PreUpdateSurfaces);
 
         for (int i = 0; i < surfaces.GetSize(); i++)
         {
 			surfaces[i]->TickSurface(deltaTime);
         }
 
-		InvokeServiceTick(FServiceTickPhase::UpdateSurfaces);
+		InvokeServiceTick(FServiceTickPhase::PostUpdateSurfaces);
 
 		InvokeServiceTick(FServiceTickPhase::RenderPrepare);
 

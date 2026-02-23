@@ -22,7 +22,7 @@ namespace CE
         catch (const Exception& exception)
         {
             CE_LOG(Error, All, "Exception occurred during widget [{}] construction: {}\nStack Trace:\n{}", GetClass()->GetName().GetLastComponent(), exception.what(), exception.GetStackTraceString(true));
-	        flags |= FWidgetFlags::Faulted;
+	        widgetFlags |= FWidgetFlags::Faulted;
         }
     }
 
@@ -41,7 +41,7 @@ namespace CE
 		if (IsPaintDirty())
             return;
 
-		flags |= FWidgetFlags::PaintDirty;
+		widgetFlags |= FWidgetFlags::PaintDirty;
 
 		if (Ref<FSurface> surface = parentSurface.Lock())
         {
@@ -72,7 +72,7 @@ namespace CE
         if (IsLayoutDirty())
             return;
 
-		flags |= FWidgetFlags::LayoutDirty;
+		widgetFlags |= FWidgetFlags::LayoutDirty;
 
 		if (Ref<FSurface> surface = parentSurface.Lock())
         {
@@ -133,11 +133,92 @@ namespace CE
 
     bool FWidget::IsPaintRoot()
     {
-        const bool isRootWidget = parentWidget.IsNull() && parentSurface.IsValid();
-        if (isRootWidget)
+        return ownedLayer.IsValid();
+    }
+
+    bool FWidget::ShouldOwnLayer()
+    {
+        if (EnumHasAnyFlags(widgetFlags, FWidgetFlags::ForceOwnLayer))
+            return true;
+
+        if (parentWidget.IsNull() && parentSurface.IsValid())
+            return true;
+
+        if (m_Opacity < 0.9999f)
             return true;
 
         return false;
+    }
+
+    void FWidget::UpdateLayerOwnership()
+    {
+        const bool should = ShouldOwnLayer();
+		const bool has = ownedLayer.IsValid();
+
+		if (should && !has)
+        {
+            PromoteToLayerOwner();
+        }
+        else if (!should && has)
+        {
+            DemoteFromLayerOwner();
+        }
+    }
+
+    void FWidget::PromoteToLayerOwner()
+    {
+        ownedLayer = CreateObject<FLayer>(this, "Layer");
+		ownedLayer->SetOwningWidget(this);
+        
+    	if (FLayer* parentLayer = FindNearestAncestorLayer())
+        {
+            parentLayer->AddChild(ownedLayer);
+		}
+
+        MarkPaintDirty();
+    }
+
+    void FWidget::DemoteFromLayerOwner()
+    {
+        if (!ownedLayer)
+            return;
+
+        Ref<FLayer> parentLayer = ownedLayer->GetParentLayer();
+
+        // Re-parent all child layers up to our former parent.
+        // Iterate until empty since AddChild removes children from ownedLayer as it goes.
+        while (ownedLayer->GetChildCount() > 0)
+        {
+            Ref<FLayer> child = ownedLayer->GetChildAt(0);
+            if (!child)
+                break;
+
+            if (parentLayer)
+                parentLayer->AddChild(child);
+            else
+                ownedLayer->RemoveChild(child);
+        }
+
+        // Detach our layer from the tree
+        if (parentLayer)
+            parentLayer->RemoveChild(ownedLayer);
+
+        ownedLayer = nullptr;
+
+        // Re-bake this widget into the parent layer
+        MarkPaintDirty();
+    }
+
+    FLayer* FWidget::FindNearestAncestorLayer()
+    {
+        Ref<FWidget> ancestor = parentWidget.Lock();
+        while (ancestor)
+        {
+            if (ancestor->ownedLayer)
+                return ancestor->ownedLayer.Get();
+            ancestor = ancestor->GetParentWidget();
+        }
+        return nullptr;
     }
 
     Vec2 FWidget::GetMinimumContentSize()
@@ -154,9 +235,15 @@ namespace CE
     {
         ZoneScoped;
 
-		layoutSize = ApplyLayoutConstraints(finalSize);
+        widgetFlags &= ~FWidgetFlags::LayoutDirty;
 
-        flags &= ~FWidgetFlags::LayoutDirty;
+		Vec2 newLayoutSize = ApplyLayoutConstraints(finalSize);
+        if (layoutSize == newLayoutSize)
+			return;
+
+		layoutSize = newLayoutSize;
+
+        MarkPaintDirty();
     }
 
     void FWidget::SetParentSurfaceRecursive(Ref<FSurface> surface)
@@ -164,6 +251,7 @@ namespace CE
         ZoneScoped;
 
         this->parentSurface = surface;
+        UpdateLayerOwnership();
     }
 
     void FWidget::DetachFromParent()
