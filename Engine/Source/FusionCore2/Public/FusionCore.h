@@ -20,13 +20,16 @@
 #include "Application/Service/FAnimationService.h"
 #include "Application/Service/FRenderService.h"
 
-// Surface
-#include "Surface/FSurface.h"
-#include "Surface/FNativeSurface.h"
+#include "Rendering/FPainter.h"
 
 // Compositing
 #include "Compositing/FLayer.h"
+#include "Compositing/FFrameContext.h"
 #include "Compositing/FLayerCompositor.h"
+
+// Surface
+#include "Surface/FSurface.h"
+#include "Surface/FNativeSurface.h"
 
 // Widget
 #include "Widget/Layout/LayoutTypes.h"

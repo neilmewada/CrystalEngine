@@ -3,6 +3,7 @@
 namespace CE
 {
     class FWidget;
+    class FLayer;
 
     CLASS(Abstract)
     class FUSIONCORE_API FSurface : public CE::Object
@@ -37,7 +38,7 @@ namespace CE
 
         // - Paint -
 
-        void AddDirtyPaintRoot(Ref<FWidget> paintRoot);
+        void AddDirtyPaintRoot(Ref<FLayer> paintRoot);
 
     public: 
     	
@@ -63,11 +64,13 @@ namespace CE
 		Array<Ref<FWidget>> pendingLayoutRoots;
 
         HashSet<Uuid> dirtyPaintRootIds;
-        Array<Ref<FWidget>> dirtyPaintRoots;
+        Array<Ref<FLayer>> dirtyPaintRoots;
 
         Array<Ref<FSurface>> childrenSurfaces;
         
 		WeakRef<FSurface> parentSurface;
+
+        Ref<FLayerCompositor> compositor;
 
         FIELD()
 		f32 dpiScale = 1.0f;

@@ -5,7 +5,7 @@ namespace CE
 
     FSurface::FSurface()
     {
-
+        compositor = CreateDefaultSubobject<FLayerCompositor>("LayerCompositor");
     }
 
     void FSurface::GetDrawListMask(RHI::DrawListMask& drawListMask)
@@ -67,7 +67,7 @@ namespace CE
         pendingLayoutRootIds.Add(layoutRoot->GetUuid());
     }
 
-    void FSurface::AddDirtyPaintRoot(Ref<FWidget> paintRoot)
+    void FSurface::AddDirtyPaintRoot(Ref<FLayer> paintRoot)
     {
         if (!paintRoot)
             return;
@@ -140,14 +140,14 @@ namespace CE
 
         try
         {
-            HashSet<FWidget*> dirtySet;
+            HashSet<FLayer*> dirtySet;
             for (auto root : dirtyPaintRoots)
                 dirtySet.Add(root.Get());
 
             // Remove any root whose ancestor is also pending
-            dirtyPaintRoots.RemoveAll([&](const Ref<FWidget>& root)
+            dirtyPaintRoots.RemoveAll([&](const Ref<FLayer>& root)
                 {
-                    Ref<FWidget> ancestor = root->GetParentWidget();
+                    Ref<FLayer> ancestor = root->GetParentLayer();
                     while (ancestor != nullptr)
                     {
                         if (dirtySet.Exists(ancestor.Get()))
@@ -155,30 +155,37 @@ namespace CE
                             dirtyPaintRootIds.Remove(root->GetUuid());
 	                        return true;
                         }
-                        ancestor = ancestor->GetParentWidget();
+                        ancestor = ancestor->GetParentLayer();
                     }
                     return false;
                 });
 
 			for (int i = dirtyPaintRoots.GetSize() - 1; i >= 0; i--)
             {
-                Ref<FWidget> root = dirtyPaintRoots[i];
+                Ref<FLayer> root = dirtyPaintRoots[i];
                 dirtyPaintRoots.RemoveAt(i);
                 if (!root)
                     continue;
 
                 dirtyPaintRootIds.Remove(root->GetUuid());
 
-                if (root->IsFaulted())
-                    continue;
+                if (Ref<FWidget> widget = root->GetOwningWidget())
+                {
+                    if (widget->IsFaulted())
+                        continue;
 
-                // TODO: Do paint
+                    // TODO: Do paint
+                }
             }
         }
         catch (const Exception& exception)
         {
             CE_LOG(Critical, All, "Exception in FSurface::TickSurface on class {}, while painting. Stack Trace:\n{}", GetClass()->GetName().GetLastComponent(), exception.GetStackTraceString(true));
         }
+
+        // - Composite
+
+
     }
 
 } // namespace CE

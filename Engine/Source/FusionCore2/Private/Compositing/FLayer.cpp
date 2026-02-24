@@ -5,7 +5,8 @@ namespace CE
 
     FLayer::FLayer()
     {
-
+        painter = CreateDefaultSubobject<FPainter>("Painter");
+        painter->owningLayer = this;
     }
 
     void FLayer::AddChild(Ref<FLayer> childLayer)
@@ -45,9 +46,18 @@ namespace CE
 		owningWidget = widget;
     }
 
-    bool FLayer::MarkPaintDirty()
+    Ref<FSurface> FLayer::GetParentSurface()
     {
-		paintDirty = true;
+        if (Ref<FWidget> widget = owningWidget.Lock())
+        {
+            return widget->GetParentSurface();
+        }
+        return nullptr;
+    }
+
+    void FLayer::MarkPaintDirty()
+    {
+        needsRepaint = true;
     }
 } // namespace CE
 

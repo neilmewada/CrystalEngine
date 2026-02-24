@@ -20,6 +20,8 @@ namespace CE
 
 		void SetOwningWidget(Ref<FWidget> widget);
 
+        Ref<FWidget> GetOwningWidget() const { return owningWidget.Lock(); }
+
 		Ref<FLayer> GetParentLayer() const { return parentLayer.Lock(); }
 
 		u32 GetChildCount() const { return (u32)children.GetSize(); }
@@ -33,7 +35,11 @@ namespace CE
             return children[index];
 		}
 
-        bool MarkPaintDirty();
+        Ref<FSurface> GetParentSurface();
+
+        void MarkPaintDirty();
+
+        bool NeedsRepaint() const { return needsRepaint; }
 
     protected:
 
@@ -48,9 +54,12 @@ namespace CE
 
         // - Properties -
 
-        Rect globalBounds;
-        Rect prevGlobalBounds;
-        bool paintDirty = false;
+        bool needsRepaint = true;
+
+    private:
+
+        FIELD()
+        Ref<FPainter> painter;
     };
     
 } // namespace CE

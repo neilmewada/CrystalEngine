@@ -21,7 +21,7 @@ namespace CE
         }
         catch (const Exception& exception)
         {
-            CE_LOG(Error, All, "Exception occurred during widget [{}] construction: {}\nStack Trace:\n{}", GetClass()->GetName().GetLastComponent(), exception.what(), exception.GetStackTraceString(true));
+            CE_LOG(Critical, All, "Exception occurred during widget [{}] construction: {}\n{}", GetClass()->GetName().GetLastComponent(), exception.what(), exception.GetStackTraceString(true));
 	        widgetFlags |= FWidgetFlags::Faulted;
         }
     }
@@ -56,7 +56,7 @@ namespace CE
 
 		        if (parent->IsPaintRoot())
 		        {
-		            surface->AddDirtyPaintRoot(parent);
+                    surface->AddDirtyPaintRoot(parent->GetLayer());
 		            break;
 		        }
 
@@ -120,6 +120,8 @@ namespace CE
 
     bool FWidget::IsLayoutRoot()
     {
+        ZoneScoped;
+
         const bool isFixedSize = Math::ApproxEquals(m_MinWidth, m_MaxWidth) && Math::ApproxEquals(m_MinHeight, m_MaxHeight);
         if (isFixedSize)
             return true;
@@ -165,8 +167,22 @@ namespace CE
         }
     }
 
+    void FWidget::SetWidgetFlag(FWidgetFlags flag, bool set)
+    {
+        if (set)
+        {
+            widgetFlags |= flag;
+        }
+        else
+        {
+            widgetFlags &= ~flag;
+        }
+    }
+
     void FWidget::PromoteToLayerOwner()
     {
+        ZoneScoped;
+
         ownedLayer = CreateObject<FLayer>(this, "Layer");
 		ownedLayer->SetOwningWidget(this);
         
@@ -182,6 +198,8 @@ namespace CE
     {
         if (!ownedLayer)
             return;
+
+        ZoneScoped;
 
         Ref<FLayer> parentLayer = ownedLayer->GetParentLayer();
 
@@ -211,6 +229,8 @@ namespace CE
 
     FLayer* FWidget::FindNearestAncestorLayer()
     {
+        ZoneScoped;
+
         Ref<FWidget> ancestor = parentWidget.Lock();
         while (ancestor)
         {

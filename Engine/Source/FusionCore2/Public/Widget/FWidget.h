@@ -82,6 +82,8 @@ namespace CE
 
         bool IsPaintRoot();
 
+        Ref<FLayer> GetLayer() const { return ownedLayer; }
+
 	protected:
 
         // - Layer -
@@ -96,12 +98,19 @@ namespace CE
 
 		Ref<FSurface> GetParentSurface() const { return parentSurface.Lock(); }
 
+    fusioncore_internal:
+
     	// For internal use only!
 		void SetParentWidget(Ref<FWidget> newParentWidget) { parentWidget = newParentWidget; }
 
     	// For internal use only!
     	void SetParentSurface(Ref<FSurface> surface) { parentSurface = surface; }
     	
+        // For internal use only!
+        void SetWidgetFlag(FWidgetFlags flag, bool set);
+
+    public:
+
     	// - Callbacks -
 
 		virtual void OnFusionPropertyModified(const Name& propertyName) {}
