@@ -20,6 +20,8 @@
 #include "Application/Service/FAnimationService.h"
 #include "Application/Service/FRenderService.h"
 
+#include "Rendering/FUIDrawData.h"
+#include "Rendering/FUIDrawList.h"
 #include "Rendering/FPainter.h"
 
 // Compositing

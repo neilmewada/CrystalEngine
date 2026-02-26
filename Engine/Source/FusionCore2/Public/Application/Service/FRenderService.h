@@ -14,7 +14,7 @@ namespace CE
 
         void TickService(FServiceTickPhase tickPhase) override;
 
-        // - Renderer Service -
+        // - Rendering -
 
         virtual void MarkFrameGraphDirty() = 0;
 

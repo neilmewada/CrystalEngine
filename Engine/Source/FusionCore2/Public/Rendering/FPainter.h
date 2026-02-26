@@ -4,26 +4,27 @@ namespace CE
 {
     class FLayer;
 
-    CLASS()
-    class FUSIONCORE_API FPainter : public Object
+    class FUSIONCORE_API FPainter
     {
-        CE_CLASS(FPainter, Object)
-    protected:
+        CE_NO_COPY_MOVE(FPainter);
+    private:
 
-        FPainter();
-        
+        FPainter(FLayer* layer);
+
     public:
 
-        Ref<FLayer> GetOwningLayer() const { return owningLayer.Lock(); }
+        void Begin();
+
+        void End();
 
     private:
 
-        FIELD()
-        WeakRef<FLayer> owningLayer;
+        FLayer* owningLayer = nullptr;
+
+        bool isRecording = false;
 
         friend class FLayer;
     };
     
 } // namespace CE
 
-#include "FPainter.rtti.h"

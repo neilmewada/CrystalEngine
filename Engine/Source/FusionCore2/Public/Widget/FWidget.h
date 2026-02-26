@@ -84,6 +84,10 @@ namespace CE
 
         Ref<FLayer> GetLayer() const { return ownedLayer; }
 
+        // - Paint -
+
+        virtual void OnPaint(FPainter& painter);
+
 	protected:
 
         // - Layer -

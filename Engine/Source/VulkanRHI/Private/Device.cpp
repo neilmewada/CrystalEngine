@@ -361,6 +361,11 @@ namespace CE::Vulkan
 				deviceExtensionNames.Add(VK_KHR_MAINTENANCE3_EXTENSION_NAME);
 			}
 
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME) == 0)
+			{
+				deviceExtensionNames.Add(VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME);
+			}
+
 #if CE_DEBUG && PLATFORM_DESKTOP
 			// Debugging Extensions
 			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME) == 0)

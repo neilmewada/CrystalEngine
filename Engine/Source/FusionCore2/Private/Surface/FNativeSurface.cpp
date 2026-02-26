@@ -92,6 +92,8 @@ namespace CE
 
         if (newAvailableSize != availableSize && rootWidget)
         {
+            
+
             rootWidget->MarkLayoutDirty();
             rootWidget->MarkPaintDirty();
         }

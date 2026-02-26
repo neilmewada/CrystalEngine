@@ -37,9 +37,13 @@ namespace CE
 
         Ref<FSurface> GetParentSurface();
 
-        void MarkPaintDirty();
+        bool IsFaulted() const { return faulted; }
 
-        bool NeedsRepaint() const { return needsRepaint; }
+        bool IsPaintDirty() const { return isPaintDirty; }
+
+        void DoPaint();
+
+        void MarkPaintDirty();
 
     protected:
 
@@ -52,14 +56,13 @@ namespace CE
         FIELD()
         WeakRef<FWidget> owningWidget;
 
-        // - Properties -
-
-        bool needsRepaint = true;
-
     private:
 
-        FIELD()
-        Ref<FPainter> painter;
+        bool isPaintDirty = false;
+        bool isRecording = false;
+        bool faulted = false;
+
+        friend class FPainter;
     };
     
 } // namespace CE

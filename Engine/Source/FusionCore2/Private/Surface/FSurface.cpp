@@ -75,6 +75,8 @@ namespace CE
         if (dirtyPaintRootIds.Exists(paintRoot->GetUuid()))
             return;
 
+        paintRoot->MarkPaintDirty();
+
         dirtyPaintRoots.Add(paintRoot);
         dirtyPaintRootIds.Add(paintRoot->GetUuid());
     }
@@ -168,13 +170,15 @@ namespace CE
                     continue;
 
                 dirtyPaintRootIds.Remove(root->GetUuid());
+                if (root->IsFaulted())
+                    continue;
 
                 if (Ref<FWidget> widget = root->GetOwningWidget())
                 {
                     if (widget->IsFaulted())
                         continue;
 
-                    // TODO: Do paint
+                    root->DoPaint();
                 }
             }
         }

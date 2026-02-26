@@ -138,6 +138,11 @@ namespace CE
         return ownedLayer.IsValid();
     }
 
+    void FWidget::OnPaint(FPainter& painter)
+    {
+
+    }
+
     bool FWidget::ShouldOwnLayer()
     {
         if (EnumHasAnyFlags(widgetFlags, FWidgetFlags::ForceOwnLayer))
@@ -146,8 +151,8 @@ namespace CE
         if (parentWidget.IsNull() && parentSurface.IsValid())
             return true;
 
-        if (m_Opacity < 0.9999f)
-            return true;
+        //if (m_Opacity < 0.9999f)
+        //    return true; 
 
         return false;
     }

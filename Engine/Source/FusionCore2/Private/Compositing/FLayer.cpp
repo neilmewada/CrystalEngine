@@ -5,8 +5,7 @@ namespace CE
 
     FLayer::FLayer()
     {
-        painter = CreateDefaultSubobject<FPainter>("Painter");
-        painter->owningLayer = this;
+
     }
 
     void FLayer::AddChild(Ref<FLayer> childLayer)
@@ -55,9 +54,42 @@ namespace CE
         return nullptr;
     }
 
+    void FLayer::DoPaint()
+    {
+        FPainter painter{ this };
+
+        try
+        {
+            painter.Begin();
+
+            if (Ref<FWidget> widget = owningWidget.Get())
+            {
+                widget->OnPaint(painter);
+            }
+
+            painter.End();
+
+            isPaintDirty = false;
+
+            for (Ref<FLayer> child : children)
+            {
+                if (child->IsFaulted() || child->IsPaintDirty())
+                    continue;
+
+                child->DoPaint();
+            }
+        }
+        catch (const Exception& exception)
+        {
+            CE_LOG(Critical, All, "Exception in FLayer::DoPaint() while painting.\n{}", exception.GetStackTraceString(true));
+            faulted = true;
+        }
+    }
+
     void FLayer::MarkPaintDirty()
     {
-        needsRepaint = true;
+        isPaintDirty = true;
     }
+
 } // namespace CE
 
