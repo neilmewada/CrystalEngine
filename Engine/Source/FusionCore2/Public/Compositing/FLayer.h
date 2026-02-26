@@ -41,7 +41,7 @@ namespace CE
 
         bool IsPaintDirty() const { return isPaintDirty; }
 
-        void DoPaint();
+        void DoPaintIfNeeded();
 
         void MarkPaintDirty();
 
@@ -61,6 +61,8 @@ namespace CE
         bool isPaintDirty = false;
         bool isRecording = false;
         bool faulted = false;
+
+        FAffineTransform cachedGlobalTransform;
 
         friend class FPainter;
     };

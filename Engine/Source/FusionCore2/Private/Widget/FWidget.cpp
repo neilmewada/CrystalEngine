@@ -54,7 +54,7 @@ namespace CE
 		            break;
 		        }
 
-		        if (parent->IsPaintRoot())
+		        if (parent->IsPaintBoundary())
 		        {
                     surface->AddDirtyPaintRoot(parent->GetLayer());
 		            break;
@@ -85,7 +85,7 @@ namespace CE
 	                break;
                 }
 
-	            if (parent->IsLayoutRoot())
+	            if (parent->IsLayoutBoundary())
 	            {
                     surface->AddPendingLayoutRoot(parent);
                     break;
@@ -118,7 +118,7 @@ namespace CE
         MarkPaintDirty();
     }
 
-    bool FWidget::IsLayoutRoot()
+    bool FWidget::IsLayoutBoundary()
     {
         ZoneScoped;
 
@@ -133,14 +133,14 @@ namespace CE
         return false;
     }
 
-    bool FWidget::IsPaintRoot()
+    bool FWidget::IsPaintBoundary()
     {
         return ownedLayer.IsValid();
     }
 
     void FWidget::OnPaint(FPainter& painter)
     {
-
+        
     }
 
     bool FWidget::ShouldOwnLayer()

@@ -60,7 +60,7 @@ namespace CE
 
 		Vec2 GetDesiredSize() const { return desiredSize; }
 
-        virtual bool IsLayoutRoot();
+        virtual bool IsLayoutBoundary();
 
 		Vec2 GetMinimumContentSize();
 
@@ -80,7 +80,7 @@ namespace CE
 
         // - Layer -
 
-        bool IsPaintRoot();
+        bool IsPaintBoundary();
 
         Ref<FLayer> GetLayer() const { return ownedLayer; }
 
@@ -138,7 +138,7 @@ namespace CE
 
         // - Cache -
 
-        FAffineTransform cachedGlobalTransform;
+        FAffineTransform cachedLayerSpaceTransform;
 
         // - Layout -
 

@@ -7,6 +7,8 @@ ThirdParty/*
 !ThirdParty/vendor
 Engine/Assets/Sponza/*
 
+.claude/
+
 # Prerequisites
 *.d
 

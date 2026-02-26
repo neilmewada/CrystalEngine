@@ -4,5 +4,3 @@ namespace CE
 {
     
 }
-
-#include "FUIDrawList.rtti.h"

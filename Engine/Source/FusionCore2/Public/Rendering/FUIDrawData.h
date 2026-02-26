@@ -3,6 +3,7 @@
 namespace CE
 {
 
+
 	struct FUIVertex
 	{
 		
@@ -14,5 +15,3 @@ namespace CE
 	};
 
 }
-
-#include "FUIDrawData.rtti.h"

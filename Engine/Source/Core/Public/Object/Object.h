@@ -283,11 +283,11 @@ namespace CE
          *  Fields
          */
 
-        Name name;
-        Uuid uuid;
-
         // Subobject Lifecycle
-		ObjectMap attachedObjects{};
+        ObjectMap attachedObjects{};
+
+        Uuid uuid;
+        Name name;
         
         WeakRef<Object> outer = nullptr;
         Internal::RefCountControl* control = nullptr;

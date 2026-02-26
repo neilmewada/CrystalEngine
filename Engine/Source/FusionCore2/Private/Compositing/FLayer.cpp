@@ -54,29 +54,34 @@ namespace CE
         return nullptr;
     }
 
-    void FLayer::DoPaint()
+    void FLayer::DoPaintIfNeeded()
     {
+        ZoneScoped;
+
         FPainter painter{ this };
 
         try
         {
-            painter.Begin();
-
-            if (Ref<FWidget> widget = owningWidget.Get())
+            if (isPaintDirty)
             {
-                widget->OnPaint(painter);
+                painter.Begin();
+
+                if (Ref<FWidget> widget = owningWidget.Get())
+                {
+                    widget->OnPaint(painter);
+                }
+
+                painter.End();
+
+                isPaintDirty = false;
             }
-
-            painter.End();
-
-            isPaintDirty = false;
 
             for (Ref<FLayer> child : children)
             {
-                if (child->IsFaulted() || child->IsPaintDirty())
+                if (child->IsFaulted())
                     continue;
 
-                child->DoPaint();
+                child->DoPaintIfNeeded();
             }
         }
         catch (const Exception& exception)
