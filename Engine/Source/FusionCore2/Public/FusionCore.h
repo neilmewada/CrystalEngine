@@ -24,10 +24,10 @@
 #include "Rendering/FUIDrawList.h"
 #include "Rendering/FPainter.h"
 
-// Compositing
-#include "Compositing/FLayer.h"
-#include "Compositing/FFrameContext.h"
-#include "Compositing/FLayerCompositor.h"
+// Layers
+#include "Layer/FLayer.h"
+#include "Layer/FLayerCompositor.h"
+#include "Layer/FCompositingLayer.h"
 
 // Surface
 #include "Surface/FSurface.h"
