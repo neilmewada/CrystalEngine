@@ -230,6 +230,8 @@ namespace CE::Vulkan
 		// Fetch memory properties
 		vkGetPhysicalDeviceMemoryProperties(gpu, &memoryProperties);
 
+		descriptorIndexingEnabled = false;
+
 		isUnifiedMemory = true;
 		int dedicatedHeapIndex = -1;
 		u64 dedicatedHeapSize = 0;
@@ -397,11 +399,13 @@ namespace CE::Vulkan
 		vulkan12Features.pNext = nullptr;
 		vulkan12Features.timelineSemaphore = VK_TRUE;
 
+		// Descriptor Indexing
 		vulkan12Features.descriptorIndexing = VK_TRUE;
 		vulkan12Features.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
 		vulkan12Features.runtimeDescriptorArray = VK_TRUE;
 		vulkan12Features.descriptorBindingVariableDescriptorCount = VK_TRUE;
 		vulkan12Features.descriptorBindingPartiallyBound = VK_TRUE;
+		descriptorIndexingEnabled = true;
 
 		deviceCI.pNext = &vulkan12Features;
 #endif

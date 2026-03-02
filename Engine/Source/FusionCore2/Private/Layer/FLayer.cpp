@@ -5,7 +5,7 @@ namespace CE
 
     FLayer::FLayer()
     {
-
+        drawList = new FUIDrawList;
     }
 
     void FLayer::AddChild(Ref<FLayer> childLayer)

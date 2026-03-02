@@ -178,7 +178,7 @@ namespace CE
                     if (widget->IsFaulted())
                         continue;
 
-                    root->DoPaint();
+                    root->DoPaintIfNeeded();
                 }
             }
         }

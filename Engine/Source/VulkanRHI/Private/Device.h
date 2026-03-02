@@ -70,6 +70,8 @@ namespace CE::Vulkan
 
         inline bool SupportsReBar() const { return supportsReBar; }
 
+        inline bool SupportsDescriptorIndexing() const { return descriptorIndexingEnabled; }
+
 		inline CommandBufferAllocator* GetCommandAllocator() const { return commandAllocator; }
 
 		INLINE bool IsOffscreenOnly() const { return !surfaceSupported; }
@@ -135,6 +137,8 @@ namespace CE::Vulkan
 		/// @brief Vulkan can be initialized without any Native windows (i.e. offscreen mode).
 		/// Potentially useful for command line applications/toos.
 		bool surfaceSupported = false;
+
+        bool descriptorIndexingEnabled = false;
 
         VkInstance instance = nullptr;
         VulkanRHI* vulkanRhi = nullptr;

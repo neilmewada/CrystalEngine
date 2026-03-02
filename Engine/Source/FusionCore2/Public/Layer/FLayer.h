@@ -56,6 +56,15 @@ namespace CE
         FIELD()
         WeakRef<FWidget> owningWidget;
 
+        Ptr<FUIDrawList> drawList;
+
+        struct SplitPoint
+        {
+	        
+        };
+
+        Array<SplitPoint> splitPoints;
+
     private:
 
         bool isPaintDirty = false;

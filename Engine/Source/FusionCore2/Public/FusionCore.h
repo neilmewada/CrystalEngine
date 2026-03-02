@@ -20,14 +20,19 @@
 #include "Application/Service/FAnimationService.h"
 #include "Application/Service/FRenderService.h"
 
+#include "Style/FPen.h"
+#include "Style/FBrush.h"
+#include "Style/FFont.h"
+
+// Rendering / Painting
 #include "Rendering/FUIDrawData.h"
 #include "Rendering/FUIDrawList.h"
 #include "Rendering/FPainter.h"
 
 // Layers
 #include "Layer/FLayer.h"
-#include "Layer/FLayerCompositor.h"
 #include "Layer/FCompositingLayer.h"
+#include "Layer/FLayerCompositor.h"
 
 // Surface
 #include "Surface/FSurface.h"

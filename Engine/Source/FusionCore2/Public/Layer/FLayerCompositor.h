@@ -15,7 +15,6 @@ namespace CE
 
     private:
 
-        StaticArray<FFrameContext, RHI::Limits::MaxSwapChainImageCount> frames{};
     };
     
 } // namespace CE

@@ -68,7 +68,7 @@ namespace CE
     void FWidget::MarkLayoutDirty()
     {
         ZoneScoped;
-
+        
         if (IsLayoutDirty())
             return;
 
@@ -140,26 +140,29 @@ namespace CE
 
     void FWidget::OnPaint(FPainter& painter)
     {
-        
+        ZoneScoped;
+
+        SetWidgetFlag(FWidgetFlags::PaintDirty, false);
     }
 
-    bool FWidget::ShouldOwnLayer()
+    SubClass<FLayer> FWidget::DetermineLayerType()
     {
-        if (EnumHasAnyFlags(widgetFlags, FWidgetFlags::ForceOwnLayer))
-            return true;
-
         if (parentWidget.IsNull() && parentSurface.IsValid())
-            return true;
+            return FCompositingLayer::StaticClass();
 
-        //if (m_Opacity < 0.9999f)
-        //    return true; 
+        if (m_Opacity < 0.9999f)
+            return FCompositingLayer::StaticClass();
 
-        return false;
+        if (EnumHasAnyFlags(widgetFlags, FWidgetFlags::ForceOwnLayer))
+            return FLayer::StaticClass();
+
+        return nullptr;
     }
 
     void FWidget::UpdateLayerOwnership()
     {
-        const bool should = ShouldOwnLayer();
+        const SubClass<FLayer> layerType = DetermineLayerType();
+        const bool should = layerType.IsValid();
 		const bool has = ownedLayer.IsValid();
 
 		if (should && !has)
@@ -169,6 +172,11 @@ namespace CE
         else if (!should && has)
         {
             DemoteFromLayerOwner();
+        }
+        else if (should && has && ownedLayer->GetClass() != layerType.GetClassType())
+        {
+            DemoteFromLayerOwner();
+            PromoteToLayerOwner();
         }
     }
 
@@ -188,7 +196,11 @@ namespace CE
     {
         ZoneScoped;
 
-        ownedLayer = CreateObject<FLayer>(this, "Layer");
+        const SubClass<FLayer> layerType = DetermineLayerType();
+        if (!layerType.IsValid())
+            return;
+
+        ownedLayer = CreateObject<FLayer>(this, "Layer", OF_NoFlags, layerType);
 		ownedLayer->SetOwningWidget(this);
         
     	if (FLayer* parentLayer = FindNearestAncestorLayer())

@@ -92,7 +92,7 @@ namespace CE
 
         // - Layer -
 
-        bool ShouldOwnLayer();
+        SubClass<FLayer> DetermineLayerType();
 
 		void UpdateLayerOwnership();
 

@@ -6,9 +6,10 @@ namespace CE
     template<typename T, SIZE_T GrowthIncrement = 128, bool CallDestructor = true>
     class StableDynamicArray
     {
-        CE_NO_COPY(StableDynamicArray);
         static_assert(GrowthIncrement > 0);
     public:
+
+        static constexpr SIZE_T IncrementSize = GrowthIncrement;
 
         StableDynamicArray()
         {}
@@ -16,6 +17,41 @@ namespace CE
         ~StableDynamicArray()
         {
             Free();
+        }
+
+        StableDynamicArray(const StableDynamicArray& copy)
+        {
+            CopyFrom(copy);
+        }
+
+        StableDynamicArray& operator=(const StableDynamicArray& copy)
+        {
+            if (this == &copy)
+                return *this;
+
+            CopyFrom(copy);
+            return *this;
+        }
+
+        StableDynamicArray(StableDynamicArray&& move) noexcept
+        {
+            CopyFrom(move);
+
+            move.data = nullptr;
+            move.count = move.capacity = 0;
+        }
+
+        StableDynamicArray& operator=(StableDynamicArray&& move) noexcept
+        {
+            if (this == &move)
+                return *this;
+
+            CopyFrom(move);
+
+            move.data = nullptr;
+            move.count = move.capacity = 0;
+
+            return *this;
         }
 
         typedef T* iterator;
@@ -190,6 +226,20 @@ namespace CE
         }
         
     private:
+
+        void CopyFrom(const StableDynamicArray& copy)
+        {
+            Free();
+
+            Reserve(std::max(copy.capacity, copy.count));
+
+            count = copy.count;
+            
+            if (count > 0)
+            {
+                memcpy(data, copy.data, count * sizeof(T));
+            }
+        }
 
         T* data = nullptr;
         SIZE_T capacity = 0;
