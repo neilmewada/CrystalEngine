@@ -22,6 +22,8 @@ namespace CE
 
     void FContainerWidget::AddChildWidget(Ref<FWidget> childWidget)
     {
+        ZoneScoped;
+
 		if (!children.Exists(childWidget))
         {
 		    childWidget->DetachFromParent();

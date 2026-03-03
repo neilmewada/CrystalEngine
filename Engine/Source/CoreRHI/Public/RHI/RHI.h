@@ -164,6 +164,8 @@ namespace CE::RHI
         
         virtual int GetClipSpaceSignY() { return 1; }
 
+		virtual bool IsUnifiedMemoryOrResizableBarSupported() { return false; }
+
 	protected:
 
 		StaticArray<Array<ValidationCallback>, (SIZE_T)ValidationMessageType::COUNT> validationCallbackHandlers{};

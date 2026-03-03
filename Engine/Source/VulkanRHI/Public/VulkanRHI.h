@@ -148,6 +148,8 @@ namespace CE::Vulkan
         virtual u64 GetShaderStructMemberSize(const RHI::ShaderStructMember& member) override;
         virtual void GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets) override;
 
+        bool IsUnifiedMemoryOrResizableBarSupported() override;
+
         inline Device* GetDevice() const { return device; }
 
         RHI::RenderPass* CreateRenderPass(const RHI::RenderPassLayout& rpLayout) override;

@@ -101,7 +101,7 @@ namespace CE
 	};
 
 	STRUCT()
-	struct FUSIONCORE_API FBrush
+	struct FUSIONCORE_API FBrush final
 	{
 		CE_STRUCT(FBrush)
 	public:

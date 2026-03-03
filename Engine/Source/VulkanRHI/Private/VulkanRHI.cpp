@@ -577,6 +577,11 @@ namespace CE::Vulkan
         }
     }
 
+    bool VulkanRHI::IsUnifiedMemoryOrResizableBarSupported()
+    {
+	    return device->IsUnifiedMemoryArchitecture() || device->SupportsReBar();
+    }
+
     RHI::RenderPass* VulkanRHI::CreateRenderPass(const RHI::RenderPassLayout& rpLayout)
     {
 		return new Vulkan::RenderPass(device, rpLayout);

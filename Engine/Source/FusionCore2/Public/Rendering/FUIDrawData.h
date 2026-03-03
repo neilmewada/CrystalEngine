@@ -2,16 +2,29 @@
 
 namespace CE
 {
-	using FUIIndex = u16;
+	using FUIIndex = u32;
 
 	enum class FUIShaderType : u32
 	{
 		SolidColor = 0,
 		Texture,
-		Gradient,
-		SDFText
+		LinearGradient,
+		RadialGradient,
+		ConicGradient,
+		SDFText,
+		Custom
 	};
 	ENUM_CLASS(FUIShaderType);
+
+	enum class FUIDrawItemFlags : u32
+	{
+		None = 0,
+		TextureTileX = 1 << 0,
+		TextureTileY = 1 << 1,
+		ImageFitCover = 1 << 2,
+		ImageFitContain = 1 << 3,
+	};
+	ENUM_CLASS_FLAGS(FUIDrawItemFlags);
 
 	ENUM()
 	enum class FUIBlendMode : u32
@@ -48,14 +61,17 @@ namespace CE
 		FUIShaderType shaderType = FUIShaderType::SolidColor;
 		u32 textureIndex0 = 0;
 		u32 textureIndex1 = 0;
-		u32 flags = 0;
+		FUIDrawItemFlags drawItemFlags = FUIDrawItemFlags::None;
 
 		int clipRectIndex = -1;
-		u32 _pad[3];
+		int gradientStartIndex = 0;
+		int gradientStopCount = 0;
+		u32 userFlags = 0;
 
 		// 128 bytes: per-shader payload
-		Vec4 data[8] = {};
+		f32 data[32] = {};
 	};
+	static_assert(sizeof(FUIDrawItem) == 160);
 
 	struct FUIDrawCmd
 	{
