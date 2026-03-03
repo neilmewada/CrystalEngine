@@ -145,6 +145,11 @@ namespace CE
         SetWidgetFlag(FWidgetFlags::PaintDirty, false);
     }
 
+    void FWidget::NotifyStyleStateChanged()
+    {
+
+    }
+
     SubClass<FLayer> FWidget::DetermineLayerType()
     {
         if (parentWidget.IsNull() && parentSurface.IsValid())

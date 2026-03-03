@@ -88,6 +88,8 @@ namespace CE
 
         virtual void OnPaint(FPainter& painter);
 
+        void NotifyStyleStateChanged();
+
 	protected:
 
         // - Layer -
@@ -139,6 +141,7 @@ namespace CE
         // - Cache -
 
         FAffineTransform cachedLayerSpaceTransform;
+        WeakRef<FStyle> styleRef;
 
         // - Layout -
 
@@ -152,6 +155,8 @@ namespace CE
 		Vec2 desiredSize;
 
     public: // - Fusion Properties -
+
+        FUSION_PAINT_PROPERTY(CE::Name, Style);
 
 		// Does not affect layout. Used for freeform transformations like rotation or translation that should not cause a layout pass when modified.
         FUSION_PAINT_PROPERTY(FAffineTransform, Transform);

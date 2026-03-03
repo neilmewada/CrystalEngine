@@ -2,6 +2,7 @@
 
 namespace CE
 {
+    class FStyleSet;
     class FService;
     class FSurface;
     class FNativeSurface;

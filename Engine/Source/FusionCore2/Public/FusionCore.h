@@ -20,10 +20,13 @@
 #include "Application/Service/FAnimationService.h"
 #include "Application/Service/FRenderService.h"
 
+// Style
 #include "Style/FPen.h"
 #include "Style/FBrush.h"
 #include "Style/FShape.h"
 #include "Style/FFont.h"
+#include "Style/FStyle.h"
+#include "Style/FStyleSet.h"
 
 // Rendering / Painting
 #include "Rendering/FUIDrawData.h"
