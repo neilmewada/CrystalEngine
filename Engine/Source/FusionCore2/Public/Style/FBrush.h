@@ -5,7 +5,9 @@ namespace CE
 	ENUM()
 	enum class FGradientType : u8
 	{
-		Linear
+		Linear,
+		Radial,
+		Conic
 	};
 	ENUM_CLASS(FGradientType);
 

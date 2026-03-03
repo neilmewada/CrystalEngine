@@ -22,6 +22,7 @@
 
 #include "Style/FPen.h"
 #include "Style/FBrush.h"
+#include "Style/FShape.h"
 #include "Style/FFont.h"
 
 // Rendering / Painting
@@ -43,6 +44,7 @@
 #include "Widget/FWidget.h"
 #include "Widget/FCompoundWidget.h"
 #include "Widget/FContainerWidget.h"
+#include "Widget/FDecoratedWidget.h"
 #include "Widget/Layout/FStackBox.h"
 
 

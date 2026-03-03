@@ -63,6 +63,7 @@ namespace CE
         }
 
         MarkLayoutDirty();
+        MarkPaintDirty();
     }
 
     Vec2 FCompoundWidget::MeasureContent(Vec2 availableSize)
