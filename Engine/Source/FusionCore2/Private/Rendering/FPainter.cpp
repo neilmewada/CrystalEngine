@@ -45,5 +45,13 @@ namespace CE
 		coordinateSpaceStack.RemoveLast();
 	}
 
+	FAffineTransform FPainter::GetCurrentTransform()
+	{
+		if (coordinateSpaceStack.IsEmpty())
+			return FAffineTransform::Identity();
+
+		return coordinateSpaceStack.Last().transform;
+	}
+
 } // namespace CE
 

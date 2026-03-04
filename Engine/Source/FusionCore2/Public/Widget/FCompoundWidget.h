@@ -22,13 +22,19 @@ namespace CE
 
         void SetChild(Ref<FWidget> child);
 
-
 		// - Layout -
 
         Vec2 MeasureContent(Vec2 availableSize) override;
 
 		void ArrangeContent(Vec2 finalSize) override;
 
+        // - Paint -
+
+        void OnPaint(FPainter& painter) override final;
+
+        virtual void OnPaintBackground(FPainter& painter);
+
+        virtual void OnPaintOverlay(FPainter& painter);
 
     private: // - Internal -
 
@@ -38,6 +44,8 @@ namespace CE
     public: // - Fusion Properties - 
 
         Self& Child(FWidget& widget);
+
+        FUSION_PAINT_PROPERTY(bool, ClipContent);
 
         FUSION_WIDGET;
     };

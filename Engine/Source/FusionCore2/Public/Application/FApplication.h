@@ -46,6 +46,8 @@ namespace CE
 
 		// - Getters & Setters -
 
+        Ref<FStyleSet> GetDefaultStyleSet() const { return defaultStyleSet; }
+
 		f32 GetDeltaTime() const { return deltaTime; }
 
 		bool HasService(ClassType* serviceClass) const;
@@ -80,6 +82,9 @@ namespace CE
         Array<Ref<FSurface>> surfaces;
         
 		Array<Ref<FService>> services;
+
+        FIELD()
+        Ref<FStyleSet> defaultStyleSet;
 
     private:
 

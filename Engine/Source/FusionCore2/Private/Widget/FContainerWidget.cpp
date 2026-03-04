@@ -34,6 +34,7 @@ namespace CE
 		    childWidget->SetParentSurfaceRecursive(parentSurface.Lock());
 
             MarkLayoutDirty();
+            MarkPaintDirty();
         }
     }
 
@@ -55,6 +56,7 @@ namespace CE
             child->SetParentSurfaceRecursive(nullptr);
 
             MarkLayoutDirty();
+            MarkPaintDirty();
         }
     }
 }

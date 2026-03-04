@@ -11,7 +11,8 @@ namespace CE
 		Faulted = BIT(2),
 		Disabled = BIT(3),
 		Hidden = BIT(4),
-		ForceOwnLayer = BIT(5)
+        ForcePaintBoundary = BIT(5),
+        ForceCompositingBoundary = BIT(6),
     };
     ENUM_CLASS_FLAGS(FWidgetFlags)
 
@@ -78,6 +79,8 @@ namespace CE
 
     	void DetachFromParent();
 
+        FLayer* FindNearestAncestorLayer();
+
         // - Layer -
 
         bool IsPaintBoundary();
@@ -104,6 +107,8 @@ namespace CE
 
 		Ref<FSurface> GetParentSurface() const { return parentSurface.Lock(); }
 
+        const FAffineTransform& GetCachedLayerSpaceTransform() const { return cachedLayerSpaceTransform; }
+
     fusioncore_internal:
 
     	// For internal use only!
@@ -119,13 +124,12 @@ namespace CE
 
     	// - Callbacks -
 
-		virtual void OnFusionPropertyModified(const Name& propertyName) {}
+        virtual void OnFusionPropertyModified(const Name& propertyName);
 
 	private: // - Internal -
 
 		void PromoteToLayerOwner();
 		void DemoteFromLayerOwner();
-        FLayer* FindNearestAncestorLayer();
 
         FIELD()
 		WeakRef<FWidget> parentWidget;
@@ -141,7 +145,6 @@ namespace CE
         // - Cache -
 
         FAffineTransform cachedLayerSpaceTransform;
-        WeakRef<FStyle> styleRef;
 
         // - Layout -
 

@@ -148,6 +148,36 @@ namespace CE
         m_Child->ArrangeContent(childSize);
     }
 
+    void FCompoundWidget::OnPaint(FPainter& painter)
+    {
+        ZoneScoped;
+
+	    Super::OnPaint(painter);
+
+        OnPaintBackground(painter);
+
+        if (m_Child && !m_Child->IsPaintBoundary())
+        {
+            painter.PushCoordinateSpace(FAffineTransform::Translation(layoutPosition) * m_Transform);
+            {
+
+            }
+            painter.PopCoordinateSpace();
+        }
+
+        OnPaintOverlay(painter);
+    }
+
+    void FCompoundWidget::OnPaintBackground(FPainter& painter)
+    {
+
+    }
+
+    void FCompoundWidget::OnPaintOverlay(FPainter& painter)
+    {
+
+    }
+
     FCompoundWidget& FCompoundWidget::Child(FWidget& widget)
     {
         SetChild(&widget);

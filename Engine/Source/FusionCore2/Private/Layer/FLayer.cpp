@@ -23,6 +23,14 @@ namespace CE
 
 		children.Add(childLayer);
 		childLayer->parentLayer = this;
+
+        if (Ref<FWidget> widget = owningWidget.Lock())
+        {
+            if (Ref<FSurface> surface = widget->GetParentSurface())
+            {
+                surface->AddDirtyPaintRoot(this);
+            }
+        }
     }
 
     void FLayer::RemoveChild(Ref<FLayer> childLayer)
@@ -38,6 +46,14 @@ namespace CE
         }
 
 		children.Remove(childLayer);
+
+        if (Ref<FWidget> widget = owningWidget.Lock())
+        {
+            if (Ref<FSurface> surface = widget->GetParentSurface())
+            {
+                surface->AddDirtyPaintRoot(this);
+            }
+        }
     }
 
     void FLayer::SetOwningWidget(Ref<FWidget> widget)
@@ -58,12 +74,12 @@ namespace CE
     {
         ZoneScoped;
 
-        FPainter painter{ this };
-
         try
         {
             if (isPaintDirty)
             {
+                FPainter painter{ this };
+
                 painter.Begin();
 
                 if (Ref<FWidget> widget = owningWidget.Get())
@@ -86,7 +102,7 @@ namespace CE
         }
         catch (const Exception& exception)
         {
-            CE_LOG(Critical, All, "Exception in FLayer::DoPaint() while painting.\n{}", exception.GetStackTraceString(true));
+            CE_LOG(Critical, All, "Exception in FLayer::DoPaintIfNeeded() while painting.\n{}", exception.GetStackTraceString(true));
             faulted = true;
         }
     }

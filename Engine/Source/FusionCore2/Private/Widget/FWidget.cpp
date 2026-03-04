@@ -143,22 +143,46 @@ namespace CE
         ZoneScoped;
 
         SetWidgetFlag(FWidgetFlags::PaintDirty, false);
+
+        cachedLayerSpaceTransform = painter.GetCurrentTransform() * FAffineTransform::Translation(layoutPosition) * m_Transform;
     }
 
     void FWidget::NotifyStyleStateChanged()
     {
+        if (!m_Style.IsValid())
+            return;
 
+        FStyleSet* styleSet = nullptr;
+
+        if (Ref<FSurface> surface = parentSurface.Lock())
+        {
+            styleSet = surface->GetStyleSet().Get();
+        }
+
+        if (!styleSet)
+            styleSet = FApplication::Get()->GetDefaultStyleSet().Get();
+        
+        if (!styleSet)
+            return;
+
+        if (Ref<FStyle> style = styleSet->FindStyle(m_Style))
+        {
+            style->MakeStyle(*this);
+        }
     }
 
     SubClass<FLayer> FWidget::DetermineLayerType()
     {
+        if (EnumHasAnyFlags(widgetFlags, FWidgetFlags::ForceCompositingBoundary))
+            return FCompositingLayer::StaticClass();
+
         if (parentWidget.IsNull() && parentSurface.IsValid())
             return FCompositingLayer::StaticClass();
 
         if (m_Opacity < 0.9999f)
             return FCompositingLayer::StaticClass();
 
-        if (EnumHasAnyFlags(widgetFlags, FWidgetFlags::ForceOwnLayer))
+        if (EnumHasAnyFlags(widgetFlags, FWidgetFlags::ForcePaintBoundary))
             return FLayer::StaticClass();
 
         return nullptr;
@@ -194,6 +218,16 @@ namespace CE
         else
         {
             widgetFlags &= ~flag;
+        }
+    }
+
+    void FWidget::OnFusionPropertyModified(const CE::Name& propertyName)
+    {
+        thread_local const CE::Name styleProperty = "Style";
+
+        if (propertyName == styleProperty)
+        {
+            NotifyStyleStateChanged();
         }
     }
 
@@ -293,7 +327,19 @@ namespace CE
         ZoneScoped;
 
         this->parentSurface = surface;
+
+        const bool wasPaintDirty = IsPaintDirty();
+        const bool wasLayoutDirty = IsLayoutDirty();
+        widgetFlags &= ~(FWidgetFlags::PaintDirty | FWidgetFlags::LayoutDirty);
+
         UpdateLayerOwnership();
+
+        if (wasPaintDirty)
+            MarkPaintDirty();
+        if (wasLayoutDirty)
+            MarkLayoutDirty();
+
+        this->parentSurface = surface;
     }
 
     void FWidget::DetachFromParent()

@@ -16,11 +16,12 @@ namespace CE
         // - Public API 0
 
         void Begin();
-
         void End();
 
         void PushCoordinateSpace(const FAffineTransform& transform);
         void PopCoordinateSpace();
+
+        FAffineTransform GetCurrentTransform();
 
     private:
 

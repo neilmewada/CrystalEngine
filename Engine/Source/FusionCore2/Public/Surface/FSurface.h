@@ -30,6 +30,8 @@ namespace CE
 
         Vec2 GetAvailableSize() const { return availableSize; }
 
+        Ref<FStyleSet> GetStyleSet();
+
     public:
 
         // - Layout -
@@ -83,6 +85,9 @@ namespace CE
 
 		FIELD()
 		Ref<FWidget> rootWidget;
+
+        FIELD()
+        Ref<FStyleSet> styleSet;
     };
     
 } // namespace CE

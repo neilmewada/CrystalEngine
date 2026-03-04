@@ -55,6 +55,17 @@ namespace CE
 		}
     }
 
+    Ref<FStyleSet> FSurface::GetStyleSet()
+    {
+        if (styleSet.IsValid())
+			return styleSet;
+        if (Ref<FSurface> parent = parentSurface.Lock())
+        {
+            return parent->GetStyleSet();
+        }
+        return FApplication::Get()->GetDefaultStyleSet();
+    }
+
     void FSurface::AddPendingLayoutRoot(Ref<FWidget> layoutRoot)
     {
         if (!layoutRoot)
