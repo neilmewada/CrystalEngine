@@ -30,7 +30,7 @@ namespace CE
 
         // - Paint -
 
-        void OnPaint(FPainter& painter) override final;
+        void OnPaint() override final;
 
         virtual void OnPaintBackground(FPainter& painter);
 

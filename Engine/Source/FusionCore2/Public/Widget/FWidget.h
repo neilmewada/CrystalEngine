@@ -11,8 +11,7 @@ namespace CE
 		Faulted = BIT(2),
 		Disabled = BIT(3),
 		Hidden = BIT(4),
-        ForcePaintBoundary = BIT(5),
-        ForceCompositingBoundary = BIT(6),
+        ForcePaintBoundary = BIT(5)
     };
     ENUM_CLASS_FLAGS(FWidgetFlags)
 
@@ -79,27 +78,21 @@ namespace CE
 
     	void DetachFromParent();
 
-        FLayer* FindNearestAncestorLayer();
-
         // - Layer -
 
         bool IsPaintBoundary();
 
-        Ref<FLayer> GetLayer() const { return ownedLayer; }
+        bool IsCompositingBoundary();
 
         // - Paint -
 
-        virtual void OnPaint(FPainter& painter);
+        virtual void OnPaint();
 
         void NotifyStyleStateChanged();
 
 	protected:
 
         // - Layer -
-
-        SubClass<FLayer> DetermineLayerType();
-
-		void UpdateLayerOwnership();
 
 	public: // - Getters & Setters -
 
@@ -128,17 +121,11 @@ namespace CE
 
 	private: // - Internal -
 
-		void PromoteToLayerOwner();
-		void DemoteFromLayerOwner();
-
         FIELD()
 		WeakRef<FWidget> parentWidget;
 
         FIELD()
 		WeakRef<FSurface> parentSurface;
-
-        FIELD()
-        Ref<FLayer> ownedLayer;
 
     protected:
 

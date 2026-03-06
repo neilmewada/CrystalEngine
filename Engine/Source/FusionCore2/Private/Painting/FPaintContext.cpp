@@ -2,11 +2,5 @@
 
 namespace CE
 {
-
-    FLayerCompositor::FLayerCompositor()
-    {
-
-    }
     
 } // namespace CE
-

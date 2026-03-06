@@ -148,15 +148,17 @@ namespace CE
         m_Child->ArrangeContent(childSize);
     }
 
-    void FCompoundWidget::OnPaint(FPainter& painter)
+    void FCompoundWidget::OnPaint()
     {
         ZoneScoped;
 
-	    Super::OnPaint(painter);
+	    Super::OnPaint();
+
+        FPainter painter{ this };
 
         OnPaintBackground(painter);
 
-        if (m_Child && !m_Child->IsPaintBoundary())
+        if (m_Child)
         {
             painter.PushCoordinateSpace(FAffineTransform::Translation(layoutPosition) * m_Transform);
             {

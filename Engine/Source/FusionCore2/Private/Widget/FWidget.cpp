@@ -56,7 +56,7 @@ namespace CE
 
 		        if (parent->IsPaintBoundary())
 		        {
-                    surface->AddDirtyPaintRoot(parent->GetLayer());
+                    //surface->AddDirtyPaintRoot(parent);
 		            break;
 		        }
 
@@ -135,16 +135,21 @@ namespace CE
 
     bool FWidget::IsPaintBoundary()
     {
-        return ownedLayer.IsValid();
+        return parentWidget == nullptr || EnumHasFlag(widgetFlags, FWidgetFlags::ForcePaintBoundary) || IsCompositingBoundary();
     }
 
-    void FWidget::OnPaint(FPainter& painter)
+    bool FWidget::IsCompositingBoundary()
+    {
+        return m_Opacity < 0.999f;
+    }
+
+    void FWidget::OnPaint()
     {
         ZoneScoped;
 
         SetWidgetFlag(FWidgetFlags::PaintDirty, false);
 
-        cachedLayerSpaceTransform = painter.GetCurrentTransform() * FAffineTransform::Translation(layoutPosition) * m_Transform;
+        // TODO
     }
 
     void FWidget::NotifyStyleStateChanged()
@@ -171,44 +176,6 @@ namespace CE
         }
     }
 
-    SubClass<FLayer> FWidget::DetermineLayerType()
-    {
-        if (EnumHasAnyFlags(widgetFlags, FWidgetFlags::ForceCompositingBoundary))
-            return FCompositingLayer::StaticClass();
-
-        if (parentWidget.IsNull() && parentSurface.IsValid())
-            return FCompositingLayer::StaticClass();
-
-        if (m_Opacity < 0.9999f)
-            return FCompositingLayer::StaticClass();
-
-        if (EnumHasAnyFlags(widgetFlags, FWidgetFlags::ForcePaintBoundary))
-            return FLayer::StaticClass();
-
-        return nullptr;
-    }
-
-    void FWidget::UpdateLayerOwnership()
-    {
-        const SubClass<FLayer> layerType = DetermineLayerType();
-        const bool should = layerType.IsValid();
-		const bool has = ownedLayer.IsValid();
-
-		if (should && !has)
-        {
-            PromoteToLayerOwner();
-        }
-        else if (!should && has)
-        {
-            DemoteFromLayerOwner();
-        }
-        else if (should && has && ownedLayer->GetClass() != layerType.GetClassType())
-        {
-            DemoteFromLayerOwner();
-            PromoteToLayerOwner();
-        }
-    }
-
     void FWidget::SetWidgetFlag(FWidgetFlags flag, bool set)
     {
         if (set)
@@ -229,72 +196,6 @@ namespace CE
         {
             NotifyStyleStateChanged();
         }
-    }
-
-    void FWidget::PromoteToLayerOwner()
-    {
-        ZoneScoped;
-
-        const SubClass<FLayer> layerType = DetermineLayerType();
-        if (!layerType.IsValid())
-            return;
-
-        ownedLayer = CreateObject<FLayer>(this, "Layer", OF_NoFlags, layerType);
-		ownedLayer->SetOwningWidget(this);
-        
-    	if (FLayer* parentLayer = FindNearestAncestorLayer())
-        {
-            parentLayer->AddChild(ownedLayer);
-		}
-
-        MarkPaintDirty();
-    }
-
-    void FWidget::DemoteFromLayerOwner()
-    {
-        if (!ownedLayer)
-            return;
-
-        ZoneScoped;
-
-        Ref<FLayer> parentLayer = ownedLayer->GetParentLayer();
-
-        // Re-parent all child layers up to our former parent.
-        // Iterate until empty since AddChild removes children from ownedLayer as it goes.
-        while (ownedLayer->GetChildCount() > 0)
-        {
-            Ref<FLayer> child = ownedLayer->GetChildAt(0);
-            if (!child)
-                break;
-
-            if (parentLayer)
-                parentLayer->AddChild(child);
-            else
-                ownedLayer->RemoveChild(child);
-        }
-
-        // Detach our layer from the tree
-        if (parentLayer)
-            parentLayer->RemoveChild(ownedLayer);
-
-        ownedLayer = nullptr;
-
-        // Re-bake this widget into the parent layer
-        MarkPaintDirty();
-    }
-
-    FLayer* FWidget::FindNearestAncestorLayer()
-    {
-        ZoneScoped;
-
-        Ref<FWidget> ancestor = parentWidget.Lock();
-        while (ancestor)
-        {
-            if (ancestor->ownedLayer)
-                return ancestor->ownedLayer.Get();
-            ancestor = ancestor->GetParentWidget();
-        }
-        return nullptr;
     }
 
     Vec2 FWidget::GetMinimumContentSize()
@@ -331,8 +232,6 @@ namespace CE
         const bool wasPaintDirty = IsPaintDirty();
         const bool wasLayoutDirty = IsLayoutDirty();
         widgetFlags &= ~(FWidgetFlags::PaintDirty | FWidgetFlags::LayoutDirty);
-
-        UpdateLayerOwnership();
 
         if (wasPaintDirty)
             MarkPaintDirty();

@@ -25,7 +25,7 @@ namespace CE
     };
     ENUM_CLASS(FCursor);
 
-    CLASS()
+    CLASS(Abstract)
     class FUSIONCORE_API FStyle : public Object
     {
         CE_CLASS(FStyle, Object)

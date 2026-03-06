@@ -5,7 +5,7 @@ namespace CE
 
     FSurface::FSurface()
     {
-        compositor = CreateDefaultSubobject<FLayerCompositor>("LayerCompositor");
+        
     }
 
     void FSurface::GetDrawListMask(RHI::DrawListMask& drawListMask)
@@ -78,15 +78,13 @@ namespace CE
         pendingLayoutRootIds.Add(layoutRoot->GetUuid());
     }
 
-    void FSurface::AddDirtyPaintRoot(Ref<FLayer> paintRoot)
+    void FSurface::AddDirtyPaintRoot(Ref<FWidget> paintRoot)
     {
         if (!paintRoot)
             return;
 
         if (dirtyPaintRootIds.Exists(paintRoot->GetUuid()))
             return;
-
-        paintRoot->MarkPaintDirty();
 
         dirtyPaintRoots.Add(paintRoot);
         dirtyPaintRootIds.Add(paintRoot->GetUuid());
@@ -106,7 +104,7 @@ namespace CE
                 pendingSet.Add(root.Get());
 
             // Remove any root whose ancestor is also pending
-            pendingLayoutRoots.RemoveAll([&](const Ref<FWidget>& root)
+            pendingLayoutRoots.RemoveAll([&](Ref<FWidget> root)
                 {
                     Ref<FWidget> ancestor = root->GetParentWidget();
                     while (ancestor != nullptr)
@@ -153,44 +151,39 @@ namespace CE
 
         try
         {
-            HashSet<FLayer*> dirtySet;
-            for (auto root : dirtyPaintRoots)
+            HashSet<FWidget*> dirtySet;
+            for (auto& root : dirtyPaintRoots)
                 dirtySet.Add(root.Get());
 
             // Remove any root whose ancestor is also pending
-            dirtyPaintRoots.RemoveAll([&](const Ref<FLayer>& root)
+            dirtyPaintRoots.RemoveAll([&](Ref<FWidget> root)
                 {
-                    Ref<FLayer> ancestor = root->GetParentLayer();
+                    Ref<FWidget> ancestor = root->GetParentWidget();
                     while (ancestor != nullptr)
                     {
                         if (dirtySet.Exists(ancestor.Get()))
                         {
                             dirtyPaintRootIds.Remove(root->GetUuid());
-	                        return true;
+                            return true;
                         }
-                        ancestor = ancestor->GetParentLayer();
+                        ancestor = ancestor->GetParentWidget();
                     }
                     return false;
                 });
 
-			for (int i = dirtyPaintRoots.GetSize() - 1; i >= 0; i--)
+            for (int i = dirtyPaintRoots.GetSize() - 1; i >= 0; i--)
             {
-                Ref<FLayer> root = dirtyPaintRoots[i];
+                Ref<FWidget> root = dirtyPaintRoots[i];
                 dirtyPaintRoots.RemoveAt(i);
                 if (!root)
                     continue;
 
                 dirtyPaintRootIds.Remove(root->GetUuid());
+
                 if (root->IsFaulted())
                     continue;
 
-                if (Ref<FWidget> widget = root->GetOwningWidget())
-                {
-                    if (widget->IsFaulted())
-                        continue;
-
-                    root->DoPaintIfNeeded();
-                }
+                root->OnPaint();
             }
         }
         catch (const Exception& exception)

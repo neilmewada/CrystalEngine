@@ -35,8 +35,7 @@
 
 // Layers
 #include "Layer/FLayer.h"
-#include "Layer/FCompositingLayer.h"
-#include "Layer/FLayerCompositor.h"
+#include "Layer/FLayerTree.h"
 
 // Surface
 #include "Surface/FSurface.h"

@@ -1,4 +1,4 @@
-#include "FusionCore.h"
+#pragma once
 
 namespace CE
 {

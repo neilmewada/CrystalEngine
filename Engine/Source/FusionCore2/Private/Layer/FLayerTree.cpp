@@ -2,11 +2,5 @@
 
 namespace CE
 {
-
-    FCompositingLayer::FCompositingLayer()
-    {
-
-    }
     
 } // namespace CE
-
