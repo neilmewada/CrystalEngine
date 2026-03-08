@@ -125,7 +125,7 @@ namespace CE
             String fullMessage = String::Format("{}\n{}", message.GetCString(), cpptrace::generate_trace().to_string(true));
             Log(level, fullMessage, target);
             Flush();
-            assert(false);
+            PlatformProcess::Crash();
         }
         else
         {

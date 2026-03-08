@@ -13,6 +13,8 @@ namespace CE
     public:
         CE_STATIC_CLASS(WindowsProcess);
 
+        static void Crash();
+
         static void* LoadDll(IO::Path path);
 
         static void* GetDllSymbol(void* dllHandle, const char* procName);
