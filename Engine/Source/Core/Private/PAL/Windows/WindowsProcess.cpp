@@ -7,6 +7,10 @@
 
 namespace CE
 {
+	void WindowsProcess::Crash()
+	{
+		TerminateProcess(GetCurrentProcess(), 1);
+	}
 
 	void* WindowsProcess::LoadDll(IO::Path path)
 	{
