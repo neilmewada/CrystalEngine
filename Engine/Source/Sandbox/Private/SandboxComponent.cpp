@@ -30,7 +30,7 @@ namespace CE
 		Ref<CE::StaticMesh> sponzaMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Engine/Assets/Sponza/NewSponza_Main_Yup_003");
 		if (sponzaMesh.IsNull())
 		{
-			CE_LOG(Error, All, "Failed to load Sponza assets. Please ensure the Sponza assets are placed in the Engine/Assets/Sponza/ folder.");
+			CE_LOG(Crash, All, "Failed to load Sponza assets. Please ensure the Sponza assets are placed in the Engine/Assets/Sponza/ folder.");
 			return;
 		}
 

@@ -142,7 +142,7 @@ namespace CE
 			.forceReload = false,
 			.destroyOutdatedObjects = false
 		};
-
+		
 		Ref<Bundle> load = Bundle::LoadBundleAbsolute(nullptr, bundleAbsolutePath, args);
 		if (load == nullptr)
 			return;
@@ -153,6 +153,7 @@ namespace CE
 
 		auto engineInstallDir = EngineDirectories::GetEngineInstallDirectory();
 		auto engineAssetsPath = engineInstallDir / "Engine/Assets";
+		auto engineAssetsPath2 = gProjectPath / "Engine/Assets";
 		auto editorAssetsPath = engineInstallDir / "Editor/Assets";
 
 		if (IO::Path::IsSubDirectory(bundleAbsolutePath, projectAssetsPath))
@@ -175,11 +176,20 @@ namespace CE
 			if (!parentRelativePathStr.StartsWith("/"))
 				parentRelativePathStr = "/" + parentRelativePathStr;
 		}
+		else if (IO::Path::IsSubDirectory(bundleAbsolutePath, engineAssetsPath2))
+		{
+			relativePathStr = IO::Path::GetRelative(bundleAbsolutePath, gProjectPath).RemoveExtension().GetString().Replace({ '\\' }, '/');
+			if (!relativePathStr.StartsWith("/"))
+				relativePathStr = "/" + relativePathStr;
+
+			parentRelativePathStr = IO::Path::GetRelative(bundleAbsolutePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
+			if (!parentRelativePathStr.StartsWith("/"))
+				parentRelativePathStr = "/" + parentRelativePathStr;
+		}
 
 		AssetData* assetData = nullptr;
 		bool newEntry = false;
-		int originalIndex = cachedPrimaryAssetsByParentPath[parentRelativePathStr]
-			.IndexOf([&](AssetData* data) -> bool { return data->bundleName == load->GetName(); });
+		int originalIndex = cachedPrimaryAssetsByParentPath[parentRelativePathStr].IndexOf([&](AssetData* data) -> bool { return data->bundleName == load->GetName(); });
 
 		if (originalIndex >= 0)
 		{

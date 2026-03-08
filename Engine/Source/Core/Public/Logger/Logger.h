@@ -23,6 +23,7 @@ namespace CE
         Error = 4,
         Critical = 5,
         Off = 6,
+        Crash = 7,
 	};
 
     enum class LogTarget
@@ -48,6 +49,8 @@ namespace CE
 
         static void Log(LogLevel level, StringView message, LogTarget target = LogTarget::All);
         static void Log(LogLevel level, StringView message, const char* fileName, int line, LogTarget target = LogTarget::All);
+
+        static void Flush();
 
         static std::shared_ptr<spdlog::logger> GetConsoleLogger();
 
