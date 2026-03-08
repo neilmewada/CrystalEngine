@@ -92,6 +92,9 @@ namespace CE
         if (!GIsLoggerInitialized)
             return;
 
+        if (level == LogLevel::Crash)
+            level = LogLevel::Critical;
+
         if (EnumHasAnyFlags(target, LogTarget::Console))
         {
             GConsoleLogger->log((spdlog::level::level_enum)level, message.GetCString());
@@ -117,11 +120,12 @@ namespace CE
             return;
 
 #if !CE_BUILD_RELEASE // For Non-release builds
-        if (level == LogLevel::Critical)
+        if (level == LogLevel::Crash)
         {
-            //fullMsg = String::Format("{}\n{} Line {}", message, fileName, line);
-            String fullMessage = String::Format("{}\n{}", message.GetCString(), cpptrace::generate_trace().to_string());
+            String fullMessage = String::Format("{}\n{}", message.GetCString(), cpptrace::generate_trace().to_string(true));
             Log(level, fullMessage, target);
+            Flush();
+            assert(false);
         }
         else
         {
@@ -130,6 +134,20 @@ namespace CE
 #else
         Log(level, message, target);
 #endif
+    }
+
+    void Logger::Flush()
+    {
+        if (GConsoleLogger)
+			GConsoleLogger->flush();
+
+        if (EditorLoggers.GetSize() > 0)
+        {
+            for (auto editorLogger : EditorLoggers)
+            {
+                editorLogger->flush();
+            }
+        }
     }
 
     std::shared_ptr<spdlog::logger> Logger::GetConsoleLogger()
