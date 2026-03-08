@@ -2,5 +2,9 @@
 
 namespace CE
 {
-    
+	FLayer::FLayer()
+	{
+		
+	}
+
 } // namespace CE

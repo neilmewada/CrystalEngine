@@ -5,7 +5,7 @@ namespace CE
 
     FSurface::FSurface()
     {
-        
+        layerTree = CreateDefaultSubobject<FLayerTree>("LayerTree");
     }
 
     void FSurface::GetDrawListMask(RHI::DrawListMask& drawListMask)
@@ -64,6 +64,11 @@ namespace CE
             return parent->GetStyleSet();
         }
         return FApplication::Get()->GetDefaultStyleSet();
+    }
+
+    void FSurface::MarkLayerTreeDirty()
+    {
+        layerTree->MarkSyncDirty();
     }
 
     void FSurface::AddPendingLayoutRoot(Ref<FWidget> layoutRoot)
@@ -146,6 +151,10 @@ namespace CE
         {
             CE_LOG(Critical, All, "Exception in FSurface::TickSurface on class {}, while calculating Layout.\n{}", GetClass()->GetName().GetLastComponent(), exception.GetStackTraceString(true));
         }
+
+        // - Layer Tree Sync
+
+        layerTree->DoSyncIfNeeded(rootWidget.Get());
 
         // - Paint
 

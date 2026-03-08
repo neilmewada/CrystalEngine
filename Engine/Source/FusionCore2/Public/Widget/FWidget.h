@@ -3,7 +3,7 @@
 namespace CE
 {
     ENUM(Flags)
-    enum class FWidgetFlags : u8
+    enum class FWidgetFlags : u32
     {
 	    None = 0,
         PaintDirty = BIT(0),
@@ -11,7 +11,10 @@ namespace CE
 		Faulted = BIT(2),
 		Disabled = BIT(3),
 		Hidden = BIT(4),
-        ForcePaintBoundary = BIT(5)
+        ForcePaintBoundary = BIT(5),
+        ForceCompositingBoundary = BIT(6),
+        CachedCompositingBoundary = BIT(7),
+        CachedPaintBoundary = BIT(8),
     };
     ENUM_CLASS_FLAGS(FWidgetFlags)
 
@@ -37,6 +40,8 @@ namespace CE
         virtual void MarkPaintDirty();
 
         virtual void MarkLayoutDirty();
+
+        CE_FORCE_INLINE bool TestWidgetFlags(FWidgetFlags flags) const { return EnumHasAllFlags(widgetFlags, flags); }
 
 		CE_FORCE_INLINE bool IsPaintDirty() const { return EnumHasAnyFlags(widgetFlags, FWidgetFlags::PaintDirty); }
 
@@ -78,11 +83,17 @@ namespace CE
 
     	void DetachFromParent();
 
+        virtual u32 GetChildCount() { return 0; }
+
+        virtual Ref<FWidget> GetChildAt(u32 index) { return nullptr; }
+
         // - Layer -
 
         bool IsPaintBoundary();
 
         bool IsCompositingBoundary();
+
+        void UpdateBoundaryFlags();
 
         // - Paint -
 
@@ -100,7 +111,7 @@ namespace CE
 
 		Ref<FSurface> GetParentSurface() const { return parentSurface.Lock(); }
 
-        const FAffineTransform& GetCachedLayerSpaceTransform() const { return cachedLayerSpaceTransform; }
+        const FAffineTransform& GetCachedGlobalTransform() const { return cachedGlobalTransform; }
 
     fusioncore_internal:
 
@@ -131,7 +142,7 @@ namespace CE
 
         // - Cache -
 
-        FAffineTransform cachedLayerSpaceTransform;
+        FAffineTransform cachedGlobalTransform;
 
         // - Layout -
 
@@ -197,6 +208,7 @@ namespace CE
 			}
 
 			self.MarkLayoutDirty();
+            self.MarkPaintDirty();
             return self;
         }
 

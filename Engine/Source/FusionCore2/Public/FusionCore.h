@@ -31,10 +31,11 @@
 // Rendering / Painting
 #include "Rendering/FUIDrawData.h"
 #include "Rendering/FUIDrawList.h"
-#include "Rendering/FPainter.h"
+#include "Painting/FPainter.h"
 
 // Layers
 #include "Layer/FLayer.h"
+#include "Layer/FCompositingLayer.h"
 #include "Layer/FLayerTree.h"
 
 // Surface

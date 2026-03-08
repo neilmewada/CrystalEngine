@@ -33,6 +33,7 @@ namespace CE
             m_Child = nullptr;
 
             MarkLayoutDirty();
+            MarkPaintDirty();
         }
     }
 
@@ -148,42 +149,5 @@ namespace CE
         m_Child->ArrangeContent(childSize);
     }
 
-    void FCompoundWidget::OnPaint()
-    {
-        ZoneScoped;
-
-	    Super::OnPaint();
-
-        FPainter painter{ this };
-
-        OnPaintBackground(painter);
-
-        if (m_Child)
-        {
-            painter.PushCoordinateSpace(FAffineTransform::Translation(layoutPosition) * m_Transform);
-            {
-
-            }
-            painter.PopCoordinateSpace();
-        }
-
-        OnPaintOverlay(painter);
-    }
-
-    void FCompoundWidget::OnPaintBackground(FPainter& painter)
-    {
-
-    }
-
-    void FCompoundWidget::OnPaintOverlay(FPainter& painter)
-    {
-
-    }
-
-    FCompoundWidget& FCompoundWidget::Child(FWidget& widget)
-    {
-        SetChild(&widget);
-        return *this;
-    }
 }
 

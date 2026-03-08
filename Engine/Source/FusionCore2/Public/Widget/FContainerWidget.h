@@ -20,11 +20,11 @@ namespace CE
 
         void DetachChild(Ref<FWidget> child) override;
 
-		int GetChildCount() const { return (int)children.GetSize(); }
+		u32 GetChildCount() override { return (int)children.GetSize(); }
 
-		Ref<FWidget> GetChildAt(int index) const
+		Ref<FWidget> GetChildAt(u32 index) override
 		{
-			if (index < 0 || index >= (int)children.GetSize())
+			if (index >= (u32)children.GetSize())
             {
                 return nullptr;
             }
@@ -46,8 +46,8 @@ namespace CE
         {
         };
 
-        template<typename... TArgs> requires TValidate_Children<TArgs...>::Value and (sizeof...(TArgs) > 0)
-        FContainerWidget& operator()(const TArgs&... childWidget)
+        template<typename TSelf, typename... TArgs> requires TValidate_Children<TArgs...>::Value and (sizeof...(TArgs) > 0)
+        TSelf& operator()(this TSelf& self, const TArgs&... childWidget)
         {
             using TupleType = std::tuple<const TArgs&...>;
             TupleType args = { childWidget... };
@@ -58,15 +58,15 @@ namespace CE
                     using ArgType = std::remove_cvref_t<ArgTypeBase>;
                     if constexpr (TIsBaseClassOf<FWidget, ArgType>::Value)
                     {
-                        this->AddChildWidget(const_cast<ArgType*>(&std::get<i()>(args)));
+                        self.AddChildWidget(const_cast<ArgType*>(&std::get<i()>(args)));
                     }
                     else if constexpr (TIsBaseClassOf<FWidgetBuilder, ArgType>::Value)
                     {
-                        const_cast<ArgType*>(&std::get<i()>(args))->Build(this);
+                        const_cast<ArgType*>(&std::get<i()>(args))->Build(&self);
                     }
                 });
 
-            return *this;
+            return self;
         }
 
     protected: // - Internal -

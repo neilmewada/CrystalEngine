@@ -20,6 +20,10 @@ namespace CE
 
         Ref<FWidget> GetChild() const { return m_Child; }
 
+        u32 GetChildCount() override { return m_Child.IsValid() ? 1 : 0; }
+
+        Ref<FWidget> GetChildAt(u32 index) override { return index == 0 ? m_Child : nullptr; }
+
         void SetChild(Ref<FWidget> child);
 
 		// - Layout -
@@ -30,11 +34,6 @@ namespace CE
 
         // - Paint -
 
-        void OnPaint() override final;
-
-        virtual void OnPaintBackground(FPainter& painter);
-
-        virtual void OnPaintOverlay(FPainter& painter);
 
     private: // - Internal -
 
@@ -43,7 +42,11 @@ namespace CE
 
     public: // - Fusion Properties - 
 
-        Self& Child(FWidget& widget);
+        FUSION_PROPERTY_SET(FWidget&, Child)
+        {
+            SetChild(&value);
+            return *this;
+        }
 
         FUSION_PAINT_PROPERTY(bool, ClipContent);
 

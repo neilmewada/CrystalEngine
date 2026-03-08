@@ -49,7 +49,7 @@ namespace CE
 
         Super::DetachChild(child);
 
-        if (const int index = children.IndexOf(child); index >= 0)
+        if (const int index = (int)children.IndexOf(child); index >= 0)
         {
             children.RemoveAt(index);
             child->SetParentWidget(nullptr);

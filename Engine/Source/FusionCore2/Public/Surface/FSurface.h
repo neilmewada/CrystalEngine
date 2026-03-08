@@ -31,6 +31,8 @@ namespace CE
 
         Ref<FStyleSet> GetStyleSet();
 
+        void MarkLayerTreeDirty();
+
     public:
 
         // - Layout -
@@ -70,6 +72,8 @@ namespace CE
         Array<Ref<FSurface>> childrenSurfaces;
         
 		WeakRef<FSurface> parentSurface;
+
+        Ref<FLayerTree> layerTree;
 
         FIELD()
 		f32 dpiScale = 1.0f;

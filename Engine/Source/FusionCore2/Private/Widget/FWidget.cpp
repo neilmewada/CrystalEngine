@@ -56,7 +56,7 @@ namespace CE
 
 		        if (parent->IsPaintBoundary())
 		        {
-                    //surface->AddDirtyPaintRoot(parent);
+                    surface->AddDirtyPaintRoot(parent);
 		            break;
 		        }
 
@@ -135,12 +135,30 @@ namespace CE
 
     bool FWidget::IsPaintBoundary()
     {
-        return parentWidget == nullptr || EnumHasFlag(widgetFlags, FWidgetFlags::ForcePaintBoundary) || IsCompositingBoundary();
+        return TestWidgetFlags(FWidgetFlags::CachedPaintBoundary) || TestWidgetFlags(FWidgetFlags::CachedCompositingBoundary);
     }
 
     bool FWidget::IsCompositingBoundary()
     {
-        return m_Opacity < 0.999f;
+        return TestWidgetFlags(FWidgetFlags::CachedCompositingBoundary);
+    }
+
+    void FWidget::UpdateBoundaryFlags()
+    {
+        bool isCompositing = (m_Opacity < 0.999f) || EnumHasFlag(widgetFlags, FWidgetFlags::ForceCompositingBoundary);
+        bool isPaint = (parentWidget == nullptr) || EnumHasFlag(widgetFlags, FWidgetFlags::ForcePaintBoundary) || isCompositing;
+
+        bool wasCompositing = EnumHasFlag(widgetFlags, FWidgetFlags::CachedCompositingBoundary);
+        bool wasPaint = EnumHasFlag(widgetFlags, FWidgetFlags::CachedPaintBoundary);
+
+        SetWidgetFlag(FWidgetFlags::CachedCompositingBoundary, isCompositing);
+        SetWidgetFlag(FWidgetFlags::CachedPaintBoundary, isPaint);
+
+        if (isCompositing != wasCompositing || isPaint != wasPaint)
+        {
+            if (Ref<FSurface> surface = parentSurface.Lock())
+                surface->MarkLayerTreeDirty();
+        }
     }
 
     void FWidget::OnPaint()
@@ -191,10 +209,15 @@ namespace CE
     void FWidget::OnFusionPropertyModified(const CE::Name& propertyName)
     {
         thread_local const CE::Name styleProperty = "Style";
+        thread_local const CE::Name opacityProperty = "Opacity";
 
         if (propertyName == styleProperty)
         {
             NotifyStyleStateChanged();
+        }
+        else if (propertyName == opacityProperty)
+        {
+	        
         }
     }
 
@@ -237,8 +260,6 @@ namespace CE
             MarkPaintDirty();
         if (wasLayoutDirty)
             MarkLayoutDirty();
-
-        this->parentSurface = surface;
     }
 
     void FWidget::DetachFromParent()
