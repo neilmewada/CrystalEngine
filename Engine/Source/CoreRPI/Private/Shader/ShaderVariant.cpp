@@ -30,17 +30,28 @@ namespace CE::RPI
 		{
 			String value = desc.GetTagValue("Blend").RemoveWhitespaces();
 			Array<String> splits = value.Split(',');
-			if (splits.GetSize() == 2)
+			if (splits.GetSize() == 2 || splits.GetSize() == 4)
 			{
 				EnumConstant* srcBlend = blendFactorEnum->FindConstantWithName(splits[0]);
 				EnumConstant* dstBlend = blendFactorEnum->FindConstantWithName(splits[1]);
+
+				EnumConstant* srcAlphaBlend = splits.GetSize() == 4 ? blendFactorEnum->FindConstantWithName(splits[2]) : nullptr;
+				EnumConstant* dstAlphaBlend = splits.GetSize() == 4 ? blendFactorEnum->FindConstantWithName(splits[3]) : nullptr;
 				
 				if (srcBlend != nullptr && dstBlend != nullptr)
 				{
 					colorBlend.srcColorBlend = (RHI::BlendFactor)srcBlend->GetValue();
 					colorBlend.dstColorBlend = (RHI::BlendFactor)dstBlend->GetValue();
-					colorBlend.srcAlphaBlend = RHI::BlendFactor::One;
-					colorBlend.dstAlphaBlend = RHI::BlendFactor::Zero;
+					if (srcAlphaBlend != nullptr && dstAlphaBlend != nullptr)
+					{
+						colorBlend.srcAlphaBlend = (RHI::BlendFactor)srcAlphaBlend->GetValue();
+						colorBlend.dstAlphaBlend = (RHI::BlendFactor)dstAlphaBlend->GetValue();
+					}
+					else
+					{
+						colorBlend.srcAlphaBlend = RHI::BlendFactor::One;
+						colorBlend.dstAlphaBlend = RHI::BlendFactor::Zero;
+					}
 					blendFactorFound = true;
 				}
 			}

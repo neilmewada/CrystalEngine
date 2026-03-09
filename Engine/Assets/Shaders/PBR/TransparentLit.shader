@@ -1,4 +1,4 @@
-Shader "PBR/Standard"
+Shader "PBR/Transparent Lit"
 {
     Properties
     {
@@ -26,8 +26,7 @@ Shader "PBR/Standard"
             Tags {
                 "Vertex"="VertMain", "DrawListTag"="depth"
             }
-            ZWrite On
-            ZTest LEqual
+            ZWrite Off
 
             HLSLPROGRAM
 
@@ -38,26 +37,9 @@ Shader "PBR/Standard"
 
         Pass
         {
-            Name "Shadow"
-            Tags {
-                "Vertex"="VertMain", "DrawListTag"="shadow"
-            }
-            ZWrite On
-            ZTest LEqual
-            Cull Off
-
-            HLSLPROGRAM
-
-            #include "Depth.hlsli"
-
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "Opaque"
+            Name "Transparent"
             Tags { 
-                "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="opaque"
+                "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="transparent"
             }
             ZWrite Off
             ZTest LEqual
@@ -65,7 +47,7 @@ Shader "PBR/Standard"
 
             HLSLPROGRAM
             
-            #include "Opaque.hlsli"
+            #include "Transparent.hlsli"
 
             ENDHLSL
         }
