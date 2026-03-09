@@ -80,7 +80,10 @@ float4 FragMain(PSInput input) : SV_TARGET
     material.roughness = _Roughness * _RoughnessTex.Sample(_AlbedoTexSampler, input.uv);
     material.ambient = _AmbientOcclusion;
 
-    float alpha = _Albedo.a * albedoSample.a;
+    float NdotV = clamp(dot(normal, viewDir), 0.0, 1.0);
+    float3 F0 = float3(0.04, 0.04, 0.04);
+    float fresnel = FresnelSchlickRoughness(NdotV, F0, material.roughness).x;
+    float alpha = lerp(_Albedo.a * albedoSample.a, 1.0, fresnel);
 
     float3 Lo = float3(0, 0, 0);
 
