@@ -76,8 +76,12 @@ namespace CE::RPI
 		//! The function is thread safe and is supposed to be called every frame!
 		void AddDrawPacket(DrawPacket* drawPacket, f32 depth = 0.0f);
 
+		void AddDrawPacket(DrawPacket* drawPacket, Vec3 worldPosition);
+
 		bool IsEnabled() const { return enabled; }
 		void SetEnabled(bool enabled) { this->enabled = enabled; }
+
+		void SetWorldToViewMatrix(const Matrix4x4& worldToViewMatrix);
 
 	private:
 
@@ -90,6 +94,12 @@ namespace CE::RPI
 		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> viewConstantBuffers{};
 
 		PerViewConstants viewConstants{};
+
+		// View's position in world space.
+		Vec3 position;
+
+		Matrix4x4 worldToViewMatrix;
+		Matrix4x4 viewToWorldMatrix;
 
 		b8 enabled = true;
 

@@ -65,7 +65,6 @@ namespace CE::RHI
 				auto& drawList = threadDrawListsByTag[drawListTag.Get()];
 				drawList.listTag = drawListTag;
 				drawList.AddDrawItem(drawItemProperties);
-				
 			}
 		}
 	}
@@ -96,6 +95,18 @@ namespace CE::RHI
 					mergedDrawListsByTag[i].Merge(drawLists[i]);
 					drawLists[i].Clear();
 				}
+			});
+	}
+
+	void DrawListContext::Sort(DrawListTag tag)
+	{
+		if (!tag.IsValid() || tag >= mergedDrawListsByTag.GetSize())
+			return;
+
+		DrawList& drawList = mergedDrawListsByTag[tag];
+		drawList.drawItems.Sort([](const DrawItemProperties& a, const DrawItemProperties& b)
+			{
+				return a.depth > b.depth; // descending: farthest first (back-to-front)
 			});
 	}
 

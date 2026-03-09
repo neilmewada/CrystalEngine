@@ -91,6 +91,14 @@ namespace CE
 			viewConstants.nearPlane = nearPlane;
             viewConstants.farPlane = farPlane;
         }
+
+        if (rpiView)
+        {
+            Vec3 lookDir = GetForwardVector();
+            Vec3 upDir = GetUpwardVector();
+
+            rpiView->SetWorldToViewMatrix(Quat::LookRotation2(lookDir, upDir).ToMatrix() * Matrix4x4::Translation(-GetPosition()));
+        }
     }
 
     void CameraComponent::OnEnabled()

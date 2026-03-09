@@ -190,7 +190,7 @@ namespace CE
             return hash;
         }
 
-        inline Color WithAlpha(f32 alpha) const
+        constexpr Color WithAlpha(f32 alpha) const
         {
             return Color(r, g, b, alpha);
         }

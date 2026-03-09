@@ -27,6 +27,9 @@ namespace CE::RHI
 
 		void ClearAll();
 
+		/// @brief Sorts the merged draw list for the given tag by depth, descending (back-to-front).
+		void Sort(DrawListTag tag);
+
 	private:
 		
 		ThreadLocalContext<DrawListsByTag> threadDrawListsByTag{};

@@ -329,6 +329,8 @@ namespace CE
 			fusion->EnqueueDrawPackets(drawList, curImageIndex);
 		}
 
+		auto transparentTag = RPI::RPISystem::Get().GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag::Transparent);
+
 		for (FGameWindow* renderViewport : renderViewports)
 		{
 			//if (!renderViewport->IsEnabledInHierarchy())
@@ -345,6 +347,7 @@ namespace CE
 				for (RPI::View* view : views.views)
 				{
 					view->GetDrawListContext()->Finalize();
+					view->GetDrawListContext()->Sort(transparentTag);
 
 					for (const auto& drawListTag : drawListTags)
 					{
@@ -382,6 +385,7 @@ namespace CE
 				for (RPI::View* view : views.views)
 				{
 					view->GetDrawListContext()->Finalize();
+					view->GetDrawListContext()->Sort(transparentTag);
 
 					for (const auto& drawListTag : drawListTags)
 					{

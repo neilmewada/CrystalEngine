@@ -99,4 +99,19 @@ namespace CE::RPI
 		drawListContext.AddDrawPacket(drawPacket, depth);
 	}
 
+	void View::AddDrawPacket(DrawPacket* drawPacket, Vec3 worldPosition)
+	{
+		Vec3 cameraToObject = worldPosition - position;
+		f32 depth = Vec3::Dot(cameraToObject, viewToWorldMatrix * Vec4(0, 0, 1, 0));
+		AddDrawPacket(drawPacket, depth);
+	}
+
+	void View::SetWorldToViewMatrix(const Matrix4x4& worldToViewMatrix)
+	{
+		this->worldToViewMatrix = worldToViewMatrix;
+		this->viewToWorldMatrix = worldToViewMatrix.GetInverse();
+		
+		position = this->viewToWorldMatrix.GetTranslation();
+	}
+
 } // namespace CE::RPI

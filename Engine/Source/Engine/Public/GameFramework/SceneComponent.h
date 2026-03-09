@@ -105,7 +105,7 @@ namespace CE
 		Quat localRotation = Quat::EulerDegrees(0, 0, 0);
 
 		FIELD(ReadOnly)
-		Vec3 globalPosition{};
+		Vec3 worldPosition{};
 
 		FIELD(ReadOnly)
 		Vec3 forwardVector{};
