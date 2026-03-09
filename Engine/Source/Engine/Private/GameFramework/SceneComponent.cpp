@@ -91,7 +91,7 @@ namespace CE
 
 	Vec3 SceneComponent::GetPosition()
 	{
-		return globalPosition;
+		return worldPosition;
 	}
 
 	Quat SceneComponent::GetRotation()
@@ -112,7 +112,7 @@ namespace CE
 
 	void SceneComponent::SetPosition(Vec3 pos)
 	{
-		globalPosition = pos;
+		worldPosition = pos;
 
 		if (!parentComponent)
 		{
@@ -260,7 +260,7 @@ namespace CE
 		{
 			UpdateTransformInternal();
 
-			globalPosition = transform * Vec4(0, 0, 0, 1);
+			worldPosition = transform * Vec4(0, 0, 0, 1);
 
 			forwardVector = transform * Vec4(0, 0, 1, 0);
 			upwardVector = transform * Vec4(0, 1, 0, 0);

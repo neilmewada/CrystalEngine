@@ -381,6 +381,11 @@ namespace CE
 		outRotation = q.GetNormalized();
 	}
 
+	Vec3 Matrix4x4::GetTranslation() const
+	{
+		return Vec3(rows[0][3], rows[1][3], rows[2][3]);
+	}
+
 	Quat Matrix4x4::GetRotation() const
 	{
 		Vec3 pos;

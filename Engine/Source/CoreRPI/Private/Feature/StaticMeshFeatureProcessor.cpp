@@ -262,7 +262,7 @@ namespace CE::RPI
 							for (int i = 0; i < meshDrawPacketList.GetSize(); ++i)
 							{
 								RHI::DrawPacket* drawPacket = meshDrawPacketList[i].GetDrawPacket();
-								view->AddDrawPacket(drawPacket, 0);
+								view->AddDrawPacket(drawPacket, it->worldPosition);
 							}
 						}
 					}

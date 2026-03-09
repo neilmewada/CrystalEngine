@@ -20,6 +20,8 @@ namespace CE::RPI
 
 		Matrix4x4 localToWorldTransform{};
 
+		Vec3 worldPosition;
+
 		RPI::Scene* scene = nullptr;
 
 		CustomMaterialMap materialMap{};

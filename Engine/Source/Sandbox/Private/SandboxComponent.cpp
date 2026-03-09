@@ -162,22 +162,29 @@ namespace CE
 
 		// - Sphere -
 
-		StaticMeshActor* sphereActor = CreateObject<StaticMeshActor>(scene, "SphereActor");
-		scene->AddActor(sphereActor);
-        {
-			StaticMeshComponent* meshComponent = sphereActor->GetMeshComponent();
-			meshComponent->SetName("DebugMeshComponent");
-			meshComponent->SetStaticMesh(sphereMesh);
-			meshComponent->SetLocalPosition(Vec3(5, 0, -2.5f));
-			meshComponent->SetLocalScale(Vec3(1, 1, 1));
+		constexpr int NumSpheres = 3;
+		constexpr Color ColorList[] = { Colors::Red.WithAlpha(0.5f), Colors::Green.WithAlpha(0.5f), Colors::Blue.WithAlpha(0.5f) };
 
-			CE::Material* sphereMaterial = CreateObject<CE::Material>(meshComponent, "SphereMaterial");
-			sphereMaterial->SetShader(transparentShader);
-			sphereMaterial->SetProperty("_Albedo", Colors::Red.WithAlpha(0.7f));
-			sphereMaterial->ApplyProperties();
+		for (int i = 0; i < NumSpheres; i++)
+		{
+			int colorIdx = i % COUNTOF(ColorList);
 
-			meshComponent->SetMaterial(sphereMaterial, 0, 0);
-        }
+			StaticMeshActor* sphereActor = CreateObject<StaticMeshActor>(scene, "SphereActor");
+			scene->AddActor(sphereActor);
+			{
+				StaticMeshComponent* meshComponent = sphereActor->GetMeshComponent();
+				meshComponent->SetStaticMesh(sphereMesh);
+				meshComponent->SetLocalPosition(Vec3(5 + i, 0, -2.5f));
+				meshComponent->SetLocalScale(Vec3(1, 1, 1));
+				
+				CE::Material* sphereMaterial = CreateObject<CE::Material>(meshComponent, "SphereMaterial");
+				sphereMaterial->SetShader(transparentShader);
+				sphereMaterial->SetProperty("_Albedo", ColorList[colorIdx]);
+				sphereMaterial->ApplyProperties();
+
+				meshComponent->SetMaterial(sphereMaterial, 0, 0);
+			}
+		}
     }
 
 	void SandboxComponent::Tick(f32 delta)

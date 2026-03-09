@@ -156,6 +156,7 @@ namespace CE
         if (meshHandle.IsValid())
         {
             meshHandle->localToWorldTransform = GetTransform();
+            meshHandle->worldPosition = GetPosition();
         }
 
         meshChanged = false;

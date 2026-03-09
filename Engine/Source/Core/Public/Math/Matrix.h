@@ -226,6 +226,8 @@ namespace CE
 
         void Decompose(Vec3& outTranslation, Quat& outRotation, Vec3& outScale) const;
 
+        Vec3 GetTranslation() const;
+
         Quat GetRotation() const;
 
     private:
