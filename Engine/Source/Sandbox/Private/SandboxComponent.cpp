@@ -173,7 +173,7 @@ namespace CE
 
 			CE::Material* sphereMaterial = CreateObject<CE::Material>(meshComponent, "SphereMaterial");
 			sphereMaterial->SetShader(transparentShader);
-			sphereMaterial->SetProperty("_Albedo", Colors::Red.WithAlpha(0.25f));
+			sphereMaterial->SetProperty("_Albedo", Colors::Red.WithAlpha(0.5f));
 			sphereMaterial->ApplyProperties();
 
 			meshComponent->SetMaterial(sphereMaterial, 0, 0);
