@@ -16,25 +16,6 @@ Shader "PBR/Transparent Lit"
 
     SubShader
     {
-        Tags {
-            "Blend" = "SrcAlpha,OneMinusSrcAlpha"
-        }
-
-        Pass
-        {
-            Name "Depth"
-            Tags {
-                "Vertex"="VertMain", "DrawListTag"="depth"
-            }
-            ZWrite Off
-
-            HLSLPROGRAM
-
-            #include "Depth.hlsli"
-
-            ENDHLSL
-        }
-
         Pass
         {
             Name "Transparent"
