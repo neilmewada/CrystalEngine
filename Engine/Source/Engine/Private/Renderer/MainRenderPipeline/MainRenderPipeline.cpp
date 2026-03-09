@@ -203,6 +203,7 @@ namespace CE
 	    }
 
         // _TileHeaders
+
 		PassAttachment* tileHeaders;
 	    {
 		    RPI::PassBufferAttachmentDesc tileHeadersDesc{};
@@ -552,6 +553,54 @@ namespace CE
             rootPass->AddChild(opaquePass);
 	    }
 
+        // - Transparent Pass -
+        auto transparentPass = CreateObject<RPI::RasterPass>(this, "Transparent");
+        transparentPass->SetViewTag(mainViewTag);
+        transparentPass->SetDrawListTag(GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag::Transparent));
+	    {
+            // Color MSAA
+	    	{
+                RPI::PassSlot colorSlot{};
+                colorSlot.name = "ColorMSAA";
+                colorSlot.slotType = RPI::PassSlotType::InputOutput;
+                colorSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
+                colorSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                colorSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+
+                transparentPass->AddSlot(colorSlot);
+
+                RPI::PassAttachmentBinding colorBinding{};
+                colorBinding.name = "ColorMSAA";
+                colorBinding.slotType = RPI::PassSlotType::InputOutput;
+                colorBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
+                colorBinding.connectedBinding = opaquePass->FindInputOutputBinding("ColorMSAA");
+
+                transparentPass->AddAttachmentBinding(colorBinding);
+            }
+
+            // DepthInput
+            {
+                RPI::PassSlot depthSlot{};
+                depthSlot.name = "DepthInput";
+                depthSlot.slotType = RPI::PassSlotType::Input;
+                depthSlot.attachmentUsage = RHI::ScopeAttachmentUsage::DepthStencil;
+                depthSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                depthSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+
+                transparentPass->AddSlot(depthSlot);
+
+                RPI::PassAttachmentBinding depthBinding{};
+                depthBinding.name = "DepthInput";
+                depthBinding.slotType = RPI::PassSlotType::Input;
+                depthBinding.attachmentUsage = RHI::ScopeAttachmentUsage::DepthStencil;
+                depthBinding.connectedBinding = depthPass->FindOutputBinding("DepthOutput");
+
+                transparentPass->AddAttachmentBinding(depthBinding);
+            }
+
+            rootPass->AddChild(transparentPass);
+	    }
+
         // - Resolve Pass -
 
         auto resolvePass = (RPI::RasterPass*)RPI::PassSystem::Get().CreatePass(this, "ResolvePass");
@@ -562,7 +611,7 @@ namespace CE
                 colorBinding.name = "ColorMSAA";
                 colorBinding.slotType = RPI::PassSlotType::InputOutput;
                 colorBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
-                colorBinding.connectedBinding = opaquePass->FindInputOutputBinding("ColorMSAA");
+                colorBinding.connectedBinding = transparentPass->FindInputOutputBinding("ColorMSAA");
                 colorBinding.fallbackBinding = nullptr;
 
                 resolvePass->AddAttachmentBinding(colorBinding);

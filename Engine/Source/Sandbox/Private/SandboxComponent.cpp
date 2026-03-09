@@ -18,7 +18,8 @@ namespace CE
         AssetManager* assetManager = AssetManager::Get();
 
         Ref<TextureCube> skybox = assetManager->LoadAssetAtPath<TextureCube>("/Engine/Assets/Textures/HDRI/sample_day");
-        Ref<CE::Shader> standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+		Ref<CE::Shader> standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+		Ref<CE::Shader> transparentShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/TransparentLit");
         Ref<CE::Shader> skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
 
 		CE::Scene* scene = GetScene().Get();
@@ -109,11 +110,11 @@ namespace CE
 		// - Camera -
 
 		CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
-		camera->GetCameraComponent()->SetLocalPosition(Vec3(0, -2, -2));
 		scene->AddActor(camera);
 
 		cameraComponent = camera->GetCameraComponent();
 		cameraComponent->SetFieldOfView(60);
+		cameraComponent->SetLocalEulerAngles(Vec3(0, 90, 0));
 
 		// - Skybox -
 
@@ -139,7 +140,6 @@ namespace CE
 		scene->AddActor(sponzaActor);
         {
 			StaticMeshComponent* meshComponent = sponzaActor->GetMeshComponent();
-			meshComponent->SetName("DebugMeshComponent");
 			meshComponent->SetStaticMesh(sponzaMesh);
 			meshComponent->SetLocalPosition(Vec3(0, 0, 0));
 			meshComponent->SetLocalEulerAngles(Vec3(-90, 0, 0));
@@ -159,6 +159,25 @@ namespace CE
 			sunLight->SetLightColor(Colors::White);
 			sunLight->SetShadowDistance(25);
 		}
+
+		// - Sphere -
+
+		StaticMeshActor* sphereActor = CreateObject<StaticMeshActor>(scene, "SphereActor");
+		scene->AddActor(sphereActor);
+        {
+			StaticMeshComponent* meshComponent = sphereActor->GetMeshComponent();
+			meshComponent->SetName("DebugMeshComponent");
+			meshComponent->SetStaticMesh(sphereMesh);
+			meshComponent->SetLocalPosition(Vec3(5, 0, -2.5f));
+			meshComponent->SetLocalScale(Vec3(1, 1, 1));
+
+			CE::Material* sphereMaterial = CreateObject<CE::Material>(meshComponent, "SphereMaterial");
+			sphereMaterial->SetShader(transparentShader);
+			sphereMaterial->SetProperty("_Albedo", Colors::Red.WithAlpha(0.25f));
+			sphereMaterial->ApplyProperties();
+
+			meshComponent->SetMaterial(sphereMaterial, 0, 0);
+        }
     }
 
 	void SandboxComponent::Tick(f32 delta)

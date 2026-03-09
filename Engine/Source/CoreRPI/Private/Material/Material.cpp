@@ -56,9 +56,15 @@ namespace CE::RPI
         currentShader = nullptr; // Reset current shader
 
         RHI::DrawListTag opaqueTag = RPISystem::Get().GetBuiltinDrawListTag(BuiltinDrawItemTag::Opaque);
+        RHI::DrawListTag transparentTag = RPISystem::Get().GetBuiltinDrawListTag(BuiltinDrawItemTag::Transparent);
+
         if (shaderCollection->HasItem(opaqueTag))
         {
             currentShader = shaderCollection->GetShader(opaqueTag);
+        }
+        else if (shaderCollection->HasItem(transparentTag))
+        {
+            currentShader = shaderCollection->GetShader(transparentTag);
         }
         else
         {

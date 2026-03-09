@@ -167,6 +167,11 @@ namespace CE::RPI
 				continue;
 			}
 
+			if (drawListTag == transparentTag)
+			{
+				String::IsAlphabet('a');
+			}
+
 			// TODO: Implement dynamic shader variant selection based on flags & shader options
 			RPI::ShaderVariant* variant = shader->GetVariant(shader->GetDefaultVariantIndex());
 
