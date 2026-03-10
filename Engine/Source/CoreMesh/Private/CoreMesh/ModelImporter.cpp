@@ -101,6 +101,10 @@ namespace CE
 				outMat.reflectivity = floatValue;
 
 				floatValue = 0;
+				material->Get(AI_MATKEY_TRANSPARENCYFACTOR, floatValue);
+				outMat.transparencyFactor = floatValue;
+
+				floatValue = 0;
 				material->Get(AI_MATKEY_SHININESS, floatValue);
 				outMat.shininess = floatValue;
 
