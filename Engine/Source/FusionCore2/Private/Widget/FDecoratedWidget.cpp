@@ -14,6 +14,12 @@ namespace CE
 
         
     }
-    
+
+    void FDecoratedWidget::Paint(FPainter& painter)
+    {
+	    Super::Paint(painter);
+
+        
+    }
 }
 

@@ -23,6 +23,7 @@ namespace CE
 		{
 		}
 
+		// Normalized position along the gradient (0.0 = start, 1.0 = end)
 		FIELD()
 		f32 position = 0;
 
@@ -42,6 +43,8 @@ namespace CE
 		FIELD()
 		Array<FGradientKey> stops;
 
+		// Angle in degrees. Used by Linear (direction) and Conic (start angle).
+		// Radial gradients ignore this field — center/radius are inferred from the widget rect.
 		FIELD()
 		float angle = 0;
 
@@ -73,35 +76,51 @@ namespace CE
 
 	};
 
+	// Determines what content the brush renders.
 	ENUM()
 	enum class FBrushStyle : u8
 	{
 		None = 0,
-		SolidFill,
-		Image,
-		Gradient
+		SolidFill,  // Filled with a solid color (uses color)
+		Image,      // Textured fill (uses imageName, color as tint, imageFit, brushSize, brushPos)
+		Gradient    // Gradient fill (uses gradient, color as tint)
 	};
 	ENUM_CLASS(FBrushStyle);
 
+	// Controls how an image brush tiles when brushSize is smaller than the widget rect.
+	// Only applies to FBrushStyle::Image. Mutually exclusive with NineSlice.
 	ENUM()
 	enum class FBrushTiling : u8
 	{
 		None = 0,
-		TileX,
-		TileY,
-		TileXY
+		TileX,   // Repeat horizontally
+		TileY,   // Repeat vertically
+		TileXY   // Repeat in both axes
 	};
 	ENUM_CLASS(FBrushTiling);
 
+	// Controls how an image brush is fitted into the widget rect.
+	// FPainter computes vertex UVs from this at tessellation time.
 	ENUM()
 	enum class FImageFit : u8
 	{
-		Default = 0,
-		Fill,
-		Contain,
-		Cover
+		Fill = 0, // Stretch to fill the widget rect exactly (default, ignores aspect ratio)
+		Contain,  // Scale uniformly to fit within the rect, preserving aspect ratio (may letterbox)
+		Cover,    // Scale uniformly to fill the rect, preserving aspect ratio (may crop)
+		NineSlice // Fixed corners, stretched edges/center. Requires sliceMargins to be set.
 	};
+	ENUM_CLASS(FImageFit);
 
+	// Defines the fill used to paint the interior of a shape.
+	// Supports solid color, image (textured), and gradient fills.
+	//
+	// Key fields by style:
+	//   SolidFill : color
+	//   Image     : imageName, color (tint), imageFit, tiling, brushSize, brushPos, sliceMargins (NineSlice only)
+	//   Gradient  : gradient, color (tint)
+	//
+	// brushSize : explicit pixel size of the image within the widget rect. Vec2(-1,-1) = auto (driven by imageFit).
+	// brushPos  : normalized anchor point (0,0 = top-left, 0.5,0.5 = center, 1,1 = bottom-right). Like CSS background-position.
 	STRUCT()
 	struct FUSIONCORE_API FBrush final
 	{
@@ -112,8 +131,10 @@ namespace CE
 
 		FBrush(const Color& fillColor, FBrushStyle brushStyle = FBrushStyle::SolidFill);
 
+		// Image brush. tintColor is multiplied with the texture color (White = no tint).
 		FBrush(const Name& imageName, const Color& tintColor = Colors::White);
 
+		// Gradient brush. tintColor is multiplied with the gradient output (White = no tint).
 		FBrush(const FGradient& gradient, const Color& tintColor = Colors::White);
 
 		~FBrush();
@@ -127,17 +148,26 @@ namespace CE
 		void SetBrushStyle(FBrushStyle brushStyle) { this->brushStyle = brushStyle; }
 		void SetBrushTiling(FBrushTiling tiling) { this->tiling = tiling; }
 
-		const Color& GetFillColor() const { return fillColor; }
-		void SetFillColor(const Color& color) { this->fillColor = color; }
+		// For SolidFill: the fill color. For Image/Gradient: the tint color (multiplied with texture/gradient output).
+		const Color& GetColor() const { return color; }
+		void SetColor(const Color& color) { this->color = color; }
 
 		const Name& GetImageName() const { return imageName; }
 
 		FImageFit GetImageFit() const { return imageFit; }
 		void SetImageFit(FImageFit imageFit) { this->imageFit = imageFit; }
 
+		// Border sizes for NineSlice fitting (left, top, right, bottom in pixels).
+		// Only used when imageFit == FImageFit::NineSlice.
+		const FMargin& GetSliceMargins() const { return sliceMargins; }
+		void SetSliceMargins(const FMargin& margins) { this->sliceMargins = margins; }
+
+		// Explicit pixel size of the image within the widget rect. Vec2(-1,-1) = auto (driven by imageFit).
 		const Vec2& GetBrushSize() const { return brushSize; }
 		void SetBrushSize(Vec2 brushSize) { this->brushSize = brushSize; }
 
+		// Normalized anchor point for image placement within the widget rect.
+		// (0,0) = top-left, (0.5,0.5) = centered, (1,1) = bottom-right. Equivalent to CSS background-position.
 		const Vec2& GetBrushPosition() const { return brushPos; }
 		void SetBrushPosition(Vec2 brushPos) { this->brushPos = brushPos; }
 
@@ -154,16 +184,18 @@ namespace CE
 		FGradient gradient;
 
 		FIELD()
-		Color fillColor;
+		Color color;
 
 		FIELD()
 		Name imageName;
 
+		// Explicit size of the image. Vec2(-1,-1) = auto.
 		FIELD()
-		Vec2 brushSize = Vec2(-1, -1); // -1 means auto size
+		Vec2 brushSize = Vec2(-1, -1);
 
+		// Normalized anchor point (0=start, 1=end per axis). Default: centered (0.5, 0.5).
 		FIELD()
-		Vec2 brushPos = Vec2(0.5f, 0.5f); // 50% means centered
+		Vec2 brushPos = Vec2(0.5f, 0.5f);
 
 		FIELD()
 		FBrushTiling tiling = FBrushTiling::None;
@@ -172,8 +204,12 @@ namespace CE
 		FBrushStyle brushStyle = FBrushStyle::None;
 
 		FIELD()
-		FImageFit imageFit = FImageFit::Default;
-		
+		FImageFit imageFit = FImageFit::Fill;
+
+		// NineSlice border sizes in pixels (left, top, right, bottom). Only used when imageFit == NineSlice.
+		FIELD()
+		FMargin sliceMargins;
+
 	};
 
 }

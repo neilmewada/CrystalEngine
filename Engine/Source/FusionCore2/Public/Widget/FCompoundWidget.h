@@ -44,8 +44,8 @@ namespace CE
 
         FUSION_PROPERTY_SET(FWidget&, Child)
         {
-            SetChild(&value);
-            return *this;
+            self.SetChild(&value);
+            return self;
         }
 
         FUSION_PAINT_PROPERTY(bool, ClipContent);

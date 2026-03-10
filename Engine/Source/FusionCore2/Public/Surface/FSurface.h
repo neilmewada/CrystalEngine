@@ -41,8 +41,6 @@ namespace CE
 
         // - Paint -
 
-        void AddDirtyPaintRoot(Ref<FWidget> paintRoot);
-
     public: 
     	
     	// - Lifecycle -

@@ -10,13 +10,23 @@ namespace CE
 
         bool IsSyncNeeded() const { return needsSync; }
 
-        void MarkSyncDirty();
+        void MarkSyncNeeded();
 
         void DoSyncIfNeeded(FWidget* rootWidget);
 
+        void DoPaintIfNeeded();
+
+        Ref<FLayer> FindLayerForWidget(Uuid widgetUuid);
+
     protected:
 
+        void SyncWidget(FWidget* widget, FLayer* parentLayer, HashSet<Uuid>& visited);
+
         Ref<FLayer> rootLayer;
+
+        FAffineTransform rootLayerTransform;
+
+        HashMap<Uuid, Ref<FLayer>> widgetUuidToLayerMap;
 
         bool needsSync = true;
     };

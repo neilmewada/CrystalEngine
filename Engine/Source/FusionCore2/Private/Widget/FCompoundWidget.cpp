@@ -28,6 +28,11 @@ namespace CE
 
         if (m_Child == child && m_Child != nullptr)
         {
+            if (Ref<FSurface> surface = GetParentSurface())
+            {
+                surface->MarkLayerTreeDirty();
+            }
+
             m_Child->SetParentSurfaceRecursive(nullptr);
             m_Child->SetParentWidget(nullptr);
             m_Child = nullptr;
@@ -55,11 +60,17 @@ namespace CE
 
         if (m_Child)
         {
-            m_Child->SetParentWidget(this);
-
             if (m_Child->GetParentSurface() != GetParentSurface())
             {
                 m_Child->SetParentSurfaceRecursive(GetParentSurface());
+            }
+
+            m_Child->SetParentWidget(this);
+            m_Child->UpdateBoundaryFlags();
+
+            if (Ref<FSurface> surface = GetParentSurface())
+            {
+                surface->MarkLayerTreeDirty();
             }
         }
 

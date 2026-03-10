@@ -89,6 +89,8 @@ namespace CE
 
         // - Layer -
 
+        bool IsBoundary() { return IsCompositingBoundary() || IsPaintBoundary(); }
+
         bool IsPaintBoundary();
 
         bool IsCompositingBoundary();
@@ -97,7 +99,7 @@ namespace CE
 
         // - Paint -
 
-        virtual void OnPaint();
+        virtual void Paint(FPainter& painter);
 
         void NotifyStyleStateChanged();
 

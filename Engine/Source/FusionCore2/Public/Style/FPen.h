@@ -6,7 +6,9 @@ namespace CE
 	enum class FPenStyle : u32
 	{
 		None,
-		SolidLine
+		SolidLine,
+		Dashed, // Uses dashLength and dashGap
+		Dotted  // Uses dashLength and dashGap (typically dashLength == thickness for round dots)
 	};
 	ENUM_CLASS(FPenStyle);
 
@@ -17,7 +19,7 @@ namespace CE
 	public:
 
 		FPen();
-		virtual ~FPen();
+		~FPen();
 
 		FPen(const Color& color, f32 thickness = 1.0f, FPenStyle style = FPenStyle::SolidLine);
 
@@ -30,8 +32,13 @@ namespace CE
 		FPenStyle GetStyle() const { return style; }
 		void SetStyle(FPenStyle penStyle) { this->style = penStyle; }
 
+		// Length of each dash segment in pixels. Only used when style is Dashed or Dotted.
 		f32 GetDashLength() const { return dashLength; }
 		void SetDashLength(f32 dashLength) { this->dashLength = dashLength; }
+
+		// Gap between dash segments in pixels. Only used when style is Dashed or Dotted.
+		f32 GetDashGap() const { return dashGap; }
+		void SetDashGap(f32 dashGap) { this->dashGap = dashGap; }
 
 		bool IsValidPen() const
 		{
@@ -46,8 +53,13 @@ namespace CE
 		FIELD()
 		f32 thickness = 0.0f;
 
+		// Length of each dash in pixels. Only relevant for Dashed/Dotted styles.
 		FIELD()
 		f32 dashLength = 5.0f;
+
+		// Gap between dashes in pixels. Only relevant for Dashed/Dotted styles.
+		FIELD()
+		f32 dashGap = 5.0f;
 
 		FIELD()
 		FPenStyle style = FPenStyle::None;

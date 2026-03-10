@@ -23,6 +23,7 @@ namespace CE
         void PrimWriteVtx(Vec2 pos, Vec2 uv, u32 color, u32 drawItemIndex);
         void PrimWriteIdx(FUIIndex idx);
 
+        SIZE_T GetCurrentDrawCmdCount() const { return drawCmdArray.GetCount(); }
 
         // Current vertex count — used to compute relative index offsets
         u32 GetCurrentVertexCount() const { return vertexArray.GetCount(); }

@@ -23,6 +23,7 @@ namespace RenderingTests
 
 			Child(
 				FAssignNew(FVerticalStack, vstack)
+				.ContentHAlign(HAlign::Fill)
 				.HAlign(HAlign::Fill)
 				.VAlign(VAlign::Fill)
 				.Enabled(true)
@@ -51,6 +52,10 @@ namespace RenderingTests
 						.Height(50)
 						.Name("H_3")
 					),
+
+					FNew(FDecoratedWidget)
+					.Background(Colors::Red)
+					.Height(30),
 
 					FNew(FWidget)
 					.FillRatio(1.0f)

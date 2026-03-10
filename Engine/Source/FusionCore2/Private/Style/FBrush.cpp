@@ -19,7 +19,7 @@ namespace CE
 	}
 
 	FBrush::FBrush()
-		: fillColor(Colors::Clear)
+		: color(Colors::Clear)
 		, imageName(Name())
 		, tiling(FBrushTiling::None)
 		, brushStyle(FBrushStyle::None)
@@ -29,15 +29,15 @@ namespace CE
 	}
 
 	FBrush::FBrush(const Color& fillColor, FBrushStyle brushStyle)
-		: fillColor(fillColor)
+		: color(fillColor)
 		, brushStyle(brushStyle)
 		, imageFit(FImageFit::Fill)
 	{
 
 	}
 
-	FBrush::FBrush(const Name& imageName, const Color& fillColor)
-		: fillColor(fillColor)
+	FBrush::FBrush(const Name& imageName, const Color& tintColor)
+		: color(tintColor)
 		, imageName(imageName)
 		, tiling(FBrushTiling::None)
 		, brushStyle(FBrushStyle::Image)
@@ -47,7 +47,7 @@ namespace CE
 	}
 
 	FBrush::FBrush(const FGradient& gradient, const Color& tintColor)
-		: fillColor(Colors::White)
+		: color(tintColor)
 		, gradient(gradient)
 		, brushStyle(FBrushStyle::Gradient)
 		, imageFit(FImageFit::Fill)
@@ -57,14 +57,7 @@ namespace CE
 
 	FBrush::~FBrush()
 	{
-		switch (brushStyle)
-		{
-		case FBrushStyle::Image:
-			imageName.~Name();
-			break;
-		default:
-			break;
-		}
+		
 	}
 
 	bool FBrush::IsValidBrush()
@@ -74,11 +67,13 @@ namespace CE
 		case FBrushStyle::None:
 			return false;
 		case FBrushStyle::SolidFill:
-			return fillColor.a > 0.001f;
+			return color.a > 0.001f;
 		case FBrushStyle::Image:
-			return fillColor.a > 0.001f && imageName.IsValid();
+			if (imageFit == FImageFit::NineSlice)
+				return color.a > 0.001f && imageName.IsValid() && sliceMargins != FMargin();
+			return color.a > 0.001f && imageName.IsValid();
 		case FBrushStyle::Gradient:
-			return gradient.stops.GetSize() >= 2 && fillColor.a > 0.001f;
+			return gradient.stops.GetSize() >= 2 && color.a > 0.001f;
 		}
 
 		return true;
@@ -100,11 +95,11 @@ namespace CE
 		switch (brushStyle)
 		{
 		case FBrushStyle::SolidFill:
-			return fillColor == rhs.fillColor;
+			return color == rhs.color;
 		case FBrushStyle::Gradient:
-			return fillColor == rhs.fillColor && gradient == rhs.gradient;
+			return color == rhs.color && gradient == rhs.gradient;
 		case FBrushStyle::Image:
-			return fillColor == rhs.fillColor && imageName == rhs.imageName;
+			return color == rhs.color && imageName == rhs.imageName && (imageFit != FImageFit::NineSlice || sliceMargins == rhs.sliceMargins);
 		case FBrushStyle::None:
 			break;
 		}

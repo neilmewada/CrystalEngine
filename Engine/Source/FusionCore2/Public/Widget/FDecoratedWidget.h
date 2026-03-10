@@ -14,6 +14,7 @@ namespace CE
 
     public: // - Public API -
 
+        void Paint(FPainter& painter) override;
 
     protected: // - Internal -
 

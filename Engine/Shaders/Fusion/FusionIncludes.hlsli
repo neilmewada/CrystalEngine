@@ -2,6 +2,7 @@
 #define __FUSION_INCLUDES_HLSLI__
 
 #include "Core/Macros.hlsli"
+#include "Core/ViewData.hlsli"
 #include "Core/Gamma.hlsli"
 
 

@@ -36,8 +36,6 @@ namespace CE
     {
         ZoneScoped;
 
-        // TODO: Update this method
-
 		if (IsPaintDirty())
             return;
 
@@ -56,7 +54,7 @@ namespace CE
 
 		        if (parent->IsPaintBoundary())
 		        {
-                    surface->AddDirtyPaintRoot(parent);
+                    parent->SetWidgetFlag(FWidgetFlags::PaintDirty, true);
 		            break;
 		        }
 
@@ -161,11 +159,9 @@ namespace CE
         }
     }
 
-    void FWidget::OnPaint()
+    void FWidget::Paint(FPainter& painter)
     {
         ZoneScoped;
-
-        SetWidgetFlag(FWidgetFlags::PaintDirty, false);
 
         // TODO
     }
@@ -217,7 +213,7 @@ namespace CE
         }
         else if (propertyName == opacityProperty)
         {
-	        
+            UpdateBoundaryFlags();
         }
     }
 
