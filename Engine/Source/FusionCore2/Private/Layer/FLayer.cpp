@@ -44,7 +44,7 @@ namespace CE
 		if (widget == nullptr || widget->IsFaulted())
 			return;
 
-		if (widget != GetOwningWidget() && widget->IsPaintBoundary())
+		if (widget != GetOwningWidget().Get() && widget->IsPaintBoundary())
 		{
 			if (Ref<FLayerTree> tree = ownerTree.Lock())
 			{
