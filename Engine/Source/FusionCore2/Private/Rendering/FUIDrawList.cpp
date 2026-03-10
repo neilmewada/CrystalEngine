@@ -46,8 +46,11 @@ namespace CE
 		return transformStack.IsEmpty() ? FAffineTransform::Identity() : transformStack.Last();
 	}
 
-	FUIDrawCmd& FUIDrawList::ForceNewDrawCmd()
+	FUIDrawCmd& FUIDrawList::NewDrawCmd()
 	{
+		if (!drawCmdArray.IsEmpty() && drawCmdArray.Last().indexCount == 0)
+			return drawCmdArray.Last(); // already a clean boundary, reuse it
+
 		FUIDrawCmd cmd{};
 		cmd.indexOffset = (u32)indexArray.GetCount();
 		cmd.vertexOffset = 0;
