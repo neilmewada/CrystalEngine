@@ -20,11 +20,8 @@ namespace CE
 
 	void FUIDrawList::Finalize()
 	{
-		if (!drawCmdArray.IsEmpty())
-		{
-			auto& last = drawCmdArray.Last();
-			last.indexCount = (u32)indexArray.GetCount() - last.indexOffset;
-		}
+		// indexCount is maintained incrementally by prim functions (e.g. PrimRect).
+		// Nothing to do here.
 	}
 
 	u32 FUIDrawList::AddDrawItem(const FUIDrawItem& item)
@@ -61,8 +58,7 @@ namespace CE
 				return last;
 			}
 
-			u32 currentIndexCount = (u32)indexArray.GetCount() - last.indexOffset;
-			if (currentIndexCount == 0)
+			if (last.indexCount == 0)
 			{
 				// Last command had nothing written — reuse the slot with the new state
 				last.blendMode      = blendMode;
@@ -70,9 +66,7 @@ namespace CE
 				last.customShaderId = customShaderId;
 				return last;
 			}
-
-			// Seal the previous command before opening a new one
-			last.indexCount = currentIndexCount;
+			// indexCount is already current (maintained by prim functions), no sealing needed.
 		}
 
 		FUIDrawCmd cmd{};
