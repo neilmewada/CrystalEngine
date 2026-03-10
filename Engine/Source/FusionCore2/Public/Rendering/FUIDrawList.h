@@ -24,6 +24,8 @@ namespace CE
         // Current vertex count — used to compute relative index offsets
         u32 GetCurrentVertexCount() const { return vertexArray.GetCount(); }
 
+        FUIDrawCmd& ForceNewDrawCmd();
+
         FUIDrawCmd& AcquireDrawCmd(FUIBlendMode blendMode, Rect scissorRect, u32 customShaderId = 0);
 
         u32 AddDrawItem(const FUIDrawItem& item);

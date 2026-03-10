@@ -51,6 +51,7 @@ namespace CE
 				if (Ref<FLayer> layer = tree->FindLayerForWidget(widget->GetUuid()))
 				{
 					splitPoints.Add(drawList.GetCurrentDrawCmdCount());
+					drawList.ForceNewDrawCmd();
 
 					layer->cachedGlobalTransform = this->cachedGlobalTransform
 						* painter.GetCurrentTransform()

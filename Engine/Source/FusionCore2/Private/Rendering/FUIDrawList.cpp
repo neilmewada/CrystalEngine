@@ -46,6 +46,19 @@ namespace CE
 		return transformStack.IsEmpty() ? FAffineTransform::Identity() : transformStack.Last();
 	}
 
+	FUIDrawCmd& FUIDrawList::ForceNewDrawCmd()
+	{
+		FUIDrawCmd cmd{};
+		cmd.indexOffset = (u32)indexArray.GetCount();
+		cmd.vertexOffset = 0;
+		cmd.blendMode = drawCmdArray.IsEmpty() ? FUIBlendMode::Normal : drawCmdArray.Last().blendMode;
+		cmd.scissorRect = drawCmdArray.IsEmpty() ? Rect() : drawCmdArray.Last().scissorRect;
+		cmd.customShaderId = drawCmdArray.IsEmpty() ? 0 : drawCmdArray.Last().customShaderId;
+		drawCmdArray.Insert(cmd);
+
+		return drawCmdArray.Last();
+	}
+
 	FUIDrawCmd& FUIDrawList::AcquireDrawCmd(FUIBlendMode blendMode, Rect scissorRect, u32 customShaderId)
 	{
 		if (!drawCmdArray.IsEmpty())
