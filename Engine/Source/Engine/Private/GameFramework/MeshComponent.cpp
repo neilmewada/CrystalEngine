@@ -47,23 +47,6 @@ namespace CE
                     materialMap[materialId] = material;
                 }
             }
-
-	        /*for (int meshIndex = 0; meshIndex < materialsPerLod[lodIndex].materials.GetSize(); ++meshIndex)
-	        {
-                Ref<MaterialInterface> materialInterface = materialsPerLod[lodIndex].materials[meshIndex];
-	            if (materialInterface.IsNull())
-	            {
-	                materialInterface = gEngine->GetErrorMaterial();
-	            }
-                if (materialInterface.IsNull())
-                    continue;
-                RPI::Material* material = materialInterface->GetRpiMaterial();
-                if (material == nullptr)
-                    continue;
-
-                RPI::CustomMaterialId materialId = RPI::CustomMaterialId(lodIndex, meshIndex);
-                materialMap[materialId] = material;
-	        }*/
         }
 
         return materialMap;

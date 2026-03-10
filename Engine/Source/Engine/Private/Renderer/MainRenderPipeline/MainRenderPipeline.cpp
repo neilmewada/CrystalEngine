@@ -470,10 +470,10 @@ namespace CE
                 RPI::PassSlot depthMapSlot{};
 				depthMapSlot.name = "DepthMap";
                 depthMapSlot.slotType = PassSlotType::Input;
-				depthMapSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
+				depthMapSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
 				depthMapSlot.dimensions = { RHI::Dimension::Dim2D };
-                depthMapSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-				depthMapSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+                depthMapSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				depthMapSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 				depthMapSlot.shaderInputName = "_DepthMap";
 
                 opaquePass->AddSlot(depthMapSlot);
@@ -481,7 +481,7 @@ namespace CE
 				RPI::PassAttachmentBinding depthMapBinding{};
 				depthMapBinding.name = "DepthMap";
 				depthMapBinding.slotType = PassSlotType::Input;
-				depthMapBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+				depthMapBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
                 depthMapBinding.connectedBinding = depthCopyPass->FindOutputBinding("Output");
 
 				opaquePass->AddAttachmentBinding(depthMapBinding);
@@ -492,9 +492,9 @@ namespace CE
                 RPI::PassSlot shadowMapSlot{};
                 shadowMapSlot.name = "DirectionalShadowMap";
                 shadowMapSlot.slotType = RPI::PassSlotType::Input;
-                shadowMapSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
-                shadowMapSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-                shadowMapSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+                shadowMapSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+                shadowMapSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                shadowMapSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
                 shadowMapSlot.shaderInputName = "_DirectionalShadowMap";
 
                 opaquePass->AddSlot(shadowMapSlot);
@@ -502,7 +502,7 @@ namespace CE
                 RPI::PassAttachmentBinding shadowMapBinding{};
                 shadowMapBinding.name = "DirectionalShadowMap";
                 shadowMapBinding.slotType = RPI::PassSlotType::Input;
-                shadowMapBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+                shadowMapBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
                 shadowMapBinding.connectedBinding = directionalShadowPass->FindOutputBinding("DepthOutput");
 
                 opaquePass->AddAttachmentBinding(shadowMapBinding);
@@ -513,9 +513,9 @@ namespace CE
 	            RPI::PassSlot lightIndexPoolSlot{};
                 lightIndexPoolSlot.name = "LightIndexPool";
                 lightIndexPoolSlot.slotType = RPI::PassSlotType::Input;
-                lightIndexPoolSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
-                lightIndexPoolSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-                lightIndexPoolSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+                lightIndexPoolSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+                lightIndexPoolSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                lightIndexPoolSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
                 lightIndexPoolSlot.shaderInputName = "_LightIndexPool";
 
                 opaquePass->AddSlot(lightIndexPoolSlot);
@@ -523,7 +523,7 @@ namespace CE
                 RPI::PassAttachmentBinding lightIndexPoolBinding{};
                 lightIndexPoolBinding.name = "LightIndexPool";
                 lightIndexPoolBinding.slotType = RPI::PassSlotType::Input;
-                lightIndexPoolBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+                lightIndexPoolBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
                 lightIndexPoolBinding.connectedBinding = tileCullingPass->FindOutputBinding("LightIndexPool");
 
 				opaquePass->AddAttachmentBinding(lightIndexPoolBinding);
@@ -535,16 +535,16 @@ namespace CE
                 tileHeadersSlot.name = "TileHeaders";
                 tileHeadersSlot.shaderInputName = "_TileHeaders";
                 tileHeadersSlot.slotType = RPI::PassSlotType::Input;
-                tileHeadersSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
-                tileHeadersSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-                tileHeadersSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+                tileHeadersSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+                tileHeadersSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                tileHeadersSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
                 opaquePass->AddSlot(tileHeadersSlot);
 
                 RPI::PassAttachmentBinding tileHeadersBinding{};
                 tileHeadersBinding.name = "TileHeaders";
                 tileHeadersBinding.slotType = RPI::PassSlotType::Input;
-                tileHeadersBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+                tileHeadersBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
 				tileHeadersBinding.connectedBinding = tileCullingPass->FindOutputBinding("TileHeaders");
 
 				opaquePass->AddAttachmentBinding(tileHeadersBinding);
@@ -596,6 +596,69 @@ namespace CE
                 depthBinding.connectedBinding = depthPass->FindOutputBinding("DepthOutput");
 
                 transparentPass->AddAttachmentBinding(depthBinding);
+            }
+
+            // DirectionalShadowMap
+            {
+                RPI::PassSlot shadowMapSlot{};
+                shadowMapSlot.name = "DirectionalShadowMap";
+                shadowMapSlot.slotType = RPI::PassSlotType::Input;
+                shadowMapSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+                shadowMapSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                shadowMapSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+                shadowMapSlot.shaderInputName = "_DirectionalShadowMap";
+
+                transparentPass->AddSlot(shadowMapSlot);
+
+                RPI::PassAttachmentBinding shadowMapBinding{};
+                shadowMapBinding.name = "DirectionalShadowMap";
+                shadowMapBinding.slotType = RPI::PassSlotType::Input;
+                shadowMapBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+                shadowMapBinding.connectedBinding = directionalShadowPass->FindOutputBinding("DepthOutput");
+
+                transparentPass->AddAttachmentBinding(shadowMapBinding);
+            }
+
+            // LightIndexPool
+            {
+                RPI::PassSlot lightIndexPoolSlot{};
+                lightIndexPoolSlot.name = "LightIndexPool";
+                lightIndexPoolSlot.slotType = RPI::PassSlotType::Input;
+                lightIndexPoolSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+                lightIndexPoolSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                lightIndexPoolSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+                lightIndexPoolSlot.shaderInputName = "_LightIndexPool";
+
+                transparentPass->AddSlot(lightIndexPoolSlot);
+
+                RPI::PassAttachmentBinding lightIndexPoolBinding{};
+                lightIndexPoolBinding.name = "LightIndexPool";
+                lightIndexPoolBinding.slotType = RPI::PassSlotType::Input;
+                lightIndexPoolBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+                lightIndexPoolBinding.connectedBinding = tileCullingPass->FindOutputBinding("LightIndexPool");
+
+                transparentPass->AddAttachmentBinding(lightIndexPoolBinding);
+            }
+
+            // TileHeaders
+            {
+                RPI::PassSlot tileHeadersSlot{};
+                tileHeadersSlot.name = "TileHeaders";
+                tileHeadersSlot.shaderInputName = "_TileHeaders";
+                tileHeadersSlot.slotType = RPI::PassSlotType::Input;
+                tileHeadersSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+                tileHeadersSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                tileHeadersSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+
+                transparentPass->AddSlot(tileHeadersSlot);
+
+                RPI::PassAttachmentBinding tileHeadersBinding{};
+                tileHeadersBinding.name = "TileHeaders";
+                tileHeadersBinding.slotType = RPI::PassSlotType::Input;
+                tileHeadersBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+                tileHeadersBinding.connectedBinding = tileCullingPass->FindOutputBinding("TileHeaders");
+
+                transparentPass->AddAttachmentBinding(tileHeadersBinding);
             }
 
             rootPass->AddChild(transparentPass);

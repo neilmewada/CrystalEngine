@@ -97,7 +97,8 @@ namespace CE
 
         float reflectivity = 0.0f;
         float shininess = 0.0f;
-        float opacity = 1;
+        float opacity = 1.0f;
+        float transparencyFactor = 0.0f;
 
         float metallicFactor = 0.0f;
         float roughnessFactor = 0.0f;

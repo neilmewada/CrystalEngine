@@ -441,7 +441,7 @@ namespace CE
 
 						if (passDrawTag.IsValid() && viewTag.IsValid() && scopeId.IsValid())
 						{
-							DrawList& viewportDrawList = renderViewport->GetDrawListContext().GetDrawListForTag(passDrawTag);
+							RHI::DrawList& viewportDrawList = renderViewport->GetDrawListContext().GetDrawListForTag(passDrawTag);
 							scheduler->SetScopeDrawList(scopeId, &viewportDrawList);
 						}
 					});
@@ -475,7 +475,7 @@ namespace CE
 
 						if (passDrawTag.IsValid() && viewTag.IsValid() && scopeId.IsValid())
 						{
-							DrawList& viewportDrawList = sceneRenderer->GetDrawListContext().GetDrawListForTag(passDrawTag);
+							RHI::DrawList& viewportDrawList = sceneRenderer->GetDrawListContext().GetDrawListForTag(passDrawTag);
 							scheduler->SetScopeDrawList(scopeId, &viewportDrawList);
 						}
 					});

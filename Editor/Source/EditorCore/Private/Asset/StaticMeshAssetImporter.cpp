@@ -137,13 +137,14 @@ namespace CE::Editor
 
     	// - Materials -
 
-    	Ref<CE::Shader> standardShader = AssetManager::Get()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+		Ref<CE::Shader> standardShader = AssetManager::Get()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+		Ref<CE::Shader> transparentShader = AssetManager::Get()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/TransparentLit");
 
     	const Array<CMMaterial>& materials = scene->GetMaterials();
 		for (int i = 0; i < materials.GetSize(); ++i)
 		{
 			Ref<CE::Material> material = CreateObject<CE::Material>(staticMesh.Get(), String::Format("Material_{}", i));
-
+			
 			material->SetShader(standardShader);
 
 			String diffuseMap = FixTextureFileName(materials[i].diffuseMap);
