@@ -43,6 +43,7 @@ namespace CE
         Array<u32> splitPoints;
 
         friend class FLayerTree;
+        friend class FPainter;
     };
 
 } // namespace CE

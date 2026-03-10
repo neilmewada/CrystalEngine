@@ -30,19 +30,19 @@ namespace CE
 		return index;
 	}
 
-	void FUIDrawList::PrimWriteVtx(Vec2 pos, Vec2 uv, u32 color, u32 drawItemIndex)
+	void FUIDrawList::PushTransform(const FAffineTransform& transform)
 	{
-		FUIVertex vtx{};
-		vtx.pos = pos;
-		vtx.uv = uv;
-		vtx.color = color;
-		vtx.drawItemIndex = drawItemIndex;
-		vertexArray.Insert(vtx);
+		transformStack.Insert(GetCurrentTransform() * transform);
 	}
 
-	void FUIDrawList::PrimWriteIdx(FUIIndex idx)
+	void FUIDrawList::PopTransform()
 	{
-		indexArray.Insert(idx);
+		transformStack.RemoveLast();
+	}
+
+	FAffineTransform FUIDrawList::GetCurrentTransform()
+	{
+		return transformStack.IsEmpty() ? FAffineTransform::Identity() : transformStack.Last();
 	}
 
 	FUIDrawCmd& FUIDrawList::AcquireDrawCmd(FUIBlendMode blendMode, Rect scissorRect, u32 customShaderId)
@@ -82,4 +82,53 @@ namespace CE
 		return drawCmdArray.Last();
 	}
 
+	void FUIDrawList::PrimReserve(int vertexCount, int indexCount)
+	{
+		ZoneScoped;
+
+		SIZE_T curVertexCount = vertexArray.GetCount();
+
+		vertexArray.InsertRange(vertexCount);
+		vertexWritePtr = vertexArray.GetData() + curVertexCount;
+
+		SIZE_T curIndexCount = indexArray.GetCount();
+
+		indexArray.InsertRange(indexCount);
+		indexWritePtr = indexArray.GetData() + curIndexCount;
+	}
+
+	void FUIDrawList::PrimRect(const Rect& quad, u32 color, Vec2* uvs, u32 drawItemIndex)
+	{
+		Vec2 topLeft = quad.min;
+		Vec2 topRight = Vec2(quad.max.x, quad.min.y);
+		Vec2 bottomRight = Vec2(quad.max.x, quad.max.y);
+		Vec2 bottomLeft = Vec2(quad.min.x, quad.max.y);
+
+		Vec2 topLeftUV = uvs != nullptr ? uvs[0] : Vec2(0, 0);
+		Vec2 topRightUV = uvs != nullptr ? uvs[1] : Vec2(1, 0);
+		Vec2 bottomRightUV = uvs != nullptr ? uvs[2] : Vec2(1, 1);
+		Vec2 bottomLeftUV = uvs != nullptr ? uvs[3] : Vec2(0, 1);
+
+		FUIIndex idx = vertexCurrentIdx;
+		indexWritePtr[0] = idx; indexWritePtr[1] = (idx + 1); indexWritePtr[2] = (idx + 2);
+		indexWritePtr[3] = idx; indexWritePtr[4] = (idx + 2); indexWritePtr[5] = (idx + 3);
+
+		vertexWritePtr[0].pos = topLeft; vertexWritePtr[0].color = color; vertexWritePtr[0].uv = topLeftUV;
+		vertexWritePtr[0].drawItemIndex = drawItemIndex;
+
+		vertexWritePtr[1].pos = topRight; vertexWritePtr[1].color = color; vertexWritePtr[1].uv = topRightUV;
+		vertexWritePtr[1].drawItemIndex = drawItemIndex;
+
+		vertexWritePtr[2].pos = bottomRight; vertexWritePtr[2].color = color; vertexWritePtr[2].uv = bottomRightUV;
+		vertexWritePtr[2].drawItemIndex = drawItemIndex;
+
+		vertexWritePtr[3].pos = bottomLeft; vertexWritePtr[3].color = color; vertexWritePtr[3].uv = bottomLeftUV;
+		vertexWritePtr[3].drawItemIndex = drawItemIndex;
+
+		vertexWritePtr += 4;
+		vertexCurrentIdx += 4;
+		indexWritePtr += 6;
+
+		drawCmdArray.Last().indexCount += 6;
+	}
 }

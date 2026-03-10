@@ -25,14 +25,23 @@ namespace CE
 
         void SetBrush(const FBrush& brush) { currentBrush = brush; }
 
+        // - Path API -
+
+        void PathInsert(Vec2 point);
+        void PathMinMax(Vec2 point);
+
     private:
 
-        Array<FAffineTransform> transformStack;
+        using FPathArray = StableDynamicArray<Vec2, 64, false>;
 
         FLayer* layer = nullptr;
+        FUIDrawList* drawList = nullptr;
 
         FPen currentPen;
         FBrush currentBrush;
+
+        FPathArray path;
+        Vec2 pathMin, pathMax;
 
     };
     

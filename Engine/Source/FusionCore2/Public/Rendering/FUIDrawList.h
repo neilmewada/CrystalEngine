@@ -8,6 +8,7 @@ namespace CE
     using FUIClipRectArray	    = StableDynamicArray<FUIClipRect,       64,   false>;
     using FUIGradientStopArray  = StableDynamicArray<FUIGradientStop,   64,   false>;
     using FUIDrawCmdArray	    = StableDynamicArray<FUIDrawCmd,        64,   false>;
+    using FTransformStack       = StableDynamicArray<FAffineTransform,  128,  false>;
 
     class FUSIONCORE_API FUIDrawList final : public IntrusiveBase
     {
@@ -16,12 +17,7 @@ namespace CE
         // -  Public API -
 
         void Clear();
-
         void Finalize();
-
-        // Low-level write — called by FPainter's tessellation
-        void PrimWriteVtx(Vec2 pos, Vec2 uv, u32 color, u32 drawItemIndex);
-        void PrimWriteIdx(FUIIndex idx);
 
         SIZE_T GetCurrentDrawCmdCount() const { return drawCmdArray.GetCount(); }
 
@@ -32,6 +28,17 @@ namespace CE
 
         u32 AddDrawItem(const FUIDrawItem& item);
 
+        void PushTransform(const FAffineTransform& transform);
+        void PopTransform();
+
+        FAffineTransform GetCurrentTransform();
+
+    private:
+
+        void PrimReserve(int vertexCount, int indexCount);
+
+        void PrimRect(const Rect& quad, u32 color, Vec2* uvs, u32 drawItemIndex);
+
         // - Data -
 
         FUIVertexArray vertexArray;
@@ -41,6 +48,15 @@ namespace CE
         FUIGradientStopArray gradientStopArray;
         FUIDrawCmdArray drawCmdArray;
 
+        FTransformStack transformStack;
+
+        FUIVertex* vertexWritePtr = nullptr;
+        FUIIndex* indexWritePtr = nullptr;
+
+        // Start offset of current vertex
+        FUIIndex vertexCurrentIdx = 0;
+
+        friend class FPainter;
     };
     
 }

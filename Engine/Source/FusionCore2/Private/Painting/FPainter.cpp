@@ -4,22 +4,42 @@ namespace CE
 {
 	FPainter::FPainter(FLayer* layer) : layer(layer)
 	{
-		
+		drawList = &layer->drawList;
 	}
 
 	void FPainter::PushTransform(const FAffineTransform& transform)
 	{
-		transformStack.Push(GetCurrentTransform() * transform);
+		drawList->PushTransform(transform);
 	}
 
 	void FPainter::PopTransform()
 	{
-		transformStack.Pop();
+		drawList->PopTransform();
 	}
 
 	FAffineTransform FPainter::GetCurrentTransform()
 	{
-		return transformStack.NotEmpty() ? transformStack.GetLast() : FAffineTransform::Identity();
+		return drawList->GetCurrentTransform();
+	}
+
+	void FPainter::PathInsert(Vec2 point)
+	{
+		ZoneScoped;
+
+		path.Insert(point);
+
+		PathMinMax(point);
+	}
+
+	void FPainter::PathMinMax(Vec2 point)
+	{
+		ZoneScoped;
+
+		pathMin.x = Math::Min(point.x, pathMin.x);
+		pathMin.y = Math::Min(point.y, pathMin.y);
+
+		pathMax.x = Math::Max(point.x, pathMax.x);
+		pathMax.y = Math::Max(point.y, pathMax.y);
 	}
 } // namespace CE
 
