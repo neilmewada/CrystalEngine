@@ -28,9 +28,10 @@ namespace CE
         // - Path API -
 
         void PathInsert(Vec2 point);
-        void PathMinMax(Vec2 point);
 
     private:
+
+        void PathMinMax(Vec2 point);
 
         using FPathArray = StableDynamicArray<Vec2, 64, false>;
 

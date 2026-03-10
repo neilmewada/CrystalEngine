@@ -12,6 +12,10 @@ namespace CE
 		clipRectArray.RemoveAll();
 		gradientStopArray.RemoveAll();
 		drawCmdArray.RemoveAll();
+
+		vertexWritePtr = nullptr;
+		indexWritePtr = nullptr;
+		vertexCurrentIdx = 0;
 	}
 
 	void FUIDrawList::Finalize()
