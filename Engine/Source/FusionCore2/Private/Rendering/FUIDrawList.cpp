@@ -111,12 +111,13 @@ namespace CE
 		indexWritePtr = indexArray.GetData() + curIndexCount;
 	}
 
-	void FUIDrawList::PrimRect(const Rect& quad, u32 color, Vec2* uvs, u32 drawItemIndex)
+	void FUIDrawList::PrimRect(const Rect& rect, u32 color, Vec2* uvs, u32 drawItemIndex)
 	{
-		Vec2 topLeft = quad.min;
-		Vec2 topRight = Vec2(quad.max.x, quad.min.y);
-		Vec2 bottomRight = Vec2(quad.max.x, quad.max.y);
-		Vec2 bottomLeft = Vec2(quad.min.x, quad.max.y);
+		FAffineTransform t = GetCurrentTransform();
+		Vec2 topLeft     = t.TransformPoint(Vec2(rect.min.x, rect.min.y));
+		Vec2 topRight    = t.TransformPoint(Vec2(rect.max.x, rect.min.y));
+		Vec2 bottomRight = t.TransformPoint(Vec2(rect.max.x, rect.max.y));
+		Vec2 bottomLeft  = t.TransformPoint(Vec2(rect.min.x, rect.max.y));
 
 		Vec2 topLeftUV = uvs != nullptr ? uvs[0] : Vec2(0, 0);
 		Vec2 topRightUV = uvs != nullptr ? uvs[1] : Vec2(1, 0);

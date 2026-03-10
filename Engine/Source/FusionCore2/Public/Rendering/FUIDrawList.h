@@ -39,7 +39,7 @@ namespace CE
 
         void PrimReserve(int vertexCount, int indexCount);
 
-        void PrimRect(const Rect& quad, u32 color, Vec2* uvs, u32 drawItemIndex);
+        void PrimRect(const Rect& rect, u32 color, Vec2* uvs, u32 drawItemIndex);
 
         // - Data -
 
