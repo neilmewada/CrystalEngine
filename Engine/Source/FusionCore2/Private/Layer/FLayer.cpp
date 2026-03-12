@@ -34,6 +34,21 @@ namespace CE
 		{
 			DoPaint();
 		}
+
+		for (auto child : children)
+		{
+			child->DoPaintIfNeeded();
+		}
+	}
+
+	bool FLayer::IsLayerDirty()
+	{
+		return isLayerDirty;
+	}
+
+	void FLayer::SetLayerDirty(bool value)
+	{
+		isLayerDirty = false;
 	}
 
 	void FLayer::DoPaint()
@@ -77,6 +92,8 @@ namespace CE
 
 			return;
 		}
+
+		isLayerDirty = true;
 
 		painter.PushTransform(FAffineTransform::Translation(widget->GetLayoutPosition()) * widget->Transform());
 

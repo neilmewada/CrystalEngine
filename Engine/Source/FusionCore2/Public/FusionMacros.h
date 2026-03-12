@@ -6,7 +6,9 @@
     friend class FWidget;\
 	friend class FSurface;\
 	friend class FContainerWidget;\
-	friend class FNativeSurface;
+	friend class FNativeSurface;\
+	friend class FLayerTree;\
+	friend class FLayer;
 
 #define FUSION_WIDGET FUSION_FRIENDS
 

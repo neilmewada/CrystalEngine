@@ -240,6 +240,122 @@ namespace CE
 		return result;
 	}
 
+	void FPainter::StrokeRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
+	{
+		PathClear();
+		PathRect(rect, cornerRadius);
+		PathStroke(true, antiAliased);
+	}
+
+	void FPainter::FillRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
+	{
+		PathClear();
+		PathRect(rect, cornerRadius);
+		PathFill(antiAliased);
+	}
+
+	void FPainter::FillAndStrokeRect(const Rect& rect, const Vec4& cornerRadius, bool antiAliased)
+	{
+		PathClear();
+		PathRect(rect, cornerRadius);
+		PathFillAndStroke(antiAliased);
+	}
+
+	void FPainter::StrokeCircle(const Vec2& center, f32 radius, bool antiAliased)
+	{
+		PathClear();
+		PathArcToFast(center, radius, 0, Math::PI * 2.0f);
+		PathStroke(true, antiAliased);
+	}
+
+	void FPainter::FillCircle(const Vec2& center, f32 radius, bool antiAliased)
+	{
+		PathClear();
+		PathArcToFast(center, radius, 0, Math::PI * 2.0f);
+		PathFill(antiAliased);
+	}
+
+	void FPainter::FillAndStrokeCircle(const Vec2& center, f32 radius, bool antiAliased)
+	{
+		PathClear();
+		PathArcToFast(center, radius, 0, Math::PI * 2.0f);
+		PathFillAndStroke(antiAliased);
+	}
+
+	void FPainter::DrawLine(const Vec2& p1, const Vec2& p2, bool antiAliased)
+	{
+		PathClear();
+		PathInsert(p1);
+		PathInsert(p2);
+		PathStroke(false, antiAliased);
+	}
+
+	void FPainter::StrokeShape(const Rect& rect, const FShape& shape, bool antiAliased)
+	{
+		switch (shape.GetShapeType())
+		{
+		case FShapeType::None:
+			return;
+		case FShapeType::Rect:
+			StrokeRect(rect, Vec4(), antiAliased);
+			break;
+		case FShapeType::RoundedRect:
+			StrokeRect(rect, shape.GetCornerRadius(), antiAliased);
+			break;
+		case FShapeType::Circle:
+			{
+				Vec2 center = rect.min + rect.GetSize() / 2.0f;
+				f32 radius = rect.GetSize().GetMin() / 2.0f;
+				StrokeCircle(center, radius, antiAliased);
+			}
+			break;
+		}
+	}
+
+	void FPainter::FillShape(const Rect& rect, const FShape& shape, bool antiAliased)
+	{
+		switch (shape.GetShapeType())
+		{
+		case FShapeType::None:
+			return;
+		case FShapeType::Rect:
+			FillRect(rect, Vec4(), antiAliased);
+			break;
+		case FShapeType::RoundedRect:
+			FillRect(rect, shape.GetCornerRadius(), antiAliased);
+			break;
+		case FShapeType::Circle:
+			{
+				Vec2 center = rect.min + rect.GetSize() / 2.0f;
+				f32 radius = rect.GetSize().GetMin() / 2.0f;
+				FillCircle(center, radius, antiAliased);
+			}
+			break;
+		}
+	}
+
+	void FPainter::FillAndStrokeShape(const Rect& rect, const FShape& shape, bool antiAliased)
+	{
+		switch (shape.GetShapeType())
+		{
+		case FShapeType::None:
+			return;
+		case FShapeType::Rect:
+			FillAndStrokeRect(rect, Vec4(), antiAliased);
+			break;
+		case FShapeType::RoundedRect:
+			FillAndStrokeRect(rect, shape.GetCornerRadius(), antiAliased);
+			break;
+		case FShapeType::Circle:
+		{
+			Vec2 center = rect.min + rect.GetSize() / 2.0f;
+			f32 radius = rect.GetSize().GetMin() / 2.0f;
+			FillAndStrokeCircle(center, radius, antiAliased);
+		}
+		break;
+		}
+	}
+
 	int FPainter::CalculateNumCircleSegments(float radius) const
 	{
 		const int radiusIndex = (int)(radius + 0.999999f); // ceil to never reduce accuracy

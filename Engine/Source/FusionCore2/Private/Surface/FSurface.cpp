@@ -99,14 +99,14 @@ namespace CE
 
     void FSurface::Initialize()
     {
-        for (int i = 0; i < viewConstantBuffers.GetSize(); i++)
+        for (u32 i = 0; i < viewConstantBuffers.GetSize(); i++)
         {
             RHI::BufferDescriptor desc{};
             desc.name = "FSurface ViewConstants";
             desc.bindFlags = BufferBindFlags::ConstantBuffer;
             desc.bufferSize = sizeof(RPI::PerViewConstants);
             desc.structureByteStride = desc.bufferSize;
-            desc.defaultHeapType = MemoryHeapType::Default;
+            desc.defaultHeapType = MemoryHeapType::Upload;
 
             viewConstantBuffers[i] = RHI::gDynamicRHI->CreateBuffer(desc);
         }
@@ -127,6 +127,13 @@ namespace CE
         srgDesc.layout = viewSrgLayout;
 
         viewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
+
+        for (u32 i = 0; i < viewConstantBuffers.GetSize(); i++)
+        {
+            viewSrg->Bind(i, "_PerViewData", viewConstantBuffers[i]);
+        }
+
+        viewSrg->FlushBindings();
     }
 
     void FSurface::TickSurface(f32 deltaTime)
@@ -204,6 +211,23 @@ namespace CE
         // - Composite
 
 
+    }
+
+    void FSurface::UpdateViewConstantBuffer(u32 imageIndex)
+    {
+        ZoneScoped;
+
+        viewConstantBuffers[imageIndex]->UploadData(&viewConstants, sizeof(viewConstants));
+
+        for (int i = 0; i < childrenSurfaces.GetSize(); i++)
+        {
+            childrenSurfaces[i]->UpdateViewConstantBuffer(imageIndex);
+        }
+    }
+
+    void FSurface::OnSurfaceResize()
+    {
+        
     }
 
 } // namespace CE

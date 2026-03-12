@@ -52,6 +52,9 @@ namespace CE
 
         virtual void TickSurface(f32 deltaTime);
 
+        virtual void UpdateViewConstantBuffer(u32 imageIndex);
+
+        virtual void OnSurfaceResize();
 
         // - Frame Graph -
 
@@ -64,9 +67,6 @@ namespace CE
 
 		HashSet<Uuid> pendingLayoutRootIds;
 		Array<Ref<FWidget>> pendingLayoutRoots;
-
-        HashSet<Uuid> dirtyPaintRootIds;
-        Array<Ref<FWidget>> dirtyPaintRoots;
 
         Array<Ref<FSurface>> childrenSurfaces;
         

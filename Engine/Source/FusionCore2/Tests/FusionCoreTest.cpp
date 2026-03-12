@@ -4,26 +4,26 @@
 namespace RenderingTests
 {
 
-	void FusionRendererService::OnStart()
+	void FusionRenderService::OnStart()
 	{
         Super::OnStart();
 
 		PlatformApplication::Get()->AddMessageHandler(this);
 	}
 
-	void FusionRendererService::OnShutdown()
+	void FusionRenderService::OnShutdown()
 	{
 		Super::OnShutdown();
 
         PlatformApplication::Get()->RemoveMessageHandler(this);
 	}
 
-	void FusionRendererService::MarkFrameGraphDirty()
+	void FusionRenderService::MarkFrameGraphDirty()
 	{
         rebuildFrameGraph = recompileFrameGraph = true;
 	}
 
-	void FusionRendererService::RenderPrepare()
+	void FusionRenderService::RenderPrepare()
 	{
         if (IsEngineRequestingExit())
             return;
@@ -39,10 +39,10 @@ namespace RenderingTests
 		recompileFrameGraph = false;
 	}
 
-	void FusionRendererService::RenderFrame()
+	bool FusionRenderService::BeginRender()
 	{
         if (IsEngineRequestingExit())
-            return;
+            return false;
 
         auto scheduler = RHI::FrameScheduler::Get();
 
@@ -51,10 +51,17 @@ namespace RenderingTests
         if (imageIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph || recompileFrameGraph)
         {
 			MarkFrameGraphDirty();
-            return;
+            return false;
         }
 
         curImageIndex = imageIndex;
+
+        return true;
+	}
+
+	void FusionRenderService::EndRender()
+	{
+        auto scheduler = RHI::FrameScheduler::Get();
 
         // ---------------------------------------------------------
         // - Enqueue draw packets to views
@@ -77,7 +84,7 @@ namespace RenderingTests
 
         // - Setup draw list mask
 
-		UpdateDrawListMask(drawListMask);
+        UpdateDrawListMask(drawListMask);
 
         for (int i = 0; i < drawListMask.GetSize(); ++i)
         {
@@ -96,7 +103,7 @@ namespace RenderingTests
             if (Ref<FSurface> surface = application->GetSurface(i))
             {
                 // TODO: Implement below method
-				//surface->FlushDrawPackets(drawList, curImageIndex);
+                //surface->FlushDrawPackets(drawList, curImageIndex);
             }
         }
 
@@ -105,7 +112,7 @@ namespace RenderingTests
         scheduler->EndExecution();
 	}
 
-	void FusionRendererService::BuildFrameGraph()
+	void FusionRenderService::BuildFrameGraph()
 	{
         rebuildFrameGraph = false;
         recompileFrameGraph = true;
@@ -132,7 +139,7 @@ namespace RenderingTests
         scheduler->EndFrameGraph();
 	}
 
-	void FusionRendererService::CompileFrameGraph()
+	void FusionRenderService::CompileFrameGraph()
 	{
         recompileFrameGraph = false;
 
@@ -141,42 +148,42 @@ namespace RenderingTests
         scheduler->Compile();
 	}
 
-	void FusionRendererService::OnWindowRestored(PlatformWindow* window)
+	void FusionRenderService::OnWindowRestored(PlatformWindow* window)
 	{
         MarkFrameGraphDirty();
 	}
 
-	void FusionRendererService::OnWindowDestroyed(PlatformWindow* window)
+	void FusionRenderService::OnWindowDestroyed(PlatformWindow* window)
 	{
         MarkFrameGraphDirty();
 	}
 
-	void FusionRendererService::OnWindowClosed(PlatformWindow* window)
+	void FusionRenderService::OnWindowClosed(PlatformWindow* window)
 	{
         MarkFrameGraphDirty();
 	}
 
-	void FusionRendererService::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
+	void FusionRenderService::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
 	{
         MarkFrameGraphDirty();
 	}
 
-	void FusionRendererService::OnWindowMinimized(PlatformWindow* window)
+	void FusionRenderService::OnWindowMinimized(PlatformWindow* window)
 	{
         MarkFrameGraphDirty();
 	}
 
-	void FusionRendererService::OnWindowCreated(PlatformWindow* window)
+	void FusionRenderService::OnWindowCreated(PlatformWindow* window)
 	{
         MarkFrameGraphDirty();
 	}
 
-	void FusionRendererService::OnWindowExposed(PlatformWindow* window)
+	void FusionRenderService::OnWindowExposed(PlatformWindow* window)
 	{
         MarkFrameGraphDirty();
 	}
 
-	void FusionRendererService::OnWindowShown(PlatformWindow* window)
+	void FusionRenderService::OnWindowShown(PlatformWindow* window)
 	{
 		MarkFrameGraphDirty();
 	}

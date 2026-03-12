@@ -91,16 +91,22 @@ namespace CE
         drawableSize = platformWindow->GetDrawableWindowSize();
 
         Vec2 newAvailableSize = drawableSize.ToVec2() / dpiScale;
+        bool sizeChanged = false;
 
         if (newAvailableSize != availableSize && rootWidget)
         {
-            
+            sizeChanged = true;
 
             rootWidget->MarkLayoutDirty();
             rootWidget->MarkPaintDirty();
         }
 
 		availableSize = newAvailableSize;
+
+        if (sizeChanged)
+        {
+            OnSurfaceResize();
+        }
     }
 
     void FNativeSurface::OnWindowDisplayChanged(PlatformWindow* window, int displayIndex)

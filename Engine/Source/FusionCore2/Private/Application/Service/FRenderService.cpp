@@ -8,6 +8,12 @@ namespace CE
 
     }
 
+    void FRenderService::OnStart()
+    {
+	    Super::OnStart();
+
+    }
+
     void FRenderService::TickService(FServiceTickPhase tickPhase)
     {
         if (tickPhase == FServiceTickPhase::RenderPrepare)
@@ -16,7 +22,18 @@ namespace CE
         }
 		else if (tickPhase == FServiceTickPhase::Render)
         {
-            RenderFrame();
+            if (BeginRender())
+            {
+                if (Ref<FApplication> application = this->application.Get())
+                {
+                    for (int i = 0; i < application->GetSurfaceCount(); i++)
+                    {
+                        application->GetSurface(i)->UpdateViewConstantBuffer(GetCurrentFrameIndex());
+                    }
+                }
+
+                EndRender();
+            }
         }
     }
 

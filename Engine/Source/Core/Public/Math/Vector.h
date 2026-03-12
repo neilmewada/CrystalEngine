@@ -190,6 +190,11 @@ namespace CE
             return *this / GetMagnitude();
         }
 
+        f32 GetMin() const
+        {
+            return Math::Min({ x, y });
+        }
+
         f32 GetMax() const
         {
             return Math::Max({x, y});

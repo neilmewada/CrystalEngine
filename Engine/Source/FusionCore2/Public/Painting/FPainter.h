@@ -44,6 +44,22 @@ namespace CE
         bool PathStroke(bool closed, bool antiAliased);
         bool PathFillAndStroke(bool antiAliased);
 
+        // - Simple Shapes -
+
+        void StrokeRect(const Rect& rect, const Vec4& cornerRadius = Vec4(), bool antiAliased = true);
+        void FillRect(const Rect& rect, const Vec4& cornerRadius = Vec4(), bool antiAliased = true);
+        void FillAndStrokeRect(const Rect& rect, const Vec4& cornerRadius = Vec4(), bool antiAliased = true);
+
+        void StrokeCircle(const Vec2& center, f32 radius, bool antiAliased = true);
+        void FillCircle(const Vec2& center, f32 radius, bool antiAliased = true);
+        void FillAndStrokeCircle(const Vec2& center, f32 radius, bool antiAliased = true);
+
+        void DrawLine(const Vec2& p1, const Vec2& p2, bool antiAliased = true);
+
+        void StrokeShape(const Rect& rect, const FShape& shape, bool antiAliased = true);
+        void FillShape(const Rect& rect, const FShape& shape, bool antiAliased = true);
+        void FillAndStrokeShape(const Rect& rect, const FShape& shape, bool antiAliased = true);
+
     private:
 
         int CalculateNumCircleSegments(float radius) const;

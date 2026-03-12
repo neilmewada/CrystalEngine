@@ -20,6 +20,12 @@ namespace CE
 
         void DoPaintIfNeeded();
 
+        bool IsLayerDirty();
+
+    fusioncore_internal:
+
+        void SetLayerDirty(bool value);
+
     protected:
 
         void DoPaint();
@@ -41,6 +47,7 @@ namespace CE
         FIELD()
         FAffineTransform cachedGlobalTransform;
 
+        bool isLayerDirty = false;
         FUIDrawList drawList;
         Array<u32> splitPoints;
 

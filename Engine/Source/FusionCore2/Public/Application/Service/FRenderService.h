@@ -12,6 +12,10 @@ namespace CE
         
     public:
 
+        // - Lifecycle -
+
+        void OnStart() override;
+
         void TickService(FServiceTickPhase tickPhase) override;
 
         // - Rendering -
@@ -20,7 +24,8 @@ namespace CE
 
         virtual void RenderPrepare() = 0;
 
-		virtual void RenderFrame() = 0;
+        virtual bool BeginRender() = 0;
+        virtual void EndRender() = 0;
 
         virtual int GetCurrentFrameIndex() = 0;
 

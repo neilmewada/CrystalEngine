@@ -42,7 +42,7 @@ namespace CE
 
 		bool IsValidPen() const
 		{
-			return color.a > 0 && thickness > 0;
+			return color.a > 0.001f && thickness > 0.01f;
 		}
 
 	private:

@@ -69,9 +69,9 @@ namespace RenderingTests
 	};
 
 	CLASS()
-	class FusionRendererService : public FRenderService, public ApplicationMessageHandler
+	class FusionRenderService : public FRenderService, public ApplicationMessageHandler
 	{
-		CE_CLASS(FusionRendererService, FRenderService)
+		CE_CLASS(FusionRenderService, FRenderService)
 	public:
 
 		void OnStart() override;
@@ -82,7 +82,9 @@ namespace RenderingTests
 
 		void RenderPrepare() override;
 
-		void RenderFrame() override;
+		bool BeginRender() override;
+
+		void EndRender() override;
 
 		int GetCurrentFrameIndex() override { return curImageIndex; }
 
