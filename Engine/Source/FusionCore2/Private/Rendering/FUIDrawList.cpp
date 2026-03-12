@@ -30,7 +30,7 @@ namespace CE
             .textureIndex = 0,
             .samplerIndex = 0,
             .drawItemFlags = FUIDrawItemFlags::None,
-            .clipRectIndex = 0,
+            .clipRectIndex = -1,
             .gradientStartIndex = 0,
             .gradientStopCount = 0,
             .userFlags = 0
@@ -331,11 +331,120 @@ namespace CE
 	{
         ZoneScoped;
 
-        if (points == nullptr || numPoints <= 0)
+        if (points == nullptr || numPoints < 3)
             return;
         if ((color & ColorAlphaMask) == 0)
             return;
 
+        FUIDrawCmd& drawCmd = AcquireDrawCmd();
 
+        const Vec2 rectMin  = minMaxPos ? minMaxPos->min      : Vec2(0, 0);
+        const Vec2 rectSize = minMaxPos ? minMaxPos->GetSize() : Vec2(1, 1);
+
+        if (antiAliased)
+        {
+            const float AA_SIZE = fringeScale;
+            const u32 transparentColor = color & ~ColorAlphaMask;
+
+            const int indexCount  = (numPoints - 2) * 3 + numPoints * 6;
+            const int vertexCount = numPoints * 2;
+            PrimReserve(vertexCount, indexCount);
+
+            // Compute per-edge outward normals
+            temporaryPoints.RemoveAll();
+            temporaryPoints.InsertRange(numPoints, Vec2());
+            Vec2* tempNormals = temporaryPoints.GetData();
+
+            for (int i0 = numPoints - 1, i1 = 0; i1 < numPoints; i0 = i1++)
+            {
+                float dx = points[i1].x - points[i0].x;
+                float dy = points[i1].y - points[i0].y;
+                IM_NORMALIZE2F_OVER_ZERO(dx, dy);
+                tempNormals[i0].x =  dy;
+                tempNormals[i0].y = -dx;
+            }
+
+            // Layout: inner[i] = vertexCurrentIdx + i*2
+            //         outer[i] = vertexCurrentIdx + i*2 + 1
+            const FUIIndex vtxInnerIdx = vertexCurrentIdx;
+            const FUIIndex vtxOuterIdx = vertexCurrentIdx + 1;
+
+            // Fill indices: fan from inner vertex 0
+            for (int i = 2; i < numPoints; i++)
+            {
+                indexWritePtr[0] = (FUIIndex)(vtxInnerIdx);
+                indexWritePtr[1] = (FUIIndex)(vtxInnerIdx + (i - 1) * 2);
+                indexWritePtr[2] = (FUIIndex)(vtxInnerIdx + i * 2);
+                indexWritePtr += 3;
+            }
+
+            // Fringe indices
+            for (int i0 = numPoints - 1, i1 = 0; i1 < numPoints; i0 = i1++)
+            {
+                indexWritePtr[0] = (FUIIndex)(vtxInnerIdx + i1 * 2);
+                indexWritePtr[1] = (FUIIndex)(vtxInnerIdx + i0 * 2);
+                indexWritePtr[2] = (FUIIndex)(vtxOuterIdx + i0 * 2);
+                indexWritePtr[3] = (FUIIndex)(vtxOuterIdx + i0 * 2);
+                indexWritePtr[4] = (FUIIndex)(vtxOuterIdx + i1 * 2);
+                indexWritePtr[5] = (FUIIndex)(vtxInnerIdx + i1 * 2);
+                indexWritePtr += 6;
+            }
+
+            // Vertices: average adjacent edge normals at each point
+            for (int i0 = numPoints - 1, i1 = 0; i1 < numPoints; i0 = i1++)
+            {
+                float dm_x = (tempNormals[i0].x + tempNormals[i1].x) * 0.5f;
+                float dm_y = (tempNormals[i0].y + tempNormals[i1].y) * 0.5f;
+                IM_FIXNORMAL2F(dm_x, dm_y);
+                dm_x *= AA_SIZE * 0.5f;
+                dm_y *= AA_SIZE * 0.5f;
+
+                const Vec2 uv = minMaxPos ? Vec2((points[i1].x - rectMin.x) / rectSize.x,
+                                                 (points[i1].y - rectMin.y) / rectSize.y)
+                                          : Vec2(0, 0);
+
+                vertexWritePtr[0].pos = Vec2(points[i1].x - dm_x, points[i1].y - dm_y);
+                vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = color;
+                vertexWritePtr[0].drawItemIndex = drawItemIndex;
+
+                vertexWritePtr[1].pos = Vec2(points[i1].x + dm_x, points[i1].y + dm_y);
+                vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = transparentColor;
+                vertexWritePtr[1].drawItemIndex = drawItemIndex;
+
+                vertexWritePtr += 2;
+            }
+
+            vertexCurrentIdx += vertexCount;
+            drawCmd.indexCount += indexCount;
+        }
+        else
+        {
+            const int indexCount  = (numPoints - 2) * 3;
+            const int vertexCount = numPoints;
+            PrimReserve(vertexCount, indexCount);
+
+            for (int i = 0; i < numPoints; i++)
+            {
+                const Vec2 uv = minMaxPos ? Vec2((points[i].x - rectMin.x) / rectSize.x,
+                                                 (points[i].y - rectMin.y) / rectSize.y)
+                                          : Vec2(0, 0);
+                vertexWritePtr[i].pos = points[i];
+                vertexWritePtr[i].uv = uv;
+                vertexWritePtr[i].color = color;
+                vertexWritePtr[i].drawItemIndex = drawItemIndex;
+            }
+            vertexWritePtr += numPoints;
+
+            for (int i = 2; i < numPoints; i++)
+            {
+                indexWritePtr[0] = (FUIIndex)(vertexCurrentIdx);
+                indexWritePtr[1] = (FUIIndex)(vertexCurrentIdx + i - 1);
+                indexWritePtr[2] = (FUIIndex)(vertexCurrentIdx + i);
+                indexWritePtr += 3;
+            }
+
+            vertexCurrentIdx += vertexCount;
+            drawCmd.indexCount += indexCount;
+        }
 	}
 }

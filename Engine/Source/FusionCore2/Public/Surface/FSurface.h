@@ -73,6 +73,8 @@ namespace CE
 
         Ref<FLayerTree> layerTree;
 
+        RPI::PerViewConstants viewConstants{};
+
         FIELD()
 		f32 dpiScale = 1.0f;
 

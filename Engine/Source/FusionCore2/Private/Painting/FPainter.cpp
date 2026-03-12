@@ -78,6 +78,8 @@ namespace CE
 	{
 		drawList = &layer->drawList;
 
+		drawList->fringeScale = 1.0f / layer->GetDpiScale();
+
 		for (int i = 0; i < ArcFastTableSize; i++)
 		{
 			const float a = ((float)i * 2 * M_PI) / (float)ArcFastTableSize;
@@ -494,27 +496,44 @@ namespace CE
 
 	bool FPainter::PathFillInternal(bool antiAliased)
 	{
-		if (path.IsEmpty())
+		if (path.IsEmpty() || currentBrush.GetBrushStyle() == FBrushStyle::None)
 		{
 			return true;
 		}
 
 		Rect minMax = Rect(pathMin, pathMax);
 
+		Color brushColor = currentBrush.GetColor();
+		brushColor.a *= GetCurrentOpacity();
+
+		u32 color = brushColor.ToU32();
+
+		// First item will always be a SolidFill shader.
+		u32 drawItemIndex = 0;
+
 		switch (currentBrush.GetBrushStyle())
 		{
 		case FBrushStyle::None:
-			break;
+			return true;
 		case FBrushStyle::SolidFill:
-			//AddConvexPolyFilled(path.GetData(), path.GetCount(), antiAliased);
 			break;
 		case FBrushStyle::Image:
-			//AddConvexPolyFilled(path.GetData(), path.GetCount(), antiAliased, &minMax);
+			{
+				FUIDrawItem drawItem{};
+				drawItem.textureIndex = 0;
+				// TODO: Add support for images
+				
+				//drawItemIndex = drawList->AddDrawItem(drawItem);
+			}
 			break;
 		case FBrushStyle::Gradient:
-			//AddConvexPolyFilled(path.GetData(), path.GetCount(), antiAliased, &minMax);
+			{
+				// TODO: Add support for gradients
+			}
 			break;
 		}
+
+		drawList->AddConvexPolyFilled(path.GetData(), path.GetCount(), color, antiAliased, &minMax, drawItemIndex);
 
 		return true;
 	}

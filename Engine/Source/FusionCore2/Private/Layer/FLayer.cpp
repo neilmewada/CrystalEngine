@@ -7,6 +7,18 @@ namespace CE
 		
 	}
 
+	f32 FLayer::GetDpiScale()
+	{
+		if (Ref<FWidget> widget = GetOwningWidget())
+		{
+			if (Ref<FSurface> surface = widget->GetParentSurface())
+			{
+				return surface->GetDpiScale();
+			}
+		}
+		return FApplication::Get()->GetDefaultDpiScale();
+	}
+
 	bool FLayer::NeedsRepaint()
 	{
 		if (Ref<FWidget> widget = GetOwningWidget())
@@ -78,6 +90,8 @@ namespace CE
 				DoPaint(child.Get(), painter);
 			}
 		}
+
+		widget->PaintOverlay(painter);
 
 		painter.PopTransform();
 	}

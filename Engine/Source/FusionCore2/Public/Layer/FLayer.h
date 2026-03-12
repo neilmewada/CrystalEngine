@@ -14,6 +14,8 @@ namespace CE
 
         Ref<FWidget> GetOwningWidget() { return owningWidget.Lock(); }
 
+        f32 GetDpiScale();
+
         bool NeedsRepaint();
 
         void DoPaintIfNeeded();

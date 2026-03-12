@@ -48,6 +48,8 @@ namespace CE
 
         Ref<FStyleSet> GetDefaultStyleSet() const { return defaultStyleSet; }
 
+        f32 GetDefaultDpiScale() const { return defaultDpiScale; }
+
 		f32 GetDeltaTime() const { return deltaTime; }
 
 		bool HasService(ClassType* serviceClass) const;
@@ -78,6 +80,7 @@ namespace CE
 		void InvokeServiceTick(FServiceTickPhase tickPhase);
 
 		f32 deltaTime = 0;
+        f32 defaultDpiScale = 0;
 
         FIELD()
         Array<Ref<FSurface>> surfaces;

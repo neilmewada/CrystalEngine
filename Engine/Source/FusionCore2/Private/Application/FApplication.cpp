@@ -67,6 +67,8 @@ namespace CE
     {
         ZoneScoped;
 
+        defaultDpiScale = PlatformApplication::Get()->GetSystemDpiScaling();
+
 		bool hasRenderService = false;
 
         for (const SubClass<FService>& serviceClass : initInfo.services)
