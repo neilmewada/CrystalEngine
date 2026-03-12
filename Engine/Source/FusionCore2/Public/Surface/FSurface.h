@@ -12,6 +12,7 @@ namespace CE
 
         FSurface();
         
+        void OnBeginDestroy() override;
 
     public: // - Public API -
 
@@ -45,7 +46,7 @@ namespace CE
     	
     	// - Lifecycle -
 
-        virtual void Initialize() = 0;
+        virtual void Initialize();
 
         virtual void Shutdown() = 0;
 
@@ -73,7 +74,10 @@ namespace CE
 
         Ref<FLayerTree> layerTree;
 
+        // - View Constants -
         RPI::PerViewConstants viewConstants{};
+        StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> viewConstantBuffers;
+        RHI::ShaderResourceGroup* viewSrg = nullptr;
 
         FIELD()
 		f32 dpiScale = 1.0f;

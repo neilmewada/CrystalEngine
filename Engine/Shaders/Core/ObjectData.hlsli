@@ -24,11 +24,11 @@ ConstantBuffer<ObjectData> _ObjectData : SRG_PerObject(b0);
 
 #endif // !USE_INSTANCING
 
-#define LOCAL_TO_CLIP_SPACE(localSpace, vertexInput) mul(mul(localSpace, MODEL_MATRIX(vertexInput)), viewProjectionMatrix)
+#define LOCAL_TO_CLIP_SPACE(localSpace, vertexInput) mul(mul(localSpace, MODEL_MATRIX(vertexInput)), _ViewProjectionMatrix)
 
 #define LOCAL_TO_WORLD_SPACE(localSpace, vertexInput) mul(localSpace, MODEL_MATRIX(vertexInput))
 
-#define WORLD_TO_CLIP_SPACE(worldSpace) mul(worldSpace, viewProjectionMatrix)
+#define WORLD_TO_CLIP_SPACE(worldSpace) mul(worldSpace, _ViewProjectionMatrix)
 
 
 #endif // __OBJECT_DATA_HLSL__

@@ -48,6 +48,8 @@ namespace CE
 
     void FNativeSurface::Initialize()
     {
+        Super::Initialize();
+
 		scopeId = String::Format("NativeSurface_{}", platformWindow->GetWindowId());
 
         drawListTag = RPI::RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(scopeId);

@@ -8,6 +8,18 @@ namespace CE
         layerTree = CreateDefaultSubobject<FLayerTree>("LayerTree");
     }
 
+    void FSurface::OnBeginDestroy()
+    {
+	    Super::OnBeginDestroy();
+
+	    for (int i = 0; i < viewConstantBuffers.GetSize(); ++i)
+	    {
+            delete viewConstantBuffers[i]; viewConstantBuffers[i] = nullptr;
+	    }
+
+        delete viewSrg; viewSrg = nullptr;
+    }
+
     void FSurface::GetDrawListMask(RHI::DrawListMask& drawListMask)
     {
 		if (drawListTag.IsValid())
@@ -83,6 +95,38 @@ namespace CE
 
 		pendingLayoutRoots.Add(layoutRoot);
         pendingLayoutRootIds.Add(layoutRoot->GetUuid());
+    }
+
+    void FSurface::Initialize()
+    {
+        for (int i = 0; i < viewConstantBuffers.GetSize(); i++)
+        {
+            RHI::BufferDescriptor desc{};
+            desc.name = "FSurface ViewConstants";
+            desc.bindFlags = BufferBindFlags::ConstantBuffer;
+            desc.bufferSize = sizeof(RPI::PerViewConstants);
+            desc.structureByteStride = desc.bufferSize;
+            desc.defaultHeapType = MemoryHeapType::Default;
+
+            viewConstantBuffers[i] = RHI::gDynamicRHI->CreateBuffer(desc);
+        }
+
+        RHI::ShaderResourceGroupLayout viewSrgLayout;
+        viewSrgLayout.srgType = SRGType::PerView;
+        viewSrgLayout.TryAdd(
+            RHI::SRGVariableDescriptor(
+				"_PerViewData",
+                0,
+                RHI::ShaderResourceType::ConstantBuffer,
+                RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment
+            )
+        );
+
+        RHI::ShaderResourceGroupDescriptor srgDesc{};
+        srgDesc.name = "FSurface SRG_PerView";
+        srgDesc.layout = viewSrgLayout;
+
+        viewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
     }
 
     void FSurface::TickSurface(f32 deltaTime)
