@@ -6,7 +6,7 @@ namespace CE
 	enum class FPenStyle : u32
 	{
 		None,
-		SolidLine,
+		Solid,
 		Dashed, // Uses dashLength and dashGap
 		Dotted  // Uses dashLength and dashGap (typically dashLength == thickness for round dots)
 	};
@@ -21,7 +21,7 @@ namespace CE
 		FPen();
 		~FPen();
 
-		FPen(const Color& color, f32 thickness = 1.0f, FPenStyle style = FPenStyle::SolidLine);
+		FPen(const Color& color, f32 thickness = 1.0f, FPenStyle style = FPenStyle::Solid);
 
 		const Color& GetColor() const { return color; }
 		void SetColor(const Color& penColor) { this->color = penColor; }

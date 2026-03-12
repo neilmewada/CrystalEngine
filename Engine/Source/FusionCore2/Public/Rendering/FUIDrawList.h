@@ -8,7 +8,6 @@ namespace CE
     using FUIClipRectArray	    = StableDynamicArray<FUIClipRect,       64,   false>;
     using FUIGradientStopArray  = StableDynamicArray<FUIGradientStop,   64,   false>;
     using FUIDrawCmdArray	    = StableDynamicArray<FUIDrawCmd,        64,   false>;
-    using FTransformStack       = StableDynamicArray<FAffineTransform,  128,  false>;
 
     class FUSIONCORE_API FUIDrawList final : public IntrusiveBase
     {
@@ -30,16 +29,18 @@ namespace CE
 
         u32 AddDrawItem(const FUIDrawItem& item);
 
-        void PushTransform(const FAffineTransform& transform);
-        void PopTransform();
-
-        FAffineTransform GetCurrentTransform();
+        void AddPolyLine(const Vec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased);
 
     private:
 
         void PrimReserve(int vertexCount, int indexCount);
 
         void PrimRect(const Rect& rect, u32 color, Vec2* uvs, u32 drawItemIndex);
+
+        // - Types & Constants -
+
+        using FTempPointsArray = StableDynamicArray<Vec2, 128, false>;
+        static constexpr u32 ColorAlphaMask = 0xff000000;
 
         // - Data -
 
@@ -50,13 +51,14 @@ namespace CE
         FUIGradientStopArray gradientStopArray;
         FUIDrawCmdArray drawCmdArray;
 
-        FTransformStack transformStack;
-
+        FTempPointsArray temporaryPoints;
         FUIVertex* vertexWritePtr = nullptr;
         FUIIndex* indexWritePtr = nullptr;
 
         // Start offset of current vertex
         FUIIndex vertexCurrentIdx = 0;
+
+        float fringeScale = 1.0f;
 
         friend class FPainter;
     };

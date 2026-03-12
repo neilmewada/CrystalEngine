@@ -101,6 +101,8 @@ namespace CE
 
         virtual void Paint(FPainter& painter);
 
+        virtual void PaintOverlay(FPainter& painter);
+
         void NotifyStyleStateChanged();
 
 	protected:

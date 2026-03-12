@@ -161,9 +161,12 @@ namespace CE
 
     void FWidget::Paint(FPainter& painter)
     {
-        ZoneScoped;
+        
+    }
 
-        // TODO
+    void FWidget::PaintOverlay(FPainter& painter)
+    {
+        
     }
 
     void FWidget::NotifyStyleStateChanged()

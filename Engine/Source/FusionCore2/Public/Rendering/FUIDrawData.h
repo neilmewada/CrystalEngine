@@ -59,8 +59,8 @@ namespace CE
 	struct FUIDrawItem
 	{
 		FUIShaderType shaderType = FUIShaderType::SolidColor;
-		u32 textureIndex0 = 0;
-		u32 textureIndex1 = 0;
+		u32 textureIndex = 0;
+		u32 samplerIndex = 0;
 		FUIDrawItemFlags drawItemFlags = FUIDrawItemFlags::None;
 
 		int clipRectIndex = -1;

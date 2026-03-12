@@ -44,6 +44,7 @@ namespace CE
 		if (widget == nullptr || widget->IsFaulted())
 			return;
 
+		// If a widget in the children hierarchy is a paint boundary
 		if (widget != GetOwningWidget().Get() && widget->IsPaintBoundary())
 		{
 			if (Ref<FLayerTree> tree = ownerTree.Lock())

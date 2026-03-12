@@ -95,7 +95,7 @@ namespace CE::Editor
 		underlineButton->contentMoveY = 0;
 
 		underlineButton->underline = FPen(Colors::White, 1, FPenStyle::DottedLine);
-		underlineButton->hoverUnderline = FPen(Colors::White, 1, FPenStyle::SolidLine);
+		underlineButton->hoverUnderline = FPen(Colors::White, 1, FPenStyle::Solid);
 		underlineButton->pressedUnderline = FPen();
 
 		if (!highlightedButton)
