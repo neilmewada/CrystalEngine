@@ -23,6 +23,18 @@ namespace CE
 		vertexWritePtr = nullptr;
 		indexWritePtr = nullptr;
 		vertexCurrentIdx = 0;
+
+        // First draw item is always the default one
+        drawItemArray.Insert(FUIDrawItem{
+            .shaderType = FUIShaderType::SolidColor,
+            .textureIndex = 0,
+            .samplerIndex = 0,
+            .drawItemFlags = FUIDrawItemFlags::None,
+            .clipRectIndex = 0,
+            .gradientStartIndex = 0,
+            .gradientStopCount = 0,
+            .userFlags = 0
+        });
 	}
 
 	void FUIDrawList::Finalize()
@@ -47,21 +59,17 @@ namespace CE
 		cmd.indexOffset = (u32)indexArray.GetCount();
 		cmd.vertexOffset = 0;
 		cmd.blendMode = drawCmdArray.IsEmpty() ? FUIBlendMode::Normal : drawCmdArray.Last().blendMode;
-		cmd.scissorRect = drawCmdArray.IsEmpty() ? Rect() : drawCmdArray.Last().scissorRect;
-		cmd.customShaderId = drawCmdArray.IsEmpty() ? 0 : drawCmdArray.Last().customShaderId;
 		drawCmdArray.Insert(cmd);
 
 		return drawCmdArray.Last();
 	}
 
-	FUIDrawCmd& FUIDrawList::AcquireDrawCmd(FUIBlendMode blendMode, Rect scissorRect, u32 customShaderId)
+	FUIDrawCmd& FUIDrawList::AcquireDrawCmd()
 	{
 		if (!drawCmdArray.IsEmpty())
 		{
 			auto& last = drawCmdArray.Last();
-			if (last.blendMode == blendMode &&
-				last.scissorRect == scissorRect &&
-				last.customShaderId == customShaderId)
+			if (last.blendMode == blendMode)
 			{
 				return last;
 			}
@@ -69,20 +77,15 @@ namespace CE
 			if (last.indexCount == 0)
 			{
 				// Last command had nothing written — reuse the slot with the new state
-				last.blendMode      = blendMode;
-				last.scissorRect    = scissorRect;
-				last.customShaderId = customShaderId;
+				last.blendMode = blendMode;
 				return last;
 			}
-			// indexCount is already current (maintained by prim functions), no sealing needed.
 		}
 
 		FUIDrawCmd cmd{};
 		cmd.indexOffset    = (u32)indexArray.GetCount();
 		cmd.vertexOffset   = 0;
 		cmd.blendMode      = blendMode;
-		cmd.scissorRect    = scissorRect;
-		cmd.customShaderId = customShaderId;
 		drawCmdArray.Insert(cmd);
 
 		return drawCmdArray.Last();
@@ -103,52 +106,21 @@ namespace CE
 		indexWritePtr = indexArray.GetData() + curIndexCount;
 	}
 
-	void FUIDrawList::PrimRect(const Rect& rect, u32 color, Vec2* uvs, u32 drawItemIndex)
-	{
-		const Vec2 topLeft     = Vec2(rect.min.x, rect.min.y);
-		const Vec2 topRight    = Vec2(rect.max.x, rect.min.y);
-		const Vec2 bottomRight = Vec2(rect.max.x, rect.max.y);
-		const Vec2 bottomLeft  = Vec2(rect.min.x, rect.max.y);
-
-		const Vec2 topLeftUV = uvs != nullptr ? uvs[0] : Vec2(0, 0);
-		const Vec2 topRightUV = uvs != nullptr ? uvs[1] : Vec2(1, 0);
-		const Vec2 bottomRightUV = uvs != nullptr ? uvs[2] : Vec2(1, 1);
-		const Vec2 bottomLeftUV = uvs != nullptr ? uvs[3] : Vec2(0, 1);
-
-		FUIIndex idx = vertexCurrentIdx;
-		indexWritePtr[0] = idx; indexWritePtr[1] = (idx + 1); indexWritePtr[2] = (idx + 2);
-		indexWritePtr[3] = idx; indexWritePtr[4] = (idx + 2); indexWritePtr[5] = (idx + 3);
-
-		vertexWritePtr[0].pos = topLeft; vertexWritePtr[0].color = color; vertexWritePtr[0].uv = topLeftUV;
-		vertexWritePtr[0].drawItemIndex = drawItemIndex;
-
-		vertexWritePtr[1].pos = topRight; vertexWritePtr[1].color = color; vertexWritePtr[1].uv = topRightUV;
-		vertexWritePtr[1].drawItemIndex = drawItemIndex;
-
-		vertexWritePtr[2].pos = bottomRight; vertexWritePtr[2].color = color; vertexWritePtr[2].uv = bottomRightUV;
-		vertexWritePtr[2].drawItemIndex = drawItemIndex;
-
-		vertexWritePtr[3].pos = bottomLeft; vertexWritePtr[3].color = color; vertexWritePtr[3].uv = bottomLeftUV;
-		vertexWritePtr[3].drawItemIndex = drawItemIndex;
-
-		vertexWritePtr += 4;
-		vertexCurrentIdx += 4;
-		indexWritePtr += 6;
-
-		drawCmdArray.Last().indexCount += 6;
-	}
-
-	void FUIDrawList::AddPolyLine(const Vec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased)
+	void FUIDrawList::AddPolyLine(const Vec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased, u32 drawItemIndex)
 	{
 		ZoneScoped;
 
 		if (points == nullptr || numPoints <= 0)
 			return;
+        if ((color & ColorAlphaMask) == 0)
+            return;
 
         constexpr Vec2 uv = Vec2();
 
 		const int count = closed ? numPoints : numPoints - 1; // The number of line segments we need to draw
 		const bool thickLine = (thickness > fringeScale);
+
+        FUIDrawCmd& drawCmd = AcquireDrawCmd();
 
         if (antiAliased)
         {
@@ -239,9 +211,9 @@ namespace CE
                     // If we're not using a texture, we need the center vertex as well
                     for (int i = 0; i < numPoints; i++)
                     {
-                        vertexWritePtr[0].pos = points[i];             vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = color;            // Center of line
-                        vertexWritePtr[1].pos = tempPoints[i * 2 + 0]; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = transparentColor; // Left-side outer edge
-                        vertexWritePtr[2].pos = tempPoints[i * 2 + 1]; vertexWritePtr[2].uv = uv; vertexWritePtr[2].color = transparentColor; // Right-side outer edge
+                        vertexWritePtr[0].pos = points[i];             vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = color; vertexWritePtr[0].drawItemIndex = drawItemIndex;// Center of line
+                        vertexWritePtr[1].pos = tempPoints[i * 2 + 0]; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = transparentColor; vertexWritePtr[1].drawItemIndex = drawItemIndex; // Left-side outer edge
+                        vertexWritePtr[2].pos = tempPoints[i * 2 + 1]; vertexWritePtr[2].uv = uv; vertexWritePtr[2].color = transparentColor; vertexWritePtr[2].drawItemIndex = drawItemIndex; // Right-side outer edge
                         vertexWritePtr += 3;
                     }
                 }
@@ -309,16 +281,16 @@ namespace CE
                 // Add vertices
                 for (int i = 0; i < numPoints; i++)
                 {
-                    vertexWritePtr[0].pos = tempPoints[i * 4 + 0]; vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = transparentColor;
-                    vertexWritePtr[1].pos = tempPoints[i * 4 + 1]; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = color;
-                    vertexWritePtr[2].pos = tempPoints[i * 4 + 2]; vertexWritePtr[2].uv = uv; vertexWritePtr[2].color = color;
-                    vertexWritePtr[3].pos = tempPoints[i * 4 + 3]; vertexWritePtr[3].uv = uv; vertexWritePtr[3].color = transparentColor;
+                    vertexWritePtr[0].pos = tempPoints[i * 4 + 0]; vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = transparentColor; vertexWritePtr[0].drawItemIndex = drawItemIndex;
+                    vertexWritePtr[1].pos = tempPoints[i * 4 + 1]; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = color; vertexWritePtr[1].drawItemIndex = drawItemIndex;
+                    vertexWritePtr[2].pos = tempPoints[i * 4 + 2]; vertexWritePtr[2].uv = uv; vertexWritePtr[2].color = color; vertexWritePtr[2].drawItemIndex = drawItemIndex;
+                    vertexWritePtr[3].pos = tempPoints[i * 4 + 3]; vertexWritePtr[3].uv = uv; vertexWritePtr[3].color = transparentColor; vertexWritePtr[3].drawItemIndex = drawItemIndex;
                     vertexWritePtr += 4;
                 }
             }
 
             vertexCurrentIdx += vertexCount;
-            drawCmdArray.Last().indexCount += indexCount;
+            drawCmd.indexCount += indexCount;
         }
         else
         {
@@ -339,10 +311,10 @@ namespace CE
                 dx *= (thickness * 0.5f);
                 dy *= (thickness * 0.5f);
 
-                vertexWritePtr[0].pos.x = p1.x + dy; vertexWritePtr[0].pos.y = p1.y - dx; vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = color;
-                vertexWritePtr[1].pos.x = p2.x + dy; vertexWritePtr[1].pos.y = p2.y - dx; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = color;
-                vertexWritePtr[2].pos.x = p2.x - dy; vertexWritePtr[2].pos.y = p2.y + dx; vertexWritePtr[2].uv = uv; vertexWritePtr[2].color = color;
-                vertexWritePtr[3].pos.x = p1.x - dy; vertexWritePtr[3].pos.y = p1.y + dx; vertexWritePtr[3].uv = uv; vertexWritePtr[3].color = color;
+                vertexWritePtr[0].pos.x = p1.x + dy; vertexWritePtr[0].pos.y = p1.y - dx; vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = color; vertexWritePtr[0].drawItemIndex = drawItemIndex;
+                vertexWritePtr[1].pos.x = p2.x + dy; vertexWritePtr[1].pos.y = p2.y - dx; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = color; vertexWritePtr[1].drawItemIndex = drawItemIndex;
+                vertexWritePtr[2].pos.x = p2.x - dy; vertexWritePtr[2].pos.y = p2.y + dx; vertexWritePtr[2].uv = uv; vertexWritePtr[2].color = color; vertexWritePtr[2].drawItemIndex = drawItemIndex;
+                vertexWritePtr[3].pos.x = p1.x - dy; vertexWritePtr[3].pos.y = p1.y + dx; vertexWritePtr[3].uv = uv; vertexWritePtr[3].color = color; vertexWritePtr[3].drawItemIndex = drawItemIndex;
                 vertexWritePtr += 4;
 
                 indexWritePtr[0] = (FUIIndex)(vertexCurrentIdx); indexWritePtr[1] = (FUIIndex)(vertexCurrentIdx + 1); indexWritePtr[2] = (FUIIndex)(vertexCurrentIdx + 2);
@@ -351,8 +323,19 @@ namespace CE
                 vertexCurrentIdx += 4;
             }
 
-            vertexCurrentIdx += vertexCount;
-            drawCmdArray.Last().indexCount += indexCount;
+            drawCmd.indexCount += indexCount;
         }
+	}
+
+	void FUIDrawList::AddConvexPolyFilled(const Vec2* points, int numPoints, u32 color, bool antiAliased, Rect* minMaxPos, u32 drawItemIndex)
+	{
+        ZoneScoped;
+
+        if (points == nullptr || numPoints <= 0)
+            return;
+        if ((color & ColorAlphaMask) == 0)
+            return;
+
+
 	}
 }

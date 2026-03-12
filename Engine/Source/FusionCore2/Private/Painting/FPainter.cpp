@@ -151,8 +151,8 @@ namespace CE
 			return;
 		}
 
-		int sampleMin = (int)Math::Round(Math::ToDegrees(startAngle) / 360.0f * ArcFastTableSize);
-		int sampleMax = (int)Math::Round(Math::ToDegrees(endAngle) / 360.0f * ArcFastTableSize);
+		int sampleMin = (int)Math::Round(startAngle / (Math::PI * 2.0f) * ArcFastTableSize);
+		int sampleMax = (int)Math::Round(endAngle / (Math::PI * 2.0f) * ArcFastTableSize);
 
 		PathArcToFastInternal(center, radius, sampleMin, sampleMax, 0);
 	}
@@ -188,6 +188,31 @@ namespace CE
 			{
 				PathInsert(ImBezierQuadraticCalc(p1, p2, p3, totalSteps * i));
 			}
+		}
+	}
+
+	void FPainter::PathRect(const Rect& rect, const Vec4& cornerRadius)
+	{
+		const Vec2& min = rect.min;
+		const Vec2& max = rect.max;
+
+		if (cornerRadius.GetMax() < 0.5f)
+		{
+			PathInsert(min);
+			PathInsert(Vec2(max.x, min.y));
+			PathInsert(max);
+			PathInsert(Vec2(min.x, max.y));
+		}
+		else
+		{
+			PathArcToFast(Vec2(min.x + cornerRadius.topLeft, min.y + cornerRadius.topLeft),
+				cornerRadius.topLeft, Math::PI, Math::PI * 1.5f);
+			PathArcToFast(Vec2(max.x - cornerRadius.topRight, min.y + cornerRadius.topRight),
+				cornerRadius.topRight, Math::PI * 1.5f, Math::PI * 2.0f);
+			PathArcToFast(Vec2(max.x - cornerRadius.bottomRight, max.y - cornerRadius.bottomRight),
+				cornerRadius.bottomRight, 0.0f, Math::PI * 0.5f);
+			PathArcToFast(Vec2(min.x + cornerRadius.bottomLeft, max.y - cornerRadius.bottomLeft),
+				cornerRadius.bottomLeft, Math::PI * 0.5f, Math::PI);
 		}
 	}
 

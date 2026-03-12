@@ -38,6 +38,8 @@ namespace CE
         void PathBezierCubicCurveTo(const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec2& p4, int numSegments = 0);
         void PathQuadraticCubicCurveTo(const Vec2& p1, const Vec2& p2, const Vec2& p3, int numSegments = 0);
 
+        void PathRect(const Rect& rect, const Vec4& cornerRadius = Vec4());
+
         bool PathFill(bool antiAliased);
         bool PathStroke(bool closed, bool antiAliased);
         bool PathFillAndStroke(bool antiAliased);

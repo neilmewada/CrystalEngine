@@ -79,8 +79,10 @@ namespace CE
 
 		f32 deltaTime = 0;
 
+        FIELD()
         Array<Ref<FSurface>> surfaces;
         
+        FIELD()
 		Array<Ref<FService>> services;
 
         FIELD()

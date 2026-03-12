@@ -79,8 +79,6 @@ namespace CE
 		u32 indexCount = 0;
 		u32 vertexOffset = 0;
 		FUIBlendMode blendMode = FUIBlendMode::Normal;
-		u32 customShaderId = 0;
-		Rect scissorRect;
 	};
 
 }

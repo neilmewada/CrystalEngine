@@ -25,17 +25,17 @@ namespace CE
 
         FUIDrawCmd& NewDrawCmd();
 
-        FUIDrawCmd& AcquireDrawCmd(FUIBlendMode blendMode, Rect scissorRect, u32 customShaderId = 0);
+        FUIDrawCmd& AcquireDrawCmd();
 
         u32 AddDrawItem(const FUIDrawItem& item);
 
-        void AddPolyLine(const Vec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased);
+        void AddPolyLine(const Vec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased, u32 drawItemIndex = 0);
+
+        void AddConvexPolyFilled(const Vec2* points, int numPoints, u32 color, bool antiAliased, Rect* minMaxPos, u32 drawItemIndex = 0);
 
     private:
 
         void PrimReserve(int vertexCount, int indexCount);
-
-        void PrimRect(const Rect& rect, u32 color, Vec2* uvs, u32 drawItemIndex);
 
         // - Types & Constants -
 
@@ -59,6 +59,9 @@ namespace CE
         FUIIndex vertexCurrentIdx = 0;
 
         float fringeScale = 1.0f;
+
+        // Draw Cmd
+        FUIBlendMode blendMode = FUIBlendMode::Normal;
 
         friend class FPainter;
     };

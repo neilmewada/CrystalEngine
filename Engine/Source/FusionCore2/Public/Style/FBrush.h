@@ -53,7 +53,7 @@ namespace CE
 
 		Self& AddKey(f32 position, const Color& color)
 		{
-			stops.Add(FGradientKey(position, color));
+			stops.EmplaceBack(position, color);
 			return *this;
 		}
 
