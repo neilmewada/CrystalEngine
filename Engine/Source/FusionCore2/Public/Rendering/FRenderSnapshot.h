@@ -9,10 +9,19 @@ namespace CE
 
 	private:
 
+		using FSplitPointArray = StableDynamicArray<u32, 128, false>;
+
 		FUIVertexArray vertexArray;
+		FSplitPointArray vertexSplits;
+
 		FUIIndexArray indexArray;
-		FUIDrawItemArray drawItems;
+		FSplitPointArray indexSplits;
+
+		FUIDrawItemArray drawItemArray;
+		FSplitPointArray drawItemSplits;
+
 		FUIDrawCmdArray drawCmdArray;
+		FSplitPointArray drawCmdSplits;
 
 	};
 
