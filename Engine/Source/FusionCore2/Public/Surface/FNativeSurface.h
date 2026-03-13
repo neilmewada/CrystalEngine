@@ -22,7 +22,6 @@ namespace CE
 
         void Shutdown() override;
 
-
 		// - Frame Graph -
 
 		void EmplaceFrameAttachments() override;

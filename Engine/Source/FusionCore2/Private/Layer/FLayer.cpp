@@ -96,6 +96,7 @@ namespace CE
 		isLayerDirty = true;
 
 		painter.PushTransform(FAffineTransform::Translation(widget->GetLayoutPosition()) * widget->Transform());
+		widget->cachedGlobalTransform = this->cachedGlobalTransform * painter.GetCurrentTransform();
 
 		widget->SetWidgetFlag(FWidgetFlags::PaintDirty, false);
 		widget->Paint(painter);

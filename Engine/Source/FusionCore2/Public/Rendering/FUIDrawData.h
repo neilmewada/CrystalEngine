@@ -56,7 +56,7 @@ namespace CE
 		f32 position = 0;
 	};
 
-	struct FUIDrawItem
+	struct alignas(4) FUIDrawItem
 	{
 		FUIShaderType shaderType = FUIShaderType::SolidColor;
 		u32 textureIndex = 0;
