@@ -17,6 +17,11 @@ namespace CE
             delete viewConstantBuffers[i]; viewConstantBuffers[i] = nullptr;
 	    }
 
+        for (u32 i = 0; i < renderSnapshots.GetSize(); i++)
+        {
+            renderSnapshots[i] = nullptr;
+        }
+
         delete viewSrg; viewSrg = nullptr;
     }
 
@@ -103,16 +108,21 @@ namespace CE
         {
             RHI::BufferDescriptor desc{};
             desc.name = "FSurface ViewConstants";
-            desc.bindFlags = BufferBindFlags::ConstantBuffer;
+            desc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
             desc.bufferSize = sizeof(RPI::PerViewConstants);
             desc.structureByteStride = desc.bufferSize;
-            desc.defaultHeapType = MemoryHeapType::Upload;
+            desc.defaultHeapType = RHI::MemoryHeapType::Upload;
 
             viewConstantBuffers[i] = RHI::gDynamicRHI->CreateBuffer(desc);
         }
 
+        for (u32 i = 0; i < renderSnapshots.GetSize(); i++)
+        {
+            renderSnapshots[i] = new FRenderSnapshot();
+        }
+
         RHI::ShaderResourceGroupLayout viewSrgLayout;
-        viewSrgLayout.srgType = SRGType::PerView;
+        viewSrgLayout.srgType = RHI::SRGType::PerView;
         viewSrgLayout.TryAdd(
             RHI::SRGVariableDescriptor(
 				"_PerViewData",
@@ -213,15 +223,20 @@ namespace CE
 
     }
 
-    void FSurface::UpdateViewConstantBuffer(u32 imageIndex)
+    void FSurface::RenderFrame(u32 frameIndex)
+    {
+        renderSnapshots[frameIndex]->BuildSnapshot(layerTree->GetRootLayer());
+    }
+
+    void FSurface::UpdateViewConstantBuffer(u32 frameIndex)
     {
         ZoneScoped;
 
-        viewConstantBuffers[imageIndex]->UploadData(&viewConstants, sizeof(viewConstants));
+        viewConstantBuffers[frameIndex]->UploadData(&viewConstants, sizeof(viewConstants));
 
         for (int i = 0; i < childrenSurfaces.GetSize(); i++)
         {
-            childrenSurfaces[i]->UpdateViewConstantBuffer(imageIndex);
+            childrenSurfaces[i]->UpdateViewConstantBuffer(frameIndex);
         }
     }
 

@@ -18,6 +18,8 @@ namespace CE
 
         Ref<FLayer> FindLayerForWidget(Uuid widgetUuid);
 
+        Ref<FLayer> GetRootLayer() { return rootLayer; }
+
     protected:
 
         void SyncWidget(FWidget* widget, FLayer* parentLayer, HashSet<Uuid>& visited);

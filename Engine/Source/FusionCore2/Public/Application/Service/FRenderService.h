@@ -2,6 +2,8 @@
 
 namespace CE
 {
+    class FShader;
+
     CLASS(Abstract)
     class FUSIONCORE_API FRenderService : public FService
     {
@@ -33,7 +35,7 @@ namespace CE
 
         void UpdateDrawListMask(RHI::DrawListMask& drawListMask);
 
-
+        Ref<FShader> mainShader;
     };
     
 } // namespace CE

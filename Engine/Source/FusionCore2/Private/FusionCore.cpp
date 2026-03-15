@@ -6,7 +6,25 @@
 
 namespace CE
 {
+    RawData Get_Shaders_Fusion_vert_spv()
+    {
+        return RawData{ .data = (u8*)Shaders_Fusion_vert_spv_Data, .dataSize = Shaders_Fusion_vert_spv_Length };
+    }
+
+    RawData Get_Shaders_Fusion_frag_spv()
+    {
+        return RawData{ .data = (u8*)Shaders_Fusion_frag_spv_Data, .dataSize = Shaders_Fusion_frag_spv_Length };
+    }
 	
+    RawData Get_Shaders_Fusion_vert_json()
+    {
+        return RawData{ .data = (u8*)Shaders_Fusion_vert_json_Data, .dataSize = Shaders_Fusion_vert_json_Length };
+    }
+
+    RawData Get_Shaders_Fusion_frag_json()
+    {
+        return RawData{ .data = (u8*)Shaders_Fusion_frag_json_Data, .dataSize = Shaders_Fusion_frag_json_Length };
+    }
 
     class FusionCoreModule : public CE::Module
     {

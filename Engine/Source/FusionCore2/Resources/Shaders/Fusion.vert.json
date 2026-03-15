@@ -1,0 +1,151 @@
+{
+    "entryPoints" : [
+        {
+            "name" : "VertMain",
+            "mode" : "vert"
+        }
+    ],
+    "types" : {
+        "_57" : {
+            "name" : "type._PerViewData",
+            "members" : [
+                {
+                    "name" : "_ViewMatrix",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "_ViewProjectionMatrix",
+                    "type" : "mat4",
+                    "offset" : 64,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "_ProjectionMatrix",
+                    "type" : "mat4",
+                    "offset" : 128,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                },
+                {
+                    "name" : "_ViewPosition",
+                    "type" : "vec4",
+                    "offset" : 192
+                },
+                {
+                    "name" : "_PixelResolution",
+                    "type" : "vec2",
+                    "offset" : 208
+                },
+                {
+                    "name" : "_FarPlane",
+                    "type" : "float",
+                    "offset" : 216
+                },
+                {
+                    "name" : "_NearPlane",
+                    "type" : "float",
+                    "offset" : 220
+                }
+            ]
+        },
+        "_63" : {
+            "name" : "type._LayerData",
+            "members" : [
+                {
+                    "name" : "_LayerTransform",
+                    "type" : "mat4",
+                    "offset" : 0,
+                    "matrix_stride" : 16,
+                    "row_major" : true
+                }
+            ]
+        }
+    },
+    "inputs" : [
+        {
+            "type" : "vec2",
+            "name" : "in.var.POSITION",
+            "location" : 0
+        },
+        {
+            "type" : "vec2",
+            "name" : "in.var.TEXCOORD0",
+            "location" : 1
+        },
+        {
+            "type" : "vec4",
+            "name" : "in.var.COLOR0",
+            "location" : 2
+        },
+        {
+            "type" : "uint",
+            "name" : "in.var.TEXCOORD1",
+            "location" : 3
+        }
+    ],
+    "outputs" : [
+        {
+            "type" : "vec2",
+            "name" : "out.var.TEXCOORD1",
+            "location" : 0
+        },
+        {
+            "type" : "vec4",
+            "name" : "out.var.TEXCOORD2",
+            "location" : 1
+        },
+        {
+            "type" : "uint",
+            "name" : "out.var.TEXCOORD3",
+            "location" : 2
+        }
+    ],
+    "separate_images" : [
+        {
+            "type" : "texture2D",
+            "name" : "_Textures",
+            "array" : [
+                0
+            ],
+            "array_size_is_literal" : [
+                true
+            ],
+            "set" : 0,
+            "binding" : 0
+        }
+    ],
+    "separate_samplers" : [
+        {
+            "type" : "sampler",
+            "name" : "_Samplers",
+            "array" : [
+                0
+            ],
+            "array_size_is_literal" : [
+                true
+            ],
+            "set" : 0,
+            "binding" : 1
+        }
+    ],
+    "ubos" : [
+        {
+            "type" : "_57",
+            "name" : "type._PerViewData",
+            "block_size" : 224,
+            "set" : 1,
+            "binding" : 0
+        },
+        {
+            "type" : "_63",
+            "name" : "type._LayerData",
+            "block_size" : 64,
+            "set" : 3,
+            "binding" : 0
+        }
+    ]
+}

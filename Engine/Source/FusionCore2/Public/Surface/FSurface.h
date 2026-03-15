@@ -52,7 +52,9 @@ namespace CE
 
         virtual void TickSurface(f32 deltaTime);
 
-        virtual void UpdateViewConstantBuffer(u32 imageIndex);
+        virtual void RenderFrame(u32 frameIndex);
+
+        virtual void UpdateViewConstantBuffer(u32 frameIndex);
 
         virtual void OnSurfaceResize();
 
@@ -78,6 +80,9 @@ namespace CE
         RPI::PerViewConstants viewConstants{};
         StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> viewConstantBuffers;
         RHI::ShaderResourceGroup* viewSrg = nullptr;
+
+        // - Render Data -
+        StaticArray<Ptr<FRenderSnapshot>, RHI::Limits::MaxSwapChainImageCount> renderSnapshots;
 
         FIELD()
 		f32 dpiScale = 1.0f;

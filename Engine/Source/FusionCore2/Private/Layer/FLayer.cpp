@@ -34,11 +34,6 @@ namespace CE
 		{
 			DoPaint();
 		}
-
-		for (auto child : children)
-		{
-			child->DoPaintIfNeeded();
-		}
 	}
 
 	bool FLayer::IsLayerDirty()
@@ -63,6 +58,12 @@ namespace CE
 			DoPaint(widget.Get(), painter);
 
 			drawList.Finalize();
+		}
+
+		// Force re-paint of all children layers
+		for (auto child : children)
+		{
+			child->DoPaint();
 		}
 	}
 

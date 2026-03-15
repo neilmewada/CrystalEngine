@@ -32,6 +32,7 @@
 #include "Rendering/FUIDrawData.h"
 #include "Rendering/FUIDrawList.h"
 #include "Rendering/FRenderSnapshot.h"
+#include "Rendering/FShader.h"
 #include "Painting/FPainter.h"
 
 // Layers

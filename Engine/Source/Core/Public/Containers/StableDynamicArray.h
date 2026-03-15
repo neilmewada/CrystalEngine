@@ -164,6 +164,21 @@ namespace CE
             }
         }
 
+        void Insert(T* values, int numItems)
+        {
+            ZoneScoped;
+
+            while (data == nullptr || this->count + numItems >= capacity)
+            {
+                Grow();
+            }
+
+            for (int i = 0; i < numItems; i++)
+            {
+                data[count++] = values[i];
+            }
+        }
+
         void RemoveAll()
         {
             ZoneScoped;

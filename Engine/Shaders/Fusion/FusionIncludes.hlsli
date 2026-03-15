@@ -40,12 +40,12 @@ struct FUIDrawItem
 	FUIShaderType shaderType;
 	uint textureIndex;
 	uint samplerIndex;
-	FUIDrawItemFlags drawItemFlags = FUIDrawItemFlags::None;
+	FUIDrawItemFlags drawItemFlags;
 
-	int clipRectIndex = -1;
-	int gradientStartIndex = 0;
-	int gradientStopCount = 0;
-	uint userFlags = 0;
+	int clipRectIndex;
+	int gradientStartIndex;
+	int gradientStopCount;
+	uint userFlags;
 
 	// 128 bytes: per-shader payload
 	float data[32];

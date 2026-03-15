@@ -14,6 +14,8 @@ namespace CE
 
         Ref<FWidget> GetOwningWidget() { return owningWidget.Lock(); }
 
+        Ref<FLayer> GetParentLayer() { return parent.Lock(); }
+
         f32 GetDpiScale();
 
         bool NeedsRepaint();
@@ -21,6 +23,16 @@ namespace CE
         void DoPaintIfNeeded();
 
         bool IsLayerDirty();
+
+        u32 GetChildCount() { return children.GetSize(); }
+
+        Ref<FLayer> GetChild(u32 index) { return children[index]; }
+
+        FUIDrawList* GetDrawList() { return &drawList; }
+
+        u32 GetSplitPointCount() { return splitPoints.GetSize(); }
+
+        u32 GetSplitPoint(u32 index) { return splitPoints[index]; }
 
     fusioncore_internal:
 

@@ -33,8 +33,6 @@ namespace CE
 
         void AddConvexPolyFilled(const Vec2* points, int numPoints, u32 color, bool antiAliased, Rect* minMaxPos, u32 drawItemIndex = 0);
 
-    private:
-
         void PrimReserve(int vertexCount, int indexCount);
 
         // - Types & Constants -

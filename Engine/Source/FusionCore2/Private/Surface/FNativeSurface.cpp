@@ -65,7 +65,7 @@ namespace CE
     {
 		FApplication::Get()->RemoveSurface(this);
 
-		RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
+		RPI::RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
 
 		PlatformApplication::Get()->RemoveMessageHandler(this);
     }

@@ -5,6 +5,11 @@ namespace CE
 	static Ref<FApplication> gApplicationInstance;
 	static WeakRef<FApplication> gApplicationInstanceRef;
 
+    extern RawData Get_Shaders_Fusion_vert_spv();
+    extern RawData Get_Shaders_Fusion_frag_spv();
+    extern RawData Get_Shaders_Fusion_vert_json();
+    extern RawData Get_Shaders_Fusion_frag_json();
+
     FApplication::FApplication()
     {
 
