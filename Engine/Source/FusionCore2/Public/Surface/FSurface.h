@@ -75,6 +75,8 @@ namespace CE
         Array<RHI::DrawPacket*> drawPackets;
         u32 drawPacketCount = 0;
 
+        StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> quadBuffersPerImage;
+
 		HashSet<Uuid> pendingLayoutRootIds;
 		Array<Ref<FWidget>> pendingLayoutRoots;
 
