@@ -7,8 +7,12 @@
 
 #define TRANSFORM_POSITION(pos2f) mul(mul(float4(pos2f, 0.0, 1.0), _LayerTransform), _ViewProjectionMatrix)
 
-Texture2D<float4> _Textures[] : SRG_PerScene(t0);
-SamplerState _Samplers[] : SRG_PerScene(s1);
+#if FRAGMENT
+
+SamplerState _Samplers[16] : SRG_PerScene(s0);
+Texture2D<float4> _Textures[] : SRG_PerScene(t1);
+
+#endif
 
 cbuffer _LayerData : SRG_PerSubPass(b0)
 {

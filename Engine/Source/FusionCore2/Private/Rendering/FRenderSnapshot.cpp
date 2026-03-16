@@ -2,6 +2,11 @@
 
 namespace CE
 {
+	FRenderSnapshot::FRenderSnapshot(RHI::DrawListTag drawListTag) : drawListTag(drawListTag)
+	{
+		
+	}
+
 	void FRenderSnapshot::Clear()
 	{
 		vertexArray.RemoveAll();
@@ -17,6 +22,8 @@ namespace CE
 		drawCmdSplits.RemoveAll();
 
 		renderPassArray.RemoveAll();
+
+		drawPacketCount = 0;
 	}
 
 	void FRenderSnapshot::BuildSnapshot(Ref<FLayer> layer)
@@ -44,7 +51,7 @@ namespace CE
 
 		u32 drawCmdSplitCount = layer->GetSplitPointCount();
 
-		SIZE_T cmdBase = drawCmdSplits[layerIndex].startIndex;
+		SIZE_T cmdBase = drawCmdSplits.Last().startIndex;
 		u32 prevSplit = 0;
 
 		for (u32 i = 0; i < drawCmdSplitCount; i++)
@@ -57,7 +64,7 @@ namespace CE
 				.layerIndex = (SIZE_T)layerIndex,
 				.drawCmdStartIndex = cmdBase + prevSplit,
 				.drawCmdCount = sp - prevSplit   // excludes the placeholder at sp
-				});
+			});
 
 			prevSplit = sp + 1; // +1 skips the placeholder cmd
 

@@ -26,6 +26,10 @@ namespace CE
 
 		void EmplaceFrameAttachments() override;
 
+        void EnqueueScopes() override;
+
+        void FlushDrawPackets(u32 frameIndex) override;
+
     protected:
 
 		void UpdateDrawableSize();
@@ -36,6 +40,8 @@ namespace CE
         void OnWindowMaximized(PlatformWindow* window) override;
 
 		PlatformWindow* platformWindow = nullptr;
+
+        RHI::SwapChain* swapChain = nullptr;
     };
     
 } // namespace CE

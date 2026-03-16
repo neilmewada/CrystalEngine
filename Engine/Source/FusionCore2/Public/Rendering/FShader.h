@@ -10,7 +10,9 @@ namespace CE
 
         FShader();
 
-        static Ref<FShader> Create(RawData vertexShader, RawData fragmentShader, Ref<Object> outer = nullptr);
+        static Ref<FShader> Create(Name shaderName, const ShaderReflection& reflection, RawData vertexShader, RawData fragmentShader, Ref<Object> outer = nullptr);
+
+        RHI::PipelineState* GetDefaultPipeline();
 
     protected:
 

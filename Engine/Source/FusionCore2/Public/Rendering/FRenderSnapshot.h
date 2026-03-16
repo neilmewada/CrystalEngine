@@ -8,9 +8,13 @@ namespace CE
 	{
 	public:
 
+		FRenderSnapshot(RHI::DrawListTag drawListTag);
+
 		void Clear();
 
 		void BuildSnapshot(Ref<FLayer> layer);
+
+		void FlushDrawPackets(u32 frameIndex);
 
 	private:
 
@@ -47,6 +51,11 @@ namespace CE
 		FSplitRangeArray drawCmdSplits;
 
 		FRenderPassArray renderPassArray;
+
+		RHI::DrawListTag drawListTag = RHI::DrawListTag::NullValue;
+
+		friend class FSurface;
+		friend class FNativeSurface;
 	};
 
 }

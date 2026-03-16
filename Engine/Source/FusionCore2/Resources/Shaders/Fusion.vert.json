@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_57" : {
+        "_50" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -52,7 +52,7 @@
                 }
             ]
         },
-        "_63" : {
+        "_52" : {
             "name" : "type._LayerData",
             "members" : [
                 {
@@ -104,44 +104,16 @@
             "location" : 2
         }
     ],
-    "separate_images" : [
-        {
-            "type" : "texture2D",
-            "name" : "_Textures",
-            "array" : [
-                0
-            ],
-            "array_size_is_literal" : [
-                true
-            ],
-            "set" : 0,
-            "binding" : 0
-        }
-    ],
-    "separate_samplers" : [
-        {
-            "type" : "sampler",
-            "name" : "_Samplers",
-            "array" : [
-                0
-            ],
-            "array_size_is_literal" : [
-                true
-            ],
-            "set" : 0,
-            "binding" : 1
-        }
-    ],
     "ubos" : [
         {
-            "type" : "_57",
+            "type" : "_50",
             "name" : "type._PerViewData",
             "block_size" : 224,
             "set" : 1,
             "binding" : 0
         },
         {
-            "type" : "_63",
+            "type" : "_52",
             "name" : "type._LayerData",
             "block_size" : 64,
             "set" : 3,

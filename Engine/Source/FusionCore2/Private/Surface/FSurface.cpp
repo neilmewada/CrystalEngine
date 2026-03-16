@@ -116,11 +116,6 @@ namespace CE
             viewConstantBuffers[i] = RHI::gDynamicRHI->CreateBuffer(desc);
         }
 
-        for (u32 i = 0; i < renderSnapshots.GetSize(); i++)
-        {
-            renderSnapshots[i] = new FRenderSnapshot();
-        }
-
         RHI::ShaderResourceGroupLayout viewSrgLayout;
         viewSrgLayout.srgType = RHI::SRGType::PerView;
         viewSrgLayout.TryAdd(
@@ -228,15 +223,17 @@ namespace CE
         renderSnapshots[frameIndex]->BuildSnapshot(layerTree->GetRootLayer());
     }
 
-    void FSurface::UpdateViewConstantBuffer(u32 frameIndex)
+    void FSurface::UpdateBuffers(u32 frameIndex)
     {
         ZoneScoped;
+
+        layerTree->UpdateLayerSrg(frameIndex);
 
         viewConstantBuffers[frameIndex]->UploadData(&viewConstants, sizeof(viewConstants));
 
         for (int i = 0; i < childrenSurfaces.GetSize(); i++)
         {
-            childrenSurfaces[i]->UpdateViewConstantBuffer(frameIndex);
+            childrenSurfaces[i]->UpdateBuffers(frameIndex);
         }
     }
 

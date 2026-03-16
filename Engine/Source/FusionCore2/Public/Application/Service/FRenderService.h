@@ -14,9 +14,15 @@ namespace CE
         
     public:
 
+        static constexpr u32 MaxTextureCount = 50'000;
+
+        const RHI::ShaderResourceGroupLayout& GetSubPassSrgLayout() const { return subPassSrgLayout; }
+
         // - Lifecycle -
 
         void OnStart() override;
+
+        void OnShutdown() override;
 
         void TickService(FServiceTickPhase tickPhase) override;
 
@@ -31,11 +37,50 @@ namespace CE
 
         virtual int GetCurrentFrameIndex() = 0;
 
+        Ref<FShader> GetMainShader() const { return mainShader; }
+
     protected:
 
         void UpdateDrawListMask(RHI::DrawListMask& drawListMask);
 
+        struct FSampleState
+        {
+            RHI::FilterMode filterMode;
+            RHI::SamplerAddressMode addressU, addressV;
+            RHI::SamplerBorderColor borderColor;
+
+            SIZE_T GetHash() const
+            {
+                SIZE_T hash = CE::GetHash(filterMode);
+                CombineHash(hash, addressU);
+                CombineHash(hash, addressV);
+
+                if (addressU == SamplerAddressMode::ClampToBorder || addressV == SamplerAddressMode::ClampToBorder)
+                {
+                    CombineHash(hash, borderColor);
+                }
+
+                return hash;
+            }
+
+            bool operator==(const FSampleState& other) const
+            {
+                return GetHash() == other.GetHash();
+            }
+
+            bool operator!=(const FSampleState& other) const
+            {
+                return !operator==(other);
+            }
+        };
+
         Ref<FShader> mainShader;
+
+        RHI::ShaderResourceGroup* sceneSrg = nullptr;
+
+        RHI::ShaderResourceGroupLayout subPassSrgLayout{};
+
+        HashMap<FSampleState, int> samplerIndicesByState;
     };
     
 } // namespace CE

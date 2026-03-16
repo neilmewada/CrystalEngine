@@ -100,7 +100,7 @@
                 true
             ],
             "set" : 0,
-            "binding" : 0
+            "binding" : 1
         }
     ],
     "separate_samplers" : [
@@ -108,13 +108,13 @@
             "type" : "sampler",
             "name" : "_Samplers",
             "array" : [
-                0
+                16
             ],
             "array_size_is_literal" : [
                 true
             ],
             "set" : 0,
-            "binding" : 1
+            "binding" : 0
         }
     ],
     "ubos" : [

@@ -20,6 +20,8 @@ namespace CE
 
         Ref<FLayer> GetRootLayer() { return rootLayer; }
 
+        void UpdateLayerSrg(u32 frameIndex);
+
     protected:
 
         void SyncWidget(FWidget* widget, FLayer* parentLayer, HashSet<Uuid>& visited);

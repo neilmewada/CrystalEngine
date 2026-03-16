@@ -131,10 +131,17 @@ namespace RenderingTests
             {
                 if (Ref<FSurface> surface = application->GetSurface(i))
                 {
-                    
+                    surface->EmplaceFrameAttachments();
                 }
             }
 
+            for (int i = 0; i < application->GetSurfaceCount(); i++)
+            {
+                if (Ref<FSurface> surface = application->GetSurface(i))
+                {
+                    surface->EnqueueScopes();
+                }
+            }
         }
         scheduler->EndFrameGraph();
 	}

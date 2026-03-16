@@ -54,7 +54,7 @@ namespace CE
 
         virtual void RenderFrame(u32 frameIndex);
 
-        virtual void UpdateViewConstantBuffer(u32 frameIndex);
+        virtual void UpdateBuffers(u32 frameIndex);
 
         virtual void OnSurfaceResize();
 
@@ -62,10 +62,18 @@ namespace CE
 
         virtual void EmplaceFrameAttachments() = 0;
 
+        virtual void EnqueueScopes() = 0;
+
+        virtual void FlushDrawPackets(u32 frameIndex) = 0;
+
     protected:
 
         RHI::DrawListTag drawListTag = 0;
 		RHI::ScopeId scopeId;
+        RHI::AttachmentID attachmentId;
+
+        Array<RHI::DrawPacket*> drawPackets;
+        u32 drawPacketCount = 0;
 
 		HashSet<Uuid> pendingLayoutRootIds;
 		Array<Ref<FWidget>> pendingLayoutRoots;

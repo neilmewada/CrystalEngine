@@ -7,6 +7,7 @@ namespace CE
     {
         m_MaxHeight = NumericLimits<f32>::Infinity();
         m_MaxWidth = NumericLimits<f32>::Infinity();
+        m_Opacity = 1.0f;
     }
 
     void FWidget::OnAfterConstruct()

@@ -51,18 +51,34 @@ namespace CE
         Super::Initialize();
 
 		scopeId = String::Format("NativeSurface_{}", platformWindow->GetWindowId());
+        attachmentId = scopeId;
 
         drawListTag = RPI::RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(scopeId);
+
+        for (u32 i = 0; i < renderSnapshots.GetSize(); i++)
+        {
+            renderSnapshots[i] = new FRenderSnapshot(drawListTag);
+        }
 
         UpdateDrawableSize();
 
 		PlatformApplication::Get()->AddMessageHandler(this);
 
         FApplication::Get()->AddSurface(this);
+
+        RHI::SwapChainDescriptor desc{};
+        desc.frameBufferOnly = true;
+        desc.imageCount = 2;
+        desc.useMailboxMode = true;
+        desc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
+
+        swapChain = gDynamicRHI->CreateSwapChain(platformWindow, desc);
     }
 
     void FNativeSurface::Shutdown()
     {
+        delete swapChain; swapChain = nullptr;
+
 		FApplication::Get()->RemoveSurface(this);
 
 		RPI::RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
@@ -76,9 +92,84 @@ namespace CE
 
         RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
 
+        if (swapChain)
+        {
+            attachmentDatabase.EmplaceFrameAttachment(attachmentId, swapChain);
+        }
+
         for (Ref<FSurface> childSurface : childrenSurfaces)
         {
 			childSurface->EmplaceFrameAttachments();
+        }
+    }
+
+    void FNativeSurface::EnqueueScopes()
+    {
+        auto scheduler = RHI::FrameScheduler::Get();
+
+        scheduler->BeginScope(scopeId);
+        {
+            RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+            swapChainAttachment.attachmentId = attachmentId;
+            swapChainAttachment.loadStoreAction.loadAction = AttachmentLoadAction::Clear;
+            swapChainAttachment.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+            swapChainAttachment.multisampleState.sampleCount = 1;
+            scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::ReadWrite);
+
+            scheduler->PresentSwapChain(swapChain);
+        }
+        scheduler->EndScope();
+
+        for (Ref<FSurface> childSurface : childrenSurfaces)
+        {
+            childSurface->EnqueueScopes();
+        }
+    }
+
+    void FNativeSurface::FlushDrawPackets(u32 frameIndex)
+    {
+        Ptr<FRenderSnapshot> snapshot = renderSnapshots[frameIndex];
+
+        drawPacketCount = 0;
+
+        for (int i = 0; i < snapshot->renderPassArray.GetCount(); i++)
+        {
+            const auto& renderPass = snapshot->renderPassArray[i];
+
+            SIZE_T layerIndex = renderPass.layerIndex;
+
+            DrawPacket* packet = nullptr;
+
+            if (drawPackets.GetSize() > drawPacketCount)
+            {
+                packet = drawPackets[drawPacketCount];
+                drawPacketCount++;
+            }
+            else
+            {
+                Ref<FShader> shader = FApplication::Get()->GetService<FRenderService>()->GetMainShader();
+
+                RHI::DrawPacketBuilder builder{};
+                builder.AddDrawItem({
+                    .stencilRef = 0,
+                    .drawItemTag = drawListTag,
+                    .indexBufferView = {},
+                    .vertexBufferViews = {},
+                    .uniqueShaderResourceGroups = {},
+                    .pipelineState = shader->GetDefaultPipeline(),
+                    .drawFilterMask = RHI::DrawFilterMask::ALL
+                });
+
+                packet = builder.Build();
+                drawPackets.Add(packet);
+
+                drawPacketCount++;
+            }
+        }
+
+        for (Ref<FSurface> childSurface : childrenSurfaces)
+        {
+            childSurface->FlushDrawPackets(frameIndex);
         }
     }
 
