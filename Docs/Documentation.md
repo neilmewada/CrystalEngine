@@ -306,7 +306,7 @@ Here's the high level overview of how it works:
 - You annotate types with macros: CLASS(), FIELD(), FUNCTION(), ENUM().
 - The AutoRTTI host tool scans source files at build time and generates .rtti.h files.
 - These generated headers contain ClassType metadata, serialization glue, and property tables.
-- An object cannot be serialized directly to disk. A `CE::Bundle`, a collection of `CE::Object`s, is the one that can be serialized/deserialized to disk.
+- An object by itself cannot be serialized directly to disk. A `CE::Bundle`, a collection of `CE::Object`s, is the one that can be serialized/deserialized to disk. See [BundleFileFormatSpec3](./BundleFileFormatSpec3.md) for Bundle file format spec.
 - The DetailsView Property Editor is driven by reflection.
 
 Here is an example of how to reflect fields and functions in a class:
