@@ -23,8 +23,8 @@ namespace RenderingTests
 
 			Child(
 				FAssignNew(FVerticalStack, vstack)
-				.ContentHAlign(HAlign::Fill)
-				.HAlign(HAlign::Center)
+				.ContentHAlign(HAlign::Auto)
+				.HAlign(HAlign::Fill)
 				.VAlign(VAlign::Fill)
 				.Enabled(true)
 				.Visible(true)
@@ -58,7 +58,7 @@ namespace RenderingTests
 					.Border(FPen(Colors::Green, 1.0f))
 					.Shape(FRoundedRectangle(5.0f))
 					.Height(30)
-					.Width(150),
+					.HAlign(HAlign::Fill),
 
 					FNew(FWidget)
 					.FillRatio(1.0f)
