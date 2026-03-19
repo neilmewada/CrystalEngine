@@ -32,9 +32,6 @@ namespace CE::RHI
 	protected:
 		FrameGraphExecuter() = default;
 
-	private:
-
-		virtual bool ExecuteInternal(const FrameGraphExecuteRequest& executeRequest) = 0;
 
 	};
 

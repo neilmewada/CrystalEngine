@@ -76,15 +76,6 @@ namespace CE::RHI
         compiler->Compile(compileRequest);
     }
 
-	void FrameScheduler::Execute()
-	{
-		FrameGraphExecuteRequest executeRequest{};
-		executeRequest.frameGraph = frameGraph;
-		executeRequest.compiler = compiler;
-
-		executer->Execute(executeRequest);
-	}
-
 	u32 FrameScheduler::BeginExecution()
 	{
 		FrameGraphExecuteRequest executeRequest{};

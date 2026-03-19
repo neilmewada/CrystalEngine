@@ -65,8 +65,6 @@ namespace CE::Vulkan
 	{
 		ZoneScoped;
 
-		//vkDeviceWaitIdle(device->GetHandle());
-
 		// Queue allocation logic...
 
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;

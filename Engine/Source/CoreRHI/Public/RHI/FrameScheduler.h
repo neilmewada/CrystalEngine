@@ -39,8 +39,6 @@ namespace CE::RHI
 		//! @brief Compile the transient attachments, and everything.
 		void Compile();
 
-		void Execute();
-
 		u32 BeginExecution();
 
 		void EndExecution();
