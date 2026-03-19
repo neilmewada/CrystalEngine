@@ -90,6 +90,8 @@ namespace CE
 
     void FNativeSurface::EmplaceFrameAttachments()
     {
+        ZoneScoped;
+
 		auto scheduler = RHI::FrameScheduler::Get();
 
         RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
@@ -107,6 +109,8 @@ namespace CE
 
     void FNativeSurface::EnqueueScopes()
     {
+        ZoneScoped;
+
         auto scheduler = RHI::FrameScheduler::Get();
 
         scheduler->BeginScope(scopeId);
@@ -130,6 +134,8 @@ namespace CE
 
     void FNativeSurface::UpdateDrawableSize()
     {
+        ZoneScoped;
+
         dpiScale = platformWindow->GetDpiScaling();
 		if (dpiScale <= 0)
             return;

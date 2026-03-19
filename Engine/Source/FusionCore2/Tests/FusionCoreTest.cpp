@@ -25,6 +25,8 @@ namespace RenderingTests
 
 	void FusionRenderService::RenderPrepare()
 	{
+        ZoneScoped;
+
         if (IsEngineRequestingExit())
             return;
 
@@ -41,6 +43,8 @@ namespace RenderingTests
 
 	bool FusionRenderService::BeginRender()
 	{
+        ZoneScoped;
+
         if (IsEngineRequestingExit())
             return false;
 
@@ -61,6 +65,8 @@ namespace RenderingTests
 
 	void FusionRenderService::EndRender()
 	{
+        ZoneScoped;
+
         auto scheduler = RHI::FrameScheduler::Get();
 
         auto application = this->application.Lock();
@@ -128,6 +134,8 @@ namespace RenderingTests
         if (!surface)
             return;
 
+        ZoneScoped;
+
         auto scheduler = RHI::FrameScheduler::Get();
 
         RHI::DrawList& surfaceDrawList = drawList.GetDrawListForTag(surface->GetDrawListTag());
@@ -142,6 +150,8 @@ namespace RenderingTests
 
 	void FusionRenderService::BuildFrameGraph()
 	{
+        ZoneScoped;
+
         rebuildFrameGraph = false;
         recompileFrameGraph = true;
 

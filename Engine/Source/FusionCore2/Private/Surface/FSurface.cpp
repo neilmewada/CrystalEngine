@@ -361,6 +361,8 @@ namespace CE
 
     void FSurface::FlushDrawPackets(RHI::DrawListContext& drawList, u32 frameIndex)
     {
+        ZoneScoped;
+
         Ptr<FRenderSnapshot> snapshot = renderSnapshots[frameIndex];
 
         drawPacketCount = 0;
@@ -439,6 +441,8 @@ namespace CE
 
     void FSurface::UpdateLayerSrgs()
     {
+        ZoneScoped;
+
         auto layerSrgLayout = FApplication::Get()->GetService<FRenderService>()->GetSubPassSrgLayout();
 
         for (int i = 0; i < layerMatricesBuffers.GetElementCount(); i++)
@@ -466,6 +470,8 @@ namespace CE
 
     void FSurface::UpdateDrawItemSrgs(u32 frameIndex)
     {
+        ZoneScoped;
+
         auto objectSrgLayout = FApplication::Get()->GetService<FRenderService>()->GetObjectSrgLayout();
 
         Ptr<FRenderSnapshot> renderSnapshot = renderSnapshots[frameIndex];

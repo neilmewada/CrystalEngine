@@ -23,11 +23,13 @@ namespace RenderingTests
 
 			Child(
 				FAssignNew(FVerticalStack, vstack)
-				.ContentHAlign(HAlign::Auto)
+				.ContentHAlign(HAlign::Fill)
 				.HAlign(HAlign::Fill)
 				.VAlign(VAlign::Fill)
 				.Enabled(true)
 				.Visible(true)
+				.Padding(FMargin(5, 5, 5, 5))
+				.Spacing(5)
 				.Name("RootStack")
 				(
 					FNew(FWidget)
@@ -58,7 +60,20 @@ namespace RenderingTests
 					.Border(FPen(Colors::Green, 1.0f))
 					.Shape(FRoundedRectangle(5.0f))
 					.Height(30)
-					.HAlign(HAlign::Fill),
+					.Child(
+						FNew(FDecoratedWidget)
+						.Shape(FCircle())
+						.Background(Colors::Blue)
+						.Width(25)
+						.Height(25)
+						.HAlign(HAlign::Center)
+						.VAlign(VAlign::Center)
+					),
+
+					FNew(FDecoratedWidget)
+					.Background(Colors::Yellow)
+					.Shape(FRectangle())
+					.Height(30),
 
 					FNew(FWidget)
 					.FillRatio(1.0f)
