@@ -52,11 +52,6 @@ namespace CE
 		return nullptr;
 	}
 
-	void FLayerTree::UpdateLayerSrg(u32 frameIndex)
-	{
-		rootLayer->UpdateLayerSrg(frameIndex);
-	}
-
 	void FLayerTree::SyncWidget(FWidget* widget, FLayer* parentLayer, HashSet<Uuid>& visited)
 	{
 		if (!widget)

@@ -112,17 +112,7 @@ namespace CE
         {
             if (BeginRender())
             {
-                for (int i = 0; i < application->GetSurfaceCount(); i++)
-                {
-                    application->GetSurface(i)->UpdateBuffers(GetCurrentFrameIndex());
-                }
-
-                for (int i = 0; i < application->GetSurfaceCount(); i++)
-                {
-                    application->GetSurface(i)->FlushDrawPackets();
-                }
-
-                EndRender();
+            	EndRender();
             }
         }
     }

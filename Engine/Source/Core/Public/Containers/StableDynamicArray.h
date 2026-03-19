@@ -235,6 +235,11 @@ namespace CE
             return count;
         }
 
+        SIZE_T GetByteSize() const
+        {
+            return count * sizeof(T);
+        }
+
         T* GetData() const
         {
             return data;

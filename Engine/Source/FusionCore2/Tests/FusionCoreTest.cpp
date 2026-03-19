@@ -63,6 +63,10 @@ namespace RenderingTests
 	{
         auto scheduler = RHI::FrameScheduler::Get();
 
+        auto application = this->application.Lock();
+        if (!application)
+            return;
+
         // ---------------------------------------------------------
         // - Enqueue draw packets to views
 
@@ -102,14 +106,38 @@ namespace RenderingTests
         {
             if (Ref<FSurface> surface = application->GetSurface(i))
             {
-                // TODO: Implement below method
-                //surface->FlushDrawPackets(drawList, curImageIndex);
+                surface->FlushDrawPackets(drawList, curImageIndex);
+            }
+        }
+
+        for (int i = 0; i < application->GetSurfaceCount(); i++)
+        {
+            if (Ref<FSurface> surface = application->GetSurface(i))
+            {
+                SetScopeDrawPackets(surface.Get());
             }
         }
 
         drawList.Finalize();
 
         scheduler->EndExecution();
+	}
+
+	void FusionRenderService::SetScopeDrawPackets(FSurface* surface)
+	{
+        if (!surface)
+            return;
+
+        auto scheduler = RHI::FrameScheduler::Get();
+
+        RHI::DrawList& surfaceDrawList = drawList.GetDrawListForTag(surface->GetDrawListTag());
+
+        scheduler->SetScopeDrawList(surface->GetScopeId(), &surfaceDrawList);
+
+		for (int i = 0; i < surface->GetChildSurfaceCount(); ++i)
+		{
+            SetScopeDrawPackets(surface->GetChildSurface(i).Get());
+		}
 	}
 
 	void FusionRenderService::BuildFrameGraph()

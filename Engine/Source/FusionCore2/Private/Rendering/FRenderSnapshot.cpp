@@ -9,6 +9,8 @@ namespace CE
 
 	void FRenderSnapshot::Clear()
 	{
+		ZoneScoped;
+
 		vertexArray.RemoveAll();
 		vertexSplits.RemoveAll();
 
@@ -23,11 +25,13 @@ namespace CE
 
 		renderPassArray.RemoveAll();
 
-		drawPacketCount = 0;
+		matricesPerLayer.RemoveAll();
 	}
 
 	void FRenderSnapshot::BuildSnapshot(Ref<FLayer> layer)
 	{
+		ZoneScoped;
+
 		Clear();
 
 		DoLayer(layer, 0);
@@ -35,6 +39,8 @@ namespace CE
 
 	void FRenderSnapshot::DoLayer(Ref<FLayer> layer, int layerIndex)
 	{
+		ZoneScoped;
+
 		FUIDrawList* drawList = layer->GetDrawList();
 		
 		vertexSplits.Insert({ .startIndex = vertexArray.GetCount(), .count = drawList->vertexArray.GetCount() });
@@ -53,6 +59,9 @@ namespace CE
 
 		SIZE_T cmdBase = drawCmdSplits.Last().startIndex;
 		u32 prevSplit = 0;
+
+		Matrix4x4 layerGlobalMatrix = layer->GetGlobalTransform().ToMatrix4x4();
+		matricesPerLayer.Insert(layerGlobalMatrix);
 
 		for (u32 i = 0; i < drawCmdSplitCount; i++)
 		{

@@ -28,8 +28,6 @@ namespace CE
 
         void EnqueueScopes() override;
 
-        void FlushDrawPackets(u32 frameIndex) override;
-
     protected:
 
 		void UpdateDrawableSize();

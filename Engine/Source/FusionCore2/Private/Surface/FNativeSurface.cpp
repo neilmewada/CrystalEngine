@@ -77,6 +77,8 @@ namespace CE
 
     void FNativeSurface::Shutdown()
     {
+        Super::Shutdown();
+
         delete swapChain; swapChain = nullptr;
 
 		FApplication::Get()->RemoveSurface(this);
@@ -123,53 +125,6 @@ namespace CE
         for (Ref<FSurface> childSurface : childrenSurfaces)
         {
             childSurface->EnqueueScopes();
-        }
-    }
-
-    void FNativeSurface::FlushDrawPackets(u32 frameIndex)
-    {
-        Ptr<FRenderSnapshot> snapshot = renderSnapshots[frameIndex];
-
-        drawPacketCount = 0;
-
-        for (int i = 0; i < snapshot->renderPassArray.GetCount(); i++)
-        {
-            const auto& renderPass = snapshot->renderPassArray[i];
-
-            SIZE_T layerIndex = renderPass.layerIndex;
-
-            DrawPacket* packet = nullptr;
-
-            if (drawPackets.GetSize() > drawPacketCount)
-            {
-                packet = drawPackets[drawPacketCount];
-                drawPacketCount++;
-            }
-            else
-            {
-                Ref<FShader> shader = FApplication::Get()->GetService<FRenderService>()->GetMainShader();
-
-                RHI::DrawPacketBuilder builder{};
-                builder.AddDrawItem({
-                    .stencilRef = 0,
-                    .drawItemTag = drawListTag,
-                    .indexBufferView = {},
-                    .vertexBufferViews = {},
-                    .uniqueShaderResourceGroups = {},
-                    .pipelineState = shader->GetDefaultPipeline(),
-                    .drawFilterMask = RHI::DrawFilterMask::ALL
-                });
-
-                packet = builder.Build();
-                drawPackets.Add(packet);
-
-                drawPacketCount++;
-            }
-        }
-
-        for (Ref<FSurface> childSurface : childrenSurfaces)
-        {
-            childSurface->FlushDrawPackets(frameIndex);
         }
     }
 

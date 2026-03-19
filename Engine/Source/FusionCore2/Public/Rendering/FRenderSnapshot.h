@@ -37,6 +37,7 @@ namespace CE
 
 		using FSplitRangeArray = StableDynamicArray<FSplitRange, 64, false>;
 		using FRenderPassArray = StableDynamicArray<FRenderPass, 32, false>;
+		using FMatrixArray = StableDynamicArray<Matrix4x4, 64, false>;
 
 		FUIVertexArray vertexArray;
 		FSplitRangeArray vertexSplits;
@@ -53,6 +54,8 @@ namespace CE
 		FRenderPassArray renderPassArray;
 
 		RHI::DrawListTag drawListTag = RHI::DrawListTag::NullValue;
+
+		FMatrixArray matricesPerLayer;
 
 		friend class FSurface;
 		friend class FNativeSurface;

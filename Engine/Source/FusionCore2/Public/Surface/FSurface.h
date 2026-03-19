@@ -16,9 +16,17 @@ namespace CE
 
     public: // - Public API -
 
+        RHI::ScopeId GetScopeId() const { return scopeId; }
+
+        RHI::DrawListTag GetDrawListTag() const { return drawListTag; }
+
         void GetDrawListMask(RHI::DrawListMask& drawListMask);
 
 		void AddChildSurface(Ref<FSurface> childSurface);
+
+        u32 GetChildSurfaceCount() const { return childrenSurfaces.GetSize(); }
+        
+        Ref<FSurface> GetChildSurface(u32 index) const { return childrenSurfaces[index]; }
 
         bool IsNativeSurface();
 
@@ -42,19 +50,17 @@ namespace CE
 
         // - Paint -
 
-    public: 
+    public:
     	
     	// - Lifecycle -
 
         virtual void Initialize();
 
-        virtual void Shutdown() = 0;
+        virtual void Shutdown();
 
         virtual void TickSurface(f32 deltaTime);
 
         virtual void RenderFrame(u32 frameIndex);
-
-        virtual void UpdateBuffers(u32 frameIndex);
 
         virtual void OnSurfaceResize();
 
@@ -64,9 +70,13 @@ namespace CE
 
         virtual void EnqueueScopes() = 0;
 
-        virtual void FlushDrawPackets(u32 frameIndex) = 0;
+        virtual void FlushDrawPackets(RHI::DrawListContext& drawList, u32 frameIndex);
 
     protected:
+
+        // - Layer Srg -
+
+        void UpdateLayerSrgs();
 
         RHI::DrawListTag drawListTag = 0;
 		RHI::ScopeId scopeId;
@@ -74,8 +84,6 @@ namespace CE
 
         Array<RHI::DrawPacket*> drawPackets;
         u32 drawPacketCount = 0;
-
-        StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> quadBuffersPerImage;
 
 		HashSet<Uuid> pendingLayoutRootIds;
 		Array<Ref<FWidget>> pendingLayoutRoots;
@@ -89,10 +97,22 @@ namespace CE
         // - View Constants -
         RPI::PerViewConstants viewConstants{};
         StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> viewConstantBuffers;
-        RHI::ShaderResourceGroup* viewSrg = nullptr;
 
         // - Render Data -
         StaticArray<Ptr<FRenderSnapshot>, RHI::Limits::MaxSwapChainImageCount> renderSnapshots;
+
+        // - GPU Resources -
+        StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> quadBuffersPerImage;
+        StaticArray<RHI::VertexBufferView, RHI::Limits::MaxSwapChainImageCount> vertexBufferViewPerImage;
+        StaticArray<RHI::IndexBufferView, RHI::Limits::MaxSwapChainImageCount> indexBufferViewPerImage;
+        DynamicMultiBuffer<Matrix4x4> layerMatricesBuffers;
+
+        // - SRGs -
+        Array<RHI::ShaderResourceGroup*> layerSrgs{};
+        RHI::ShaderResourceGroup* viewSrg = nullptr;
+
+        FIELD()
+        f32 quadBufferGrowRatio = 0.2f;
 
         FIELD()
 		f32 dpiScale = 1.0f;

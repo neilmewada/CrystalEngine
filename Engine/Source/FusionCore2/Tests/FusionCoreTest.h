@@ -24,7 +24,7 @@ namespace RenderingTests
 			Child(
 				FAssignNew(FVerticalStack, vstack)
 				.ContentHAlign(HAlign::Fill)
-				.HAlign(HAlign::Fill)
+				.HAlign(HAlign::Center)
 				.VAlign(VAlign::Fill)
 				.Enabled(true)
 				.Visible(true)
@@ -55,7 +55,8 @@ namespace RenderingTests
 
 					FNew(FDecoratedWidget)
 					.Background(Colors::Red)
-					.Height(30),
+					.Height(30)
+					.Width(150),
 
 					FNew(FWidget)
 					.FillRatio(1.0f)
@@ -85,6 +86,8 @@ namespace RenderingTests
 		bool BeginRender() override;
 
 		void EndRender() override;
+
+		void SetScopeDrawPackets(FSurface* surface);
 
 		int GetCurrentFrameIndex() override { return curImageIndex; }
 

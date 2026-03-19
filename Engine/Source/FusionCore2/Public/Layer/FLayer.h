@@ -34,19 +34,9 @@ namespace CE
 
         u32 GetSplitPoint(u32 index) { return splitPoints[index]; }
 
-        RHI::ShaderResourceGroup* GetLayerSrg() const { return layerSrg; }
-
-        void UpdateLayerSrg(u32 frameIndex);
-
-    fusioncore_internal:
-
-        void SetLayerDirty(bool value);
+        const FAffineTransform& GetGlobalTransform() const { return cachedGlobalTransform; }
 
     protected:
-
-        void OnAfterConstruct() override;
-
-        void OnBeforeDestroy() override;
 
         void DoPaint();
 
@@ -70,9 +60,6 @@ namespace CE
         bool isLayerDirty = false;
         FUIDrawList drawList;
         Array<u32> splitPoints;
-
-        RHI::ShaderResourceGroup* layerSrg = nullptr;
-        StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> buffersPerImage;
 
         friend class FLayerTree;
         friend class FPainter;

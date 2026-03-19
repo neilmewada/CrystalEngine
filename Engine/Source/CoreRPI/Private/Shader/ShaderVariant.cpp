@@ -69,6 +69,7 @@ namespace CE::RPI
 		}
 		
 		pipelineDesc.srgLayouts = desc.reflectionInfo.srgLayouts;
+
 		for (auto& srgLayout : pipelineDesc.srgLayouts)
 		{
 			if (srgLayout.srgType != RHI::SRGType::PerScene &&
@@ -79,6 +80,7 @@ namespace CE::RPI
 
 			for (auto& variable : srgLayout.variables)
 			{
+				// FIXME: Need a fix: This forces us the match the exact shader stage for PerScene and PerView SRGs being bound.
 				variable.shaderStages |= RHI::ShaderStage::Compute;
 			}
 		}

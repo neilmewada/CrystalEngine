@@ -34,63 +34,18 @@ namespace CE
 		{
 			DoPaint();
 		}
+		else
+		{
+			for (auto layer : children)
+			{
+				layer->DoPaintIfNeeded();
+			}
+		}
 	}
 
 	bool FLayer::IsLayerDirty()
 	{
 		return isLayerDirty;
-	}
-
-	void FLayer::UpdateLayerSrg(u32 frameIndex)
-	{
-		Matrix4x4 transform = cachedGlobalTransform.ToMatrix4x4();
-
-		buffersPerImage[frameIndex]->UploadData(&transform, sizeof(transform));
-
-		for (int i = 0; i < children.GetSize(); i++)
-		{
-			children[i]->UpdateLayerSrg(frameIndex);
-		}
-	}
-
-	void FLayer::SetLayerDirty(bool value)
-	{
-		isLayerDirty = false;
-	}
-
-	void FLayer::OnAfterConstruct()
-	{
-		Super::OnAfterConstruct();
-
-		if (IsDefaultInstance())
-			return;
-
-		if (Ref<FRenderService> renderService = FApplication::Get()->GetService<FRenderService>())
-		{
-			layerSrg = gDynamicRHI->CreateShaderResourceGroup({ "Layer SRG", renderService->GetSubPassSrgLayout() });
-
-			for (int i = 0; i < buffersPerImage.GetSize(); i++)
-			{
-				buffersPerImage[i] = gDynamicRHI->CreateBuffer({ "LayerBuffer", sizeof(Matrix4x4), sizeof(Matrix4x4),
-					RHI::BufferBindFlags::ConstantBuffer, RHI::MemoryHeapType::Upload });
-
-				layerSrg->Bind(i, "_LayerData", buffersPerImage[i]);
-			}
-
-			layerSrg->FlushBindings();
-		}
-	}
-
-	void FLayer::OnBeforeDestroy()
-	{
-		Super::OnBeforeDestroy();
-
-		for (int i = 0; i < buffersPerImage.GetSize(); i++)
-		{
-			delete buffersPerImage[i]; buffersPerImage[i] = nullptr;
-		}
-
-		delete layerSrg; layerSrg = nullptr;
 	}
 
 	void FLayer::DoPaint()
@@ -105,12 +60,6 @@ namespace CE
 			DoPaint(widget.Get(), painter);
 
 			drawList.Finalize();
-		}
-
-		// Force re-paint of all children layers
-		for (auto child : children)
-		{
-			child->DoPaint();
 		}
 	}
 

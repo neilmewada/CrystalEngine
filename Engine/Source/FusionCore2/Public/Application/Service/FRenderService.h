@@ -81,6 +81,7 @@ namespace CE
         RHI::ShaderResourceGroupLayout subPassSrgLayout{};
 
         HashMap<FSampleState, int> samplerIndicesByState;
+
     };
     
 } // namespace CE
