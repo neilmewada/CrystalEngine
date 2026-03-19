@@ -133,6 +133,7 @@ namespace CE
         );
 
         layerMatricesBuffers.Init("Layer Matrices", 4, RHI::BufferBindFlags::ConstantBuffer);
+        drawItemBuffers.Init("Draw Items", 64, RHI::BufferBindFlags::StructuredBuffer);
 
         auto layerSrgLayout = FApplication::Get()->GetService<FRenderService>()->GetSubPassSrgLayout();
 
@@ -159,6 +160,12 @@ namespace CE
             delete srg;
         }
         layerSrgs.Clear();
+
+        for (auto srg : drawItemSrgs)
+        {
+            delete srg;
+        }
+        drawItemSrgs.Clear();
 
         for (RHI::DrawPacket* drawPacket : drawPackets)
         {
@@ -311,6 +318,26 @@ namespace CE
         }
         layerMatricesBuffers.GetBuffer(frameIndex)->Unmap();
 
+        // - Draw Items buffer -
+
+        const u64 drawItemCount = renderSnapshot->drawItemArray.GetCount();
+
+        if (drawItemBuffers.GetElementCount() < drawItemCount)
+        {
+            drawItemBuffers.GrowToFit(drawItemCount);
+        }
+
+        if (drawItemCount > 0)
+        {
+            drawItemBuffers.GetBuffer(frameIndex)->Map(0, drawItemCount * sizeof(FUIDrawItem), (void**)&data);
+            {
+                memcpy(data, renderSnapshot->drawItemArray.GetData(), drawItemCount * sizeof(FUIDrawItem));
+            }
+            drawItemBuffers.GetBuffer(frameIndex)->Unmap();
+        }
+
+        UpdateDrawItemSrgs(frameIndex);
+
         // - View Constants -
 
         viewConstants.pixelResolution = drawableSize.ToVec2();
@@ -349,6 +376,9 @@ namespace CE
                 int drawCmdIdx = renderPass.drawCmdStartIndex + j;
                 FUIDrawCmd drawCmd = snapshot->drawCmdArray[drawCmdIdx];
 
+                u32 globalVertexOffset = snapshot->vertexSplits[layerIndex].startIndex + drawCmd.vertexOffset;
+                u32 globalIndexOffset = snapshot->indexSplits[layerIndex].startIndex + drawCmd.indexOffset;
+
                 DrawPacket* packet = nullptr;
 
                 if (drawPackets.GetSize() > drawPacketCount)
@@ -362,10 +392,11 @@ namespace CE
 
                     packet->shaderResourceGroups[0] = layerSrgs[layerIndex];
                     packet->shaderResourceGroups[1] = viewSrg;
+                    packet->shaderResourceGroups[2] = drawItemSrgs[layerIndex];
 
                     drawItem.pipelineState = shader->GetDefaultPipeline();
 
-                    drawItem.arguments = RHI::DrawIndexedArguments(1, 0, drawCmd.vertexOffset, drawCmd.indexCount, drawCmd.indexOffset);
+                    drawItem.arguments = RHI::DrawIndexedArguments(1, 0, globalVertexOffset, drawCmd.indexCount, globalIndexOffset);
 
                     drawPacketCount++;
                 }
@@ -386,8 +417,9 @@ namespace CE
 
                     builder.AddShaderResourceGroup(layerSrgs[layerIndex]);
                     builder.AddShaderResourceGroup(viewSrg);
+                    builder.AddShaderResourceGroup(drawItemSrgs[layerIndex]);
 
-                    builder.SetDrawArguments(RHI::DrawIndexedArguments(1, 0, drawCmd.vertexOffset, drawCmd.indexCount, drawCmd.indexOffset));
+                    builder.SetDrawArguments(RHI::DrawIndexedArguments(1, 0, globalVertexOffset, drawCmd.indexCount, globalIndexOffset));
 
                     packet = builder.Build();
                     drawPackets.Add(packet);
@@ -428,6 +460,35 @@ namespace CE
                 srg->Bind(j, "_LayerData", RHI::BufferView(layerMatricesBuffers.GetBuffer(j), i * sizeof(Matrix4x4), sizeof(Matrix4x4)));
             }
 
+            srg->FlushBindings();
+        }
+    }
+
+    void FSurface::UpdateDrawItemSrgs(u32 frameIndex)
+    {
+        auto objectSrgLayout = FApplication::Get()->GetService<FRenderService>()->GetObjectSrgLayout();
+
+        Ptr<FRenderSnapshot> renderSnapshot = renderSnapshots[frameIndex];
+
+        for (int i = 0; i < (int)renderSnapshot->drawItemSplits.GetCount(); i++)
+        {
+            RHI::ShaderResourceGroup* srg = nullptr;
+
+            if (i < drawItemSrgs.GetSize())
+            {
+                srg = drawItemSrgs[i];
+            }
+            else
+            {
+                srg = gDynamicRHI->CreateShaderResourceGroup({ "DrawItemSrg", objectSrgLayout });
+                drawItemSrgs.Add(srg);
+            }
+
+            const auto& split = renderSnapshot->drawItemSplits[i];
+            const u64 byteOffset = split.startIndex * sizeof(FUIDrawItem);
+            const u64 byteSize = Math::Max(split.count, (SIZE_T)1) * sizeof(FUIDrawItem);
+
+            srg->Bind(frameIndex, "_DrawItems", RHI::BufferView(drawItemBuffers.GetBuffer(frameIndex), byteOffset, byteSize));
             srg->FlushBindings();
         }
     }

@@ -78,6 +78,8 @@ namespace CE
 
         void UpdateLayerSrgs();
 
+        void UpdateDrawItemSrgs(u32 frameIndex);
+
         RHI::DrawListTag drawListTag = 0;
 		RHI::ScopeId scopeId;
         RHI::AttachmentID attachmentId;
@@ -106,9 +108,11 @@ namespace CE
         StaticArray<RHI::VertexBufferView, RHI::Limits::MaxSwapChainImageCount> vertexBufferViewPerImage;
         StaticArray<RHI::IndexBufferView, RHI::Limits::MaxSwapChainImageCount> indexBufferViewPerImage;
         DynamicMultiBuffer<Matrix4x4> layerMatricesBuffers;
+        DynamicMultiBuffer<FUIDrawItem> drawItemBuffers;
 
         // - SRGs -
         Array<RHI::ShaderResourceGroup*> layerSrgs{};
+        Array<RHI::ShaderResourceGroup*> drawItemSrgs{};
         RHI::ShaderResourceGroup* viewSrg = nullptr;
 
         FIELD()

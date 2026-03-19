@@ -54,10 +54,15 @@ namespace CE
 	};
 
 	STRUCT()
-	struct CORESHADER_API ShaderTagEntry
+	struct CORESHADER_API ShaderTagEntry final
 	{
 		CE_STRUCT(ShaderTagEntry)
 	public:
+
+		ShaderTagEntry() = default;
+
+		ShaderTagEntry(Name key, const String& value) : key(key), value(value)
+		{}
 
 		FIELD()
 		Name key{};
@@ -67,7 +72,7 @@ namespace CE
 	};
 
 	STRUCT()
-	struct CORESHADER_API SubShaderPassEntry
+	struct CORESHADER_API SubShaderPassEntry final
 	{
 		CE_STRUCT(SubShaderPassEntry)
 	public:
@@ -110,7 +115,7 @@ namespace CE
 	};
 
 	STRUCT()
-	struct CORESHADER_API SubShaderEntry
+	struct CORESHADER_API SubShaderEntry final
 	{
 		CE_STRUCT(SubShaderEntry)
 	public:
@@ -138,7 +143,7 @@ namespace CE
 	};
 
 	STRUCT()
-	struct CORESHADER_API ShaderPreprocessData
+	struct CORESHADER_API ShaderPreprocessData final
 	{
 		CE_STRUCT(ShaderPreprocessData)
 	public:

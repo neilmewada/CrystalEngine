@@ -23,8 +23,6 @@ namespace CE
         painter.SetPen(m_Border);
 
         painter.FillAndStrokeShape(Rect(0, 0, layoutSize.width, layoutSize.height), m_Shape);
-
-        String::IsAlphabet('a');
     }
 }
 

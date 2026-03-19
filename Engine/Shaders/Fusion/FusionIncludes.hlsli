@@ -55,7 +55,7 @@ struct FUIDrawItem
 	float data[32];
 };
 
-// StructuredBuffer<FUIDrawItem> _DrawItems : SRG_PerObject(t0);
+StructuredBuffer<FUIDrawItem> _DrawItems : SRG_PerObject(t0);
 
 struct VSInput
 {

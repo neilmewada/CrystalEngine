@@ -18,6 +18,8 @@ namespace CE
 
         const RHI::ShaderResourceGroupLayout& GetSubPassSrgLayout() const { return subPassSrgLayout; }
 
+        const RHI::ShaderResourceGroupLayout& GetObjectSrgLayout() const { return objectSrgLayout; }
+
         // - Lifecycle -
 
         void OnStart() override;
@@ -79,6 +81,8 @@ namespace CE
         RHI::ShaderResourceGroup* sceneSrg = nullptr;
 
         RHI::ShaderResourceGroupLayout subPassSrgLayout{};
+
+        RHI::ShaderResourceGroupLayout objectSrgLayout{};
 
         HashMap<FSampleState, int> samplerIndicesByState;
 

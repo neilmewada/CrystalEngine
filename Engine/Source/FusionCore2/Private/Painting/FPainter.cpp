@@ -78,7 +78,7 @@ namespace CE
 	{
 		drawList = &layer->drawList;
 
-		drawList->fringeScale = 1.0f / layer->GetDpiScale();
+		drawList->fringeScale = 1.0f;// / layer->GetDpiScale();
 
 		for (int i = 0; i < ArcFastTableSize; i++)
 		{

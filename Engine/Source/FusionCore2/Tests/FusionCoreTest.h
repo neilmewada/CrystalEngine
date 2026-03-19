@@ -33,7 +33,7 @@ namespace RenderingTests
 					FNew(FWidget)
 					.Height(25),
 
-					FNew(FHorizontalStack, hstack)
+					FAssignNew(FHorizontalStack, hstack)
 					.ContentHAlign(HAlign::Center)
 					.ContentVAlign(VAlign::Center)
 					(
@@ -55,6 +55,8 @@ namespace RenderingTests
 
 					FNew(FDecoratedWidget)
 					.Background(Colors::Red)
+					.Border(FPen(Colors::Green, 1.0f))
+					.Shape(FRoundedRectangle(5.0f))
 					.Height(30)
 					.Width(150),
 

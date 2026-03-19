@@ -83,6 +83,20 @@ namespace CE
 
         this->subPassSrgLayout = subPassSrgLayout;
 
+        reflection.srgLayouts.Add({});
+        auto& objectSrgLayout = reflection.srgLayouts.GetLast();
+        objectSrgLayout.srgType = SRGType::PerObject;
+        objectSrgLayout.TryAdd(
+            RHI::SRGVariableDescriptor(
+                "_DrawItems",
+                0,
+                RHI::ShaderResourceType::StructuredBuffer,
+                RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment
+            )
+        );
+
+        this->objectSrgLayout = objectSrgLayout;
+
         mainShader = FShader::Create("FusionShader", reflection, vertexShader, fragmentShader, this);
     }
 

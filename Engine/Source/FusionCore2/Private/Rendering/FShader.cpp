@@ -38,6 +38,10 @@ namespace CE
 
 		desc.reflectionInfo = reflection;
 
+		desc.tags.Add(ShaderTagEntry("ZWrite", "Off"));
+		desc.tags.Add(ShaderTagEntry("ZTest", "Off"));
+		desc.tags.Add(ShaderTagEntry("Cull", "Off"));
+
 		Ref<FShader> shader = CreateObject<FShader>(outer.Get(), "Shader");
 		shader->shader = new RPI::Shader();
 

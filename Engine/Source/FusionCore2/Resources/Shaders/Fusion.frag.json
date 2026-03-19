@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_52" : {
+        "_66" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -52,7 +52,7 @@
                 }
             ]
         },
-        "_58" : {
+        "_72" : {
             "name" : "type._LayerData",
             "members" : [
                 {
@@ -61,6 +61,80 @@
                     "offset" : 0,
                     "matrix_stride" : 16,
                     "row_major" : true
+                }
+            ]
+        },
+        "_75" : {
+            "name" : "FUIDrawItem",
+            "members" : [
+                {
+                    "name" : "shaderType",
+                    "type" : "int",
+                    "offset" : 0
+                },
+                {
+                    "name" : "textureIndex",
+                    "type" : "uint",
+                    "offset" : 4
+                },
+                {
+                    "name" : "samplerIndex",
+                    "type" : "uint",
+                    "offset" : 8
+                },
+                {
+                    "name" : "drawItemFlags",
+                    "type" : "int",
+                    "offset" : 12
+                },
+                {
+                    "name" : "clipRectIndex",
+                    "type" : "int",
+                    "offset" : 16
+                },
+                {
+                    "name" : "gradientStartIndex",
+                    "type" : "int",
+                    "offset" : 20
+                },
+                {
+                    "name" : "gradientStopCount",
+                    "type" : "int",
+                    "offset" : 24
+                },
+                {
+                    "name" : "userFlags",
+                    "type" : "uint",
+                    "offset" : 28
+                },
+                {
+                    "name" : "data",
+                    "type" : "float",
+                    "array" : [
+                        32
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 32,
+                    "array_stride" : 4
+                }
+            ]
+        },
+        "_74" : {
+            "name" : "type.StructuredBuffer.FUIDrawItem",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_75",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 160
                 }
             ]
         }
@@ -117,16 +191,26 @@
             "binding" : 0
         }
     ],
+    "ssbos" : [
+        {
+            "type" : "_74",
+            "name" : "type.StructuredBuffer.FUIDrawItem",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 5,
+            "binding" : 0
+        }
+    ],
     "ubos" : [
         {
-            "type" : "_52",
+            "type" : "_66",
             "name" : "type._PerViewData",
             "block_size" : 224,
             "set" : 1,
             "binding" : 0
         },
         {
-            "type" : "_58",
+            "type" : "_72",
             "name" : "type._LayerData",
             "block_size" : 64,
             "set" : 3,
