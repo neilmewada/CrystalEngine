@@ -44,16 +44,32 @@ namespace CE::Vulkan
 
 	bool Scope::CompileInternal(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
-		// TODO: Remove vkDeviceWaitIdle calls! They are bad for performance.
-		vkDeviceWaitIdle(device->GetHandle());
+		DestroySyncObjects(compileRequest.compiler);
 
-		DestroySyncObjects();
-
+		// Enqueue existing framebuffers for deferred deletion, one slot at a time, so they
+		// are only destroyed once the GPU has finished executing that frame slot.
 		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 		{
+			Array<FrameBuffer*> oldFrameBuffers{};
+
 			for (int j = 0; j < RHI::Limits::MaxSwapChainImageCount; j++)
 			{
-				delete frameBuffers[i][j]; frameBuffers[i][j] = nullptr;
+				if (frameBuffers[i][j] != nullptr)
+				{
+					oldFrameBuffers.Add(frameBuffers[i][j]);
+					frameBuffers[i][j] = nullptr;
+				}
+			}
+
+			if (oldFrameBuffers.NotEmpty())
+			{
+				compileRequest.compiler->EnqueueDeletion(i, [oldFrameBuffers = std::move(oldFrameBuffers)]() mutable
+				{
+					for (FrameBuffer* fb : oldFrameBuffers)
+					{
+						delete fb;
+					}
+				});
 			}
 		}
 
@@ -463,7 +479,8 @@ namespace CE::Vulkan
 
 	void Scope::DestroySyncObjects()
 	{
-		vkDeviceWaitIdle(device->GetHandle());
+		// Immediate destruction — only safe when the GPU is idle.
+		// The caller is responsible for ensuring this (e.g. via vkDeviceWaitIdle in ~Scope).
 
 		for (int i = 0; i < signalSemaphores.GetSize(); i++)
 		{
@@ -477,16 +494,42 @@ namespace CE::Vulkan
 		signalSemaphores.Clear();
 		signalSemaphoresByConsumerScope.Clear();
 
-		//for (VkSemaphore semaphore : renderFinishedSemaphores)
-		//{
-		//	vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
-		//}
-		//renderFinishedSemaphores.Clear();
-
 		for (VkFence fence : renderFinishedFences)
 		{
 			vkDestroyFence(device->GetHandle(), fence, VULKAN_CPU_ALLOCATOR);
 		}
+		renderFinishedFences.Clear();
+	}
+
+	void Scope::DestroySyncObjects(RHI::FrameGraphCompiler* compiler)
+	{
+		// Deferred destruction — enqueues per-slot callbacks into the compiler's deletion
+		// queues. Each callback fires once BeginExecution has waited on that slot's fence,
+		// guaranteeing the GPU is no longer executing work that referenced these objects.
+
+		for (int slot = 0; slot < signalSemaphores.GetSize(); slot++)
+		{
+			List<VkSemaphore> semaphoresToDestroy = signalSemaphores[slot];
+			VkFence fenceToDestroy = (slot < renderFinishedFences.GetSize())
+				? renderFinishedFences[slot]
+				: VK_NULL_HANDLE;
+			VkDevice deviceHandle = device->GetHandle();
+
+			compiler->EnqueueDeletion(slot, [deviceHandle, semaphoresToDestroy, fenceToDestroy]() mutable
+			{
+				for (VkSemaphore semaphore : semaphoresToDestroy)
+				{
+					if (semaphore != VK_NULL_HANDLE)
+						vkDestroySemaphore(deviceHandle, semaphore, VULKAN_CPU_ALLOCATOR);
+				}
+
+				if (fenceToDestroy != VK_NULL_HANDLE)
+					vkDestroyFence(deviceHandle, fenceToDestroy, VULKAN_CPU_ALLOCATOR);
+			});
+		}
+
+		signalSemaphores.Clear();
+		signalSemaphoresByConsumerScope.Clear();
 		renderFinishedFences.Clear();
 	}
 

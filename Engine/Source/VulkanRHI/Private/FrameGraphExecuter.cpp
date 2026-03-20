@@ -18,6 +18,13 @@ namespace CE::Vulkan
 		ZoneScoped;
 
 		vkDeviceWaitIdle(device->GetHandle());
+
+		// All pending work is complete — safe to flush every deferred deletion queue.
+		if (compiler != nullptr)
+		{
+			compiler->FlushAllDeletionQueues();
+		}
+
 		return;
 
 		constexpr u64 u64Max = NumericLimits<u64>::Max();
@@ -61,6 +68,10 @@ namespace CE::Vulkan
 				   compiler->graphExecutionFences[currentSubmissionIndex].GetSize(),
 				   compiler->graphExecutionFences[currentSubmissionIndex].GetData(),
 				   VK_TRUE, u64Max);
+
+				// The GPU has finished all work submitted in the previous use of this frame slot.
+				// Flush any resources that were deferred for deletion during the last compile.
+				compiler->FlushDeletionQueue(currentSubmissionIndex);
 			}
 
 			for (int i = 0; i < frameGraph->presentSwapChains.GetSize(); i++)

@@ -58,6 +58,9 @@ namespace CE::Vulkan
 	{
 		vkDeviceWaitIdle(device->GetHandle());
 
+		// Flush all deferred deletions now that the GPU is fully idle.
+		FlushAllDeletionQueues();
+
 		DestroySyncObjects();
 	}
 
@@ -128,8 +131,6 @@ namespace CE::Vulkan
 
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 
-		vkDeviceWaitIdle(device->GetHandle());
-
 		numFramesInFlight = compileRequest.numFramesInFlight;
 		imageCount = numFramesInFlight;
 
@@ -145,14 +146,40 @@ namespace CE::Vulkan
 
 		imageCount = Math::Min(imageCount, RHI::Limits::MaxSwapChainImageCount);
 
-		for (auto scope : frameGraph->scopes)
+		// Enqueue deferred deletion of any pre-existing per-pass SRGs, one per frame slot
+		// so they are only destroyed once the GPU has finished executing that slot.
+		for (auto rhiScope : frameGraph->scopes)
 		{
-			delete scope->passShaderResourceGroup;
-			scope->passShaderResourceGroup = nullptr;
-			delete scope->subpassShaderResourceGroup;
-			scope->subpassShaderResourceGroup = nullptr;
+			Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
+
+			auto DeferSrgDeletion = [&](RHI::ShaderResourceGroup*& srg)
+			{
+				if (srg == nullptr)
+					return;
+
+				// Use a raw refcount so the SRG is deleted exactly once, after the last
+				// frame slot that could have referenced it has been flushed.
+				int* refCount = new int(imageCount);
+				RHI::ShaderResourceGroup* srgToDestroy = srg;
+				srg = nullptr;
+
+				for (u32 slot = 0; slot < imageCount; slot++)
+				{
+					EnqueueDeletion(slot, [srgToDestroy, refCount]()
+					{
+						if (--(*refCount) == 0)
+						{
+							delete srgToDestroy;
+							delete refCount;
+						}
+					});
+				}
+			};
+
+			DeferSrgDeletion(scope->passShaderResourceGroup);
+			DeferSrgDeletion(scope->subpassShaderResourceGroup);
 		}
-		
+
 		// Compile sync objects for individual scopes
 		for (auto scope : frameGraph->scopes)
 		{
@@ -182,9 +209,33 @@ namespace CE::Vulkan
 		CompileCrossQueueDependencies(compileRequest);
 
 		// ---------------------------
-		// Destroy old objects
+		// Enqueue deferred deletion of the old imageAcquired semaphores and fences.
+		// They will be destroyed once BeginExecution flushes that slot's deletion queue,
+		// after waiting on graphExecutionFences for that slot.
+		{
+			VkDevice deviceHandle = device->GetHandle();
 
-		DestroySyncObjects();
+			for (int slot = 0; slot < RHI::Limits::MaxSwapChainImageCount; slot++)
+			{
+				List<VkSemaphore> oldSemaphores = imageAcquiredSemaphores[slot];
+				List<VkFence>    oldFences      = imageAcquiredFences[slot];
+
+				imageAcquiredSemaphores[slot].Clear();
+				imageAcquiredFences[slot].Clear();
+
+				if (oldSemaphores.IsEmpty() && oldFences.IsEmpty())
+					continue;
+
+				EnqueueDeletion(slot, [deviceHandle, oldSemaphores, oldFences]() mutable
+				{
+					for (VkSemaphore semaphore : oldSemaphores)
+						vkDestroySemaphore(deviceHandle, semaphore, VULKAN_CPU_ALLOCATOR);
+
+					for (VkFence fence : oldFences)
+						vkDestroyFence(deviceHandle, fence, VULKAN_CPU_ALLOCATOR);
+				});
+			}
+		}
 
 		// ----------------------------
 		// Create new objects
@@ -247,6 +298,8 @@ namespace CE::Vulkan
 
     void FrameGraphCompiler::DestroySyncObjects()
     {
+		// Immediate destruction — only safe when the GPU is idle.
+		// Used exclusively in the destructor after vkDeviceWaitIdle + FlushAllDeletionQueues().
 		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 		{
 			for (VkSemaphore semaphore : imageAcquiredSemaphores[i])

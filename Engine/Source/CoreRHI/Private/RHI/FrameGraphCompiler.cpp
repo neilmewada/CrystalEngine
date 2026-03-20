@@ -7,14 +7,47 @@ namespace CE::RHI
 	{
 		ZoneScoped;
 
+		// Inject this compiler into the request so platform-specific code and scopes
+		// can enqueue deferred deletions without needing a separate reference.
+		FrameGraphCompileRequest request = compileRequest;
+		request.compiler = this;
+
 		// 1. Compile scope
-		CompileScopes(compileRequest);
+		CompileScopes(request);
 
 		// 2. Compile transient attachments (also allocates heap memory)
-		CompileTransientAttachments(compileRequest);
+		CompileTransientAttachments(request);
 
 		// Platform specific compilation
-		CompileInternal(compileRequest);
+		CompileInternal(request);
+	}
+
+	void FrameGraphCompiler::EnqueueDeletion(u32 frameSlot, std::function<void()> fn)
+	{
+		if (frameSlot >= Limits::MaxSwapChainImageCount)
+			return;
+
+		deletionQueues[frameSlot].Add(std::move(fn));
+	}
+
+	void FrameGraphCompiler::FlushDeletionQueue(u32 frameSlot)
+	{
+		if (frameSlot >= Limits::MaxSwapChainImageCount)
+			return;
+
+		for (auto& fn : deletionQueues[frameSlot])
+		{
+			fn();
+		}
+		deletionQueues[frameSlot].Clear();
+	}
+
+	void FrameGraphCompiler::FlushAllDeletionQueues()
+	{
+		for (u32 slot = 0; slot < Limits::MaxSwapChainImageCount; slot++)
+		{
+			FlushDeletionQueue(slot);
+		}
 	}
 
 	void FrameGraphCompiler::CompileScopes(const FrameGraphCompileRequest& compileRequest)

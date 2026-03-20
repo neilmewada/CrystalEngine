@@ -44,7 +44,13 @@ namespace CE::Vulkan
 
 	private:
 
+		//! Immediately destroy all sync objects. Only safe to call when the GPU is idle
+		//! (e.g. from the destructor after vkDeviceWaitIdle).
 		void DestroySyncObjects();
+
+		//! Enqueue destruction of all current sync objects into @compiler's deletion queues,
+		//! one entry per frame slot. Safe to call during compilation without stalling the GPU.
+		void DestroySyncObjects(RHI::FrameGraphCompiler* compiler);
 		
 		//FixedArray<VkSemaphore, RHI::Limits::MaxSwapChainImageCount> renderFinishedSemaphores{};
 		FixedArray<HashMap<RHI::ScopeId, VkSemaphore>, RHI::Limits::MaxSwapChainImageCount> signalSemaphoresByConsumerScope{};

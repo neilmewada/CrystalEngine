@@ -2,7 +2,7 @@
 
 namespace CE::RHI
 {
-	struct BufferDescriptor
+	struct CORERHI_API BufferDescriptor
 	{
 		/// @brief Name used for debugging purposes.
 		Name name = "Buffer";
@@ -14,6 +14,18 @@ namespace CE::RHI
 		BufferBindFlags bindFlags{};
 
 		MemoryHeapType defaultHeapType{};
+
+		SIZE_T GetHash() const;
+
+		bool operator==(const BufferDescriptor& other) const
+		{
+			return bufferSize == other.bufferSize && bindFlags == other.bindFlags && defaultHeapType == other.defaultHeapType && structureByteStride == other.structureByteStride;
+		}
+
+		bool operator!=(const BufferDescriptor& other) const
+		{
+			return !operator==(other);
+		}
 	};
 
 	class MemoryHeap;

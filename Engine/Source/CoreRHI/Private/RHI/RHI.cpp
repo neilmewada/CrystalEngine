@@ -215,4 +215,27 @@ namespace CE::RHI
 		return hash;
 	}
 
+	SIZE_T TextureDescriptor::GetHash() const
+	{
+		SIZE_T hash = CE::GetHash(format);
+		CombineHash(hash, width);
+		CombineHash(hash, height);
+		CombineHash(hash, depth);
+		CombineHash(hash, mipLevels);
+		CombineHash(hash, arrayLayers);
+		CombineHash(hash, sampleCount);
+		CombineHash(hash, bindFlags);
+		CombineHash(hash, dimension);
+		CombineHash(hash, defaultHeapType);
+		return hash;
+	}
+
+	SIZE_T BufferDescriptor::GetHash() const
+	{
+		SIZE_T hash = CE::GetHash(bufferSize);
+		CombineHash(hash, bindFlags);
+		CombineHash(hash, structureByteStride);
+		CombineHash(hash, defaultHeapType);
+		return hash;
+	}
 }

@@ -3,7 +3,7 @@
 namespace CE::RHI
 {
 
-	struct TextureDescriptor
+	struct CORERHI_API TextureDescriptor
 	{
 		Name name{};
 		u32 width = 0, height = 0, depth = 1;
@@ -14,6 +14,20 @@ namespace CE::RHI
 		u32 arrayLayers = 1;
 		TextureBindFlags bindFlags = TextureBindFlags::ShaderRead;
 		MemoryHeapType defaultHeapType = MemoryHeapType::Default;
+
+		SIZE_T GetHash() const;
+
+		bool operator==(const TextureDescriptor& other) const
+		{
+			return width == other.width && height == other.height && depth == other.depth && format == other.format && 
+				mipLevels == other.mipLevels && arrayLayers == other.arrayLayers && sampleCount == other.sampleCount &&
+				dimension == other.dimension && bindFlags == other.bindFlags && defaultHeapType == other.defaultHeapType;
+		}
+
+		bool operator!=(const TextureDescriptor& other) const
+		{
+			return !operator==(other);
+		}
 	};
 
     using ImageDescriptor = TextureDescriptor;
