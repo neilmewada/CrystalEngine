@@ -104,6 +104,11 @@ namespace CE
 
         Ref<FLayerTree> layerTree;
 
+        // - Event -
+        WeakRef<FWidget> hoveredWidget;
+        WeakRef<FWidget> pressedWidget;
+        WeakRef<FWidget> focusedWidget;
+
         // - View Constants -
         RPI::PerViewConstants viewConstants{};
         StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> viewConstantBuffers;

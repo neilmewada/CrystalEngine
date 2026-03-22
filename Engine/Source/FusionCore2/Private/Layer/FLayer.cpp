@@ -43,6 +43,22 @@ namespace CE
 		}
 	}
 
+	FAffineTransform FLayer::GetGlobalTransform()
+	{
+		FAffineTransform global = GetTransformInParentSpace();
+
+		FLayer* parent = this->parent.Get();
+
+		while (parent != nullptr)
+		{
+			global = parent->GetTransformInParentSpace() * global;
+
+			parent = parent->parent.Get();
+		}
+
+		return global;
+	}
+
 	void FLayer::DoPaint()
 	{
 		if (Ref<FWidget> widget = GetOwningWidget())
@@ -73,8 +89,7 @@ namespace CE
 					splitPoints.Add(drawList.GetCurrentDrawCmdCount());
 					drawList.NewDrawCmd();
 
-					layer->cachedGlobalTransform = this->cachedGlobalTransform
-						* painter.GetCurrentTransform();
+					layer->cachedTransformInParentSpace = painter.GetCurrentTransform();
 
 					layer->needsCompositing = true;
 					layer->DoPaintIfNeeded();

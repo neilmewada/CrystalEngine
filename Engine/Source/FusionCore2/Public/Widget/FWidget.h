@@ -110,7 +110,7 @@ namespace CE
 
         virtual FEventReply HandleEvent(FEvent& event);
 
-        virtual bool HitTest(Vec2 localMousePos);
+        bool SelfHitTest(Vec2 localMousePos);
 
 	protected:
 
@@ -125,6 +125,8 @@ namespace CE
         const FAffineTransform& GetCachedLayerSpaceTransform() const { return cachedLayerSpaceTransform; }
 
         FAffineTransform GetGlobalTransform() const;
+
+        FAffineTransform GetChildTransform();
 
     fusioncore_internal:
 

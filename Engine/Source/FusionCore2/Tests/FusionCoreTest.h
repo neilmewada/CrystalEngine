@@ -33,7 +33,8 @@ namespace RenderingTests
 				.Name("RootStack")
 				(
 					FNew(FWidget)
-					.Height(25),
+					.Height(25)
+					.Name("Empty"),
 
 					FAssignNew(FHorizontalStack, hstack)
 					.ContentHAlign(HAlign::Center)
@@ -76,6 +77,7 @@ namespace RenderingTests
 						.HAlign(HAlign::Fill)
 						.VAlign(VAlign::Fill)
 						.Name("hstack")
+						.Padding(Vec4(25, 0, 0, 0))
 						(
 							FNew(FDecoratedWidget)
 							.Shape(FCircle())
@@ -100,10 +102,12 @@ namespace RenderingTests
 					FNew(FDecoratedWidget)
 					.Background(Colors::Yellow)
 					.Shape(FRectangle())
-					.Height(30),
+					.Height(30)
+					.Name("Bar_3"),
 
 					FNew(FWidget)
 					.FillRatio(1.0f)
+					.Name("Whitespace")
 				)
 			);
 		}

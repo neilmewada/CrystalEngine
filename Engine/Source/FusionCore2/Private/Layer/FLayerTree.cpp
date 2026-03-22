@@ -40,7 +40,7 @@ namespace CE
 		if (!rootLayer)
 			return;
 
-		rootLayer->cachedGlobalTransform = rootLayerTransform;
+		rootLayer->cachedTransformInParentSpace = FAffineTransform::Identity();
 		rootLayer->DoPaintIfNeeded();
 	}
 

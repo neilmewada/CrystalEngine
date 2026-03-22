@@ -16,11 +16,14 @@ namespace CE
 
         void TickService(FServiceTickPhase tickPhase) override;
 
+        Ref<FSurface> GetFocusedSurface() const { return focusedSurface.Lock(); }
+
     protected:
 
         WeakRef<FWidget> capturedWidget;
-        WeakRef<FWidget> pressedWidget;
-        WeakRef<FWidget> hoveredWidget;
+        WeakRef<FWidget> inputLockedWidget;
+
+        WeakRef<FSurface> focusedSurface;
 
     };
     

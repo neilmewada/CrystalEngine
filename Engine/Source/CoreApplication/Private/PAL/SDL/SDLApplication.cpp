@@ -491,6 +491,62 @@ namespace CE
 				}
 			}
 		}
+		else if (event.window.type == SDL_EVENT_WINDOW_FOCUS_GAINED)
+		{
+			for (auto window : windowList)
+			{
+				if ((u32)window->GetWindowId() == event.window.windowID) // Found the window
+				{
+					for (ApplicationMessageHandler* handler : messageHandlers)
+					{
+						handler->OnWindowKeyboardFocusChanged(window, true);
+					}
+					break;
+				}
+			}
+		}
+		else if (event.window.type == SDL_EVENT_WINDOW_FOCUS_LOST)
+		{
+			for (auto window : windowList)
+			{
+				if ((u32)window->GetWindowId() == event.window.windowID) // Found the window
+				{
+					for (ApplicationMessageHandler* handler : messageHandlers)
+					{
+						handler->OnWindowKeyboardFocusChanged(window, false);
+					}
+					break;
+				}
+			}
+		}
+		else if (event.window.type == SDL_EVENT_WINDOW_MOUSE_ENTER)
+		{
+			for (auto window : windowList)
+			{
+				if ((u32)window->GetWindowId() == event.window.windowID) // Found the window
+				{
+					for (ApplicationMessageHandler* handler : messageHandlers)
+					{
+						handler->OnWindowMouseFocusChanged(window, true);
+					}
+					break;
+				}
+			}
+		}
+		else if (event.window.type == SDL_EVENT_WINDOW_MOUSE_LEAVE)
+		{
+			for (auto window : windowList)
+			{
+				if ((u32)window->GetWindowId() == event.window.windowID) // Found the window
+				{
+					for (ApplicationMessageHandler* handler : messageHandlers)
+					{
+						handler->OnWindowMouseFocusChanged(window, false);
+					}
+					break;
+				}
+			}
+		}
 	}
 
 	void SDLApplication::ProcessInputEvents(SDL_Event& event)

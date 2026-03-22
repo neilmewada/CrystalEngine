@@ -57,6 +57,14 @@ namespace CE
         return cachedLayerSpaceTransform;
     }
 
+    FAffineTransform FWidget::GetChildTransform()
+    {
+        return FAffineTransform::Translation(GetLayoutPosition()) *
+            FAffineTransform::Translation(m_Pivot) *
+            m_Transform *
+            FAffineTransform::Translation(-m_Pivot);
+    }
+
     void FWidget::MarkPaintDirty()
     {
         ZoneScoped;
@@ -223,7 +231,7 @@ namespace CE
         return FEventReply::Unhandled();
     }
 
-    bool FWidget::HitTest(Vec2 localMousePos)
+    bool FWidget::SelfHitTest(Vec2 localMousePos)
     {
         ZoneScoped;
 

@@ -21,14 +21,11 @@ namespace CE
 		}
         else if (tickPhase == FServiceTickPhase::DispatchInput)
         {
-	        // TODO
-
-            for (int i = application->GetSurfaceCount() - 1; i >= 0; i--)
+            if (Ref<FSurface> surface = mouseFocusedSurface.Lock())
             {
-                Ref<FSurface> surface = application->GetSurface(i);
-
                 Vec2 screenMousePos = InputManager::Get().GetGlobalMousePosition();
                 Vec2 surfaceMousePos = surface->ScreenToSurfacePoint(screenMousePos);
+                surfaceMousePos /= surface->GetDpiScale();
 
                 FWidget* hitResult = surface->HitTestWidget(surfaceMousePos);
 

@@ -34,7 +34,9 @@ namespace CE
 
         u32 GetSplitPoint(u32 index) { return splitPoints[index]; }
 
-        const FAffineTransform& GetGlobalTransform() const { return cachedGlobalTransform; }
+        const FAffineTransform& GetTransformInParentSpace() const { return cachedTransformInParentSpace; }
+
+        FAffineTransform GetGlobalTransform();
 
     protected:
 
@@ -55,7 +57,7 @@ namespace CE
         Array<Ref<FLayer>> children;
 
         FIELD()
-        FAffineTransform cachedGlobalTransform;
+        FAffineTransform cachedTransformInParentSpace;
 
         bool needsCompositing = false;
         FUIDrawList drawList;

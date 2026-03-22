@@ -26,38 +26,51 @@ namespace CE
 
     struct FEventReply
     {
-    private:
-
-        bool handled = false;
-        bool captureMouse = false;
-        bool releaseMouse = false;
-        bool focusSelf = false;
-        bool hideCursor = false;
-        bool showCursor = false;
-
     public:
+        // -- Enums for mutually exclusive pairs --
 
-        // --- Constructors ---
+        enum class MouseCaptureOp { None, Capture, Release };
+        enum class InputLockOp { None, Lock, Unlock };
+        enum class CursorOp { None, Hide, Show };
+
+        // -- Constructors --
 
         static FEventReply Handled() { FEventReply r; r.handled = true; return r; }
         static FEventReply Unhandled() { return {}; }
 
-        // --- Intent Builders ---
+        // -- Intent builders --
 
-        FEventReply& CaptureMouse() { captureMouse = true;  return *this; }
-        FEventReply& ReleaseMouse() { releaseMouse = true;  return *this; }
-        FEventReply& FocusSelf() { focusSelf = true;     return *this; }
-        FEventReply& HideCursor() { hideCursor = true;    return *this; }
-        FEventReply& ShowCursor() { showCursor = true;    return *this; }
+        // Soft mouse capture: mouse events keep routing here even when cursor leaves bounds.
+        // Does NOT affect keyboard. Does NOT hide cursor.
+        FEventReply& CaptureMouse() { mouseCaptureOp = MouseCaptureOp::Capture;  return *this; }
+        FEventReply& ReleaseMouse() { mouseCaptureOp = MouseCaptureOp::Release;  return *this; }
 
-        // --- Accessors (for FEventService::ProcessReply) ---
+        // Full input lock: ALL mouse + keyboard route here. Hides and locks cursor.
+        // Use for 3D viewport / game input capture.
+        FEventReply& LockInput() { inputLockOp = InputLockOp::Lock;           return *this; }
+        FEventReply& UnlockInput() { inputLockOp = InputLockOp::Unlock;         return *this; }
 
-        bool IsHandled()          const { return handled; }
-        bool ShouldCaptureMouse() const { return captureMouse; }
-        bool ShouldReleaseMouse() const { return releaseMouse; }
-        bool ShouldFocusSelf()    const { return focusSelf; }
-        bool ShouldHideCursor()   const { return hideCursor; }
-        bool ShouldShowCursor()   const { return showCursor; }
+        // Keyboard focus
+        FEventReply& FocusSelf() { focusSelf = true;                          return *this; }
+
+        // Cursor visibility — independent of capture (e.g. custom cursor hide without locking)
+        //FEventReply& HideCursor() { cursorOp = CursorOp::Hide;                 return *this; }
+        //FEventReply& ShowCursor() { cursorOp = CursorOp::Show;                 return *this; }
+
+        // -- Accessors for FEventService::ProcessReply --
+
+        bool              IsHandled()           const { return handled; }
+        bool              ShouldFocusSelf()     const { return focusSelf; }
+        MouseCaptureOp    GetMouseCaptureOp()   const { return mouseCaptureOp; }
+        InputLockOp       GetInputLockOp()      const { return inputLockOp; }
+        CursorOp          GetCursorOp()         const { return cursorOp; }
+
+    private:
+        bool           handled = false;
+        bool           focusSelf = false;
+        MouseCaptureOp mouseCaptureOp = MouseCaptureOp::None;
+        InputLockOp    inputLockOp = InputLockOp::None;
+        CursorOp       cursorOp = CursorOp::None;
     };
 
     STRUCT()

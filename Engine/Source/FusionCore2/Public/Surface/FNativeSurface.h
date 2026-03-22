@@ -43,6 +43,9 @@ namespace CE
         void OnWindowRestored(PlatformWindow* window) override;
         void OnWindowMaximized(PlatformWindow* window) override;
 
+        void OnWindowKeyboardFocusChanged(PlatformWindow* window, bool gotFocus) override;
+        void OnWindowMouseFocusChanged(PlatformWindow* window, bool gotFocus) override;
+
 		PlatformWindow* platformWindow = nullptr;
 
         RHI::SwapChain* swapChain = nullptr;

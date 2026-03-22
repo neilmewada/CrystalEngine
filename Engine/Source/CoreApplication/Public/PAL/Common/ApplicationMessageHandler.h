@@ -38,6 +38,9 @@ namespace CE
         virtual void OnWindowExposed(PlatformWindow* window) {}
 		virtual void OnWindowDisplayChanged(PlatformWindow* window, int displayIndex) {}
 
+        virtual void OnWindowMouseFocusChanged(PlatformWindow* window, bool gotFocus) {}
+        virtual void OnWindowKeyboardFocusChanged(PlatformWindow* window, bool gotFocus) {}
+
     };
     
 } // namespace CE

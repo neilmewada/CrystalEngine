@@ -112,11 +112,8 @@ namespace CE
         if (widget == nullptr)
         {
             widget = rootWidget.Get();
-            if (!widget) return nullptr;
-
-            // Convert surface space -> root layer space
-            if (Ref<FLayer> rootLayer = layerTree->GetRootLayer())
-                pos = rootLayer->GetGlobalTransform().Inverse().TransformPoint(pos);
+            if (!widget) 
+                return nullptr;
         }
 
         if (!widget->IsEnabled() || widget->IsFaulted() || !widget->IsVisible())
@@ -125,6 +122,8 @@ namespace CE
         // Broad-phase: pos is in widget's own layer space, cachedLayerSpaceAABB is too
         if (!widget->cachedLayerSpaceAABB.Contains(pos))
             return nullptr;
+
+        String::IsAlphabet('a');
 
         // Walk children last-to-first (last = painted on top = check first)
         for (int i = (int)widget->GetChildCount() - 1; i >= 0; i--)
@@ -150,7 +149,7 @@ namespace CE
 
         // Exact self hit test — convert layer pos → widget local space
         Vec2 localPos = widget->cachedLayerSpaceTransform.Inverse().TransformPoint(pos);
-        if (widget->HitTest(localPos))
+        if (widget->SelfHitTest(localPos))
             return widget;
 
         return nullptr;

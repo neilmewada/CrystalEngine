@@ -198,5 +198,33 @@ namespace CE
         UpdateDrawableSize();
     }
 
+    void FNativeSurface::OnWindowKeyboardFocusChanged(PlatformWindow* window, bool gotFocus)
+    {
+        if (window != platformWindow)
+            return;
+
+        if (FEventService* eventService = FApplication::Get()->GetService<FEventService>().Get())
+        {
+            if (gotFocus)
+                eventService->OnSurfaceKeyboardFocusGained(this);
+            else
+                eventService->OnSurfaceKeyboardFocusLost(this);
+        }
+    }
+
+    void FNativeSurface::OnWindowMouseFocusChanged(PlatformWindow* window, bool gotFocus)
+    {
+        if (window != platformWindow)
+            return;
+
+        if (FEventService* eventService = FApplication::Get()->GetService<FEventService>().Get())
+        {
+            if (gotFocus)
+                eventService->OnSurfaceMouseFocusGained(this);
+            else
+                eventService->OnSurfaceMouseFocusLost(this);
+        }
+    }
+
 } // namespace CE
 
