@@ -8,6 +8,7 @@ namespace CE
         m_MaxHeight = NumericLimits<f32>::Infinity();
         m_MaxWidth = NumericLimits<f32>::Infinity();
         m_Opacity = 1.0f;
+        m_Pivot = Vec2();
     }
 
     void FWidget::OnAfterConstruct()
@@ -31,6 +32,29 @@ namespace CE
     {
         ZoneScoped;
 
+    }
+
+    FAffineTransform FWidget::GetGlobalTransform() const
+    {
+        // Walk up to the nearest paint boundary (which owns a layer)
+        const FWidget* boundary = this;
+        while (boundary != nullptr && !boundary->IsPaintBoundary())
+        {
+            boundary = boundary->GetParentWidget().Get();
+        }
+
+        if (boundary == nullptr)
+            return cachedLayerSpaceTransform;
+
+        if (Ref<FSurface> surface = parentSurface.Lock())
+        {
+            if (Ref<FLayer> layer = surface->GetLayerTree()->FindLayerForWidget(boundary->GetUuid()))
+            {
+                return layer->GetGlobalTransform() * cachedLayerSpaceTransform;
+            }
+        }
+
+        return cachedLayerSpaceTransform;
     }
 
     void FWidget::MarkPaintDirty()
@@ -132,12 +156,12 @@ namespace CE
         return false;
     }
 
-    bool FWidget::IsPaintBoundary()
+    bool FWidget::IsPaintBoundary() const
     {
         return TestWidgetFlags(FWidgetFlags::CachedPaintBoundary) || TestWidgetFlags(FWidgetFlags::CachedCompositingBoundary);
     }
 
-    bool FWidget::IsCompositingBoundary()
+    bool FWidget::IsCompositingBoundary() const
     {
         return TestWidgetFlags(FWidgetFlags::CachedCompositingBoundary);
     }
@@ -194,6 +218,21 @@ namespace CE
         }
     }
 
+    FEventReply FWidget::HandleEvent(FEvent& event)
+    {
+        return FEventReply::Unhandled();
+    }
+
+    bool FWidget::HitTest(Vec2 localMousePos)
+    {
+        ZoneScoped;
+
+        if (!Enabled() || IsFaulted() || !Visible())
+            return false;
+
+        return Rect::FromSize(Vec2(), layoutSize).Contains(localMousePos);
+    }
+
     void FWidget::SetWidgetFlag(FWidgetFlags flag, bool set)
     {
         if (set)
@@ -210,6 +249,7 @@ namespace CE
     {
         thread_local const CE::Name styleProperty = "Style";
         thread_local const CE::Name opacityProperty = "Opacity";
+        thread_local const CE::Name pivotProperty = "Pivot";
 
         if (propertyName == styleProperty)
         {
@@ -218,6 +258,11 @@ namespace CE
         else if (propertyName == opacityProperty)
         {
             UpdateBoundaryFlags();
+        }
+        else if (propertyName == pivotProperty)
+        {
+            m_Pivot.x = Math::Clamp01(m_Pivot.x);
+            m_Pivot.y = Math::Clamp01(m_Pivot.y);
         }
     }
 

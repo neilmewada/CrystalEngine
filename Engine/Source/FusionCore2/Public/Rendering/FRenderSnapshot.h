@@ -3,6 +3,7 @@
 namespace CE
 {
 	class FLayer;
+	class FLayerTree;
 
 	class FUSIONCORE_API FRenderSnapshot : public IntrusiveBase
 	{
@@ -12,9 +13,7 @@ namespace CE
 
 		void Clear();
 
-		void BuildSnapshot(Ref<FLayer> layer);
-
-		void FlushDrawPackets(u32 frameIndex);
+		void BuildSnapshot(Ref<FLayerTree> layerTree);
 
 	private:
 

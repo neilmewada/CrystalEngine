@@ -18,11 +18,11 @@ namespace CE
 
         f32 GetDpiScale();
 
+        bool NeedsCompositing() { return needsCompositing; }
+
         bool NeedsRepaint();
 
         void DoPaintIfNeeded();
-
-        bool IsLayerDirty();
 
         u32 GetChildCount() { return children.GetSize(); }
 
@@ -57,12 +57,13 @@ namespace CE
         FIELD()
         FAffineTransform cachedGlobalTransform;
 
-        bool isLayerDirty = false;
+        bool needsCompositing = false;
         FUIDrawList drawList;
         Array<u32> splitPoints;
 
         friend class FLayerTree;
         friend class FPainter;
+        friend class FRenderSnapshot;
     };
 
 } // namespace CE

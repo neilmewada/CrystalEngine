@@ -113,6 +113,8 @@ namespace CE
         if (!application)
             return;
 
+        ZoneScoped;
+
         if (tickPhase == FServiceTickPhase::RenderPrepare)
         {
             RenderPrepare();
@@ -136,6 +138,8 @@ namespace CE
         Ref<FApplication> application = this->application.Lock();
         if (!application)
             return;
+
+        ZoneScoped;
 
 		for (int i = 0; i < application->GetSurfaceCount(); i++)
         {

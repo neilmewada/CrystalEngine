@@ -6,6 +6,7 @@
     friend class FWidget;\
 	friend class FSurface;\
 	friend class FContainerWidget;\
+	friend class FCompoundWidget;\
 	friend class FNativeSurface;\
 	friend class FLayerTree;\
 	friend class FLayer;

@@ -37,6 +37,8 @@ namespace CE
 
     private: // - Internal -
 
+        void SetWidgetFlagInternal(FWidgetFlags flag, bool set);
+
         FIELD()
         Ref<FWidget> m_Child;
 
@@ -48,7 +50,19 @@ namespace CE
             return self;
         }
 
+        FUSION_PAINT_PROPERTY(FShape, ClipShape);
+
         FUSION_PAINT_PROPERTY(bool, ClipContent);
+
+        FUSION_PROPERTY_SET(bool, ForcePaintBoundary)
+        {
+            if (self.TestWidgetFlags(FWidgetFlags::ForcePaintBoundary) == value)
+                return self;
+
+            self.SetWidgetFlagInternal(FWidgetFlags::ForcePaintBoundary, value);
+            self.UpdateBoundaryFlags();
+            return self;
+        }
 
         FUSION_WIDGET;
     };

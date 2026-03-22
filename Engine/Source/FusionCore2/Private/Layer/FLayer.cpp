@@ -43,11 +43,6 @@ namespace CE
 		}
 	}
 
-	bool FLayer::IsLayerDirty()
-	{
-		return isLayerDirty;
-	}
-
 	void FLayer::DoPaint()
 	{
 		if (Ref<FWidget> widget = GetOwningWidget())
@@ -79,21 +74,33 @@ namespace CE
 					drawList.NewDrawCmd();
 
 					layer->cachedGlobalTransform = this->cachedGlobalTransform
-						* painter.GetCurrentTransform()
-						* FAffineTransform::Translation(widget->GetLayoutPosition())
-						* widget->Transform();
+						* painter.GetCurrentTransform();
 
-					layer->DoPaint();
+					layer->needsCompositing = true;
+					layer->DoPaintIfNeeded();
 				}
 			}
-
+			
 			return;
 		}
 
-		isLayerDirty = true;
+		needsCompositing = true;
 
-		painter.PushTransform(FAffineTransform::Translation(widget->GetLayoutPosition()) * widget->Transform());
-		widget->cachedGlobalTransform = this->cachedGlobalTransform * painter.GetCurrentTransform();
+		Vec2 pivot = widget->Pivot() * widget->GetLayoutSize();
+
+		painter.PushTransform(
+			FAffineTransform::Translation(widget->GetLayoutPosition()) *
+			FAffineTransform::Translation(pivot) *
+			widget->Transform() *
+			FAffineTransform::Translation(-pivot)
+		);
+
+		widget->cachedLayerSpaceTransform = painter.GetCurrentTransform();
+
+		// Own AABB: transform the [0,0 → layoutSize] rect into layer space
+		widget->cachedLayerSpaceAABB = widget->cachedLayerSpaceTransform.TransformAABB(
+			Rect(Vec2(0, 0), widget->GetLayoutSize())
+		);
 
 		widget->SetWidgetFlag(FWidgetFlags::PaintDirty, false);
 		widget->Paint(painter);
@@ -103,6 +110,24 @@ namespace CE
 			if (Ref<FWidget> child = widget->GetChildAt(i))
 			{
 				DoPaint(child.Get(), painter);
+
+				// painter.GetCurrentTransform() is always the parent widget's transform here,
+				// whether child was paint boundary (no push/pop) or normal (pushed then popped).
+				if (child->IsPaintBoundary())
+				{
+					// child->cachedLayerSpaceAABB is in child layer space; convert to this layer
+					widget->cachedLayerSpaceAABB = Rect::Union(
+						widget->cachedLayerSpaceAABB,
+						painter.GetCurrentTransform().TransformAABB(child->cachedLayerSpaceAABB)
+					);
+				}
+				else
+				{
+					widget->cachedLayerSpaceAABB = Rect::Union(
+						widget->cachedLayerSpaceAABB,
+						child->cachedLayerSpaceAABB
+					);
+				}
 			}
 		}
 

@@ -160,5 +160,9 @@ namespace CE
         m_Child->ArrangeContent(childSize);
     }
 
+    void FCompoundWidget::SetWidgetFlagInternal(FWidgetFlags flag, bool set)
+    {
+        SetWidgetFlag(flag, set);
+    }
 }
 

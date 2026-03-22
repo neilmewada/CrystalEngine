@@ -107,6 +107,55 @@ namespace CE
         pendingLayoutRootIds.Add(layoutRoot->GetUuid());
     }
 
+    FWidget* FSurface::HitTestWidget(Vec2 pos, FWidget* widget)
+    {
+        if (widget == nullptr)
+        {
+            widget = rootWidget.Get();
+            if (!widget) return nullptr;
+
+            // Convert surface space -> root layer space
+            if (Ref<FLayer> rootLayer = layerTree->GetRootLayer())
+                pos = rootLayer->GetGlobalTransform().Inverse().TransformPoint(pos);
+        }
+
+        if (!widget->IsEnabled() || widget->IsFaulted() || !widget->IsVisible())
+            return nullptr;
+
+        // Broad-phase: pos is in widget's own layer space, cachedLayerSpaceAABB is too
+        if (!widget->cachedLayerSpaceAABB.Contains(pos))
+            return nullptr;
+
+        // Walk children last-to-first (last = painted on top = check first)
+        for (int i = (int)widget->GetChildCount() - 1; i >= 0; i--)
+        {
+            FWidget* child = widget->GetChildAt(i).Get();
+            if (!child) continue;
+
+            Vec2 childPos;
+            if (child->IsPaintBoundary())
+            {
+                // Child layer space = parent widget's local space numerically.
+                // Convert: parent layer pos → child layer pos via parent widget's transform inverse.
+                childPos = widget->cachedLayerSpaceTransform.Inverse().TransformPoint(pos);
+            }
+            else
+            {
+                childPos = pos;
+            }
+
+            if (FWidget* hit = HitTestWidget(childPos, child))
+                return hit;
+        }
+
+        // Exact self hit test — convert layer pos → widget local space
+        Vec2 localPos = widget->cachedLayerSpaceTransform.Inverse().TransformPoint(pos);
+        if (widget->HitTest(localPos))
+            return widget;
+
+        return nullptr;
+    }
+
     void FSurface::Initialize()
     {
         for (u32 i = 0; i < viewConstantBuffers.GetSize(); i++)
@@ -261,7 +310,7 @@ namespace CE
         
         constexpr RHI::IndexFormat kIndexFormat = sizeof(FUIIndex) == 4 ? RHI::IndexFormat::Uint32 : RHI::IndexFormat::Uint16;
 
-        renderSnapshot->BuildSnapshot(layerTree->GetRootLayer());
+        renderSnapshot->BuildSnapshot(layerTree);
 
         const u64 vertexArrayByteSize = renderSnapshot->vertexArray.GetCount() * sizeof(FUIVertex);
         const u64 indexArrayByteSize = renderSnapshot->indexArray.GetCount() * sizeof(FUIIndex);

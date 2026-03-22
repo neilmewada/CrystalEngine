@@ -13,6 +13,9 @@
 // Math
 #include "Math/FAffineTransform.h"
 
+// Events
+#include "Event/FEvent.h"
+
 // Application
 #include "Application/Service/FService.h"
 #include "Application/FApplication.h"

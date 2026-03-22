@@ -28,18 +28,20 @@ namespace CE
 		matricesPerLayer.RemoveAll();
 	}
 
-	void FRenderSnapshot::BuildSnapshot(Ref<FLayer> layer)
+	void FRenderSnapshot::BuildSnapshot(Ref<FLayerTree> layerTree)
 	{
 		ZoneScoped;
 
 		Clear();
 
-		DoLayer(layer, 0);
+		DoLayer(layerTree->GetRootLayer(), 0);
 	}
 
 	void FRenderSnapshot::DoLayer(Ref<FLayer> layer, int layerIndex)
 	{
 		ZoneScoped;
+
+		layer->needsCompositing = false;
 
 		FUIDrawList* drawList = layer->GetDrawList();
 		
@@ -67,26 +69,36 @@ namespace CE
 		{
 			u32 sp = layer->GetSplitPoint(i);
 
-			// Emit render pass for this layer's cmds before the split point
-			renderPassArray.Insert({
+			FRenderPass rp1 = {
 				.renderTarget = nullptr,
 				.layerIndex = (SIZE_T)layerIndex,
 				.drawCmdStartIndex = cmdBase + prevSplit,
 				.drawCmdCount = sp - prevSplit   // excludes the placeholder at sp
-			});
+			};
 
-			prevSplit = sp + 1; // +1 skips the placeholder cmd
+			if (rp1.drawCmdCount > 0)
+			{
+				// Emit render pass for this layer's cmds before the split point
+				renderPassArray.Insert(rp1);
+
+				prevSplit = sp;
+			}
 
 			// Child's index in the split arrays = current count before it inserts
 			DoLayer(layer->GetChild(i), (int)vertexSplits.GetCount());
 		}
 
-		// Final segment after the last split (or the whole thing if no splits)
-		renderPassArray.Insert({
+		FRenderPass rp2 = {
 			.renderTarget = nullptr,
 			.layerIndex = (SIZE_T)layerIndex,
 			.drawCmdStartIndex = cmdBase + prevSplit,
 			.drawCmdCount = drawCmdSplits[layerIndex].count - prevSplit
-		});
+		};
+
+		if (rp2.drawCmdCount == 0)
+			return;
+
+		// Final segment after the last split (or the whole thing if no splits)
+		renderPassArray.Insert(rp2);
 	}
 }

@@ -2,6 +2,7 @@
 
 namespace CE
 {
+    class FLayer;
     ENUM(Flags)
     enum class FWidgetFlags : u32
     {
@@ -89,11 +90,11 @@ namespace CE
 
         // - Layer -
 
-        bool IsBoundary() { return IsCompositingBoundary() || IsPaintBoundary(); }
+        bool IsBoundary() const { return IsCompositingBoundary() || IsPaintBoundary(); }
 
-        bool IsPaintBoundary();
+        bool IsPaintBoundary() const;
 
-        bool IsCompositingBoundary();
+        bool IsCompositingBoundary() const;
 
         void UpdateBoundaryFlags();
 
@@ -105,6 +106,12 @@ namespace CE
 
         void NotifyStyleStateChanged();
 
+        // - Event -
+
+        virtual FEventReply HandleEvent(FEvent& event);
+
+        virtual bool HitTest(Vec2 localMousePos);
+
 	protected:
 
         // - Layer -
@@ -115,7 +122,9 @@ namespace CE
 
 		Ref<FSurface> GetParentSurface() const { return parentSurface.Lock(); }
 
-        const FAffineTransform& GetCachedGlobalTransform() const { return cachedGlobalTransform; }
+        const FAffineTransform& GetCachedLayerSpaceTransform() const { return cachedLayerSpaceTransform; }
+
+        FAffineTransform GetGlobalTransform() const;
 
     fusioncore_internal:
 
@@ -146,7 +155,8 @@ namespace CE
 
         // - Cache -
 
-        FAffineTransform cachedGlobalTransform;
+        FAffineTransform cachedLayerSpaceTransform;
+        Rect cachedLayerSpaceAABB;
 
         // - Layout -
 
@@ -168,6 +178,8 @@ namespace CE
 
         FUSION_LAYOUT_PROPERTY(FMargin, Margin);
         FUSION_LAYOUT_PROPERTY(FMargin, Padding);
+
+        FUSION_LAYOUT_PROPERTY(Vec2, Pivot);
 
         FUSION_LAYOUT_PROPERTY(f32, MinWidth);
         FUSION_LAYOUT_PROPERTY(f32, MinHeight);

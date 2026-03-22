@@ -2,6 +2,8 @@
 
 namespace CE
 {
+    class FSurface;
+
     CLASS()
     class FUSIONCORE_API FEventService : public FService
     {
@@ -15,6 +17,10 @@ namespace CE
         void TickService(FServiceTickPhase tickPhase) override;
 
     protected:
+
+        WeakRef<FWidget> capturedWidget;
+        WeakRef<FWidget> pressedWidget;
+        WeakRef<FWidget> hoveredWidget;
 
     };
     

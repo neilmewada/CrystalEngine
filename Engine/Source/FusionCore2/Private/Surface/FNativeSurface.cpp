@@ -15,6 +15,11 @@ namespace CE
 		Shutdown();
     }
 
+    Vec2 FNativeSurface::ScreenToSurfacePoint(Vec2 position)
+    {
+        return position - platformWindow->GetWindowPosition().ToVec2();
+    }
+
     FNativeSurface* FNativeSurface::Create(PlatformWindow* window, const String& name, FSurface* parentSurface)
     {
 		if (!FApplication::Get()->IsNativeSurfaceSupported())

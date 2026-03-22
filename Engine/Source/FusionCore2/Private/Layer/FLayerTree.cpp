@@ -12,6 +12,8 @@ namespace CE
 		if (!needsSync)
 			return;
 
+		ZoneScoped;
+
 		HashSet<Uuid> visited;
 		SyncWidget(rootWidget, nullptr, visited);
 
@@ -56,6 +58,8 @@ namespace CE
 	{
 		if (!widget)
 			return;
+
+		ZoneScoped;
 
 		FLayer* currentLayer = parentLayer;
 

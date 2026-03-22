@@ -29,7 +29,7 @@ namespace RenderingTests
 				.Enabled(true)
 				.Visible(true)
 				.Padding(FMargin(5, 5, 5, 5))
-				.Spacing(5)
+				.Spacing(10)
 				.Name("RootStack")
 				(
 					FNew(FWidget)
@@ -56,18 +56,45 @@ namespace RenderingTests
 					),
 
 					FNew(FDecoratedWidget)
+					.Background(Colors::Cyan)
+					.Height(30)
+					.Name("Bar_1"),
+
+					FNew(FDecoratedWidget)
 					.Background(Colors::Red)
 					.Border(FPen(Colors::Green, 1.0f))
 					.Shape(FRoundedRectangle(5.0f))
 					.Height(30)
+					.ForcePaintBoundary(true)
+					.Pivot(Vec2(0.5f, 0.5f))
+					.Transform(FAffineTransform::Rotation(Math::ToRadians(10)))
+					.Name("Bar_2")
 					.Child(
-						FNew(FDecoratedWidget)
-						.Shape(FCircle())
-						.Background(Colors::Blue)
-						.Width(25)
-						.Height(25)
-						.HAlign(HAlign::Center)
-						.VAlign(VAlign::Center)
+						FNew(FHorizontalStack)
+						.Spacing(10)
+						.ContentVAlign(VAlign::Center)
+						.HAlign(HAlign::Fill)
+						.VAlign(VAlign::Fill)
+						.Name("hstack")
+						(
+							FNew(FDecoratedWidget)
+							.Shape(FCircle())
+							.Background(Colors::Blue)
+							.Width(25)
+							.Height(25)
+							.HAlign(HAlign::Center)
+							.VAlign(VAlign::Center)
+							.Name("Ball_1"),
+
+							FNew(FDecoratedWidget)
+							.Shape(FCircle())
+							.Background(Colors::Orange)
+							.Width(25)
+							.Height(25)
+							.HAlign(HAlign::Center)
+							.VAlign(VAlign::Center)
+							.Name("Ball_2")
+						)
 					),
 
 					FNew(FDecoratedWidget)

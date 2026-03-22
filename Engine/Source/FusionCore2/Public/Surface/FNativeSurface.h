@@ -14,6 +14,12 @@ namespace CE
         
     public:
 
+        PlatformWindow* GetPlatformWindow() const { return platformWindow; }
+
+        bool IsFocused() override { return platformWindow != nullptr && platformWindow->IsFocused(); }
+
+        Vec2 ScreenToSurfacePoint(Vec2 position) override;
+
 		// - Lifecycle -
 
 		static FNativeSurface* Create(PlatformWindow* window, const String& name, FSurface* parentSurface);

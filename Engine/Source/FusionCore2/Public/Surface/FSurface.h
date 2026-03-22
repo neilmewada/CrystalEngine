@@ -42,6 +42,8 @@ namespace CE
 
         void MarkLayerTreeDirty();
 
+        Ref<FLayerTree> GetLayerTree() const { return layerTree; }
+
     public:
 
         // - Layout -
@@ -50,7 +52,13 @@ namespace CE
 
         // - Paint -
 
-    public:
+        // - Input -
+
+        virtual bool IsFocused() = 0;
+
+        virtual Vec2 ScreenToSurfacePoint(Vec2 position) = 0;
+
+        FWidget* HitTestWidget(Vec2 pos, FWidget* widget = nullptr);
     	
     	// - Lifecycle -
 

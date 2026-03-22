@@ -76,6 +76,9 @@ namespace CE
 
     public: // - Fusion Properties - 
 
+        FUSION_PAINT_PROPERTY(FShape, ClipShape);
+
+        FUSION_PAINT_PROPERTY(bool, ClipContent);
 
         FUSION_WIDGET;
     };
