@@ -107,6 +107,331 @@ namespace CE
         pendingLayoutRootIds.Add(layoutRoot->GetUuid());
     }
 
+    void FSurface::DispatchSurfaceUnfocusEvent()
+    {
+        ZoneScoped;
+
+        if (Ref<FWidget> widget = curFocusedWidget.Lock())
+        {
+            FFocusEvent focusEvent{};
+            focusEvent.eventType = FEventType::FocusChanged;
+            focusEvent.gotFocus = false;
+            focusEvent.focusedWidget = nullptr;
+            focusEvent.sender = widget;
+
+            widget->HandleEvent(focusEvent);
+        }
+    }
+
+    void FSurface::DispatchSurfaceFocusEvent()
+    {
+        ZoneScoped;
+
+        curFocusedWidget = nextFocusWidget;
+
+        if (Ref<FWidget> widget = curFocusedWidget.Lock())
+        {
+            FFocusEvent focusEvent{};
+            focusEvent.eventType = FEventType::FocusChanged;
+            focusEvent.gotFocus = true;
+            focusEvent.focusedWidget = widget;
+            focusEvent.sender = widget;
+
+            widget->HandleEvent(focusEvent);
+        }
+    }
+
+    static void BuildHoverStack(FWidget* leaf, Array<FWidget*>& outStack)
+    {
+        FWidget* w = leaf;
+        while (w)
+        {
+            outStack.Add(w);
+            w = w->GetParentWidget().Get();
+        }
+    }
+
+    void FSurface::DispatchMouseEvents()
+    {
+        ZoneScoped;
+
+        Ref<FEventService> eventService = FApplication::Get()->GetService<FEventService>();
+        if (!eventService)
+            return;
+
+        // - Mouse Pos
+
+        Vec2 screenMousePos = eventService->GetScreenMousePos();
+        Vec2 prevScreenMousePos = eventService->GetPrevScreenMousePos();
+        Vec2 wheelDelta = eventService->GetMouseWheelDelta();
+
+        Vec2 surfaceMousePos = ScreenToSurfacePoint(screenMousePos);
+        Vec2 prevSurfaceMousePos = ScreenToSurfacePoint(prevScreenMousePos);
+        Vec2 surfaceMouseDelta = surfaceMousePos - prevSurfaceMousePos;
+
+        // - Mouse Buttons
+
+        MouseButtonMask curButtonMask = MouseButtonMask::None;
+        if (InputManager::IsMouseButtonHeld(MouseButton::Left))
+        {
+            curButtonMask |= MouseButtonMask::Left;
+        }
+        if (InputManager::IsMouseButtonHeld(MouseButton::Right))
+        {
+            curButtonMask |= MouseButtonMask::Right;
+        }
+        if (InputManager::IsMouseButtonHeld(MouseButton::Middle))
+        {
+            curButtonMask |= MouseButtonMask::Middle;
+        }
+        if (InputManager::IsMouseButtonHeld(MouseButton::Button4))
+        {
+            curButtonMask |= MouseButtonMask::Button4;
+        }
+        if (InputManager::IsMouseButtonHeld(MouseButton::Button5))
+        {
+            curButtonMask |= MouseButtonMask::Button5;
+        }
+
+        // - Key Modifiers
+
+        keyModifierStates = KeyModifier::None;
+
+        Enum* keyModifierEnum = GetStaticEnum<KeyModifier>();
+
+        for (int i = 0; i < keyModifierEnum->GetConstantsCount(); ++i)
+        {
+            if (InputManager::TestModifiers((KeyModifier)keyModifierEnum->GetConstant(i)->GetValue()))
+            {
+                keyModifierStates |= (KeyModifier)keyModifierEnum->GetConstant(i)->GetValue();
+            }
+        }
+
+        bool mouseInSurface = Rect::FromSize(Vec2(), availableSize).Contains(surfaceMousePos);
+
+        Ref<FWidget> captured = capturedWidget.Lock();
+
+        FWidget* hitWidget = mouseInSurface ? HitTestWidget(surfaceMousePos) : nullptr;
+
+        FWidget* hoveredWidget = captured.IsValid() ? captured.Get() : hitWidget;
+
+        Array<FWidget*> newHoverStack;
+        BuildHoverStack(hoveredWidget, newHoverStack);
+
+        // Mouse Leave
+        for (WeakRef<FWidget>& weakWidget : hoveredWidgetStack)
+        {
+            Ref<FWidget> widget = weakWidget.Lock();
+            if (!widget || newHoverStack.Exists(widget.Get()))
+                continue;
+
+            FMouseEvent event{};
+            event.eventType = FEventType::MouseLeave;
+            event.sender = widget;
+            event.mousePosition = surfaceMousePos;
+            event.prevMousePosition = prevSurfaceMousePos;
+            event.wheelDelta = wheelDelta;
+            event.isInside = false;
+            event.keyModifiers = keyModifierStates;
+            
+            widget->HandleEvent(event);
+        }
+
+        // Mouse Enter
+        for (int i = newHoverStack.GetSize() - 1; i >= 0; i--)
+        {
+            FWidget* widget = newHoverStack[i];
+
+            bool wasHovered = hoveredWidgetStack.Exists(widget);
+            if (wasHovered)
+                continue;
+
+            FMouseEvent event{};
+            event.eventType = FEventType::MouseEnter;
+            event.sender = widget;
+            event.mousePosition = surfaceMousePos;
+            event.prevMousePosition = prevSurfaceMousePos;
+            event.isInside = true;
+            event.keyModifiers = keyModifierStates;
+
+            widget->HandleEvent(event);
+        }
+
+        hoveredWidgetStack.Clear();
+        for (FWidget* widget : newHoverStack)
+            hoveredWidgetStack.Add(widget);
+
+        if (hoveredWidget)
+        {
+            constexpr auto epsilon = std::numeric_limits<float>::epsilon();
+
+            // Mouse Move
+	        if (abs(surfaceMouseDelta.x) >= epsilon || abs(surfaceMouseDelta.y) >= epsilon)
+	        {
+                FMouseEvent event{};
+                event.eventType = FEventType::MouseMove;
+                event.sender = hoveredWidget;
+                event.mousePosition = surfaceMousePos;
+                event.prevMousePosition = prevSurfaceMousePos;
+                event.buttons = curButtonMask;
+                event.isInside = true;
+                event.keyModifiers = keyModifierStates;
+
+                FEventReply reply = hoveredWidget->HandleEvent(event);
+                ProcessReply(hoveredWidget, reply);
+	        }
+
+            // Mouse Wheel
+            if (abs(wheelDelta.x) >= epsilon || abs(wheelDelta.y) >= epsilon)
+            {
+                for (WeakRef<FWidget>& weakWidget : hoveredWidgetStack)
+                {
+                    Ref<FWidget> widget = weakWidget.Lock();
+                    if (!widget) continue;
+
+                    FMouseEvent event{};
+                    event.eventType = FEventType::MouseWheel;
+                    event.sender = hoveredWidget;
+                    event.mousePosition = surfaceMousePos;
+                    event.prevMousePosition = prevSurfaceMousePos;
+                    event.wheelDelta = wheelDelta;
+                    event.buttons = curButtonMask;
+                    event.isInside = true;
+                    event.keyModifiers = keyModifierStates;
+
+                    FEventReply reply = widget->HandleEvent(event);
+                    ProcessReply(widget.Get(), reply);
+                    if (reply.IsHandled())
+                        break;
+                }
+            }
+        }
+
+        constexpr MouseButton kButtons[] = {
+        	MouseButton::Left, MouseButton::Right, MouseButton::Middle,
+        	MouseButton::Button4, MouseButton::Button5
+        };
+        constexpr MouseButtonMask kMasks[] = {
+            MouseButtonMask::Left, MouseButtonMask::Right, MouseButtonMask::Middle,
+            MouseButtonMask::Button4, MouseButtonMask::Button5
+        };
+
+        // - Mouse Down/Up
+
+        for (int i = 0; i < 5; i++)
+        {
+            if (InputManager::IsMouseButtonDown(kButtons[i]))
+            {
+                FWidget* target = captured ? captured.Get() : hitWidget;
+                if (target)
+                {
+                    FMouseEvent downEvent{};
+                    downEvent.eventType = FEventType::MouseButtonDown;
+                    downEvent.sender = target;
+                    downEvent.mousePosition = surfaceMousePos;
+                    downEvent.prevMousePosition = prevSurfaceMousePos;
+                    downEvent.buttons = kMasks[i];
+                    downEvent.isInside = true;
+                    downEvent.keyModifiers = keyModifierStates;
+
+                    // Bubble up until handled
+                    FWidget* current = target;
+                    while (current)
+                    {
+                        downEvent.sender = current;
+                        FEventReply reply = current->HandleEvent(downEvent);
+                        ProcessReply(current, reply);
+                        if (reply.IsHandled()) 
+                            break;
+                        current = current->GetParentWidget().Get();
+                    }
+
+                    pressedWidgetPerButton[i] = target;
+                }
+            }
+
+            if (InputManager::IsMouseButtonUp(kButtons[i]))
+            {
+                Ref<FWidget> pressed = pressedWidgetPerButton[i].Lock();
+                FWidget* upTarget = captured ? captured.Get()
+                    : pressed ? pressed.Get()
+                    : nullptr;
+
+                if (upTarget)
+                {
+                    FMouseEvent upEvent{};
+                    upEvent.eventType = FEventType::MouseButtonUp;
+                    upEvent.mousePosition = surfaceMousePos;
+                    upEvent.prevMousePosition = prevSurfaceMousePos;
+                    upEvent.buttons = kMasks[i];
+                    upEvent.isInside = (upTarget == hitWidget);
+                    upEvent.keyModifiers = keyModifierStates;
+
+                    // Bubble up from the pressed/captured widget
+                    FWidget* current = upTarget;
+                    while (current)
+                    {
+                        upEvent.sender = current;
+                        FEventReply reply = current->HandleEvent(upEvent);
+                        ProcessReply(current, reply);
+                        if (reply.IsHandled())
+                            break;
+                        current = current->GetParentWidget().Get();
+                    }
+                }
+
+                pressedWidgetPerButton[i] = nullptr;
+            }
+        }
+
+        Ref<FWidget> nextFocus = nextFocusWidget.Lock();
+        Ref<FWidget> curFocus = curFocusedWidget.Lock();
+
+        if (nextFocus != curFocus)
+        {
+            if (curFocus)
+            {
+                FFocusEvent lostEvent{};
+                lostEvent.eventType = FEventType::FocusChanged;
+                lostEvent.gotFocus = false;
+                lostEvent.focusedWidget = nextFocus;
+                lostEvent.sender = curFocus;
+                curFocus->HandleEvent(lostEvent);
+            }
+
+            if (nextFocus)
+            {
+                FFocusEvent gotEvent{};
+                gotEvent.eventType = FEventType::FocusChanged;
+                gotEvent.gotFocus = true;
+                gotEvent.focusedWidget = nextFocus;
+                gotEvent.sender = nextFocus;
+                nextFocus->HandleEvent(gotEvent);
+            }
+
+            curFocusedWidget = nextFocus;
+            nextFocusWidget = nullptr;
+        }
+    }
+
+    void FSurface::DispatchKeyEvents()
+    {
+        
+    }
+
+    void FSurface::ProcessReply(FWidget* sender, const FEventReply& reply)
+    {
+        switch (reply.GetMouseCaptureOp())
+        {
+        case FEventReply::MouseCaptureOp::Capture:  capturedWidget = sender; break;
+        case FEventReply::MouseCaptureOp::Release:  capturedWidget = nullptr; break;
+        default: break;
+        }
+
+        if (reply.ShouldFocusSelf())
+            nextFocusWidget = sender;
+    }
+
     FWidget* FSurface::HitTestWidget(Vec2 pos, FWidget* widget)
     {
         if (widget == nullptr)

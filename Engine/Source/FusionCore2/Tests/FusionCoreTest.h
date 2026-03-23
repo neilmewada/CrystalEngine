@@ -39,6 +39,7 @@ namespace RenderingTests
 					FAssignNew(FHorizontalStack, hstack)
 					.ContentHAlign(HAlign::Center)
 					.ContentVAlign(VAlign::Center)
+					.Name("hstack")
 					(
 						FNew(FWidget)
 						.FillRatio(1.0f)
@@ -88,7 +89,7 @@ namespace RenderingTests
 							.VAlign(VAlign::Center)
 							.Name("Ball_1"),
 
-							FNew(FDecoratedWidget)
+							FNew(FButton)
 							.Shape(FCircle())
 							.Background(Colors::Orange)
 							.Width(25)
@@ -96,6 +97,10 @@ namespace RenderingTests
 							.HAlign(HAlign::Center)
 							.VAlign(VAlign::Center)
 							.Name("Ball_2")
+							.OnClick([]
+							{
+								CE_LOG(Info, All, "Clicked Ball_2");
+							})
 						)
 					),
 

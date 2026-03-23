@@ -3494,7 +3494,7 @@ TEST(Bundle, Basic)
 
     	EXPECT_EQ(bundle->GetSubObjectCount(), 1);
 
-    	Ref<WritingTestObj2> testObject = (Ref<WritingTestObj2>)bundle->LoadObject("TestObject2");
+    	Ref<WritingTestObj2> testObject = Object::CastTo<WritingTestObj2>(bundle->LoadObject("TestObject2"));
 
     	EXPECT_EQ(testObject->GetSubObjectCount(), 0);
     	EXPECT_EQ(testObject->GetOuter(), bundle);
@@ -3636,7 +3636,7 @@ TEST(Bundle, Multiple)
 
 		EXPECT_EQ(scriptBundle->GetSubObjectCount(), 1);
 
-		Ref<MyScript> myScript = (Ref<MyScript>)scriptBundle->LoadObject("MyScript");
+		Ref<MyScript> myScript = Object::CastTo<MyScript>(scriptBundle->LoadObject("MyScript"));
 		Ref<MyMesh> myMesh = myScript->meshAsset;
 
 		EXPECT_TRUE(myScript->meshAsset.IsValid());

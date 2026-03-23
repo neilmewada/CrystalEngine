@@ -16,15 +16,23 @@ namespace CE
 
         void TickService(FServiceTickPhase tickPhase) override;
 
-        Ref<FSurface> GetFocusedSurface() const { return focusedSurface.Lock(); }
+        void FocusSurface(FSurface* surface);
+
+        Vec2 GetScreenMousePos() const { return screenMousePos; }
+        Vec2 GetPrevScreenMousePos() const { return prevScreenMousePos; }
+
+        Vec2 GetMouseWheelDelta() const { return wheelDelta; }
 
     protected:
 
-        WeakRef<FWidget> capturedWidget;
-        WeakRef<FWidget> inputLockedWidget;
+        WeakRef<FSurface> curFocusSurface;
+        WeakRef<FSurface> focusSurface;
 
-        WeakRef<FSurface> focusedSurface;
+        Vec2 screenMousePos;
+        Vec2 prevScreenMousePos;
+        Vec2 wheelDelta;
 
+        b8 isFirstTick = true;
     };
     
 } // namespace CE

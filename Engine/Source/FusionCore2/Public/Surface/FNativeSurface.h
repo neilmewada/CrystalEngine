@@ -20,6 +20,8 @@ namespace CE
 
         Vec2 ScreenToSurfacePoint(Vec2 position) override;
 
+        // - Events -
+
 		// - Lifecycle -
 
 		static FNativeSurface* Create(PlatformWindow* window, const String& name, FSurface* parentSurface);

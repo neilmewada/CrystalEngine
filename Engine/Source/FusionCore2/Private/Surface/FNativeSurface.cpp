@@ -17,7 +17,7 @@ namespace CE
 
     Vec2 FNativeSurface::ScreenToSurfacePoint(Vec2 position)
     {
-        return position - platformWindow->GetWindowPosition().ToVec2();
+        return (position - platformWindow->GetWindowPosition().ToVec2()) / dpiScale;
     }
 
     FNativeSurface* FNativeSurface::Create(PlatformWindow* window, const String& name, FSurface* parentSurface)
@@ -206,9 +206,7 @@ namespace CE
         if (FEventService* eventService = FApplication::Get()->GetService<FEventService>().Get())
         {
             if (gotFocus)
-                eventService->OnSurfaceKeyboardFocusGained(this);
-            else
-                eventService->OnSurfaceKeyboardFocusLost(this);
+                eventService->FocusSurface(this);
         }
     }
 
@@ -220,9 +218,7 @@ namespace CE
         if (FEventService* eventService = FApplication::Get()->GetService<FEventService>().Get())
         {
             if (gotFocus)
-                eventService->OnSurfaceMouseFocusGained(this);
-            else
-                eventService->OnSurfaceMouseFocusLost(this);
+                eventService->FocusSurface(this);
         }
     }
 

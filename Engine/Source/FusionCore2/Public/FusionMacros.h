@@ -67,6 +67,29 @@
 	template<typename TSelf>\
 	TSelf& PropertyName(this TSelf& self, PropertyType value)
 
+#define FUSION_EVENT(EventType, PropertyName, ...)\
+	protected:\
+		EventType m_##PropertyName;\
+	public:\
+		auto& PropertyName() { return this->m_##PropertyName; }\
+		template<typename TSelf>\
+		TSelf& PropertyName(this TSelf& self, const FunctionBinding& binding)\
+		{\
+			self.m_##PropertyName.Bind(binding);\
+			return self;\
+		}\
+		template<typename TSelf, typename TLambda>\
+		TSelf& PropertyName(this TSelf& self, const TLambda& lambda)\
+		{\
+			self.m_##PropertyName.Bind(lambda);\
+			return self;\
+		}\
+		template<typename TSelf, typename TLambda>\
+		TSelf& PropertyName(this TSelf& self, DelegateHandle& outHandle, const TLambda& lambda)\
+		{\
+			outHandle = self.m_##PropertyName.Bind(lambda);\
+			return self;\
+		}
 
 // IGNORE THE COMMENTED CODE BELOW, IT'S JUST FOR REFERENCE AND NOT PART OF THE MACROS
 /*

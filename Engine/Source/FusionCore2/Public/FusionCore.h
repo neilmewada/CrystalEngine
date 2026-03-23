@@ -30,6 +30,7 @@
 #include "Style/FFont.h"
 #include "Style/FStyle.h"
 #include "Style/FStyleSet.h"
+#include "Style/FButtonStyle.h"
 
 // Rendering / Painting
 #include "Rendering/FUIDrawData.h"
@@ -54,5 +55,6 @@
 #include "Widget/FContainerWidget.h"
 #include "Widget/FDecoratedWidget.h"
 #include "Widget/Layout/FStackBox.h"
+#include "Widget/FButton.h"
 
 

@@ -89,7 +89,7 @@ namespace CE
 					splitPoints.Add(drawList.GetCurrentDrawCmdCount());
 					drawList.NewDrawCmd();
 
-					layer->cachedTransformInParentSpace = painter.GetCurrentTransform();
+					layer->cachedTransformInParentLayerSpace = painter.GetCurrentTransform();
 
 					layer->needsCompositing = true;
 					layer->DoPaintIfNeeded();

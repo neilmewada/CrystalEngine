@@ -13,4 +13,11 @@ namespace CE
 			return nullptr;
 		return stylesByKey[name];
 	}
+
+	void FStyleSet::OnAfterDeserialize()
+	{
+		Super::OnAfterDeserialize();
+
+
+	}
 } // namespace CE

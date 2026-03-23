@@ -27,7 +27,6 @@ namespace CE
     struct FEventReply
     {
     public:
-        // -- Enums for mutually exclusive pairs --
 
         enum class MouseCaptureOp { None, Capture, Release };
         enum class InputLockOp { None, Lock, Unlock };
@@ -131,6 +130,7 @@ namespace CE
         FIELD()
         Vec2 mousePosition;
 
+        //! @brief Previous mouse position in global space (i.e. surface space)
         FIELD()
         Vec2 prevMousePosition;
 

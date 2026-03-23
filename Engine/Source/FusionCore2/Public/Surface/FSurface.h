@@ -52,6 +52,17 @@ namespace CE
 
         // - Paint -
 
+        // - Events -
+
+        virtual void DispatchSurfaceUnfocusEvent();
+
+        virtual void DispatchSurfaceFocusEvent();
+
+        virtual void DispatchMouseEvents();
+        virtual void DispatchKeyEvents();
+
+        void ProcessReply(FWidget* sender, const FEventReply& reply);
+
         // - Input -
 
         virtual bool IsFocused() = 0;
@@ -105,9 +116,13 @@ namespace CE
         Ref<FLayerTree> layerTree;
 
         // - Event -
-        WeakRef<FWidget> hoveredWidget;
-        WeakRef<FWidget> pressedWidget;
-        WeakRef<FWidget> focusedWidget;
+
+        KeyModifier keyModifierStates;
+        
+    	Array<WeakRef<FWidget>> hoveredWidgetStack;
+        StaticArray<WeakRef<FWidget>, 5> pressedWidgetPerButton;
+        WeakRef<FWidget> curFocusedWidget, nextFocusWidget;
+        WeakRef<FWidget> capturedWidget;
 
         // - View Constants -
         RPI::PerViewConstants viewConstants{};
