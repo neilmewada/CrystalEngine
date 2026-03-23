@@ -17,6 +17,7 @@ namespace CE
     {
         FButton& button = widget.As<FButton>();
 
+        button.Background(background);
 
     }
 } // namespace CE

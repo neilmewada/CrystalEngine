@@ -814,6 +814,31 @@ namespace CE
 					ConfigParseStruct(string.GetSubstringView(1, string.GetLength() - 2), structInstance, structType);
 				}
 			}
+			else if (fieldDeclType != nullptr && fieldDeclType->GetTypeId() == TYPEID(Color))
+			{
+				String string = configValue.GetString().RemoveWhitespaces();
+
+				if (string.StartsWith("(") && string.EndsWith(")"))
+				{
+					String subString = string.GetSubstring(1, string.GetLength() - 2);
+					if (subString.NotEmpty())
+					{
+						Array<String> splits = subString.Split(',');
+
+						if (splits.GetSize() == 4)
+						{
+							Color color{};
+
+							for (int i = 0; i < splits.GetSize(); i++)
+							{
+								String::TryParse(splits[i], color.rgba[i]);
+							}
+
+							field->SetFieldValue<Color>(this, color);
+						}
+					}
+				}
+			}
             else if (field->IsArrayType() && configValue.IsValid())
             {
                 Array<String>& array = configValue.GetArray();
@@ -1358,6 +1383,29 @@ namespace CE
 			if (String::TryParse(value, boolValue))
 			{
 				field->SetFieldValue<bool>(instance, boolValue);
+			}
+		}
+		else if (field->GetTypeId() == TYPEID(Color))
+		{
+			if (value.StartsWith("(") && value.EndsWith(")"))
+			{
+				String subString = value.GetSubstring(1, value.GetLength() - 2);
+				if (subString.NotEmpty())
+				{
+					Array<String> splits = subString.Split(',');
+
+					if (splits.GetSize() == 4)
+					{
+						Color color{};
+
+						for (int i = 0; i < splits.GetSize(); i++)
+						{
+							String::TryParse(splits[i], color.rgba[i]);
+						}
+
+						field->SetFieldValue<Color>(this, color);
+					}
+				}
 			}
 		}
 		else if (fieldDeclType != nullptr && fieldDeclType->IsStruct())

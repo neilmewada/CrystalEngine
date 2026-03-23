@@ -16,7 +16,8 @@ namespace CE
 
         void MakeStyle(FWidget& widget) override;
 
-
+        FIELD()
+        FBrush background;
     };
     
 } // namespace CE
