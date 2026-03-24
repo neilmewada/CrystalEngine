@@ -110,10 +110,28 @@ namespace CE
 
 		this->deltaTime = deltaTime;
 
+        for (int i = destructionQueue.GetSize() - 1; i >= 0; i--)
+        {
+            destructionQueue[i].frameCounter += 1;
+
+            if (destructionQueue[i].frameCounter > RHI::Limits::MaxSwapChainImageCount)
+            {
+                if (destructionQueue[i].itemToDestroy)
+					destructionQueue[i].itemToDestroy->BeginDestroy();
+                destructionQueue.RemoveAt(i);
+            }
+        }
+
+        if (IsEngineRequestingExit())
+            return;
+
 		if (!exposed)
         {
 			InvokeServiceTick(FServiceTickPhase::PumpPlatformEvents);
         }
+
+        if (IsEngineRequestingExit())
+            return;
 
 		InvokeServiceTick(FServiceTickPhase::DispatchInput);
 
@@ -146,6 +164,12 @@ namespace CE
 
     void FApplication::Shutdown()
     {
+        for (int i = destructionQueue.GetSize() - 1; i >= 0; i--)
+        {
+            if (destructionQueue[i].itemToDestroy)
+                destructionQueue[i].itemToDestroy->BeginDestroy();
+        }
+        destructionQueue.Clear();
     }
 
     bool FApplication::HasService(ClassType* serviceClass) const
@@ -183,6 +207,14 @@ namespace CE
 		{
 			GetService<FRenderService>()->MarkFrameGraphDirty();
 		}
+    }
+
+    void FApplication::QueueDestroy(Ref<Object> object)
+    {
+        destructionQueue.Add({
+            object,
+            0
+        });
     }
 
     void FApplication::InvokeServiceTick(FServiceTickPhase tickPhase)

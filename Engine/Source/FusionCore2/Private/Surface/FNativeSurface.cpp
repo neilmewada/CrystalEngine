@@ -8,13 +8,6 @@ namespace CE
 
     }
 
-    void FNativeSurface::OnBeforeDestroy()
-    {
-	    Super::OnBeforeDestroy();
-
-		Shutdown();
-    }
-
     Vec2 FNativeSurface::ScreenToSurfacePoint(Vec2 position)
     {
         return (position - platformWindow->GetWindowPosition().ToVec2()) / dpiScale;
@@ -85,8 +78,6 @@ namespace CE
         Super::Shutdown();
 
         delete swapChain; swapChain = nullptr;
-
-		FApplication::Get()->RemoveSurface(this);
 
 		RPI::RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
 
@@ -164,6 +155,14 @@ namespace CE
         {
             OnSurfaceResize();
         }
+    }
+
+    void FNativeSurface::OnWindowDestroyed(PlatformWindow* window)
+    {
+        if (window != platformWindow)
+            return;
+
+        QueueDestroy();
     }
 
     void FNativeSurface::OnWindowDisplayChanged(PlatformWindow* window, int displayIndex)

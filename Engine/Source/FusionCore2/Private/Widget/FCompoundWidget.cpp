@@ -5,7 +5,7 @@ namespace CE
 
     FCompoundWidget::FCompoundWidget()
     {
-
+        m_ClipShape = FRectangle();
     }
 
     void FCompoundWidget::SetParentSurfaceRecursive(Ref<FSurface> surface)

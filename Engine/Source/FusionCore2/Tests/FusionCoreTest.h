@@ -43,6 +43,7 @@ namespace RenderingTests
 					.ContentVAlign(VAlign::Center)
 					.Spacing(10)
 					.Name("hstack")
+					.ClipContent(true)
 					(
 						FNew(FButton)
 						.FillRatio(1.0f)

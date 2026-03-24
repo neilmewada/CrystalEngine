@@ -24,6 +24,8 @@ namespace CE
 
 		void AddChildSurface(Ref<FSurface> childSurface);
 
+        void RemoveChildSurface(Ref<FSurface> childSurface);
+
         u32 GetChildSurfaceCount() const { return childrenSurfaces.GetSize(); }
         
         Ref<FSurface> GetChildSurface(u32 index) const { return childrenSurfaces[index]; }
@@ -78,6 +80,8 @@ namespace CE
         virtual void Initialize();
 
         virtual void Shutdown();
+
+        void QueueDestroy();
 
         virtual void TickSurface(f32 deltaTime);
 

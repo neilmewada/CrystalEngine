@@ -74,6 +74,8 @@ namespace CE
 
         void AddSurface(Ref<FSurface> surface);
         void RemoveSurface(Ref<FSurface> surface);
+
+        void QueueDestroy(Ref<Object> object);
         
     protected:
 
@@ -92,6 +94,14 @@ namespace CE
         Ref<FStyleSet> defaultStyleSet;
 
     private:
+
+        struct DestroyItem
+        {
+            Ref<Object> itemToDestroy;
+            int frameCounter = 0;
+        };
+
+        Array<DestroyItem> destructionQueue;
 
         friend class FNativeSurface;
     };

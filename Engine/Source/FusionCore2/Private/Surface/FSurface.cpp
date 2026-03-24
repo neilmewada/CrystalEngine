@@ -28,6 +28,8 @@ namespace CE
         }
 
         delete viewSrg; viewSrg = nullptr;
+
+        Shutdown();
     }
 
     void FSurface::GetDrawListMask(RHI::DrawListMask& drawListMask)
@@ -47,6 +49,16 @@ namespace CE
 
 		childrenSurfaces.Add(childSurface);
 		childSurface->parentSurface = this;
+    }
+
+    void FSurface::RemoveChildSurface(Ref<FSurface> childSurface)
+    {
+        if (childSurface->parentSurface == this)
+        {
+            childSurface->parentSurface = nullptr;
+        }
+
+        childrenSurfaces.Remove(childSurface);
     }
 
     bool FSurface::IsNativeSurface()
@@ -598,6 +610,20 @@ namespace CE
             delete drawPacket;
         }
         drawPackets.Clear();
+    }
+
+    void FSurface::QueueDestroy()
+    {
+        if (Ref<FSurface> parent = parentSurface.Lock())
+        {
+            parent->RemoveChildSurface(this);
+        }
+        else
+        {
+            FApplication::Get()->RemoveSurface(this);
+        }
+
+        FApplication::Get()->QueueDestroy(this);
     }
 
     void FSurface::TickSurface(f32 deltaTime)

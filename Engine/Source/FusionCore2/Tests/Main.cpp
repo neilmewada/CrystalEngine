@@ -77,7 +77,7 @@ static void TestBegin(bool gui)
 		windowHeight = h;
 
 		PlatformWindow* window = app->InitMainWindow("MainWindow", w, h, windowInfo);
-		window->SetBorderless(true);
+		window->SetBorderless(false);
 
 		InputManager::Get().Initialize(app);
 	}
@@ -228,6 +228,8 @@ TEST(FusionCore, Rendering)
 
 			previousTime = curTime;
 		}
+
+		FrameScheduler::Get()->WaitUntilIdle();
 
 		nativeSurface->BeginDestroy();
 		nativeSurface = nullptr;

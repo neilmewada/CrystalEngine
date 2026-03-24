@@ -5,7 +5,7 @@ namespace CE
 
     FContainerWidget::FContainerWidget()
     {
-
+        m_ClipShape = FRectangle();
     }
 
     void FContainerWidget::SetParentSurfaceRecursive(Ref<FSurface> surface)

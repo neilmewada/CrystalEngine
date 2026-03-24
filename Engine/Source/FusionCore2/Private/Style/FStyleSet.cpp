@@ -84,9 +84,9 @@ namespace CE
 		{
 			auto style = CreateObject<FButtonStyle>(this, "Button_Destructive");
 
-			style->backgroundDefault  = FBrush(Color(0.75f, 0.17f, 0.13f));
-			style->backgroundHovered  = FBrush(Color(0.88f, 0.22f, 0.17f));
-			style->backgroundPressed  = FBrush(Color(0.62f, 0.12f, 0.09f));
+			style->backgroundDefault  = FBrush(Color(0.82f, 0.20f, 0.15f));
+			style->backgroundHovered  = FBrush(Color(0.95f, 0.30f, 0.24f));
+			style->backgroundPressed  = FBrush(Color(0.65f, 0.13f, 0.10f));
 			style->backgroundDisabled = FBrush(Color(0.38f, 0.20f, 0.19f));
 			style->shape              = FRoundedRectangle(4.0f);
 
