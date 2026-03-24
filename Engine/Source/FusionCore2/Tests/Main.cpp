@@ -201,6 +201,9 @@ TEST(FusionCore, Rendering)
 
 	auto exposedTick = [&]
 		{
+			if (IsEngineRequestingExit())
+				return;
+
 			fApp->Tick(deltaTime, true);
 		};
 

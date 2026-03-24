@@ -120,6 +120,8 @@ namespace CE
 		widget->SetWidgetFlag(FWidgetFlags::PaintDirty, false);
 		widget->Paint(painter);
 
+		widget->PushClip(painter);
+
 		for (u32 i = 0; i < widget->GetChildCount(); i++)
 		{
 			if (Ref<FWidget> child = widget->GetChildAt(i))
@@ -145,6 +147,8 @@ namespace CE
 				}
 			}
 		}
+
+		widget->PopClip(painter);
 
 		widget->PaintOverlay(painter);
 

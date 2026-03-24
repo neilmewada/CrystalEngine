@@ -104,6 +104,9 @@ namespace CE
 
         virtual void PaintOverlay(FPainter& painter);
 
+        virtual void PushClip(FPainter& painter) {}
+        virtual void PopClip(FPainter& painter) {}
+
         void NotifyStyleStateChanged();
 
         // - Event -
