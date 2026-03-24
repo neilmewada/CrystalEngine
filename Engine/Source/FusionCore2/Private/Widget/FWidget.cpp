@@ -8,7 +8,7 @@ namespace CE
         m_MaxHeight = NumericLimits<f32>::Infinity();
         m_MaxWidth = NumericLimits<f32>::Infinity();
         m_Opacity = 1.0f;
-        m_Pivot = Vec2();
+        m_Pivot = Vec2(0.5f, 0.5f);
     }
 
     void FWidget::OnAfterConstruct()
@@ -224,11 +224,6 @@ namespace CE
         {
             style->MakeStyle(*this);
         }
-    }
-
-    FEventReply FWidget::HandleEvent(FEvent& event)
-    {
-        return FEventReply::Unhandled();
     }
 
     bool FWidget::SelfHitTest(Vec2 localMousePos)

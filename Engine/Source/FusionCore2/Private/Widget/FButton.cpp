@@ -15,51 +15,56 @@ namespace CE
         
     }
 
-    FEventReply FButton::HandleEvent(FEvent& event)
+    void FButton::OnMouseEnter(FMouseEvent& event)
     {
-        if (event.IsMouseEvent())
+        Super::OnMouseEnter(event);
+
+        if (!IsHovered())
         {
-            FMouseEvent& mouseEvent = static_cast<FMouseEvent&>(event);
+            buttonState |= FButtonState::Hovered;
+            NotifyStyleStateChanged();
+        }
+    }
 
-            if (event.eventType == FEventType::MouseEnter)
-            {
-	            if (!IsHovered())
-	            {
-                    buttonState |= FButtonState::Hovered;
-                    NotifyStyleStateChanged();
-	            }
-                return FEventReply::Handled();
-            }
-            else if (event.eventType == FEventType::MouseLeave)
-            {
-                if (IsHovered())
-                {
-                    buttonState &= ~FButtonState::Hovered;
-                    NotifyStyleStateChanged();
-                }
-                return FEventReply::Handled();
-            }
-            else if (event.eventType == FEventType::MouseMove)
-            {
-	            
-            }
-            else if (event.eventType == FEventType::MouseButtonDown && mouseEvent.IsLeftButton())
-            {
-	            
-            }
-            else if (event.eventType == FEventType::MouseButtonUp && mouseEvent.IsLeftButton())
-            {
-                if (mouseEvent.isInside)
-                {
-                    m_OnClick.Broadcast(this);
-                }
+    void FButton::OnMouseLeave(FMouseEvent& event)
+    {
+	    Super::OnMouseLeave(event);
 
-                return FEventReply::Handled();
+        if (IsHovered())
+        {
+            buttonState &= ~FButtonState::Hovered;
+            NotifyStyleStateChanged();
+        }
+    }
+
+    FEventReply FButton::OnMouseButtonDown(FMouseEvent& event)
+    {
+        if (event.IsLeftButton())
+        {
+	        buttonState |= FButtonState::Pressed; 
+        	NotifyStyleStateChanged();
+        }
+        return FEventReply::Handled();
+    }
+
+    FEventReply FButton::OnMouseButtonUp(FMouseEvent& event)
+    {
+        if (event.IsLeftButton())
+        {
+            if (IsPressed())
+            {
+                buttonState &= ~FButtonState::Pressed;
+                NotifyStyleStateChanged();
+            }
+            if (event.isInside)
+            {
+                m_OnClick.Broadcast(this);
             }
         }
 
-	    return Super::HandleEvent(event);
+        return FEventReply::Handled();
     }
+
 
 }
 

@@ -50,6 +50,8 @@ namespace CE
 
 		void AddPendingLayoutRoot(Ref<FWidget> layoutRoot);
 
+        void MarkRootLayoutDirty();
+
         // - Paint -
 
         // - Events -

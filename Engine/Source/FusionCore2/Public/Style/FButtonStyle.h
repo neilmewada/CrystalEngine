@@ -14,10 +14,46 @@ namespace CE
 
         SubClass<FWidget> GetWidgetClass() const override;
 
-        void MakeStyle(FWidget& widget) override;
+        void MakeStyle(FWidget& widget) const override;
 
         FIELD()
-        FBrush background;
+        FBrush backgroundDefault;
+
+        FIELD()
+        FBrush backgroundHovered;
+
+        FIELD()
+        FBrush backgroundPressed;
+
+        FIELD()
+        FBrush backgroundDisabled;
+
+        FIELD()
+        FPen borderDefault;
+
+        FIELD()
+        FPen borderHovered;
+
+        FIELD()
+        FPen borderPressed;
+
+        FIELD()
+        FPen borderDisabled;
+
+        FIELD()
+        FShape shape = FRoundedRectangle(2.0f);
+
+        FIELD()
+        f32 opacityDisabled = 1.0f;
+
+        FIELD()
+        f32 scaleHovered = 1.0f;
+
+        FIELD()
+        f32 scalePressed = 1.0f;
+
+        FIELD()
+        Vec2 pressedTranslation = Vec2(0, 2.5f);
     };
     
 } // namespace CE

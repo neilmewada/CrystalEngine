@@ -7,9 +7,9 @@ using namespace CE;
 namespace RenderingTests
 {
 	CLASS()
-	class TestWindow : public FCompoundWidget
+	class TestWindow : public FDecoratedWidget
 	{
-		CE_CLASS(TestWindow, FCompoundWidget)
+		CE_CLASS(TestWindow, FDecoratedWidget)
 	public:
 
 		TestWindow()
@@ -20,6 +20,8 @@ namespace RenderingTests
 		void Construct() override
 		{
 			Super::Construct();
+
+			Background(FBrush(Color(0.13f, 0.13f, 0.15f)));
 
 			Child(
 				FAssignNew(FVerticalStack, vstack)
@@ -39,25 +41,29 @@ namespace RenderingTests
 					FAssignNew(FHorizontalStack, hstack)
 					.ContentHAlign(HAlign::Center)
 					.ContentVAlign(VAlign::Center)
+					.Spacing(10)
 					.Name("hstack")
 					(
-						FNew(FWidget)
+						FNew(FButton)
 						.FillRatio(1.0f)
-						.Height(25)
-						.Name("H_1"),
-
-						FNew(FWidget)
-						.FillRatio(2.0f)
 						.Height(30)
-						.Name("H_2"),
+						.Name("H_1")
+						.Style("Button/Primary"),
 
-						FNew(FWidget)
+						FNew(FButton)
 						.FillRatio(1.0f)
-						.Height(50)
+						.Height(30)
+						.Name("H_2")
+						.Style("Button/Secondary"),
+
+						FNew(FButton)
+						.FillRatio(1.0f)
+						.Height(30)
 						.Name("H_3")
+						.Style("Button/Destructive")
 					),
 
-					FNew(FDecoratedWidget)
+					/*FNew(FDecoratedWidget)
 					.Background(Colors::Cyan)
 					.Height(30)
 					.Name("Bar_1"),
@@ -68,7 +74,6 @@ namespace RenderingTests
 					.Shape(FRoundedRectangle(5.0f))
 					.Height(30)
 					.ForcePaintBoundary(true)
-					.Pivot(Vec2(0.5f, 0.5f))
 					.Transform(FAffineTransform::Rotation(Math::ToRadians(10)))
 					.Name("Bar_2")
 					.Child(
@@ -108,7 +113,7 @@ namespace RenderingTests
 					.Background(Colors::Yellow)
 					.Shape(FRectangle())
 					.Height(30)
-					.Name("Bar_3"),
+					.Name("Bar_3"),*/
 
 					FNew(FWidget)
 					.FillRatio(1.0f)

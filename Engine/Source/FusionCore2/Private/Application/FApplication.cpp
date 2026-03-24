@@ -8,6 +8,7 @@ namespace CE
     FApplication::FApplication()
     {
         defaultStyleSet = CreateDefaultSubobject<FStyleSet>("DefaultStyleSet");
+        defaultStyleSet->InitDefault();
     }
 
     void FApplication::OnBeginDestroy()

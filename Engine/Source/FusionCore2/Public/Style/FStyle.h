@@ -3,6 +3,7 @@
 namespace CE
 {
     class FWidget;
+    class FStyleSet;
 
     ENUM()
     enum class FCursor
@@ -33,10 +34,20 @@ namespace CE
 
         virtual SubClass<FWidget> GetWidgetClass() const;
 
-        virtual void MakeStyle(FWidget& widget) = 0;
+        virtual void MakeStyle(FWidget& widget) const = 0;
+
+        Ref<FStyleSet> GetParent() const { return parent.Lock(); }
 
     protected:
 
+
+
+    private:
+
+        FIELD()
+        WeakRef<FStyleSet> parent;
+
+        friend class FStyleSet;
     };
 
 } // namespace CE

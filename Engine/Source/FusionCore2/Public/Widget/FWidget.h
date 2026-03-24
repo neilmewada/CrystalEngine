@@ -108,7 +108,15 @@ namespace CE
 
         // - Event -
 
-        virtual FEventReply HandleEvent(FEvent& event);
+        virtual void OnMouseEnter(FMouseEvent& event) {}
+        virtual void OnMouseLeave(FMouseEvent& event) {}
+        virtual FEventReply OnMouseMove(FMouseEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnMouseButtonDown(FMouseEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnMouseButtonUp(FMouseEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnMouseWheel(FMouseEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnKeyDown(FKeyEvent& event) { return FEventReply::Unhandled(); }
+        virtual FEventReply OnKeyUp(FKeyEvent& event) { return FEventReply::Unhandled(); }
+        virtual void OnFocusChanged(FFocusEvent& event) {}
 
         bool SelfHitTest(Vec2 localMousePos);
 
@@ -296,6 +304,7 @@ namespace CE
 
         // - Internal -
 
+        FIELD(ReadOnly)
 		FWidgetFlags widgetFlags = FWidgetFlags::None;
 
         FUSION_WIDGET;

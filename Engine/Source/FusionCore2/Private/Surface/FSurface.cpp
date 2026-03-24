@@ -107,6 +107,17 @@ namespace CE
         pendingLayoutRootIds.Add(layoutRoot->GetUuid());
     }
 
+    void FSurface::MarkRootLayoutDirty()
+    {
+        if (!rootWidget)
+            return;
+
+        AddPendingLayoutRoot(rootWidget);
+
+        rootWidget->MarkLayoutDirty();
+        rootWidget->MarkPaintDirty();
+    }
+
     void FSurface::DispatchSurfaceUnfocusEvent()
     {
         ZoneScoped;
@@ -119,7 +130,7 @@ namespace CE
             focusEvent.focusedWidget = nullptr;
             focusEvent.sender = widget;
 
-            widget->HandleEvent(focusEvent);
+            widget->OnFocusChanged(focusEvent);
         }
     }
 
@@ -137,7 +148,7 @@ namespace CE
             focusEvent.focusedWidget = widget;
             focusEvent.sender = widget;
 
-            widget->HandleEvent(focusEvent);
+            widget->OnFocusChanged(focusEvent);
         }
     }
 
@@ -234,7 +245,7 @@ namespace CE
             event.isInside = false;
             event.keyModifiers = keyModifierStates;
             
-            widget->HandleEvent(event);
+            widget->OnMouseLeave(event);
         }
 
         // Mouse Enter
@@ -254,7 +265,7 @@ namespace CE
             event.isInside = true;
             event.keyModifiers = keyModifierStates;
 
-            widget->HandleEvent(event);
+            widget->OnMouseEnter(event);
         }
 
         hoveredWidgetStack.Clear();
@@ -277,7 +288,7 @@ namespace CE
                 event.isInside = true;
                 event.keyModifiers = keyModifierStates;
 
-                FEventReply reply = hoveredWidget->HandleEvent(event);
+                FEventReply reply = hoveredWidget->OnMouseMove(event);
                 ProcessReply(hoveredWidget, reply);
 	        }
 
@@ -299,7 +310,7 @@ namespace CE
                     event.isInside = true;
                     event.keyModifiers = keyModifierStates;
 
-                    FEventReply reply = widget->HandleEvent(event);
+                    FEventReply reply = widget->OnMouseWheel(event);
                     ProcessReply(widget.Get(), reply);
                     if (reply.IsHandled())
                         break;
@@ -339,11 +350,33 @@ namespace CE
                     while (current)
                     {
                         downEvent.sender = current;
-                        FEventReply reply = current->HandleEvent(downEvent);
-                        ProcessReply(current, reply);
-                        if (reply.IsHandled()) 
-                            break;
-                        current = current->GetParentWidget().Get();
+                        FWidget* parent = current->GetParentWidget().Get();
+
+                        try
+                        {
+                            FEventReply reply = current->OnMouseButtonDown(downEvent);
+                            ProcessReply(current, reply);
+                            if (reply.IsHandled())
+                                break;
+                        }
+                        catch (const Exception& e)
+                        {
+                            current->SetWidgetFlag(FWidgetFlags::Faulted, true);
+                            CE_LOG(Critical, All, "Exception in {}::OnMouseButtonDown(): {}\n{}", current->GetClass()->GetName().GetLastComponent(), e.what(), e.GetStackTraceString(true));
+
+                            if (parent)
+                            {
+                                parent->MarkLayoutDirty();
+                                parent->MarkPaintDirty();
+                            }
+                            else if (rootWidget)
+                            {
+                                rootWidget->MarkLayoutDirty();
+                                rootWidget->MarkPaintDirty();
+                            }
+                        }
+
+                        current = parent;
                     }
 
                     pressedWidgetPerButton[i] = target;
@@ -372,11 +405,33 @@ namespace CE
                     while (current)
                     {
                         upEvent.sender = current;
-                        FEventReply reply = current->HandleEvent(upEvent);
-                        ProcessReply(current, reply);
-                        if (reply.IsHandled())
-                            break;
-                        current = current->GetParentWidget().Get();
+                        FWidget* parent = current->GetParentWidget().Get();
+                        
+                        try
+	                    {
+		                    FEventReply reply = current->OnMouseButtonUp(upEvent);
+                        	ProcessReply(current, reply);
+                        	if (reply.IsHandled())
+                        		break;
+	                    }
+                        catch (const Exception& e)
+                        {
+                            current->SetWidgetFlag(FWidgetFlags::Faulted, true);
+                            CE_LOG(Critical, All, "Exception in {}::OnMouseButtonUp(): {}\n{}", current->GetClass()->GetName().GetLastComponent(), e.what(), e.GetStackTraceString(true));
+
+                            if (parent)
+                            {
+                                parent->MarkLayoutDirty();
+                                parent->MarkPaintDirty();
+                            }
+                            else if (rootWidget)
+                            {
+                                rootWidget->MarkLayoutDirty();
+                                rootWidget->MarkPaintDirty();
+                            }
+                        }
+
+                        current = parent;
                     }
                 }
 
@@ -396,7 +451,7 @@ namespace CE
                 lostEvent.gotFocus = false;
                 lostEvent.focusedWidget = nextFocus;
                 lostEvent.sender = curFocus;
-                curFocus->HandleEvent(lostEvent);
+                curFocus->OnFocusChanged(lostEvent);
             }
 
             if (nextFocus)
@@ -406,7 +461,7 @@ namespace CE
                 gotEvent.gotFocus = true;
                 gotEvent.focusedWidget = nextFocus;
                 gotEvent.sender = nextFocus;
-                nextFocus->HandleEvent(gotEvent);
+                nextFocus->OnFocusChanged(gotEvent);
             }
 
             curFocusedWidget = nextFocus;
@@ -447,8 +502,6 @@ namespace CE
         // Broad-phase: pos is in widget's own layer space, cachedLayerSpaceAABB is too
         if (!widget->cachedLayerSpaceAABB.Contains(pos))
             return nullptr;
-
-        String::IsAlphabet('a');
 
         // Walk children last-to-first (last = painted on top = check first)
         for (int i = (int)widget->GetChildCount() - 1; i >= 0; i--)
@@ -641,6 +694,9 @@ namespace CE
 
         u64 totalQuadBufferSize = vertexArrayByteSize + indexArrayByteSize;
         u64 currentQuadBufferSize = 0;
+
+        if (totalQuadBufferSize == 0)
+            return;
 
         // - Geometry Buffer -
         

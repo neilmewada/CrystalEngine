@@ -25,7 +25,13 @@ namespace CE
 
         void Construct() override;
 
-        FEventReply HandleEvent(FEvent& event) override;
+        // - Events -
+
+        void OnMouseEnter(FMouseEvent& event) override;
+        void OnMouseLeave(FMouseEvent& event) override;
+
+        FEventReply OnMouseButtonDown(FMouseEvent& event) override;
+        FEventReply OnMouseButtonUp(FMouseEvent& event) override;
 
     public: // - Public API -
 

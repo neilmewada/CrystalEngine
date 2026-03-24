@@ -2,19 +2,7 @@
 
 namespace CE
 {
-    STRUCT()
-    struct FUSIONCORE_API FStyleSetEntry final
-    {
-        CE_STRUCT(FStyleSetEntry)
-    public:
-
-        FIELD()
-        CE::Name styleKey;
-
-        FIELD()
-        Ref<FStyle> style;
-
-    };
+    class FStyle;
 
     CLASS()
     class FUSIONCORE_API FStyleSet : public Object
@@ -26,17 +14,23 @@ namespace CE
 
         Ref<FStyle> FindStyle(CE::Name name);
 
+        void SetParent(Ref<FStyleSet> parent);
+
+        void RegisterStyle(CE::Name name, Ref<FStyle> style);
+        void DeregisterStyle(CE::Name name);
+
+        void InitDefault();
+
     protected:
 
-        void OnAfterDeserialize() override;
+        
 
     private:
 
         FIELD()
-        Array<FStyleSetEntry> entries;
+        WeakRef<FStyleSet> parent;
 
         HashMap<CE::Name, Ref<FStyle>> stylesByKey;
-
     };
 
 } // namespace CE

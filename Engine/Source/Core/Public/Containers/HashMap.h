@@ -88,6 +88,11 @@ namespace CE
         inline auto Find(const KeyType& key)
         {
             return Impl.find(key);
+        }
+
+        inline auto Find(const KeyType& key) const
+        {
+            return Impl.find(key);
 		}
 
         inline auto Begin()
