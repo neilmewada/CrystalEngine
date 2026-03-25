@@ -533,7 +533,6 @@ namespace CE
 
 		FUIDrawItem drawItem{};
 		drawItem.clipRectIndex = GetCurrentClipIndex();
-		drawItem.clipRectIndex = -1;
 		drawItem.shaderType = FUIShaderType::SolidColor;
 
 		u32 drawItemIndex = drawList->AddDrawItem(drawItem);
