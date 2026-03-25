@@ -55,7 +55,17 @@ struct FUIDrawItem
 	float data[32];
 };
 
+struct FUIClipRect
+{
+	float4x4 clipInverseTransform; // clip-owner layer-local → clip-local
+	float4   cornerRadii;          // topLeft, topRight, bottomRight, bottomLeft
+	float2   clipHalfSize;
+	int      _pad[2];
+};
+
 StructuredBuffer<FUIDrawItem> _DrawItems : SRG_PerObject(t0);
+
+StructuredBuffer<FUIClipRect> _ClipRects : SRG_PerObject(t1);
 
 struct VSInput
 {

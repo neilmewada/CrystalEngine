@@ -463,7 +463,29 @@ namespace CE
                 lostEvent.gotFocus = false;
                 lostEvent.focusedWidget = nextFocus;
                 lostEvent.sender = curFocus;
-                curFocus->OnFocusChanged(lostEvent);
+
+                FWidget* parent = curFocus->GetParentWidget().Get();
+
+                try
+                {
+                    curFocus->OnFocusChanged(lostEvent);
+                }
+                catch (const Exception& e)
+                {
+                    curFocus->SetWidgetFlag(FWidgetFlags::Faulted, true);
+                    CE_LOG(Critical, All, "Exception in {}::OnFocusChanged(): {}\n{}", curFocus->GetClass()->GetName().GetLastComponent(), e.what(), e.GetStackTraceString(true));
+
+                    if (parent)
+                    {
+                        parent->MarkLayoutDirty();
+                        parent->MarkPaintDirty();
+                    }
+                    else if (rootWidget)
+                    {
+                        rootWidget->MarkLayoutDirty();
+                        rootWidget->MarkPaintDirty();
+                    }
+                }
             }
 
             if (nextFocus)
@@ -473,7 +495,29 @@ namespace CE
                 gotEvent.gotFocus = true;
                 gotEvent.focusedWidget = nextFocus;
                 gotEvent.sender = nextFocus;
-                nextFocus->OnFocusChanged(gotEvent);
+
+                FWidget* parent = nextFocus->GetParentWidget().Get();
+
+                try
+                {
+                    nextFocus->OnFocusChanged(gotEvent);
+                }
+                catch (const Exception& e)
+                {
+                    nextFocus->SetWidgetFlag(FWidgetFlags::Faulted, true);
+                    CE_LOG(Critical, All, "Exception in {}::OnFocusChanged(): {}\n{}", nextFocus->GetClass()->GetName().GetLastComponent(), e.what(), e.GetStackTraceString(true));
+
+                    if (parent)
+                    {
+                        parent->MarkLayoutDirty();
+                        parent->MarkPaintDirty();
+                    }
+                    else if (rootWidget)
+                    {
+                        rootWidget->MarkLayoutDirty();
+                        rootWidget->MarkPaintDirty();
+                    }
+                }
             }
 
             curFocusedWidget = nextFocus;
@@ -820,7 +864,15 @@ namespace CE
 
         Ptr<FRenderSnapshot> snapshot = renderSnapshots[frameIndex];
 
+        const u64 vertexArrayByteSize = snapshot->vertexArray.GetCount() * sizeof(FUIVertex);
+        const u64 indexArrayByteSize = snapshot->indexArray.GetCount() * sizeof(FUIIndex);
+
+        u64 totalQuadBufferSize = vertexArrayByteSize + indexArrayByteSize;
+
         drawPacketCount = 0;
+
+        if (totalQuadBufferSize == 0)
+            return;
 
         for (int i = 0; i < snapshot->renderPassArray.GetCount(); i++)
         {

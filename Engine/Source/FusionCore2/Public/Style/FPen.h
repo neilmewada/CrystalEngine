@@ -13,7 +13,7 @@ namespace CE
 	ENUM_CLASS(FPenStyle);
 
 	STRUCT()
-	struct FUSIONCORE_API FPen
+	struct FUSIONCORE_API FPen final
 	{
 		CE_STRUCT(FPen)
 	public:

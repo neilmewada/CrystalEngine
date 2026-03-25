@@ -44,6 +44,7 @@ namespace RenderingTests
 					.Spacing(10)
 					.Name("hstack")
 					.ClipContent(true)
+					.Transform(FAffineTransform::Rotation(Math::ToRadians(2)))
 					(
 						FNew(FButton)
 						.FillRatio(1.0f)

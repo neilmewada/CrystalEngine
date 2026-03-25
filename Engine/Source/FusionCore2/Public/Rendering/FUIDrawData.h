@@ -48,6 +48,7 @@ namespace CE
 		Matrix4x4 clipInverseTransform;
 		Vec4 cornerRadii;
 		Vec2 clipHalfSize;
+		int _pad[2];
 	};
 
 	struct FUIGradientStop

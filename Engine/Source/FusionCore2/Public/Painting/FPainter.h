@@ -23,8 +23,8 @@ namespace CE
 
         FAffineTransform GetCurrentTransform();
 
+        void SetFont(const FFont& font) { currentFont = font; }
         void SetPen(const FPen& pen) { currentPen = pen; }
-
         void SetBrush(const FBrush& brush) { currentBrush = brush; }
 
         // - Path API -
@@ -86,6 +86,7 @@ namespace CE
 
         FPen currentPen;
         FBrush currentBrush;
+        FFont currentFont;
 
         FPathArray path;
         Vec2 pathMin, pathMax;
