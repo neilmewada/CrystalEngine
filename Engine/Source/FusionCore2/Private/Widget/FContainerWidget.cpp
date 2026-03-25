@@ -71,5 +71,9 @@ namespace CE
         }
     }
 
+    void FContainerWidget::SetWidgetFlagInternal(FWidgetFlags flag, bool set)
+    {
+        SetWidgetFlag(flag, set);
+    }
 }
 

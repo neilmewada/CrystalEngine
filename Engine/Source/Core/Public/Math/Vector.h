@@ -652,9 +652,14 @@ namespace CE
             return *this / GetMagnitude();
         }
 
-        f32 GetMax() const
+        T GetMax() const
 		{
             return Math::Max({x, y, z, w});
+		}
+
+        T GetMin() const
+		{
+            return Math::Min({ x, y, z, w });
 		}
 
         constexpr static f32 Dot(TVector4 a, TVector4 b)

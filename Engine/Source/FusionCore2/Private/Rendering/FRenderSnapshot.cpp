@@ -23,6 +23,9 @@ namespace CE
 		drawCmdArray.RemoveAll();
 		drawCmdSplits.RemoveAll();
 
+		clipRectArray.RemoveAll();
+		clipRectSplits.RemoveAll();
+
 		renderPassArray.RemoveAll();
 
 		matricesPerLayer.RemoveAll();
@@ -56,6 +59,9 @@ namespace CE
 
 		drawCmdSplits.Insert({ .startIndex = drawCmdArray.GetCount(), .count = drawList->drawCmdArray.GetCount() });
 		drawCmdArray.Insert(drawList->drawCmdArray.GetData(), drawList->drawCmdArray.GetCount());
+
+		clipRectSplits.Insert({ .startIndex = clipRectArray.GetCount(), .count = drawList->clipRectArray.GetCount() });
+		clipRectArray.Insert(drawList->clipRectArray.GetData(), drawList->clipRectArray.GetCount());
 
 		u32 drawCmdSplitCount = layer->GetSplitPointCount();
 

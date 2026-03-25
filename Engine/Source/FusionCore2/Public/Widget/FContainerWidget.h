@@ -69,16 +69,24 @@ namespace CE
             return self;
         }
 
-    protected: // - Internal -
+    private: // - Internal -
+
+        void SetWidgetFlagInternal(FWidgetFlags flag, bool set);
 
         FIELD()
         Array<Ref<FWidget>> children;
 
     public: // - Fusion Properties - 
 
-        FUSION_PAINT_PROPERTY(FShape, ClipShape);
+        FUSION_PROPERTY_SET(bool, ForcePaintBoundary)
+        {
+            if (self.TestWidgetFlags(FWidgetFlags::ForcePaintBoundary) == value)
+                return self;
 
-        FUSION_PAINT_PROPERTY(bool, ClipContent);
+            self.SetWidgetFlagInternal(FWidgetFlags::ForcePaintBoundary, value);
+            self.UpdateBoundaryFlags();
+            return self;
+        }
 
         FUSION_WIDGET;
     };

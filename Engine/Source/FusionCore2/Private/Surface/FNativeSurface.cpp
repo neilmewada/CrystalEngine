@@ -144,9 +144,6 @@ namespace CE
         if (newAvailableSize != availableSize && rootWidget)
         {
             sizeChanged = true;
-
-            rootWidget->MarkLayoutDirty();
-            rootWidget->MarkPaintDirty();
         }
 
 		availableSize = newAvailableSize;

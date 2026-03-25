@@ -50,6 +50,9 @@ namespace CE
 		FUIDrawCmdArray drawCmdArray;
 		FSplitRangeArray drawCmdSplits;
 
+		FUIClipRectArray clipRectArray;
+		FSplitRangeArray clipRectSplits;
+
 		FRenderPassArray renderPassArray;
 
 		RHI::DrawListTag drawListTag = RHI::DrawListTag::NullValue;

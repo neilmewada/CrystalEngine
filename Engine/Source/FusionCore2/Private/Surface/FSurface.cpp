@@ -615,7 +615,8 @@ namespace CE
         );
 
         layerMatricesBuffers.Init("Layer Matrices", 4, RHI::BufferBindFlags::ConstantBuffer);
-        drawItemBuffers.Init("Draw Items", 64, RHI::BufferBindFlags::StructuredBuffer);
+        drawItemBuffers.Init("Draw Items", 256);
+        clipRectBuffers.Init("Clip Rects", 128);
 
         auto layerSrgLayout = FApplication::Get()->GetService<FRenderService>()->GetSubPassSrgLayout();
 
@@ -637,6 +638,10 @@ namespace CE
 
     void FSurface::Shutdown()
     {
+        layerMatricesBuffers.Shutdown();
+        drawItemBuffers.Shutdown();
+        clipRectBuffers.Shutdown();
+
         for (auto srg : layerSrgs)
         {
             delete srg;
@@ -817,6 +822,24 @@ namespace CE
         }
         layerMatricesBuffers.GetBuffer(frameIndex)->Unmap();
 
+        // - Clip Rects buffer -
+
+        const u64 clipRectCount = renderSnapshot->clipRectArray.GetCount();
+
+        if (clipRectBuffers.GetElementCount() < clipRectCount)
+        {
+            clipRectBuffers.GrowToFit(clipRectCount);
+        }
+
+        if (clipRectCount > 0)
+        {
+            clipRectBuffers.GetBuffer(frameIndex)->Map(0, clipRectCount * sizeof(FUIClipRect), (void**)&data);
+            {
+                memcpy(data, renderSnapshot->clipRectArray.GetData(), clipRectCount * sizeof(FUIClipRect));
+            }
+            clipRectBuffers.GetBuffer(frameIndex)->Unmap();
+        }
+
         // - Draw Items buffer -
 
         const u64 drawItemCount = renderSnapshot->drawItemArray.GetCount();
@@ -855,7 +878,11 @@ namespace CE
 
     void FSurface::OnSurfaceResize()
     {
-        
+        if (rootWidget)
+        {
+            rootWidget->MarkLayoutDirty();
+            rootWidget->MarkPaintDirty();
+        }
     }
 
     void FSurface::FlushDrawPackets(RHI::DrawListContext& drawList, u32 frameIndex)
@@ -997,11 +1024,21 @@ namespace CE
                 drawItemSrgs.Add(srg);
             }
 
-            const auto& split = renderSnapshot->drawItemSplits[i];
-            const u64 byteOffset = split.startIndex * sizeof(FUIDrawItem);
-            const u64 byteSize = Math::Max(split.count, (SIZE_T)1) * sizeof(FUIDrawItem);
+	        {
+		        const auto& split = renderSnapshot->drawItemSplits[i];
+            	const u64 byteOffset = split.startIndex * sizeof(FUIDrawItem);
+            	const u64 byteSize = Math::Max(split.count, (SIZE_T)1) * sizeof(FUIDrawItem);
 
-            srg->Bind(frameIndex, "_DrawItems", RHI::BufferView(drawItemBuffers.GetBuffer(frameIndex), byteOffset, byteSize));
+            	srg->Bind(frameIndex, "_DrawItems", RHI::BufferView(drawItemBuffers.GetBuffer(frameIndex), byteOffset, byteSize));
+	        }
+
+            {
+                const auto& split = renderSnapshot->clipRectSplits[i];
+                const u64 byteOffset = split.startIndex * sizeof(FUIClipRect);
+                const u64 byteSize = Math::Max(split.count, (SIZE_T)1) * sizeof(FUIClipRect);
+
+	            srg->Bind(frameIndex, "_ClipItems", RHI::BufferView(clipRectBuffers.GetBuffer(frameIndex), byteOffset, byteSize));
+            }
             srg->FlushBindings();
         }
     }

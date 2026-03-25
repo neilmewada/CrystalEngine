@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_76" : {
+        "_87" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -52,7 +52,7 @@
                 }
             ]
         },
-        "_82" : {
+        "_93" : {
             "name" : "type._LayerData",
             "members" : [
                 {
@@ -64,7 +64,7 @@
                 }
             ]
         },
-        "_85" : {
+        "_96" : {
             "name" : "FUIDrawItem",
             "members" : [
                 {
@@ -121,12 +121,12 @@
                 }
             ]
         },
-        "_84" : {
+        "_95" : {
             "name" : "type.StructuredBuffer.FUIDrawItem",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_85",
+                    "type" : "_96",
                     "array" : [
                         0
                     ],
@@ -138,7 +138,7 @@
                 }
             ]
         },
-        "_88" : {
+        "_99" : {
             "name" : "FUIClipRect",
             "members" : [
                 {
@@ -172,12 +172,12 @@
                 }
             ]
         },
-        "_87" : {
+        "_98" : {
             "name" : "type.StructuredBuffer.FUIClipRect",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_88",
+                    "type" : "_99",
                     "array" : [
                         0
                     ],
@@ -249,7 +249,7 @@
     ],
     "ssbos" : [
         {
-            "type" : "_84",
+            "type" : "_95",
             "name" : "type.StructuredBuffer.FUIDrawItem",
             "readonly" : true,
             "block_size" : 0,
@@ -257,7 +257,7 @@
             "binding" : 0
         },
         {
-            "type" : "_87",
+            "type" : "_98",
             "name" : "type.StructuredBuffer.FUIClipRect",
             "readonly" : true,
             "block_size" : 0,
@@ -267,14 +267,14 @@
     ],
     "ubos" : [
         {
-            "type" : "_76",
+            "type" : "_87",
             "name" : "type._PerViewData",
             "block_size" : 224,
             "set" : 1,
             "binding" : 0
         },
         {
-            "type" : "_82",
+            "type" : "_93",
             "name" : "type._LayerData",
             "block_size" : 64,
             "set" : 3,

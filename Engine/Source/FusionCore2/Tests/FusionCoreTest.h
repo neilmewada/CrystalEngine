@@ -41,10 +41,10 @@ namespace RenderingTests
 					FAssignNew(FHorizontalStack, hstack)
 					.ContentHAlign(HAlign::Center)
 					.ContentVAlign(VAlign::Center)
+					.ClipContent(true)
+					.ForcePaintBoundary(true)
 					.Spacing(10)
 					.Name("hstack")
-					.ClipContent(true)
-					.Transform(FAffineTransform::Rotation(Math::ToRadians(2)))
 					(
 						FNew(FButton)
 						.FillRatio(1.0f)
@@ -62,10 +62,17 @@ namespace RenderingTests
 						.FillRatio(1.0f)
 						.Height(30)
 						.Name("H_3")
-						.Style("Button/Destructive")
+						.Style("Button/Destructive"),
+
+						FNew(FDecoratedWidget)
+						.Background(Colors::Cyan)
+						.FillRatio(1.0f)
+						.Height(30)
+						.Name("H_4")
+						.Transform(FAffineTransform::Rotation(Math::ToRadians(5)))
 					),
 
-					/*FNew(FDecoratedWidget)
+					FNew(FDecoratedWidget)
 					.Background(Colors::Cyan)
 					.Height(30)
 					.Name("Bar_1"),
@@ -115,7 +122,7 @@ namespace RenderingTests
 					.Background(Colors::Yellow)
 					.Shape(FRectangle())
 					.Height(30)
-					.Name("Bar_3"),*/
+					.Name("Bar_3"),
 
 					FNew(FWidget)
 					.FillRatio(1.0f)

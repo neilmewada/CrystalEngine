@@ -142,7 +142,8 @@ namespace CE
         StaticArray<RHI::VertexBufferView, RHI::Limits::MaxSwapChainImageCount> vertexBufferViewPerImage;
         StaticArray<RHI::IndexBufferView, RHI::Limits::MaxSwapChainImageCount> indexBufferViewPerImage;
         DynamicMultiBuffer<Matrix4x4> layerMatricesBuffers;
-        DynamicMultiBuffer<FUIDrawItem> drawItemBuffers;
+        DynamicStructuredBuffer<FUIDrawItem> drawItemBuffers;
+        DynamicStructuredBuffer<FUIClipRect> clipRectBuffers;
 
         // - SRGs -
         Array<RHI::ShaderResourceGroup*> layerSrgs{};

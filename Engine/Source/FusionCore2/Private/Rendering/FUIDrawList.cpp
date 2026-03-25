@@ -30,7 +30,7 @@ namespace CE
             .textureIndex = 0,
             .samplerIndex = 0,
             .drawItemFlags = FUIDrawItemFlags::None,
-            .clipRectIndex = -1,
+            .clipRectIndex = 0,//-1,
             .gradientStartIndex = 0,
             .gradientStopCount = 0,
             .userFlags = 0

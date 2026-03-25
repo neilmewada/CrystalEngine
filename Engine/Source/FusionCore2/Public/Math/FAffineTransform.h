@@ -103,8 +103,8 @@ namespace CE
         Matrix4x4 ToMatrix4x4() const
         {
             Matrix4x4 r{};
-            r.rows[0] = Vec4(m00, m01, tx, 0);
-            r.rows[1] = Vec4(m10, m11, ty, 0);
+            r.rows[0] = Vec4(m00, m01, 0, tx);
+            r.rows[1] = Vec4(m10, m11, 0, ty);
             r.rows[2] = Vec4(0, 0, 1, 0);
             r.rows[3] = Vec4(0, 0, 0, 1);
             return r;

@@ -68,6 +68,20 @@ namespace CE
 			drawList.Clear();
 			splitPoints.Clear();
 
+			// Default draw item always exists
+			drawList.drawItemArray[0].clipRectIndex = -1;
+
+			/*
+			Vec2 halfSize = widget->GetLayoutSize() / 2.0f;
+			Vec2 clipCenter = widget->GetLayoutPosition() + halfSize;
+
+			drawList.clipRectArray.Insert(FUIClipRect{
+				.clipInverseTransform = FAffineTransform::Translation(-clipCenter).ToMatrix4x4(),
+				.cornerRadii = Vec4(),
+				.clipHalfSize = halfSize,
+			});
+			*/
+
 			DoPaint(widget.Get(), painter);
 
 			drawList.Finalize();
@@ -120,7 +134,14 @@ namespace CE
 		widget->SetWidgetFlag(FWidgetFlags::PaintDirty, false);
 		widget->Paint(painter);
 
-		widget->PushClip(painter);
+		bool clipPushed = false;
+
+		// TODO: Push Clip
+		if (widget->ClipContent())
+		{
+			painter.PushClip(Rect(Vec2(), widget->GetLayoutSize()), widget->ClipShape());
+			clipPushed = true;
+		}
 
 		for (u32 i = 0; i < widget->GetChildCount(); i++)
 		{
@@ -148,7 +169,11 @@ namespace CE
 			}
 		}
 
-		widget->PopClip(painter);
+		// TODO: Pop Clip
+		if (clipPushed)
+		{
+			painter.PopClip();
+		}
 
 		widget->PaintOverlay(painter);
 

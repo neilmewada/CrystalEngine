@@ -104,9 +104,6 @@ namespace CE
 
         virtual void PaintOverlay(FPainter& painter);
 
-        virtual void PushClip(FPainter& painter) {}
-        virtual void PopClip(FPainter& painter) {}
-
         void NotifyStyleStateChanged();
 
         // - Event -
@@ -203,6 +200,9 @@ namespace CE
         FUSION_LAYOUT_PROPERTY(f32, FillRatio);
 
         FUSION_PAINT_PROPERTY(f32, Opacity);
+
+        FUSION_PAINT_PROPERTY(FShape, ClipShape);
+        FUSION_PAINT_PROPERTY(bool, ClipContent);
 
         FUSION_LAYOUT_PROPERTY(CE::HAlign, HAlign);
         FUSION_LAYOUT_PROPERTY(CE::VAlign, VAlign);

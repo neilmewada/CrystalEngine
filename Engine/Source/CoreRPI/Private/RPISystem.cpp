@@ -331,7 +331,7 @@ namespace CE::RPI
             for (int i = rhiDestructionQueue.GetSize() - 1; i >= 0; i--)
             {
                 auto& entry = rhiDestructionQueue[i];
-	            if (entry.frameCounter >= RHI::Limits::MaxSwapChainImageCount)
+	            if (entry.frameCounter > RHI::Limits::MaxSwapChainImageCount)
 	            {
                     delete entry.resource; entry.resource = nullptr;
                 

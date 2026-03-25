@@ -95,6 +95,15 @@ namespace CE
             )
         );
 
+        objectSrgLayout.TryAdd(
+            RHI::SRGVariableDescriptor(
+				"_ClipItems",
+                1,
+                RHI::ShaderResourceType::StructuredBuffer,
+                RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment
+            )
+        );
+
         this->objectSrgLayout = objectSrgLayout;
 
         mainShader = FShader::Create("FusionShader", reflection, vertexShader, fragmentShader, this);

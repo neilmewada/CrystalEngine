@@ -13,9 +13,9 @@ namespace CE
     {
         Super::SetParentSurfaceRecursive(surface);
 
-        for (int i = 0; i < children.GetSize(); i++)
+        for (int i = 0; i < GetChildCount(); i++)
         {
-            children[i]->SetParentSurfaceRecursive(surface);
+            GetChildAt(i)->SetParentSurfaceRecursive(surface);
         }
     }
 
@@ -32,9 +32,9 @@ namespace CE
         f32 maxCrossAxis  = 0.0f;
         int enabledCount  = 0;
 
-        for (int i = 0; i < children.GetSize(); i++)
+        for (int i = 0; i < GetChildCount(); i++)
         {
-            Ref<FWidget> child = children[i];
+            Ref<FWidget> child = GetChildAt(i);
             if (!child->Enabled())
                 continue;
 
@@ -113,9 +113,9 @@ namespace CE
         // Collect fill children in iteration order (indices into children array)
         Array<FillEntry> fillEntries;
 
-        for (int i = 0; i < children.GetSize(); i++)
+        for (int i = 0; i < GetChildCount(); i++)
         {
-            Ref<FWidget> child = children[i];
+            Ref<FWidget> child = GetChildAt(i);
             if (!child->Enabled()) continue;
 
             FMargin m      = child->Margin();
@@ -166,7 +166,7 @@ namespace CE
                 // Check whether this child's constraints clamp the main axis.
                 // We probe with the full contentCross for the cross dimension;
                 // only the main-axis result of ApplyLayoutConstraints matters here.
-                Ref<FWidget> child = children[entry.childIdx];
+                Ref<FWidget> child = GetChildAt(entry.childIdx);
                 Vec2 probe   = isHorizontal ? Vec2(allocated, contentCross)
                                             : Vec2(contentCross, allocated);
                 Vec2 clamped = child->ApplyLayoutConstraints(probe);
@@ -203,9 +203,9 @@ namespace CE
         bool isFirst  = true;
         int  fillSlot = 0; // walking index into fillEntries (same order as children)
 
-        for (int i = 0; i < children.GetSize(); i++)
+        for (int i = 0; i < GetChildCount(); i++)
         {
-            Ref<FWidget> child = children[i];
+            Ref<FWidget> child = GetChildAt(i);
             if (!child->Enabled()) continue;
 
             if (!isFirst) cursor += m_Spacing;

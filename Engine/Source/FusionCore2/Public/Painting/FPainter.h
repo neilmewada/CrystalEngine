@@ -60,9 +60,16 @@ namespace CE
         void FillShape(const Rect& rect, const FShape& shape, bool antiAliased = true);
         void FillAndStrokeShape(const Rect& rect, const FShape& shape, bool antiAliased = true);
 
+        // - Clipping -
+
+        void PushClip(const Rect& rect, const FShape& shape);
+        void PopClip();
+
     private:
 
         int CalculateNumCircleSegments(float radius) const;
+
+        int GetCurrentClipIndex() const { return clipStack.GetCount() - 1; }
 
         // - Path Internals -
 
@@ -78,6 +85,7 @@ namespace CE
         using FPathArray = StableDynamicArray<Vec2, 128, false>;
         using FOpacityStack = StableDynamicArray<f32, 32, false>;
         using FTransformStack = StableDynamicArray<FAffineTransform, 128, false>;
+        using FClipStack = StableDynamicArray<int, 32, false>;
 
         static constexpr u32 ArcFastTableSize = 48;
 
@@ -93,6 +101,7 @@ namespace CE
 
         FOpacityStack opacityStack;
         FTransformStack transformStack;
+        FClipStack clipStack;
 
         f32 circleSegmentMaxError = 0.2f;
         f32 curveTessellationTolerance = 1.25f;

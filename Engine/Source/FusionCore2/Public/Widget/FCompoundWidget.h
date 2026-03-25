@@ -50,10 +50,6 @@ namespace CE
             return self;
         }
 
-        FUSION_PAINT_PROPERTY(FShape, ClipShape);
-
-        FUSION_PAINT_PROPERTY(bool, ClipContent);
-
         FUSION_PROPERTY_SET(bool, ForcePaintBoundary)
         {
             if (self.TestWidgetFlags(FWidgetFlags::ForcePaintBoundary) == value)

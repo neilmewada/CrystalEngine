@@ -356,6 +356,40 @@ namespace CE
 		}
 	}
 
+	void FPainter::PushClip(const Rect& rect, const FShape& shape)
+	{
+		int index = drawList->clipRectArray.GetCount();
+
+		clipStack.Insert(index);
+
+		Vec4 radii = shape.GetCornerRadius();
+		Vec4 halfSize = rect.GetSize() / 2.0f;
+
+		if (shape.GetShapeType() == FShapeType::Rect)
+		{
+			radii = Vec4();
+		}
+		else if (shape.GetShapeType() == FShapeType::Circle)
+		{
+			radii = Vec4();
+			f32 min = halfSize.GetMin();
+			halfSize = Vec2(min, min);
+		}
+
+		Vec2 clipCenter = rect.min + halfSize;
+
+		drawList->clipRectArray.Insert(FUIClipRect{
+			.clipInverseTransform = (GetCurrentTransform() * FAffineTransform::Translation(clipCenter)).ToMatrix4x4().GetInverse(),
+			.cornerRadii = radii,
+			.clipHalfSize = halfSize
+		});
+	}
+
+	void FPainter::PopClip()
+	{
+		clipStack.RemoveLast();
+	}
+
 	int FPainter::CalculateNumCircleSegments(float radius) const
 	{
 		const int radiusIndex = (int)(radius + 0.999999f); // ceil to never reduce accuracy
@@ -485,6 +519,11 @@ namespace CE
 
 	bool FPainter::PathStrokeInternal(bool closed, bool antiAliased)
 	{
+		if (!currentPen.IsValidPen())
+			return true;
+
+		ZoneScoped;
+
 		f32 thickness = currentPen.GetThickness();
 
 		Color penColor = currentPen.GetColor();
@@ -492,12 +531,19 @@ namespace CE
 
 		u32 color = penColor.ToU32();
 
+		FUIDrawItem drawItem{};
+		drawItem.clipRectIndex = GetCurrentClipIndex();
+		drawItem.clipRectIndex = -1;
+		drawItem.shaderType = FUIShaderType::SolidColor;
+
+		u32 drawItemIndex = drawList->AddDrawItem(drawItem);
+
 		switch (currentPen.GetStyle())
 		{
 		case FPenStyle::None:
-			break;
+			return true;
 		case FPenStyle::Solid:
-			drawList->AddPolyLine(path.GetData(), (int)path.GetCount(), color, thickness, closed, antiAliased);
+			drawList->AddPolyLine(path.GetData(), (int)path.GetCount(), color, thickness, closed, antiAliased, drawItemIndex);
 			break;
 		case FPenStyle::Dashed:
 		{
@@ -531,7 +577,7 @@ namespace CE
 
 						Vec2 points[2] = { curPoint, nextPoint };
 
-						drawList->AddPolyLine(points, 2, color, thickness, false, antiAliased);
+						drawList->AddPolyLine(points, 2, color, thickness, false, antiAliased, drawItemIndex);
 					}
 				}
 				else // Distance between the points is less than the individual dot length, so just draw a normal solid line.
@@ -540,7 +586,7 @@ namespace CE
 					{
 						Vec2 points[2] = { p0, p1 };
 
-						drawList->AddPolyLine(points, 2, color, thickness, false, antiAliased);
+						drawList->AddPolyLine(points, 2, color, thickness, false, antiAliased, drawItemIndex);
 
 						distanceWithoutPainting = 0;
 					}
@@ -584,7 +630,7 @@ namespace CE
 
 						Vec2 points[2] = { curPoint, nextPoint };
 
-						drawList->AddPolyLine(points, 2, color, thickness, false, antiAliased);
+						drawList->AddPolyLine(points, 2, color, thickness, false, antiAliased, drawItemIndex);
 					}
 				}
 				else // Distance between the points is less than the individual dot length, so just draw a normal solid line.
@@ -593,7 +639,7 @@ namespace CE
 					{
 						Vec2 points[2] = { p0, p1 };
 
-						drawList->AddPolyLine(points, 2, color, thickness, false, antiAliased);
+						drawList->AddPolyLine(points, 2, color, thickness, false, antiAliased, drawItemIndex);
 
 						distanceWithoutPainting = 0;
 					}
@@ -617,6 +663,8 @@ namespace CE
 			return true;
 		}
 
+		ZoneScoped;
+
 		Rect minMax = Rect(pathMin, pathMax);
 
 		Color brushColor = currentBrush.GetColor();
@@ -632,21 +680,26 @@ namespace CE
 		case FBrushStyle::None:
 			return true;
 		case FBrushStyle::SolidFill:
+			{
+				FUIDrawItem drawItem{};
+				drawItem.clipRectIndex = GetCurrentClipIndex();
+				drawItem.shaderType = FUIShaderType::SolidColor;
+
+				drawItemIndex = drawList->AddDrawItem(drawItem);
+			}
 			break;
 		case FBrushStyle::Image:
 			{
 				FUIDrawItem drawItem{};
+				drawItem.clipRectIndex = GetCurrentClipIndex();
 				drawItem.textureIndex = 0;
 				// TODO: Add support for images
 				
-				//drawItemIndex = drawList->AddDrawItem(drawItem);
+				drawItemIndex = drawList->AddDrawItem(drawItem);
 			}
 			break;
-		case FBrushStyle::Gradient:
-			{
-				// TODO: Add support for gradients
-			}
-			break;
+		default:
+			return true;
 		}
 
 		drawList->AddConvexPolyFilled(path.GetData(), path.GetCount(), color, antiAliased, &minMax, drawItemIndex);
