@@ -158,7 +158,7 @@ namespace RenderingTests
         RPI::RPISystem::Get().SimulationTick(curImageIndex);
         RPI::RPISystem::Get().RenderTick(curImageIndex);
         frameGraphBuildSubmissionIndex = curImageIndex;
-
+        
         auto scheduler = RHI::FrameScheduler::Get();
 
         RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();

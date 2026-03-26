@@ -9,7 +9,7 @@ namespace CE
 
     struct FApplicationInitInfo
     {
-		Array<SubClass<FService>> services;
+		Array<SubClass<FService>> externalServices;
 	};
 
     CLASS(Config = Engine)

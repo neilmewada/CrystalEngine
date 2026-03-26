@@ -3,6 +3,7 @@
 namespace CE
 {
     class FWidget;
+    DECLARE_SCRIPT_EVENT(FVoidEvent);
 
     ENUM()
     enum class FEventType

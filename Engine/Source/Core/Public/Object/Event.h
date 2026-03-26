@@ -402,7 +402,17 @@ namespace CE
             if (invocationList.IsEmpty())
                 return;
 
-            Broadcast(Array<Variant>{ args... });
+            isBroadcasting = true;
+
+            for (int i = 0; i < invocationList.GetSize(); ++i)
+            {
+                if (invocationList[i].IsBound())
+                {
+                    invocationList[i].Invoke(args...);
+                }
+            }
+
+            isBroadcasting = false;
         }
 
         void operator()(const TArgs&... args) const
@@ -410,7 +420,7 @@ namespace CE
             if (invocationList.IsEmpty())
                 return;
 
-            Broadcast(Array<Variant>{ args... });
+            Broadcast(args...);
         }
 
         SIZE_T GetSignature() const override

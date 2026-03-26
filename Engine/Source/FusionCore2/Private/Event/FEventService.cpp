@@ -47,40 +47,6 @@ namespace CE
             }
 
             curFocusSurface = focusSurface;
-
-            /*Ref<FSurface> curFocus = curFocusSurface.Lock();
-            Ref<FSurface> focus = focusSurface.Lock();
-
-            if (focus != curFocus) // Focused surface changed
-            {
-	            if (curFocus != nullptr)
-	            {
-                    curFocus->DispatchSurfaceUnfocusEvent();
-	            }
-
-                if (focus != nullptr)
-                {
-                    Vec2 screenMousePos = InputManager::Get().GetGlobalMousePosition();
-                    Vec2 surfaceMousePos = focus->ScreenToSurfacePoint(screenMousePos);
-
-                    focus->DispatchSurfaceFocusEvent();
-                }
-            }
-
-            if (Ref<FSurface> surface = focus)
-            {
-                Vec2 screenMousePos = InputManager::Get().GetGlobalMousePosition();
-                Vec2 surfaceMousePos = surface->ScreenToSurfacePoint(screenMousePos);
-
-                FWidget* hitResult = surface->HitTestWidget(surfaceMousePos);
-
-                if (hitResult)
-                {
-                    CE_LOG(Info, All, "Hit Result: {} [{}]", hitResult->GetName(), hitResult->GetClass()->GetName().GetLastComponent());
-                }
-            }
-
-            this->curFocusSurface = this->focusSurface;*/
         }
     }
 

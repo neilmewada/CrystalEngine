@@ -32,6 +32,8 @@ namespace CE
 
         FWidget();
 
+        void OnBeginDestroy() override;
+
     	void OnAfterConstruct() override final;
 
 		virtual void Construct();
@@ -105,6 +107,10 @@ namespace CE
         virtual void PaintOverlay(FPainter& painter);
 
         void NotifyStyleStateChanged();
+
+        // - Animation -
+
+        void StopAllAnimations();
 
         // - Event -
 

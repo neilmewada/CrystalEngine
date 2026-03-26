@@ -191,12 +191,6 @@ namespace CE
             move.ptr = nullptr;
 #endif
         }
-
-        /*template<class U> requires TIsBaseClassOf<Object, U>::Value and (not std::is_same_v<T, U>)
-        explicit operator WeakRef<U>() const
-        {
-            return WeakRef<U>((U*)Get());
-        }*/
         
         ~WeakRef()
         {

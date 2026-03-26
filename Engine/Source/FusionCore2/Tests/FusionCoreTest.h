@@ -50,7 +50,18 @@ namespace RenderingTests
 						.FillRatio(1.0f)
 						.Height(30)
 						.Name("H_1")
-						.Style("Button/Primary"),
+						.Style("Button/Primary")
+						.OnClick([this]
+						{
+							FDecoratedWidget* bar1 = this->bar1.Get();
+
+							FAnimate::Tween<FDecoratedWidget>(bar1, &FDecoratedWidget::Transition_Transform)
+							.From(FAffineTransform::Identity())
+							.To(FAffineTransform::Scale(Vec2(0.5f, 0.5f)))
+							.Duration(1.0f)
+							.Easing(FEasingType::EaseInOutCubic)
+							.Play(bar1, "bar1");
+						}),
 
 						FNew(FButton)
 						.FillRatio(1.0f)
@@ -72,12 +83,12 @@ namespace RenderingTests
 						.Transform(FAffineTransform::Rotation(Math::ToRadians(5)))
 					),
 
-					FNew(FDecoratedWidget)
+					FAssignNew(FDecoratedWidget, bar1)
 					.Background(Colors::Cyan)
 					.Height(30)
 					.Name("Bar_1"),
 
-					FNew(FDecoratedWidget)
+					FAssignNew(FDecoratedWidget, bar2)
 					.Background(Colors::Red)
 					.Border(FPen(Colors::Green, 1.0f))
 					.Shape(FRoundedRectangle(5.0f))
@@ -134,6 +145,8 @@ namespace RenderingTests
 
 		Ref<FVerticalStack> vstack;
 		Ref<FHorizontalStack> hstack;
+		Ref<FDecoratedWidget> bar1;
+		Ref<FDecoratedWidget> bar2;
 	};
 
 	CLASS()

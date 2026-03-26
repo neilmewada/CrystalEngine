@@ -34,6 +34,7 @@
 #define FAssignNewOwned(WidgetClass, VariableName, Parent) FNewOwned(WidgetClass, Parent).Assign(VariableName)
 #define FAssignNewOwnedDynamic(WidgetClass, VariableName, Parent, WidgetDynamicClass) FNewOwnedDynamic(WidgetClass, Parent, WidgetDynamicClass).Assign(VariableName)
 
+// TODO: Implement TransitionManager callback in Transition_PropertyName setter
 #define __FUSION_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
 	protected:\
 		PropertyType m_##PropertyName = {};\
@@ -53,6 +54,21 @@
 				 DirtyFunc;\
 			}\
 			return self;\
+		}\
+		void Transition_##PropertyName(const PropertyType& value) {\
+			ZoneScoped;\
+			Self& self = *this;\
+			if constexpr (TEquitable<PropertyType>::Value)\
+			{\
+				if (TEquitable<PropertyType>::AreEqual(m_##PropertyName, value))\
+					return;\
+			}\
+			m_##PropertyName = value;\
+			thread_local const CE::Name nameValue = #PropertyName;\
+			if ((GetFlags() & OF_InsideConstructor) == 0) {\
+				 OnFusionPropertyModified(nameValue);\
+				 DirtyFunc;\
+			}\
 		}\
 		auto PropertyName() const { return this->m_##PropertyName; }
 
@@ -90,6 +106,8 @@
 			outHandle = self.m_##PropertyName.Bind(lambda);\
 			return self;\
 		}
+
+#define FProperty(widgetPtr, PropertyName) [widgetPtr]
 
 // IGNORE THE COMMENTED CODE BELOW, IT'S JUST FOR REFERENCE AND NOT PART OF THE MACROS
 /*

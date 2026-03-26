@@ -72,7 +72,14 @@ namespace CE
 
 		bool hasRenderService = false;
 
-        for (const SubClass<FService>& serviceClass : initInfo.services)
+        Array<SubClass<FService>> serviceClasses = {
+            GetStaticClass<FEventService>(),
+            GetStaticClass<FAnimationService>()
+        };
+
+        serviceClasses.AddRange(initInfo.externalServices);
+
+        for (const SubClass<FService>& serviceClass : serviceClasses)
         {
             if (serviceClass == nullptr || !serviceClass->CanBeInstantiated())
                 continue;

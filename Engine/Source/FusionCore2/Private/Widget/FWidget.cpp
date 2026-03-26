@@ -11,6 +11,16 @@ namespace CE
         m_Pivot = Vec2(0.5f, 0.5f);
     }
 
+    void FWidget::OnBeginDestroy()
+    {
+	    Super::OnBeginDestroy();
+
+        if (!IsDefaultInstance())
+        {
+            StopAllAnimations();
+        }
+    }
+
     void FWidget::OnAfterConstruct()
     {
         ZoneScoped;
@@ -223,6 +233,16 @@ namespace CE
         if (Ref<FStyle> style = styleSet->FindStyle(m_Style))
         {
             style->MakeStyle(*this);
+        }
+    }
+
+    void FWidget::StopAllAnimations()
+    {
+        ZoneScoped;
+
+        if (Ref<FAnimationService> animationService = FApplication::Get()->GetService<FAnimationService>())
+        {
+            animationService->TerminateAll(this);
         }
     }
 

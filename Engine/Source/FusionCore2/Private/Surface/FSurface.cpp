@@ -256,8 +256,29 @@ namespace CE
             event.wheelDelta = wheelDelta;
             event.isInside = false;
             event.keyModifiers = keyModifierStates;
+
+            FWidget* parent = widget->GetParentWidget().Get();
             
-            widget->OnMouseLeave(event);
+            try
+            {
+	            widget->OnMouseLeave(event);
+            }
+            catch (const Exception& e)
+            {
+                widget->SetWidgetFlag(FWidgetFlags::Faulted, true);
+                CE_LOG(Critical, All, "Exception in {}::OnMouseLeave(): {}\n{}", widget->GetClass()->GetName().GetLastComponent(), e.what(), e.GetStackTraceString(true));
+
+                if (parent)
+                {
+                    parent->MarkLayoutDirty();
+                    parent->MarkPaintDirty();
+                }
+                else
+                {
+                    rootWidget->MarkLayoutDirty();
+                    rootWidget->MarkPaintDirty();
+                }
+            }
         }
 
         // Mouse Enter
@@ -277,7 +298,28 @@ namespace CE
             event.isInside = true;
             event.keyModifiers = keyModifierStates;
 
-            widget->OnMouseEnter(event);
+            FWidget* parent = widget->GetParentWidget().Get();
+
+            try
+            {
+                widget->OnMouseEnter(event);
+            }
+            catch (const Exception& e)
+            {
+                widget->SetWidgetFlag(FWidgetFlags::Faulted, true);
+                CE_LOG(Critical, All, "Exception in {}::OnMouseEnter(): {}\n{}", widget->GetClass()->GetName().GetLastComponent(), e.what(), e.GetStackTraceString(true));
+
+                if (parent)
+                {
+                    parent->MarkLayoutDirty();
+                    parent->MarkPaintDirty();
+                }
+                else
+                {
+                    rootWidget->MarkLayoutDirty();
+                    rootWidget->MarkPaintDirty();
+                }
+            }
         }
 
         hoveredWidgetStack.Clear();
@@ -300,8 +342,29 @@ namespace CE
                 event.isInside = true;
                 event.keyModifiers = keyModifierStates;
 
-                FEventReply reply = hoveredWidget->OnMouseMove(event);
-                ProcessReply(hoveredWidget, reply);
+                FWidget* parent = hoveredWidget->GetParentWidget().Get();
+
+                try
+                {
+                    FEventReply reply = hoveredWidget->OnMouseMove(event);
+                    ProcessReply(hoveredWidget, reply);
+                }
+                catch (const Exception& e)
+                {
+                    hoveredWidget->SetWidgetFlag(FWidgetFlags::Faulted, true);
+                    CE_LOG(Critical, All, "Exception in {}::OnMouseMove(): {}\n{}", hoveredWidget->GetClass()->GetName().GetLastComponent(), e.what(), e.GetStackTraceString(true));
+
+                    if (parent)
+                    {
+                        parent->MarkLayoutDirty();
+                        parent->MarkPaintDirty();
+                    }
+                    else
+                    {
+                        rootWidget->MarkLayoutDirty();
+                        rootWidget->MarkPaintDirty();
+                    }
+                }
 	        }
 
             // Mouse Wheel
@@ -322,10 +385,31 @@ namespace CE
                     event.isInside = true;
                     event.keyModifiers = keyModifierStates;
 
-                    FEventReply reply = widget->OnMouseWheel(event);
-                    ProcessReply(widget.Get(), reply);
-                    if (reply.IsHandled())
-                        break;
+                    FWidget* parent = widget->GetParentWidget().Get();
+
+                    try
+                    {
+                        FEventReply reply = widget->OnMouseWheel(event);
+                        ProcessReply(widget.Get(), reply);
+                        if (reply.IsHandled())
+                            break;
+                    }
+                    catch (const Exception& e)
+                    {
+                        widget->SetWidgetFlag(FWidgetFlags::Faulted, true);
+                        CE_LOG(Critical, All, "Exception in {}::OnMouseWheel(): {}\n{}", widget->GetClass()->GetName().GetLastComponent(), e.what(), e.GetStackTraceString(true));
+
+                        if (parent)
+                        {
+                            parent->MarkLayoutDirty();
+                            parent->MarkPaintDirty();
+                        }
+                        else
+                        {
+                            rootWidget->MarkLayoutDirty();
+                            rootWidget->MarkPaintDirty();
+                        }
+                    }
                 }
             }
         }
@@ -355,6 +439,7 @@ namespace CE
                     downEvent.prevMousePosition = prevSurfaceMousePos;
                     downEvent.buttons = kMasks[i];
                     downEvent.isInside = true;
+                    downEvent.isDoubleClick = InputManager::GetMouseButtonClicks(kButtons[i]) == 2;
                     downEvent.keyModifiers = keyModifierStates;
 
                     // Bubble up until handled

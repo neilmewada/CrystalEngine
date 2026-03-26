@@ -106,10 +106,8 @@ static void TestBegin(bool gui)
 		FApplication* fApp = FApplication::GetOrCreate();
 
 		FApplicationInitInfo initInfo = {};
-		initInfo.services.AddRange({
-			GetStaticClass<FEventService>(),
+		initInfo.externalServices.AddRange({
 			GetStaticClass<FusionRenderService>(),
-			GetStaticClass<FAnimationService>()
 		});
 
 		fApp->Initialize(initInfo);
