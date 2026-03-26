@@ -88,7 +88,17 @@ namespace RenderingTests
 						.FillRatio(1.0f)
 						.Height(30)
 						.Name("H_3")
-						.Style("Button/Destructive"),
+						.Style("Button/Destructive")
+						.OnClick([this]
+						{
+							FAffineTransform toRotation = rotateForward ? FAffineTransform::Rotation(Math::ToRadians(90)) : FAffineTransform::Identity();
+
+							FAnimate_Spring(bar1, Transform)
+								.Target(toRotation)
+								.Play("rotate");
+
+							rotateForward = !rotateForward;
+						}),
 
 						FNew(FDecoratedWidget)
 						.Background(Colors::Cyan)
@@ -165,6 +175,7 @@ namespace RenderingTests
 		Ref<FDecoratedWidget> bar2;
 
 		bool scaleDown = true;
+		bool rotateForward = true;
 	};
 
 	CLASS()
