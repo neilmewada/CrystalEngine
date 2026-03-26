@@ -2,10 +2,13 @@
 
 exe=""
 
+DxCompiler=${VULKAN_SDK}/bin/dxc
+
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     platform="linux"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     platform="mac"
+    DxCompiler=$(eval echo ${VULKAN_SDK}/bin/dxc)
 elif [[ "$OSTYPE" == "cygwin" ]]; then
     platform="windows"
 elif [[ "$OSTYPE" == "msys" ]]; then
@@ -20,8 +23,6 @@ else
     exit 1
 fi
 
-#DxCompiler=${VULKAN_SDK}/bin/dxc
-DxCompiler=$(eval echo ${VULKAN_SDK}/bin/dxc)
 
 CompileShader() {
 

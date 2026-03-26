@@ -26,6 +26,9 @@ namespace CE
 		clipRectArray.RemoveAll();
 		clipRectSplits.RemoveAll();
 
+		gradientStopArray.RemoveAll();
+		gradientStopSplits.RemoveAll();
+
 		renderPassArray.RemoveAll();
 
 		matricesPerLayer.RemoveAll();
@@ -62,6 +65,9 @@ namespace CE
 
 		clipRectSplits.Insert({ .startIndex = clipRectArray.GetCount(), .count = drawList->clipRectArray.GetCount() });
 		clipRectArray.Insert(drawList->clipRectArray.GetData(), drawList->clipRectArray.GetCount());
+
+		gradientStopSplits.Insert({ .startIndex = gradientStopArray.GetCount(), .count = drawList->gradientStopArray.GetCount() });
+		gradientStopArray.Insert(drawList->gradientStopArray.GetData(), drawList->gradientStopArray.GetCount());
 
 		u32 drawCmdSplitCount = layer->GetSplitPointCount();
 

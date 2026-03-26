@@ -53,6 +53,9 @@ namespace CE
 		FUIClipRectArray clipRectArray;
 		FSplitRangeArray clipRectSplits;
 
+		FUIGradientStopArray gradientStopArray;
+		FSplitRangeArray gradientStopSplits;
+
 		FRenderPassArray renderPassArray;
 
 		RHI::DrawListTag drawListTag = RHI::DrawListTag::NullValue;

@@ -50,6 +50,17 @@ struct type_StructuredBuffer_FUIClipRect
     FUIClipRect _m0[1];
 };
 
+struct FUIGradientStop
+{
+    uint packedColor;
+    float position;
+};
+
+struct type_StructuredBuffer_FUIGradientStop
+{
+    FUIGradientStop _m0[1];
+};
+
 struct spvDescriptorSetBuffer1
 {
     constant type_PerViewData* _PerViewData [[id(0)]];

@@ -14,9 +14,13 @@ struct spvDescriptor
 template<typename T>
 struct spvDescriptorArray
 {
-    spvDescriptorArray(const device spvDescriptor<T>* ptr_) : ptr(&ptr_->value) {}
-    spvDescriptorArray(const device void *ptr_) : spvDescriptorArray(static_cast<const device spvDescriptor<T>*>(ptr_)) {}
-    const device T& operator [] (size_t i) const { return ptr[i]; }
+    spvDescriptorArray(const device spvDescriptor<T>* ptr) : ptr(&ptr->value)
+    {
+    }
+    const device T& operator [] (size_t i) const
+    {
+        return ptr[i];
+    }
     const device T* ptr;
 };
 
@@ -67,10 +71,16 @@ struct type_StructuredBuffer_FUIClipRect
     FUIClipRect _m0[1];
 };
 
-constant float4 _373 = {};
-constant int _374 = {};
-constant uint _375 = {};
-constant float _376 = {};
+struct FUIGradientStop
+{
+    uint packedColor;
+    float position;
+};
+
+struct type_StructuredBuffer_FUIGradientStop
+{
+    FUIGradientStop _m0[1];
+};
 
 struct spvDescriptorSetBuffer0
 {
@@ -78,20 +88,11 @@ struct spvDescriptorSetBuffer0
     spvDescriptor<texture2d<float>> _Textures [[id(16)]][1] /* unsized array hack */;
 };
 
-struct spvDescriptorSetBuffer1
-{
-    constant type_PerViewData* _PerViewData [[id(0)]];
-};
-
-struct spvDescriptorSetBuffer3
-{
-    constant type_LayerData* _LayerData [[id(0)]];
-};
-
 struct spvDescriptorSetBuffer5
 {
     const device type_StructuredBuffer_FUIDrawItem* _DrawItems [[id(0)]];
     const device type_StructuredBuffer_FUIClipRect* _ClipRects [[id(1)]];
+    const device type_StructuredBuffer_FUIGradientStop* _GradientStops [[id(2)]];
 };
 
 struct FragMain_out
@@ -107,63 +108,104 @@ struct FragMain_in
     float2 in_var_TEXCOORD4 [[user(locn3)]];
 };
 
-fragment FragMain_out FragMain(FragMain_in in [[stage_in]], const device spvDescriptorSetBuffer0& spvDescriptorSet0 [[buffer(0)]], constant spvDescriptorSetBuffer1& spvDescriptorSet1 [[buffer(1)]], constant spvDescriptorSetBuffer3& spvDescriptorSet3 [[buffer(3)]], constant spvDescriptorSetBuffer5& spvDescriptorSet5 [[buffer(5)]])
+fragment FragMain_out FragMain(FragMain_in in [[stage_in]], const device spvDescriptorSetBuffer0& spvDescriptorSet0 [[buffer(0)]], constant spvDescriptorSetBuffer5& spvDescriptorSet5 [[buffer(5)]], float4 gl_FragCoord [[position]])
 {
     spvDescriptorArray<texture2d<float>> _Textures {spvDescriptorSet0._Textures};
 
     FragMain_out out = {};
-    float4 _380 = in.in_var_TEXCOORD2;
-    float4 _611;
+    float4 _470 = in.in_var_TEXCOORD2;
+    float4 _787;
     if ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].clipRectIndex >= 0)
     {
-        uint _487 = uint((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].clipRectIndex);
-        float4 _513 = float4(in.in_var_TEXCOORD4, 0.0, 1.0) * (*spvDescriptorSet5._ClipRects)._m0[_487].clipInverseTransform;
-        float _567;
-        if (_513.x > 0.0)
+        uint _655 = uint((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].clipRectIndex);
+        float4 _689 = float4(in.in_var_TEXCOORD4, 0.0, 1.0) * (*spvDescriptorSet5._ClipRects)._m0[_655].clipInverseTransform;
+        float _743;
+        if (_689.x > 0.0)
         {
-            float _548;
-            if (_513.y > 0.0)
+            float _724;
+            if (_689.y > 0.0)
             {
-                _548 = (*spvDescriptorSet5._ClipRects)._m0[_487].cornerRadii.z;
+                _724 = (*spvDescriptorSet5._ClipRects)._m0[_655].cornerRadii.z;
             }
             else
             {
-                _548 = (*spvDescriptorSet5._ClipRects)._m0[_487].cornerRadii.y;
+                _724 = (*spvDescriptorSet5._ClipRects)._m0[_655].cornerRadii.y;
             }
-            _567 = _548;
+            _743 = _724;
         }
         else
         {
-            float _565;
-            if (_513.y > 0.0)
+            float _741;
+            if (_689.y > 0.0)
             {
-                _565 = (*spvDescriptorSet5._ClipRects)._m0[_487].cornerRadii.w;
+                _741 = (*spvDescriptorSet5._ClipRects)._m0[_655].cornerRadii.w;
             }
             else
             {
-                _565 = (*spvDescriptorSet5._ClipRects)._m0[_487].cornerRadii.x;
+                _741 = (*spvDescriptorSet5._ClipRects)._m0[_655].cornerRadii.x;
             }
-            _567 = _565;
+            _743 = _741;
         }
-        float2 _577 = (abs(_513.xy) - (*spvDescriptorSet5._ClipRects)._m0[_487].clipHalfSize) + float2(_567);
-        float4 _607 = _380;
-        _607.w = _380.w * fast::clamp(0.5 - ((length(precise::max(_577, float2(0.0))) + precise::min(precise::max(_577.x, _577.y), 0.0)) - _567), 0.0, 1.0);
-        _611 = _607;
+        float2 _753 = (abs(_689.xy) - (*spvDescriptorSet5._ClipRects)._m0[_655].clipHalfSize) + float2(_743);
+        float4 _783 = _470;
+        _783.w = _470.w * fast::clamp(0.5 - ((length(precise::max(_753, float2(0.0))) + precise::min(precise::max(_753.x, _753.y), 0.0)) - _743), 0.0, 1.0);
+        _787 = _783;
     }
     else
     {
-        _611 = _380;
+        _787 = _470;
     }
-    float4 _638;
+    float4 _991;
     if ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].shaderType == 1)
     {
-        _638 = _611 * _Textures[(*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].textureIndex].sample(spvDescriptorSet0._Samplers[(*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].samplerIndex], in.in_var_TEXCOORD1);
+        _991 = _787 * _Textures[(*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].textureIndex].sample(spvDescriptorSet0._Samplers[(*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].samplerIndex], in.in_var_TEXCOORD1);
     }
     else
     {
-        _638 = _611;
+        float4 _988;
+        if ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].shaderType == 2)
+        {
+            float4 _985;
+            int _827 = 0;
+            for (;;)
+            {
+                if (_827 < ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].gradientStopCount - 1))
+                {
+                    int _840 = (*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].gradientStartIndex + _827;
+                    uint _844 = uint(_840);
+                    uint _860 = uint(_840 + 1);
+                    bool _884;
+                    if ((*spvDescriptorSet5._GradientStops)._m0[_844].position <= in.in_var_TEXCOORD1.x)
+                    {
+                        _884 = in.in_var_TEXCOORD1.x < (*spvDescriptorSet5._GradientStops)._m0[_860].position;
+                    }
+                    else
+                    {
+                        _884 = false;
+                    }
+                    if (_884)
+                    {
+                        _985 = _787 * mix(float4(float((*spvDescriptorSet5._GradientStops)._m0[_844].packedColor & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_844].packedColor >> 8u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_844].packedColor >> 16u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_844].packedColor >> 24u) & 255u) * 0.0039215688593685626983642578125), float4(float((*spvDescriptorSet5._GradientStops)._m0[_860].packedColor & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_860].packedColor >> 8u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_860].packedColor >> 16u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_860].packedColor >> 24u) & 255u) * 0.0039215688593685626983642578125), float4(fast::clamp((in.in_var_TEXCOORD1.x - (*spvDescriptorSet5._GradientStops)._m0[_844].position) / ((*spvDescriptorSet5._GradientStops)._m0[_860].position - (*spvDescriptorSet5._GradientStops)._m0[_844].position), 0.0, 1.0)));
+                        break;
+                    }
+                    _827++;
+                    continue;
+                }
+                else
+                {
+                    _985 = _787;
+                    break;
+                }
+            }
+            _988 = _985;
+        }
+        else
+        {
+            _988 = _787;
+        }
+        _991 = _988;
     }
-    out.out_var_SV_TARGET = _638;
+    out.out_var_SV_TARGET = _991;
     return out;
 }
 

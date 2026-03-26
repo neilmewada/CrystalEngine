@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_79" : {
+        "_86" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -52,7 +52,7 @@
                 }
             ]
         },
-        "_85" : {
+        "_92" : {
             "name" : "type._LayerData",
             "members" : [
                 {
@@ -64,7 +64,7 @@
                 }
             ]
         },
-        "_88" : {
+        "_95" : {
             "name" : "FUIDrawItem",
             "members" : [
                 {
@@ -121,12 +121,12 @@
                 }
             ]
         },
-        "_87" : {
+        "_94" : {
             "name" : "type.StructuredBuffer.FUIDrawItem",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_88",
+                    "type" : "_95",
                     "array" : [
                         0
                     ],
@@ -138,7 +138,7 @@
                 }
             ]
         },
-        "_91" : {
+        "_98" : {
             "name" : "FUIClipRect",
             "members" : [
                 {
@@ -172,12 +172,12 @@
                 }
             ]
         },
-        "_90" : {
+        "_97" : {
             "name" : "type.StructuredBuffer.FUIClipRect",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_91",
+                    "type" : "_98",
                     "array" : [
                         0
                     ],
@@ -186,6 +186,38 @@
                     ],
                     "offset" : 0,
                     "array_stride" : 96
+                }
+            ]
+        },
+        "_101" : {
+            "name" : "FUIGradientStop",
+            "members" : [
+                {
+                    "name" : "packedColor",
+                    "type" : "uint",
+                    "offset" : 0
+                },
+                {
+                    "name" : "position",
+                    "type" : "float",
+                    "offset" : 4
+                }
+            ]
+        },
+        "_100" : {
+            "name" : "type.StructuredBuffer.FUIGradientStop",
+            "members" : [
+                {
+                    "name" : "_m0",
+                    "type" : "_101",
+                    "array" : [
+                        0
+                    ],
+                    "array_size_is_literal" : [
+                        true
+                    ],
+                    "offset" : 0,
+                    "array_stride" : 8
                 }
             ]
         }
@@ -264,7 +296,7 @@
     ],
     "ssbos" : [
         {
-            "type" : "_87",
+            "type" : "_94",
             "name" : "type.StructuredBuffer.FUIDrawItem",
             "readonly" : true,
             "block_size" : 0,
@@ -272,24 +304,32 @@
             "binding" : 0
         },
         {
-            "type" : "_90",
+            "type" : "_97",
             "name" : "type.StructuredBuffer.FUIClipRect",
             "readonly" : true,
             "block_size" : 0,
             "set" : 5,
             "binding" : 1
+        },
+        {
+            "type" : "_100",
+            "name" : "type.StructuredBuffer.FUIGradientStop",
+            "readonly" : true,
+            "block_size" : 0,
+            "set" : 5,
+            "binding" : 2
         }
     ],
     "ubos" : [
         {
-            "type" : "_79",
+            "type" : "_86",
             "name" : "type._PerViewData",
             "block_size" : 224,
             "set" : 1,
             "binding" : 0
         },
         {
-            "type" : "_85",
+            "type" : "_92",
             "name" : "type._LayerData",
             "block_size" : 64,
             "set" : 3,

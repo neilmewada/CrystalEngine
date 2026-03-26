@@ -111,6 +111,15 @@ namespace CE
             )
         );
 
+        objectSrgLayout.TryAdd(
+            RHI::SRGVariableDescriptor(
+				"_GradientStops",
+                2,
+                RHI::ShaderResourceType::StructuredBuffer,
+                RHI::ShaderStage::Fragment
+            )
+        );
+
         this->objectSrgLayout = objectSrgLayout;
 
         mainShader = FShader::Create("FusionShader", reflection, vertexShader, fragmentShader, this);

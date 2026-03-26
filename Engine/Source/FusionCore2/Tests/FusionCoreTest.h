@@ -28,6 +28,14 @@ namespace RenderingTests
 
 			Background(Color(0.13f, 0.13f, 0.15f));
 
+			FGradient gradient{};
+			gradient.gradientType = FGradientType::Linear;
+			gradient.stops = {
+				FGradientKey(0.0f, Colors::Red),
+				FGradientKey(0.5f, Colors::Yellow),
+				FGradientKey(1.0f, Colors::Green),
+			};
+
 			Child(
 				FAssignNew(FVerticalStack, vstack)
 				.ContentHAlign(HAlign::Fill)
@@ -156,7 +164,7 @@ namespace RenderingTests
 					),
 
 					FNew(FDecoratedWidget)
-					.Background(Colors::Yellow)
+					.Background(gradient)
 					.Shape(FRectangle())
 					.Height(30)
 					.Name("Bar_3"),

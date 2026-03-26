@@ -691,9 +691,31 @@ namespace CE
 			{
 				FUIDrawItem drawItem{};
 				drawItem.clipRectIndex = GetCurrentClipIndex();
+				drawItem.shaderType = FUIShaderType::SolidColor;
 				drawItem.textureIndex = 0;
 				// TODO: Add support for images
 				
+				drawItemIndex = drawList->AddDrawItem(drawItem);
+			}
+			break;
+		case FBrushStyle::Gradient:
+			{
+				FUIDrawItem drawItem{};
+				drawItem.clipRectIndex = GetCurrentClipIndex();
+				drawItem.shaderType = FUIShaderType::LinearGradient;
+				drawItem.gradientStartIndex = drawList->gradientStopArray.GetCount();
+				drawItem.gradientStopCount = currentBrush.GetGradient().stops.GetSize();
+
+				if (drawItem.gradientStopCount < 2)
+					return true;
+
+				for (const auto& stop : currentBrush.GetGradient().stops)
+				{
+					drawList->gradientStopArray.Insert({ .packedColor = stop.color.ToU32(), .position = stop.position });
+				}
+
+				drawItem.data[0] = currentBrush.GetGradient().angle;
+
 				drawItemIndex = drawList->AddDrawItem(drawItem);
 			}
 			break;

@@ -701,7 +701,8 @@ namespace CE
 
         layerMatricesBuffers.Init("Layer Matrices", 4, RHI::BufferBindFlags::ConstantBuffer);
         drawItemBuffers.Init("Draw Items", 256);
-        clipRectBuffers.Init("Clip Rects", 128);
+        clipRectBuffers.Init("Clip Rects", 256);
+        gradientStopBuffers.Init("Gradient Stops", 256);
 
         auto layerSrgLayout = FApplication::Get()->GetService<FRenderService>()->GetSubPassSrgLayout();
 
@@ -726,6 +727,7 @@ namespace CE
         layerMatricesBuffers.Shutdown();
         drawItemBuffers.Shutdown();
         clipRectBuffers.Shutdown();
+        gradientStopBuffers.Shutdown();
 
         for (auto srg : layerSrgs)
         {
@@ -925,6 +927,24 @@ namespace CE
             clipRectBuffers.GetBuffer(frameIndex)->Unmap();
         }
 
+        // - Gradient Stops buffer -
+
+        const u64 gradientStopCount = renderSnapshot->gradientStopArray.GetCount();
+
+        if (gradientStopBuffers.GetElementCount() < gradientStopCount)
+        {
+            gradientStopBuffers.GrowToFit(gradientStopCount);
+        }
+
+        if (gradientStopCount > 0)
+        {
+        	gradientStopBuffers.GetBuffer(frameIndex)->Map(0, gradientStopCount * sizeof(FUIGradientStop), (void**)&data);
+            {
+                memcpy(data, renderSnapshot->gradientStopArray.GetData(), gradientStopCount * sizeof(FUIGradientStop));
+            }
+            gradientStopBuffers.GetBuffer(frameIndex)->Unmap();
+        }
+
         // - Draw Items buffer -
 
         const u64 drawItemCount = renderSnapshot->drawItemArray.GetCount();
@@ -943,7 +963,7 @@ namespace CE
             drawItemBuffers.GetBuffer(frameIndex)->Unmap();
         }
 
-        UpdateDrawItemSrgs(frameIndex);
+        UpdateObjectSrgs(frameIndex);
 
         // - View Constants -
 
@@ -1092,7 +1112,7 @@ namespace CE
         }
     }
 
-    void FSurface::UpdateDrawItemSrgs(u32 frameIndex)
+    void FSurface::UpdateObjectSrgs(u32 frameIndex)
     {
         ZoneScoped;
 
@@ -1110,10 +1130,11 @@ namespace CE
             }
             else
             {
-                srg = gDynamicRHI->CreateShaderResourceGroup({ "DrawItemSrg", objectSrgLayout });
+                srg = gDynamicRHI->CreateShaderResourceGroup({ "ObjectSrgs", objectSrgLayout });
                 drawItemSrgs.Add(srg);
             }
 
+            // - Draw Items -
 	        {
 		        const auto& split = renderSnapshot->drawItemSplits[i];
             	const u64 byteOffset = split.startIndex * sizeof(FUIDrawItem);
@@ -1122,6 +1143,7 @@ namespace CE
             	srg->Bind(frameIndex, "_DrawItems", RHI::BufferView(drawItemBuffers.GetBuffer(frameIndex), byteOffset, byteSize));
 	        }
 
+            // - Clip Rects -
             {
                 const auto& split = renderSnapshot->clipRectSplits[i];
                 const u64 byteOffset = split.startIndex * sizeof(FUIClipRect);
@@ -1129,6 +1151,16 @@ namespace CE
 
 	            srg->Bind(frameIndex, "_ClipItems", RHI::BufferView(clipRectBuffers.GetBuffer(frameIndex), byteOffset, byteSize));
             }
+
+            // - Gradient Stops -
+            {
+                const auto& split = renderSnapshot->gradientStopSplits[i];
+                const u64 byteOffset = split.startIndex * sizeof(FUIClipRect);
+                const u64 byteSize = Math::Max(split.count, (SIZE_T)1) * sizeof(FUIGradientStop);
+	            
+                srg->Bind(frameIndex, "_GradientStops", RHI::BufferView(gradientStopBuffers.GetBuffer(frameIndex), byteOffset, byteSize));
+            }
+
             srg->FlushBindings();
         }
     }

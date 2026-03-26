@@ -136,7 +136,6 @@ namespace CE
 
 		bool clipPushed = false;
 
-		// TODO: Push Clip
 		if (widget->ClipContent())
 		{
 			painter.PushClip(Rect(Vec2(), widget->GetLayoutSize()), widget->ClipShape());
@@ -173,7 +172,6 @@ namespace CE
 			}
 		}
 
-		// TODO: Pop Clip
 		if (clipPushed)
 		{
 			painter.PopClip();

@@ -103,7 +103,7 @@ namespace CE
 
         void UpdateLayerSrgs();
 
-        void UpdateDrawItemSrgs(u32 frameIndex);
+        void UpdateObjectSrgs(u32 frameIndex);
 
         RHI::DrawListTag drawListTag = 0;
 		RHI::ScopeId scopeId;
@@ -144,6 +144,7 @@ namespace CE
         DynamicMultiBuffer<Matrix4x4> layerMatricesBuffers;
         DynamicStructuredBuffer<FUIDrawItem> drawItemBuffers;
         DynamicStructuredBuffer<FUIClipRect> clipRectBuffers;
+        DynamicStructuredBuffer<FUIClipRect> gradientStopBuffers;
 
         // - SRGs -
         Array<RHI::ShaderResourceGroup*> layerSrgs{};

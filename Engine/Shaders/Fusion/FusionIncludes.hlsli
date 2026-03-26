@@ -71,11 +71,24 @@ struct FUIClipRect
 	int      _pad[2];
 };
 
+struct FUIGradientStop
+{
+	uint 	packedColor;
+	float 	position;
+};
+
+inline float4 UnpackColor(uint packedColor)
+{
+	return float4((float)((packedColor) & 0xFF) / 255.0, (float)((packedColor >> 8) & 0xFF) / 255.0, (float)((packedColor >> 16) & 0xFF) / 255.0, (float)((packedColor >> 24) & 0xFF) / 255.0);
+}
+
 #if FRAGMENT
 
 StructuredBuffer<FUIDrawItem> _DrawItems : SRG_PerObject(t0);
 
 StructuredBuffer<FUIClipRect> _ClipRects : SRG_PerObject(t1);
+
+StructuredBuffer<FUIGradientStop> _GradientStops : SRG_PerObject(t2);
 
 #endif
 
