@@ -19,6 +19,8 @@ namespace CE
         const RHI::ShaderResourceGroupLayout& GetSubPassSrgLayout() const { return subPassSrgLayout; }
 
         const RHI::ShaderResourceGroupLayout& GetObjectSrgLayout() const { return objectSrgLayout; }
+        
+        RHI::ShaderResourceGroup* GetSceneSrg() const { return sceneSrg; }
 
         // - Lifecycle -
 

@@ -49,6 +49,12 @@ float4 FragMain(PSInput input) : SV_TARGET
         color.a *= saturate(0.5 - dist);
     }
 
+    if (item.shaderType == FUIShaderType::Texture)
+    {
+        float4 sampleColor = _Textures[item.textureIndex].Sample(_Samplers[item.samplerIndex], input.uv);
+        color *= sampleColor;
+    }
+
     return color;
 }
 

@@ -3,16 +3,16 @@
 #include "Core.h"
 
 // Media
-#include "CoreMedia/Image.h"
-#include "CoreMedia/CubeMap.h"
+#include "CoreAssets/Image.h"
+#include "CoreAssets/CubeMap.h"
 
-#include "CoreMedia/ImageEncoder.h"
+#include "CoreAssets/ImageEncoder.h"
 
-#include "CoreMedia/Font.h"
+#include "CoreAssets/Font.h"
 
 namespace CE
 {
-    class COREMEDIA_API CoreMediaModule : public CE::Module
+    class COREASSETS_API CoreAssetsModule : public CE::Module
     {
     public:
         virtual void StartupModule() override;

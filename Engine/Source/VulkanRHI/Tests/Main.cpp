@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 
 #include "Core.h"
-#include "CoreMedia.h"
+#include "CoreAssets.h"
 #include "CoreRHI.h"
 #include "VulkanRHI.h"
 

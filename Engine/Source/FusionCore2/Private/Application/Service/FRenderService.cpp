@@ -4,6 +4,8 @@ namespace CE
 {
     extern RawData Get_Shaders_Fusion_vert_spv();
     extern RawData Get_Shaders_Fusion_frag_spv();
+    extern RawData Get_Shaders_Fusion_vert_msl();
+    extern RawData Get_Shaders_Fusion_frag_msl();
     extern RawData Get_Shaders_Fusion_vert_json();
     extern RawData Get_Shaders_Fusion_frag_json();
 
@@ -16,8 +18,13 @@ namespace CE
     {
 	    Super::OnStart();
 
+#if PLATFORM_MAC
+        RawData vertexShader = Get_Shaders_Fusion_vert_msl();
+        RawData fragmentShader = Get_Shaders_Fusion_frag_msl();
+#else
         RawData vertexShader = Get_Shaders_Fusion_vert_spv();
         RawData fragmentShader = Get_Shaders_Fusion_frag_spv();
+#endif
 
         ShaderReflection reflection{};
         reflection.vertexInputTypes.AddRange({
@@ -91,7 +98,7 @@ namespace CE
                 "_DrawItems",
                 0,
                 RHI::ShaderResourceType::StructuredBuffer,
-                RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment
+                RHI::ShaderStage::Fragment
             )
         );
 
@@ -100,7 +107,7 @@ namespace CE
 				"_ClipItems",
                 1,
                 RHI::ShaderResourceType::StructuredBuffer,
-                RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment
+                RHI::ShaderStage::Fragment
             )
         );
 

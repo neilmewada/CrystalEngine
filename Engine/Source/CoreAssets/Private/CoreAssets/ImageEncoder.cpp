@@ -1,4 +1,4 @@
-#include "CoreMedia.h"
+#include "CoreAssets.h"
 
 #if PLATFORM_DESKTOP
 #include "ispc_texcomp.h"

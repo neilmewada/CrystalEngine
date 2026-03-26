@@ -6,7 +6,7 @@
         }
     ],
     "types" : {
-        "_75" : {
+        "_79" : {
             "name" : "type._PerViewData",
             "members" : [
                 {
@@ -52,7 +52,7 @@
                 }
             ]
         },
-        "_77" : {
+        "_85" : {
             "name" : "type._LayerData",
             "members" : [
                 {
@@ -64,7 +64,7 @@
                 }
             ]
         },
-        "_80" : {
+        "_88" : {
             "name" : "FUIDrawItem",
             "members" : [
                 {
@@ -121,12 +121,12 @@
                 }
             ]
         },
-        "_79" : {
+        "_87" : {
             "name" : "type.StructuredBuffer.FUIDrawItem",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_80",
+                    "type" : "_88",
                     "array" : [
                         0
                     ],
@@ -138,7 +138,7 @@
                 }
             ]
         },
-        "_83" : {
+        "_91" : {
             "name" : "FUIClipRect",
             "members" : [
                 {
@@ -172,12 +172,12 @@
                 }
             ]
         },
-        "_82" : {
+        "_90" : {
             "name" : "type.StructuredBuffer.FUIClipRect",
             "members" : [
                 {
                     "name" : "_m0",
-                    "type" : "_83",
+                    "type" : "_91",
                     "array" : [
                         0
                     ],
@@ -234,9 +234,37 @@
             "location" : 3
         }
     ],
+    "separate_images" : [
+        {
+            "type" : "texture2D",
+            "name" : "_Textures",
+            "array" : [
+                0
+            ],
+            "array_size_is_literal" : [
+                true
+            ],
+            "set" : 0,
+            "binding" : 1
+        }
+    ],
+    "separate_samplers" : [
+        {
+            "type" : "sampler",
+            "name" : "_Samplers",
+            "array" : [
+                16
+            ],
+            "array_size_is_literal" : [
+                true
+            ],
+            "set" : 0,
+            "binding" : 0
+        }
+    ],
     "ssbos" : [
         {
-            "type" : "_79",
+            "type" : "_87",
             "name" : "type.StructuredBuffer.FUIDrawItem",
             "readonly" : true,
             "block_size" : 0,
@@ -244,7 +272,7 @@
             "binding" : 0
         },
         {
-            "type" : "_82",
+            "type" : "_90",
             "name" : "type.StructuredBuffer.FUIClipRect",
             "readonly" : true,
             "block_size" : 0,
@@ -254,14 +282,14 @@
     ],
     "ubos" : [
         {
-            "type" : "_75",
+            "type" : "_79",
             "name" : "type._PerViewData",
             "block_size" : 224,
             "set" : 1,
             "binding" : 0
         },
         {
-            "type" : "_77",
+            "type" : "_85",
             "name" : "type._LayerData",
             "block_size" : 64,
             "set" : 3,

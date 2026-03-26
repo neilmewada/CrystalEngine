@@ -30,7 +30,6 @@ ce_add_target(Engine SHARED
         PUBLIC
             CE::Core
             CE::CoreSettings
-            CE::CoreMedia
             CE::CoreShader
             CE::CorePhysics
             CE::CoreRHI

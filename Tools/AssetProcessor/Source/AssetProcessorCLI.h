@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core.h"
-#include "CoreMedia.h"
+#include "CoreAssets.h"
 #include "CoreShader.h"
 #include "CoreRHI.h"
 #include "VulkanRHI.h"

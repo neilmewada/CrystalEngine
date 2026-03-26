@@ -1,4 +1,4 @@
-#include "CoreMedia.h"
+#include "CoreAssets.h"
 
 #include "stb_image_write.h"
 

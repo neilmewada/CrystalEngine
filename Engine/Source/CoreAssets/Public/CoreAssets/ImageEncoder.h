@@ -3,7 +3,7 @@
 namespace CE
 {
     
-    class COREMEDIA_API CMImageEncoder final
+    class COREASSETS_API CMImageEncoder final
     {
     public:
 

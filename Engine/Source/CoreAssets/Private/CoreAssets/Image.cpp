@@ -1,5 +1,5 @@
 
-#include "CoreMedia.h"
+#include "CoreAssets.h"
 
 #include "lodepng.h"
 #include "lodepng_util.h"

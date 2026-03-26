@@ -28,7 +28,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
         PUBLIC
             CE::Core
-            CE::CoreMedia
+            CE::CoreAssets
             CE::CoreApplication
         TARGETS Config
     RUNTIME_DEPENDENCIES

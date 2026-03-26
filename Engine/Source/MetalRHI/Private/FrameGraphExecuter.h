@@ -18,9 +18,7 @@ namespace CE::Metal
         void EndExecution(const FrameGraphExecuteRequest &executeRequest) override;
         
         void ResetFramesInFlight() override;
-        
-        bool ExecuteInternal(const FrameGraphExecuteRequest &executeRequest) override;
-        
+
         bool ExecuteScope(const RHI::FrameGraphExecuteRequest& executeRequest, Metal::Scope* scope,
                           HashSet<RHI::ScopeId>& executedScopes,
                           HashSet<Metal::SwapChain*>& usedSwapChains);

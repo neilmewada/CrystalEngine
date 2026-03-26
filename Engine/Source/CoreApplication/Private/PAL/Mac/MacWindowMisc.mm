@@ -3,8 +3,7 @@
 
 #include "PAL/Common/PlatformWindowMisc.h"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_syswm.h>
+#include <SDL3/SDL.h>
 
 #include <AppKit/AppKit.h>
 
@@ -20,11 +19,11 @@ namespace CE
 
         auto handle = (SDL_Window*)window->GetUnderlyingHandle();
 
-        SDL_SysWMinfo wmInfo;
-        SDL_VERSION(&wmInfo.version);
-        SDL_GetWindowWMInfo(handle, &wmInfo);
-        
-        NSWindow* nsWindow = wmInfo.info.cocoa.window;
+        NSWindow* nsWindow = (__bridge NSWindow*)SDL_GetPointerProperty(
+            SDL_GetWindowProperties(handle),
+            SDL_PROP_WINDOW_COCOA_WINDOW_POINTER,
+            nullptr
+        );
         
         // Get the backing scale factor
         CGFloat scaleFactor = [nsWindow backingScaleFactor]; // Alternatively, screen.backingScaleFactor
@@ -44,14 +43,15 @@ namespace CE
         }
         
         auto handle = (SDL_Window*)window->GetUnderlyingHandle();
-        
-        SDL_SetWindowBordered(handle, SDL_FALSE);
 
-        SDL_SysWMinfo wmInfo;
-        SDL_VERSION(&wmInfo.version);
-        SDL_GetWindowWMInfo(handle, &wmInfo);
-        
-        NSWindow* nsWindow = wmInfo.info.cocoa.window;
+        SDL_SetWindowBordered(handle, !borderless);
+        return;
+
+        NSWindow* nsWindow = (__bridge NSWindow*)SDL_GetPointerProperty(
+            SDL_GetWindowProperties(handle),
+            SDL_PROP_WINDOW_COCOA_WINDOW_POINTER,
+            nullptr
+        );
         
         NSWindowStyleMask styleMask = [nsWindow styleMask];
         styleMask |= NSWindowStyleMaskFullSizeContentView;
@@ -64,12 +64,11 @@ namespace CE
 
     int MacWindowMisc::GetWindowZOrder(SDLPlatformWindow* window)
     {
-        SDL_SysWMinfo wmInfo;
-        SDL_VERSION(&wmInfo.version);
-        if (!SDL_GetWindowWMInfo(window->GetSdlHandle(), &wmInfo))
-            return -1;
-
-        NSWindow* nsWindow = wmInfo.info.cocoa.window;
+        NSWindow* nsWindow = (__bridge NSWindow*)SDL_GetPointerProperty(
+            SDL_GetWindowProperties(window->GetSdlHandle()),
+            SDL_PROP_WINDOW_COCOA_WINDOW_POINTER,
+            nullptr
+        );
 
         NSArray* windows = [NSApp orderedWindows];
         NSInteger zOrder = [windows indexOfObject:nsWindow];

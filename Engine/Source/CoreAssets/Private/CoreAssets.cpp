@@ -1,8 +1,8 @@
 
-#include "CoreMedia.h"
+#include "CoreAssets.h"
 
 
-CE_IMPLEMENT_MODULE(CoreMedia, CE::CoreMediaModule)
+CE_IMPLEMENT_MODULE(CoreAssets, CE::CoreAssetsModule)
 
 #define STBI_FAILURE_USERMSG
 
@@ -23,17 +23,17 @@ CE_IMPLEMENT_MODULE(CoreMedia, CE::CoreMediaModule)
 
 namespace CE
 {
-    void CoreMediaModule::StartupModule()
+    void CoreAssetsModule::StartupModule()
     {
 
     }
 
-    void CoreMediaModule::ShutdownModule()
+    void CoreAssetsModule::ShutdownModule()
     {
 
     }
 
-    void CoreMediaModule::RegisterTypes()
+    void CoreAssetsModule::RegisterTypes()
     {
 
     }

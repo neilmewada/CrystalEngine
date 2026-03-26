@@ -863,11 +863,16 @@ namespace CE
         // - View Constants -
 
         viewConstants.pixelResolution = drawableSize.ToVec2();
+        
         viewConstants.projectionMatrix = Matrix4x4::OrthographicProjection(
             0, availableSize.x,
             0, availableSize.y,
             -1.0f, 1.0f
         );
+        
+        viewConstants.projectionMatrix[1][1] *= gDynamicRHI->GetClipSpaceSignY();
+        viewConstants.projectionMatrix[1][3] *= gDynamicRHI->GetClipSpaceSignY();
+        
         viewConstants.viewProjectionMatrix = viewConstants.projectionMatrix;
         viewConstants.viewMatrix = Matrix4x4::Identity();
         viewConstants.nearPlane = -1.0f;

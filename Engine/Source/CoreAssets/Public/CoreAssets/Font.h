@@ -39,7 +39,7 @@ namespace CE
         int startOffsetY = 0;
     };
     
-    class COREMEDIA_API CMFontAtlas final
+    class COREASSETS_API CMFontAtlas final
     {
     public:
 

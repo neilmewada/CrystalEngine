@@ -1,4 +1,4 @@
-#include "CoreMedia.h"
+#include "CoreAssets.h"
 
 #define TINYEXR_USE_THREAD 1
 #define TINYEXR_IMPLEMENTATION

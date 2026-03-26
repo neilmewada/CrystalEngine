@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "CoreApplication.h"
-#include "CoreMedia.h"
+#include "CoreAssets.h"
 
 #include "RHI/Limits.h"
 #include "RHI/Handle.h"

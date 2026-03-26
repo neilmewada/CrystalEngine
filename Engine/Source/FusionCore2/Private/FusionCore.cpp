@@ -15,7 +15,17 @@ namespace CE
     {
         return RawData{ .data = (u8*)Shaders_Fusion_frag_spv_Data, .dataSize = Shaders_Fusion_frag_spv_Length };
     }
-	
+
+    RawData Get_Shaders_Fusion_vert_msl()
+    {
+        return RawData{ .data = (u8*)Shaders_Fusion_vert_msl_Data, .dataSize = Shaders_Fusion_vert_msl_Length };
+    }
+
+    RawData Get_Shaders_Fusion_frag_msl()
+    {
+        return RawData{ .data = (u8*)Shaders_Fusion_frag_msl_Data, .dataSize = Shaders_Fusion_frag_msl_Length };
+    }
+
     RawData Get_Shaders_Fusion_vert_json()
     {
         return RawData{ .data = (u8*)Shaders_Fusion_vert_json_Data, .dataSize = Shaders_Fusion_vert_json_Length };

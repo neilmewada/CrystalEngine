@@ -7,16 +7,18 @@ namespace CE::Metal
 	{
 		SDL_Window* sdlWindow = (SDL_Window*)sdlWindowHandle;
 
-		SDL_DisplayMode mode{};
-		int displayIndex = 0;
+		DisplayId displayId = 0;
 		if (sdlWindow != nullptr)
-			displayIndex = SDL_GetWindowDisplayIndex(sdlWindow);
-		if (SDL_GetCurrentDisplayMode(displayIndex, &mode) != 0)
+			displayId = SDL_GetDisplayForWindow(sdlWindow);
+
+		const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(displayId);
+
+		if (mode == nullptr)
 		{
 			CE_LOG(Error, All, "Failed to get screen size for window. Error: {}", SDL_GetError());
 			return Vec2i();
 		}
-		return Vec2i(mode.w, mode.h);
+		return Vec2i(mode->w, mode->h);
 	}
 
 	void MetalSDLPlatform::InitMetalForWindow(PlatformWindow* window)

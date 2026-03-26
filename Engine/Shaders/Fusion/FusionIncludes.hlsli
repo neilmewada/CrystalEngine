@@ -1,6 +1,14 @@
 #ifndef __FUSION_INCLUDES_HLSLI__
 #define __FUSION_INCLUDES_HLSLI__
 
+#ifndef VERTEX
+#define VERTEX 1
+#endif
+
+#ifndef FRAGMENT
+#define FRAGMENT 1
+#endif
+
 #include "Core/Macros.hlsli"
 #include "Core/ViewData.hlsli"
 #include "Core/Gamma.hlsli"
@@ -63,9 +71,13 @@ struct FUIClipRect
 	int      _pad[2];
 };
 
+#if FRAGMENT
+
 StructuredBuffer<FUIDrawItem> _DrawItems : SRG_PerObject(t0);
 
 StructuredBuffer<FUIClipRect> _ClipRects : SRG_PerObject(t1);
+
+#endif
 
 struct VSInput
 {

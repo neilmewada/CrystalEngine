@@ -3,7 +3,7 @@
 namespace CE
 {
     
-    class COREMEDIA_API CMCubeMap
+    class COREASSETS_API CMCubeMap
     {
     public:
 

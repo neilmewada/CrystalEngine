@@ -5,7 +5,7 @@
     },
     "C_Cpp.default.defines": [
         "CORE_API=",
-        "COREMEDIA_API=",
+        "COREASSETS_API=",
         "CORESETTINGS_API=",
         "CORESHADER_API=",
         "GAMEENGINE_API=",

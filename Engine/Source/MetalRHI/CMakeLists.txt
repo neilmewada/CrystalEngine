@@ -31,7 +31,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::Core
             CE::CoreApplication
             CE::CoreRHI
-            CE::CoreMedia
+            CE::CoreAssets
         TARGETS Config
         MAC_FRAMEWORKS
             QuartzCore

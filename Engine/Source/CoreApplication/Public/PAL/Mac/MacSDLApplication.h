@@ -15,8 +15,6 @@ namespace CE
         void Initialize() override;
 
         u32 GetSystemDpi() override;
-        
-        int GetCurrentDisplayIndex() override;
 
     private:
 

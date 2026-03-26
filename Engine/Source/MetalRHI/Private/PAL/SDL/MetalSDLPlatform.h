@@ -1,7 +1,6 @@
 #pragma once
 
-#include "SDL.h"
-#include "SDL_metal.h"
+#include <SDL3/SDL.h>
 
 #include "CoreApplication.h"
 

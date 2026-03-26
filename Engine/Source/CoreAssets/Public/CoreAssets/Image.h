@@ -73,7 +73,7 @@ namespace CE
 	* It abstracts away all the image loading mechanisms to provide a 'raw' image to be used across the engine.
 	* You have to manually call Free() function to destroy the image!
 	*/
-    class COREMEDIA_API CMImage : private CMImageInfo
+    class COREASSETS_API CMImage : private CMImageInfo
     {
     public:
         CMImage();

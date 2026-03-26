@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(CoreMedia CXX)
+project(CoreAssets CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 

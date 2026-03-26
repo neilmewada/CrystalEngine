@@ -27,7 +27,7 @@ ce_add_target(${PROJECT_NAME} SHARED
     BUILD_DEPENDENCIES
         PUBLIC
             CE::Core
-            CE::CoreMedia
+            CE::CoreAssets
             CE::CoreApplication
             CE::CoreRHI
             CE::CoreRPI

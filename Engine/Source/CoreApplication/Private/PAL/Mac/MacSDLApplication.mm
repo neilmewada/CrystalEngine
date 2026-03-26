@@ -37,7 +37,7 @@ namespace CE
 
     }
 
-    int MacSDLApplication::GetCurrentDisplayIndex()
+    /*int MacSDLApplication::GetCurrentDisplayIndex()
     {
         // Get the window info list for the frontmost window
         CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, kCGNullWindowID);
@@ -103,13 +103,13 @@ namespace CE
         }
 
         return displayIndex;
-    }
+    }*/
 
 
-    int SDLWindowEventWatch(void* data, SDL_Event* event)
+    bool SDLWindowEventWatch(void* data, SDL_Event* event)
     {
         
-        return 0;
+        return false;
     }
 
 }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(TEST_TARGET CoreMedia)
+set(TEST_TARGET CoreAssets)
 
 set(TEST_NAME ${TEST_TARGET}_Test)
 project(${TEST_NAME})
@@ -12,7 +12,7 @@ file(GLOB_RECURSE SRCS "*.cpp" "*.h")
 ce_add_test(${PROJECT_NAME}
     AUTORTTI
     RESOURCES
-    TARGET CoreMedia
+    TARGET ${TEST_TARGET}
     FOLDER "Tests/Engine"
     SOURCES
         ${SRCS}

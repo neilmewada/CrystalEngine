@@ -5,6 +5,7 @@
 namespace CE::RHI
 {
 	class FrameScheduler;
+	class FrameGraphCompiler;
 
 	struct FrameGraphCompileRequest
 	{

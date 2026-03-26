@@ -10,7 +10,11 @@ namespace CE
 
     Vec2 FNativeSurface::ScreenToSurfacePoint(Vec2 position)
     {
+#if PLATFORM_MAC
+        return (position - platformWindow->GetWindowPosition().ToVec2());
+#else
         return (position - platformWindow->GetWindowPosition().ToVec2()) / dpiScale;
+#endif
     }
 
     FNativeSurface* FNativeSurface::Create(PlatformWindow* window, const String& name, FSurface* parentSurface)
@@ -108,6 +112,7 @@ namespace CE
         ZoneScoped;
 
         auto scheduler = RHI::FrameScheduler::Get();
+        auto renderService = FApplication::Get()->GetService<FRenderService>();
 
         scheduler->BeginScope(scopeId);
         {
@@ -117,6 +122,8 @@ namespace CE
             swapChainAttachment.loadStoreAction.storeAction = AttachmentStoreAction::Store;
             swapChainAttachment.multisampleState.sampleCount = 1;
             scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::ReadWrite);
+            
+            scheduler->UseShaderResourceGroup(renderService->GetSceneSrg());
 
             scheduler->PresentSwapChain(swapChain);
         }

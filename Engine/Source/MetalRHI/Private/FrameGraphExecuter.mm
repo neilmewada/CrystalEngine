@@ -410,11 +410,5 @@ namespace CE::Metal
         ZoneScoped;
         
     }
-    
-    bool FrameGraphExecuter::ExecuteInternal(const FrameGraphExecuteRequest& executeRequest)
-    {
-        ZoneScoped;
-        
-    }
-    
+
 }
