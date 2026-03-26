@@ -69,8 +69,8 @@ namespace CE::RHI
 
 		SRGVariableDescriptor() {}
 
-		SRGVariableDescriptor(const Name& name, u32 bindingSlot, ShaderResourceType type, ShaderStage shaderStages, u32 arrayCount = 1)
-			: name(name), bindingSlot(bindingSlot), type(type), shaderStages(shaderStages), arrayCount(arrayCount)
+		SRGVariableDescriptor(const Name& name, u32 bindingSlot, ShaderResourceType type, ShaderStage shaderStages, u32 arrayCount = 1, u32 maximumArrayCount = 100'000)
+			: name(name), bindingSlot(bindingSlot), type(type), shaderStages(shaderStages), arrayCount(arrayCount), maximumArrayCount(maximumArrayCount)
 		{}
 
 		/// @brief Name of the variable.
@@ -81,8 +81,12 @@ namespace CE::RHI
 		FIELD()
 		u32 bindingSlot = 0;
 
+		/// @brief The number of elements for a static array, or 0 if it is a dynamic array (e.g. bindless textures).
 		FIELD()
 		u32 arrayCount = 1;
+
+		FIELD()
+		u32 maximumArrayCount = 100'000;
 
 		FIELD()
 		ShaderResourceType type = ShaderResourceType::None;

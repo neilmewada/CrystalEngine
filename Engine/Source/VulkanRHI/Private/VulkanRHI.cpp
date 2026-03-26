@@ -86,6 +86,12 @@ namespace CE::Vulkan
 				gVulkanRHI->BroadCastValidationMessage(RHI::ValidationMessageType::Error, pCallbackData->pMessage);
             CE_LOG(Error, All, "Vulkan Error: {}", pCallbackData->pMessage);
         }
+        else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+        {
+            if (gVulkanRHI != nullptr)
+                gVulkanRHI->BroadCastValidationMessage(RHI::ValidationMessageType::Warning, pCallbackData->pMessage);
+            CE_LOG(Warn, All, "Vulkan Warning: {}", pCallbackData->pMessage);
+        }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
         {
 			if (gVulkanRHI != nullptr)
@@ -97,12 +103,6 @@ namespace CE::Vulkan
 			if (gVulkanRHI != nullptr)
 				gVulkanRHI->BroadCastValidationMessage(RHI::ValidationMessageType::Verbose, pCallbackData->pMessage);
             CE_LOG(Info, All, "Vulkan Verbose: {}", pCallbackData->pMessage);
-        }
-        else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
-        {
-			if (gVulkanRHI != nullptr)
-				gVulkanRHI->BroadCastValidationMessage(RHI::ValidationMessageType::Warning, pCallbackData->pMessage);
-            CE_LOG(Warn, All, "Vulkan Warning: {}", pCallbackData->pMessage);
         }
         return VK_FALSE;
     }

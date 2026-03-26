@@ -14,7 +14,7 @@ namespace CE
         
     public:
 
-        static constexpr u32 MaxTextureCount = 50'000;
+        static constexpr u32 MaxTextureCount = 100'000;
 
         const RHI::ShaderResourceGroupLayout& GetSubPassSrgLayout() const { return subPassSrgLayout; }
 

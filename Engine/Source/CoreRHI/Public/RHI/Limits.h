@@ -27,6 +27,9 @@ namespace CE::RHI
 			//! @brief Max number of vertex buffer input slots.
 			constexpr u32 MaxVertexInputSlotCount = 16;
 
+			//! @brief Max number of elements a bindless texture array can have.
+			constexpr u32 MaxBindlessArraySize = 100'000;
+
 			//! @brief Max number of color attachment counts.
 #if PLATFORM_ANDROID
 			constexpr u32 MaxColorAttachmentCount = 4;

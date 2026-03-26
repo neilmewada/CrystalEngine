@@ -48,7 +48,7 @@ namespace CE
                 "_Samplers",
                 0,
                 RHI::ShaderResourceType::SamplerState,
-                RHI::ShaderStage::Fragment,
+                RHI::ShaderStage::Fragment | RHI::ShaderStage::Compute,
                 16
             )
         );
@@ -57,8 +57,8 @@ namespace CE
 				"_Textures",
                 1,
                 RHI::ShaderResourceType::Texture2D,
-                RHI::ShaderStage::Fragment,
-                0
+                RHI::ShaderStage::Fragment | RHI::ShaderStage::Compute,
+                MaxTextureCount
             )
         );
 

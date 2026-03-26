@@ -125,7 +125,7 @@ namespace CE::Vulkan
                         bindingFlags.Add(0);
                     }
 #if !PLATFORM_DESKTOP
-                    CE_ASSERT(layoutBinding.descriptorCount > 0, "Unbounded descriptor arrays are supported only on windows!");
+                    CE_ASSERT(layoutBinding.descriptorCount > 0, "Unbounded descriptor arrays are supported only on desktop!");
 #endif
 
                     layoutBinding.stageFlags = 0;
