@@ -26,7 +26,7 @@ namespace RenderingTests
 		{
 			Super::Construct();
 
-			Background(FBrush(Color(0.13f, 0.13f, 0.15f)));
+			Background(Color(0.13f, 0.13f, 0.15f));
 
 			Child(
 				FAssignNew(FVerticalStack, vstack)
@@ -58,23 +58,31 @@ namespace RenderingTests
 						.Style("Button/Primary")
 						.OnClick([this]
 						{
-							using FuncSig = TMemberFunctionCast<TPtrType<decltype(bar1)>::Type, decltype(&TPtrType<decltype(bar1)>::Type::Transition_Transform)>::TCastedFuncSignature;
-							
-							auto ptr = (FuncSig)&TPtrType<decltype(bar1)>::Type::Transition_Transform;
+							FAffineTransform toScale = scaleDown ? FAffineTransform::Scale(Vec2(0.5f, 0.5f)) : FAffineTransform::Identity();
 
-							FAnimate::Tween(bar1, ptr)
-							.From(FAffineTransform::Identity())
-							.To(FAffineTransform::Scale(Vec2(0.5f, 0.5f)))
-							.Duration(1.0f)
-							.Easing(FEasingType::EaseInOutCubic)
-							.Play(bar1, "bar1");
+							FAnimate_Tween(bar1, Transform)
+							.To(toScale)
+							.Duration(0.5f)
+							.Play("scale");
+
+							scaleDown = !scaleDown;
 						}),
 
 						FNew(FButton)
 						.FillRatio(1.0f)
 						.Height(30)
 						.Name("H_2")
-						.Style("Button/Secondary"),
+						.Style("Button/Secondary")
+						.OnClick([this]
+						{
+							FAffineTransform toScale = scaleDown ? FAffineTransform::Scale(Vec2(0.5f, 0.5f)) : FAffineTransform::Identity();
+
+							FAnimate_Spring(bar1, Transform)
+							.Target(toScale)
+							.Play("scale");
+
+							scaleDown = !scaleDown;
+						}),
 
 						FNew(FButton)
 						.FillRatio(1.0f)
@@ -101,7 +109,7 @@ namespace RenderingTests
 					.Shape(FRoundedRectangle(5.0f))
 					.Height(30)
 					.ForcePaintBoundary(true)
-					.Transform(FAffineTransform::Rotation(Math::ToRadians(10)))
+					.ClipContent(true)
 					.Name("Bar_2")
 					.Child(
 						FNew(FHorizontalStack)
@@ -110,6 +118,7 @@ namespace RenderingTests
 						.HAlign(HAlign::Fill)
 						.VAlign(VAlign::Fill)
 						.Name("hstack")
+						.Transform(FAffineTransform::Rotation(Math::ToRadians(3)))
 						.Padding(Vec4(25, 0, 0, 0))
 						(
 							FNew(FDecoratedWidget)
@@ -154,6 +163,8 @@ namespace RenderingTests
 		Ref<FHorizontalStack> hstack;
 		Ref<FDecoratedWidget> bar1;
 		Ref<FDecoratedWidget> bar2;
+
+		bool scaleDown = true;
 	};
 
 	CLASS()

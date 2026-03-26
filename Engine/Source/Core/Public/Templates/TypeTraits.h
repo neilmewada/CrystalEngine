@@ -286,30 +286,40 @@ namespace CE
 	struct TPtrType : TFalseType
 	{
 		typedef void Type;
+
+		static T* GetRawPtr(T ptr) { return nullptr; }
 	};
 
 	template<typename T>
-	struct TPtrType<T*> : TFalseType
+	struct TPtrType<T*> : TTrueType
 	{
 		typedef T Type;
+
+		static T* GetRawPtr(T* ptr) { return ptr; }
 	};
 
 	template<typename T>
-	struct TPtrType<Ref<T>> : TFalseType
+	struct TPtrType<Ref<T>> : TTrueType
 	{
 		typedef T Type;
+
+		static T* GetRawPtr(Ref<T> ptr);
 	};
 
 	template<typename T>
-	struct TPtrType<WeakRef<T>> : TFalseType
+	struct TPtrType<WeakRef<T>> : TTrueType
 	{
 		typedef T Type;
+
+		static T* GetRawPtr(WeakRef<T> ptr);
 	};
 
 	template<typename T>
-	struct TPtrType<IntrusivePtr<T>> : TFalseType
+	struct TPtrType<IntrusivePtr<T>> : TTrueType
 	{
 		typedef T Type;
+
+		static T* GetRawPtr(IntrusivePtr<T> ptr);
 	};
 
 	template<typename T>
@@ -503,6 +513,20 @@ namespace CE
 		};
 	};
 
+	template<class TCastClassType, typename T, typename = void>
+	struct TMemberFunctionCast : TFalseType
+	{
+
+	};
+
+	template<class TCastClassType, typename TRetType, class TClassType, class... TArgs>
+	struct TMemberFunctionCast<TCastClassType, TRetType(TClassType::*)(TArgs...)>
+	{
+		using TCastedFuncTraits = TFunctionTraits<TRetType(TCastClassType::*)(TArgs...)>;
+		using TCastedFuncSignature = TCastedFuncTraits::FuncSignature;
+
+		static constexpr bool Value = TCastedFuncTraits::Value;
+	};
 
 	template<typename T, typename = void>
 	struct TStructReleaseFunction : TFalseType

@@ -27,6 +27,7 @@
 #include "Animation/FAnimation.h"
 #include "Animation/FTweenAnimation.h"
 #include "Animation/FKeyframeAnimation.h"
+#include "Animation/FSpringAnimation.h"
 #include "Animation/FSequenceAnimation.h"
 #include "Animation/FParallelAnimation.h"
 #include "Animation/FAnimationService.h"

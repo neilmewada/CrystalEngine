@@ -51,17 +51,32 @@ namespace CE
         
         WeakRef& operator=(const WeakRef& copy)
         {
+            if (copy.control)
+            {
+                copy.control->AddWeakRef();
+            }
             if (control)
             {
                 control->ReleaseWeakRef();
             }
             control = copy.control;
-            if (control)
-            {
-                control->AddWeakRef();
-            }
 #if CE_BUILD_DEBUG
             ptr = copy.ptr;
+#endif
+            return *this;
+        }
+
+        WeakRef& operator=(WeakRef&& move)
+        {
+            if (control)
+            {
+                control->ReleaseWeakRef();
+            }
+            control = move.control;
+            move.control = nullptr;
+#if CE_BUILD_DEBUG
+            ptr = move.ptr;
+            move.ptr = nullptr;
 #endif
             return *this;
         }
@@ -367,6 +382,12 @@ namespace CE
     bool Ref<T>::operator==(const WeakRef<U>& rhs) const
     {
         return control == rhs.control;
+    }
+
+    template <typename T>
+    T* TPtrType<WeakRef<T>>::GetRawPtr(WeakRef<T> ptr)
+    {
+        return ptr.Get();
     }
 
 } // namespace CE

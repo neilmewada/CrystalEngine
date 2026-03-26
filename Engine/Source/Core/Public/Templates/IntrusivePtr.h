@@ -243,4 +243,10 @@ namespace CE
 	template<typename T>
 	using Ptr = IntrusivePtr<T>;
 
+	template <typename T>
+	T* TPtrType<IntrusivePtr<T>>::GetRawPtr(IntrusivePtr<T> ptr)
+	{
+		return ptr.Get();
+	}
+
 } // namespace CE

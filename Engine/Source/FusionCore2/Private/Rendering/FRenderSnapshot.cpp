@@ -87,7 +87,7 @@ namespace CE
 				// Emit render pass for this layer's cmds before the split point
 				renderPassArray.Insert(rp1);
 
-				prevSplit = sp;
+				prevSplit = sp; // There is no "dummy" draw command for split points.
 			}
 
 			// Child's index in the split arrays = current count before it inserts

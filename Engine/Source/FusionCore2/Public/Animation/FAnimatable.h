@@ -12,6 +12,18 @@ namespace CE
 
         // Identity/zero value — needed for spring initial velocity
         static T Identity() { return {}; }
+
+        // Spring arithmetic helpers
+        static T Add(const T& a, const T& b) { return a + b; }
+        static T Scale(const T& a, f32 s) { return a * s; }
+
+        static f32 SquaredMagnitude(const T& v)
+        {
+            if constexpr (requires { v.GetSqrMagnitude(); })
+                return v.GetSqrMagnitude();
+            else
+                return static_cast<f32>(v * v);
+        }
     };
 
     template<>
@@ -23,6 +35,19 @@ namespace CE
 
         // Identity/zero value — needed for spring initial velocity
         static Color Identity() { return {}; }
+
+        // Spring arithmetic helpers
+        static Color Add(const Color& a, const Color& b)
+        {
+            return Color(a.r + b.r, a.g + b.g, a.b + b.b, a.a + b.a);
+        }
+
+        static Color Scale(const Color& a, f32 s) { return a * s; }
+
+        static f32 SquaredMagnitude(const Color& v)
+        {
+            return v.r * v.r + v.g * v.g + v.b * v.b + v.a * v.a;
+        }
     };
 
     template<>
@@ -75,6 +100,30 @@ namespace CE
 
         // Identity/zero value — needed for spring initial velocity
         static FAffineTransform Identity() { return FAffineTransform::Identity(); }
+
+        // Spring arithmetic helpers — element-wise, treating the matrix as a 6-vector
+        static FAffineTransform Add(const FAffineTransform& a, const FAffineTransform& b)
+        {
+            FAffineTransform out;
+            out.m00 = a.m00 + b.m00; out.m01 = a.m01 + b.m01;
+            out.m10 = a.m10 + b.m10; out.m11 = a.m11 + b.m11;
+            out.tx  = a.tx  + b.tx;  out.ty  = a.ty  + b.ty;
+            return out;
+        }
+
+        static FAffineTransform Scale(const FAffineTransform& a, f32 s)
+        {
+            FAffineTransform out;
+            out.m00 = a.m00 * s; out.m01 = a.m01 * s;
+            out.m10 = a.m10 * s; out.m11 = a.m11 * s;
+            out.tx  = a.tx  * s; out.ty  = a.ty  * s;
+            return out;
+        }
+
+        static f32 SquaredMagnitude(const FAffineTransform& v)
+        {
+            return v.m00*v.m00 + v.m01*v.m01 + v.m10*v.m10 + v.m11*v.m11 + v.tx*v.tx + v.ty*v.ty;
+        }
     };
 
 }

@@ -55,7 +55,7 @@
 			}\
 			return self;\
 		}\
-		void Transition_##PropertyName(const PropertyType& value) {\
+		void Animate_##PropertyName(const PropertyType& value) {\
 			ZoneScoped;\
 			Self& self = *this;\
 			if constexpr (TEquitable<PropertyType>::Value)\
@@ -107,7 +107,14 @@
 			return self;\
 		}
 
-#define FProperty(widgetPtr, PropertyName) [widgetPtr]
+// Builds 3 parameters in this order: widgetPtr, getter, setter
+#define FAnimatedProperty(widgetPtr, PropertyName) TPtrType<decltype(widgetPtr)>::GetRawPtr(widgetPtr),\
+	(decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().Transform())(TPtrType<decltype(widgetPtr)>::Type::*)() const)&TPtrType<decltype(widgetPtr)>::Type::PropertyName,\
+	(TMemberFunctionCast<TPtrType<decltype(widgetPtr)>::Type, decltype(&TPtrType<decltype(widgetPtr)>::Type::Animate_##PropertyName)>::TCastedFuncSignature)\
+	& TPtrType<decltype(widgetPtr)>::Type::Animate_##PropertyName
+
+#define FAnimate_Tween(widgetPtr, PropertyName) FAnimate::Tween(CE_EXPAND(FAnimatedProperty(widgetPtr, PropertyName)))
+#define FAnimate_Spring(widgetPtr, PropertyName) FAnimate::Spring(CE_EXPAND(FAnimatedProperty(widgetPtr, PropertyName)))
 
 // IGNORE THE COMMENTED CODE BELOW, IT'S JUST FOR REFERENCE AND NOT PART OF THE MACROS
 /*

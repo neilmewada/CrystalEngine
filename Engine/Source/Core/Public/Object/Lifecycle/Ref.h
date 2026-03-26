@@ -54,17 +54,32 @@ namespace CE
         
         Ref& operator=(const Ref& copy)
         {
+            if (copy.control)
+            {
+                copy.control->AddStrongRef();
+            }
             if (control)
             {
                 control->ReleaseStrongRef();
             }
             control = copy.control;
-            if (control)
-            {
-                control->AddStrongRef();
-            }
 #if CE_BUILD_DEBUG
             ptr = (T*)copy.ptr;
+#endif
+            return *this;
+        }
+
+        Ref& operator=(Ref&& move)
+        {
+            if (control)
+            {
+                control->ReleaseStrongRef();
+            }
+            control = move.control;
+            move.control = nullptr;
+#if CE_BUILD_DEBUG
+            ptr = move.ptr;
+            move.ptr = nullptr;
 #endif
             return *this;
         }
@@ -314,6 +329,12 @@ namespace CE
         friend class Ref;
 	};
 
+
+    template <typename T>
+    T* TPtrType<Ref<T>>::GetRawPtr(Ref<T> ptr)
+    {
+        return ptr.Get();
+    }
     
 } // namespace CE
 

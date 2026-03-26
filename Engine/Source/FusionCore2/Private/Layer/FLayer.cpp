@@ -149,6 +149,10 @@ namespace CE
 			{
 				DoPaint(child.Get(), painter);
 
+				// We only include children in AABB if clipping is disabled
+				if (widget->ClipContent())
+					continue;
+
 				// painter.GetCurrentTransform() is always the parent widget's transform here,
 				// whether child was paint boundary (no push/pop) or normal (pushed then popped).
 				if (child->IsPaintBoundary())
