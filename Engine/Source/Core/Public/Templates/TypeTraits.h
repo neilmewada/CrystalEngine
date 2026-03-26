@@ -255,6 +255,9 @@ namespace CE
 	template<typename T>
 	class WeakRef;
 
+	template<class T>
+	class IntrusivePtr;
+
 	template<typename T>
 	struct TIsRef : TFalseType
 	{
@@ -275,6 +278,36 @@ namespace CE
 
 	template<typename T>
 	struct TIsWeakRef<WeakRef<T>> : TTrueType
+	{
+		typedef T Type;
+	};
+
+	template<typename T>
+	struct TPtrType : TFalseType
+	{
+		typedef void Type;
+	};
+
+	template<typename T>
+	struct TPtrType<T*> : TFalseType
+	{
+		typedef T Type;
+	};
+
+	template<typename T>
+	struct TPtrType<Ref<T>> : TFalseType
+	{
+		typedef T Type;
+	};
+
+	template<typename T>
+	struct TPtrType<WeakRef<T>> : TFalseType
+	{
+		typedef T Type;
+	};
+
+	template<typename T>
+	struct TPtrType<IntrusivePtr<T>> : TFalseType
 	{
 		typedef T Type;
 	};
@@ -389,11 +422,15 @@ namespace CE
 
 	// Function
 
-	template <typename T>
-	struct TFunctionTraits : public TFunctionTraits<decltype(&T::operator())>
+	template <typename T, typename = void>
+	struct TFunctionTraits
 	{
 		static constexpr bool Value = false;
 	};
+
+	template <typename T>
+	struct TFunctionTraits<T, std::void_t<decltype(&T::operator())>> : TFunctionTraits<decltype(&T::operator())>
+	{};
 
 	// For generic types, directly use the result of the signature of its 'operator()'
 
@@ -406,6 +443,8 @@ namespace CE
 
 		typedef TReturnType ReturnType;
 		typedef TClassType ClassType;
+		
+		typedef TReturnType(TClassType::* FuncSignature)(Args...) const;
 
 		typedef std::tuple<Args...> Tuple;
 
@@ -428,6 +467,8 @@ namespace CE
 		typedef TReturnType ReturnType;
 		typedef TClassType ClassType;
 
+		typedef TReturnType(TClassType::* FuncSignature)(Args...);
+
 		typedef std::tuple<Args...> Tuple;
 
 		template <SIZE_T i>
@@ -448,6 +489,8 @@ namespace CE
 
 		typedef TReturnType ReturnType;
 		typedef void ClassType;
+
+		typedef TReturnType(* FuncSignature)(Args...);
 
 		typedef std::tuple<Args...> Tuple;
 

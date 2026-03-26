@@ -4,8 +4,8 @@
 #include "CoreApplication.h"
 #include "CoreRPI.h"
 
-
 #include "FusionMacros.h"
+#include "FusionTemplates.h"
 
 // Exception
 #include "Exception/FException.h"

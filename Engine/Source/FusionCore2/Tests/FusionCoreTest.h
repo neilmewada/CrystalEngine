@@ -6,15 +6,20 @@ using namespace CE;
 
 namespace RenderingTests
 {
+
 	CLASS()
 	class TestWindow : public FDecoratedWidget
 	{
 		CE_CLASS(TestWindow, FDecoratedWidget)
 	public:
 
+		using SomeType = FWidget;
+
+		String MyFunc() { return ""; }
+
 		TestWindow()
 		{
-			
+
 		}
 
 		void Construct() override
@@ -53,9 +58,11 @@ namespace RenderingTests
 						.Style("Button/Primary")
 						.OnClick([this]
 						{
-							FDecoratedWidget* bar1 = this->bar1.Get();
+							using FuncSig = TMemberFunctionCast<TPtrType<decltype(bar1)>::Type, decltype(&TPtrType<decltype(bar1)>::Type::Transition_Transform)>::TCastedFuncSignature;
+							
+							auto ptr = (FuncSig)&TPtrType<decltype(bar1)>::Type::Transition_Transform;
 
-							FAnimate::Tween<FDecoratedWidget>(bar1, &FDecoratedWidget::Transition_Transform)
+							FAnimate::Tween(bar1, ptr)
 							.From(FAffineTransform::Identity())
 							.To(FAffineTransform::Scale(Vec2(0.5f, 0.5f)))
 							.Duration(1.0f)

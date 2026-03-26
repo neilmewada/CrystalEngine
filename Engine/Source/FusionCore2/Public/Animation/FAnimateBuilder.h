@@ -2,24 +2,6 @@
 
 namespace CE
 {
-    // Extracts T from a setter callable of the form void(const T&)
-    template<typename>
-    struct FSetterArgType;
-
-    template<typename T>
-    struct FSetterArgType<void(*)(const T&)> { using Type = T; };
-
-    template<typename C, typename T>
-    struct FSetterArgType<void(C::*)(const T&)> { using Type = T; };
-
-    template<typename C, typename T>
-    struct FSetterArgType<void(C::*)(const T&) const> { using Type = T; };
-
-    // Fallback for lambdas/functors — deduces from operator()
-    template<typename C>
-    struct FSetterArgType : FSetterArgType<decltype(&C::operator())> {};
-
-
 
     template<typename T>
     class FTweenBuilder
@@ -100,22 +82,37 @@ namespace CE
     public:
 
         
-        template<typename WidgetType, typename T>
-        static FTweenBuilder<T> Tween(WidgetType* target, void (WidgetType::*setter)(const T&))
+        template<WidgetClassType TWidgetType, typename T>
+        static FTweenBuilder<T> Tween(TWidgetType* target, void (TWidgetType::*setter)(const T&))
         {
             FTweenBuilder<T> builder{};
             builder.setter = [target, setter](const T& v) { (target->*setter)(v); };
             return builder;
         }
 
-        template<typename WidgetType, typename T>
-        static FTweenBuilder<T> Tween(WidgetType* target, void (WidgetType::*setter)(T))
+        template<WidgetClassType TWidgetType, typename T>
+        static FTweenBuilder<T> Tween(TWidgetType* target, void (TWidgetType::*setter)(T))
         {
             FTweenBuilder<T> builder{};
             builder.setter = [target, setter](const T& v) { (target->*setter)(v); };
             return builder;
         }
 
+        template<WidgetClassType TWidgetType, typename T>
+        static FTweenBuilder<T> Tween(Ref<TWidgetType> target, void (TWidgetType::* setter)(const T&))
+        {
+            FTweenBuilder<T> builder{};
+            builder.setter = [target, setter](const T& v) { (target.Get()->*setter)(v); };
+            return builder;
+        }
+
+        template<WidgetClassType TWidgetType, typename T>
+        static FTweenBuilder<T> Tween(Ref<TWidgetType> target, void (TWidgetType::* setter)(T))
+        {
+            FTweenBuilder<T> builder{};
+            builder.setter = [target, setter](const T& v) { (target.Get()->*setter)(v); };
+            return builder;
+        }
     };
 
 }
