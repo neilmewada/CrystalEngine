@@ -159,7 +159,7 @@ namespace CE
         }
 
         template<typename T>
-        CE_INLINE static T Clamp(T value, T min, T max)
+        CE_INLINE static constexpr T Clamp(T value, T min, T max)
         {
             if (min > max)
                 std::swap(min, max);
@@ -167,7 +167,7 @@ namespace CE
         }
 
         template<typename T>
-        CE_INLINE static T Clamp01(T value) { return Clamp<T>(value, 0, 1); }
+        CE_INLINE static constexpr T Clamp01(T value) { return Clamp<T>(value, 0, 1); }
 
         CE_INLINE static f32 Lerp(f32 from, f32 to, f32 t) { return from * (1 - Clamp01(t)) + to * Clamp01(t); }
 

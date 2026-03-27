@@ -134,7 +134,11 @@ namespace CE
         
         constexpr u32 ToU32() const
         {
-            return ((u32)(r * 255)) | ((u32)(g * 255) << 8) | ((u32)(b * 255) << 16) | ((u32)(a * 255) << 24);
+            auto pack = [](int v) -> u32 { return (u32)(v < 0 ? 0 : v > 255 ? 255 : v); };
+            return pack((int)(r * 255))        |
+                   (pack((int)(g * 255)) << 8)  |
+                   (pack((int)(b * 255)) << 16) |
+                   (pack((int)(a * 255)) << 24);
         }
         
         constexpr Vec4 ToVec4() const

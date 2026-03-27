@@ -31,11 +31,12 @@ namespace RenderingTests
 			FGradient gradient{};
 			gradient.gradientType = FGradientType::Linear;
 			gradient.stops = {
-				FGradientKey(0.0f, Colors::Red),
-				FGradientKey(0.5f, Colors::Yellow),
-				FGradientKey(1.0f, Colors::Green),
+				FGradientKey(0.0f,  Color(0.80f, 0.00f, 0.10f)),  // deep red
+				FGradientKey(0.25f, Color(1.00f, 0.35f, 0.00f)),  // orange
+				FGradientKey(0.65f, Color(1.00f, 0.88f, 0.10f)),  // yellow
+				FGradientKey(1.0f,  Color(1.00f, 1.00f, 0.88f)),  // warm white
 			};
-			gradient.angle = Math::ToRadians(45);
+			gradient.angle = Math::ToRadians(30);
 
 			Child(
 				FAssignNew(FVerticalStack, vstack)
@@ -67,31 +68,33 @@ namespace RenderingTests
 						.Style("Button/Primary")
 						.OnClick([this]
 						{
+							// Sunset fire: deep red → orange → yellow → warm white, shallow angle
 							FGradient gradientA{};
 							gradientA.gradientType = FGradientType::Linear;
 							gradientA.stops = {
-								FGradientKey(0.0f, Colors::Red),
-								FGradientKey(0.5f, Colors::Yellow),
-								FGradientKey(1.0f, Colors::Green),
+								FGradientKey(0.0f,  Color(0.80f, 0.00f, 0.10f)),
+								FGradientKey(0.25f, Color(1.00f, 0.35f, 0.00f)),
+								FGradientKey(0.65f, Color(1.00f, 0.88f, 0.10f)),
+								FGradientKey(1.0f,  Color(1.00f, 1.00f, 0.88f)),
 							};
-							gradientA.angle = Math::ToRadians(45);
+							gradientA.angle = Math::ToRadians(30);
 
+							// Aurora: deep indigo → violet → cyan → mint, steep angle
 							FGradient gradientB{};
 							gradientB.gradientType = FGradientType::Linear;
 							gradientB.stops = {
-								FGradientKey(0.0f, Colors::Blue),
-								FGradientKey(0.5f, Colors::Cyan),
-								FGradientKey(1.0f, Colors::White),
+								FGradientKey(0.0f,  Color(0.05f, 0.00f, 0.40f)),
+								FGradientKey(0.35f, Color(0.55f, 0.00f, 0.85f)),
+								FGradientKey(0.70f, Color(0.00f, 0.80f, 0.90f)),
+								FGradientKey(1.0f,  Color(0.20f, 1.00f, 0.65f)),
 							};
-							//gradientB.stops = gradientA.stops;
-							gradientB.angle = Math::ToRadians(45 + 180);
+							gradientB.angle = Math::ToRadians(150);
 
 							FBrush target = gradientToggle ? FBrush(gradientA) : FBrush(gradientB);
 
 							FAnimate_Spring(bar3, Background)
-							.Target(target)
-							//.Duration(1.0f)
-							.Play("gradient");
+								.Target(target)
+								.Play("gradient");
 
 							gradientToggle = !gradientToggle;
 						}),
@@ -100,6 +103,12 @@ namespace RenderingTests
 						.FillRatio(1.0f)
 						.Height(30)
 						.Name("H_2")
+						.Style("Button/Primary"),
+
+						FNew(FButton)
+						.FillRatio(1.0f)
+						.Height(30)
+						.Name("H_3")
 						.Style("Button/Secondary")
 						.OnClick([this]
 						{
@@ -115,7 +124,7 @@ namespace RenderingTests
 						FNew(FButton)
 						.FillRatio(1.0f)
 						.Height(30)
-						.Name("H_3")
+						.Name("H_4")
 						.Style("Button/Destructive")
 						.OnClick([this]
 						{
@@ -185,8 +194,8 @@ namespace RenderingTests
 
 					FAssignNew(FDecoratedWidget, bar3)
 					.Background(gradient)
-					.Shape(FRectangle())
-					.Height(100)
+					.Shape(FRoundedRectangle(8.0f))
+					.Height(120)
 					.Name("Bar_3"),
 
 					FNew(FWidget)
