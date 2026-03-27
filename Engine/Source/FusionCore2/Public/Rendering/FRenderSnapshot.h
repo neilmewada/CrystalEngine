@@ -21,8 +21,8 @@ namespace CE
 
 		struct FSplitRange
 		{
-			SIZE_T startIndex = 0;
-			SIZE_T count = 0;
+			SIZE_T startOffset = 0;
+			SIZE_T byteSize = 0;
 		};
 
 		struct FRenderPass

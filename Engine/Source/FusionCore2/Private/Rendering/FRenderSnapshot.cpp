@@ -49,29 +49,44 @@ namespace CE
 
 		layer->needsCompositing = false;
 
+		RHI::DeviceLimits* limits = gDynamicRHI->GetDeviceLimits();
+		SIZE_T structuredBufferAlignment = limits->GetMinStructuredBufferOffsetAlignment();
+
 		FUIDrawList* drawList = layer->GetDrawList();
-		
-		vertexSplits.Insert({ .startIndex = vertexArray.GetCount(), .count = drawList->vertexArray.GetCount() });
+
+		vertexSplits.Insert({ .startOffset = vertexArray.GetByteSize(), .byteSize = drawList->vertexArray.GetByteSize() });
 		vertexArray.Insert(drawList->vertexArray.GetData(), drawList->vertexArray.GetCount());
 
-		indexSplits.Insert({ .startIndex = indexArray.GetCount(), .count = drawList->indexArray.GetCount() });
+		indexSplits.Insert({ .startOffset = indexArray.GetByteSize(), .byteSize = drawList->indexArray.GetByteSize() });
 		indexArray.Insert(drawList->indexArray.GetData(), drawList->indexArray.GetCount());
 
-		drawItemSplits.Insert({ .startIndex = drawItemArray.GetCount(), .count = drawList->drawItemArray.GetCount() });
-		drawItemArray.Insert(drawList->drawItemArray.GetData(), drawList->drawItemArray.GetCount());
+		{
+			SIZE_T alignedOffset = Memory::AlignUp(drawItemArray.GetByteSize(), structuredBufferAlignment);
+			drawItemArray.InsertRange((int)((alignedOffset - drawItemArray.GetByteSize()) / sizeof(FUIDrawItem)));
+			drawItemSplits.Insert({ .startOffset = alignedOffset, .byteSize = drawList->drawItemArray.GetByteSize() });
+			drawItemArray.Insert(drawList->drawItemArray.GetData(), drawList->drawItemArray.GetCount());
+		}
 
-		drawCmdSplits.Insert({ .startIndex = drawCmdArray.GetCount(), .count = drawList->drawCmdArray.GetCount() });
+		drawCmdSplits.Insert({ .startOffset = drawCmdArray.GetByteSize(), .byteSize = drawList->drawCmdArray.GetByteSize() });
 		drawCmdArray.Insert(drawList->drawCmdArray.GetData(), drawList->drawCmdArray.GetCount());
 
-		clipRectSplits.Insert({ .startIndex = clipRectArray.GetCount(), .count = drawList->clipRectArray.GetCount() });
-		clipRectArray.Insert(drawList->clipRectArray.GetData(), drawList->clipRectArray.GetCount());
+		{
+			SIZE_T alignedOffset = Memory::AlignUp(clipRectArray.GetByteSize(), structuredBufferAlignment);
+			clipRectArray.InsertRange((int)((alignedOffset - clipRectArray.GetByteSize()) / sizeof(FUIClipRect)));
+			clipRectSplits.Insert({ .startOffset = alignedOffset, .byteSize = drawList->clipRectArray.GetByteSize() });
+			clipRectArray.Insert(drawList->clipRectArray.GetData(), drawList->clipRectArray.GetCount());
+		}
 
-		gradientStopSplits.Insert({ .startIndex = gradientStopArray.GetCount(), .count = drawList->gradientStopArray.GetCount() });
-		gradientStopArray.Insert(drawList->gradientStopArray.GetData(), drawList->gradientStopArray.GetCount());
+		{
+			SIZE_T alignedOffset = Memory::AlignUp(gradientStopArray.GetByteSize(), structuredBufferAlignment);
+			gradientStopArray.InsertRange((int)((alignedOffset - gradientStopArray.GetByteSize()) / sizeof(FUIGradientStop)));
+			gradientStopSplits.Insert({ .startOffset = alignedOffset, .byteSize = drawList->gradientStopArray.GetByteSize() });
+			gradientStopArray.Insert(drawList->gradientStopArray.GetData(), drawList->gradientStopArray.GetCount());
+		}
 
 		u32 drawCmdSplitCount = layer->GetSplitPointCount();
 
-		SIZE_T cmdBase = drawCmdSplits.Last().startIndex;
+		SIZE_T cmdBase = drawCmdSplits.Last().startOffset / sizeof(FUIDrawCmd);
 		u32 prevSplit = 0;
 
 		Matrix4x4 layerGlobalMatrix = layer->GetGlobalTransform().ToMatrix4x4();
@@ -104,7 +119,7 @@ namespace CE
 			.renderTarget = nullptr,
 			.layerIndex = (SIZE_T)layerIndex,
 			.drawCmdStartIndex = cmdBase + prevSplit,
-			.drawCmdCount = drawCmdSplits[layerIndex].count - prevSplit
+			.drawCmdCount = drawCmdSplits[layerIndex].byteSize / sizeof(FUIDrawCmd) - prevSplit
 		};
 
 		if (rp2.drawCmdCount == 0)

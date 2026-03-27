@@ -149,9 +149,10 @@ namespace CE
             ZoneScoped;
 
             // Scalar fields: lerp continuously regardless of style
-            const f32 thickness  = a.GetThickness()  + (b.GetThickness()  - a.GetThickness())  * t;
-            const f32 dashLength = a.GetDashLength() + (b.GetDashLength() - a.GetDashLength()) * t;
-            const f32 dashGap    = a.GetDashGap()    + (b.GetDashGap()    - a.GetDashGap())    * t;
+            const f32 thickness       = a.GetThickness()       + (b.GetThickness()       - a.GetThickness())       * t;
+            const f32 dashLength      = a.GetDashLength()      + (b.GetDashLength()      - a.GetDashLength())      * t;
+            const f32 dashGap         = a.GetDashGap()         + (b.GetDashGap()         - a.GetDashGap())         * t;
+            const f32 gradientOffset  = a.GetGradientOffset()  + (b.GetGradientOffset()  - a.GetGradientOffset())  * t;
 
             // Style (Solid/Dashed/Dotted/None): discrete, snap at t=0.5 if different
             const FPenStyle style = (a.GetStyle() == b.GetStyle() || t < 0.5f) ? a.GetStyle() : b.GetStyle();
@@ -162,6 +163,7 @@ namespace CE
             out.SetThickness(thickness);
             out.SetDashLength(dashLength);
             out.SetDashGap(dashGap);
+            out.SetGradientOffset(gradientOffset);
             return out;
         }
 
@@ -181,6 +183,7 @@ namespace CE
                 out.SetThickness(a.GetThickness() + b.GetThickness());
                 out.SetDashLength(a.GetDashLength() + b.GetDashLength());
                 out.SetDashGap(a.GetDashGap() + b.GetDashGap());
+                out.SetGradientOffset(a.GetGradientOffset() + b.GetGradientOffset());
                 return out;
             }
 
@@ -189,6 +192,7 @@ namespace CE
             out.SetThickness(a.GetThickness() + b.GetThickness());
             out.SetDashLength(a.GetDashLength() + b.GetDashLength());
             out.SetDashGap(a.GetDashGap() + b.GetDashGap());
+            out.SetGradientOffset(a.GetGradientOffset() + b.GetGradientOffset());
             out.SetColor(FAnimatable<Color>::Add(a.GetColor(), b.GetColor()));
 
             if (a.HasGradient() && b.HasGradient())
@@ -219,6 +223,7 @@ namespace CE
             out.SetThickness(a.GetThickness() * s);
             out.SetDashLength(a.GetDashLength() * s);
             out.SetDashGap(a.GetDashGap() * s);
+            out.SetGradientOffset(a.GetGradientOffset() * s);
             out.SetColor(FAnimatable<Color>::Scale(a.GetColor(), s));
 
             if (a.HasGradient())
@@ -242,9 +247,10 @@ namespace CE
             ZoneScoped;
 
             f32 mag = FAnimatable<Color>::SquaredMagnitude(v.GetColor())
-                    + v.GetThickness()  * v.GetThickness()
-                    + v.GetDashLength() * v.GetDashLength()
-                    + v.GetDashGap()    * v.GetDashGap();
+                    + v.GetThickness()      * v.GetThickness()
+                    + v.GetDashLength()     * v.GetDashLength()
+                    + v.GetDashGap()        * v.GetDashGap()
+                    + v.GetGradientOffset() * v.GetGradientOffset();
 
             if (v.HasGradient())
             {

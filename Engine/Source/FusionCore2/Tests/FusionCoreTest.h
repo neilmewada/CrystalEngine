@@ -19,7 +19,7 @@ namespace RenderingTests
 
 		TestWindow()
 		{
-
+			m_LineOffset = 0.0f;
 		}
 
 		void Construct() override
@@ -116,8 +116,16 @@ namespace RenderingTests
 						.Style("Button/Primary")
 						.OnClick([this]
 						{
+							FAnimate_Tween(this, LineOffset)
+							.From(0.0f)
+							.To(1.0f)
+							.Duration(5.0f)
+							.Easing(FEasingType::Linear)
+							.Loop(FAnimationLoopMode::Loop)
+							.Play();
+
 							// Neon aurora border: indigo → violet → cyan  ↔  magenta → orange → gold
-							FGradient penGradA{};
+							/*FGradient penGradA{};
 							penGradA.gradientType = FGradientType::Linear;
 							penGradA.stops = {
 								FGradientKey(0.00f, Color(0.10f, 0.00f, 0.90f)), // electric indigo
@@ -130,20 +138,24 @@ namespace RenderingTests
 							FGradient penGradB{};
 							penGradB.gradientType = FGradientType::Linear;
 							penGradB.stops = {
-								FGradientKey(0.00f, Color(1.00f, 0.00f, 0.60f)), // hot magenta
-								FGradientKey(0.25f, Color(1.00f, 0.45f, 0.00f)), // orange
-								FGradientKey(0.50f, Color(1.00f, 0.85f, 0.00f)), // gold
-								FGradientKey(0.75f, Color(1.00f, 0.45f, 0.00f)), // orange
-								FGradientKey(1.00f, Color(1.00f, 0.00f, 0.60f)), // hot magenta
+								FGradientKey(0.000f, Color(1.00f, 0.00f, 0.50f)), // magenta
+								FGradientKey(0.125f, Color(1.00f, 0.00f, 0.00f)), // red
+								FGradientKey(0.250f, Color(1.00f, 0.50f, 0.00f)), // orange
+								FGradientKey(0.375f, Color(1.00f, 1.00f, 0.00f)), // yellow
+								FGradientKey(0.500f, Color(0.00f, 1.00f, 0.00f)), // green
+								FGradientKey(0.625f, Color(0.00f, 1.00f, 1.00f)), // cyan
+								FGradientKey(0.750f, Color(0.00f, 0.00f, 1.00f)), // blue
+								FGradientKey(0.875f, Color(0.50f, 0.00f, 1.00f)), // violet
+								FGradientKey(1.000f, Color(1.00f, 0.00f, 0.50f)), // magenta
 							};
 
 							FAnimate_Tween(bar2, Border)
-							.From(FPen(penGradA, 2.0f))
-							.To(FPen(penGradB, 2.0f))
-							.Duration(3.0f)
-							.Easing(FEasingType::EaseInOutCubic)
-							.Loop(FAnimationLoopMode::PingPong)
-							.Play();
+							.From(FPen(penGradB, 2.5f))
+							.To(FPen(penGradB, 2.5f).GradientOffset(1.0f))
+							.Duration(7.0f)
+							.Easing(FEasingType::Linear)
+							.Loop(FAnimationLoopMode::Loop)
+							.Play();*/
 						}),
 
 						FNew(FButton)
@@ -196,7 +208,7 @@ namespace RenderingTests
 					.Border(FPen(Colors::Red, 2.0f))
 					.Shape(FRoundedRectangle(5.0f))
 					.Height(30)
-					.ForcePaintBoundary(true)
+					//.ForcePaintBoundary(true)
 					.ClipContent(true)
 					.Name("Bar_2")
 					.Child(
@@ -263,6 +275,7 @@ namespace RenderingTests
 			};
 
 			FPen pen(grad, 4.0f);
+			pen.SetGradientOffset(m_LineOffset);
 			pen.SetStyle(FPenStyle::Dashed);
 			pen.SetDashLength(10.0f);
 			pen.SetDashGap(5.0f);
@@ -300,6 +313,8 @@ namespace RenderingTests
 
 			painter.PathStroke(false, true);
 		}
+
+		FUSION_PAINT_PROPERTY(f32, LineOffset);
 
 		Ref<FVerticalStack> vstack;
 		Ref<FHorizontalStack> hstack;

@@ -28,6 +28,8 @@ namespace CE::RHI
 
         inline u64 GetMaxConstantBufferRange() const { return maxConstantBufferRange; }
         inline u64 GetMaxStructuredBufferRange() const { return maxStructuredBufferRange; }
+
+        inline u64 GetMinStructuredBufferOffsetAlignment() const { return minStructuredBufferOffsetAlignment; }
         
         inline u32 GetMaxRootConstantByteSize() const { return maxRootConstantByteSize; }
 
@@ -67,6 +69,7 @@ namespace CE::RHI
 
         u32 maxConstantBufferRange = 0;
         u32 maxStructuredBufferRange = 0;
+        u64 minStructuredBufferOffsetAlignment = 0;
         
         u32 maxRootConstantByteSize = 256;
 

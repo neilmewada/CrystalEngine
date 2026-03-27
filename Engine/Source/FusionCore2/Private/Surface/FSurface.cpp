@@ -1022,8 +1022,8 @@ namespace CE
                 int drawCmdIdx = renderPass.drawCmdStartIndex + j;
                 FUIDrawCmd drawCmd = snapshot->drawCmdArray[drawCmdIdx];
 
-                u32 globalVertexOffset = snapshot->vertexSplits[layerIndex].startIndex + drawCmd.vertexOffset;
-                u32 globalIndexOffset = snapshot->indexSplits[layerIndex].startIndex + drawCmd.indexOffset;
+                u32 globalVertexOffset = snapshot->vertexSplits[layerIndex].startOffset / sizeof(FUIVertex) + drawCmd.vertexOffset;
+                u32 globalIndexOffset = snapshot->indexSplits[layerIndex].startOffset / sizeof(FUIIndex) + drawCmd.indexOffset;
 
                 DrawPacket* packet = nullptr;
 
@@ -1120,6 +1120,8 @@ namespace CE
 
         Ptr<FRenderSnapshot> renderSnapshot = renderSnapshots[frameIndex];
 
+        // TODO: Fix offset alignment for binding BufferViews
+
         for (int i = 0; i < (int)renderSnapshot->drawItemSplits.GetCount(); i++)
         {
             RHI::ShaderResourceGroup* srg = nullptr;
@@ -1137,8 +1139,8 @@ namespace CE
             // - Draw Items -
 	        {
 		        const auto& split = renderSnapshot->drawItemSplits[i];
-            	const u64 byteOffset = split.startIndex * sizeof(FUIDrawItem);
-            	const u64 byteSize = Math::Max(split.count, (SIZE_T)1) * sizeof(FUIDrawItem);
+            	const u64 byteOffset = split.startOffset;
+            	const u64 byteSize = Math::Max(split.byteSize, sizeof(FUIDrawItem));
 
             	srg->Bind(frameIndex, "_DrawItems", RHI::BufferView(drawItemBuffers.GetBuffer(frameIndex), byteOffset, byteSize));
 	        }
@@ -1146,20 +1148,19 @@ namespace CE
             // - Clip Rects -
             {
                 const auto& split = renderSnapshot->clipRectSplits[i];
-                const u64 byteOffset = split.startIndex * sizeof(FUIClipRect);
-                const u64 byteSize = Math::Max(split.count, (SIZE_T)1) * sizeof(FUIClipRect);
+                const u64 byteOffset = split.startOffset;
+                const u64 byteSize = Math::Max(split.byteSize, sizeof(FUIClipRect));
 
 	            srg->Bind(frameIndex, "_ClipItems", RHI::BufferView(clipRectBuffers.GetBuffer(frameIndex), byteOffset, byteSize));
             }
 
             // - Gradient Stops -
-            {
-                const auto& split = renderSnapshot->gradientStopSplits[i];
-                const u64 byteOffset = split.startIndex * sizeof(FUIGradientStop);
-                const u64 byteSize = Math::Max(split.count, (SIZE_T)1) * sizeof(FUIGradientStop);
+            
+            const auto& gradientSplit = renderSnapshot->gradientStopSplits[i];
+            const u64 gradientByteOffset = gradientSplit.startOffset;
+            const u64 gradientByteSize = Math::Max(gradientSplit.byteSize, sizeof(FUIGradientStop));
 
-                srg->Bind(frameIndex, "_GradientStops", RHI::BufferView(gradientStopBuffers.GetBuffer(frameIndex), byteOffset, byteSize));
-            }
+            srg->Bind(frameIndex, "_GradientStops", RHI::BufferView(gradientStopBuffers.GetBuffer(frameIndex), gradientByteOffset, gradientByteSize));
 
             srg->FlushBindings();
         }

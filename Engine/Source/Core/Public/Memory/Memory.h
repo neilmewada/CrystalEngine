@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Math/Math.h"
+
 #include "Types/CoreTypeDefs.h"
 #include "Misc/CoreDefines.h"
 
@@ -78,6 +80,12 @@ namespace CE
         /* Returns a Size that is Aligned to the given Alignment. IMPORTANT: Alignment should always be a power of 2 */
         static inline SIZE_T GetAlignedSize(SIZE_T baseSize, SIZE_T alignment)
         {
+            return (baseSize + alignment - 1) & ~(alignment - 1);
+        }
+
+        static inline SIZE_T AlignUp(SIZE_T baseSize, SIZE_T alignment)
+        {
+            assert(Math::IsPowerOf2(alignment));
             return (baseSize + alignment - 1) & ~(alignment - 1);
         }
 

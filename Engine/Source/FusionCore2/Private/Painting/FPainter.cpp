@@ -566,13 +566,17 @@ namespace CE
 			for (int i = 0; i < segCount; i++)
 				totalLength += Vec2::Distance(path[i], path[(i + 1) % numPoints]);
 
+			const f32 gradientOffset = currentPen.GetGradientOffset();
+
 			tempPoints.InsertRange(numPoints, 0.0f);
+			tempPoints[0] = fmod(gradientOffset, 1.0f);
 			f32 acc = 0;
+
 			for (int i = 0; i < segCount; i++)
 			{
 				const int j = (i + 1) % numPoints;
 				acc += Vec2::Distance(path[i], path[j]);
-				tempPoints[j] = totalLength > 0 ? acc / totalLength : 0.0f;
+				tempPoints[j] = totalLength > 0 ? fmod(acc / totalLength + gradientOffset, 1.0f) : 0.0f;
 			}
 		}
 

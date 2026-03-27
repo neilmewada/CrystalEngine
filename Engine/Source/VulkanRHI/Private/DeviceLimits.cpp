@@ -10,6 +10,8 @@ namespace CE::Vulkan
 		maxConstantBufferRange = gpuProps.limits.maxUniformBufferRange;
 		maxStructuredBufferRange = gpuProps.limits.maxStorageBufferRange;
 
+		minStructuredBufferOffsetAlignment = gpuProps.limits.minStorageBufferOffsetAlignment;
+
 		VkPhysicalDeviceFeatures features;
 		vkGetPhysicalDeviceFeatures(device->gpu, &features);
 

@@ -48,6 +48,18 @@ namespace CE
 		f32 GetDashGap() const { return dashGap; }
 		void SetDashGap(f32 dashGap) { this->dashGap = dashGap; }
 
+		// Normalized offset (0-1) applied to gradient UV along the stroke arc-length.
+		// Animating this from 0 to 1 makes the gradient appear to travel along the stroke.
+		// Only affects gradient strokes; ignored for solid pens and fills.
+		f32 GetGradientOffset() const { return gradientOffset; }
+		void SetGradientOffset(f32 offset) { this->gradientOffset = offset; }
+
+		FPen& GradientOffset(f32 value)
+		{
+			gradientOffset = value;
+			return *this;
+		}
+
 		bool IsValidPen() const
 		{
 			return (HasGradient() || color.a > 0.001f) && thickness > 0.01f;
@@ -74,6 +86,10 @@ namespace CE
 
 		FIELD()
 		FPenStyle style = FPenStyle::None;
+
+		// Normalized offset applied to gradient UV along the stroke arc-length. Only used for gradient strokes.
+		FIELD()
+		f32 gradientOffset = 0.0f;
 	};
 	
 }

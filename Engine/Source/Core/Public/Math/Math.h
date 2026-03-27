@@ -88,6 +88,12 @@ namespace CE
         template<typename T1, typename T2>
         INLINE static auto Pow(T1 base, T2 power) { return pow(base, power); }
 
+        template <typename T>
+        constexpr static bool IsPowerOf2(T inV)
+        {
+            return inV > 0 && (inV & (inV - 1)) == 0;
+        }
+
         template<typename T>
         constexpr static T Min(std::initializer_list<T> list)
         {
