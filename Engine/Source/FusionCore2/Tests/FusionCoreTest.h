@@ -35,6 +35,7 @@ namespace RenderingTests
 				FGradientKey(0.5f, Colors::Yellow),
 				FGradientKey(1.0f, Colors::Green),
 			};
+			gradient.angle = Math::ToRadians(45);
 
 			Child(
 				FAssignNew(FVerticalStack, vstack)
@@ -66,14 +67,7 @@ namespace RenderingTests
 						.Style("Button/Primary")
 						.OnClick([this]
 						{
-							FAffineTransform toScale = scaleDown ? FAffineTransform::Scale(Vec2(0.5f, 0.5f)) : FAffineTransform::Identity();
-
-							FAnimate_Tween(bar1, Transform)
-							.To(toScale)
-							.Duration(0.5f)
-							.Play("scale");
-
-							scaleDown = !scaleDown;
+							
 						}),
 
 						FNew(FButton)
@@ -166,7 +160,7 @@ namespace RenderingTests
 					FNew(FDecoratedWidget)
 					.Background(gradient)
 					.Shape(FRectangle())
-					.Height(30)
+					.Height(100)
 					.Name("Bar_3"),
 
 					FNew(FWidget)

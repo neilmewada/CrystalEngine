@@ -60,6 +60,8 @@ namespace CE
 
         static FAffineTransform LerpUnclamped(const FAffineTransform& a, const FAffineTransform& b, f32 t)
         {
+            ZoneScoped;
+
             // Decompose a
             const f32 sxA    = Math::Sqrt(a.m00 * a.m00 + a.m10 * a.m10);
             const f32 thetaA = std::atan2(a.m10, a.m00);
@@ -123,6 +125,201 @@ namespace CE
         static f32 SquaredMagnitude(const FAffineTransform& v)
         {
             return v.m00*v.m00 + v.m01*v.m01 + v.m10*v.m10 + v.m11*v.m11 + v.tx*v.tx + v.ty*v.ty;
+        }
+    };
+
+    template<>
+    struct FAnimatable<FBrush>
+    {
+        static FBrush Lerp(const FBrush& a, const FBrush& b, f32 t)
+        {
+            return LerpUnclamped(a, b, Math::Clamp01(t));
+        }
+
+        static FBrush LerpUnclamped(const FBrush& a, const FBrush& b, f32 t)
+        {
+            ZoneScoped;
+
+            const FBrushStyle styleA = a.GetBrushStyle();
+            const FBrushStyle styleB = b.GetBrushStyle();
+
+            if (styleA == styleB)
+            {
+                switch (styleA)
+                {
+                case FBrushStyle::SolidFill: return LerpSolidFill(a, b, t);
+                case FBrushStyle::Gradient:  return LerpGradient(a, b, t);
+                case FBrushStyle::Image:     return LerpImage(a, b, t);
+                default:                     return t < 1.0f ? a : b;
+                }
+            }
+
+            // SolidFill <-> Gradient: treat solid as a degenerate gradient
+            if (styleA == FBrushStyle::SolidFill && styleB == FBrushStyle::Gradient)
+                return LerpSolidGradient(a, b, t);
+            if (styleA == FBrushStyle::Gradient && styleB == FBrushStyle::SolidFill)
+                return LerpSolidGradient(b, a, 1.0f - t);
+
+            // All other cross-style mismatches: snap at t=0.5
+            return t < 0.5f ? a : b;
+        }
+
+        static FBrush Identity() { return FBrush(); }
+
+        // Spring arithmetic helpers
+        static FBrush Add(const FBrush& a, const FBrush& b)
+        {
+            ZoneScoped;
+
+            const FBrushStyle styleA = a.GetBrushStyle();
+            const FBrushStyle styleB = b.GetBrushStyle();
+
+            if (styleA == FBrushStyle::Gradient && styleA == styleB)
+            {
+                const FGradient& ga = a.GetGradient();
+                const FGradient& gb = b.GetGradient();
+                if (ga.stops.GetSize() == gb.stops.GetSize())
+                {
+                    FGradient outGrad = ga;
+                    for (int i = 0; i < (int)ga.stops.GetSize(); i++)
+                    {
+                        outGrad.stops[i].color    = FAnimatable<Color>::Add(ga.stops[i].color, gb.stops[i].color);
+                        outGrad.stops[i].position = ga.stops[i].position + gb.stops[i].position;
+                    }
+                    outGrad.angle = ga.angle + gb.angle;
+                    return FBrush(outGrad, FAnimatable<Color>::Add(a.GetColor(), b.GetColor()));
+                }
+            }
+
+            if (styleA == FBrushStyle::Image && styleA == styleB)
+            {
+                FBrush out = a;
+                out.SetColor(FAnimatable<Color>::Add(a.GetColor(), b.GetColor()));
+                out.SetBrushSize(a.GetBrushSize() + b.GetBrushSize());
+                out.SetBrushPosition(a.GetBrushPosition() + b.GetBrushPosition());
+                return out;
+            }
+
+            // SolidFill and None (zero velocity) styles: add color only
+            FBrush out = a;
+            out.SetColor(FAnimatable<Color>::Add(a.GetColor(), b.GetColor()));
+            return out;
+        }
+
+        static FBrush Scale(const FBrush& a, f32 s)
+        {
+            ZoneScoped;
+
+            const FBrushStyle style = a.GetBrushStyle();
+
+            if (style == FBrushStyle::Gradient)
+            {
+                const FGradient& g = a.GetGradient();
+                FGradient outGrad = g;
+                for (int i = 0; i < (int)g.stops.GetSize(); i++)
+                {
+                    outGrad.stops[i].color    = FAnimatable<Color>::Scale(g.stops[i].color, s);
+                    outGrad.stops[i].position = g.stops[i].position * s;
+                }
+                outGrad.angle = g.angle * s;
+                return FBrush(outGrad, FAnimatable<Color>::Scale(a.GetColor(), s));
+            }
+
+            if (style == FBrushStyle::Image)
+            {
+                FBrush out = a;
+                out.SetColor(FAnimatable<Color>::Scale(a.GetColor(), s));
+                out.SetBrushSize(a.GetBrushSize() * s);
+                out.SetBrushPosition(a.GetBrushPosition() * s);
+                return out;
+            }
+
+            // SolidFill and None: scale color only
+            FBrush out = a;
+            out.SetColor(FAnimatable<Color>::Scale(a.GetColor(), s));
+            return out;
+        }
+
+        static f32 SquaredMagnitude(const FBrush& v)
+        {
+            ZoneScoped;
+
+            f32 mag = FAnimatable<Color>::SquaredMagnitude(v.GetColor());
+
+            if (v.GetBrushStyle() == FBrushStyle::Gradient)
+            {
+                const FGradient& g = v.GetGradient();
+                for (int i = 0; i < (int)g.stops.GetSize(); i++)
+                    mag += FAnimatable<Color>::SquaredMagnitude(g.stops[i].color);
+                mag += g.angle * g.angle;
+            }
+
+            return mag;
+        }
+
+    private:
+
+        static FBrush LerpSolidFill(const FBrush& a, const FBrush& b, f32 t)
+        {
+            ZoneScoped;
+
+            return FBrush(Color::Lerp(a.GetColor(), b.GetColor(), t), FBrushStyle::SolidFill);
+        }
+
+        static FBrush LerpGradient(const FBrush& a, const FBrush& b, f32 t)
+        {
+            ZoneScoped;
+
+            const FGradient& ga = a.GetGradient();
+            const FGradient& gb = b.GetGradient();
+
+            // Snap at t=0.5 if gradient type or stop count differ
+            if (ga.gradientType != gb.gradientType || ga.stops.GetSize() != gb.stops.GetSize())
+                return t < 0.5f ? a : b;
+
+            FGradient outGrad = ga;
+            for (int i = 0; i < (int)ga.stops.GetSize(); i++)
+            {
+                outGrad.stops[i].color    = Color::Lerp(ga.stops[i].color, gb.stops[i].color, t);
+                outGrad.stops[i].position = ga.stops[i].position + (gb.stops[i].position - ga.stops[i].position) * t;
+            }
+            outGrad.angle = ga.angle + (gb.angle - ga.angle) * t;
+
+            return FBrush(outGrad, Color::Lerp(a.GetColor(), b.GetColor(), t));
+        }
+
+        static FBrush LerpImage(const FBrush& a, const FBrush& b, f32 t)
+        {
+            ZoneScoped;
+
+            const Name& imgA = a.GetImageName();
+            const Name& imgB = b.GetImageName();
+
+            // Snap image name at t=0.5 if different; discrete fields snap at t=1
+            const Name& outImg = (imgA == imgB || t < 0.5f) ? imgA : imgB;
+            FBrush out(outImg, Color::Lerp(a.GetColor(), b.GetColor(), t));
+            out.SetImageFit(t < 1.0f ? a.GetImageFit() : b.GetImageFit());
+            out.SetBrushTiling(t < 1.0f ? a.GetBrushTiling() : b.GetBrushTiling());
+            out.SetSliceMargins(t < 1.0f ? a.GetSliceMargins() : b.GetSliceMargins());
+            out.SetBrushSize(a.GetBrushSize() + (b.GetBrushSize() - a.GetBrushSize()) * t);
+            out.SetBrushPosition(a.GetBrushPosition() + (b.GetBrushPosition() - a.GetBrushPosition()) * t);
+            return out;
+        }
+
+        // solid is the SolidFill brush, gradient is the Gradient brush, t goes 0->1 solid->gradient
+        static FBrush LerpSolidGradient(const FBrush& solid, const FBrush& gradient, f32 t)
+        {
+            ZoneScoped;
+
+            const FGradient& g = gradient.GetGradient();
+
+            FGradient outGrad = g;
+            for (int i = 0; i < (int)g.stops.GetSize(); i++)
+                outGrad.stops[i].color = Color::Lerp(solid.GetColor(), g.stops[i].color, t);
+            outGrad.angle = g.angle * t;
+
+            // Tint lerps from white (no tint at t=0) to the gradient's tint
+            return FBrush(outGrad, Color::Lerp(Colors::White, gradient.GetColor(), t));
         }
     };
 

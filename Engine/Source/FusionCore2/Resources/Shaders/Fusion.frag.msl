@@ -113,99 +113,102 @@ fragment FragMain_out FragMain(FragMain_in in [[stage_in]], const device spvDesc
     spvDescriptorArray<texture2d<float>> _Textures {spvDescriptorSet0._Textures};
 
     FragMain_out out = {};
-    float4 _470 = in.in_var_TEXCOORD2;
-    float4 _787;
+    float4 _477 = in.in_var_TEXCOORD2;
+    float4 _794;
     if ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].clipRectIndex >= 0)
     {
-        uint _655 = uint((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].clipRectIndex);
-        float4 _689 = float4(in.in_var_TEXCOORD4, 0.0, 1.0) * (*spvDescriptorSet5._ClipRects)._m0[_655].clipInverseTransform;
-        float _743;
-        if (_689.x > 0.0)
+        uint _662 = uint((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].clipRectIndex);
+        float4 _696 = float4(in.in_var_TEXCOORD4, 0.0, 1.0) * (*spvDescriptorSet5._ClipRects)._m0[_662].clipInverseTransform;
+        float _750;
+        if (_696.x > 0.0)
         {
-            float _724;
-            if (_689.y > 0.0)
+            float _731;
+            if (_696.y > 0.0)
             {
-                _724 = (*spvDescriptorSet5._ClipRects)._m0[_655].cornerRadii.z;
+                _731 = (*spvDescriptorSet5._ClipRects)._m0[_662].cornerRadii.z;
             }
             else
             {
-                _724 = (*spvDescriptorSet5._ClipRects)._m0[_655].cornerRadii.y;
+                _731 = (*spvDescriptorSet5._ClipRects)._m0[_662].cornerRadii.y;
             }
-            _743 = _724;
+            _750 = _731;
         }
         else
         {
-            float _741;
-            if (_689.y > 0.0)
+            float _748;
+            if (_696.y > 0.0)
             {
-                _741 = (*spvDescriptorSet5._ClipRects)._m0[_655].cornerRadii.w;
+                _748 = (*spvDescriptorSet5._ClipRects)._m0[_662].cornerRadii.w;
             }
             else
             {
-                _741 = (*spvDescriptorSet5._ClipRects)._m0[_655].cornerRadii.x;
+                _748 = (*spvDescriptorSet5._ClipRects)._m0[_662].cornerRadii.x;
             }
-            _743 = _741;
+            _750 = _748;
         }
-        float2 _753 = (abs(_689.xy) - (*spvDescriptorSet5._ClipRects)._m0[_655].clipHalfSize) + float2(_743);
-        float4 _783 = _470;
-        _783.w = _470.w * fast::clamp(0.5 - ((length(precise::max(_753, float2(0.0))) + precise::min(precise::max(_753.x, _753.y), 0.0)) - _743), 0.0, 1.0);
-        _787 = _783;
+        float2 _760 = (abs(_696.xy) - (*spvDescriptorSet5._ClipRects)._m0[_662].clipHalfSize) + float2(_750);
+        float4 _790 = _477;
+        _790.w = _477.w * fast::clamp(0.5 - ((length(precise::max(_760, float2(0.0))) + precise::min(precise::max(_760.x, _760.y), 0.0)) - _750), 0.0, 1.0);
+        _794 = _790;
     }
     else
     {
-        _787 = _470;
+        _794 = _477;
     }
-    float4 _991;
+    float4 _1022;
     if ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].shaderType == 1)
     {
-        _991 = _787 * _Textures[(*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].textureIndex].sample(spvDescriptorSet0._Samplers[(*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].samplerIndex], in.in_var_TEXCOORD1);
+        _1022 = _794 * _Textures[(*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].textureIndex].sample(spvDescriptorSet0._Samplers[(*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].samplerIndex], in.in_var_TEXCOORD1);
     }
     else
     {
-        float4 _988;
+        float4 _1019;
         if ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].shaderType == 2)
         {
-            float4 _985;
-            int _827 = 0;
+            float _831 = cos((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[0]);
+            float _833 = sin((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[0]);
+            float _853 = (dot(in.in_var_TEXCOORD1 - float2(0.5), float2(_831, _833)) / (abs(_831) + abs(_833))) + 0.5;
+            float4 _1016;
+            int _860 = 0;
             for (;;)
             {
-                if (_827 < ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].gradientStopCount - 1))
+                if (_860 < ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].gradientStopCount - 1))
                 {
-                    int _840 = (*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].gradientStartIndex + _827;
-                    uint _844 = uint(_840);
-                    uint _860 = uint(_840 + 1);
-                    bool _884;
-                    if ((*spvDescriptorSet5._GradientStops)._m0[_844].position <= in.in_var_TEXCOORD1.x)
+                    int _873 = (*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].gradientStartIndex + _860;
+                    uint _877 = uint(_873);
+                    uint _893 = uint(_873 + 1);
+                    bool _915;
+                    if ((*spvDescriptorSet5._GradientStops)._m0[_877].position <= _853)
                     {
-                        _884 = in.in_var_TEXCOORD1.x < (*spvDescriptorSet5._GradientStops)._m0[_860].position;
+                        _915 = _853 < (*spvDescriptorSet5._GradientStops)._m0[_893].position;
                     }
                     else
                     {
-                        _884 = false;
+                        _915 = false;
                     }
-                    if (_884)
+                    if (_915)
                     {
-                        _985 = _787 * mix(float4(float((*spvDescriptorSet5._GradientStops)._m0[_844].packedColor & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_844].packedColor >> 8u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_844].packedColor >> 16u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_844].packedColor >> 24u) & 255u) * 0.0039215688593685626983642578125), float4(float((*spvDescriptorSet5._GradientStops)._m0[_860].packedColor & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_860].packedColor >> 8u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_860].packedColor >> 16u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_860].packedColor >> 24u) & 255u) * 0.0039215688593685626983642578125), float4(fast::clamp((in.in_var_TEXCOORD1.x - (*spvDescriptorSet5._GradientStops)._m0[_844].position) / ((*spvDescriptorSet5._GradientStops)._m0[_860].position - (*spvDescriptorSet5._GradientStops)._m0[_844].position), 0.0, 1.0)));
+                        _1016 = _794 * mix(float4(float((*spvDescriptorSet5._GradientStops)._m0[_877].packedColor & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_877].packedColor >> 8u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_877].packedColor >> 16u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_877].packedColor >> 24u) & 255u) * 0.0039215688593685626983642578125), float4(float((*spvDescriptorSet5._GradientStops)._m0[_893].packedColor & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_893].packedColor >> 8u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_893].packedColor >> 16u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_893].packedColor >> 24u) & 255u) * 0.0039215688593685626983642578125), float4(fast::clamp((_853 - (*spvDescriptorSet5._GradientStops)._m0[_877].position) / ((*spvDescriptorSet5._GradientStops)._m0[_893].position - (*spvDescriptorSet5._GradientStops)._m0[_877].position), 0.0, 1.0)));
                         break;
                     }
-                    _827++;
+                    _860++;
                     continue;
                 }
                 else
                 {
-                    _985 = _787;
+                    _1016 = _794;
                     break;
                 }
             }
-            _988 = _985;
+            _1019 = _1016;
         }
         else
         {
-            _988 = _787;
+            _1019 = _794;
         }
-        _991 = _988;
+        _1022 = _1019;
     }
-    out.out_var_SV_TARGET = _991;
+    out.out_var_SV_TARGET = _1022;
     return out;
 }
 

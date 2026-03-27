@@ -59,6 +59,10 @@ float4 FragMain(PSInput input) : SV_TARGET
     {
         float angle = item.data[0];
 
+        float2 dir = float2(cos(angle), sin(angle));
+        float range = abs(dir.x) + abs(dir.y);
+        float gradientT = dot(uv - 0.5, dir) / range + 0.5;
+
         for (int i = 0; i < item.gradientStopCount - 1; i++)
         {
             int idx = item.gradientStartIndex + i;
@@ -66,10 +70,10 @@ float4 FragMain(PSInput input) : SV_TARGET
             const FUIGradientStop left = _GradientStops[idx];
             const FUIGradientStop right = _GradientStops[idx + 1];
 
-            if (left.position <= uv.x && uv.x < right.position)
+            if (left.position <= gradientT && gradientT < right.position)
             {
-                float t = clamp01((uv.x - left.position) / (right.position - left.position));
-                float4 sampleColor = lerp(UnpackColor(left.packedColor), UnpackColor(right.packedColor), t);
+                float segT = clamp01((gradientT - left.position) / (right.position - left.position));
+                float4 sampleColor = lerp(UnpackColor(left.packedColor), UnpackColor(right.packedColor), segT);
                 color *= sampleColor;
                 break;
             }
