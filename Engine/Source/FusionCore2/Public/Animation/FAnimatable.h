@@ -174,6 +174,14 @@ namespace CE
             const FBrushStyle styleA = a.GetBrushStyle();
             const FBrushStyle styleB = b.GetBrushStyle();
 
+            // None acts as a zero element: adopt the other side's structure
+            if (styleA == FBrushStyle::None && styleB != FBrushStyle::None)
+            {
+                FBrush out = b;
+                out.SetColor(FAnimatable<Color>::Add(a.GetColor(), b.GetColor()));
+                return out;
+            }
+
             if (styleA == FBrushStyle::Gradient && styleA == styleB)
             {
                 const FGradient& ga = a.GetGradient();

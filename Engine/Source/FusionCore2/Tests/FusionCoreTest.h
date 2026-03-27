@@ -83,12 +83,14 @@ namespace RenderingTests
 								FGradientKey(0.5f, Colors::Cyan),
 								FGradientKey(1.0f, Colors::White),
 							};
-							gradientB.angle = Math::ToRadians(135);
+							//gradientB.stops = gradientA.stops;
+							gradientB.angle = Math::ToRadians(45 + 180);
 
 							FBrush target = gradientToggle ? FBrush(gradientA) : FBrush(gradientB);
 
 							FAnimate_Spring(bar3, Background)
 							.Target(target)
+							//.Duration(1.0f)
 							.Play("gradient");
 
 							gradientToggle = !gradientToggle;
@@ -120,8 +122,8 @@ namespace RenderingTests
 							FAffineTransform toRotation = rotateForward ? FAffineTransform::Rotation(Math::ToRadians(90)) : FAffineTransform::Identity();
 
 							FAnimate_Spring(bar1, Transform)
-								.Target(toRotation)
-								.Play("rotate");
+							.Target(toRotation)
+							.Play("rotate");
 
 							rotateForward = !rotateForward;
 						}),
