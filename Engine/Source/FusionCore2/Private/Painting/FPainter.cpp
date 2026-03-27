@@ -555,6 +555,13 @@ namespace CE
 
 		u32 drawItemIndex = drawList->AddDrawItem(drawItem);
 
+		const bool hasGradient = currentPen.HasGradient();
+
+		if (currentPen.GetStyle() == FPenStyle::Solid && closed && hasGradient)
+		{
+			path.Insert(path[0]);
+		}
+
 		// Pre-compute per-point t values (0→1 along path length) for gradient pens
 		tempPoints.RemoveAll();
 		if (currentPen.HasGradient())
@@ -576,18 +583,18 @@ namespace CE
 			{
 				const int j = (i + 1) % numPoints;
 				acc += Vec2::Distance(path[i], path[j]);
-				tempPoints[j] = totalLength > 0 ? acc / totalLength + gradientOffset : 0.0f;
+				if (j != 0)
+					tempPoints[j] = totalLength > 0 ? acc / totalLength + gradientOffset : 0.0f;
 			}
 		}
-
-		const bool hasGradient = currentPen.HasGradient();
 
 		switch (currentPen.GetStyle())
 		{
 		case FPenStyle::None:
 			return true;
 		case FPenStyle::Solid:
-			drawList->AddPolyLine(path.GetData(), (int)path.GetCount(), color, thickness, closed, antiAliased, drawItemIndex,
+			// Only do closed line if we are not rendering a gradient
+			drawList->AddPolyLine(path.GetData(), (int)path.GetCount(), color, thickness, closed && !hasGradient, antiAliased, drawItemIndex,
 				hasGradient ? tempPoints.GetData() : nullptr);
 			break;
 		case FPenStyle::Dashed:

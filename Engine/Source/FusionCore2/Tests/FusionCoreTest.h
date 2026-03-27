@@ -13,15 +13,6 @@ namespace RenderingTests
 		CE_CLASS(TestWindow, FDecoratedWidget)
 	public:
 
-		using SomeType = FWidget;
-
-		String MyFunc() { return ""; }
-
-		TestWindow()
-		{
-			m_LineOffset = 0.0f;
-		}
-
 		void Construct() override
 		{
 			Super::Construct();
@@ -116,7 +107,7 @@ namespace RenderingTests
 						.Style("Button/Primary")
 						.OnClick([this]
 						{
-							FAnimate_Tween(this, LineOffset)
+							FAnimate_Tween(this, GradientOffset)
 							.From(0.0f)
 							.To(1.0f)
 							.Duration(5.0f)
@@ -155,6 +146,13 @@ namespace RenderingTests
 							.Duration(7.0f)
 							.Easing(FEasingType::Linear)
 							.Loop(FAnimationLoopMode::Loop)
+							.Play();
+
+							FAnimate_Tween(this, DashLength)							.From(10.0f)
+							.To(5.0f)
+							.Duration(2.0f)
+							.Easing(FEasingType::EaseInOutSine)
+							.Loop(FAnimationLoopMode::PingPong)
 							.Play();
 						}),
 
@@ -258,6 +256,13 @@ namespace RenderingTests
 			);
 		}
 
+		TestWindow()
+		{
+			m_GradientOffset = 0.0f;
+			m_DashLength = 10.0f;
+			m_DashGap = 5.0f;
+		}
+
 		void PaintOverlay(FPainter& painter) override
 		{
 			Super::PaintOverlay(painter);
@@ -278,10 +283,10 @@ namespace RenderingTests
 			};
 
 			FPen pen(grad, 4.0f);
-			pen.SetGradientOffset(m_LineOffset);
+			pen.SetGradientOffset(m_GradientOffset);
 			pen.SetStyle(FPenStyle::Dashed);
-			pen.SetDashLength(10.0f);
-			pen.SetDashGap(5.0f);
+			pen.SetDashLength(m_DashLength);
+			pen.SetDashGap(m_DashGap);
 			painter.SetPen(pen);
 			painter.SetBrush(FBrush());
 
@@ -317,7 +322,9 @@ namespace RenderingTests
 			painter.PathStroke(false, true);
 		}
 
-		FUSION_PAINT_PROPERTY(f32, LineOffset);
+		FUSION_PAINT_PROPERTY(f32, GradientOffset);
+		FUSION_PAINT_PROPERTY(f32, DashLength);
+		FUSION_PAINT_PROPERTY(f32, DashGap);
 
 		Ref<FVerticalStack> vstack;
 		Ref<FHorizontalStack> hstack;
