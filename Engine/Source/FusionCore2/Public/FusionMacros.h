@@ -107,8 +107,8 @@
 			return self;\
 		}
 
-// Builds 3 parameters in this order: widgetPtr, getter, setter
-#define FAnimatedProperty(widgetPtr, PropertyName) TPtrType<decltype(widgetPtr)>::GetRawPtr(widgetPtr),\
+// Builds 4 parameters in this order: slotName, widgetPtr, getter, setter
+#define FAnimatedProperty(widgetPtr, PropertyName) #PropertyName, TPtrType<decltype(widgetPtr)>::GetRawPtr(widgetPtr),\
 	(decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().PropertyName())(TPtrType<decltype(widgetPtr)>::Type::*)() const)&TPtrType<decltype(widgetPtr)>::Type::PropertyName,\
 	(TMemberFunctionCast<TPtrType<decltype(widgetPtr)>::Type, decltype(&TPtrType<decltype(widgetPtr)>::Type::Animate_##PropertyName)>::TCastedFuncSignature)\
 	& TPtrType<decltype(widgetPtr)>::Type::Animate_##PropertyName

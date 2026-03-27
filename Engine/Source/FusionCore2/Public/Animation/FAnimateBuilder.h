@@ -28,8 +28,16 @@ namespace CE
             return *this;
         }
 
+        Ref<FAnimation> Play()
+        {
+            Ref<FAnimation> anim = Build(owner, name);
+            FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, name);
+            return anim;
+        }
+
         Ref<FAnimation> Play(Name slot)
         {
+            this->name = slot;
             Ref<FAnimation> anim = Build(owner, slot);
             FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, slot);
             return anim;
@@ -58,6 +66,7 @@ namespace CE
             return anim;
         }
 
+        Name                          name;
         Ref<Object>                   owner;
         std::function<void(const T&)> setter;
         std::function<T()>            fromGetter;
@@ -93,10 +102,18 @@ namespace CE
             return *this;
         }
 
+        Ref<FAnimation> Play()
+        {
+            Ref<FAnimation> anim = Build(name);
+            FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, name);
+            return anim;
+        }
+
         Ref<FAnimation> Play(Name slot)
         {
+            name = slot;
             Ref<FAnimation> anim = Build(slot);
-            FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, slot);
+            FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, name);
             return anim;
         }
 
@@ -124,6 +141,7 @@ namespace CE
             return anim;
         }
 
+        Name                          name;
         Ref<Object>                   owner;
         std::function<void(const T&)> setter;
         std::function<T()>            getter;
@@ -145,9 +163,10 @@ namespace CE
 
 
         template<WidgetClassType TWidgetType, typename T>
-        static FTweenBuilder<T> Tween(TWidgetType* target, T (TWidgetType::*getter)() const, void (TWidgetType::*setter)(const T&))
+        static FTweenBuilder<T> Tween(Name name, TWidgetType* target, T (TWidgetType::*getter)() const, void (TWidgetType::*setter)(const T&))
         {
             FTweenBuilder<T> builder{};
+            builder.name = name;
             builder.setter = [target, setter](const T& v) { (target->*setter)(v); };
             builder.fromGetter = [target, getter]() -> T { return (target->*getter)(); };
             builder.owner = target;
@@ -156,9 +175,10 @@ namespace CE
         }
 
         template<WidgetClassType TWidgetType, typename T>
-        static FTweenBuilder<T> Tween(TWidgetType* target, T(TWidgetType::* getter)() const, void (TWidgetType::*setter)(T))
+        static FTweenBuilder<T> Tween(Name name, TWidgetType* target, T(TWidgetType::* getter)() const, void (TWidgetType::*setter)(T))
         {
             FTweenBuilder<T> builder{};
+            builder.name = name;
             builder.setter = [target, setter](const T& v) { (target->*setter)(v); };
             builder.fromGetter = [target, getter]() -> T { return (target->*getter)(); };
             builder.owner = target;
@@ -168,11 +188,12 @@ namespace CE
 
         // Spring — widget pointer + method pointers (owner is captured automatically)
         template<WidgetClassType TWidgetType, typename T>
-        static FSpringBuilder<T> Spring(TWidgetType* target,
+        static FSpringBuilder<T> Spring(Name name, TWidgetType* target,
                                          T (TWidgetType::*getter)() const,
                                          void (TWidgetType::*setter)(const T&))
         {
             FSpringBuilder<T> builder{};
+            builder.name = name;
             builder.setter = [target, setter](const T& v) { (target->*setter)(v); };
             builder.getter = [target, getter]() -> T { return (target->*getter)(); };
             builder.owner  = target;
@@ -180,11 +201,12 @@ namespace CE
         }
 
         template<WidgetClassType TWidgetType, typename T>
-        static FSpringBuilder<T> Spring(TWidgetType* target,
+        static FSpringBuilder<T> Spring(Name name, TWidgetType* target,
                                          T (TWidgetType::*getter)() const,
                                          void (TWidgetType::*setter)(T))
         {
             FSpringBuilder<T> builder{};
+            builder.name = name;
             builder.setter = [target, setter](const T& v) { (target->*setter)(v); };
             builder.getter = [target, getter]() -> T { return (target->*getter)(); };
             builder.owner  = target;

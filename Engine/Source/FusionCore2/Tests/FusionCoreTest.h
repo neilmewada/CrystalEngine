@@ -93,8 +93,8 @@ namespace RenderingTests
 							FBrush target = gradientToggle ? FBrush(gradientA) : FBrush(gradientB);
 
 							FAnimate_Spring(bar3, Background)
-								.Target(target)
-								.Play("gradient");
+							.Target(target)
+							.Play();
 
 							gradientToggle = !gradientToggle;
 						}),
@@ -120,7 +120,7 @@ namespace RenderingTests
 
 							FAnimate_Spring(bar1, Transform)
 							.Target(toScale)
-							.Play("scale");
+							.Play();
 
 							scaleDown = !scaleDown;
 						}),
@@ -136,7 +136,7 @@ namespace RenderingTests
 
 							FAnimate_Spring(bar1, Transform)
 							.Target(toRotation)
-							.Play("rotate");
+							.Play();
 
 							rotateForward = !rotateForward;
 						}),
@@ -263,7 +263,6 @@ namespace RenderingTests
 
 			painter.PathStroke(false, true);
 		}
-
 
 		Ref<FVerticalStack> vstack;
 		Ref<FHorizontalStack> hstack;
