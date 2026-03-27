@@ -125,7 +125,7 @@ namespace RenderingTests
 							.Play();
 
 							// Neon aurora border: indigo → violet → cyan  ↔  magenta → orange → gold
-							/*FGradient penGradA{};
+							FGradient penGradA{};
 							penGradA.gradientType = FGradientType::Linear;
 							penGradA.stops = {
 								FGradientKey(0.00f, Color(0.10f, 0.00f, 0.90f)), // electric indigo
@@ -155,7 +155,7 @@ namespace RenderingTests
 							.Duration(7.0f)
 							.Easing(FEasingType::Linear)
 							.Loop(FAnimationLoopMode::Loop)
-							.Play();*/
+							.Play();
 						}),
 
 						FNew(FButton)
@@ -264,14 +264,17 @@ namespace RenderingTests
 
 			const Vec2 sz = GetLayoutSize();
 
-			// Simple 4-stop gradient: blue → cyan → green → yellow
+			// Mirrored gradient: blue → cyan → green → yellow → green → cyan → blue
 			FGradient grad{};
 			grad.gradientType = FGradientType::Linear;
 			grad.stops = {
-				FGradientKey(0.00f, Color(0.10f, 0.20f, 1.00f)),
-				FGradientKey(0.33f, Color(0.00f, 0.85f, 0.90f)),
-				FGradientKey(0.66f, Color(0.10f, 0.90f, 0.30f)),
-				FGradientKey(1.00f, Color(0.95f, 0.95f, 0.10f)),
+				FGradientKey(0.00f, Color(0.10f, 0.20f, 1.00f)), // blue
+				FGradientKey(0.17f, Color(0.00f, 0.85f, 0.90f)), // cyan
+				FGradientKey(0.33f, Color(0.10f, 0.90f, 0.30f)), // green
+				FGradientKey(0.50f, Color(0.95f, 0.95f, 0.10f)), // yellow
+				FGradientKey(0.67f, Color(0.10f, 0.90f, 0.30f)), // green
+				FGradientKey(0.83f, Color(0.00f, 0.85f, 0.90f)), // cyan
+				FGradientKey(1.00f, Color(0.10f, 0.20f, 1.00f)), // blue
 			};
 
 			FPen pen(grad, 4.0f);

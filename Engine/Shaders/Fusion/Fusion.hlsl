@@ -58,6 +58,7 @@ float4 FragMain(PSInput input) : SV_TARGET
     else if (item.shaderType == FUIShaderType::LinearGradient)
     {
         float angle = item.data[0];
+        uv = fmod(uv, 1.0f);
 
         float2 dir = float2(cos(angle), sin(angle));
         float range = abs(dir.x) + abs(dir.y);
