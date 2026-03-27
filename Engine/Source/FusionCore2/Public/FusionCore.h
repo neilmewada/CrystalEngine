@@ -22,6 +22,7 @@
 #include "Event/FEventService.h"
 
 // Style
+#include "Style/FGradient.h"
 #include "Style/FPen.h"
 #include "Style/FBrush.h"
 #include "Style/FShape.h"

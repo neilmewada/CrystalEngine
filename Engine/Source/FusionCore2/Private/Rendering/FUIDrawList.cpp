@@ -106,7 +106,7 @@ namespace CE
 		indexWritePtr = indexArray.GetData() + curIndexCount;
 	}
 
-	void FUIDrawList::AddPolyLine(const Vec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased, u32 drawItemIndex)
+	void FUIDrawList::AddPolyLine(const Vec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased, u32 drawItemIndex, const f32* uvXValues)
 	{
 		ZoneScoped;
 
@@ -115,7 +115,9 @@ namespace CE
         if ((color & ColorAlphaMask) == 0)
             return;
 
-        constexpr Vec2 uv = Vec2();
+        auto getUV = [&](int i) -> Vec2 {
+            return uvXValues ? Vec2(uvXValues[i], 0.5f) : Vec2(0, 0);
+        };
 
 		const int count = closed ? numPoints : numPoints - 1; // The number of line segments we need to draw
 		const bool thickLine = (thickness > fringeScale);
@@ -211,7 +213,8 @@ namespace CE
                     // If we're not using a texture, we need the center vertex as well
                     for (int i = 0; i < numPoints; i++)
                     {
-                        vertexWritePtr[0].pos = points[i];             vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = color; vertexWritePtr[0].drawItemIndex = drawItemIndex;// Center of line
+                        const Vec2 uv = getUV(i);
+                        vertexWritePtr[0].pos = points[i];             vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = color;            vertexWritePtr[0].drawItemIndex = drawItemIndex; // Center of line
                         vertexWritePtr[1].pos = tempPoints[i * 2 + 0]; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = transparentColor; vertexWritePtr[1].drawItemIndex = drawItemIndex; // Left-side outer edge
                         vertexWritePtr[2].pos = tempPoints[i * 2 + 1]; vertexWritePtr[2].uv = uv; vertexWritePtr[2].color = transparentColor; vertexWritePtr[2].drawItemIndex = drawItemIndex; // Right-side outer edge
                         vertexWritePtr += 3;
@@ -281,9 +284,10 @@ namespace CE
                 // Add vertices
                 for (int i = 0; i < numPoints; i++)
                 {
+                    const Vec2 uv = getUV(i);
                     vertexWritePtr[0].pos = tempPoints[i * 4 + 0]; vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = transparentColor; vertexWritePtr[0].drawItemIndex = drawItemIndex;
-                    vertexWritePtr[1].pos = tempPoints[i * 4 + 1]; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = color; vertexWritePtr[1].drawItemIndex = drawItemIndex;
-                    vertexWritePtr[2].pos = tempPoints[i * 4 + 2]; vertexWritePtr[2].uv = uv; vertexWritePtr[2].color = color; vertexWritePtr[2].drawItemIndex = drawItemIndex;
+                    vertexWritePtr[1].pos = tempPoints[i * 4 + 1]; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = color;            vertexWritePtr[1].drawItemIndex = drawItemIndex;
+                    vertexWritePtr[2].pos = tempPoints[i * 4 + 2]; vertexWritePtr[2].uv = uv; vertexWritePtr[2].color = color;            vertexWritePtr[2].drawItemIndex = drawItemIndex;
                     vertexWritePtr[3].pos = tempPoints[i * 4 + 3]; vertexWritePtr[3].uv = uv; vertexWritePtr[3].color = transparentColor; vertexWritePtr[3].drawItemIndex = drawItemIndex;
                     vertexWritePtr += 4;
                 }
@@ -311,10 +315,12 @@ namespace CE
                 dx *= (thickness * 0.5f);
                 dy *= (thickness * 0.5f);
 
-                vertexWritePtr[0].pos.x = p1.x + dy; vertexWritePtr[0].pos.y = p1.y - dx; vertexWritePtr[0].uv = uv; vertexWritePtr[0].color = color; vertexWritePtr[0].drawItemIndex = drawItemIndex;
-                vertexWritePtr[1].pos.x = p2.x + dy; vertexWritePtr[1].pos.y = p2.y - dx; vertexWritePtr[1].uv = uv; vertexWritePtr[1].color = color; vertexWritePtr[1].drawItemIndex = drawItemIndex;
-                vertexWritePtr[2].pos.x = p2.x - dy; vertexWritePtr[2].pos.y = p2.y + dx; vertexWritePtr[2].uv = uv; vertexWritePtr[2].color = color; vertexWritePtr[2].drawItemIndex = drawItemIndex;
-                vertexWritePtr[3].pos.x = p1.x - dy; vertexWritePtr[3].pos.y = p1.y + dx; vertexWritePtr[3].uv = uv; vertexWritePtr[3].color = color; vertexWritePtr[3].drawItemIndex = drawItemIndex;
+                const Vec2 uv1 = getUV(i1);
+                const Vec2 uv2 = getUV(i2);
+                vertexWritePtr[0].pos.x = p1.x + dy; vertexWritePtr[0].pos.y = p1.y - dx; vertexWritePtr[0].uv = uv1; vertexWritePtr[0].color = color; vertexWritePtr[0].drawItemIndex = drawItemIndex;
+                vertexWritePtr[1].pos.x = p2.x + dy; vertexWritePtr[1].pos.y = p2.y - dx; vertexWritePtr[1].uv = uv2; vertexWritePtr[1].color = color; vertexWritePtr[1].drawItemIndex = drawItemIndex;
+                vertexWritePtr[2].pos.x = p2.x - dy; vertexWritePtr[2].pos.y = p2.y + dx; vertexWritePtr[2].uv = uv2; vertexWritePtr[2].color = color; vertexWritePtr[2].drawItemIndex = drawItemIndex;
+                vertexWritePtr[3].pos.x = p1.x - dy; vertexWritePtr[3].pos.y = p1.y + dx; vertexWritePtr[3].uv = uv1; vertexWritePtr[3].color = color; vertexWritePtr[3].drawItemIndex = drawItemIndex;
                 vertexWritePtr += 4;
 
                 indexWritePtr[0] = (FUIIndex)(vertexCurrentIdx); indexWritePtr[1] = (FUIIndex)(vertexCurrentIdx + 1); indexWritePtr[2] = (FUIIndex)(vertexCurrentIdx + 2);

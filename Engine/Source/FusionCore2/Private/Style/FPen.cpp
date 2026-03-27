@@ -16,4 +16,10 @@ namespace CE
 	{
 
 	}
+
+	FPen::FPen(const FGradient& gradient, f32 thickness, const Color& tintColor)
+		: gradient(gradient), color(tintColor), thickness(thickness), style(FPenStyle::Solid)
+	{
+
+	}
 }

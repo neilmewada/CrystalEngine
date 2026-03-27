@@ -23,8 +23,16 @@ namespace CE
 
 		FPen(const Color& color, f32 thickness = 1.0f, FPenStyle style = FPenStyle::Solid);
 
+		// Gradient pen. tintColor is multiplied with the gradient output (White = no tint).
+		FPen(const FGradient& gradient, f32 thickness = 1.0f, const Color& tintColor = Colors::White);
+
 		const Color& GetColor() const { return color; }
 		void SetColor(const Color& penColor) { this->color = penColor; }
+
+		const FGradient& GetGradient() const { return gradient; }
+		void SetGradient(const FGradient& g) { this->gradient = g; }
+
+		bool HasGradient() const { return gradient.IsValid(); }
 
 		f32 GetThickness() const { return thickness; }
 		void SetThickness(f32 thickness) { this->thickness = thickness; }
@@ -42,10 +50,13 @@ namespace CE
 
 		bool IsValidPen() const
 		{
-			return color.a > 0.001f && thickness > 0.01f;
+			return (HasGradient() || color.a > 0.001f) && thickness > 0.01f;
 		}
 
 	private:
+
+		FIELD()
+		FGradient gradient;
 
 		FIELD()
 		Color color;

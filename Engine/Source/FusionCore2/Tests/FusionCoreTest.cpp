@@ -4,6 +4,8 @@
 namespace RenderingTests
 {
 
+#pragma region Render Service
+
 	void FusionRenderService::OnStart()
 	{
         Super::OnStart();
@@ -232,6 +234,8 @@ namespace RenderingTests
 	{
 		MarkFrameGraphDirty();
 	}
+
+#pragma endregion
 
 }
 

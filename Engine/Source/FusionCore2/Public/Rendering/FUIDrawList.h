@@ -29,7 +29,7 @@ namespace CE
 
         u32 AddDrawItem(const FUIDrawItem& item);
 
-        void AddPolyLine(const Vec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased, u32 drawItemIndex = 0);
+        void AddPolyLine(const Vec2* points, int numPoints, u32 color, f32 thickness, bool closed, bool antiAliased, u32 drawItemIndex = 0, const f32* uvXValues = nullptr);
 
         void AddConvexPolyFilled(const Vec2* points, int numPoints, u32 color, bool antiAliased, Rect* minMaxPos, u32 drawItemIndex = 0);
 

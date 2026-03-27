@@ -103,7 +103,11 @@ namespace RenderingTests
 						.FillRatio(1.0f)
 						.Height(30)
 						.Name("H_2")
-						.Style("Button/Primary"),
+						.Style("Button/Primary")
+						.OnClick([this]
+						{
+							
+						}),
 
 						FNew(FButton)
 						.FillRatio(1.0f)
@@ -203,6 +207,61 @@ namespace RenderingTests
 					.Name("Whitespace")
 				)
 			);
+		}
+
+		void PaintOverlay(FPainter& painter) override
+		{
+			Super::PaintOverlay(painter);
+
+			const Vec2 sz = GetLayoutSize();
+
+			// Simple 4-stop gradient: blue → cyan → green → yellow
+			FGradient grad{};
+			grad.gradientType = FGradientType::Linear;
+			grad.stops = {
+				FGradientKey(0.00f, Color(0.10f, 0.20f, 1.00f)),
+				FGradientKey(0.33f, Color(0.00f, 0.85f, 0.90f)),
+				FGradientKey(0.66f, Color(0.10f, 0.90f, 0.30f)),
+				FGradientKey(1.00f, Color(0.95f, 0.95f, 0.10f)),
+			};
+
+			FPen pen(grad, 4.0f);
+			pen.SetStyle(FPenStyle::Dashed);
+			pen.SetDashLength(10.0f);
+			pen.SetDashGap(5.0f);
+			painter.SetPen(pen);
+			painter.SetBrush(FBrush());
+
+			// Drawing area: horizontally centered, in the lower half
+			const f32 drawW = Math::Min(sz.x * 0.80f, 500.0f);
+			const f32 drawH = drawW * 0.35f;
+			const Vec2 orig = Vec2((sz.x - drawW) * 0.5f, sz.y * 0.62f);
+
+			auto P = [&](f32 x, f32 y) -> Vec2
+			{
+				return Vec2(orig.x + x * drawW, orig.y + y * drawH);
+			};
+
+			// Simple debug path: straight line → cubic curve → straight line → cubic curve
+			// Easy to reason about: gradient should flow left-to-right along the whole path
+			painter.PathClear();
+
+			// Segment 1: straight horizontal line from left
+			painter.PathInsert(P(0.00f, 0.50f));
+			painter.PathInsert(P(0.20f, 0.50f));
+
+			// Segment 2: cubic curve swooping up then down
+			painter.PathBezierCubicCurveTo(
+				P(0.20f, 0.50f), P(0.30f, 0.00f), P(0.45f, 0.00f), P(0.50f, 0.50f));
+
+			// Segment 3: straight line through the middle
+			painter.PathInsert(P(0.65f, 0.50f));
+
+			// Segment 4: cubic curve swooping down then up to the right end
+			painter.PathBezierCubicCurveTo(
+				P(0.65f, 0.50f), P(0.75f, 1.00f), P(0.88f, 1.00f), P(1.00f, 0.50f));
+
+			painter.PathStroke(false, true);
 		}
 
 

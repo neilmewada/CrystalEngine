@@ -40,9 +40,9 @@ namespace CE
 
         void PathRect(const Rect& rect, const Vec4& cornerRadius = Vec4());
 
-        bool PathFill(bool antiAliased);
-        bool PathStroke(bool closed, bool antiAliased);
-        bool PathFillAndStroke(bool antiAliased);
+        bool PathFill(bool antiAliased = true);
+        bool PathStroke(bool closed, bool antiAliased = true);
+        bool PathFillAndStroke(bool antiAliased = true);
 
         // - Simple Shapes -
 
@@ -83,6 +83,7 @@ namespace CE
         // - Drawing Internals -
 
         using FPathArray = StableDynamicArray<Vec2, 128, false>;
+        using FFloatArray = StableDynamicArray<f32, 128, false>;
         using FOpacityStack = StableDynamicArray<f32, 32, false>;
         using FTransformStack = StableDynamicArray<FAffineTransform, 128, false>;
         using FClipStack = StableDynamicArray<int, 32, false>;
@@ -98,6 +99,8 @@ namespace CE
 
         FPathArray path;
         Vec2 pathMin, pathMax;
+
+        FFloatArray tempPoints;
 
         FOpacityStack opacityStack;
         FTransformStack transformStack;

@@ -533,65 +533,123 @@ namespace CE
 
 		FUIDrawItem drawItem{};
 		drawItem.clipRectIndex = GetCurrentClipIndex();
-		drawItem.shaderType = FUIShaderType::SolidColor;
+
+		if (currentPen.HasGradient())
+		{
+			const FGradient& g = currentPen.GetGradient();
+			drawItem.shaderType = FUIShaderType::LinearGradient;
+			drawItem.gradientStartIndex = drawList->gradientStopArray.GetCount();
+			drawItem.gradientStopCount = g.stops.GetSize();
+
+			for (const auto& stop : g.stops)
+			{
+				drawList->gradientStopArray.Insert({ .packedColor = stop.color.ToU32(), .position = stop.position });
+			}
+
+			drawItem.data[0] = 0.0f; // angle=0: shader computes gradientT = uv.x directly
+		}
+		else
+		{
+			drawItem.shaderType = FUIShaderType::SolidColor;
+		}
 
 		u32 drawItemIndex = drawList->AddDrawItem(drawItem);
+
+		// Pre-compute per-point t values (0→1 along path length) for gradient pens
+		tempPoints.RemoveAll();
+		if (currentPen.HasGradient())
+		{
+			const int numPoints = (int)path.GetCount();
+			const int segCount  = closed ? numPoints : numPoints - 1;
+
+			f32 totalLength = 0;
+			for (int i = 0; i < segCount; i++)
+				totalLength += Vec2::Distance(path[i], path[(i + 1) % numPoints]);
+
+			tempPoints.InsertRange(numPoints, 0.0f);
+			f32 acc = 0;
+			for (int i = 0; i < segCount; i++)
+			{
+				const int j = (i + 1) % numPoints;
+				acc += Vec2::Distance(path[i], path[j]);
+				tempPoints[j] = totalLength > 0 ? acc / totalLength : 0.0f;
+			}
+		}
+
+		const bool hasGradient = currentPen.HasGradient();
 
 		switch (currentPen.GetStyle())
 		{
 		case FPenStyle::None:
 			return true;
 		case FPenStyle::Solid:
-			drawList->AddPolyLine(path.GetData(), (int)path.GetCount(), color, thickness, closed, antiAliased, drawItemIndex);
+			drawList->AddPolyLine(path.GetData(), (int)path.GetCount(), color, thickness, closed, antiAliased, drawItemIndex,
+				hasGradient ? tempPoints.GetData() : nullptr);
 			break;
 		case FPenStyle::Dashed:
 		{
-			const f32 dashLength = currentPen.GetDashLength();
-			const f32 dashSeparation = dashLength / 2;
-			f32 distanceWithoutPainting = dashLength + 1;
+			const f32 dashLen = currentPen.GetDashLength();
+			const f32 gapLen  = currentPen.GetDashGap();
 
-			for (int i = 0; i < path.GetCount(); ++i)
+			f32  dashOffset = 0.0f;
+			bool inDash     = true;
+
+			const int numPoints = (int)path.GetCount();
+
+			for (int i = 0; i < numPoints; ++i)
 			{
-				Vec2 p0 = path[i];
-				if (!closed && i == (int)path.GetCount() - 1)
+				if (!closed && i == numPoints - 1)
 					break;
-				Vec2 p1 = path[(i + 1) % path.GetCount()];
 
-				if (Vec2::SqrDistance(p0, p1) > dashLength * dashLength)
+				const int  nextIdx = (i + 1) % numPoints;
+				const Vec2 p0      = path[i];
+				const Vec2 p1      = path[nextIdx];
+				const f32  segLen  = Vec2::Distance(p0, p1);
+
+				if (segLen < 0.001f)
+					continue;
+
+				const Vec2 dir = (p1 - p0) / segLen;
+				const f32  t0  = hasGradient ? tempPoints[i]       : 0.0f;
+				const f32  t1  = hasGradient ? tempPoints[nextIdx] : 0.0f;
+
+				f32 segPos = 0.0f;
+				while (segPos < segLen - 0.001f)
 				{
-					// Split the line segment into individual dotted and non-dotted segments
-					int numSegments = (int)(Vec2::Distance(p0, p1) / dashLength);
+					const f32 remaining = segLen - segPos;
 
-					for (int j = 0; j < numSegments; ++j)
+					if (inDash)
 					{
-						if (j % 2 != 0) // Skip odd segments
-							continue;
+						const f32 drawLen = Math::Min(remaining, dashLen - dashOffset);
+						const f32 aFrac   = segPos / segLen;
+						const f32 bFrac   = (segPos + drawLen) / segLen;
 
-						distanceWithoutPainting = 0;
+						Vec2 pts[2] = { p0 + dir * segPos, p0 + dir * (segPos + drawLen) };
+						f32  uvs[2] = { t0 + (t1 - t0) * aFrac, t0 + (t1 - t0) * bFrac };
 
-						f32 curStep = (f32)j / numSegments;
-						f32 nextStep = (f32)(j + 1) / numSegments;
-						Vec2 curPoint = p0 + (p1 - p0) * curStep;
-						Vec2 nextPoint = p0 + (p1 - p0) * nextStep;
+						drawList->AddPolyLine(pts, 2, color, thickness, false, antiAliased, drawItemIndex,
+							hasGradient ? uvs : nullptr);
 
-						Vec2 points[2] = { curPoint, nextPoint };
+						dashOffset += drawLen;
+						segPos     += drawLen;
 
-						drawList->AddPolyLine(points, 2, color, thickness, false, antiAliased, drawItemIndex);
-					}
-				}
-				else // Distance between the points is less than the individual dot length, so just draw a normal solid line.
-				{
-					if (distanceWithoutPainting >= dashLength)
-					{
-						Vec2 points[2] = { p0, p1 };
-
-						drawList->AddPolyLine(points, 2, color, thickness, false, antiAliased, drawItemIndex);
-
-						distanceWithoutPainting = 0;
+						if (dashOffset >= dashLen - 0.001f)
+						{
+							dashOffset = 0.0f;
+							inDash     = false;
+						}
 					}
 					else
 					{
-						distanceWithoutPainting += Vec2::Distance(p0, p1);
+						const f32 skipLen = Math::Min(remaining, gapLen - dashOffset);
+						dashOffset += skipLen;
+						segPos     += skipLen;
+
+						if (dashOffset >= gapLen - 0.001f)
+						{
+							dashOffset = 0.0f;
+							inDash     = true;
+						}
 					}
 				}
 			}
@@ -599,52 +657,68 @@ namespace CE
 		break;
 		case FPenStyle::Dotted:
 		{
-			constexpr f32 dottedLength = 1;
-			f32 distanceWithoutPainting = dottedLength + 1;
+			constexpr f32 dotLen = 2.0f;
+			const f32     gapLen = currentPen.GetDashGap();
 
-			for (int i = 0; i < path.GetCount(); ++i)
+			f32  dashOffset = 0.0f;
+			bool inDash     = true;
+
+			const int numPoints = (int)path.GetCount();
+
+			for (int i = 0; i < numPoints; ++i)
 			{
-				Vec2 p0 = path[i];
-				if (!closed && i == (int)path.GetCount() - 1)
+				if (!closed && i == numPoints - 1)
 					break;
-				Vec2 p1 = path[(i + 1) % path.GetCount()];
 
-				if (Vec2::SqrDistance(p0, p1) > dottedLength * dottedLength)
+				const int  nextIdx = (i + 1) % numPoints;
+				const Vec2 p0      = path[i];
+				const Vec2 p1      = path[nextIdx];
+				const f32  segLen  = Vec2::Distance(p0, p1);
+
+				if (segLen < 0.001f)
+					continue;
+
+				const Vec2 dir = (p1 - p0) / segLen;
+				const f32  t0  = hasGradient ? tempPoints[i]       : 0.0f;
+				const f32  t1  = hasGradient ? tempPoints[nextIdx] : 0.0f;
+
+				f32 segPos = 0.0f;
+				while (segPos < segLen - 0.001f)
 				{
-					f32 dist = Vec2::Distance(p0, p1);
-					// Split the line segment into individual dotted and non-dotted segments
-					int numSegments = (int)(dist / dottedLength);
+					const f32 remaining = segLen - segPos;
 
-					for (int j = 0; j < numSegments; ++j)
+					if (inDash)
 					{
-						if (j % 2 != 0) // Skip odd segments
-							continue;
+						const f32 drawLen = Math::Min(remaining, dotLen - dashOffset);
+						const f32 aFrac   = segPos / segLen;
+						const f32 bFrac   = (segPos + drawLen) / segLen;
 
-						distanceWithoutPainting = 0;
+						Vec2 pts[2] = { p0 + dir * segPos, p0 + dir * (segPos + drawLen) };
+						f32  uvs[2] = { t0 + (t1 - t0) * aFrac, t0 + (t1 - t0) * bFrac };
 
-						f32 curStep = (f32)j / numSegments;
-						f32 nextStep = (f32)(j + 1) / numSegments;
-						Vec2 curPoint = p0 + (p1 - p0) * curStep;
-						Vec2 nextPoint = p0 + (p1 - p0) * nextStep;
+						drawList->AddPolyLine(pts, 2, color, thickness, false, antiAliased, drawItemIndex,
+							hasGradient ? uvs : nullptr);
 
-						Vec2 points[2] = { curPoint, nextPoint };
+						dashOffset += drawLen;
+						segPos     += drawLen;
 
-						drawList->AddPolyLine(points, 2, color, thickness, false, antiAliased, drawItemIndex);
-					}
-				}
-				else // Distance between the points is less than the individual dot length, so just draw a normal solid line.
-				{
-					if (distanceWithoutPainting >= dottedLength)
-					{
-						Vec2 points[2] = { p0, p1 };
-
-						drawList->AddPolyLine(points, 2, color, thickness, false, antiAliased, drawItemIndex);
-
-						distanceWithoutPainting = 0;
+						if (dashOffset >= dotLen - 0.001f)
+						{
+							dashOffset = 0.0f;
+							inDash     = false;
+						}
 					}
 					else
 					{
-						distanceWithoutPainting += Vec2::Distance(p0, p1);
+						const f32 skipLen = Math::Min(remaining, gapLen - dashOffset);
+						dashOffset += skipLen;
+						segPos     += skipLen;
+
+						if (dashOffset >= gapLen - 0.001f)
+						{
+							dashOffset = 0.0f;
+							inDash     = true;
+						}
 					}
 				}
 			}
