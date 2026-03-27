@@ -34,7 +34,7 @@
 #define FAssignNewOwned(WidgetClass, VariableName, Parent) FNewOwned(WidgetClass, Parent).Assign(VariableName)
 #define FAssignNewOwnedDynamic(WidgetClass, VariableName, Parent, WidgetDynamicClass) FNewOwnedDynamic(WidgetClass, Parent, WidgetDynamicClass).Assign(VariableName)
 
-// TODO: Implement TransitionManager callback in Transition_PropertyName setter
+// TODO: Implement TransitionManager callback in Animate_PropertyName setter
 #define __FUSION_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
 	protected:\
 		PropertyType m_##PropertyName = {};\

@@ -1155,9 +1155,9 @@ namespace CE
             // - Gradient Stops -
             {
                 const auto& split = renderSnapshot->gradientStopSplits[i];
-                const u64 byteOffset = split.startIndex * sizeof(FUIClipRect);
+                const u64 byteOffset = split.startIndex * sizeof(FUIGradientStop);
                 const u64 byteSize = Math::Max(split.count, (SIZE_T)1) * sizeof(FUIGradientStop);
-	            
+
                 srg->Bind(frameIndex, "_GradientStops", RHI::BufferView(gradientStopBuffers.GetBuffer(frameIndex), byteOffset, byteSize));
             }
 

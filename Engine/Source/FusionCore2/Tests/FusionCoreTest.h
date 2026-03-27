@@ -38,6 +38,16 @@ namespace RenderingTests
 			};
 			gradient.angle = Math::ToRadians(30);
 
+			FGradient penGrad{};
+			penGrad.gradientType = FGradientType::Linear;
+			penGrad.stops = {
+				FGradientKey(0.00f, Color(0.10f, 0.00f, 0.90f)), // electric indigo
+				FGradientKey(0.25f, Color(0.70f, 0.00f, 1.00f)), // violet
+				FGradientKey(0.50f, Color(0.00f, 0.90f, 1.00f)), // cyan
+				FGradientKey(0.75f, Color(0.70f, 0.00f, 1.00f)), // violet
+				FGradientKey(1.00f, Color(0.10f, 0.00f, 0.90f)), // electric indigo
+			};
+
 			Child(
 				FAssignNew(FVerticalStack, vstack)
 				.ContentHAlign(HAlign::Fill)
@@ -106,7 +116,34 @@ namespace RenderingTests
 						.Style("Button/Primary")
 						.OnClick([this]
 						{
-							
+							// Neon aurora border: indigo → violet → cyan  ↔  magenta → orange → gold
+							FGradient penGradA{};
+							penGradA.gradientType = FGradientType::Linear;
+							penGradA.stops = {
+								FGradientKey(0.00f, Color(0.10f, 0.00f, 0.90f)), // electric indigo
+								FGradientKey(0.25f, Color(0.70f, 0.00f, 1.00f)), // violet
+								FGradientKey(0.50f, Color(0.00f, 0.90f, 1.00f)), // cyan
+								FGradientKey(0.75f, Color(0.70f, 0.00f, 1.00f)), // violet
+								FGradientKey(1.00f, Color(0.10f, 0.00f, 0.90f)), // electric indigo
+							};
+
+							FGradient penGradB{};
+							penGradB.gradientType = FGradientType::Linear;
+							penGradB.stops = {
+								FGradientKey(0.00f, Color(1.00f, 0.00f, 0.60f)), // hot magenta
+								FGradientKey(0.25f, Color(1.00f, 0.45f, 0.00f)), // orange
+								FGradientKey(0.50f, Color(1.00f, 0.85f, 0.00f)), // gold
+								FGradientKey(0.75f, Color(1.00f, 0.45f, 0.00f)), // orange
+								FGradientKey(1.00f, Color(1.00f, 0.00f, 0.60f)), // hot magenta
+							};
+
+							FAnimate_Tween(bar2, Border)
+							.From(FPen(penGradA, 2.0f))
+							.To(FPen(penGradB, 2.0f))
+							.Duration(3.0f)
+							.Easing(FEasingType::EaseInOutCubic)
+							.Loop(FAnimationLoopMode::PingPong)
+							.Play();
 						}),
 
 						FNew(FButton)
@@ -155,8 +192,8 @@ namespace RenderingTests
 					.Name("Bar_1"),
 
 					FAssignNew(FDecoratedWidget, bar2)
-					.Background(Colors::Red)
-					.Border(FPen(Colors::Green, 1.0f))
+					.Background(Colors::White)
+					.Border(FPen(Colors::Red, 2.0f))
 					.Shape(FRoundedRectangle(5.0f))
 					.Height(30)
 					.ForcePaintBoundary(true)

@@ -6,6 +6,8 @@ namespace CE
     template<typename T>
     struct FAnimatable
     {
+        static constexpr bool Supported = requires (T a, T b) { a + b; };
+
         static T Lerp(const T& a, const T& b, f32 t) { return a + (b - a) * Math::Clamp01(t); }
 
         static T LerpUnclamped(const T& a, const T& b, f32 t) { return a + (b - a) * t; }
@@ -29,6 +31,8 @@ namespace CE
     template<>
     struct FAnimatable<Color>
     {
+        static constexpr bool Supported = true;
+
         static Color Lerp(const Color& a, const Color& b, f32 t) { return Color::Lerp(a, b, Math::Clamp01(t)); }
 
         static Color LerpUnclamped(const Color& a, const Color& b, f32 t) { return Color::Lerp(a, b, t); }
@@ -53,6 +57,8 @@ namespace CE
     template<>
     struct FAnimatable<FAffineTransform>
     {
+        static constexpr bool Supported = true;
+
         static FAffineTransform Lerp(const FAffineTransform& a, const FAffineTransform& b, f32 t)
         {
             return LerpUnclamped(a, b, Math::Clamp01(t));
@@ -129,8 +135,201 @@ namespace CE
     };
 
     template<>
+    struct FAnimatable<FPen>
+    {
+        static constexpr bool Supported = true;
+
+        static FPen Lerp(const FPen& a, const FPen& b, f32 t)
+        {
+            return LerpUnclamped(a, b, Math::Clamp01(t));
+        }
+
+        static FPen LerpUnclamped(const FPen& a, const FPen& b, f32 t)
+        {
+            ZoneScoped;
+
+            // Scalar fields: lerp continuously regardless of style
+            const f32 thickness  = a.GetThickness()  + (b.GetThickness()  - a.GetThickness())  * t;
+            const f32 dashLength = a.GetDashLength() + (b.GetDashLength() - a.GetDashLength()) * t;
+            const f32 dashGap    = a.GetDashGap()    + (b.GetDashGap()    - a.GetDashGap())    * t;
+
+            // Style (Solid/Dashed/Dotted/None): discrete, snap at t=0.5 if different
+            const FPenStyle style = (a.GetStyle() == b.GetStyle() || t < 0.5f) ? a.GetStyle() : b.GetStyle();
+
+            // Color / gradient fill: mirror FBrush SolidFill<->Gradient logic
+            FPen out = LerpColorFill(a, b, t);
+            out.SetStyle(style);
+            out.SetThickness(thickness);
+            out.SetDashLength(dashLength);
+            out.SetDashGap(dashGap);
+            return out;
+        }
+
+        // Identity/zero value — needed for spring initial velocity
+        static FPen Identity() { return FPen(); }
+
+        // Spring arithmetic helpers
+        static FPen Add(const FPen& a, const FPen& b)
+        {
+            ZoneScoped;
+
+            // None acts as additive zero: adopt the other side's structure
+            if (a.GetStyle() == FPenStyle::None && b.GetStyle() != FPenStyle::None)
+            {
+                FPen out = b;
+                out.SetColor(FAnimatable<Color>::Add(a.GetColor(), b.GetColor()));
+                out.SetThickness(a.GetThickness() + b.GetThickness());
+                out.SetDashLength(a.GetDashLength() + b.GetDashLength());
+                out.SetDashGap(a.GetDashGap() + b.GetDashGap());
+                return out;
+            }
+
+            // Build on a's structure
+            FPen out = a;
+            out.SetThickness(a.GetThickness() + b.GetThickness());
+            out.SetDashLength(a.GetDashLength() + b.GetDashLength());
+            out.SetDashGap(a.GetDashGap() + b.GetDashGap());
+            out.SetColor(FAnimatable<Color>::Add(a.GetColor(), b.GetColor()));
+
+            if (a.HasGradient() && b.HasGradient())
+            {
+                const FGradient& ga = a.GetGradient();
+                const FGradient& gb = b.GetGradient();
+                if (ga.stops.GetSize() == gb.stops.GetSize())
+                {
+                    FGradient outGrad = ga;
+                    for (int i = 0; i < (int)ga.stops.GetSize(); i++)
+                    {
+                        outGrad.stops[i].color    = FAnimatable<Color>::Add(ga.stops[i].color, gb.stops[i].color);
+                        outGrad.stops[i].position = ga.stops[i].position + gb.stops[i].position;
+                    }
+                    outGrad.angle = ga.angle + gb.angle;
+                    out.SetGradient(outGrad);
+                }
+            }
+
+            return out;
+        }
+
+        static FPen Scale(const FPen& a, f32 s)
+        {
+            ZoneScoped;
+
+            FPen out = a;
+            out.SetThickness(a.GetThickness() * s);
+            out.SetDashLength(a.GetDashLength() * s);
+            out.SetDashGap(a.GetDashGap() * s);
+            out.SetColor(FAnimatable<Color>::Scale(a.GetColor(), s));
+
+            if (a.HasGradient())
+            {
+                const FGradient& g = a.GetGradient();
+                FGradient outGrad = g;
+                for (int i = 0; i < (int)g.stops.GetSize(); i++)
+                {
+                    outGrad.stops[i].color    = FAnimatable<Color>::Scale(g.stops[i].color, s);
+                    outGrad.stops[i].position = g.stops[i].position * s;
+                }
+                outGrad.angle = g.angle * s;
+                out.SetGradient(outGrad);
+            }
+
+            return out;
+        }
+
+        static f32 SquaredMagnitude(const FPen& v)
+        {
+            ZoneScoped;
+
+            f32 mag = FAnimatable<Color>::SquaredMagnitude(v.GetColor())
+                    + v.GetThickness()  * v.GetThickness()
+                    + v.GetDashLength() * v.GetDashLength()
+                    + v.GetDashGap()    * v.GetDashGap();
+
+            if (v.HasGradient())
+            {
+                const FGradient& g = v.GetGradient();
+                for (int i = 0; i < (int)g.stops.GetSize(); i++)
+                    mag += FAnimatable<Color>::SquaredMagnitude(g.stops[i].color);
+                mag += g.angle * g.angle;
+            }
+
+            return mag;
+        }
+
+    private:
+
+        // Interpolate only the color/gradient fill; thickness/dash/style set separately by LerpUnclamped
+        static FPen LerpColorFill(const FPen& a, const FPen& b, f32 t)
+        {
+            ZoneScoped;
+
+            const bool aHasGrad = a.HasGradient();
+            const bool bHasGrad = b.HasGradient();
+
+            if (aHasGrad && bHasGrad)
+                return LerpGradientPen(a, b, t);
+
+            if (!aHasGrad && !bHasGrad)
+            {
+                FPen out = a;
+                out.SetColor(Color::Lerp(a.GetColor(), b.GetColor(), t));
+                return out;
+            }
+
+            // Solid color <-> Gradient: treat solid as a degenerate gradient
+            if (!aHasGrad && bHasGrad)
+                return LerpSolidGradientPen(a, b, t);         // t=0 → solid a, t=1 → gradient b
+            else
+                return LerpSolidGradientPen(b, a, 1.0f - t); // t=0 → gradient a, t=1 → solid b
+        }
+
+        // Both pens have gradients
+        static FPen LerpGradientPen(const FPen& a, const FPen& b, f32 t)
+        {
+            ZoneScoped;
+
+            const FGradient& ga = a.GetGradient();
+            const FGradient& gb = b.GetGradient();
+
+            // Snap at t=0.5 if gradient type or stop count differ
+            if (ga.gradientType != gb.gradientType || ga.stops.GetSize() != gb.stops.GetSize())
+                return t < 0.5f ? a : b;
+
+            FGradient outGrad = ga;
+            for (int i = 0; i < (int)ga.stops.GetSize(); i++)
+            {
+                outGrad.stops[i].color    = Color::Lerp(ga.stops[i].color, gb.stops[i].color, t);
+                outGrad.stops[i].position = ga.stops[i].position + (gb.stops[i].position - ga.stops[i].position) * t;
+            }
+            outGrad.angle = ga.angle + (gb.angle - ga.angle) * t;
+
+            // Thickness is a placeholder; LerpUnclamped overwrites it
+            return FPen(outGrad, 1.0f, Color::Lerp(a.GetColor(), b.GetColor(), t));
+        }
+
+        // solid: solid-color pen, gradient: gradient pen; t goes 0→1 solid→gradient
+        static FPen LerpSolidGradientPen(const FPen& solid, const FPen& gradient, f32 t)
+        {
+            ZoneScoped;
+
+            const FGradient& g = gradient.GetGradient();
+
+            FGradient outGrad = g;
+            for (int i = 0; i < (int)g.stops.GetSize(); i++)
+                outGrad.stops[i].color = Color::Lerp(solid.GetColor(), g.stops[i].color, t);
+            outGrad.angle = g.angle * t;
+
+            // Tint lerps from White (no tint at t=0) to the gradient pen's tint
+            return FPen(outGrad, 1.0f, Color::Lerp(Colors::White, gradient.GetColor(), t));
+        }
+    };
+
+    template<>
     struct FAnimatable<FBrush>
     {
+        static constexpr bool Supported = true;
+
         static FBrush Lerp(const FBrush& a, const FBrush& b, f32 t)
         {
             return LerpUnclamped(a, b, Math::Clamp01(t));
