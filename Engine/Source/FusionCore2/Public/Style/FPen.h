@@ -60,6 +60,28 @@ namespace CE
 			return *this;
 		}
 
+		// Arc-length offset in points applied to the start of the dash/dot pattern.
+		f32 GetDashPhase() const { return dashPhase; }
+		void SetDashPhase(f32 phase) { this->dashPhase = phase; }
+
+		FPen& DashPhase(f32 value)
+		{
+			dashPhase = value;
+			return *this;
+		}
+
+		// Computes the initial dashOffset and inDash state from dashPhase.
+		// Uses dashLength as the "on" length for Dashed, and 2pt for Dotted.
+		void InitDashState(f32& outDashOffset, bool& outInDash) const
+		{
+			constexpr f32 dotLen = 2.0f;
+			const f32 onLen  = (style == FPenStyle::Dotted) ? dotLen : dashLength;
+			const f32 period = onLen + dashGap;
+			const f32 phase  = period > 0.0f ? fmod(dashPhase, period) : 0.0f;
+			outInDash    = phase < onLen;
+			outDashOffset = outInDash ? phase : phase - onLen;
+		}
+
 		bool IsValidPen() const
 		{
 			return (HasGradient() || color.a > 0.001f) && thickness > 0.01f;
@@ -90,6 +112,11 @@ namespace CE
 		// Normalized offset applied to gradient UV along the stroke arc-length. Only used for gradient strokes.
 		FIELD()
 		f32 gradientOffset = 0.0f;
+
+		// Arc-length offset in points applied to the start of the dash/dot pattern.
+		// Increasing by 1 moves dashes forward by 1pt. Only used when style is Dashed or Dotted.
+		FIELD()
+		f32 dashPhase = 0.0f;
 	};
 	
 }

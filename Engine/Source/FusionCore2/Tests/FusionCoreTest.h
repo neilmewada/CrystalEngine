@@ -107,14 +107,6 @@ namespace RenderingTests
 						.Style("Button/Primary")
 						.OnClick([this]
 						{
-							FAnimate_Tween(this, GradientOffset)
-							.From(0.0f)
-							.To(1.0f)
-							.Duration(5.0f)
-							.Easing(FEasingType::Linear)
-							.Loop(FAnimationLoopMode::Loop)
-							.Play();
-
 							// Neon aurora border: indigo → violet → cyan  ↔  magenta → orange → gold
 							FGradient penGradA{};
 							penGradA.gradientType = FGradientType::Linear;
@@ -148,11 +140,19 @@ namespace RenderingTests
 							.Loop(FAnimationLoopMode::Loop)
 							.Play();
 
-							FAnimate_Tween(this, DashLength)							.From(10.0f)
-							.To(5.0f)
-							.Duration(2.0f)
-							.Easing(FEasingType::EaseInOutSine)
-							.Loop(FAnimationLoopMode::PingPong)
+							FAnimate_Tween(this, GradientOffset)
+							.From(1.0f)
+							.To(0.0f)
+							.Duration(5.0f)
+							.Easing(FEasingType::Linear)
+							.Loop(FAnimationLoopMode::Loop)
+							.Play();
+
+							FAnimate_Tween(this, DashPhase)							.From(0.0f)
+							.To(15.0f)
+							.Duration(1.5f)
+							.Easing(FEasingType::Linear)
+							.Loop(FAnimationLoopMode::Loop)
 							.Play();
 						}),
 
@@ -261,6 +261,7 @@ namespace RenderingTests
 			m_GradientOffset = 0.0f;
 			m_DashLength = 10.0f;
 			m_DashGap = 5.0f;
+			m_DashPhase = 0.0f;
 		}
 
 		void PaintOverlay(FPainter& painter) override
@@ -287,6 +288,7 @@ namespace RenderingTests
 			pen.SetStyle(FPenStyle::Dashed);
 			pen.SetDashLength(m_DashLength);
 			pen.SetDashGap(m_DashGap);
+			pen.SetDashPhase(m_DashPhase);
 			painter.SetPen(pen);
 			painter.SetBrush(FBrush());
 
@@ -325,6 +327,7 @@ namespace RenderingTests
 		FUSION_PAINT_PROPERTY(f32, GradientOffset);
 		FUSION_PAINT_PROPERTY(f32, DashLength);
 		FUSION_PAINT_PROPERTY(f32, DashGap);
+		FUSION_PAINT_PROPERTY(f32, DashPhase);
 
 		Ref<FVerticalStack> vstack;
 		Ref<FHorizontalStack> hstack;
@@ -334,7 +337,7 @@ namespace RenderingTests
 
 		bool scaleDown = true;
 		bool rotateForward = true;
-		bool gradientToggle = true;
+		bool gradientToggle = false;
 	};
 
 	CLASS()

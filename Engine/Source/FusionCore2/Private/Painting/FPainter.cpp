@@ -78,7 +78,7 @@ namespace CE
 	{
 		drawList = &layer->drawList;
 
-		drawList->fringeScale = 1.0f;// / layer->GetDpiScale();
+		drawList->fringeScale = 1.0f;
 
 		for (int i = 0; i < ArcFastTableSize; i++)
 		{
@@ -604,6 +604,7 @@ namespace CE
 
 			f32  dashOffset = 0.0f;
 			bool inDash     = true;
+			currentPen.InitDashState(dashOffset, inDash);
 
 			const int numPoints = (int)path.GetCount();
 
@@ -673,6 +674,7 @@ namespace CE
 
 			f32  dashOffset = 0.0f;
 			bool inDash     = true;
+			currentPen.InitDashState(dashOffset, inDash);
 
 			const int numPoints = (int)path.GetCount();
 

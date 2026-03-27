@@ -153,6 +153,7 @@ namespace CE
             const f32 dashLength      = a.GetDashLength()      + (b.GetDashLength()      - a.GetDashLength())      * t;
             const f32 dashGap         = a.GetDashGap()         + (b.GetDashGap()         - a.GetDashGap())         * t;
             const f32 gradientOffset  = a.GetGradientOffset()  + (b.GetGradientOffset()  - a.GetGradientOffset())  * t;
+            const f32 dashPhase       = a.GetDashPhase()       + (b.GetDashPhase()       - a.GetDashPhase())       * t;
 
             // Style (Solid/Dashed/Dotted/None): discrete, snap at t=0.5 if different
             const FPenStyle style = (a.GetStyle() == b.GetStyle() || t < 0.5f) ? a.GetStyle() : b.GetStyle();
@@ -164,6 +165,7 @@ namespace CE
             out.SetDashLength(dashLength);
             out.SetDashGap(dashGap);
             out.SetGradientOffset(gradientOffset);
+            out.SetDashPhase(dashPhase);
             return out;
         }
 
@@ -184,6 +186,7 @@ namespace CE
                 out.SetDashLength(a.GetDashLength() + b.GetDashLength());
                 out.SetDashGap(a.GetDashGap() + b.GetDashGap());
                 out.SetGradientOffset(a.GetGradientOffset() + b.GetGradientOffset());
+                out.SetDashPhase(a.GetDashPhase() + b.GetDashPhase());
                 return out;
             }
 
@@ -193,6 +196,7 @@ namespace CE
             out.SetDashLength(a.GetDashLength() + b.GetDashLength());
             out.SetDashGap(a.GetDashGap() + b.GetDashGap());
             out.SetGradientOffset(a.GetGradientOffset() + b.GetGradientOffset());
+            out.SetDashPhase(a.GetDashPhase() + b.GetDashPhase());
             out.SetColor(FAnimatable<Color>::Add(a.GetColor(), b.GetColor()));
 
             if (a.HasGradient() && b.HasGradient())
@@ -224,6 +228,7 @@ namespace CE
             out.SetDashLength(a.GetDashLength() * s);
             out.SetDashGap(a.GetDashGap() * s);
             out.SetGradientOffset(a.GetGradientOffset() * s);
+            out.SetDashPhase(a.GetDashPhase() * s);
             out.SetColor(FAnimatable<Color>::Scale(a.GetColor(), s));
 
             if (a.HasGradient())
@@ -250,7 +255,8 @@ namespace CE
                     + v.GetThickness()      * v.GetThickness()
                     + v.GetDashLength()     * v.GetDashLength()
                     + v.GetDashGap()        * v.GetDashGap()
-                    + v.GetGradientOffset() * v.GetGradientOffset();
+                    + v.GetGradientOffset() * v.GetGradientOffset()
+                    + v.GetDashPhase()      * v.GetDashPhase();
 
             if (v.HasGradient())
             {

@@ -131,6 +131,9 @@ namespace CE
 			Rect(Vec2(0, 0), widget->GetLayoutSize())
 		);
 
+		painter.SetBrush(FBrush());
+		painter.SetPen(FPen());
+
 		widget->SetWidgetFlag(FWidgetFlags::PaintDirty, false);
 		widget->Paint(painter);
 
@@ -176,6 +179,9 @@ namespace CE
 		{
 			painter.PopClip();
 		}
+
+		painter.SetBrush(FBrush());
+		painter.SetPen(FPen());
 
 		widget->PaintOverlay(painter);
 
