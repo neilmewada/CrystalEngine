@@ -148,7 +148,8 @@ namespace RenderingTests
 							.Loop(FAnimationLoopMode::Loop)
 							.Play();
 
-							FAnimate_Tween(this, DashPhase)							.From(0.0f)
+							FAnimate_Tween(this, DashPhase)
+							.From(0.0f)
 							.To(15.0f)
 							.Duration(1.5f)
 							.Easing(FEasingType::Linear)
