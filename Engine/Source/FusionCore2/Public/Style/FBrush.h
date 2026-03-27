@@ -64,10 +64,7 @@ namespace CE
 			return stops.GetSize() >= 2;
 		}
 
-		bool operator==(const FGradient& rhs) const
-		{
-			return GetHash() == rhs.GetHash();
-		}
+		bool operator==(const FGradient& rhs) const;
 
 		bool operator!=(const FGradient& rhs) const
 		{

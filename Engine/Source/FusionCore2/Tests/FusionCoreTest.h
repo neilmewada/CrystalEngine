@@ -67,7 +67,31 @@ namespace RenderingTests
 						.Style("Button/Primary")
 						.OnClick([this]
 						{
-							
+							FGradient gradientA{};
+							gradientA.gradientType = FGradientType::Linear;
+							gradientA.stops = {
+								FGradientKey(0.0f, Colors::Red),
+								FGradientKey(0.5f, Colors::Yellow),
+								FGradientKey(1.0f, Colors::Green),
+							};
+							gradientA.angle = Math::ToRadians(45);
+
+							FGradient gradientB{};
+							gradientB.gradientType = FGradientType::Linear;
+							gradientB.stops = {
+								FGradientKey(0.0f, Colors::Blue),
+								FGradientKey(0.5f, Colors::Cyan),
+								FGradientKey(1.0f, Colors::White),
+							};
+							gradientB.angle = Math::ToRadians(135);
+
+							FBrush target = gradientToggle ? FBrush(gradientA) : FBrush(gradientB);
+
+							FAnimate_Spring(bar3, Background)
+							.Target(target)
+							.Play("gradient");
+
+							gradientToggle = !gradientToggle;
 						}),
 
 						FNew(FButton)
@@ -157,7 +181,7 @@ namespace RenderingTests
 						)
 					),
 
-					FNew(FDecoratedWidget)
+					FAssignNew(FDecoratedWidget, bar3)
 					.Background(gradient)
 					.Shape(FRectangle())
 					.Height(100)
@@ -175,9 +199,11 @@ namespace RenderingTests
 		Ref<FHorizontalStack> hstack;
 		Ref<FDecoratedWidget> bar1;
 		Ref<FDecoratedWidget> bar2;
+		Ref<FDecoratedWidget> bar3;
 
 		bool scaleDown = true;
 		bool rotateForward = true;
+		bool gradientToggle = true;
 	};
 
 	CLASS()

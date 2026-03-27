@@ -18,6 +18,22 @@ namespace CE
 		return hash;
 	}
 
+	bool FGradient::operator==(const FGradient& rhs) const
+	{
+		if (gradientType != rhs.gradientType)
+			return false;
+		if (!Math::ApproxEquals(angle, rhs.angle))
+			return false;
+		if (stops.GetSize() != rhs.stops.GetSize())
+			return false;
+		for (int i = 0; i < (int)stops.GetSize(); i++)
+		{
+			if (!Math::ApproxEquals(stops[i].position, rhs.stops[i].position) || stops[i].color != rhs.stops[i].color)
+				return false;
+		}
+		return true;
+	}
+
 	FBrush::FBrush()
 		: color(Colors::Clear)
 		, imageName(Name())
