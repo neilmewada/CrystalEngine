@@ -587,10 +587,6 @@ namespace CE
 		case FPenStyle::None:
 			return true;
 		case FPenStyle::Solid:
-			if (hasGradient)
-			{
-				String::IsAlphabet('a');
-			}
 			drawList->AddPolyLine(path.GetData(), (int)path.GetCount(), color, thickness, closed, antiAliased, drawItemIndex,
 				hasGradient ? tempPoints.GetData() : nullptr);
 			break;
