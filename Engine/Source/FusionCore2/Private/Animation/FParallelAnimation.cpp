@@ -61,6 +61,14 @@ namespace CE
         for (int i = 0; i < children.GetSize(); i++)
         {
             Ref<FAnimation>& child = children[i];
+
+            if (!child->IsOwnerValid())
+            {
+                state = FAnimationState::Completed;
+                m_OnComplete.Broadcast();
+                return;
+            }
+
             if (child->GetState() == FAnimationState::Playing)
             {
                 child->Tick(deltaTime);

@@ -28,31 +28,12 @@ namespace CE
             return *this;
         }
 
-        Ref<FAnimation> Play()
+        Ref<FAnimation> Build(Object* outer)
         {
-            Ref<FAnimation> anim = Build(owner, name);
-            FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, name);
-            return anim;
-        }
-
-        Ref<FAnimation> Play(Name slot)
-        {
-            this->name = slot;
-            Ref<FAnimation> anim = Build(owner, slot);
-            FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, slot);
-            return anim;
-        }
-
-    private:
-
-        Ref<FAnimation> Build(Ref<Object> owner, Name name)
-        {
-            if (!owner.IsValid())
-                return nullptr;
-
             T from = hasFromGetter ? fromGetter() : fromValue;
 
-            Ref<FTweenAnimation> anim = CreateObject<FTweenAnimation>(owner.Get(), FixObjectName(name.GetString()));
+            Ref<FTweenAnimation> anim = CreateObject<FTweenAnimation>(outer, FixObjectName(name.GetString()));
+            anim->AssignOwner(owner);
             anim->SetInterpolator(MoveTemp(from), toValue, easing, setter);
             anim->SetDelay(delay);
             anim->duration = duration;
@@ -60,11 +41,32 @@ namespace CE
 
             if (onCompleteValid)
             {
-	            anim->OnComplete() += onComplete;
+                anim->OnComplete() += onComplete;
             }
 
             return anim;
         }
+
+        Ref<FAnimation> Play()
+        {
+            if (!owner.IsValid())
+                return nullptr;
+            Ref<FAnimation> anim = Build(owner.Get());
+            FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, name);
+            return anim;
+        }
+
+        Ref<FAnimation> Play(Name slot)
+        {
+            if (!owner.IsValid())
+                return nullptr;
+            this->name = slot;
+            Ref<FAnimation> anim = Build(owner.Get());
+            FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, slot);
+            return anim;
+        }
+
+    private:
 
         Name                          name;
         Ref<Object>                   owner;
@@ -88,12 +90,12 @@ namespace CE
     {
     public:
 
-	    FSpringBuilder& Target(T t)           { target = MoveTemp(t); targetValid = true; return *this; }
-	    FSpringBuilder& Stiffness(f32 s)      { stiffness     = s; return *this; }
-	    FSpringBuilder& Damping(f32 d)        { damping       = d; return *this; }
-	    FSpringBuilder& SettleEpsilon(f32 e)  { settleEpsilon = e; return *this; }
-	    FSpringBuilder& Delay(f32 d)          { delay         = d; return *this; }
-	    FSpringBuilder& Owner(Ref<Object> o)  { owner = MoveTemp(o); return *this; }
+        FSpringBuilder& Target(T t)           { target = MoveTemp(t); targetValid = true; return *this; }
+        FSpringBuilder& Stiffness(f32 s)      { stiffness     = s; return *this; }
+        FSpringBuilder& Damping(f32 d)        { damping       = d; return *this; }
+        FSpringBuilder& SettleEpsilon(f32 e)  { settleEpsilon = e; return *this; }
+        FSpringBuilder& Delay(f32 d)          { delay         = d; return *this; }
+        FSpringBuilder& Owner(Ref<Object> o)  { owner = MoveTemp(o); return *this; }
 
         FSpringBuilder& OnComplete(std::function<void()> cb)
         {
@@ -102,33 +104,15 @@ namespace CE
             return *this;
         }
 
-        Ref<FAnimation> Play()
+        Ref<FAnimation> Build(Object* outer)
         {
-            Ref<FAnimation> anim = Build(name);
-            FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, name);
-            return anim;
-        }
-
-        Ref<FAnimation> Play(Name slot)
-        {
-            name = slot;
-            Ref<FAnimation> anim = Build(slot);
-            FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, name);
-            return anim;
-        }
-
-    private:
-
-        Ref<FAnimation> Build(Name name)
-        {
-            if (!targetValid || !owner.IsValid())
-            {
-	            return nullptr;
-            }
+            if (!targetValid)
+                return nullptr;
 
             const T current = getter();
 
-            Ref<FSpringAnimation> anim = CreateObject<FSpringAnimation>(owner.Get(), FixObjectName(name.GetString()));
+            Ref<FSpringAnimation> anim = CreateObject<FSpringAnimation>(outer, FixObjectName(name.GetString()));
+            anim->AssignOwner(owner);
             anim->stiffness     = stiffness;
             anim->damping       = damping;
             anim->settleEpsilon = settleEpsilon;
@@ -140,6 +124,27 @@ namespace CE
 
             return anim;
         }
+
+        Ref<FAnimation> Play()
+        {
+            if (!targetValid || !owner.IsValid())
+                return nullptr;
+            Ref<FAnimation> anim = Build(owner.Get());
+            FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, name);
+            return anim;
+        }
+
+        Ref<FAnimation> Play(Name slot)
+        {
+            if (!targetValid || !owner.IsValid())
+                return nullptr;
+            name = slot;
+            Ref<FAnimation> anim = Build(owner.Get());
+            FApplication::Get()->GetService<FAnimationService>()->Play(anim, owner, name);
+            return anim;
+        }
+
+    private:
 
         Name                          name;
         Ref<Object>                   owner;
@@ -157,10 +162,175 @@ namespace CE
         friend class FAnimate;
     };
 
+    class FSequenceBuilder
+    {
+        using StepFactory = std::function<Ref<FAnimation>(Object*)>;
+
+        struct Step
+        {
+            StepFactory factory;
+            f32 delayBefore = 0.f;
+        };
+
+    public:
+
+        template<typename TBuilder>
+        FSequenceBuilder& Then(TBuilder childBuilder, f32 delayBefore = 0.f)
+        {
+            steps.Add({
+                [b = std::move(childBuilder)](Object* outer) mutable -> Ref<FAnimation>
+                {
+                    return b.Build(outer);
+                },
+                delayBefore
+            });
+            return *this;
+        }
+
+        FSequenceBuilder& Then(Ref<FAnimation> anim, f32 delayBefore = 0.f)
+        {
+            steps.Add({ [anim](Object*) -> Ref<FAnimation> { return anim; }, delayBefore });
+            return *this;
+        }
+
+        FSequenceBuilder& Loop(FAnimationLoopMode m) { loopMode = m; return *this; }
+        FSequenceBuilder& Delay(f32 d) { delay = d; return *this; }
+
+        FSequenceBuilder& OnComplete(std::function<void()> cb)
+        {
+            onComplete = std::move(cb);
+            onCompleteValid = true;
+            return *this;
+        }
+
+        Ref<FAnimation> Build(Object* outer)
+        {
+            Ref<FSequenceAnimation> seq = CreateObject<FSequenceAnimation>(outer, "Sequence");
+            seq->AssignOwner(anchor);
+
+            for (int i = 0; i < steps.GetSize(); i++)
+            {
+                Ref<FAnimation> child = steps[i].factory(seq.Get());
+                if (child.IsValid())
+                    seq->Add(child, steps[i].delayBefore);
+            }
+
+            seq->loopMode = loopMode;
+            seq->SetDelay(delay);
+            if (onCompleteValid)
+                seq->OnComplete() += onComplete;
+
+            return seq;
+        }
+
+        Ref<FAnimation> Play()
+        {
+            if (!anchor.IsValid())
+                return nullptr;
+            Ref<FAnimation> anim = Build(anchor.Get());
+            FApplication::Get()->GetService<FAnimationService>()->Play(anim, anchor, slot);
+            return anim;
+        }
+
+    private:
+
+        Array<Step>            steps;
+        Ref<Object>            anchor;
+        Name                   slot;
+        FAnimationLoopMode     loopMode        = FAnimationLoopMode::Once;
+        f32                    delay           = 0.f;
+        std::function<void()>  onComplete;
+        bool                   onCompleteValid = false;
+
+        friend class FAnimate;
+    };
+
+    class FParallelBuilder
+    {
+        using StepFactory = std::function<Ref<FAnimation>(Object*)>;
+
+        struct Step
+        {
+            StepFactory factory;
+            f32 delayBefore = 0.f;
+        };
+
+    public:
+
+        template<typename TBuilder>
+        FParallelBuilder& With(TBuilder childBuilder, f32 delayBefore = 0.f)
+        {
+            steps.Add({
+                [b = std::move(childBuilder)](Object* outer) mutable -> Ref<FAnimation>
+                {
+                    return b.Build(outer);
+                },
+                delayBefore
+            });
+            return *this;
+        }
+
+        FParallelBuilder& With(Ref<FAnimation> anim, f32 delayBefore = 0.f)
+        {
+            steps.Add({ [anim](Object*) -> Ref<FAnimation> { return anim; }, delayBefore });
+            return *this;
+        }
+
+        FParallelBuilder& Loop(FAnimationLoopMode m) { loopMode = m; return *this; }
+        FParallelBuilder& Delay(f32 d) { delay = d; return *this; }
+
+        FParallelBuilder& OnComplete(std::function<void()> cb)
+        {
+            onComplete = std::move(cb);
+            onCompleteValid = true;
+            return *this;
+        }
+
+        Ref<FAnimation> Build(Object* outer)
+        {
+            Ref<FParallelAnimation> par = CreateObject<FParallelAnimation>(outer, "Parallel");
+            par->AssignOwner(anchor);
+
+            for (int i = 0; i < steps.GetSize(); i++)
+            {
+                Ref<FAnimation> child = steps[i].factory(par.Get());
+                if (child.IsValid())
+                    par->Add(child, steps[i].delayBefore);
+            }
+
+            par->loopMode = loopMode;
+            par->SetDelay(delay);
+            if (onCompleteValid)
+                par->OnComplete() += onComplete;
+
+            return par;
+        }
+
+        Ref<FAnimation> Play()
+        {
+            if (!anchor.IsValid())
+                return nullptr;
+            Ref<FAnimation> anim = Build(anchor.Get());
+            FApplication::Get()->GetService<FAnimationService>()->Play(anim, anchor, slot);
+            return anim;
+        }
+
+    private:
+
+        Array<Step>            steps;
+        Ref<Object>            anchor;
+        Name                   slot;
+        FAnimationLoopMode     loopMode        = FAnimationLoopMode::Once;
+        f32                    delay           = 0.f;
+        std::function<void()>  onComplete;
+        bool                   onCompleteValid = false;
+
+        friend class FAnimate;
+    };
+
     class FAnimate
     {
     public:
-
 
         template<WidgetClassType TWidgetType, typename T>
         static FTweenBuilder<T> Tween(Name name, TWidgetType* target, T (TWidgetType::*getter)() const, void (TWidgetType::*setter)(const T&))
@@ -186,7 +356,6 @@ namespace CE
             return builder;
         }
 
-        // Spring — widget pointer + method pointers (owner is captured automatically)
         template<WidgetClassType TWidgetType, typename T>
         static FSpringBuilder<T> Spring(Name name, TWidgetType* target,
                                          T (TWidgetType::*getter)() const,
@@ -210,6 +379,40 @@ namespace CE
             builder.setter = [target, setter](const T& v) { (target->*setter)(v); };
             builder.getter = [target, getter]() -> T { return (target->*getter)(); };
             builder.owner  = target;
+            return builder;
+        }
+
+        // Top-level sequence: registered with the animation service under the given slot.
+        static FSequenceBuilder Sequence(Object* anchor, Name slot)
+        {
+            FSequenceBuilder builder{};
+            builder.anchor = anchor;
+            builder.slot = slot;
+            return builder;
+        }
+
+        // Nested sequence: owned by anchor but not registered with the service directly.
+        static FSequenceBuilder Sequence(Object* anchor)
+        {
+            FSequenceBuilder builder{};
+            builder.anchor = anchor;
+            return builder;
+        }
+
+        // Top-level parallel: registered with the animation service under the given slot.
+        static FParallelBuilder Parallel(Object* anchor, Name slot)
+        {
+            FParallelBuilder builder{};
+            builder.anchor = anchor;
+            builder.slot = slot;
+            return builder;
+        }
+
+        // Nested parallel: owned by anchor but not registered with the service directly.
+        static FParallelBuilder Parallel(Object* anchor)
+        {
+            FParallelBuilder builder{};
+            builder.anchor = anchor;
             return builder;
         }
     };

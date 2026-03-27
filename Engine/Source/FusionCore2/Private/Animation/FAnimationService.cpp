@@ -28,7 +28,6 @@ namespace CE
             }
         }
 
-        animation->AssignOwner(owner);
         animation->Play();
 
         animationSlotsByWidget[ownerUuid][slot] = animation;

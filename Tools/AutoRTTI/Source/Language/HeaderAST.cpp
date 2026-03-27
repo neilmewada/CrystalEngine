@@ -774,7 +774,7 @@ namespace CE
                     });
                 }
             }
-            else if ((token.type == TK_FUSION_DATA_PROPERTY || token.type == TK_FUSION_PROPERTY || token.type == TK_FUSION_PAINT_PROPERTY ||
+            else if ((token.type == TK_FUSION_DATA_PROPERTY || token.type == TK_FUSION_PROPERTY || token.type == TK_FUSION_STATE_PROPERTY ||
                 token.type == TK_FUSION_LAYOUT_PROPERTY || token.type == TK_FUSION_DATA_LAYOUT_PROPERTY || token.type == TK_FUSION_DATA_PAINT_PROPERTY) &&
                 curClass != nullptr)
             {
@@ -823,8 +823,8 @@ namespace CE
                     case TK_FUSION_PROPERTY:
                         field.attribs.Add("FusionProperty");
                         break;
-                    case TK_FUSION_PAINT_PROPERTY:
-                        field.attribs.Add("FusionPaintProperty");
+                    case TK_FUSION_STATE_PROPERTY:
+                        field.attribs.Add("FusionStateProperty");
                         break;
                     case TK_FUSION_DATA_PROPERTY:
                         field.attribs.Add("FusionDataProperty");

@@ -187,10 +187,10 @@ namespace CE
 
     public: // - Fusion Properties -
 
-        FUSION_PAINT_PROPERTY(CE::Name, Style);
+        FUSION_PROPERTY(CE::Name, Style);
 
 		// Does not affect layout. Used for freeform transformations like rotation or translation that should not cause a layout pass when modified.
-        FUSION_PAINT_PROPERTY(FAffineTransform, Transform);
+        FUSION_PROPERTY(FAffineTransform, Transform);
 
         FUSION_LAYOUT_PROPERTY(FMargin, Margin);
         FUSION_LAYOUT_PROPERTY(FMargin, Padding);
@@ -205,10 +205,10 @@ namespace CE
 
         FUSION_LAYOUT_PROPERTY(f32, FillRatio);
 
-        FUSION_PAINT_PROPERTY(f32, Opacity);
+        FUSION_PROPERTY(f32, Opacity);
 
-        FUSION_PAINT_PROPERTY(FShape, ClipShape);
-        FUSION_PAINT_PROPERTY(bool, ClipContent);
+        FUSION_PROPERTY(FShape, ClipShape);
+        FUSION_PROPERTY(bool, ClipContent);
 
         FUSION_LAYOUT_PROPERTY(CE::HAlign, HAlign);
         FUSION_LAYOUT_PROPERTY(CE::VAlign, VAlign);

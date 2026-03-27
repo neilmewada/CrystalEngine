@@ -180,10 +180,16 @@ namespace RenderingTests
 						.Style("Button/Destructive")
 						.OnClick([this]
 						{
-							FAffineTransform toRotation = rotateForward ? FAffineTransform::Rotation(Math::ToRadians(90)) : FAffineTransform::Identity();
-
-							FAnimate_Spring(bar1, Transform)
-							.Target(toRotation)
+							FAnimate_Sequence(this, "bar1_demo")
+							.Then(FAnimate_Tween(bar1, Transform)
+								.To(FAffineTransform::Scale(Vec2(0.5f, 0.5f)))
+								.Duration(0.5f)
+							)
+							.Then(FAnimate_Tween(bar1, Transform)
+								.From(FAffineTransform::Scale(Vec2(0.5f, 0.5f)))
+								.To(FAffineTransform::Scale(Vec2(1, 1)))
+								.Duration(0.5f)
+							)
 							.Play();
 
 							rotateForward = !rotateForward;
@@ -325,10 +331,10 @@ namespace RenderingTests
 			painter.PathStroke(false, true);
 		}
 
-		FUSION_PAINT_PROPERTY(f32, GradientOffset);
-		FUSION_PAINT_PROPERTY(f32, DashLength);
-		FUSION_PAINT_PROPERTY(f32, DashGap);
-		FUSION_PAINT_PROPERTY(f32, DashPhase);
+		FUSION_PROPERTY(f32, GradientOffset);
+		FUSION_PROPERTY(f32, DashLength);
+		FUSION_PROPERTY(f32, DashGap);
+		FUSION_PROPERTY(f32, DashPhase);
 
 		Ref<FVerticalStack> vstack;
 		Ref<FHorizontalStack> hstack;

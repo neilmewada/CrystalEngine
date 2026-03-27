@@ -73,8 +73,8 @@
 		auto PropertyName() const { return this->m_##PropertyName; }
 
 #define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkLayoutDirty())
-#define FUSION_PAINT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
-#define FUSION_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, )
+#define FUSION_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, self.MarkPaintDirty())
+#define FUSION_STATE_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, )
 
 #define FUSION_PROPERTY_GET(PropertyType, PropertyName) \
 	auto PropertyName()
@@ -115,6 +115,7 @@
 
 #define FAnimate_Tween(widgetPtr, PropertyName) FAnimate::Tween(CE_EXPAND(FAnimatedProperty(widgetPtr, PropertyName)))
 #define FAnimate_Spring(widgetPtr, PropertyName) FAnimate::Spring(CE_EXPAND(FAnimatedProperty(widgetPtr, PropertyName)))
+#define FAnimate_Sequence(owner, slotName) FAnimate::Sequence(owner, slotName)
 
 // IGNORE THE COMMENTED CODE BELOW, IT'S JUST FOR REFERENCE AND NOT PART OF THE MACROS
 /*

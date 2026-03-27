@@ -22,9 +22,9 @@ namespace CE
 
     public: // - Fusion Properties - 
 
-        FUSION_PAINT_PROPERTY(FBrush, Background);
-        FUSION_PAINT_PROPERTY(FPen, Border);
-        FUSION_PAINT_PROPERTY(FShape, Shape);
+        FUSION_PROPERTY(FBrush, Background);
+        FUSION_PROPERTY(FPen, Border);
+        FUSION_PROPERTY(FShape, Shape);
 
         FUSION_WIDGET;
     };

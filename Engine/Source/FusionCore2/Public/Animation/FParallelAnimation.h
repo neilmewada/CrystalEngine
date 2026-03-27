@@ -19,8 +19,12 @@ namespace CE
 
         void Apply(f32 normalizedTime) override {} // Parallel drives children in Tick
 
+    private:
+
         FIELD()
         Array<Ref<FAnimation>> children;
+
+        friend class FParallelBuilder;
     };
 
 } // namespace CE

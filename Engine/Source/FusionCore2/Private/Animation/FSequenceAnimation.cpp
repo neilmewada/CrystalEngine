@@ -58,6 +58,14 @@ namespace CE
 
         // Tick the active child
         Ref<FAnimation>& current = children[currentIndex];
+
+        if (!current->IsOwnerValid())
+        {
+            state = FAnimationState::Completed;
+            m_OnComplete.Broadcast();
+            return;
+        }
+
         current->Tick(deltaTime);
 
         if (current->GetState() != FAnimationState::Completed)

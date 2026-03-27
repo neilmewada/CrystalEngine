@@ -54,8 +54,11 @@ enum AttributeSpecifiers
 	//! @brief This will exclude the field from serialization.
 	NonSerialized,
 
-	//! @brief Mark the property as a 'regular' fusion widget property
+	//! @brief Mark the property as a 'regular' fusion widget property that triggers repaints on update.
 	FusionProperty,
+
+	//! @brief Mark the property as a 'regular' fusion widget property that does not mark anything dirty.
+	FusionStateProperty,
 
 	//! @brief Mark the property as fusion widget layout property.
 	FusionLayoutProperty,

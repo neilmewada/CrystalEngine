@@ -25,6 +25,8 @@ namespace CE
     private:
 
         int currentIndex = 0;
+
+        friend class FSequenceBuilder;
     };
 
 } // namespace CE
