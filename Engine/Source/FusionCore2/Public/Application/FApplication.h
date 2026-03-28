@@ -6,6 +6,7 @@ namespace CE
     class FService;
     class FSurface;
     class FNativeSurface;
+    class FTextureRegistry;
 
     struct FApplicationInitInfo
     {

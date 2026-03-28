@@ -11,7 +11,7 @@ namespace CE
 
     FRenderService::FRenderService()
     {
-
+        
     }
 
     void FRenderService::OnStart()

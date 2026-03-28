@@ -21,6 +21,10 @@
 #include "Event/FEvent.h"
 #include "Event/FEventService.h"
 
+// Image
+#include "Image/FImageService.h"
+#include "Image/FAssetService.h"
+
 // Style
 #include "Style/FGradient.h"
 #include "Style/FPen.h"

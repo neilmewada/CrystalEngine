@@ -87,7 +87,6 @@ namespace CE
         RHI::ShaderResourceGroupLayout objectSrgLayout{};
 
         HashMap<FSampleState, int> samplerIndicesByState;
-
     };
     
 } // namespace CE

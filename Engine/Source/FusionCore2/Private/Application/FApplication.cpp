@@ -74,7 +74,8 @@ namespace CE
 
         Array<SubClass<FService>> serviceClasses = {
             GetStaticClass<FEventService>(),
-            GetStaticClass<FAnimationService>()
+            GetStaticClass<FAnimationService>(),
+            GetStaticClass<FImageService>(),
         };
 
         serviceClasses.AddRange(initInfo.externalServices);
