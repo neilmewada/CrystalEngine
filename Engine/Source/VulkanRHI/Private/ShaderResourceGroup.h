@@ -97,6 +97,11 @@ namespace CE::Vulkan
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::Texture** textures) override;
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::TextureView** textureViews) override;
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::Sampler** samplers) override;
+
+		virtual bool Bind(Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures) override;
+		virtual bool Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures) override;
+		virtual bool Bind(Name name, u32 firstArrayElement, u32 count, RHI::TextureView** textureViews) override;
+		virtual bool Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::TextureView** textureViews) override;
 		
 		inline int GetSetNumber() const { return setNumber; }
 
@@ -149,8 +154,14 @@ namespace CE::Vulkan
 		HashMap<Name, VkDescriptorSetLayoutBinding> variableBindingsByName{};
 		HashMap<int, VkDescriptorSetLayoutBinding> variableBindingsBySlot{};
 
+		struct ImageBindRange
+		{
+			u32 firstArrayElement = 0;
+			List<VkDescriptorImageInfo> imageInfos;
+		};
+
 		StaticArray<HashMap<int, List<VkDescriptorBufferInfo>>, RHI::Limits::MaxSwapChainImageCount> bufferInfosBoundBySlot{};
-		StaticArray<HashMap<int, List<VkDescriptorImageInfo>>, RHI::Limits::MaxSwapChainImageCount> imageInfosBoundBySlot{};
+		StaticArray<HashMap<int, List<ImageBindRange>>, RHI::Limits::MaxSwapChainImageCount> imageInfosBoundBySlot{};
 
 		friend class GraphicsPipelineState;
 		friend class CommandList;

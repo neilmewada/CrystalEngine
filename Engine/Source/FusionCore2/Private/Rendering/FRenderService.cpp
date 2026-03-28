@@ -164,37 +164,23 @@ namespace CE
 
     int FRenderService::RegisterTexture(RHI::Texture* rhiTexture)
     {
-        return RegisterTexture(TextureImpl{ .rhiTexture = rhiTexture });
-    }
-
-    int FRenderService::RegisterTexture(RHI::TextureView* rhiTextureView)
-    {
-        return RegisterTexture(TextureImpl{ .rhiTextureView = rhiTextureView });
-    }
-
-    int FRenderService::RegisterTexture(RPI::Texture* rpiTexture)
-    {
-        return RegisterTexture(TextureImpl{ .rpiTexture = rpiTexture });
-    }
-
-    int FRenderService::RegisterTexture(const TextureImpl& texture)
-    {
-        if (!texture.IsValid())
+        if (!rhiTexture)
             return -1;
 
         textureDirty.Set();
 
         if (freeSlots.IsEmpty())
         {
-            texturesBySlot.Insert(texture);
+            texturesBySlot.Insert(rhiTexture);
             return (int)texturesBySlot.GetCount() - 1;
         }
 
         int slot = freeSlots.Last();
         freeSlots.RemoveLast();
 
-        texturesBySlot[slot] = texture;
+        texturesBySlot[slot] = rhiTexture;
 
+        totalTextures++;
         return slot;
     }
 
@@ -204,22 +190,26 @@ namespace CE
             return;
 
         textureDirty.Set(frameIndex, false);
+        
+        if (totalTextures > 0 && texturesBySlot.GetCount() > 0)
+        {
+            sceneSrg->Bind(frameIndex, "_Textures", 0, texturesBySlot.GetCount(), texturesBySlot.GetData());
+        }
 
-        StableDynamicArray<RHI::Texture*> views;
-        views.Reserve(texturesBySlot.GetCount());
-
-
+        sceneSrg->FlushBindings();
     }
 
     void FRenderService::DeregisterTexture(int slot)
     {
         if (slot < 0 || slot >= texturesBySlot.GetCount())
             return;
-        if (!texturesBySlot[slot].IsValid())
+        if (!texturesBySlot[slot])
             return;
 
         freeSlots.Insert(slot);
-        texturesBySlot[slot] = {};
+        texturesBySlot[slot] = RPISystem::Get().GetDefaultAlbedoTex()->GetRhiTexture();
+
+        totalTextures--;
 
         textureDirty.Set();
     }

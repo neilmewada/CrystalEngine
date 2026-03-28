@@ -360,6 +360,97 @@ namespace CE::Metal
         return true;
     }
     
+    bool ShaderResourceGroup::Bind(Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
+
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            Bind(i, name, firstArrayElement, count, textures);
+        }
+
+        return true;
+    }
+
+    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
+
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+
+        auto& textureList = boundTexturesBySlot[imageIndex][bindingSlot];
+
+        while ((int)textureList.GetSize() < (int)(firstArrayElement + count))
+        {
+            TextureBinding empty{};
+            empty.resourceType = RHI::ResourceType::Texture;
+            empty.texture = nullptr;
+            textureList.Add(empty);
+        }
+
+        for (int j = 0; j < count; j++)
+        {
+            TextureBinding textureBinding{};
+            textureBinding.resourceType = RHI::ResourceType::Texture;
+            textureBinding.texture = (Metal::Texture*)textures[j];
+            textureList[firstArrayElement + j] = textureBinding;
+        }
+
+        needsFlush = true;
+
+        return true;
+    }
+
+    bool ShaderResourceGroup::Bind(Name name, u32 firstArrayElement, u32 count, RHI::TextureView** textureViews)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
+
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            Bind(i, name, firstArrayElement, count, textureViews);
+        }
+
+        return true;
+    }
+
+    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::TextureView** textureViews)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
+
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+
+        auto& textures = boundTexturesBySlot[imageIndex][bindingSlot];
+
+        // Grow the list to accommodate firstArrayElement + count if needed
+        while ((int)textures.GetSize() < (int)(firstArrayElement + count))
+        {
+            TextureBinding empty{};
+            empty.resourceType = RHI::ResourceType::TextureView;
+            empty.textureView = nullptr;
+            textures.Add(empty);
+        }
+
+        for (int j = 0; j < count; j++)
+        {
+            TextureBinding textureBinding{};
+            textureBinding.resourceType = RHI::ResourceType::TextureView;
+            textureBinding.textureView = (Metal::TextureView*)textureViews[j];
+            textures[firstArrayElement + j] = textureBinding;
+        }
+
+        needsFlush = true;
+
+        return true;
+    }
+
     void ShaderResourceGroup::MtlUseResources(id<MTLComputeCommandEncoder> mtlComputeEncoder, int frameIndex)
     {
         for (const auto& [binding, boundBuffers] : boundBuffersBySlot[frameIndex])

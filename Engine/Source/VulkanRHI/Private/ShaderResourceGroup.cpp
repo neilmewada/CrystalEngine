@@ -573,8 +573,11 @@ namespace CE::Vulkan
 
 		// Do not make changes if the same image is already bound!
 
-		if (imageInfosBoundBySlot[i][bindingSlot].GetSize() == 1 &&
-			imageInfosBoundBySlot[i][bindingSlot][0].imageView == texture->GetImageView())
+		const auto& existingRanges = imageInfosBoundBySlot[i][bindingSlot];
+		if (existingRanges.GetSize() == 1 &&
+			existingRanges[0].firstArrayElement == 0 &&
+			existingRanges[0].imageInfos.GetSize() == 1 &&
+			existingRanges[0].imageInfos[0].imageView == texture->GetImageView())
 		{
 			return true;
 		}
@@ -601,8 +604,11 @@ namespace CE::Vulkan
 		imageWrite.imageView = texture->GetImageView();
 		imageWrite.sampler = nullptr;
 
-		imageInfosBoundBySlot[i][bindingSlot].Clear();
-		imageInfosBoundBySlot[i][bindingSlot].Add(imageWrite);
+		auto& ranges = imageInfosBoundBySlot[i][bindingSlot];
+		ranges.Clear();
+		ranges.Add(ImageBindRange{});
+		ranges.GetLast().firstArrayElement = 0;
+		ranges.GetLast().imageInfos.Add(imageWrite);
 
 		needsRecompile = true;
 
@@ -625,8 +631,11 @@ namespace CE::Vulkan
 
 		// Do not make changes if the same image is already bound!
 
-		if (imageInfosBoundBySlot[i][bindingSlot].GetSize() == 1 &&
-			imageInfosBoundBySlot[i][bindingSlot][0].imageView == textureView->GetImageView())
+		const auto& existingRanges = imageInfosBoundBySlot[i][bindingSlot];
+		if (existingRanges.GetSize() == 1 &&
+			existingRanges[0].firstArrayElement == 0 &&
+			existingRanges[0].imageInfos.GetSize() == 1 &&
+			existingRanges[0].imageInfos[0].imageView == textureView->GetImageView())
 		{
 			return true;
 		}
@@ -653,8 +662,11 @@ namespace CE::Vulkan
 		imageWrite.imageView = textureView->GetImageView();
 		imageWrite.sampler = nullptr;
 
-		imageInfosBoundBySlot[i][bindingSlot].Clear();
-		imageInfosBoundBySlot[i][bindingSlot].Add(imageWrite);
+		auto& ranges = imageInfosBoundBySlot[i][bindingSlot];
+		ranges.Clear();
+		ranges.Add(ImageBindRange{});
+		ranges.GetLast().firstArrayElement = 0;
+		ranges.GetLast().imageInfos.Add(imageWrite);
 
 		needsRecompile = true;
 
@@ -675,8 +687,11 @@ namespace CE::Vulkan
 		int bindingSlot = bindingSlotsByVariableName[name];
 		Vulkan::Sampler* sampler = (Vulkan::Sampler*)rhiSampler;
 
-		if (imageInfosBoundBySlot[i][bindingSlot].GetSize() == 1 &&
-			imageInfosBoundBySlot[i][bindingSlot][0].sampler == sampler->GetVkHandle())
+		const auto& existingRanges = imageInfosBoundBySlot[i][bindingSlot];
+		if (existingRanges.GetSize() == 1 &&
+			existingRanges[0].firstArrayElement == 0 &&
+			existingRanges[0].imageInfos.GetSize() == 1 &&
+			existingRanges[0].imageInfos[0].sampler == sampler->GetVkHandle())
 		{
 			return true;
 		}
@@ -686,8 +701,11 @@ namespace CE::Vulkan
 		imageWrite.imageView = VK_NULL_HANDLE;
 		imageWrite.sampler = sampler->GetVkHandle();
 
-		imageInfosBoundBySlot[i][bindingSlot].Clear();
-		imageInfosBoundBySlot[i][bindingSlot].Add(imageWrite);
+		auto& ranges = imageInfosBoundBySlot[i][bindingSlot];
+		ranges.Clear();
+		ranges.Add(ImageBindRange{});
+		ranges.GetLast().firstArrayElement = 0;
+		ranges.GetLast().imageInfos.Add(imageWrite);
 
 		needsRecompile = true;
 
@@ -755,25 +773,26 @@ namespace CE::Vulkan
 			break;
 		}
 
-		imageInfosBoundBySlot[i][bindingSlot].Clear();
-		imageInfosBoundBySlot[i][bindingSlot].Reserve(count);
+		auto& ranges = imageInfosBoundBySlot[i][bindingSlot];
+		ranges.Clear();
+		ranges.Add(ImageBindRange{});
+		ImageBindRange& range = ranges.GetLast();
+		range.firstArrayElement = 0;
+		range.imageInfos.Reserve(count);
 
 		for (int j = 0; j < count; j++)
 		{
 			Vulkan::Texture* texture = (Vulkan::Texture*)textures[j];
 
 			if (!texture)
-			{
-
 				continue;
-			}
 
 			VkDescriptorImageInfo imageWrite{};
 			imageWrite.imageLayout = expectedLayout;
 			imageWrite.imageView = texture->GetImageView();
 			imageWrite.sampler = nullptr;
 
-			imageInfosBoundBySlot[i][bindingSlot].Add(imageWrite);
+			range.imageInfos.Add(imageWrite);
 		}
 
 		needsRecompile = true;
@@ -809,7 +828,10 @@ namespace CE::Vulkan
 			break;
 		}
 
-		if (count != imageInfosBoundBySlot[i][bindingSlot].GetSize())
+		const auto& existingRanges = imageInfosBoundBySlot[i][bindingSlot];
+		if (existingRanges.GetSize() != 1 ||
+			existingRanges[0].firstArrayElement != 0 ||
+			count != existingRanges[0].imageInfos.GetSize())
 		{
 			needsRecompile = true;
 		}
@@ -817,15 +839,8 @@ namespace CE::Vulkan
 		{
 			for (int j = 0; j < count; ++j)
 			{
-				if (j >= imageInfosBoundBySlot[i][bindingSlot].GetSize())
-				{
-					needsRecompile = true;
-					break;
-				}
-
 				Vulkan::TextureView* texture = (Vulkan::TextureView*)textureViews[j];
-
-				if (imageInfosBoundBySlot[i][bindingSlot][j].imageView != texture->GetImageView())
+				if (existingRanges[0].imageInfos[j].imageView != texture->GetImageView())
 				{
 					needsRecompile = true;
 					break;
@@ -838,7 +853,11 @@ namespace CE::Vulkan
 		if (!needsRecompile)
 			return true;
 
-		imageInfosBoundBySlot[i][bindingSlot].Clear();
+		auto& ranges = imageInfosBoundBySlot[i][bindingSlot];
+		ranges.Clear();
+		ranges.Add(ImageBindRange{});
+		ImageBindRange& range = ranges.GetLast();
+		range.firstArrayElement = 0;
 
 		for (int j = 0; j < count; j++)
 		{
@@ -849,7 +868,7 @@ namespace CE::Vulkan
 			imageWrite.imageView = texture->GetImageView();
 			imageWrite.sampler = nullptr;
 
-			imageInfosBoundBySlot[i][bindingSlot].Add(imageWrite);
+			range.imageInfos.Add(imageWrite);
 		}
 
 		return true;
@@ -863,7 +882,11 @@ namespace CE::Vulkan
 		int bindingSlot = bindingSlotsByVariableName[name];
 		int i = imageIndex;
 
-		imageInfosBoundBySlot[i][bindingSlot].Clear();
+		auto& ranges = imageInfosBoundBySlot[i][bindingSlot];
+		ranges.Clear();
+		ranges.Add(ImageBindRange{});
+		ImageBindRange& range = ranges.GetLast();
+		range.firstArrayElement = 0;
 
 		for (int j = 0; j < count; j++)
 		{
@@ -876,9 +899,154 @@ namespace CE::Vulkan
 			imageWrite.imageView = VK_NULL_HANDLE;
 			imageWrite.sampler = sampler->GetVkHandle();
 
-			imageInfosBoundBySlot[i][bindingSlot].Add(imageWrite);
+			range.imageInfos.Add(imageWrite);
 		}
 
+		needsRecompile = true;
+
+		return true;
+	}
+
+	bool ShaderResourceGroup::Bind(Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures)
+	{
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+		{
+			Bind(i, name, firstArrayElement, count, textures);
+		}
+
+		return true;
+	}
+
+	bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures)
+	{
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+		int i = imageIndex;
+
+		if (!variableBindingsBySlot.KeyExists(bindingSlot))
+			return false;
+
+		const VkDescriptorSetLayoutBinding& binding = variableBindingsBySlot[bindingSlot];
+
+		VkImageLayout expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		switch (binding.descriptorType)
+		{
+		case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
+		case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+		case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+			expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			break;
+		case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+			expectedLayout = VK_IMAGE_LAYOUT_GENERAL;
+			break;
+		default:
+			break;
+		}
+
+		List<VkDescriptorImageInfo> infos{};
+		infos.Reserve(count);
+		for (int j = 0; j < count; j++)
+		{
+			Vulkan::Texture* texture = (Vulkan::Texture*)textures[j];
+
+			VkDescriptorImageInfo imageWrite{};
+			imageWrite.imageLayout = expectedLayout;
+			imageWrite.imageView = texture ? texture->GetImageView() : VK_NULL_HANDLE;
+			imageWrite.sampler = nullptr;
+
+			infos.Add(imageWrite);
+		}
+
+		auto& ranges = imageInfosBoundBySlot[i][bindingSlot];
+		for (auto& range : ranges)
+		{
+			if (range.firstArrayElement == firstArrayElement)
+			{
+				range.imageInfos = infos;
+				needsRecompile = true;
+				return true;
+			}
+		}
+
+		ranges.Add(ImageBindRange{ firstArrayElement, infos });
+		needsRecompile = true;
+
+		return true;
+	}
+
+	bool ShaderResourceGroup::Bind(Name name, u32 firstArrayElement, u32 count, RHI::TextureView** textureViews)
+	{
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+		{
+			Bind(i, name, firstArrayElement, count, textureViews);
+		}
+
+		return true;
+	}
+
+	bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::TextureView** textureViews)
+	{
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+		int i = imageIndex;
+
+		if (!variableBindingsBySlot.KeyExists(bindingSlot))
+			return false;
+
+		const VkDescriptorSetLayoutBinding& binding = variableBindingsBySlot[bindingSlot];
+
+		VkImageLayout expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		switch (binding.descriptorType)
+		{
+		case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
+		case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+		case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+			expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			break;
+		case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+			expectedLayout = VK_IMAGE_LAYOUT_GENERAL;
+			break;
+		default:
+			break;
+		}
+
+		List<VkDescriptorImageInfo> infos{};
+		infos.Reserve(count);
+		for (int j = 0; j < count; j++)
+		{
+			Vulkan::TextureView* textureView = (Vulkan::TextureView*)textureViews[j];
+
+			VkDescriptorImageInfo imageWrite{};
+			imageWrite.imageLayout = expectedLayout;
+			imageWrite.imageView = textureView ? textureView->GetImageView() : VK_NULL_HANDLE;
+			imageWrite.sampler = nullptr;
+
+			infos.Add(imageWrite);
+		}
+
+		// Find an existing range at the same firstArrayElement and update it, or append a new one
+		auto& ranges = imageInfosBoundBySlot[i][bindingSlot];
+		for (auto& range : ranges)
+		{
+			if (range.firstArrayElement == firstArrayElement)
+			{
+				range.imageInfos = infos;
+				needsRecompile = true;
+				return true;
+			}
+		}
+
+		ranges.Add(ImageBindRange{ firstArrayElement, infos });
 		needsRecompile = true;
 
 		return true;
@@ -917,7 +1085,10 @@ namespace CE::Vulkan
 					case ShaderResourceType::RWTexture2DArray:
 					case ShaderResourceType::SamplerState:
 					case ShaderResourceType::SubpassInput:
-						dynamicArraySize = imageInfosBoundBySlot[i][variable.bindingSlot].GetSize();
+						u32 total = 0;
+					for (const auto& range : imageInfosBoundBySlot[i][variable.bindingSlot])
+						total += (u32)range.imageInfos.GetSize();
+					dynamicArraySize = total;
 						break;
 					}
 
@@ -961,8 +1132,12 @@ namespace CE::Vulkan
 			if (descriptorSet == nullptr)
 				continue;
 
+			int imageWriteCount = 0;
+			for (const auto& [slot, ranges] : imageInfosBoundBySlot[i])
+				imageWriteCount += ranges.GetSize();
+
 			Array<VkWriteDescriptorSet> writes{};
-			writes.Resize(bufferInfosBoundBySlot[i].GetSize() + imageInfosBoundBySlot[i].GetSize());
+			writes.Resize(bufferInfosBoundBySlot[i].GetSize() + imageWriteCount);
 			int idx = 0;
 
 			for (const auto& [slot, bufferWrites] : bufferInfosBoundBySlot[i])
@@ -976,7 +1151,7 @@ namespace CE::Vulkan
 				write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 				write.descriptorType = variable.descriptorType;
 				write.dstArrayElement = 0;
-				write.descriptorCount = variable.descriptorCount; // Array count
+				write.descriptorCount = variable.descriptorCount;
 				if (write.descriptorCount == 0) // Dynamic sized array
 				{
 					write.descriptorCount = bufferWrites.GetSize();
@@ -986,28 +1161,27 @@ namespace CE::Vulkan
 				write.pBufferInfo = bufferWrites.GetData();
 			}
 
-			for (const auto& [slot, imageWrites] : imageInfosBoundBySlot[i])
+			for (const auto& [slot, ranges] : imageInfosBoundBySlot[i])
 			{
 				if (!variableBindingsBySlot.KeyExists(slot))
 					continue;
 
 				VkDescriptorSetLayoutBinding& variable = variableBindingsBySlot[slot];
 
-				if (variable.descriptorCount == 0 && imageWrites.IsEmpty())
-					continue;
-
-				VkWriteDescriptorSet& write = writes[idx++];
-				write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				write.descriptorType = variable.descriptorType;
-				write.dstArrayElement = 0;
-				write.descriptorCount = imageWrites.GetSize(); // Array count
-				if (write.descriptorCount == 0) // Dynamic sized array
+				for (const auto& range : ranges)
 				{
-					//write.descriptorCount = imageWrites.GetSize();
+					if (range.imageInfos.IsEmpty())
+						continue;
+
+					VkWriteDescriptorSet& write = writes[idx++];
+					write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+					write.descriptorType = variable.descriptorType;
+					write.dstArrayElement = range.firstArrayElement;
+					write.descriptorCount = range.imageInfos.GetSize();
+					write.dstBinding = variable.binding;
+					write.dstSet = descriptorSet->GetHandle();
+					write.pImageInfo = range.imageInfos.GetData();
 				}
-				write.dstBinding = variable.binding;
-				write.dstSet = descriptorSet->GetHandle();
-				write.pImageInfo = imageWrites.GetData();
 			}
 			
 			vkUpdateDescriptorSets(device->GetHandle(), idx, writes.GetData(),

@@ -46,8 +46,6 @@ namespace CE
         // - Textures -
 
         int RegisterTexture(RHI::Texture* rhiTexture);
-        int RegisterTexture(RHI::TextureView* rhiTextureView);
-        int RegisterTexture(RPI::Texture* rpiTexture);
 
         void DeregisterTexture(int slot);
 
@@ -112,23 +110,12 @@ namespace CE
 
         // - Texture -
 
-        struct TextureImpl
-        {
-            RHI::Texture*      rhiTexture = nullptr;
-            RHI::TextureView*  rhiTextureView = nullptr;
-            RPI::Texture*      rpiTexture = nullptr;
-
-            inline bool IsValid() const
-            {
-                return rhiTexture != nullptr || rhiTextureView != nullptr || rpiTexture != nullptr;
-            }
-        };
-
-        using FTextureArray = StableDynamicArray<TextureImpl, 256, false>;
+        using FTextureArray = StableDynamicArray<RHI::Texture*, 256, false>;
         using FSlotArray = StableDynamicArray<int, 256, false>;
 
         FTextureArray texturesBySlot;
         FSlotArray freeSlots;
+        int totalTextures = 0;
         BitSet<RHI::Limits::MaxSwapChainImageCount> textureDirty;
 
     };

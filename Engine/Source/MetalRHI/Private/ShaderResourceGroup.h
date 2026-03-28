@@ -39,12 +39,20 @@ namespace CE::Metal
         bool Bind(u32 imageIndex, Name name, RHI::Sampler* sampler) override;
         
         bool Bind(u32 imageIndex, Name name, u32 count, RHI::BufferView* bufferViews) override;
-        
+
         bool Bind(u32 imageIndex, Name name, u32 count, RHI::Texture** textures) override;
-        
+
         bool Bind(u32 imageIndex, Name name, u32 count, RHI::TextureView** textureViews) override;
-        
+
         bool Bind(u32 imageIndex, Name name, u32 count, RHI::Sampler** samplers) override;
+
+        bool Bind(Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures) override;
+
+        bool Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures) override;
+
+        bool Bind(Name name, u32 firstArrayElement, u32 count, RHI::TextureView** textureViews) override;
+
+        bool Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::TextureView** textureViews) override;
         
         void Compile() override;
         
