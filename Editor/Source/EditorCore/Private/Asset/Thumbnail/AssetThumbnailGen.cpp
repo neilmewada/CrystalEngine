@@ -18,7 +18,7 @@ namespace CE::Editor
         return "/Temp/ThumbnailCache" + assetPath.GetString();
     }
 
-    bool AssetThumbnailGen::SaveThumbnailToDisk(const CMImage& rawImage, const Name& assetPath)
+    bool AssetThumbnailGen::SaveThumbnailToDisk(const CAImage& rawImage, const Name& assetPath)
     {
 		Name thumbnailPath = GetThumbnailPath(assetPath);
         String objectName = FixObjectName(assetPath.GetLastComponent());
@@ -35,7 +35,7 @@ namespace CE::Editor
     void AssetThumbnailGen::SaveThumbnailToDisk(void* rgbaImageData, u32 width, u32 height, const Name& assetPath,
 	    bool compress)
     {
-        CMImage image = CMImage::LoadRawImageFromMemory((unsigned char*)rgbaImageData, width, height,
+        CAImage image = CAImage::LoadRawImageFromMemory((unsigned char*)rgbaImageData, width, height,
             CMImageFormat::RGBA8, CMImageSourceFormat::None,
             8, 8 * 4);
 
@@ -51,7 +51,7 @@ namespace CE::Editor
             u8* compressedData = new u8[size];
             if (encoder.EncodeToBCn(image, compressedData, CMImageSourceFormat::BC7))
             {
-                CMImage compressedImage = CMImage::LoadRawImageFromMemory(compressedData, width, height,
+                CAImage compressedImage = CAImage::LoadRawImageFromMemory(compressedData, width, height,
                     CMImageFormat::BC7, CMImageSourceFormat::None, 8 / 4, 8);
                 SaveThumbnailToDisk(compressedImage, assetPath);
             }

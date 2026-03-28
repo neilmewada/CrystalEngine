@@ -141,6 +141,10 @@ namespace CE
         if (IsEngineRequestingExit())
             return;
 
+        auto renderService = GetService<FRenderService>();
+        if (!renderService)
+            return;
+
 		InvokeServiceTick(FServiceTickPhase::DispatchInput);
 
 		InvokeServiceTick(FServiceTickPhase::PreUpdateSurfaces);
@@ -152,9 +156,25 @@ namespace CE
 
 		InvokeServiceTick(FServiceTickPhase::PostUpdateSurfaces);
 
-		InvokeServiceTick(FServiceTickPhase::RenderPrepare);
+        // - Rendering
 
-		InvokeServiceTick(FServiceTickPhase::Render);
+        renderService->RenderPrepare();
+
+        if (renderService->BeginRender())
+        {
+            int frameIndex = renderService->GetCurrentFrameIndex();
+
+            for (int i = 0; i < GetSurfaceCount(); i++)
+            {
+                GetSurface(i)->RenderFrame(frameIndex);
+            }
+
+            InvokeServiceTick(FServiceTickPhase::Render);
+
+            renderService->FlushTextures();
+
+            renderService->EndRender();
+        }
 
 		InvokeServiceTick(FServiceTickPhase::PostRender);
     }

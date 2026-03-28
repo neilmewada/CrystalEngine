@@ -122,7 +122,7 @@ namespace CE::Editor
 
 		// 5. Load raw image
 
-		CMImage image = CMImage::LoadFromFile(sourcePath);
+		CAImage image = CAImage::LoadFromFile(sourcePath);
 		if (!image.IsValid())
 			return false;
 
@@ -245,7 +245,7 @@ namespace CE::Editor
 		}
 	}
 
-	bool TextureAssetImportJob::ProcessCubeMap(const String& name, Bundle* bundle, const CMImage& sourceImage, TextureFormat pixelFormat,
+	bool TextureAssetImportJob::ProcessCubeMap(const String& name, Bundle* bundle, const CAImage& sourceImage, TextureFormat pixelFormat,
 		TextureSourceCompressionFormat compressionFormat,
 		CMImageSourceFormat targetSourceFormat,
 		Uuid cubeMapUuid, Uuid diffuseUuid)
@@ -331,7 +331,7 @@ namespace CE::Editor
 		return result;
 	}
 
-	bool TextureAssetImportJob::ProcessTex2D(const String& name, Bundle* bundle, const CMImage& image, TextureFormat pixelFormat,
+	bool TextureAssetImportJob::ProcessTex2D(const String& name, Bundle* bundle, const CAImage& image, TextureFormat pixelFormat,
 		TextureSourceCompressionFormat compressionFormat,
 		CMImageSourceFormat targetSourceFormat,
 		Uuid textureUuid)

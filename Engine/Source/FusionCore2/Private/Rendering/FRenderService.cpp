@@ -140,60 +140,68 @@ namespace CE
 
         ZoneScoped;
 
-        if (tickPhase == FServiceTickPhase::RenderPrepare)
-        {
-            RenderPrepare();
-
-            for (int i = 0; i < application->GetSurfaceCount(); i++)
-            {
-                application->GetSurface(i)->RenderFrame(GetCurrentFrameIndex());
-            }
-        }
-		else if (tickPhase == FServiceTickPhase::Render)
-        {
-            if (BeginRender())
-            {
-                int frameIndex = GetCurrentFrameIndex();
-
-                FlushTextures(frameIndex);
-
-            	EndRender();
-            }
-        }
     }
 
-    int FRenderService::RegisterTexture(RHI::Texture* rhiTexture)
+    bool FRenderService::ReplaceTexture(int slot, int frameIndex, RHI::Texture* rhiTexture)
     {
         if (!rhiTexture)
-            return -1;
+            return false;
+        if (slot < 0 || slot >= texturesBySlotPerFrame[frameIndex].GetCount())
+            return false;
+        if (texturesBySlotPerFrame[frameIndex][slot] == nullptr) // The slot was not registered.
+            return false;
+
+        texturesBySlotPerFrame[frameIndex][slot] = rhiTexture;
+
+        textureDirty.Set();
+
+        return true;
+    }
+
+    int FRenderService::RegisterTexture(StaticArray<RHI::Texture*, RHI::Limits::MaxSwapChainImageCount> rhiTexture)
+    {
+        for (int i = 0; i < rhiTexture.GetSize(); i++)
+        {
+            if (rhiTexture[i] == nullptr)
+                return -1;
+        }
 
         textureDirty.Set();
 
         if (freeSlots.IsEmpty())
         {
-            texturesBySlot.Insert(rhiTexture);
-            return (int)texturesBySlot.GetCount() - 1;
+            for (int i = 0; i < rhiTexture.GetSize(); i++)
+            {
+	            texturesBySlotPerFrame[i].Insert(rhiTexture[i]);
+            }
+            totalTextures++;
+            return (int)texturesBySlotPerFrame[0].GetCount() - 1;
         }
 
         int slot = freeSlots.Last();
         freeSlots.RemoveLast();
 
-        texturesBySlot[slot] = rhiTexture;
+        for (int i = 0; i < rhiTexture.GetSize(); i++)
+        {
+            texturesBySlotPerFrame[i][slot] = rhiTexture[i];
+        }
 
         totalTextures++;
         return slot;
     }
 
-    void FRenderService::FlushTextures(int frameIndex)
+    void FRenderService::FlushTextures()
     {
+		int frameIndex = GetCurrentFrameIndex();
+
         if (!textureDirty.Test(frameIndex))
             return;
 
         textureDirty.Set(frameIndex, false);
         
-        if (totalTextures > 0 && texturesBySlot.GetCount() > 0)
+        if (totalTextures > 0 && texturesBySlotPerFrame[frameIndex].GetCount() > 0)
         {
-            sceneSrg->Bind(frameIndex, "_Textures", 0, texturesBySlot.GetCount(), texturesBySlot.GetData());
+            sceneSrg->Bind(frameIndex, "_Textures", 0, texturesBySlotPerFrame[frameIndex].GetCount(), texturesBySlotPerFrame[frameIndex].GetData());
         }
 
         sceneSrg->FlushBindings();
@@ -201,13 +209,17 @@ namespace CE
 
     void FRenderService::DeregisterTexture(int slot)
     {
-        if (slot < 0 || slot >= texturesBySlot.GetCount())
+        if (slot < 0 || slot >= texturesBySlotPerFrame[0].GetCount())
             return;
-        if (!texturesBySlot[slot])
+        if (!texturesBySlotPerFrame[0][slot])
             return;
 
         freeSlots.Insert(slot);
-        texturesBySlot[slot] = RPISystem::Get().GetDefaultAlbedoTex()->GetRhiTexture();
+        
+        for (int i = 0; i < texturesBySlotPerFrame.GetSize(); i++)
+        {
+            texturesBySlotPerFrame[i][slot] = RPISystem::Get().GetDefaultAlbedoTex()->GetRhiTexture();
+        }
 
         totalTextures--;
 

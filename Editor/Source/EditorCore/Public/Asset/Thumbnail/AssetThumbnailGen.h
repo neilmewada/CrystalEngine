@@ -35,7 +35,7 @@ namespace CE::Editor
 
         static Name GetThumbnailPath(Name assetPath);
 
-        static bool SaveThumbnailToDisk(const CMImage& rawImage, const Name& assetPath);
+        static bool SaveThumbnailToDisk(const CAImage& rawImage, const Name& assetPath);
 
         static void SaveThumbnailToDisk(void* rgbaImageData, u32 width, u32 height, const Name& assetPath, bool compress = true);
 

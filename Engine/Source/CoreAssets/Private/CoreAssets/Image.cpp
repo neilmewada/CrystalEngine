@@ -72,19 +72,19 @@ namespace CE
 		return CMImageSourceFormat::None;
 	}
 	
-    CMImage::CMImage()
+    CAImage::CAImage()
     {
 		
     }
 
-    CMImage::~CMImage()
+    CAImage::~CAImage()
     {
 		
     }
 
-    CMImageInfo CMImage::GetImageInfoFromFile(const IO::Path& filePath)
+    CAImageInfo CAImage::GetImageInfoFromFile(const IO::Path& filePath)
     {
-        CMImageInfo info{};
+        CAImageInfo info{};
         if (!filePath.Exists() || filePath.IsDirectory())
         {
             info.failureReason = "File doesn't exist";
@@ -124,9 +124,9 @@ namespace CE
         return info;
     }
 
-    CMImageInfo CMImage::GetImageInfoFromMemory(unsigned char* buffer, u32 bufferLength)
+    CAImageInfo CAImage::GetImageInfoFromMemory(unsigned char* buffer, u32 bufferLength)
     {
-		CMImageInfo info{};
+		CAImageInfo info{};
 
 		if (bufferLength < 10)
 		{
@@ -153,9 +153,9 @@ namespace CE
         return info;
     }
 
-	CMImageInfo CMImage::GetPNGImageInfo(MemoryStream* stream)
+	CAImageInfo CAImage::GetPNGImageInfo(MemoryStream* stream)
 	{
-		CMImageInfo info{};
+		CAImageInfo info{};
 		if (!stream->CanRead())
 		{
 			info.failureReason = "Cannot read stream";
@@ -198,9 +198,9 @@ namespace CE
 		return info;
 	}
 
-	CMImage CMImage::LoadPNGImage(MemoryStream* stream)
+	CAImage CAImage::LoadPNGImage(MemoryStream* stream)
 	{
-		CMImage image{};
+		CAImage image{};
 		if (!stream->CanRead())
 		{
 			image.failureReason = "Cannot read stream";
@@ -234,9 +234,9 @@ namespace CE
 		return image;
 	}
 
-	CMImageInfo CMImage::GetJPGImageInfo(MemoryStream* stream)
+	CAImageInfo CAImage::GetJPGImageInfo(MemoryStream* stream)
 	{
-		CMImageInfo info{};
+		CAImageInfo info{};
 		if (!stream->CanRead())
 		{
 			info.failureReason = "Cannot read stream";
@@ -268,9 +268,9 @@ namespace CE
 		return info;
 	}
 
-	CMImage CMImage::LoadJPGImage(MemoryStream* stream)
+	CAImage CAImage::LoadJPGImage(MemoryStream* stream)
 	{
-		CMImage image{};
+		CAImage image{};
 		if (!stream->CanRead())
 		{
 			image.failureReason = "Cannot read stream";
@@ -303,9 +303,9 @@ namespace CE
 		return image;
 	}
 
-    CMImage CMImage::LoadFromFile(IO::Path filePath)
+    CAImage CAImage::LoadFromFile(IO::Path filePath)
     {
-        CMImage image{};
+        CAImage image{};
 		
         if (!filePath.Exists() || filePath.IsDirectory())
         {
@@ -429,9 +429,9 @@ namespace CE
         return image;
     }
 
-    CMImage CMImage::LoadFromMemory(unsigned char* buffer, u32 bufferLength)
+    CAImage CAImage::LoadFromMemory(unsigned char* buffer, u32 bufferLength)
     {
-		CMImage image{};
+		CAImage image{};
 
 		if (bufferLength < 10)
 		{
@@ -456,9 +456,9 @@ namespace CE
 		return image;
     }
 
-	CMImage CMImage::LoadRawImageFromMemory(unsigned char* buffer, u32 width, u32 height, CMImageFormat pixelFormat, CMImageSourceFormat sourceFormat, u32 bitDepth, u32 bitsPerPixel)
+	CAImage CAImage::LoadRawImageFromMemory(unsigned char* buffer, u32 width, u32 height, CMImageFormat pixelFormat, CMImageSourceFormat sourceFormat, u32 bitDepth, u32 bitsPerPixel)
 	{
-		CMImage image{};
+		CAImage image{};
 		image.width = width;
 		image.height = height;
 		image.allocated = false;
@@ -512,7 +512,7 @@ namespace CE
 		return image;
 	}
 
-	bool CMImage::EncodePNG(const CMImage& source, Stream* outStream, CMImageFormat pixelFormat, u32 bitDepth)
+	bool CAImage::EncodePNG(const CAImage& source, Stream* outStream, CMImageFormat pixelFormat, u32 bitDepth)
 	{
 		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
 			return false;
@@ -559,7 +559,7 @@ namespace CE
 		return true;
 	}
 
-	bool CMImage::EncodeToPNG(const IO::Path& path) const
+	bool CAImage::EncodeToPNG(const IO::Path& path) const
 	{
 		String pathString = path.GetString();
 
@@ -568,7 +568,7 @@ namespace CE
 		return true;
 	}
 
-    void CMImage::Free()
+    void CAImage::Free()
     {
 		if (data != nullptr && allocated)
 		{

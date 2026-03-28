@@ -72,7 +72,7 @@ namespace CE::RPI
         samplerState = RPISystem::Get().FindOrCreateSampler(samplerDesc);
     }
 
-    Texture::Texture(const CMImage& sourceImage, const RHI::SamplerDescriptor& samplerDesc)
+    Texture::Texture(const CAImage& sourceImage, const RHI::SamplerDescriptor& samplerDesc)
     {
         if (!sourceImage.IsValid())
             return;
@@ -128,7 +128,7 @@ namespace CE::RPI
         UploadData(data, dataSize);
     }
 
-    Texture::Texture(const Name& imageName, const Array<CMImage>& sourceImageMips, const RHI::SamplerDescriptor& samplerDesc)
+    Texture::Texture(const Name& imageName, const Array<CAImage>& sourceImageMips, const RHI::SamplerDescriptor& samplerDesc)
     {
         if (sourceImageMips.IsEmpty())
             return;

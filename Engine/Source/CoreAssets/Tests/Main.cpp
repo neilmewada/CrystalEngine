@@ -37,19 +37,19 @@ TEST(CoreMedia, Font)
 {
 	TEST_BEGIN;
 
-	CMFontAtlasGenerateInfo genInfo{};
-	genInfo.charSetRanges.Add(CharRange('a', 'z'));
-	genInfo.charSetRanges.Add(CharRange('A', 'Z'));
-	genInfo.charSetRanges.Add(CharRange('0', '9'));
-	genInfo.charSetRanges.Add(CharRange(32, 47));
-	genInfo.charSetRanges.Add(CharRange(58, 64));
-	genInfo.charSetRanges.Add(CharRange(91, 96));
-	genInfo.charSetRanges.Add(CharRange(123, 126));
+	CAFontAtlasGenerateInfo genInfo{};
+	genInfo.charSetRanges.Add(CACharRange('a', 'z'));
+	genInfo.charSetRanges.Add(CACharRange('A', 'Z'));
+	genInfo.charSetRanges.Add(CACharRange('0', '9'));
+	genInfo.charSetRanges.Add(CACharRange(32, 47));
+	genInfo.charSetRanges.Add(CACharRange(58, 64));
+	genInfo.charSetRanges.Add(CACharRange(91, 96));
+	genInfo.charSetRanges.Add(CACharRange(123, 126));
 
 	genInfo.padding = 8;
 	genInfo.fontSize = 16;
 
-	CMFontAtlas* atlas = CMFontAtlas::GenerateFromFontFile(PlatformDirectories::GetLaunchDir() / "Temp/Roboto-Medium.ttf", genInfo);
+	CAFontAtlas* atlas = CAFontAtlas::GenerateFromFontFile(PlatformDirectories::GetLaunchDir() / "Temp/Roboto-Medium.ttf", genInfo);
 	
 	delete atlas;
 

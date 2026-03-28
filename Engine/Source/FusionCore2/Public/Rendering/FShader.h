@@ -14,6 +14,8 @@ namespace CE
 
         RHI::PipelineState* GetDefaultPipeline();
 
+        RPI::Shader* GetRpiShader() const { return shader; }
+
     protected:
 
         void OnBeforeDestroy() override;

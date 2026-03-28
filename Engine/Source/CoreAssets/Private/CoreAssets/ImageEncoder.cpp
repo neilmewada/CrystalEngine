@@ -82,7 +82,7 @@ namespace CE
 		return false;
 	}
 
-	u64 CMImageEncoder::GetCompressedSizeRequirement(const CMImage& surface, CMImageSourceFormat destFormat)
+	u64 CMImageEncoder::GetCompressedSizeRequirement(const CAImage& surface, CMImageSourceFormat destFormat)
 	{
 		u64 destSize = 0;
 		switch (destFormat)
@@ -112,7 +112,7 @@ namespace CE
 		return destSize;
 	}
 
-	bool CMImageEncoder::EncodeToBCn(const CMImage& image, void* outData, CMImageSourceFormat destFormat, Quality quality)
+	bool CMImageEncoder::EncodeToBCn(const CAImage& image, void* outData, CMImageSourceFormat destFormat, Quality quality)
 	{
 #if PLATFORM_DESKTOP
 		errorMessage = "";

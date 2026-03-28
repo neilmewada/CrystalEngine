@@ -231,7 +231,7 @@ namespace CE::Editor
                     void* data;
                     stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &data);
                     {
-                        CMImage image = CMImage::LoadRawImageFromMemory((unsigned char*)data, outTextureDesc.width, outTextureDesc.width,
+                        CAImage image = CAImage::LoadRawImageFromMemory((unsigned char*)data, outTextureDesc.width, outTextureDesc.width,
                             CMImageFormat::RGBA8, CMImageSourceFormat::None, 
                             8, 8 * 4);
 
@@ -247,7 +247,7 @@ namespace CE::Editor
 	                        u8* compressedData = new u8[size];
                             if (encoder.EncodeToBCn(image, compressedData, CMImageSourceFormat::BC7))
                             {
-                                CMImage compressedImage = CMImage::LoadRawImageFromMemory(compressedData, outTextureDesc.width, outTextureDesc.width,
+                                CAImage compressedImage = CAImage::LoadRawImageFromMemory(compressedData, outTextureDesc.width, outTextureDesc.width,
                                     CMImageFormat::BC7, CMImageSourceFormat::None, 8 / 4, 8);
                                 SaveThumbnailToDisk(compressedImage, assetPath);
                             }

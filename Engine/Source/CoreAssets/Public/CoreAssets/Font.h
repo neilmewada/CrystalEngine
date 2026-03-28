@@ -2,7 +2,7 @@
 
 namespace CE
 {
-    struct CMGlyphInfo 
+    struct CAGlyphInfo 
     {
         u32 charCode = 0;
         int x0, y0, x1, y1;	// coords of glyph in the texture atlas
@@ -12,7 +12,7 @@ namespace CE
         int fontSize;
     };
 
-    struct CMFontMetrics
+    struct CAFontMetrics
     {
         f32 ascender = 0;
         f32 descender = 0;
@@ -20,46 +20,46 @@ namespace CE
         f32 lineHeight = 0;
     };
 
-    struct CharRange
+    struct CACharRange
     {
-        CharRange() = default;
-        CharRange(u32 c) { charCode = c; this->range = Vec2i(0, 0); }
-        CharRange(s32 min, s32 max) { this->range = Vec2i(min, max); charCode = 0; }
+        CACharRange() = default;
+        CACharRange(u32 c) { charCode = c; this->range = Vec2i(0, 0); }
+        CACharRange(s32 min, s32 max) { this->range = Vec2i(min, max); charCode = 0; }
 
         u32 charCode = 0;
         Vec2i range{};
     };
 
-    struct CMFontAtlasGenerateInfo
+    struct CAFontAtlasGenerateInfo
     {
-        Array<CharRange> charSetRanges{};
+        Array<CACharRange> charSetRanges{};
         u32 padding = 1;
         u32 fontSize = 16;
         int startOffsetX = 0;
         int startOffsetY = 0;
     };
     
-    class COREASSETS_API CMFontAtlas final
+    class COREASSETS_API CAFontAtlas final
     {
     public:
 
-        ~CMFontAtlas();
+        ~CAFontAtlas();
 
-        static CMFontAtlas* GenerateFromFontFile(const IO::Path& filePath, const CMFontAtlasGenerateInfo& generateInfo);
+        static CAFontAtlas* GenerateFromFontFile(const IO::Path& filePath, const CAFontAtlasGenerateInfo& generateInfo);
 
-        inline const CMImage& GetAtlas() const { return atlas; }
+        inline const CAImage& GetAtlas() const { return atlas; }
 
-        inline const Array<CMGlyphInfo>& GetGlyphInfos() const { return glyphInfos; }
+        inline const Array<CAGlyphInfo>& GetGlyphInfos() const { return glyphInfos; }
 
-        inline const CMFontMetrics& GetMetrics() const { return metrics; }
+        inline const CAFontMetrics& GetMetrics() const { return metrics; }
 
     private:
 
-        CMImage atlas{};
+        CAImage atlas{};
 
-        Array<CMGlyphInfo> glyphInfos{};
+        Array<CAGlyphInfo> glyphInfos{};
 
-        CMFontMetrics metrics{};
+        CAFontMetrics metrics{};
     };
 
 } // namespace CE

@@ -142,6 +142,8 @@ namespace CE
         // Sample a gradient's color at a normalized position by interpolating between adjacent stops.
         static Color Sample(const FGradient& g, f32 t)
         {
+            ZoneScoped;
+
             if (g.stops.IsEmpty())                   return Color(0, 0, 0, 0);
             if (t <= g.stops[0].position)             return g.stops[0].color;
             if (t >= g.stops.GetLast().position)         return g.stops.GetLast().color;

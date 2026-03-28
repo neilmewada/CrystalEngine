@@ -28,9 +28,9 @@ namespace CE
 			return arrayCount;
 		}
 
-		CMImage GetCMImage();
+		CAImage GetCMImage();
 
-		static Ref<CE::Texture2D> Create(Ref<Object> outer, const String& name, const CMImage& sourceImage, 
+		static Ref<CE::Texture2D> Create(Ref<Object> outer, const String& name, const CAImage& sourceImage, 
 			TextureAddressMode addressModeU = TextureAddressMode::ClampToBorder, TextureAddressMode addressModeV = TextureAddressMode::ClampToBorder);
 
 	protected:

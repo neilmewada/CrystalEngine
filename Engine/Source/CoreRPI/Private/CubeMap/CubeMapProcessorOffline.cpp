@@ -1529,8 +1529,8 @@ namespace CE::RPI
 								u64 totalCompressedSizeTillCurrentMipLevel =
 									CalculateTotalTextureSize(cubeMapRes, cubeMapRes, 8, 6, mip); // BC6H uses 8 bits per pixel
 
-								CMImage image =
-									CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + totalSizeTillCurrentMipLevel +
+								CAImage image =
+									CAImage::LoadRawImageFromMemory((unsigned char*)dataPtr + totalSizeTillCurrentMipLevel +
 											face * currentResolution * currentResolution * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
 										currentResolution, currentResolution,
 										CMImageFormat::RGBA16, CMImageSourceFormat::None, 
@@ -1581,8 +1581,8 @@ namespace CE::RPI
 					{
 						threads.EmplaceBack([outputDataPtr, dataPtr, compressedByteSizePerFace, face, numPixelsPerFace, diffuseIrradianceCubeMap, cubeMapDesc]
 							{
-								CMImage image =
-									CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + face * numPixelsPerFace * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
+								CAImage image =
+									CAImage::LoadRawImageFromMemory((unsigned char*)dataPtr + face * numPixelsPerFace * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
 										diffuseIrradianceCubeMap->GetWidth(), diffuseIrradianceCubeMap->GetHeight(),
 										CMImageFormat::RGBA16, CMImageSourceFormat::None, 16, 64);
 

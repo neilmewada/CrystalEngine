@@ -11,7 +11,6 @@ namespace CE
         DispatchInput,
         PreUpdateSurfaces,
         PostUpdateSurfaces,
-		RenderPrepare,
         Render,
 		PostRender
     };

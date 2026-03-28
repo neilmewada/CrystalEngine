@@ -29,7 +29,7 @@ namespace CE
 		
 		Ref<Asset> LoadAssetAtPath(const Name& path);
 
-		CMImage LoadImageAssetAtPath(const Name& path) override;
+		CAImage LoadImageAssetAtPath(const Name& path) override;
 
 		Array<Ref<Asset>> LoadAssetsAtPath(const Name& path, SubClass<Asset> classType = Asset::StaticType());
 

@@ -10,12 +10,12 @@
 
 namespace CE
 {
-	CMFontAtlas::~CMFontAtlas()
+	CAFontAtlas::~CAFontAtlas()
 	{
 		atlas.Free();
 	}
 
-	CMFontAtlas* CMFontAtlas::GenerateFromFontFile(const IO::Path& filePath, const CMFontAtlasGenerateInfo& generateInfo)
+	CAFontAtlas* CAFontAtlas::GenerateFromFontFile(const IO::Path& filePath, const CAFontAtlasGenerateInfo& generateInfo)
 	{
 		const String filePathName = filePath.GetString();
 
@@ -31,8 +31,8 @@ namespace CE
 			return nullptr;
 		}
 
-		CMFontAtlas* fontAtlas = new CMFontAtlas();
-		Array<CMGlyphInfo>& info = fontAtlas->glyphInfos;
+		CAFontAtlas* fontAtlas = new CAFontAtlas();
+		Array<CAGlyphInfo>& info = fontAtlas->glyphInfos;
 
 		Array<FT_ULong> charSet{};
 		for (auto rangeInfo : generateInfo.charSetRanges)

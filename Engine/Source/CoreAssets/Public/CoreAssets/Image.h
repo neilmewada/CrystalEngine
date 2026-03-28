@@ -45,7 +45,7 @@ namespace CE
 		BC7,
 	};
 
-    struct CMImageInfo
+    struct CAImageInfo
     {
     public:
 		union {
@@ -73,28 +73,28 @@ namespace CE
 	* It abstracts away all the image loading mechanisms to provide a 'raw' image to be used across the engine.
 	* You have to manually call Free() function to destroy the image!
 	*/
-    class COREASSETS_API CMImage : private CMImageInfo
+    class COREASSETS_API CAImage : private CAImageInfo
     {
     public:
-        CMImage();
-        virtual ~CMImage();
+        CAImage();
+        virtual ~CAImage();
 
         // - Static API -
 
-        static CMImageInfo GetImageInfoFromFile(const IO::Path& filePath);
-        static CMImageInfo GetImageInfoFromMemory(unsigned char* buffer, u32 bufferLength);
+        static CAImageInfo GetImageInfoFromFile(const IO::Path& filePath);
+        static CAImageInfo GetImageInfoFromMemory(unsigned char* buffer, u32 bufferLength);
 
-        static CMImage LoadFromFile(IO::Path filePath);
+        static CAImage LoadFromFile(IO::Path filePath);
 
-        static CMImage LoadFromMemory(unsigned char* buffer, u32 bufferLength);
+        static CAImage LoadFromMemory(unsigned char* buffer, u32 bufferLength);
 
 		/// Loads raw image from memory without allocating any memory
-		static CMImage LoadRawImageFromMemory(unsigned char* buffer, u32 width, u32 height, CMImageFormat pixelFormat, CMImageSourceFormat sourceFormat, u32 bitDepth, u32 bitsPerPixel);
+		static CAImage LoadRawImageFromMemory(unsigned char* buffer, u32 width, u32 height, CMImageFormat pixelFormat, CMImageSourceFormat sourceFormat, u32 bitDepth, u32 bitsPerPixel);
 
 		// - Encode API -
 
 		// Encodes raw image pixel data to PNG format
-		static bool EncodePNG(const CMImage& source, Stream* outStream, CMImageFormat pixelFormat, u32 bitDepth = 8);
+		static bool EncodePNG(const CAImage& source, Stream* outStream, CMImageFormat pixelFormat, u32 bitDepth = 8);
 
 		bool EncodeToPNG(const IO::Path& path) const;
 
@@ -113,23 +113,23 @@ namespace CE
 		inline u32 GetBitDepth() const { return bitDepth; }
 		inline u32 GetBitsPerPixel() const { return bitsPerPixel; }
 
-        bool IsValid() const override { return data != nullptr && CMImageInfo::IsValid(); }
+        bool IsValid() const override { return data != nullptr && CAImageInfo::IsValid(); }
 
         inline const char* GetFailureReason() const { return failureReason; }
 
     private:
 
-		static CMImageInfo GetPNGImageInfo(MemoryStream* stream);
-		static CMImage LoadPNGImage(MemoryStream* stream);
+		static CAImageInfo GetPNGImageInfo(MemoryStream* stream);
+		static CAImage LoadPNGImage(MemoryStream* stream);
 
-		static CMImageInfo GetJPGImageInfo(MemoryStream* stream);
-		static CMImage LoadJPGImage(MemoryStream* stream);
+		static CAImageInfo GetJPGImageInfo(MemoryStream* stream);
+		static CAImage LoadJPGImage(MemoryStream* stream);
 
         void* data = nullptr;
 		bool allocated = true;
 
 		friend class CMImageEncoder;
-		friend class CMFontAtlas;
+		friend class CAFontAtlas;
     };
 
 }

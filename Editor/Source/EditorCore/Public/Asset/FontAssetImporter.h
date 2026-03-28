@@ -44,7 +44,7 @@ namespace CE::Editor
 
 	private:
 
-		CMFontAtlasGenerateInfo genInfo{};
+		CAFontAtlasGenerateInfo genInfo{};
 		bool compressFontAtlas = false;
 
 		int spread = 7;

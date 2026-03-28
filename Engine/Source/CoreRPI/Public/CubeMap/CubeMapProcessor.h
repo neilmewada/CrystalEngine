@@ -6,7 +6,7 @@ namespace CE::RPI
 	struct CubeMapOfflineProcessInfo
 	{
 		Name name{};
-		CMImage sourceImage{};
+		CAImage sourceImage{};
 		RPI::Shader* equirectangularShader = nullptr;
 		RPI::Shader* mipMapShader = nullptr;
 

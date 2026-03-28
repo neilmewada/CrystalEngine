@@ -379,7 +379,7 @@ namespace CE
 		return { textureView, textureSrg };
 	}
 
-	CMImage AssetManager::LoadImageAssetAtPath(const Name& path)
+	CAImage AssetManager::LoadImageAssetAtPath(const Name& path)
 	{
 		Ref<CE::Texture2D> texture = LoadAssetAtPath<CE::Texture2D>(path);
 		if (!texture)

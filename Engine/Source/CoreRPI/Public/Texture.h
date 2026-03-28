@@ -15,8 +15,8 @@ namespace CE::RPI
         Texture(const TextureDescriptor& desc);
         Texture(RHI::Texture* texture, const RHI::SamplerDescriptor& samplerDesc = {});
         Texture(RHI::TextureView* textureView, const RHI::SamplerDescriptor& samplerDesc = {});
-        Texture(const CMImage& sourceImage, const RHI::SamplerDescriptor& samplerDesc = {});
-        Texture(const Name& imageName, const Array<CMImage>& sourceImageMips, const RHI::SamplerDescriptor& samplerDesc = {});
+        Texture(const CAImage& sourceImage, const RHI::SamplerDescriptor& samplerDesc = {});
+        Texture(const Name& imageName, const Array<CAImage>& sourceImageMips, const RHI::SamplerDescriptor& samplerDesc = {});
 
         virtual ~Texture();
 

@@ -29,13 +29,13 @@ namespace CE::Editor
 			job->genInfo.padding = padding;
 			job->genInfo.fontSize = fontSize;
 
-			job->genInfo.charSetRanges.Add(CharRange('a', 'z'));
-			job->genInfo.charSetRanges.Add(CharRange('A', 'Z'));
-			job->genInfo.charSetRanges.Add(CharRange('0', '9'));
-			job->genInfo.charSetRanges.Add(CharRange(32, 47));
-			job->genInfo.charSetRanges.Add(CharRange(58, 64));
-			job->genInfo.charSetRanges.Add(CharRange(91, 96));
-			job->genInfo.charSetRanges.Add(CharRange(123, 126));
+			job->genInfo.charSetRanges.Add(CACharRange('a', 'z'));
+			job->genInfo.charSetRanges.Add(CACharRange('A', 'Z'));
+			job->genInfo.charSetRanges.Add(CACharRange('0', '9'));
+			job->genInfo.charSetRanges.Add(CACharRange(32, 47));
+			job->genInfo.charSetRanges.Add(CACharRange(58, 64));
+			job->genInfo.charSetRanges.Add(CACharRange(91, 96));
+			job->genInfo.charSetRanges.Add(CACharRange(123, 126));
 
 			jobs.Add(job);
 		}
@@ -70,7 +70,7 @@ namespace CE::Editor
 		///////////////////////////////////////////////////
 		// - Create rasterized atlas -
 
-		CMFontAtlas* cmFontAtlas = CMFontAtlas::GenerateFromFontFile(sourcePath, genInfo);
+		CAFontAtlas* cmFontAtlas = CAFontAtlas::GenerateFromFontFile(sourcePath, genInfo);
 		if (cmFontAtlas == nullptr)
 		{
 			errorMessage = "Failed to parse TTF Font!";
@@ -82,7 +82,7 @@ namespace CE::Editor
 			delete cmFontAtlas;
 		};
 
-		const CMImage& fontAtlasImage = cmFontAtlas->GetAtlas();
+		const CAImage& fontAtlasImage = cmFontAtlas->GetAtlas();
 		if (!fontAtlasImage.IsValid())
 		{
 			errorMessage = "Invalid font atlas image!";
@@ -525,7 +525,7 @@ namespace CE::Editor
 		void* data;
 		outputBuffer->Map(0, outputBuffer->GetBufferSize(), &data);
 		{
-			CMImage img = CMImage::LoadRawImageFromMemory((u8*)data, sdfFontAtlas->GetWidth(), sdfFontAtlas->GetHeight(), CMImageFormat::R8,
+			CAImage img = CAImage::LoadRawImageFromMemory((u8*)data, sdfFontAtlas->GetWidth(), sdfFontAtlas->GetHeight(), CMImageFormat::R8,
 				CMImageSourceFormat::None, 8, 8);
 			img.EncodeToPNG(PlatformDirectories::GetLaunchDir() / ("Temp/" + fileName + ".png"));
 

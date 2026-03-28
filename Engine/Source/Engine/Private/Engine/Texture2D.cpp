@@ -124,17 +124,17 @@ namespace CE
 		return new RPI::Texture(desc);
 	}
 
-	CMImage Texture2D::GetCMImage()
+	CAImage Texture2D::GetCMImage()
 	{
 		RHI::Format rhiFormat = ToRHIFormat(GetPixelFormat());
 		
-		CMImage result = CMImage::LoadRawImageFromMemory(source.GetDataPtr(), width, height, GetCMPixelFormat(), 
+		CAImage result = CAImage::LoadRawImageFromMemory(source.GetDataPtr(), width, height, GetCMPixelFormat(), 
 			CMImageSourceFormat::None, GetBitDepthForFormat(rhiFormat), GetBitsPerPixelForFormat(rhiFormat));
 
 		return result;
 	}
 
-	Ref<CE::Texture2D> Texture2D::Create(Ref<Object> outer, const String& name, const CMImage& sourceImage,
+	Ref<CE::Texture2D> Texture2D::Create(Ref<Object> outer, const String& name, const CAImage& sourceImage,
 		TextureAddressMode addressModeU, TextureAddressMode addressModeV)
 	{
 		Ref<CE::Texture2D> texture = CreateObject<CE::Texture2D>(outer.Get(), FixObjectName(name));

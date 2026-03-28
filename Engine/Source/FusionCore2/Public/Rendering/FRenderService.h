@@ -39,19 +39,21 @@ namespace CE
         virtual bool BeginRender() = 0;
         virtual void EndRender() = 0;
 
+        void FlushTextures();
+
         virtual int GetCurrentFrameIndex() = 0;
 
         Ref<FShader> GetMainShader() const { return mainShader; }
 
         // - Textures -
 
-        int RegisterTexture(RHI::Texture* rhiTexture);
+        bool ReplaceTexture(int slot, int frameIndex, RHI::Texture* rhiTexture);
+
+        int RegisterTexture(StaticArray<RHI::Texture*, RHI::Limits::MaxSwapChainImageCount> rhiTexture);
 
         void DeregisterTexture(int slot);
 
     protected:
-
-        void FlushTextures(int frameIndex);
 
         void UpdateDrawListMask(RHI::DrawListMask& drawListMask);
 
@@ -109,7 +111,7 @@ namespace CE
         using FTextureArray = StableDynamicArray<RHI::Texture*, 256, false>;
         using FSlotArray = StableDynamicArray<int, 256, false>;
 
-        FTextureArray texturesBySlot;
+        StaticArray<FTextureArray, RHI::Limits::MaxSwapChainImageCount> texturesBySlotPerFrame;
         FSlotArray freeSlots;
         int totalTextures = 0;
         BitSet<RHI::Limits::MaxSwapChainImageCount> textureDirty;

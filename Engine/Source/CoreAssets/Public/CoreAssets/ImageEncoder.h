@@ -20,9 +20,9 @@ namespace CE
 
         inline const String& GetErrorMessage() const { return errorMessage; }
 
-        u64 GetCompressedSizeRequirement(const CMImage& image, CMImageSourceFormat destBCnFormat);
+        u64 GetCompressedSizeRequirement(const CAImage& image, CMImageSourceFormat destBCnFormat);
 
-        bool EncodeToBCn(const CMImage& image, void* outData, CMImageSourceFormat destBCnFormat, Quality quality = Quality_Normal);
+        bool EncodeToBCn(const CAImage& image, void* outData, CMImageSourceFormat destBCnFormat, Quality quality = Quality_Normal);
 
     private:
 

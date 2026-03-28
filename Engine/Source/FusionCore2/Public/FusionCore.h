@@ -22,6 +22,7 @@
 #include "Event/FEventService.h"
 
 // Image
+#include "Image/FImageAtlas.h"
 #include "Image/FImageService.h"
 #include "Image/FAssetService.h"
 
