@@ -46,6 +46,11 @@ namespace CE
 			impl.set(pos, value);
 		}
 
+		inline void Set()
+		{
+			impl.set();
+		}
+
 		/// @brief Flips all bits
 		inline void Flip()
 		{

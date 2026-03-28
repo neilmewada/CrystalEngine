@@ -43,7 +43,19 @@ namespace CE
 
         Ref<FShader> GetMainShader() const { return mainShader; }
 
+        // - Textures -
+
+        int RegisterTexture(RHI::Texture* rhiTexture);
+        int RegisterTexture(RHI::TextureView* rhiTextureView);
+        int RegisterTexture(RPI::Texture* rpiTexture);
+
+        void DeregisterTexture(int slot);
+
     protected:
+
+        struct TextureImpl;
+
+        int RegisterTexture(const TextureImpl& texture);
 
         void UpdateDrawListMask(RHI::DrawListMask& drawListMask);
 
@@ -78,7 +90,13 @@ namespace CE
             }
         };
 
+    protected:
+
+        // - Shader -
+
         Ref<FShader> mainShader;
+
+        // - Srgs -
 
         RHI::ShaderResourceGroup* sceneSrg = nullptr;
 
@@ -86,7 +104,31 @@ namespace CE
 
         RHI::ShaderResourceGroupLayout objectSrgLayout{};
 
+        // - Sampler -
+
         HashMap<FSampleState, int> samplerIndicesByState;
+
+        // - Texture -
+
+        struct TextureImpl
+        {
+            RHI::Texture*      rhiTexture = nullptr;
+            RHI::TextureView*  rhiTextureView = nullptr;
+            RPI::Texture*      rpiTexture = nullptr;
+
+            inline bool IsValid() const
+            {
+                return rhiTexture != nullptr || rhiTextureView != nullptr || rpiTexture != nullptr;
+            }
+        };
+
+        using FTextureArray = StableDynamicArray<TextureImpl, 256, false>;
+        using FSlotArray = StableDynamicArray<int, 256, false>;
+
+        FTextureArray texturesBySlot;
+        FSlotArray freeSlots;
+        BitSet<RHI::Limits::MaxSwapChainImageCount> textureDirty;
+
     };
     
 } // namespace CE

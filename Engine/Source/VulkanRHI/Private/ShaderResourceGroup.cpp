@@ -762,6 +762,12 @@ namespace CE::Vulkan
 		{
 			Vulkan::Texture* texture = (Vulkan::Texture*)textures[j];
 
+			if (!texture)
+			{
+
+				continue;
+			}
+
 			VkDescriptorImageInfo imageWrite{};
 			imageWrite.imageLayout = expectedLayout;
 			imageWrite.imageView = texture->GetImageView();

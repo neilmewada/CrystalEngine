@@ -130,7 +130,7 @@ namespace CE
             capacity = count = 0;
         }
 
-        void Grow()
+        inline void Grow()
         {
             ZoneScoped;
 
@@ -153,9 +153,9 @@ namespace CE
         {
             ZoneScoped;
 
-	        while (data == nullptr || this->count + numItems >= capacity)
+            if (data == nullptr || this->count + numItems >= capacity)
 	        {
-                Grow();
+                Reserve(capacity + std::max<SIZE_T>(this->count + numItems, GrowthIncrement));
 	        }
 
             for (int i = 0; i < numItems; i++)
@@ -168,9 +168,9 @@ namespace CE
         {
             ZoneScoped;
 
-            while (data == nullptr || this->count + numItems >= capacity)
+            if (data == nullptr || this->count + numItems >= capacity)
             {
-                Grow();
+                Reserve(capacity + std::max<SIZE_T>(this->count + numItems, GrowthIncrement));
             }
 
             for (int i = 0; i < numItems; i++)

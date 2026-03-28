@@ -11,7 +11,7 @@ namespace CE
 
     FRenderService::FRenderService()
     {
-        
+        textureDirty.Set();
     }
 
     void FRenderService::OnStart()
@@ -153,9 +153,70 @@ namespace CE
         {
             if (BeginRender())
             {
+                int frameIndex = GetCurrentFrameIndex();
+
+                if (textureDirty.Test(frameIndex))
+                {
+                    textureDirty.Set(frameIndex, false);
+
+                    for (int i = 0; i < texturesBySlot.GetCount(); i++)
+                    {
+	                    
+                    }
+                }
+
             	EndRender();
             }
         }
+    }
+
+    int FRenderService::RegisterTexture(RHI::Texture* rhiTexture)
+    {
+        return RegisterTexture(TextureImpl{ .rhiTexture = rhiTexture });
+    }
+
+    int FRenderService::RegisterTexture(RHI::TextureView* rhiTextureView)
+    {
+        return RegisterTexture(TextureImpl{ .rhiTextureView = rhiTextureView });
+    }
+
+    int FRenderService::RegisterTexture(RPI::Texture* rpiTexture)
+    {
+        return RegisterTexture(TextureImpl{ .rpiTexture = rpiTexture });
+    }
+
+    int FRenderService::RegisterTexture(const TextureImpl& texture)
+    {
+        if (!texture.IsValid())
+            return -1;
+
+        textureDirty.Set();
+
+        if (freeSlots.IsEmpty())
+        {
+            texturesBySlot.Insert(texture);
+            return (int)texturesBySlot.GetCount() - 1;
+        }
+
+        int slot = freeSlots.Last();
+        freeSlots.RemoveLast();
+
+        texturesBySlot[slot] = texture;
+
+        return slot;
+    }
+
+    void FRenderService::DeregisterTexture(int slot)
+    {
+        if (slot < 0 || slot >= texturesBySlot.GetCount())
+            return;
+        if (!texturesBySlot[slot].IsValid())
+            return;
+
+        freeSlots.Insert(slot);
+        texturesBySlot[slot] = {};
+
+        textureDirty.Set();
     }
 
     void FRenderService::UpdateDrawListMask(RHI::DrawListMask& drawListMask)
