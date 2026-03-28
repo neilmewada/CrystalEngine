@@ -199,12 +199,12 @@ namespace CE
 
 		inline bool operator!() const 
 		{ 
-			return ptr == 0; 
+			return ptr == nullptr; 
 		}
 
 		inline operator bool() const
 		{
-			return ptr != 0;
+			return ptr != nullptr;
 		}
 
 		inline bool operator==(const IntrusivePtr& rhs) const

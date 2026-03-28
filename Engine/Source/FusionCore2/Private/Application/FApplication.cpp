@@ -167,6 +167,8 @@ namespace CE
 			service->OnShutdown();
         }
         services.Clear();
+
+        FTransitionManager::Get().Shutdown();
     }
 
     void FApplication::Shutdown()

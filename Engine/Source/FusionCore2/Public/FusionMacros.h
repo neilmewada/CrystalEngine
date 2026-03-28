@@ -47,8 +47,13 @@
 				if (TEquitable<PropertyType>::AreEqual(self.m_##PropertyName, value))\
 					return self;\
 			}\
-			self.m_##PropertyName = value;\
 			thread_local const CE::Name nameValue = #PropertyName;\
+			if constexpr (FAnimatable<PropertyType>::Supported) {\
+				if ((self.GetFlags() & OF_InsideConstructor) == 0 && FTransitionManager::Get().ApplyTransition<TSelf, PropertyType>(&self, nameValue, value)) {\
+					return self;\
+				}\
+			}\
+			self.m_##PropertyName = value;\
 			if ((self.GetFlags() & OF_InsideConstructor) == 0) {\
 				 static_cast<CE::FWidget&>(self).OnFusionPropertyModified(nameValue);\
 				 DirtyFunc;\
@@ -107,21 +112,24 @@
 			return self;\
 		}
 
-// Builds 4 parameters in this order: slotName, widgetPtr, getter, setter
+// Used inside FAnimate::Tween() and FAnimate::Spring(). Builds 4 parameters in this order: slotName, widgetPtr, getter, setter.
 #define FAnimatedProperty(widgetPtr, PropertyName) #PropertyName, TPtrType<decltype(widgetPtr)>::GetRawPtr(widgetPtr),\
 	(decltype(std::declval<TPtrType<decltype(widgetPtr)>::Type>().PropertyName())(TPtrType<decltype(widgetPtr)>::Type::*)() const)&TPtrType<decltype(widgetPtr)>::Type::PropertyName,\
 	(TMemberFunctionCast<TPtrType<decltype(widgetPtr)>::Type, decltype(&TPtrType<decltype(widgetPtr)>::Type::Animate_##PropertyName)>::TCastedFuncSignature)\
 	& TPtrType<decltype(widgetPtr)>::Type::Animate_##PropertyName
 
+// Used as first argument into FTransitionManager::Register(). Builds 3 parameters in this order: propertyName/slotName, getter, animateSetter.
+#define FTransitionProperty(WidgetClass, PropertyName) #PropertyName,\
+	(decltype(std::declval<WidgetClass>().PropertyName())(WidgetClass::*)() const)&WidgetClass::PropertyName,\
+	(void (WidgetClass::*)(const decltype(std::declval<WidgetClass>().PropertyName())&))&WidgetClass::Animate_##PropertyName
+
 #define FAnimate_Tween(widgetPtr, PropertyName) FAnimate::Tween(CE_EXPAND(FAnimatedProperty(widgetPtr, PropertyName)))
 #define FAnimate_Spring(widgetPtr, PropertyName) FAnimate::Spring(CE_EXPAND(FAnimatedProperty(widgetPtr, PropertyName)))
 #define FAnimate_Sequence(owner, slotName) FAnimate::Sequence(owner, slotName)
+#define FAnimate_Parallel(owner, slotName) FAnimate::Parallel(owner, slotName)
 
 // IGNORE THE COMMENTED CODE BELOW, IT'S JUST FOR REFERENCE AND NOT PART OF THE MACROS
 /*
-#define FUSION_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkLayoutDirty())
-
-#define FUSION_PROPERTY(PropertyType, PropertyName, ...) __FUSION_PROPERTY(PropertyType, PropertyName, MarkDirty())
 
 #define __FUSION_DATA_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
 	__FUSION_PROPERTY(PropertyType, PropertyName, DirtyFunc)\

@@ -19,7 +19,7 @@ namespace CE
     ENUM_CLASS(FAnimationState);
 
     CLASS(Abstract)
-        class FUSIONCORE_API FAnimation : public Object
+    class FUSIONCORE_API FAnimation : public Object
     {
         CE_CLASS(FAnimation, Object)
     protected:

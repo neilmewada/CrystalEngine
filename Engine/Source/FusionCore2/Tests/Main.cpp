@@ -210,6 +210,14 @@ TEST(FusionCore, Rendering)
 	mainWindow->Show();
 
 	{
+		decltype(std::declval<CustomWidget>().Background()) a;
+
+
+		FTransitionManager::Get()
+			.Register(FTransitionProperty(CustomWidget, Background), FTweenTransition().Duration(0.3f));
+		FTransitionManager::Get()
+			.Register(FTransitionProperty(CustomWidget, Transform), FSpringTransition());
+		
 		Ref<FNativeSurface> nativeSurface = FNativeSurface::Create(mainWindow, "MainWindow", nullptr);
 		Ref<TestWindow> testWindow;
 

@@ -6,6 +6,20 @@ using namespace CE;
 
 namespace RenderingTests
 {
+	CLASS()
+	class CustomWidget : public FDecoratedWidget
+	{
+		CE_CLASS(CustomWidget, FDecoratedWidget)
+	public:
+
+		void Construct() override
+		{
+			Super::Construct();
+
+
+		}
+
+	};
 
 	CLASS()
 	class TestWindow : public FDecoratedWidget
@@ -18,6 +32,10 @@ namespace RenderingTests
 			Super::Construct();
 
 			Background(Color(0.13f, 0.13f, 0.15f));
+
+			constexpr Color colors[] = {
+				Colors::Red, Colors::Orange, Colors::Yellow, Colors::Green, Colors::Cyan, Colors::Purple, Colors::Blue
+			};
 
 			FGradient gradient{};
 			gradient.gradientType = FGradientType::Linear;
@@ -162,13 +180,21 @@ namespace RenderingTests
 						.Height(30)
 						.Name("H_3")
 						.Style("Button/Secondary")
-						.OnClick([this]
+						.OnClick([this, colors]
 						{
 							FAffineTransform toScale = scaleDown ? FAffineTransform::Scale(Vec2(0.5f, 0.5f)) : FAffineTransform::Identity();
-
+							
 							FAnimate_Spring(bar1, Transform)
 							.Target(toScale)
 							.Play();
+
+							colorIdx = (colorIdx + 1) % COUNTOF(colors);
+
+							bar4->Background(colors[colorIdx]);
+
+							FAffineTransform toRotation = colorIdx % 2 != 0 ? FAffineTransform::Rotation(Math::ToRadians(90)) : FAffineTransform::Identity();
+
+							bar4->Transform(toRotation);
 
 							scaleDown = !scaleDown;
 						}),
@@ -192,7 +218,6 @@ namespace RenderingTests
 							)
 							.Play();
 
-							rotateForward = !rotateForward;
 						}),
 
 						FNew(FDecoratedWidget)
@@ -255,6 +280,10 @@ namespace RenderingTests
 					.Shape(FRoundedRectangle(8.0f))
 					.Height(120)
 					.Name("Bar_3"),
+
+					FAssignNew(CustomWidget, bar4)
+					.Background(colors[colorIdx])
+					.Height(30),
 
 					FNew(FWidget)
 					.FillRatio(1.0f)
@@ -336,12 +365,14 @@ namespace RenderingTests
 		FUSION_PROPERTY(f32, DashGap);
 		FUSION_PROPERTY(f32, DashPhase);
 
-		Ref<FVerticalStack> vstack;
+		Ref<FVerticalStack>   vstack;
 		Ref<FHorizontalStack> hstack;
 		Ref<FDecoratedWidget> bar1;
 		Ref<FDecoratedWidget> bar2;
 		Ref<FDecoratedWidget> bar3;
+		Ref<CustomWidget>	  bar4;
 
+		int  colorIdx = 0;
 		bool scaleDown = true;
 		bool rotateForward = true;
 		bool gradientToggle = false;

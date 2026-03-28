@@ -42,6 +42,7 @@
 #include "Animation/FParallelAnimation.h"
 #include "Animation/FAnimationService.h"
 #include "Animation/FAnimateBuilder.h"
+#include "Animation/FTransitionManager.h"
 
 // Rendering / Painting
 #include "Rendering/FRenderService.h"

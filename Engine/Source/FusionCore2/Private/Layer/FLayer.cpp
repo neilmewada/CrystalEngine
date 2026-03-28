@@ -70,7 +70,7 @@ namespace CE
 
 			// Default draw item always exists
 			drawList.drawItemArray[0].clipRectIndex = -1;
-
+			
 			/*
 			Vec2 halfSize = widget->GetLayoutSize() / 2.0f;
 			Vec2 clipCenter = widget->GetLayoutPosition() + halfSize;
