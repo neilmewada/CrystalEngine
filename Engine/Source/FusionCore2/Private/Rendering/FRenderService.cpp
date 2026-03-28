@@ -155,15 +155,7 @@ namespace CE
             {
                 int frameIndex = GetCurrentFrameIndex();
 
-                if (textureDirty.Test(frameIndex))
-                {
-                    textureDirty.Set(frameIndex, false);
-
-                    for (int i = 0; i < texturesBySlot.GetCount(); i++)
-                    {
-	                    
-                    }
-                }
+                FlushTextures(frameIndex);
 
             	EndRender();
             }
@@ -204,6 +196,19 @@ namespace CE
         texturesBySlot[slot] = texture;
 
         return slot;
+    }
+
+    void FRenderService::FlushTextures(int frameIndex)
+    {
+        if (!textureDirty.Test(frameIndex))
+            return;
+
+        textureDirty.Set(frameIndex, false);
+
+        StableDynamicArray<RHI::Texture*> views;
+        views.Reserve(texturesBySlot.GetCount());
+
+
     }
 
     void FRenderService::DeregisterTexture(int slot)

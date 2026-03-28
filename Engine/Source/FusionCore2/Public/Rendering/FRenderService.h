@@ -57,7 +57,25 @@ namespace CE
 
         int RegisterTexture(const TextureImpl& texture);
 
+        void FlushTextures(int frameIndex);
+
         void UpdateDrawListMask(RHI::DrawListMask& drawListMask);
+
+    protected:
+
+        // - Shader -
+
+        Ref<FShader> mainShader;
+
+        // - Srgs -
+
+        RHI::ShaderResourceGroup* sceneSrg = nullptr;
+
+        RHI::ShaderResourceGroupLayout subPassSrgLayout{};
+
+        RHI::ShaderResourceGroupLayout objectSrgLayout{};
+
+        // - Sampler -
 
         struct FSampleState
         {
@@ -89,22 +107,6 @@ namespace CE
                 return !operator==(other);
             }
         };
-
-    protected:
-
-        // - Shader -
-
-        Ref<FShader> mainShader;
-
-        // - Srgs -
-
-        RHI::ShaderResourceGroup* sceneSrg = nullptr;
-
-        RHI::ShaderResourceGroupLayout subPassSrgLayout{};
-
-        RHI::ShaderResourceGroupLayout objectSrgLayout{};
-
-        // - Sampler -
 
         HashMap<FSampleState, int> samplerIndicesByState;
 
