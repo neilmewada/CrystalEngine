@@ -51,10 +51,6 @@ namespace CE
 
     protected:
 
-        struct TextureImpl;
-
-        int RegisterTexture(const TextureImpl& texture);
-
         void FlushTextures(int frameIndex);
 
         void UpdateDrawListMask(RHI::DrawListMask& drawListMask);
