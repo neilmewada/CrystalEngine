@@ -135,6 +135,157 @@ namespace CE
     };
 
     template<>
+    struct FAnimatable<FGradient>
+    {
+        static constexpr bool Supported = true;
+
+        // Sample a gradient's color at a normalized position by interpolating between adjacent stops.
+        static Color Sample(const FGradient& g, f32 t)
+        {
+            if (g.stops.IsEmpty())                   return Color(0, 0, 0, 0);
+            if (t <= g.stops[0].position)             return g.stops[0].color;
+            if (t >= g.stops.GetLast().position)         return g.stops.GetLast().color;
+
+            for (int i = 0; i < (int)g.stops.GetSize() - 1; i++)
+            {
+                if (t >= g.stops[i].position && t <= g.stops[i + 1].position)
+                {
+                    const f32 range  = g.stops[i + 1].position - g.stops[i].position;
+                    const f32 localT = range > 1e-8f ? (t - g.stops[i].position) / range : 0.f;
+                    return Color::Lerp(g.stops[i].color, g.stops[i + 1].color, localT);
+                }
+            }
+            return g.stops.GetLast().color;
+        }
+
+        static FGradient Lerp(const FGradient& a, const FGradient& b, f32 t)
+        {
+            return LerpUnclamped(a, b, Math::Clamp01(t));
+        }
+
+        static FGradient LerpUnclamped(const FGradient& a, const FGradient& b, f32 t)
+        {
+            ZoneScoped;
+
+            // Fast path: same type and same stop count — lerp per-stop directly
+            if (a.gradientType == b.gradientType && a.stops.GetSize() == b.stops.GetSize())
+            {
+                FGradient out = a;
+                for (int i = 0; i < (int)a.stops.GetSize(); i++)
+                {
+                    out.stops[i].color    = Color::Lerp(a.stops[i].color, b.stops[i].color, t);
+                    out.stops[i].position = a.stops[i].position + (b.stops[i].position - a.stops[i].position) * t;
+                }
+                out.angle = a.angle + (b.angle - a.angle) * t;
+                return out;
+            }
+
+            // Different stop counts: merge the two sorted position lists into a union,
+            // sample each gradient at every position, then lerp the sampled colors.
+            FGradient out;
+            out.gradientType = t < 0.5f ? a.gradientType : b.gradientType;
+            out.angle        = a.angle + (b.angle - a.angle) * t;
+
+            int ai = 0, bi = 0;
+            const int na = (int)a.stops.GetSize();
+            const int nb = (int)b.stops.GetSize();
+
+            while (ai < na || bi < nb)
+            {
+                const f32 pa = ai < na ? a.stops[ai].position : 2.f;
+                const f32 pb = bi < nb ? b.stops[bi].position : 2.f;
+
+                f32 pos;
+                if (pa <= pb) { pos = pa; ai++; if (Math::Abs(pa - pb) < 1e-6f) bi++; }
+                else          { pos = pb; bi++; }
+
+                // Skip positions that are effectively duplicates of the last one added
+                if (!out.stops.IsEmpty() && Math::Abs(out.stops.GetLast().position - pos) < 1e-6f)
+                    continue;
+
+                out.stops.Add(FGradientKey(pos, Color::Lerp(Sample(a, pos), Sample(b, pos), t)));
+            }
+
+            return out;
+        }
+
+        // Identity/zero value — empty gradient acts as additive zero for spring arithmetic
+        static FGradient Identity() { return FGradient{}; }
+
+        static FGradient Add(const FGradient& a, const FGradient& b)
+        {
+            ZoneScoped;
+
+            // Empty gradient acts as additive zero
+            if (b.stops.IsEmpty()) return a;
+            if (a.stops.IsEmpty()) return b;
+
+            // Fast path: same stop count
+            if (a.stops.GetSize() == b.stops.GetSize())
+            {
+                FGradient out = a;
+                for (int i = 0; i < (int)a.stops.GetSize(); i++)
+                {
+                    out.stops[i].color    = FAnimatable<Color>::Add(a.stops[i].color, b.stops[i].color);
+                    out.stops[i].position = a.stops[i].position + b.stops[i].position;
+                }
+                out.angle = a.angle + b.angle;
+                return out;
+            }
+
+            // Different counts: union merge
+            FGradient out;
+            out.gradientType = a.gradientType;
+            out.angle        = a.angle + b.angle;
+
+            int ai = 0, bi = 0;
+            const int na = (int)a.stops.GetSize();
+            const int nb = (int)b.stops.GetSize();
+
+            while (ai < na || bi < nb)
+            {
+                const f32 pa = ai < na ? a.stops[ai].position : 2.f;
+                const f32 pb = bi < nb ? b.stops[bi].position : 2.f;
+
+                f32 pos;
+                if (pa <= pb) { pos = pa; ai++; if (Math::Abs(pa - pb) < 1e-6f) bi++; }
+                else          { pos = pb; bi++; }
+
+                if (!out.stops.IsEmpty() && Math::Abs(out.stops.GetLast().position - pos) < 1e-6f)
+                    continue;
+
+                out.stops.Add(FGradientKey(pos, FAnimatable<Color>::Add(Sample(a, pos), Sample(b, pos))));
+            }
+
+            return out;
+        }
+
+        static FGradient Scale(const FGradient& a, f32 s)
+        {
+            ZoneScoped;
+
+            FGradient out = a;
+            for (int i = 0; i < (int)a.stops.GetSize(); i++)
+            {
+                out.stops[i].color    = FAnimatable<Color>::Scale(a.stops[i].color, s);
+                out.stops[i].position = a.stops[i].position * s;
+            }
+            out.angle = a.angle * s;
+            return out;
+        }
+
+        static f32 SquaredMagnitude(const FGradient& v)
+        {
+            ZoneScoped;
+
+            f32 mag = v.angle * v.angle;
+            for (int i = 0; i < (int)v.stops.GetSize(); i++)
+                mag += FAnimatable<Color>::SquaredMagnitude(v.stops[i].color);
+            return mag;
+        }
+    };
+
+    template<>
     struct FAnimatable<FPen>
     {
         static constexpr bool Supported = true;
@@ -201,19 +352,7 @@ namespace CE
 
             if (a.HasGradient() && b.HasGradient())
             {
-                const FGradient& ga = a.GetGradient();
-                const FGradient& gb = b.GetGradient();
-                if (ga.stops.GetSize() == gb.stops.GetSize())
-                {
-                    FGradient outGrad = ga;
-                    for (int i = 0; i < (int)ga.stops.GetSize(); i++)
-                    {
-                        outGrad.stops[i].color    = FAnimatable<Color>::Add(ga.stops[i].color, gb.stops[i].color);
-                        outGrad.stops[i].position = ga.stops[i].position + gb.stops[i].position;
-                    }
-                    outGrad.angle = ga.angle + gb.angle;
-                    out.SetGradient(outGrad);
-                }
+                out.SetGradient(FAnimatable<FGradient>::Add(a.GetGradient(), b.GetGradient()));
             }
 
             return out;
@@ -233,15 +372,7 @@ namespace CE
 
             if (a.HasGradient())
             {
-                const FGradient& g = a.GetGradient();
-                FGradient outGrad = g;
-                for (int i = 0; i < (int)g.stops.GetSize(); i++)
-                {
-                    outGrad.stops[i].color    = FAnimatable<Color>::Scale(g.stops[i].color, s);
-                    outGrad.stops[i].position = g.stops[i].position * s;
-                }
-                outGrad.angle = g.angle * s;
-                out.SetGradient(outGrad);
+                out.SetGradient(FAnimatable<FGradient>::Scale(a.GetGradient(), s));
             }
 
             return out;
@@ -301,21 +432,7 @@ namespace CE
         {
             ZoneScoped;
 
-            const FGradient& ga = a.GetGradient();
-            const FGradient& gb = b.GetGradient();
-
-            // Snap at t=0.5 if gradient type or stop count differ
-            if (ga.gradientType != gb.gradientType || ga.stops.GetSize() != gb.stops.GetSize())
-                return t < 0.5f ? a : b;
-
-            FGradient outGrad = ga;
-            for (int i = 0; i < (int)ga.stops.GetSize(); i++)
-            {
-                outGrad.stops[i].color    = Color::Lerp(ga.stops[i].color, gb.stops[i].color, t);
-                outGrad.stops[i].position = ga.stops[i].position + (gb.stops[i].position - ga.stops[i].position) * t;
-            }
-            outGrad.angle = ga.angle + (gb.angle - ga.angle) * t;
-
+            FGradient outGrad = FAnimatable<FGradient>::LerpUnclamped(a.GetGradient(), b.GetGradient(), t);
             // Thickness is a placeholder; LerpUnclamped overwrites it
             return FPen(outGrad, 1.0f, Color::Lerp(a.GetColor(), b.GetColor(), t));
         }
@@ -395,19 +512,8 @@ namespace CE
 
             if (styleA == FBrushStyle::Gradient && styleA == styleB)
             {
-                const FGradient& ga = a.GetGradient();
-                const FGradient& gb = b.GetGradient();
-                if (ga.stops.GetSize() == gb.stops.GetSize())
-                {
-                    FGradient outGrad = ga;
-                    for (int i = 0; i < (int)ga.stops.GetSize(); i++)
-                    {
-                        outGrad.stops[i].color    = FAnimatable<Color>::Add(ga.stops[i].color, gb.stops[i].color);
-                        outGrad.stops[i].position = ga.stops[i].position + gb.stops[i].position;
-                    }
-                    outGrad.angle = ga.angle + gb.angle;
-                    return FBrush(outGrad, FAnimatable<Color>::Add(a.GetColor(), b.GetColor()));
-                }
+                FGradient outGrad = FAnimatable<FGradient>::Add(a.GetGradient(), b.GetGradient());
+                return FBrush(outGrad, FAnimatable<Color>::Add(a.GetColor(), b.GetColor()));
             }
 
             if (styleA == FBrushStyle::Image && styleA == styleB)
@@ -433,14 +539,7 @@ namespace CE
 
             if (style == FBrushStyle::Gradient)
             {
-                const FGradient& g = a.GetGradient();
-                FGradient outGrad = g;
-                for (int i = 0; i < (int)g.stops.GetSize(); i++)
-                {
-                    outGrad.stops[i].color    = FAnimatable<Color>::Scale(g.stops[i].color, s);
-                    outGrad.stops[i].position = g.stops[i].position * s;
-                }
-                outGrad.angle = g.angle * s;
+                FGradient outGrad = FAnimatable<FGradient>::Scale(a.GetGradient(), s);
                 return FBrush(outGrad, FAnimatable<Color>::Scale(a.GetColor(), s));
             }
 
@@ -489,21 +588,7 @@ namespace CE
         {
             ZoneScoped;
 
-            const FGradient& ga = a.GetGradient();
-            const FGradient& gb = b.GetGradient();
-
-            // Snap at t=0.5 if gradient type or stop count differ
-            if (ga.gradientType != gb.gradientType || ga.stops.GetSize() != gb.stops.GetSize())
-                return t < 0.5f ? a : b;
-
-            FGradient outGrad = ga;
-            for (int i = 0; i < (int)ga.stops.GetSize(); i++)
-            {
-                outGrad.stops[i].color    = Color::Lerp(ga.stops[i].color, gb.stops[i].color, t);
-                outGrad.stops[i].position = ga.stops[i].position + (gb.stops[i].position - ga.stops[i].position) * t;
-            }
-            outGrad.angle = ga.angle + (gb.angle - ga.angle) * t;
-
+            FGradient outGrad = FAnimatable<FGradient>::LerpUnclamped(a.GetGradient(), b.GetGradient(), t);
             return FBrush(outGrad, Color::Lerp(a.GetColor(), b.GetColor(), t));
         }
 
