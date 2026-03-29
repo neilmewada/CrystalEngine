@@ -58,10 +58,10 @@ namespace RenderingTests
 			};
 
 
-			FBrush imageBrush("res:/Icons/Test.png");
+			FBrush imageBrush("res:/Icons/TransparentPattern.png");
 			imageBrush.SetImageFit(FImageFit::Fill);
 			imageBrush.SetBrushTiling(FBrushTiling::TileXY);
-			imageBrush.SetBrushSize(Vec2(180, 120));
+			imageBrush.SetBrushSize(Vec2(16, 16));
 
 			Child(
 				FAssignNew(FVerticalStack, vstack)
@@ -86,7 +86,7 @@ namespace RenderingTests
 					.Spacing(10)
 					.Name("hstack")
 					(
-						FNew(FButton)
+						FAssignNew(FButton, btn1)
 						.FillRatio(1.0f)
 						.Height(30)
 						.Name("H_1")
@@ -188,7 +188,7 @@ namespace RenderingTests
 						.Style("Button/Secondary")
 						.OnClick([this, colors]
 						{
-							FAffineTransform toScale = scaleDown ? FAffineTransform::Scale(Vec2(0.5f, 0.5f)) : FAffineTransform::Identity();
+							FAffineTransform toScale = scaleDown ? FAffineTransform::Rotation(Math::ToRadians(90)) : FAffineTransform::Identity();
 							
 							FAnimate_Spring(bar1, Transform)
 							.Target(toScale)
@@ -196,17 +196,14 @@ namespace RenderingTests
 
 							colorIdx = (colorIdx + 1) % COUNTOF(colors);
 
-							FBrush imageBrush("res:/Icons/Test.png");
+							FBrush imageBrush("res:/Icons/TransparentPattern.png");
 							imageBrush.SetImageFit(FImageFit::Fill);
 							imageBrush.SetBrushTiling(FBrushTiling::TileXY);
-							imageBrush.SetBrushSize(scaleDown ? Vec2(90, 60) : Vec2(180, 120));
-							//imageBrush.SetBrushPosition(scaleDown ? Vec2(1, 1) : Vec2(0, 0));
+							imageBrush.SetBrushSize(scaleDown ? Vec2(32, 32) * 1.5f : Vec2(16, 16));
 
-							bar4->Background(imageBrush);
+							bar4->Background(imageBrush); // Automatic transition animation applied for "registered" properties
 
 							FAffineTransform toRotation = colorIdx % 2 != 0 ? FAffineTransform::Rotation(Math::ToRadians(90)) : FAffineTransform::Identity();
-
-							//bar4->Transform(toRotation);
 
 							scaleDown = !scaleDown;
 						}),
@@ -232,12 +229,15 @@ namespace RenderingTests
 
 						}),
 
-						FNew(FDecoratedWidget)
-						.Background(Colors::Cyan)
+						FNew(FButton)
 						.FillRatio(1.0f)
 						.Height(30)
-						.Name("H_4")
-						.Transform(FAffineTransform::Rotation(Math::ToRadians(5)))
+						.Name("H_5")
+						.Style("Button/Secondary")
+						.OnClick([this]
+						{
+							
+						})
 					),
 
 					FAssignNew(FDecoratedWidget, bar1)
@@ -252,40 +252,7 @@ namespace RenderingTests
 					.Height(30)
 					//.ForcePaintBoundary(true)
 					.ClipContent(true)
-					.Name("Bar_2")
-					.Child(
-						FNew(FHorizontalStack)
-						.Spacing(10)
-						.ContentVAlign(VAlign::Center)
-						.HAlign(HAlign::Fill)
-						.VAlign(VAlign::Fill)
-						.Name("hstack")
-						.Transform(FAffineTransform::Rotation(Math::ToRadians(3)))
-						.Padding(Vec4(25, 0, 0, 0))
-						(
-							FNew(FDecoratedWidget)
-							.Shape(FCircle())
-							.Background(Colors::Blue)
-							.Width(25)
-							.Height(25)
-							.HAlign(HAlign::Center)
-							.VAlign(VAlign::Center)
-							.Name("Ball_1"),
-
-							FNew(FButton)
-							.Shape(FCircle())
-							.Background(Colors::Orange)
-							.Width(25)
-							.Height(25)
-							.HAlign(HAlign::Center)
-							.VAlign(VAlign::Center)
-							.Name("Ball_2")
-							.OnClick([]
-							{
-								CE_LOG(Info, All, "Clicked Ball_2");
-							})
-						)
-					),
+					.Name("Bar_2"),
 
 					FAssignNew(FDecoratedWidget, bar3)
 					.Background(gradient)
@@ -378,6 +345,7 @@ namespace RenderingTests
 		FUSION_PROPERTY(f32, DashGap);
 		FUSION_PROPERTY(f32, DashPhase);
 
+		Ref<FButton>		  btn1;
 		Ref<FVerticalStack>   vstack;
 		Ref<FHorizontalStack> hstack;
 		Ref<FDecoratedWidget> bar1;
