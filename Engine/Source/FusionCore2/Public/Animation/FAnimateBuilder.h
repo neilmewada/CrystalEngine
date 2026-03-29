@@ -391,6 +391,15 @@ namespace CE
             return builder;
         }
 
+        // Top-level sequence: registered with the animation service under the given slot.
+        static FSequenceBuilder Sequence(Ref<Object> anchor, Name slot)
+        {
+            FSequenceBuilder builder{};
+            builder.anchor = anchor;
+            builder.slot = slot;
+            return builder;
+        }
+
         // Nested sequence: owned by anchor but not registered with the service directly.
         static FSequenceBuilder Sequence(Object* anchor)
         {

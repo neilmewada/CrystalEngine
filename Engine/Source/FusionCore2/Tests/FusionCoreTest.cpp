@@ -191,7 +191,7 @@ namespace RenderingTests
                     .Style("Button/Destructive")
                     .OnClick([this]
                     {
-                        FAnimate_Sequence(this, "bar1_demo")
+                        FAnimate_Sequence(bar1, "Transform")
                         .Then(FAnimate_Tween(bar1, Transform)
                             .To(FAffineTransform::Scale(Vec2(0.5f, 0.5f)))
                             .Duration(0.5f)
