@@ -7,6 +7,8 @@ namespace CE::Metal
 
     DeviceLimits::DeviceLimits(Device* device) : device(device)
     {
+        minStructuredBufferOffsetAlignment = 16;
+        
         for (const TextureFormatEntry& entry : formatEntries)
         {
             RHI::TextureBindFlags bindFlags = RHI::TextureBindFlags::None;

@@ -684,6 +684,15 @@ namespace CE::Metal
             for (const auto& [binding, boundTextures] : boundTexturesBySlot[frameIndex])
             {
                 int idx = 0;
+                
+                for (int i = 0; i < binding; i++)
+                {
+                   if (srgLayout.variables[i].arrayCount > 1)
+                   {
+                       idx += srgLayout.variables[i].arrayCount - 1;
+                   }
+                }
+                
                 for (const TextureBinding& textureBinding : boundTextures)
                 {
                     if (textureBinding.resourceType == RHI::ResourceType::Texture)

@@ -88,6 +88,16 @@ struct spvDescriptorSetBuffer0
     spvDescriptor<texture2d<float>> _Textures [[id(16)]][1] /* unsized array hack */;
 };
 
+struct spvDescriptorSetBuffer1
+{
+    constant type_PerViewData* _PerViewData [[id(0)]];
+};
+
+struct spvDescriptorSetBuffer3
+{
+    constant type_LayerData* _LayerData [[id(0)]];
+};
+
 struct spvDescriptorSetBuffer5
 {
     const device type_StructuredBuffer_FUIDrawItem* _DrawItems [[id(0)]];
@@ -108,7 +118,7 @@ struct FragMain_in
     float2 in_var_TEXCOORD4 [[user(locn3)]];
 };
 
-fragment FragMain_out FragMain(FragMain_in in [[stage_in]], const device spvDescriptorSetBuffer0& spvDescriptorSet0 [[buffer(0)]], constant spvDescriptorSetBuffer5& spvDescriptorSet5 [[buffer(5)]], float4 gl_FragCoord [[position]])
+fragment FragMain_out FragMain(FragMain_in in [[stage_in]], const device spvDescriptorSetBuffer0& spvDescriptorSet0 [[buffer(0)]], constant spvDescriptorSetBuffer1& spvDescriptorSet1 [[buffer(1)]], constant spvDescriptorSetBuffer3& spvDescriptorSet3 [[buffer(3)]], constant spvDescriptorSetBuffer5& spvDescriptorSet5 [[buffer(5)]], float4 gl_FragCoord [[position]])
 {
     spvDescriptorArray<texture2d<float>> _Textures {spvDescriptorSet0._Textures};
 
