@@ -66,11 +66,11 @@ static void TestBegin(bool gui)
 		constexpr f32 scaleFactor = 1.0f;
 
 #if PLATFORM_MAC
-		u32 w = 540, h = 400;
+		u32 w = 640, h = 500;
 #elif PLATFORM_LINUX
 		u32 w = 1024 * scaleFactor, h = 768 * scaleFactor;
 #elif PLATFORM_WINDOWS
-		u32 w = 1024, h = 768;
+		u32 w = 1200, h = 900;
 #endif
 
 		windowWidth = w;

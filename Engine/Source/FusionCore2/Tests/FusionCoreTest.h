@@ -57,9 +57,11 @@ namespace RenderingTests
 				FGradientKey(1.00f, Color(0.10f, 0.00f, 0.90f)), // electric indigo
 			};
 
-			FBrush hsvColorMap("res:/Images/HSVColorMap.png");
-			hsvColorMap.SetImageFit(FImageFit::Contain);
-			hsvColorMap.SetBrushTiling(FBrushTiling::TileXY);
+
+			FBrush imageBrush("res:/Icons/Test.png");
+			imageBrush.SetImageFit(FImageFit::Fill);
+			imageBrush.SetBrushTiling(FBrushTiling::TileXY);
+			imageBrush.SetBrushSize(Vec2(180, 120));
 
 			Child(
 				FAssignNew(FVerticalStack, vstack)
@@ -194,7 +196,13 @@ namespace RenderingTests
 
 							colorIdx = (colorIdx + 1) % COUNTOF(colors);
 
-							//bar4->Background(colors[colorIdx]);
+							FBrush imageBrush("res:/Icons/Test.png");
+							imageBrush.SetImageFit(FImageFit::Fill);
+							imageBrush.SetBrushTiling(FBrushTiling::TileXY);
+							imageBrush.SetBrushSize(scaleDown ? Vec2(90, 60) : Vec2(180, 120));
+							//imageBrush.SetBrushPosition(scaleDown ? Vec2(1, 1) : Vec2(0, 0));
+
+							bar4->Background(imageBrush);
 
 							FAffineTransform toRotation = colorIdx % 2 != 0 ? FAffineTransform::Rotation(Math::ToRadians(90)) : FAffineTransform::Identity();
 
@@ -286,7 +294,8 @@ namespace RenderingTests
 					.Name("Bar_3"),
 
 					FAssignNew(CustomWidget, bar4)
-					.Background(hsvColorMap)
+					.Background(imageBrush)
+					.Shape(FRoundedRectangle(5.0f))
 					.Height(120),
 
 					FNew(FWidget)

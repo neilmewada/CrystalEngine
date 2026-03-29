@@ -129,7 +129,6 @@ namespace CE
                 if (it != transitionEntries.End() && it->second && it->second->GetPropertyTypeId() == TYPEID(T))
                 {
                     FTransitionEntry<T>* entry = static_cast<FTransitionEntry<T>*>(it->second.Get());
-                    // TODO: Apply transition
                     entry->applyTransition(widget, value);
                     return true;
                 }

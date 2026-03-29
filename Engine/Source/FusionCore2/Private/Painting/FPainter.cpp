@@ -813,16 +813,44 @@ namespace CE
 
 				halfTexel = (imgW > 0 && imgH > 0) ? Vec2(0.5f / imgW, 0.5f / imgH) : Vec2(0, 0);
 
+				switch (imageFit)
+				{
+				case FImageFit::Fill:
+					if (autoSizeX)
+						brushSize.x = imgW;
+					if (autoSizeY)
+						brushSize.y = imgH;
+					break;
+				case FImageFit::Contain:
+					if (autoSizeX)
+						brushSize.x = imgW;
+					if (autoSizeY)
+						brushSize.y = imgH;
+					break;
+				case FImageFit::Cover:
+					if (autoSizeX)
+						brushSize.x = imgW;
+					if (autoSizeY)
+						brushSize.y = imgH;
+					break;
+				case FImageFit::NineSlice:
+					if (autoSizeX)
+						brushSize.x = imgW;
+					if (autoSizeY)
+						brushSize.y = imgH;
+					break;
+				}
+
 				if (imageFit == FImageFit::Contain || imageFit == FImageFit::Cover)
 				{
-					if (imgW > 0 && imgH > 0)
+					if (brushSize.x > 0 && brushSize.y > 0)
 					{
 						const f32 scale = imageFit == FImageFit::Contain 
-							? Math::Min(rectSize.x / imgW, rectSize.y / imgH)
-							: Math::Max(rectSize.x / imgW, rectSize.y / imgH);
+							? Math::Min(rectSize.x / brushSize.x, rectSize.y / brushSize.y)
+							: Math::Max(rectSize.x / brushSize.x, rectSize.y / brushSize.y);
 
-						fitSize.x = (imgW * scale) / rectSize.x;
-						fitSize.y = (imgH * scale) / rectSize.y;
+						fitSize.x = (brushSize.x * scale) / rectSize.x;
+						fitSize.y = (brushSize.y * scale) / rectSize.y;
 						fitOffset.x = (1.0f - fitSize.x) * brushPos.x;
 						fitOffset.y = (1.0f - fitSize.y) * brushPos.y;
 					}
@@ -831,9 +859,17 @@ namespace CE
 						? FUIDrawItemFlags::ImageFitContain 
 						: FUIDrawItemFlags::ImageFitCover;
 				}
+				else if (imageFit == FImageFit::Fill)
+				{
+					fitSize.x = (brushSize.x > 0 && rectSize.x > 0) ? (brushSize.x / rectSize.x) : 1.0f;
+					fitSize.y = (brushSize.y > 0 && rectSize.y > 0) ? (brushSize.y / rectSize.y) : 1.0f;
+
+					fitOffset.x = (1.0f - fitSize.x) * brushPos.x;
+					fitOffset.y = (1.0f - fitSize.y) * brushPos.y;
+				}
 
 				if (tiledX) { flags |= FUIDrawItemFlags::TextureTileX; }
-				if (tiledY) { flags |= FUIDrawItemFlags::TextureTileY;}
+				if (tiledY) { flags |= FUIDrawItemFlags::TextureTileY; }
 
 				FUIDrawItem drawItem{};
 				drawItem.clipRectIndex = GetCurrentClipIndex();
