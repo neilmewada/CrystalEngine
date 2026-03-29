@@ -45,7 +45,7 @@ struct FUIDrawItem
     int shaderType;
     uint textureIndex;
     uint samplerIndex;
-    int drawItemFlags;
+    int flags;
     int clipRectIndex;
     int gradientStartIndex;
     int gradientStopCount;
@@ -113,102 +113,171 @@ fragment FragMain_out FragMain(FragMain_in in [[stage_in]], const device spvDesc
     spvDescriptorArray<texture2d<float>> _Textures {spvDescriptorSet0._Textures};
 
     FragMain_out out = {};
-    float4 _479 = in.in_var_TEXCOORD2;
-    float4 _796;
+    float4 _517 = in.in_var_TEXCOORD2;
+    float4 _836;
     if ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].clipRectIndex >= 0)
     {
-        uint _664 = uint((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].clipRectIndex);
-        float4 _698 = float4(in.in_var_TEXCOORD4, 0.0, 1.0) * (*spvDescriptorSet5._ClipRects)._m0[_664].clipInverseTransform;
-        float _752;
-        if (_698.x > 0.0)
+        uint _704 = uint((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].clipRectIndex);
+        float4 _738 = float4(in.in_var_TEXCOORD4, 0.0, 1.0) * (*spvDescriptorSet5._ClipRects)._m0[_704].clipInverseTransform;
+        float _792;
+        if (_738.x > 0.0)
         {
-            float _733;
-            if (_698.y > 0.0)
+            float _773;
+            if (_738.y > 0.0)
             {
-                _733 = (*spvDescriptorSet5._ClipRects)._m0[_664].cornerRadii.z;
+                _773 = (*spvDescriptorSet5._ClipRects)._m0[_704].cornerRadii.z;
             }
             else
             {
-                _733 = (*spvDescriptorSet5._ClipRects)._m0[_664].cornerRadii.y;
+                _773 = (*spvDescriptorSet5._ClipRects)._m0[_704].cornerRadii.y;
             }
-            _752 = _733;
+            _792 = _773;
         }
         else
         {
-            float _750;
-            if (_698.y > 0.0)
+            float _790;
+            if (_738.y > 0.0)
             {
-                _750 = (*spvDescriptorSet5._ClipRects)._m0[_664].cornerRadii.w;
+                _790 = (*spvDescriptorSet5._ClipRects)._m0[_704].cornerRadii.w;
             }
             else
             {
-                _750 = (*spvDescriptorSet5._ClipRects)._m0[_664].cornerRadii.x;
+                _790 = (*spvDescriptorSet5._ClipRects)._m0[_704].cornerRadii.x;
             }
-            _752 = _750;
+            _792 = _790;
         }
-        float2 _762 = (abs(_698.xy) - (*spvDescriptorSet5._ClipRects)._m0[_664].clipHalfSize) + float2(_752);
-        float4 _792 = _479;
-        _792.w = _479.w * fast::clamp(0.5 - ((length(precise::max(_762, float2(0.0))) + precise::min(precise::max(_762.x, _762.y), 0.0)) - _752), 0.0, 1.0);
-        _796 = _792;
+        float2 _802 = (abs(_738.xy) - (*spvDescriptorSet5._ClipRects)._m0[_704].clipHalfSize) + float2(_792);
+        float4 _832 = _517;
+        _832.w = _517.w * fast::clamp(0.5 - ((length(precise::max(_802, float2(0.0))) + precise::min(precise::max(_802.x, _802.y), 0.0)) - _792), 0.0, 1.0);
+        _836 = _832;
     }
     else
     {
-        _796 = _479;
+        _836 = _517;
     }
-    float4 _1028;
+    float4 _1203;
     if ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].shaderType == 1)
     {
-        _1028 = _796 * _Textures[(*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].textureIndex].sample(spvDescriptorSet0._Samplers[(*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].samplerIndex], in.in_var_TEXCOORD1);
+        float2 _862 = float2((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[8], (*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[9]);
+        bool _886 = ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].flags & 2) != 0;
+        bool _890 = !(((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].flags & 1) != 0);
+        bool _898;
+        if (_890)
+        {
+            _898 = !_886;
+        }
+        else
+        {
+            _898 = false;
+        }
+        float2 _904 = (in.in_var_TEXCOORD1 - float2((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[4], (*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[5])) / float2((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[6], (*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[7]);
+        bool _938;
+        if (_890)
+        {
+            float _924 = _904.x;
+            bool _936;
+            if (!(_924 < 0.0))
+            {
+                _936 = _924 > 1.0;
+            }
+            else
+            {
+                _936 = true;
+            }
+            _938 = _936;
+        }
+        else
+        {
+            _938 = false;
+        }
+        bool _968;
+        if (!_938)
+        {
+            bool _966;
+            if (!_886)
+            {
+                float _952 = _904.y;
+                bool _964;
+                if (!(_952 < 0.0))
+                {
+                    _964 = _952 > 1.0;
+                }
+                else
+                {
+                    _964 = true;
+                }
+                _966 = _964;
+            }
+            else
+            {
+                _966 = false;
+            }
+            _968 = _966;
+        }
+        else
+        {
+            _968 = true;
+        }
+        float4 _992;
+        if (_968)
+        {
+            _992 = float4(0.0);
+        }
+        else
+        {
+            _992 = _Textures[(*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].textureIndex].sample(spvDescriptorSet0._Samplers[(*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].samplerIndex], mix(float2((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[0], (*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[1]) + _862, float2((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[2], (*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[3]) - _862, _904));
+        }
+        _1203 = _836 * _992;
     }
     else
     {
-        float4 _1025;
+        float4 _1200;
         if ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].shaderType == 2)
         {
-            float _837 = cos((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[0]);
-            float _839 = sin((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[0]);
-            float _859 = (dot(fmod(in.in_var_TEXCOORD1, float2(1.0)) - float2(0.5), float2(_837, _839)) / (abs(_837) + abs(_839))) + 0.5;
-            float4 _1022;
-            int _866 = 0;
+            float _1012 = cos((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[0]);
+            float _1014 = sin((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].data[0]);
+            float _1034 = (dot(fmod(in.in_var_TEXCOORD1, float2(1.0)) - float2(0.5), float2(_1012, _1014)) / (abs(_1012) + abs(_1014))) + 0.5;
+            float4 _1197;
+            int _1041 = 0;
             for (;;)
             {
-                if (_866 < ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].gradientStopCount - 1))
+                if (_1041 < ((*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].gradientStopCount - 1))
                 {
-                    int _879 = (*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].gradientStartIndex + _866;
-                    uint _883 = uint(_879);
-                    uint _899 = uint(_879 + 1);
-                    bool _921;
-                    if ((*spvDescriptorSet5._GradientStops)._m0[_883].position <= _859)
+                    int _1054 = (*spvDescriptorSet5._DrawItems)._m0[in.in_var_TEXCOORD3].gradientStartIndex + _1041;
+                    uint _1058 = uint(_1054);
+                    uint _1074 = uint(_1054 + 1);
+                    bool _1096;
+                    if ((*spvDescriptorSet5._GradientStops)._m0[_1058].position <= _1034)
                     {
-                        _921 = _859 < (*spvDescriptorSet5._GradientStops)._m0[_899].position;
+                        _1096 = _1034 < (*spvDescriptorSet5._GradientStops)._m0[_1074].position;
                     }
                     else
                     {
-                        _921 = false;
+                        _1096 = false;
                     }
-                    if (_921)
+                    if (_1096)
                     {
-                        _1022 = _796 * mix(float4(float((*spvDescriptorSet5._GradientStops)._m0[_883].packedColor & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_883].packedColor >> 8u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_883].packedColor >> 16u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_883].packedColor >> 24u) & 255u) * 0.0039215688593685626983642578125), float4(float((*spvDescriptorSet5._GradientStops)._m0[_899].packedColor & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_899].packedColor >> 8u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_899].packedColor >> 16u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_899].packedColor >> 24u) & 255u) * 0.0039215688593685626983642578125), float4(fast::clamp((_859 - (*spvDescriptorSet5._GradientStops)._m0[_883].position) / ((*spvDescriptorSet5._GradientStops)._m0[_899].position - (*spvDescriptorSet5._GradientStops)._m0[_883].position), 0.0, 1.0)));
+                        _1197 = _836 * mix(float4(float((*spvDescriptorSet5._GradientStops)._m0[_1058].packedColor & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_1058].packedColor >> 8u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_1058].packedColor >> 16u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_1058].packedColor >> 24u) & 255u) * 0.0039215688593685626983642578125), float4(float((*spvDescriptorSet5._GradientStops)._m0[_1074].packedColor & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_1074].packedColor >> 8u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_1074].packedColor >> 16u) & 255u) * 0.0039215688593685626983642578125, float(((*spvDescriptorSet5._GradientStops)._m0[_1074].packedColor >> 24u) & 255u) * 0.0039215688593685626983642578125), float4(fast::clamp((_1034 - (*spvDescriptorSet5._GradientStops)._m0[_1058].position) / ((*spvDescriptorSet5._GradientStops)._m0[_1074].position - (*spvDescriptorSet5._GradientStops)._m0[_1058].position), 0.0, 1.0)));
                         break;
                     }
-                    _866++;
+                    _1041++;
                     continue;
                 }
                 else
                 {
-                    _1022 = _796;
+                    _1197 = _836;
                     break;
                 }
             }
-            _1025 = _1022;
+            _1200 = _1197;
         }
         else
         {
-            _1025 = _796;
+            _1200 = _836;
         }
-        _1028 = _1025;
+        _1203 = _1200;
     }
-    out.out_var_SV_TARGET = _1028;
+    out.out_var_SV_TARGET = _1203;
     return out;
 }
 

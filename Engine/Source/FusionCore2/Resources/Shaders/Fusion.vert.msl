@@ -24,7 +24,7 @@ struct FUIDrawItem
     int shaderType;
     uint textureIndex;
     uint samplerIndex;
-    int drawItemFlags;
+    int flags;
     int clipRectIndex;
     int gradientStartIndex;
     int gradientStopCount;

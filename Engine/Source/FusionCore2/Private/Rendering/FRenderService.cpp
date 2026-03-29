@@ -192,6 +192,16 @@ namespace CE
         return slot;
     }
 
+    int FRenderService::RegisterTexture(RHI::Texture* rhiTexture)
+    {
+        StaticArray<RHI::Texture*, RHI::Limits::MaxSwapChainImageCount> textures{};
+        for (int i = 0; i < textures.GetSize(); i++)
+        {
+            textures[i] = rhiTexture;
+        }
+		return RegisterTexture(textures);
+    }
+
     void FRenderService::FlushTextures()
     {
 		int frameIndex = GetCurrentFrameIndex();
@@ -247,6 +257,15 @@ namespace CE
     int FRenderService::FindOrCreateSampler(RHI::FilterMode filterMode, RHI::SamplerAddressMode addressU,
 	    RHI::SamplerAddressMode addressV, RHI::SamplerBorderColor borderColor)
     {
+        if (addressU == SamplerAddressMode::ClampToEdge)
+			addressU = SamplerAddressMode::ClampToBorder;
+		if (addressV == SamplerAddressMode::ClampToEdge)
+			addressV = SamplerAddressMode::ClampToBorder;
+		if (addressU == SamplerAddressMode::MirroredRepeat)
+            addressU = SamplerAddressMode::Repeat;
+        if (addressV == SamplerAddressMode::MirroredRepeat)
+			addressV = SamplerAddressMode::Repeat;
+
 		if (addressU == SamplerAddressMode::ClampToBorder || addressV == SamplerAddressMode::ClampToBorder)
         {
             if (borderColor == SamplerBorderColor::FloatTransparentBlack || borderColor == SamplerBorderColor::IntTransparentBlack)

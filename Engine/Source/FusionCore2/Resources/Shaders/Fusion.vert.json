@@ -83,7 +83,7 @@
                     "offset" : 8
                 },
                 {
-                    "name" : "drawItemFlags",
+                    "name" : "flags",
                     "type" : "int",
                     "offset" : 12
                 },

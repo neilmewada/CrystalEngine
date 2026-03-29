@@ -77,6 +77,7 @@ namespace CE
 	FPainter::FPainter(FLayer* layer) : layer(layer)
 	{
 		drawList = &layer->drawList;
+		dpiScale = layer->GetDpiScale();
 
 		drawList->fringeScale = 1.0f;
 
@@ -777,7 +778,9 @@ namespace CE
 		case FBrushStyle::Image:
 			{
 				FImageService* imageService = FApplication::Get()->GetService<FImageService>().Get();
-				FResolvedImage resolvedImage = imageService->ResolveImage(currentBrush.GetImageName());
+				FRenderService* renderService = FApplication::Get()->GetService<FRenderService>().Get();
+				FResolvedImage resolvedImage = imageService->ResolveImage(currentBrush.GetImageName(), currentBrush.IsTiled());
+
 				if (!resolvedImage.IsValid())
 				{
 					break;
@@ -788,17 +791,63 @@ namespace CE
 				FImageFit imageFit = currentBrush.GetImageFit();
 				FBrushTiling tiling = currentBrush.GetBrushTiling();
 
-				bool tiledY = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileY;
-				bool tiledX = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileX;
-				bool autoSizeX = brushSize.x < 0;
-				bool autoSizeY = brushSize.y < 0;
+				const bool tiledX = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileX;
+				const bool tiledY = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileY;
+				const bool autoSizeX = brushSize.x < 0;
+				const bool autoSizeY = brushSize.y < 0;
+
+				const Vec2 rectSize = pathMax - pathMin;
+				const f32  imgW = resolvedImage.width / dpiScale;
+				const f32  imgH = resolvedImage.height / dpiScale;
+
+				const RHI::FilterMode			filterMode	 = RHI::FilterMode::Linear;
+				const RHI::SamplerAddressMode	addressModeU = tiledX ? RHI::SamplerAddressMode::Repeat : RHI::SamplerAddressMode::ClampToBorder;
+				const RHI::SamplerAddressMode	addressModeV = tiledY ? RHI::SamplerAddressMode::Repeat : RHI::SamplerAddressMode::ClampToBorder;
+				const RHI::SamplerBorderColor	borderColor  = RHI::SamplerBorderColor::FloatTransparentBlack;
+
+				// --- Compute fit / tile transform (passed to shader via data[]) ---
+				Vec2 fitOffset = Vec2(0, 0);
+				Vec2 fitSize = Vec2(1, 1);
+				Vec2 halfTexel = Vec2(0, 0);
+				FUIDrawItemFlags flags = FUIDrawItemFlags::None;
+
+				halfTexel = (imgW > 0 && imgH > 0) ? Vec2(0.5f / imgW, 0.5f / imgH) : Vec2(0, 0);
+
+				if (imageFit == FImageFit::Contain || imageFit == FImageFit::Cover)
+				{
+					if (imgW > 0 && imgH > 0)
+					{
+						const f32 scale = imageFit == FImageFit::Contain 
+							? Math::Min(rectSize.x / imgW, rectSize.y / imgH)
+							: Math::Max(rectSize.x / imgW, rectSize.y / imgH);
+
+						fitSize.x = (imgW * scale) / rectSize.x;
+						fitSize.y = (imgH * scale) / rectSize.y;
+						fitOffset.x = (1.0f - fitSize.x) * brushPos.x;
+						fitOffset.y = (1.0f - fitSize.y) * brushPos.y;
+					}
+
+					flags |= imageFit == FImageFit::Contain 
+						? FUIDrawItemFlags::ImageFitContain 
+						: FUIDrawItemFlags::ImageFitCover;
+				}
+
+				if (tiledX) { flags |= FUIDrawItemFlags::TextureTileX; }
+				if (tiledY) { flags |= FUIDrawItemFlags::TextureTileY;}
 
 				FUIDrawItem drawItem{};
 				drawItem.clipRectIndex = GetCurrentClipIndex();
 				drawItem.shaderType = FUIShaderType::Texture;
 				drawItem.textureIndex = resolvedImage.textureSlot;
+				drawItem.samplerIndex = renderService->FindOrCreateSampler(filterMode, addressModeU, addressModeV, borderColor);
+				drawItem.drawItemFlags = flags;
 
-				// TODO: Add support for images
+				// data layout: [uvMin.xy, uvMax.xy, fitOffset.xy, fitSize.xy, tileCount.xy]
+				drawItem.data[0] = resolvedImage.uvMin.x;  drawItem.data[1] = resolvedImage.uvMin.y;
+				drawItem.data[2] = resolvedImage.uvMax.x;  drawItem.data[3] = resolvedImage.uvMax.y;
+				drawItem.data[4] = fitOffset.x;            drawItem.data[5] = fitOffset.y;
+				drawItem.data[6] = fitSize.x;              drawItem.data[7] = fitSize.y;
+				drawItem.data[8] = halfTexel.x;            drawItem.data[9] = halfTexel.y;
 				
 				drawItemIndex = drawList->AddDrawItem(drawItem);
 			}

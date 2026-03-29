@@ -67,6 +67,8 @@ namespace CE
 
 		bool IsValidBrush();
 
+		bool IsTiled() const { return tiling != FBrushTiling::None; }
+
 		FBrushStyle GetBrushStyle() const { return brushStyle; }
 		FBrushTiling GetBrushTiling() const { return tiling; }
 		const FGradient& GetGradient() const { return gradient; }

@@ -38,7 +38,7 @@ enum class FUIShaderType : uint
 	Custom
 };
 
-enum class FUIDrawItemFlags : uint
+enum FUIDrawItemFlags : uint
 {
 	None = 0,
 	TextureTileX = 1 << 0,
@@ -52,7 +52,7 @@ struct FUIDrawItem
 	FUIShaderType shaderType;
 	uint textureIndex;
 	uint samplerIndex;
-	FUIDrawItemFlags drawItemFlags;
+	FUIDrawItemFlags flags;
 
 	int clipRectIndex;
 	int gradientStartIndex;

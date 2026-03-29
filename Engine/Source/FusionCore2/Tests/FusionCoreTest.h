@@ -58,8 +58,8 @@ namespace RenderingTests
 			};
 
 			FBrush hsvColorMap("res:/Images/HSVColorMap.png");
-			hsvColorMap.SetImageFit(FImageFit::Fill);
-			hsvColorMap.SetBrushTiling(FBrushTiling::None);
+			hsvColorMap.SetImageFit(FImageFit::Contain);
+			hsvColorMap.SetBrushTiling(FBrushTiling::TileXY);
 
 			Child(
 				FAssignNew(FVerticalStack, vstack)
@@ -194,11 +194,11 @@ namespace RenderingTests
 
 							colorIdx = (colorIdx + 1) % COUNTOF(colors);
 
-							bar4->Background(colors[colorIdx]);
+							//bar4->Background(colors[colorIdx]);
 
 							FAffineTransform toRotation = colorIdx % 2 != 0 ? FAffineTransform::Rotation(Math::ToRadians(90)) : FAffineTransform::Identity();
 
-							bar4->Transform(toRotation);
+							//bar4->Transform(toRotation);
 
 							scaleDown = !scaleDown;
 						}),
@@ -287,7 +287,7 @@ namespace RenderingTests
 
 					FAssignNew(CustomWidget, bar4)
 					.Background(hsvColorMap)
-					.Height(30),
+					.Height(120),
 
 					FNew(FWidget)
 					.FillRatio(1.0f)

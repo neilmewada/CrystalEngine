@@ -51,6 +51,7 @@ namespace CE
         bool ReplaceTexture(int slot, int frameIndex, RHI::Texture* rhiTexture);
 
         int RegisterTexture(StaticArray<RHI::Texture*, RHI::Limits::MaxSwapChainImageCount> rhiTexture);
+        int RegisterTexture(RHI::Texture* rhiTexture);
 
         void DeregisterTexture(int slot);
 

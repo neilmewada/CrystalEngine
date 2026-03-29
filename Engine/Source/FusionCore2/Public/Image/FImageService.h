@@ -8,6 +8,9 @@ namespace CE
         Vec2 uvMin = Vec2(0, 0);
     	Vec2 uvMax = Vec2(1, 1);
 
+        u32 width = 0;
+        u32 height = 0;
+
         bool IsValid() const
         {
 			return textureSlot >= 0;
@@ -32,13 +35,15 @@ namespace CE
 
         // - Public API -
 
-        FResolvedImage ResolveImage(const Name& imageName);
+        FResolvedImage ResolveImage(const Name& imageName, bool tiled);
 
     private:
 
         // - Internal Methods -
 
         void LoadImageResources();
+
+		FResolvedImage LoadImageResourceInSlot(const Name& imageName);
 
     protected:
 
@@ -51,6 +56,12 @@ namespace CE
 
         FIELD()
         Ref<FImageAtlas> imageAtlas;
+
+        // - Images on slot -
+
+        Array<RPI::Texture*> loadedImages;
+
+		HashMap<Name, FResolvedImage> imagesByName;
 
     };
     

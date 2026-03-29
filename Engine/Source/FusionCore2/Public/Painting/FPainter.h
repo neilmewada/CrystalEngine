@@ -106,6 +106,8 @@ namespace CE
         FTransformStack transformStack;
         FClipStack clipStack;
 
+        f32 dpiScale = 1.0f;
+
         f32 circleSegmentMaxError = 0.2f;
         f32 curveTessellationTolerance = 1.25f;
 
