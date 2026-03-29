@@ -44,7 +44,7 @@ namespace CE
             Vec2 uvMin, uvMax;
             u32 width = 0, height = 0;
 
-            bool IsValid() const { return layerIndex >= 0; }
+            bool IsValid() const { return textureSlot >= 0; }
         };
 
         struct FUSIONCORE_API BinaryNode : IntrusiveBase

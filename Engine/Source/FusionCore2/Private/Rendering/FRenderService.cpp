@@ -18,6 +18,8 @@ namespace CE
     {
 	    Super::OnStart();
 
+        samplerStates.Reserve(MaxSamplerCount);
+
 #if PLATFORM_MAC
         RawData vertexShader = Get_Shaders_Fusion_vert_msl();
         RawData fragmentShader = Get_Shaders_Fusion_frag_msl();
@@ -49,7 +51,7 @@ namespace CE
                 0,
                 RHI::ShaderResourceType::SamplerState,
                 RHI::ShaderStage::Fragment | RHI::ShaderStage::Compute,
-                16
+                MaxSamplerCount
             )
         );
         sceneSrgLayout.TryAdd(
@@ -193,18 +195,34 @@ namespace CE
     void FRenderService::FlushTextures()
     {
 		int frameIndex = GetCurrentFrameIndex();
+		bool needsFlush = false;
 
-        if (!textureDirty.Test(frameIndex))
-            return;
-
-        textureDirty.Set(frameIndex, false);
-        
-        if (totalTextures > 0 && texturesBySlotPerFrame[frameIndex].GetCount() > 0)
+        if (samplerDirty.Test(frameIndex))
         {
-            sceneSrg->Bind(frameIndex, "_Textures", 0, texturesBySlotPerFrame[frameIndex].GetCount(), texturesBySlotPerFrame[frameIndex].GetData());
+			samplerDirty.Set(frameIndex, false);
+			needsFlush = true;
+
+			if (samplerStates.GetSize() > 0)
+            {
+                sceneSrg->Bind(frameIndex, "_Samplers", 0, samplerStates.GetSize(), samplerStates.GetData());
+            }
         }
 
-        sceneSrg->FlushBindings();
+        if (textureDirty.Test(frameIndex))
+        {
+        	textureDirty.Set(frameIndex, false);
+            needsFlush = true;
+
+            if (totalTextures > 0 && texturesBySlotPerFrame[frameIndex].GetCount() > 0)
+            {
+                sceneSrg->Bind(frameIndex, "_Textures", 0, texturesBySlotPerFrame[frameIndex].GetCount(), texturesBySlotPerFrame[frameIndex].GetData());
+            }
+        }
+
+		if (needsFlush)
+		{
+			sceneSrg->FlushBindings();
+		}
     }
 
     void FRenderService::DeregisterTexture(int slot)
@@ -224,6 +242,58 @@ namespace CE
         totalTextures--;
 
         textureDirty.Set();
+    }
+
+    int FRenderService::FindOrCreateSampler(RHI::FilterMode filterMode, RHI::SamplerAddressMode addressU,
+	    RHI::SamplerAddressMode addressV, RHI::SamplerBorderColor borderColor)
+    {
+		if (addressU == SamplerAddressMode::ClampToBorder || addressV == SamplerAddressMode::ClampToBorder)
+        {
+            if (borderColor == SamplerBorderColor::FloatTransparentBlack || borderColor == SamplerBorderColor::IntTransparentBlack)
+            {
+                borderColor = SamplerBorderColor::FloatTransparentBlack;
+            }
+            else if (borderColor == SamplerBorderColor::FloatOpaqueBlack || borderColor == SamplerBorderColor::IntOpaqueBlack)
+            {
+                borderColor = SamplerBorderColor::FloatOpaqueBlack;
+            }
+            else
+            {
+                borderColor = SamplerBorderColor::FloatOpaqueWhite;
+            }
+        }
+        else
+        {
+			borderColor = SamplerBorderColor::FloatTransparentBlack;
+        }
+
+        FSampleState state{};
+		state.filterMode = filterMode;
+		state.addressU = addressU;
+		state.addressV = addressV;
+        state.borderColor = borderColor;
+
+        if (samplerIndicesByState.KeyExists(state))
+        {
+            return samplerIndicesByState[state];
+		}
+
+		RHI::SamplerDescriptor desc{};
+		desc.samplerFilterMode = filterMode;
+		desc.addressModeU = addressU;
+		desc.addressModeV = addressV;
+        desc.addressModeW = SamplerAddressMode::Repeat;
+		desc.borderColor = borderColor;
+
+        RHI::Sampler* sampler = RPISystem::Get().FindOrCreateSampler(desc);
+		int samplerIndex = (int)samplerStates.GetSize();
+
+        samplerStates.Add(sampler);
+		samplerIndicesByState[state] = samplerIndex;
+
+		samplerDirty.Set();
+
+        return samplerIndex;
     }
 
     void FRenderService::UpdateDrawListMask(RHI::DrawListMask& drawListMask)

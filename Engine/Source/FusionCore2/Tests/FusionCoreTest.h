@@ -57,6 +57,10 @@ namespace RenderingTests
 				FGradientKey(1.00f, Color(0.10f, 0.00f, 0.90f)), // electric indigo
 			};
 
+			FBrush hsvColorMap("res:/Images/HSVColorMap.png");
+			hsvColorMap.SetImageFit(FImageFit::Fill);
+			hsvColorMap.SetBrushTiling(FBrushTiling::None);
+
 			Child(
 				FAssignNew(FVerticalStack, vstack)
 				.ContentHAlign(HAlign::Fill)
@@ -282,7 +286,7 @@ namespace RenderingTests
 					.Name("Bar_3"),
 
 					FAssignNew(CustomWidget, bar4)
-					.Background(colors[colorIdx])
+					.Background(hsvColorMap)
 					.Height(30),
 
 					FNew(FWidget)

@@ -38,6 +38,20 @@ namespace CE
         }
     }
 
+    FResolvedImage FImageService::ResolveImage(const Name& imageName)
+    {
+		String imagePath = imageName.GetString();
+
+        auto imageItem = imageAtlas->FindImage(imageName);
+
+        if (imageItem.IsValid())
+        {
+            return FResolvedImage{ imageItem.textureSlot, imageItem.uvMin, imageItem.uvMax };
+        }
+
+        return {};
+    }
+
     void FImageService::LoadImageResources()
     {
         IO::Path engineResourcesDir = PlatformDirectories::GetLaunchDir() / "Engine/Resources";

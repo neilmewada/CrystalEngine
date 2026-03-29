@@ -776,10 +776,28 @@ namespace CE
 			break;
 		case FBrushStyle::Image:
 			{
+				FImageService* imageService = FApplication::Get()->GetService<FImageService>().Get();
+				FResolvedImage resolvedImage = imageService->ResolveImage(currentBrush.GetImageName());
+				if (!resolvedImage.IsValid())
+				{
+					break;
+				}
+
+				Vec2 brushSize = currentBrush.GetBrushSize();
+				Vec2 brushPos = currentBrush.GetBrushPosition();
+				FImageFit imageFit = currentBrush.GetImageFit();
+				FBrushTiling tiling = currentBrush.GetBrushTiling();
+
+				bool tiledY = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileY;
+				bool tiledX = tiling == FBrushTiling::TileXY || tiling == FBrushTiling::TileX;
+				bool autoSizeX = brushSize.x < 0;
+				bool autoSizeY = brushSize.y < 0;
+
 				FUIDrawItem drawItem{};
 				drawItem.clipRectIndex = GetCurrentClipIndex();
-				drawItem.shaderType = FUIShaderType::SolidColor;
-				drawItem.textureIndex = 0;
+				drawItem.shaderType = FUIShaderType::Texture;
+				drawItem.textureIndex = resolvedImage.textureSlot;
+
 				// TODO: Add support for images
 				
 				drawItemIndex = drawList->AddDrawItem(drawItem);

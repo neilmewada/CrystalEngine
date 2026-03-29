@@ -2,6 +2,18 @@
 
 namespace CE
 {
+    struct FResolvedImage
+    {
+        int textureSlot = -1;
+        Vec2 uvMin = Vec2(0, 0);
+    	Vec2 uvMax = Vec2(1, 1);
+
+        bool IsValid() const
+        {
+			return textureSlot >= 0;
+        }
+    };
+
     CLASS(Config = Engine)
     class FUSIONCORE_API FImageService : public FService
     {
@@ -18,6 +30,9 @@ namespace CE
         
     public:
 
+        // - Public API -
+
+        FResolvedImage ResolveImage(const Name& imageName);
 
     private:
 

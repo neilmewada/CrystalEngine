@@ -907,6 +907,58 @@ namespace CE::Vulkan
 		return true;
 	}
 
+	bool ShaderResourceGroup::Bind(Name name, u32 firstArrayElement, u32 count, RHI::Sampler** samplers)
+	{
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+		{
+			Bind(i, name, firstArrayElement, count, samplers);
+		}
+
+		return true;
+	}
+
+	bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::Sampler** samplers)
+	{
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+		int i = imageIndex;
+
+		List<VkDescriptorImageInfo> infos{};
+		infos.Reserve(count);
+		for (int j = 0; j < count; j++)
+		{
+			Vulkan::Sampler* sampler = (Vulkan::Sampler*)samplers[j];
+
+			VkDescriptorImageInfo imageWrite{};
+			imageWrite.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			imageWrite.imageView = VK_NULL_HANDLE;
+			imageWrite.sampler = sampler ? sampler->GetVkHandle() : VK_NULL_HANDLE;
+
+			infos.Add(imageWrite);
+		}
+
+		auto& ranges = imageInfosBoundBySlot[i][bindingSlot];
+		for (auto& range : ranges)
+		{
+			if (range.firstArrayElement == firstArrayElement)
+			{
+				range.imageInfos = infos;
+				needsRecompile = true;
+				return true;
+			}
+		}
+
+		ranges.Add(ImageBindRange{ firstArrayElement, infos });
+		needsRecompile = true;
+
+		return true;
+	}
+
 	bool ShaderResourceGroup::Bind(Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures)
 	{
 		if (!bindingSlotsByVariableName.KeyExists(name))

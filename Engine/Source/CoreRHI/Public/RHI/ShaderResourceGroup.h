@@ -34,6 +34,9 @@ namespace CE::RHI
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::TextureView** textureViews) = 0;
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::Sampler** samplers) = 0;
 
+		virtual bool Bind(Name name, u32 firstArrayElement, u32 count, RHI::Sampler** samplers) = 0;
+		virtual bool Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::Sampler** samplers) = 0;
+
 		virtual bool Bind(Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures) = 0;
 		virtual bool Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures) = 0;
 		virtual bool Bind(Name name, u32 firstArrayElement, u32 count, RHI::TextureView** textureViews) = 0;

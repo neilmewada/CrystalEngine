@@ -98,6 +98,9 @@ namespace CE::Vulkan
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::TextureView** textureViews) override;
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::Sampler** samplers) override;
 
+		virtual bool Bind(Name name, u32 firstArrayElement, u32 count, RHI::Sampler** samplers) override;
+		virtual bool Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::Sampler** samplers) override;
+
 		virtual bool Bind(Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures) override;
 		virtual bool Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::Texture** textures) override;
 		virtual bool Bind(Name name, u32 firstArrayElement, u32 count, RHI::TextureView** textureViews) override;

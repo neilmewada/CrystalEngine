@@ -451,6 +451,46 @@ namespace CE::Metal
         return true;
     }
 
+    bool ShaderResourceGroup::Bind(Name name, u32 firstArrayElement, u32 count, RHI::Sampler** samplers)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
+
+        for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+        {
+            Bind(i, name, firstArrayElement, count, samplers);
+        }
+
+        return true;
+    }
+
+    bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 firstArrayElement, u32 count, RHI::Sampler** samplers)
+    {
+        if (!bindingSlotsByVariableName.KeyExists(name))
+            return false;
+
+        int bindingSlot = bindingSlotsByVariableName[name];
+        if (bindingSlot < 0)
+            return false;
+
+        auto& samplerList = boundSamplersBySlot[imageIndex][bindingSlot];
+
+        // Grow the list to accommodate firstArrayElement + count if needed
+        while ((int)samplerList.GetSize() < (int)(firstArrayElement + count))
+        {
+            samplerList.Add(nullptr);
+        }
+
+        for (int j = 0; j < count; j++)
+        {
+            samplerList[firstArrayElement + j] = (Metal::Sampler*)samplers[j];
+        }
+
+        needsFlush = true;
+
+        return true;
+    }
+
     void ShaderResourceGroup::MtlUseResources(id<MTLComputeCommandEncoder> mtlComputeEncoder, int frameIndex)
     {
         for (const auto& [binding, boundBuffers] : boundBuffersBySlot[frameIndex])

@@ -15,6 +15,7 @@ namespace CE
     public:
 
         static constexpr u32 MaxTextureCount = 100'000;
+		static constexpr u32 MaxSamplerCount = 16;
 
         const RHI::ShaderResourceGroupLayout& GetSubPassSrgLayout() const { return subPassSrgLayout; }
 
@@ -52,6 +53,10 @@ namespace CE
         int RegisterTexture(StaticArray<RHI::Texture*, RHI::Limits::MaxSwapChainImageCount> rhiTexture);
 
         void DeregisterTexture(int slot);
+
+        // - Acquire Sampler -
+
+		int FindOrCreateSampler(RHI::FilterMode filterMode, RHI::SamplerAddressMode addressU, RHI::SamplerAddressMode addressV, RHI::SamplerBorderColor borderColor);
 
     protected:
 
@@ -106,6 +111,8 @@ namespace CE
 
         HashMap<FSampleState, int> samplerIndicesByState;
 
+        Array<RHI::Sampler*> samplerStates;
+
         // - Texture -
 
         using FTextureArray = StableDynamicArray<RHI::Texture*, 256, false>;
@@ -115,6 +122,7 @@ namespace CE
         FSlotArray freeSlots;
         int totalTextures = 0;
         BitSet<RHI::Limits::MaxSwapChainImageCount> textureDirty;
+        BitSet<RHI::Limits::MaxSwapChainImageCount> samplerDirty;
 
     };
     
