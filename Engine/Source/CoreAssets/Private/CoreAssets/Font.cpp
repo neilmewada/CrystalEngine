@@ -15,6 +15,32 @@ namespace CE
 		atlas.Free();
 	}
 
+	CAFontAtlas::CAFontAtlas(CAFontAtlas&& move) noexcept
+	{
+		atlas = std::move(move.atlas);
+		glyphInfos = std::move(move.glyphInfos);
+		metrics = move.metrics;
+
+		move.atlas.allocated = false;
+		move.atlas.data = nullptr;
+	}
+
+	CAFontAtlas& CAFontAtlas::operator=(CAFontAtlas&& move) noexcept
+	{
+		if (this != &move)
+		{
+			atlas.Free();
+			atlas = std::move(move.atlas);
+			glyphInfos = std::move(move.glyphInfos);
+			metrics = move.metrics;
+
+			move.atlas.allocated = false;
+			move.atlas.data = nullptr;
+		}
+
+		return *this;
+	}
+
 	CAFontAtlas* CAFontAtlas::GenerateFromFontFile(const IO::Path& filePath, const CAFontAtlasGenerateInfo& generateInfo)
 	{
 		const String filePathName = filePath.GetString();

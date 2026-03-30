@@ -41,9 +41,14 @@ namespace CE
     
     class COREASSETS_API CAFontAtlas final
     {
+		CE_NO_COPY(CAFontAtlas);
     public:
 
         ~CAFontAtlas();
+
+		CAFontAtlas(CAFontAtlas&& move) noexcept;
+
+		CAFontAtlas& operator=(CAFontAtlas&& move) noexcept;
 
         static CAFontAtlas* GenerateFromFontFile(const IO::Path& filePath, const CAFontAtlasGenerateInfo& generateInfo);
 
@@ -54,6 +59,8 @@ namespace CE
         inline const CAFontMetrics& GetMetrics() const { return metrics; }
 
     private:
+
+		CAFontAtlas() = default;
 
         CAImage atlas{};
 
