@@ -55,7 +55,7 @@ Shader "Error"
 
             HLSLPROGRAM
 
-            #include "OpaqueIncludes.hlsli"
+            #include "StandardIncludes.hlsli"
 
             struct VSInput
             {
