@@ -23,7 +23,7 @@ Shader "PBR/Standard"
 
             HLSLPROGRAM
             
-            #include "OpaqueIncludes.hlsli"
+            #include "StandardIncludes.hlsli"
 
             struct VSInput
             {
