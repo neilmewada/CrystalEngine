@@ -191,6 +191,32 @@ namespace CE::RPI
 		return false;
 	}
 
+	void StaticMeshFeatureProcessor::CollectTlasInstances(Array<RHI::RayTracingTlasInstance>& outInstances)
+	{
+		u32 instanceID = 0;
+
+		for (const ModelDataInstance& instance : modelInstances)
+		{
+			if (!instance.flags.initialized || !instance.flags.visible)
+				continue;
+			if (!instance.model || instance.model->GetModelLodCount() == 0)
+				continue;
+
+			ModelLod* lod = instance.model->GetModelLod(0);
+			if (!lod || !lod->GetBlas())
+				continue;
+
+			RHI::RayTracingTlasInstance tlasInstance{};
+			tlasInstance.instanceID = instanceID++;
+			tlasInstance.hitGroupIndex = 0;
+			tlasInstance.instanceMask = 0xFF;
+			tlasInstance.transform = instance.localToWorldTransform;
+			tlasInstance.transparent = false;
+			tlasInstance.blas = lod->GetBlas();
+			outInstances.Add(tlasInstance);
+		}
+	}
+
 	void StaticMeshFeatureProcessor::Simulate(const SimulatePacket& packet)
 	{
 		ZoneScoped;

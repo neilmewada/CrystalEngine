@@ -6,7 +6,9 @@ namespace CE::Vulkan
 		: RHI::RayTracingTlas(desc)
 		, device(device)
 	{
-		instanceCount = desc.instances.GetSize();
+		return;
+
+		instanceCount = desc.initialInstances.GetSize();
 
 		const VkPhysicalDeviceAccelerationStructurePropertiesKHR& accelProps = device->GetAccelerationStructureProperties();
 
@@ -16,7 +18,7 @@ namespace CE::Vulkan
 			Array<VkAccelerationStructureInstanceKHR> instanceData{};
 			instanceData.Reserve(instanceCount);
 
-			for (const auto& instance : desc.instances)
+			for (const RHI::RayTracingTlasInstance& instance : desc.initialInstances)
 			{
 				VkAccelerationStructureDeviceAddressInfoKHR addrInfo{};
 				addrInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
@@ -97,6 +99,13 @@ namespace CE::Vulkan
 
 		scratchBuffer = new Vulkan::Buffer(device, scratchBufferDesc);
 
+		RHI::BufferDescriptor tlasBufferDesc{};
+		tlasBufferDesc.name = "TLAS Buffer";
+		tlasBufferDesc.bindFlags = BufferBindFlags::StructuredBuffer | RHI::BufferBindFlags::RayTracingAccelerationStructure;
+		tlasBufferDesc.bufferSize = buildSizesInfo.accelerationStructureSize;
+
+		tlasBuffer = (Vulkan::Buffer*)RHI::gDynamicRHI->CreateBuffer(tlasBufferDesc);
+
 		VkAccelerationStructureCreateInfoKHR accelerationStructureCreateInfo{};
 		accelerationStructureCreateInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
 		accelerationStructureCreateInfo.pNext = nullptr;
@@ -128,4 +137,39 @@ namespace CE::Vulkan
 		delete tlasBuffer; tlasBuffer = nullptr;
 		delete scratchBuffer; scratchBuffer = nullptr;
 	}
+
+	void RayTracingTlas::SetInstances(u32 numInstances, RayTracingTlasInstance* instances)
+	{
+		return;
+
+		Array<VkAccelerationStructureInstanceKHR> instanceData{};
+		instanceCount = numInstances;
+
+		instanceData.Reserve(instanceCount);
+
+		for (int i = 0; i < numInstances; i++)
+		{
+			const RayTracingTlasInstance& instance = instances[i];
+
+			VkAccelerationStructureDeviceAddressInfoKHR addrInfo{};
+			addrInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
+			addrInfo.accelerationStructure = static_cast<Vulkan::RayTracingBlas*>(instance.blas)->GetAccelerationStructure()->GetHandle();
+
+			u64 blasDeviceAddress = device->vkGetAccelerationStructureDeviceAddressKHR(device->GetHandle(), &addrInfo);
+
+			VkAccelerationStructureInstanceKHR& instanceInfo = instanceData.EmplaceBack();
+			instanceInfo.mask = instance.instanceMask;
+			instanceInfo.instanceCustomIndex = instance.instanceID;
+
+			memcpy(instanceInfo.transform.matrix[0], instance.transform.rows[0].xyzw, sizeof(float) * 4);
+			memcpy(instanceInfo.transform.matrix[1], instance.transform.rows[1].xyzw, sizeof(float) * 4);
+			memcpy(instanceInfo.transform.matrix[2], instance.transform.rows[2].xyzw, sizeof(float) * 4);
+
+			instanceInfo.accelerationStructureReference = blasDeviceAddress;
+			instanceInfo.flags = instance.transparent ? VK_GEOMETRY_INSTANCE_FORCE_NO_OPAQUE_BIT_KHR : 0;
+
+			instanceInfo.instanceShaderBindingTableRecordOffset = instance.hitGroupIndex;
+		}
+	}
+
 } // namespace CE::Vulkan

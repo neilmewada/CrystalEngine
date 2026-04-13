@@ -106,6 +106,10 @@ namespace CE::RPI
 		RPI::Texture* skyboxCubeMap = nullptr;
 		RPI::Texture* skyboxIrradiance = nullptr;
 
+		// Ray Tracing
+		RHI::RayTracingTlas* sceneTlas = nullptr;
+		Array<RHI::RayTracingTlasInstance> tlasInstances{};
+
 		// - Temporary Lighting data -
 
 		LightConstants lightConstants{};

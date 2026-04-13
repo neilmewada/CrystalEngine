@@ -57,7 +57,7 @@ namespace CE::RHI
 
     struct RayTracingTlasDescriptor
     {
-		Array<RayTracingTlasInstance> instances;
+		Array<RayTracingTlasInstance> initialInstances;
 
     };
 
@@ -70,6 +70,8 @@ namespace CE::RHI
 		{}
 
     public:
+
+        virtual void SetInstances(u32 numInstances, RayTracingTlasInstance* instances) = 0;
 
     protected:
 

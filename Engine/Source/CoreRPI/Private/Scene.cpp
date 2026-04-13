@@ -8,6 +8,10 @@ namespace CE::RPI
 		if (RPISystem::Get().isInitialized && RHI::gDynamicRHI != nullptr)
 		{
 			RPISystem::Get().scenes.Add(this);
+
+			RHI::RayTracingTlasDescriptor tlasDesc{};
+
+			sceneTlas = RHI::gDynamicRHI->CreateRayTracingTlas(tlasDesc);
 		}
 	}
 
@@ -283,6 +287,17 @@ namespace CE::RPI
 		// Enqueue draw packets to views
 
 		CollectDrawPackets();
+
+		// TLAS
+
+		tlasInstances.Clear();
+
+		if (Ref<StaticMeshFeatureProcessor> fp = GetFeatureProcessor<StaticMeshFeatureProcessor>())
+		{
+			fp->CollectTlasInstances(tlasInstances);
+		}
+
+		sceneTlas->SetInstances(tlasInstances.GetSize(), tlasInstances.GetData());
 	}
 
 	void Scene::SubmitDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex)

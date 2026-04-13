@@ -14,6 +14,8 @@ namespace CE::Vulkan
 
 		RayTracingAccelerationStructure* GetAccelerationStructure() const { return accelerationStructure; }
 
+        void SetInstances(u32 numInstances, RayTracingTlasInstance* instances) override;
+
     private:
 
         VulkanDevice* device = nullptr;
