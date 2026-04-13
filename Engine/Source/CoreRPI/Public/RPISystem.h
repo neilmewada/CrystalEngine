@@ -95,6 +95,7 @@ namespace CE::RPI
 		RPI::Texture* FindBuiltinTexture(const Name& name);
 
 		void EnqueueBlasBuild(ModelLod* lod);
+		void EnqueueTlasBuild(RHI::RayTracingTlas* tlas);
 
 	private:
 
@@ -123,10 +124,11 @@ namespace CE::RPI
 		RHI::DrawLinearArguments quadDrawArgs{};
 
 		// - Blas -
+		Array<RHI::RayTracingTlas*> tlasBuilds;
 		Array<Ptr<ModelLod>> blasBuilds;
-		RHI::CommandQueue* blasCommandQueue = nullptr;
-		RHI::CommandList* blasCommandList = nullptr;
-		RHI::Fence* blasFence = nullptr;
+		RHI::CommandQueue* rtCommandQueue = nullptr;
+		RHI::CommandList* rtCommandList = nullptr;
+		RHI::Fence* rtFence = nullptr;
 
 		Array<RHI::VertexBufferView> textQuadVertexBufferViews{};
 		RHI::DrawLinearArguments textQuadDrawArgs{};

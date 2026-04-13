@@ -69,6 +69,8 @@ namespace CE::RPI
 		ModelHandle AcquireMesh(const ModelHandleDescriptor& modelHandleDescriptor, RPI::Material* defaultMaterial);
 		bool ReleaseMesh(ModelHandle& handle);
 
+		void CollectTlasInstances(Array<RHI::RayTracingTlasInstance>& outInstances);
+
 		void Simulate(const SimulatePacket& packet) override;
 
 		void Render(const RenderPacket& packet) override;

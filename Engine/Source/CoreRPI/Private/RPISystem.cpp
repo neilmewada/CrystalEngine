@@ -99,10 +99,10 @@ namespace CE::RPI
             isRayTracingEnabled = true;
 
             Array<CommandQueue*> queues = RHI::gDynamicRHI->GetHardwareQueues(HardwareQueueClass::Graphics);
-            blasCommandQueue = queues[0];
+            rtCommandQueue = queues[0];
 
-			blasCommandList = RHI::gDynamicRHI->AllocateCommandList(blasCommandQueue);
-			blasFence = RHI::gDynamicRHI->CreateFence(false);
+			rtCommandList = RHI::gDynamicRHI->AllocateCommandList(rtCommandQueue);
+			rtFence = RHI::gDynamicRHI->CreateFence(false);
         }
     }
 
@@ -283,15 +283,15 @@ namespace CE::RPI
         standardShader = nullptr;
         isInitialized = false;
 
-        if (blasCommandList)
+        if (rtCommandList)
         {
-            RHI::gDynamicRHI->FreeCommandLists(1, &blasCommandList);
-			blasCommandList = nullptr;
+            RHI::gDynamicRHI->FreeCommandLists(1, &rtCommandList);
+			rtCommandList = nullptr;
         }
-        if (blasFence)
+        if (rtFence)
         {
-            RHI::gDynamicRHI->DestroyFence(blasFence);
-			blasFence = nullptr;
+            RHI::gDynamicRHI->DestroyFence(rtFence);
+			rtFence = nullptr;
         }
 
         for (const auto& [builtinTag, drawListTag] : builtinDrawTags)
@@ -378,19 +378,26 @@ namespace CE::RPI
 
         currentTime = GetCurrentTime();
 
-		if (blasBuilds.GetSize() > 0 && blasCommandList && blasFence)
+        // - Blas Builds -
+
+		if (blasBuilds.GetSize() > 0 && rtCommandList && rtFence)
         {
-            blasCommandList->Begin();
+            rtCommandList->Begin();
             {
                 for (ModelLod* lod : blasBuilds)
                 {
-                    blasCommandList->BuildBlas(lod->GetBlas());
+                    rtCommandList->BuildBlas(lod->GetBlas());
+                }
+
+                for (RHI::RayTracingTlas* tlas : tlasBuilds)
+                {
+                    rtCommandList->BuildTlas(tlas);
                 }
             }
-            blasCommandList->End();
+            rtCommandList->End();
             
-            blasCommandQueue->Execute(1, &blasCommandList, blasFence);
-            blasFence->WaitForFence();
+            rtCommandQueue->Execute(1, &rtCommandList, rtFence);
+            rtFence->WaitForFence();
             blasBuilds.Clear();
         }
 
@@ -492,6 +499,11 @@ namespace CE::RPI
     void RPISystem::EnqueueBlasBuild(ModelLod* lod)
     {
         blasBuilds.Add(lod);
+    }
+
+    void RPISystem::EnqueueTlasBuild(RHI::RayTracingTlas* tlas)
+    {
+        tlasBuilds.Add(tlas);
     }
 
     void RPISystem::CreateDefaultTextures()

@@ -26,7 +26,7 @@ namespace CE
 		scene->SetSkyboxCubeMap(skybox.Get());
 
 		// NOTE: You need to manually download and place the Sponza assets in the below path for this to work
-		// TODO: Download the assets from here: https://www.intel.com/content/www/us/en/developer/topic-technology/graphics-research/samples.html
+		// Download the assets from here: https://www.intel.com/content/www/us/en/developer/topic-technology/graphics-research/samples.html
 		// and place them in the Engine/Assets/Sponza/ folder
 		Ref<CE::StaticMesh> sponzaMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Engine/Assets/Sponza/NewSponza_Main_Yup_003");
 		if (sponzaMesh.IsNull())

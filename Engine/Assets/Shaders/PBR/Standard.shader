@@ -16,15 +16,12 @@ Shader "PBR/Standard"
 
     SubShader
     {
-        Tags {
-            "Blend" = "SrcAlpha,OneMinusSrcAlpha"
-        }
 
         Pass
         {
             Name "Depth"
             Tags {
-                "Vertex"="VertMain", "DrawListTag"="depth"
+                "Vertex"="VertMain", "DrawListTag"="depth", "Blend" = "SrcAlpha,OneMinusSrcAlpha"
             }
             ZWrite On
             ZTest LEqual
@@ -40,7 +37,7 @@ Shader "PBR/Standard"
         {
             Name "Shadow"
             Tags {
-                "Vertex"="VertMain", "DrawListTag"="shadow"
+                "Vertex"="VertMain", "DrawListTag"="shadow", "Blend" = "SrcAlpha,OneMinusSrcAlpha"
             }
             ZWrite On
             ZTest LEqual
@@ -57,7 +54,7 @@ Shader "PBR/Standard"
         {
             Name "Opaque"
             Tags { 
-                "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="opaque"
+                "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="opaque", "Blend" = "SrcAlpha,OneMinusSrcAlpha"
             }
             ZWrite Off
             ZTest LEqual
@@ -66,6 +63,22 @@ Shader "PBR/Standard"
             HLSLPROGRAM
             
             #include "Opaque.hlsli"
+
+            ENDHLSL
+        }
+
+        HitGroup
+        {
+            Name "RayHit"
+            Tags
+            {
+                "ClosestHit" = "ClosestHitMain"
+                "AnyHit"     = "AnyHitMain"
+                "RayTypes"   = "primary,shadow"
+            }
+            HLSLPROGRAM
+            
+            
 
             ENDHLSL
         }
