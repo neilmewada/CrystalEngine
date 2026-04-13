@@ -57,6 +57,8 @@ namespace CE::RPI
 
 		RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
 
+		RayTracingScene* GetRayTracingScene() const { return rtScene; }
+
 		RHI::DrawListMask& GetDrawListMask(SceneViewTag viewTag);
 
 		LightConstants& GetLightConstants() { return lightConstants; }
@@ -107,6 +109,7 @@ namespace CE::RPI
 		RPI::Texture* skyboxIrradiance = nullptr;
 
 		// Ray Tracing
+		RayTracingScene* rtScene = nullptr;
 		RHI::RayTracingTlas* sceneTlas = nullptr;
 		Array<RHI::RayTracingTlasInstance> tlasInstances{};
 

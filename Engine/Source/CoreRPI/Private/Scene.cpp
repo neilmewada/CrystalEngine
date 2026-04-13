@@ -9,9 +9,10 @@ namespace CE::RPI
 		{
 			RPISystem::Get().scenes.Add(this);
 
-			RHI::RayTracingTlasDescriptor tlasDesc{};
-
-			sceneTlas = RHI::gDynamicRHI->CreateRayTracingTlas(tlasDesc);
+			if (RHI::gDynamicRHI->GetDeviceLimits()->IsRayTracingSupported())
+			{
+				rtScene = new RayTracingScene();
+			}
 		}
 	}
 
@@ -35,6 +36,8 @@ namespace CE::RPI
 			fp->BeginDestroy();
 		}
 		featureProcessors.Clear();
+
+		delete rtScene; rtScene = nullptr;
 
 		RPISystem::Get().scenes.Remove(this);
 	}

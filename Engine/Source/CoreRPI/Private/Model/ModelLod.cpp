@@ -87,7 +87,7 @@ namespace CE::RPI
 		if (RPISystem::Get().IsRayTracingEnabled() && blas == nullptr)
 		{
 			RHI::RayTracingBlasDescriptor blasDesc{};
-			blasDesc.buildFlags = RHI::RayTracingBuildFlags::FastTrace;
+			blasDesc.buildFlags = RHI::RayTracingBuildFlags::FastTrace | RHI::RayTracingBuildFlags::AllowUpdate;
 			blasDesc.geometries.Reserve(meshes.GetSize());
 
 			for (const RPI::Mesh& mesh : meshes)
