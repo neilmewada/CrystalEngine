@@ -138,7 +138,7 @@ namespace CE::Editor
 					L"-D", L"FRAGMENT=1",
 					L"-fspv-preserve-bindings",
 					L"-fspv-debug=vulkan-with-source"
-					});
+				});
 
 				result = compiler.BuildSpirv(passEntry.source.GetDataPtr(), (u32)passEntry.source.GetDataSize(), buildConfig, fragBlob->byteCode, fragmentExtraArgs);
 				if (result != ShaderCompiler::ERR_Success)
@@ -158,6 +158,51 @@ namespace CE::Editor
 				// Clear the original HLSL source
 				passEntry.source.Free();
 				passIndex++;
+			}
+
+			for (const SubShaderHitGroupEntry& hitGroup : subShaderEntry.hitGroups)
+			{
+				ShaderCompiler compiler{};
+
+				// HitGroup block (new):
+				ShaderBuildConfig rtConfig{};
+				rtConfig.stage = RHI::ShaderStage::Library;
+				rtConfig.includeSearchPaths = includePaths;
+				rtConfig.debugName = preprocessData.shaderName.GetString();
+
+				subShader.hitGroups.Add({});
+				ShaderHitGroup& hitGroupData = subShader.hitGroups.GetLast();
+				hitGroupData.variants.Add({});
+				
+				CE::ShaderVariant& variant = hitGroupData.variants.GetLast();
+				variant.variantHash = 0;
+				variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader.Get(), String("HitGroup")));
+				ShaderBlob* blob = variant.shaderStageBlobs.GetLast();
+
+				Array<std::wstring> extraArgs{};
+				extraArgs.AddRange({
+					L"-D", L"COMPILE=1",
+					L"-D", L"RAYHIT=1",
+					L"-fspv-preserve-bindings",
+					L"-fspv-debug=vulkan-with-source"
+				});
+
+				ShaderCompiler::ErrorCode result = compiler.BuildSpirv(hitGroup.source.GetDataPtr(), (u32)hitGroup.source.GetDataSize(), rtConfig, blob->byteCode, extraArgs);
+				if (result != ShaderCompiler::ERR_Success)
+				{
+					errorMessage = "Failed to compile Hit Group shader. Error: " + compiler.GetErrorMessage();
+					return false;
+				}
+
+				ShaderReflector shaderReflector{};
+
+				ShaderReflector::ErrorCode reflectionResult = 
+					shaderReflector.ReflectSpirv(blob->byteCode.GetDataPtr(), blob->byteCode.GetDataSize(), ShaderStage::Library, variant.reflectionInfo, "");
+				if (reflectionResult != ShaderReflector::ERR_Success)
+				{
+					errorMessage = "Failed to reflect Hit Group shader. Error: " + compiler.GetErrorMessage();
+					return false;
+				}
 			}
 		}
 		

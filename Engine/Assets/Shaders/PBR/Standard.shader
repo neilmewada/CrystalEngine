@@ -73,12 +73,20 @@ Shader "PBR/Standard"
             Tags
             {
                 "ClosestHit" = "ClosestHitMain"
-                "AnyHit"     = "AnyHitMain"
-                "RayTypes"   = "primary,shadow"
             }
+
             HLSLPROGRAM
+
+            struct RayPayload
+            {
+                float4 color;
+            };
             
-            
+            [shader("closesthit")]
+            void ClosestHitMain(inout RayPayload payload, BuiltInTriangleIntersectionAttributes attr)
+            {
+                payload.color = float4(1.0, 1.0, 1.0, 1.0);
+            }
 
             ENDHLSL
         }

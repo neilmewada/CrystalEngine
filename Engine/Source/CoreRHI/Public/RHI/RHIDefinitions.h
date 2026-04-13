@@ -339,6 +339,7 @@ namespace CE::RHI
 		Tessellation = BIT(2),
 		Geometry = BIT(3),
         Compute = BIT(4),
+        Library = BIT(5),
 
 		Default = Vertex | Fragment,
 		All = Vertex | Fragment | Tessellation | Geometry,

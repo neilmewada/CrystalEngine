@@ -822,7 +822,10 @@ namespace CE
 
 		std::wstring entryName = ToWString(config.entry);
 
-		wcharArgs.AddRange({ L"-E", entryName.data() });
+		if (buildConfig.stage != RHI::ShaderStage::Library)
+		{
+			wcharArgs.AddRange({ L"-E", entryName.data() });
+		}
 
 		if (buildConfig.stage == RHI::ShaderStage::Vertex)
 		{
@@ -835,6 +838,11 @@ namespace CE
 		else if (buildConfig.stage == RHI::ShaderStage::Compute)
 		{
 			wcharArgs.AddRange({ L"-T", L"cs_6_0" });
+		}
+		else if (buildConfig.stage == RHI::ShaderStage::Library)
+		{
+			wcharArgs.AddRange({ L"-T", L"lib_6_6" });
+			wcharArgs.Add(L"-fspv-target-env=vulkan1.2");
 		}
 		else
 		{
