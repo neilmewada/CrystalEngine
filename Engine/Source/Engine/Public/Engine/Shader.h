@@ -103,6 +103,23 @@ namespace CE
 	};
 
 	STRUCT()
+	struct ENGINE_API ShaderHitGroup
+	{
+		CE_STRUCT(ShaderHitGroup)
+	public:
+
+		FIELD()
+		Array<ShaderTagEntry> tags{};
+
+		FIELD()
+		Array<CE::ShaderVariant> variants{};
+
+		FIELD()
+		BinaryBlob hlslSource{};
+
+	};
+
+	STRUCT()
 	struct ENGINE_API SubShader
 	{
 		CE_STRUCT(SubShader)
@@ -113,6 +130,9 @@ namespace CE
 
 		FIELD()
 		Array<ShaderPass> passes{};
+
+		FIELD()
+		Array<ShaderHitGroup> hitGroups{};
 
 		inline bool TagExists(const Name& key) const
 		{

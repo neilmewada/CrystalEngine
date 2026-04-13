@@ -47,6 +47,7 @@ namespace CE
 		curScope = SCOPE_NONE;
 
 		int passIndex = 0;
+		int hitGroupIndex = 0;
 
 		defer(&)
 		{
@@ -260,7 +261,7 @@ namespace CE
 				preprocessData->subShaders.Add({});
 				curScope = SCOPE_SUBSHADER;
 			}
-			else if ((lastScope == SCOPE_SUBSHADER || lastScope == SCOPE_PASS) && curToken.token == TK_KW_TAGS)
+			else if ((lastScope == SCOPE_SUBSHADER || lastScope == SCOPE_PASS || lastScope == SCOPE_HITGROUP) && curToken.token == TK_KW_TAGS)
 			{
 				curScope = SCOPE_TAGS;
 			}
@@ -270,6 +271,11 @@ namespace CE
 				{
 					preprocessData->subShaders.Top().passes.Add({});
 					curScope = SCOPE_PASS;
+				}
+				else if (curToken.token == TK_KW_HITGROUP)
+				{
+					preprocessData->subShaders.Top().hitGroups.Add({});
+					curScope = SCOPE_HITGROUP;
 				}
 				else if (curToken.token == TK_KW_ZTEST && i < tokens.GetSize() - 1)
 				{
@@ -355,6 +361,32 @@ namespace CE
 						}
 					}
 				}
+				else if (parentScope == SCOPE_HITGROUP)
+				{
+					if (curToken.token == TK_LITERAL_STRING)
+					{
+						ShaderTagEntry tag{};
+						tag.key = curToken.lexeme;
+
+						Token next{};
+						while (i < tokens.GetSize() && next.token != TK_LITERAL_STRING)
+						{
+							i++;
+							next = tokens[i];
+						}
+
+						if (next.token == TK_LITERAL_STRING)
+						{
+							tag.value = next.lexeme;
+							preprocessData->subShaders.Top().hitGroups.Top().passTags.Add(tag);
+
+							if (tag.key == "ClosestHit")
+								preprocessData->subShaders.Top().hitGroups.Top().closestHitEntry = tag.value;
+							else if (tag.key == "AnyHit")
+								preprocessData->subShaders.Top().hitGroups.Top().anyHitEntry = tag.value;
+						}
+					}
+				}
 			}
 			else if (lastScope == SCOPE_PASS)
 			{
@@ -413,6 +445,30 @@ namespace CE
 					passIndex++;
 				}
 			}
+			else if (lastScope == SCOPE_HITGROUP)
+			{
+				if (curToken.token == TK_IDENTIFIER && curToken.lexeme == "Name")
+				{
+					Token next{};
+					while (i < tokens.GetSize() && next.token != TK_LITERAL_STRING)
+					{
+						i++;
+						next = tokens[i];
+					}
+
+					if (next.token == TK_LITERAL_STRING)
+					{
+						preprocessData->subShaders.Top().hitGroups.Top().passName = next.lexeme;
+					}
+				}
+				else if (curToken.token == TK_HLSLPROGRAM)
+				{
+					BinaryBlob& source = hitGroupSources[hitGroupIndex];
+					preprocessData->subShaders.Top().hitGroups.Top().source = source;
+					//preprocessData->subShaders.Top().hitGroups.Top().features.AddRange(passPreprocessData[hitGroupIndex].features);
+					hitGroupIndex++;
+				}
+			}
 		}
 
 		return;
@@ -421,22 +477,40 @@ namespace CE
 	bool ShaderPreprocessor::Tokenize(Array<Token>& tokens)
 	{
 		passSources.Clear();
+		hitGroupSources.Clear();
 
 		while (!stream->IsOutOfBounds())
 		{
 			Token token{};
 			bool valid = ReadNextToken(token);
 
-			if (token.token == TK_HLSLPROGRAM && curPassSource != nullptr)
+			if (scopeStack.NotEmpty() && scopeStack.GetLast() == SCOPE_PASS)
 			{
-				auto data = curPassSource->GetRawDataPtr();
-				auto dataSize = curPassSource->GetLength();
-				passSources.Push({});
-				BinaryBlob& blob = passSources.Top();
-				blob.LoadData(data, dataSize);
+				if (token.token == TK_HLSLPROGRAM && curPassSource != nullptr)
+				{
+					auto data = curPassSource->GetRawDataPtr();
+					auto dataSize = curPassSource->GetLength();
+					passSources.Push({});
+					BinaryBlob& blob = passSources.Top();
+					blob.LoadData(data, dataSize);
 
-				delete curPassSource;
-				curPassSource = nullptr;
+					delete curPassSource;
+					curPassSource = nullptr;
+				}
+			}
+			else if (scopeStack.NotEmpty() && scopeStack.GetLast() == SCOPE_HITGROUP)
+			{
+				if (token.token == TK_HLSLPROGRAM && curPassSource != nullptr)
+				{
+					auto data = curPassSource->GetRawDataPtr();
+					auto dataSize = curPassSource->GetLength();
+					hitGroupSources.Push({});
+					BinaryBlob& blob = hitGroupSources.Top();
+					blob.LoadData(data, dataSize);
+
+					delete curPassSource;
+					curPassSource = nullptr;
+				}
 			}
 
 			if (valid)
@@ -573,7 +647,7 @@ namespace CE
 					outToken = Token{ TK_KW_SUBSHADER, identifier };
 					return true;
 				}
-				else if ((lastScope == SCOPE_SUBSHADER || lastScope == SCOPE_PASS) && identifier == "Tags")
+				else if ((lastScope == SCOPE_SUBSHADER || lastScope == SCOPE_PASS || lastScope == SCOPE_HITGROUP) && identifier == "Tags")
 				{
 					curScope = SCOPE_TAGS;
 					outToken = Token{ TK_KW_TAGS, identifier };
@@ -583,6 +657,12 @@ namespace CE
 				{
 					curScope = SCOPE_PASS;
 					outToken = Token{ TK_KW_PASS, identifier };
+					return true;
+				}
+				else if (lastScope == SCOPE_SUBSHADER && identifier == "HitGroup")
+				{
+					curScope = SCOPE_HITGROUP;
+					outToken = Token{ TK_KW_HITGROUP, identifier };
 					return true;
 				}
 				else if ((lastScope == SCOPE_SUBSHADER || lastScope == SCOPE_PASS) && identifier == "ZTest")
@@ -604,15 +684,24 @@ namespace CE
 				{
 					curScope = SCOPE_HLSLPROGRAM;
 					outToken = Token{ TK_HLSLPROGRAM, identifier };
-					if (curPassSource != nullptr)
-					{
-						delete curPassSource;
-					}
+					delete curPassSource; curPassSource = nullptr;
 					curPassPreprocess = {};
 					curPassSource = new MemoryStream(1024);
 					curPassSource->SetAutoResizeIncrement(1024);
 					curPassSource->SetAsciiMode(true);
 					bool result = ReadHLSLProgram();
+					return true;
+				}
+				else if (lastScope == SCOPE_HITGROUP && identifier == "HLSLPROGRAM")
+				{
+					curScope = SCOPE_HLSLPROGRAM;
+					outToken = Token{ TK_HLSLPROGRAM, identifier };
+					delete curPassSource; curPassSource = nullptr;
+					curPassPreprocess = {};
+					curPassSource = new MemoryStream(1024);
+					curPassSource->SetAutoResizeIncrement(1024);
+					curPassSource->SetAsciiMode(true);
+					ReadHLSLProgram();
 					return true;
 				}
 				else

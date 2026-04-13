@@ -67,7 +67,7 @@ namespace CE
 	};
 
 	STRUCT()
-	struct CORESHADER_API SubShaderPassEntry
+	struct CORESHADER_API SubShaderPassEntry final
 	{
 		CE_STRUCT(SubShaderPassEntry)
 	public:
@@ -110,6 +110,32 @@ namespace CE
 	};
 
 	STRUCT()
+	struct CORESHADER_API SubShaderHitGroupEntry final
+	{
+		CE_STRUCT(SubShaderHitGroupEntry)
+	public:
+
+		FIELD()
+		Name passName{};
+
+		FIELD()
+		Array<ShaderTagEntry> passTags{};
+
+		FIELD()
+		ShaderSourceLanguage language = ShaderSourceLanguage::HLSL;
+
+		FIELD()
+		Name closestHitEntry = "";
+
+		FIELD()
+		Name anyHitEntry = "";
+
+		FIELD()
+		BinaryBlob source{};
+
+	};
+
+	STRUCT()
 	struct CORESHADER_API SubShaderEntry
 	{
 		CE_STRUCT(SubShaderEntry)
@@ -120,6 +146,9 @@ namespace CE
 
 		FIELD()
 		Array<SubShaderPassEntry> passes{};
+
+		FIELD()
+		Array<SubShaderHitGroupEntry> hitGroups{};
 
 		inline bool TagExists(const Name& key) const
 		{
@@ -183,6 +212,7 @@ namespace CE
 			TK_KW_SUBSHADER,
 			TK_KW_TAGS,
 			TK_KW_PASS,
+			TK_KW_HITGROUP,
 			TK_KW_ZTEST,
 			TK_KW_ZWRITE,
 			TK_KW_PROPERTIES,
@@ -210,6 +240,7 @@ namespace CE
 			SCOPE_SUBSHADER,
 			SCOPE_TAGS,
 			SCOPE_PASS,
+			SCOPE_HITGROUP,
 			SCOPE_HLSLPROGRAM,
 			SCOPE_HLSLINCLUDE,
 		};
@@ -241,6 +272,7 @@ namespace CE
 		Token prevToken{};
 
 		Array<BinaryBlob> passSources{};
+		Array<BinaryBlob> hitGroupSources{};
 		Array<HlslPreprocessData> passPreprocessData{};
 
 		// Per HLSL program
