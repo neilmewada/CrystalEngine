@@ -76,6 +76,9 @@ namespace CE::RPI
 #include "Feature/LocalLightFeatureProcessor.h"
 #include "Feature/StaticMeshFeatureProcessor.h"
 
+// Ray Tracing
+#include "RayTracing/RayTracingScene.h"
+
 #include "Scene.h"
 
 #include "Texture.h"

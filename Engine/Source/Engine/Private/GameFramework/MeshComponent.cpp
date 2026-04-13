@@ -17,11 +17,6 @@ namespace CE
     {
 	    RPI::CustomMaterialMap materialMap{};
 
-        if (GetName() == "DebugMeshComponent")
-        {
-	        String::IsAlphabet('a');
-        }
-
         for (int lodIndex = 0; lodIndex < GetLodCount(); ++lodIndex)
         {
             for (int meshIndex = 0; meshIndex < GetLodSubMeshCount(lodIndex); meshIndex++)
@@ -119,7 +114,7 @@ namespace CE
     {
 	    Super::OnFieldEdited(fieldName);
 
-		thread_local String materialsFieldName = "materials";
+		thread_local String materialsFieldName = "materialsPerLod";
 
         if (fieldName.GetString().Contains(materialsFieldName))
         {
@@ -131,7 +126,7 @@ namespace CE
     {
 	    Super::OnFieldChanged(fieldName);
 
-        thread_local String materialsFieldName = "materials";
+        thread_local String materialsFieldName = "materialsPerLod";
 
         if (fieldName.GetString().Contains(materialsFieldName))
         {
