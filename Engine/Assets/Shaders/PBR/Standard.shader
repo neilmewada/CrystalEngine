@@ -77,10 +77,7 @@ Shader "PBR/Standard"
 
             HLSLPROGRAM
 
-            struct RayPayload
-            {
-                float4 color;
-            };
+            #include "Core/RayTracingCommon.hlsli"
             
             [shader("closesthit")]
             void ClosestHitMain(inout RayPayload payload, BuiltInTriangleIntersectionAttributes attr)
