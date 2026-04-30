@@ -199,6 +199,16 @@ namespace CE::Vulkan
 
     void VulkanRHI::GetTextureMemoryRequirements(const RHI::TextureDescriptor& desc, RHI::ResourceMemoryRequirements& outRequirements)
     {
+		ZoneScoped;
+
+		SIZE_T hash = desc.GetHash();
+		auto it = imageMemoryRequirementCache.Find(hash);
+		if (it != imageMemoryRequirementCache.End())
+		{
+			outRequirements = it->second;
+			return;
+		}
+
         VkImageCreateInfo imageCI{};
         imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         switch (desc.dimension)
@@ -276,6 +286,8 @@ namespace CE::Vulkan
         outRequirements.size = memoryRequirements.size;
         outRequirements.offsetAlignment = memoryRequirements.alignment;
         outRequirements.flags = memoryRequirements.memoryTypeBits;
+
+		imageMemoryRequirementCache[hash] = outRequirements;
         
         vkDestroyImage(device->GetHandle(), tempImage, VULKAN_CPU_ALLOCATOR);
     }
@@ -424,7 +436,7 @@ namespace CE::Vulkan
 		case RHI::Dimension::Dim2D:
 			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D;
 			break;
-		case Dimension::Dim2DArray:
+		case RHI::Dimension::Dim2DArray:
 			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
 			break;
 		case RHI::Dimension::DimCUBE:
@@ -538,7 +550,7 @@ namespace CE::Vulkan
 		case RHI::Dimension::Dim1D:
 			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_1D;
 			break;
-		case Dimension::Dim2DArray:
+		case RHI::Dimension::Dim2DArray:
 			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
 			break;
 		}

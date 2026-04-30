@@ -16,6 +16,14 @@ namespace CE::RHI
 		BufferBindFlags bindFlags{};
 
 		MemoryHeapType defaultHeapType{};
+
+		SIZE_T GetHash() const
+		{
+			SIZE_T hash = CE::GetHash(bufferSize);
+			CombineHash(hash, bindFlags);
+			CombineHash(hash, structureByteStride);
+			return hash;
+		}
 	};
 
 	class MemoryHeap;

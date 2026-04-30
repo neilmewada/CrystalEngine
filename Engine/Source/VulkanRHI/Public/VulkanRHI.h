@@ -169,6 +169,9 @@ namespace CE::Vulkan
 
         VulkanDevice* device = nullptr;
         Array<const char*> instanceExtensions{};
+
+        HashMap<SIZE_T, RHI::ResourceMemoryRequirements> bufferMemoryRequirementCache{};
+        HashMap<SIZE_T, RHI::ResourceMemoryRequirements> imageMemoryRequirementCache{};
     };
     
 } // namespace CE
