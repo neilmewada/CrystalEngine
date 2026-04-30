@@ -82,6 +82,8 @@ namespace CE::RPI
 		pipelineDesc.srgLayouts = desc.reflectionInfo.srgLayouts;
 		for (auto& srgLayout : pipelineDesc.srgLayouts)
 		{
+			// TODO: Need to come up with better way to set shader stage masks for compute shaders.
+			// The reason we need this is so we can use the same PerScene/PerView SRG for graphics and compute shaders.
 			if (srgLayout.srgType != RHI::SRGType::PerScene &&
 				srgLayout.srgType != RHI::SRGType::PerView)
 			{

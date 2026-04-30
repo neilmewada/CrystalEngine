@@ -303,7 +303,7 @@ namespace CE::RPI
 			fp->CollectTlasInstances(tlasInstances);
 		}
 
-		sceneTlas->SetInstances(tlasInstances.GetSize(), tlasInstances.GetData());
+		//sceneTlas->SetInstances(tlasInstances.GetSize(), tlasInstances.GetData());
 	}
 
 	void Scene::SubmitDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex)

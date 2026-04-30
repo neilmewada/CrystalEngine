@@ -14,6 +14,20 @@ namespace CE::RHI
 		u32 arrayLayers = 1;
 		TextureBindFlags bindFlags = TextureBindFlags::ShaderRead;
 		MemoryHeapType defaultHeapType = MemoryHeapType::Default;
+
+		SIZE_T GetHash() const
+		{
+			SIZE_T hash = CE::GetHash(format);
+			CombineHash(hash, width);
+			CombineHash(hash, height);
+			CombineHash(hash, depth);
+			CombineHash(hash, dimension);
+			CombineHash(hash, mipLevels);
+			CombineHash(hash, arrayLayers);
+			CombineHash(hash, sampleCount);
+			CombineHash(hash, bindFlags);
+			return hash;
+		}
 	};
 
     using ImageDescriptor = TextureDescriptor;

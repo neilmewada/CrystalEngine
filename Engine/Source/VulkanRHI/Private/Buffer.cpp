@@ -47,6 +47,17 @@ namespace CE::Vulkan
 
 	void VulkanRHI::GetBufferMemoryRequirements(const RHI::BufferDescriptor& bufferDesc, RHI::ResourceMemoryRequirements& outRequirements)
 	{
+		ZoneScoped;
+
+		SIZE_T hash = bufferDesc.GetHash();
+
+		auto it = bufferMemoryRequirementCache.Find(hash);
+		if (it != bufferMemoryRequirementCache.End())
+		{
+			outRequirements = it->second;
+			return;
+		}
+
 		VkBuffer tempBuffer = nullptr;
 		VkBufferCreateInfo tempBufferCI{};
 		tempBufferCI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -69,6 +80,8 @@ namespace CE::Vulkan
 		outRequirements.size = bufferRequirements.size;
 		outRequirements.offsetAlignment = bufferRequirements.alignment;
 		outRequirements.flags = bufferRequirements.memoryTypeBits;
+
+		bufferMemoryRequirementCache[hash] = outRequirements;
 		
 		vkDestroyBuffer(device->GetHandle(), tempBuffer, VULKAN_CPU_ALLOCATOR);
 	}
@@ -93,12 +106,12 @@ namespace CE::Vulkan
 		
 		bufferCI.usage = VkBufferUsageFlagsFromBufferBindFlags(desc.bindFlags) | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		
-		if (device->HasBufferDeviceAddressExt() && heapType == MemoryHeapType::Default)
+		if (device->HasBufferDeviceAddressExt() && heapType == RHI::MemoryHeapType::Default)
 		{
 			bufferCI.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 		}
 
-		if (device->HasRayTracing() && EnumHasAnyFlags(bindFlags, BufferBindFlags::VertexBuffer | BufferBindFlags::IndexBuffer))
+		if (device->HasRayTracing() && EnumHasAnyFlags(bindFlags, RHI::BufferBindFlags::VertexBuffer | RHI::BufferBindFlags::IndexBuffer))
 		{
 			bufferCI.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 		}
@@ -147,7 +160,7 @@ namespace CE::Vulkan
 		allocFlagsInfo.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
 		allocFlagsInfo.pNext = nullptr;
 
-		if (device->HasBufferDeviceAddressExt() && heapType == MemoryHeapType::Default)
+		if (device->HasBufferDeviceAddressExt() && heapType == RHI::MemoryHeapType::Default)
 		{
 			allocInfo.pNext = &allocFlagsInfo;
 		}
@@ -195,12 +208,12 @@ namespace CE::Vulkan
 		
 		bufferCI.usage = VkBufferUsageFlagsFromBufferBindFlags(desc.bindFlags) | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-		if (device->HasBufferDeviceAddressExt() && memoryHeap->GetHeapType() == MemoryHeapType::Default)
+		if (device->HasBufferDeviceAddressExt() && memoryHeap->GetHeapType() == RHI::MemoryHeapType::Default)
 		{
 			bufferCI.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 		}
 
-		if (device->HasRayTracing() && EnumHasAnyFlags(bindFlags, BufferBindFlags::VertexBuffer | BufferBindFlags::IndexBuffer))
+		if (device->HasRayTracing() && EnumHasAnyFlags(bindFlags, RHI::BufferBindFlags::VertexBuffer | RHI::BufferBindFlags::IndexBuffer))
 		{
 			bufferCI.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 		}

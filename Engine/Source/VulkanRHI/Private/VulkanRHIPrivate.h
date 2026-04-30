@@ -51,6 +51,7 @@
 
 // Frame
 #include "Scope.h"
+#include "TransientAttachmentPool.h"
 #include "FrameGraphCompiler.h"
 #include "FrameGraphExecuter.h"
 
