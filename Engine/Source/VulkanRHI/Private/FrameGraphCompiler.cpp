@@ -112,13 +112,17 @@ namespace CE::Vulkan
             }
         };
 
+		auto graphicsQueue = device->GetGraphicsQueue();
+		auto computeQueue = device->GetComputeQueue();
+
 		for (int t = 0; t <= frameGraph->maxTimelineLevel; t++)
 		{
 			ArrayView scopes = frameGraph->scopesByTimelineLevel[t];
 			
 			for (int i = 0; i < scopes.GetSize(); i++)
 			{
-				
+				bool useComputeQueue = scopes.GetSize() > 1 && scopes[i]->IsComputePass();
+				((Vulkan::Scope*)scopes[i])->queue = useComputeQueue ? computeQueue : graphicsQueue;
 			}
 		}
         
