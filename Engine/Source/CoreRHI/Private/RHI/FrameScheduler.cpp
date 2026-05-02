@@ -49,6 +49,13 @@ namespace CE::RHI
 		}
 	}
 
+	u32 FrameScheduler::GetFrameIndex()
+	{
+		if (!executer)
+			return 0;
+		return executer->GetFrameIndex();
+	}
+
 	void FrameScheduler::BeginFrameGraph()
 	{
 		ZoneScoped;

@@ -19,7 +19,8 @@ namespace CE
 
 	PlatformApplication::~PlatformApplication()
 	{
-		instance = nullptr;
+		if (instance == this)
+			instance = nullptr;
 	}
 
 	void PlatformApplication::Initialize()

@@ -90,7 +90,7 @@ function(ce_add_test NAME)
         list(APPEND include_dirs "${dir}")
     endforeach()
     
-    get_target_property(target_links ${ce_add_test_TARGET} LINK_LIBRARIES)
+    get_target_property(target_links ${ce_add_test_TARGET} INTERFACE_LINK_LIBRARIES)
     target_link_libraries(${NAME}
         PRIVATE
             ${target_links}

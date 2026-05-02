@@ -65,8 +65,6 @@ namespace CE::Vulkan
 	{
 		ZoneScoped;
 
-		//vkDeviceWaitIdle(device->GetHandle());
-
 		// Queue allocation logic...
 
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
@@ -113,6 +111,16 @@ namespace CE::Vulkan
 				i++;
             }
         };
+
+		for (int t = 0; t <= frameGraph->maxTimelineLevel; t++)
+		{
+			ArrayView scopes = frameGraph->scopesByTimelineLevel[t];
+			
+			for (int i = 0; i < scopes.GetSize(); i++)
+			{
+				
+			}
+		}
         
         int trackNumber = 0;
         for (RHI::Scope* scope : frameGraph->producers)

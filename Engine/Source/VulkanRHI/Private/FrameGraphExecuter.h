@@ -12,6 +12,8 @@ namespace CE::Vulkan
 		FrameGraphExecuter(Device* device);
 		~FrameGraphExecuter() override;
 
+		u32 GetFrameIndex() override { return currentSubmissionIndex; }
+
 		void WaitUntilIdle() override;
 
 		u32 BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest) override;

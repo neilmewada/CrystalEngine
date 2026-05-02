@@ -1190,6 +1190,18 @@ static void TestBegin(bool gui = false)
 	RHI::gDynamicRHI = new Vulkan::VulkanRHI;
 #endif
 
+	if (gui)
+	{
+		auto app = PlatformApplication::Get();
+		app->Initialize();
+
+		InputManager::Get().Initialize(app);
+
+		app->InitMainWindow("Test", 1280, 720, PlatformWindowInfo{
+			false, false, true, false, 0, true, {}, PlatformWindowFlags::DestroyOnClose
+		});
+	}
+
 	RHI::gDynamicRHI->Initialize();
 	RHI::gDynamicRHI->PostInitialize();
 
@@ -1206,6 +1218,16 @@ static void TestEnd()
 	RHI::gDynamicRHI->PreShutdown();
 	RHI::gDynamicRHI->Shutdown();
 
+	if (PlatformApplication* app = PlatformApplication::TryGet())
+	{
+		InputManager::Get().Shutdown(app);
+
+		app->PreShutdown();
+		app->Shutdown();
+
+		delete app;
+	}
+
 	delete RHI::gDynamicRHI; RHI::gDynamicRHI = nullptr;
 
 #if PAL_TRAIT_VULKAN_SUPPORTED
@@ -1220,7 +1242,7 @@ static void TestEnd()
 #define TEST_BEGIN(...) using namespace RHI; TestBegin(__VA_ARGS__)
 #define TEST_END() TestEnd()
 
-static void BuildSampleRenderPipeline(RHI::FrameScheduler* scheduler)
+static void BuildSampleRenderPipeline(RHI::FrameScheduler* scheduler, RHI::SwapChain* swapChain)
 {
 	using namespace RHI;
 
@@ -1228,7 +1250,8 @@ static void BuildSampleRenderPipeline(RHI::FrameScheduler* scheduler)
 	{
 		auto& attachmentDatabase = scheduler->GetAttachmentDatabase();
 
-		const u32 kWidth = 1920, kHeight = 1080;
+		const u32 kWidth = swapChain->GetWidth();
+		const u32 kHeight = swapChain->GetHeight();
 
 		const Name kDepthAttachment = "_Depth";
 		attachmentDatabase.EmplaceFrameAttachment(kDepthAttachment, RHI::ImageDescriptor{
@@ -1260,20 +1283,8 @@ static void BuildSampleRenderPipeline(RHI::FrameScheduler* scheduler)
 			.defaultHeapType = MemoryHeapType::Default
 			});
 
-		const Name kColorOutputAttachment = "_ShadowMap";
-		attachmentDatabase.EmplaceFrameAttachment(kColorOutputAttachment, RHI::ImageDescriptor{
-			.name = kColorOutputAttachment,
-			.width = kWidth,
-			.height = kHeight,
-			.depth = 1,
-			.dimension = Dimension::Dim2D,
-			.format = Format::D32_SFLOAT,
-			.mipLevels = 1,
-			.sampleCount = 1,
-			.arrayLayers = 1,
-			.bindFlags = TextureBindFlags::Depth,
-			.defaultHeapType = MemoryHeapType::Default
-			});
+		const Name kColorOutputAttachment = "_ColorOutput";
+		attachmentDatabase.EmplaceFrameAttachment(kColorOutputAttachment, swapChain);
 
 		const Name kTiledLightList = "_TiledLightList";
 		attachmentDatabase.EmplaceFrameAttachment(kTiledLightList, RHI::BufferDescriptor{
@@ -1319,11 +1330,6 @@ static void BuildSampleRenderPipeline(RHI::FrameScheduler* scheduler)
 			lightListAttachment.shaderInputName = "_LightList";
 
 			scheduler->UseAttachment(lightListAttachment, ScopeAttachmentUsage::Shader, ScopeAttachmentAccess::Write);
-
-			ImageScopeAttachmentDescriptor depthAttachment{};
-			depthAttachment.attachmentId = kDepthAttachment;
-
-			scheduler->UseAttachment(depthAttachment, ScopeAttachmentUsage::DepthStencil, ScopeAttachmentAccess::Read);
 		}
 		scheduler->EndScope();
 
@@ -1338,6 +1344,13 @@ static void BuildSampleRenderPipeline(RHI::FrameScheduler* scheduler)
 			colorAttachment.attachmentId = kColorOutputAttachment;
 
 			scheduler->UseAttachment(colorAttachment, ScopeAttachmentUsage::Color, ScopeAttachmentAccess::ReadWrite);
+
+			BufferScopeAttachmentDescriptor lightListAttachment{};
+			lightListAttachment.attachmentId = kTiledLightList;
+			lightListAttachment.shaderInputName = "_LightList";
+
+			scheduler->UseAttachment(lightListAttachment, ScopeAttachmentUsage::Shader, ScopeAttachmentAccess::Read);
+
 		}
 		scheduler->EndScope();
 
@@ -1358,13 +1371,127 @@ static void BuildSampleRenderPipeline(RHI::FrameScheduler* scheduler)
 	scheduler->EndFrameGraph();
 }
 
-TEST(FrameGraphTest, Build)
+static void BuildRealRenderPipeline(RHI::FrameScheduler* scheduler, RHI::SwapChain* swapChain)
 {
-	TEST_BEGIN();
+	using namespace RHI;
 
+	scheduler->BeginFrameGraph();
+	{
+		auto& attachmentDatabase = scheduler->GetAttachmentDatabase();
+
+		const u32 kWidth = swapChain->GetWidth();
+		const u32 kHeight = swapChain->GetHeight();
+
+		const Name kDepthAttachment = "_Depth";
+		attachmentDatabase.EmplaceFrameAttachment(kDepthAttachment, RHI::ImageDescriptor{
+			.name = kDepthAttachment,
+			.width = kWidth,
+			.height = kHeight,
+			.depth = 1,
+			.dimension = Dimension::Dim2D,
+			.format = Format::D32_SFLOAT,
+			.mipLevels = 1,
+			.sampleCount = 1,
+			.arrayLayers = 1,
+			.bindFlags = TextureBindFlags::Depth,
+			.defaultHeapType = MemoryHeapType::Default
+		});
+
+		const Name kShadowMapAttachment = "_ShadowMap";
+		attachmentDatabase.EmplaceFrameAttachment(kShadowMapAttachment, RHI::ImageDescriptor{
+			.name = kShadowMapAttachment,
+			.width = 1024,
+			.height = 1024,
+			.depth = 1,
+			.dimension = Dimension::Dim2D,
+			.format = Format::D32_SFLOAT,
+			.mipLevels = 1,
+			.sampleCount = 1,
+			.arrayLayers = 1,
+			.bindFlags = TextureBindFlags::Depth,
+			.defaultHeapType = MemoryHeapType::Default
+			});
+
+		const Name kColorOutputAttachment = "_ColorOutput";
+		attachmentDatabase.EmplaceFrameAttachment(kColorOutputAttachment, swapChain);
+
+		scheduler->BeginScope("Depth");
+		{
+			ImageScopeAttachmentDescriptor depthAttachment{};
+			depthAttachment.attachmentId = kDepthAttachment;
+
+			scheduler->UseAttachment(depthAttachment, ScopeAttachmentUsage::DepthStencil, ScopeAttachmentAccess::Write);
+		}
+		scheduler->EndScope();
+
+		scheduler->BeginScope("Shadow");
+		{
+			ImageScopeAttachmentDescriptor shadowAttachment{};
+			shadowAttachment.attachmentId = kShadowMapAttachment;
+
+			scheduler->UseAttachment(shadowAttachment, ScopeAttachmentUsage::DepthStencil, ScopeAttachmentAccess::Write);
+		}
+		scheduler->EndScope();
+
+		scheduler->BeginScope("Skybox");
+		{
+			ImageScopeAttachmentDescriptor colorAttachment{};
+			colorAttachment.attachmentId = kColorOutputAttachment;
+
+			scheduler->UseAttachment(colorAttachment, ScopeAttachmentUsage::Color, ScopeAttachmentAccess::Write);
+		}
+		scheduler->EndScope();
+
+		scheduler->BeginScope("Opaque");
+		{
+			ImageScopeAttachmentDescriptor depthAttachment{};
+			depthAttachment.attachmentId = kDepthAttachment;
+
+			scheduler->UseAttachment(depthAttachment, ScopeAttachmentUsage::DepthStencil, ScopeAttachmentAccess::Read);
+
+			ImageScopeAttachmentDescriptor shadowAttachment{};
+			shadowAttachment.attachmentId = kShadowMapAttachment;
+			shadowAttachment.shaderInputName = "_ShadowMap";
+
+			scheduler->UseAttachment(shadowAttachment, ScopeAttachmentUsage::DepthStencil, ScopeAttachmentAccess::Read);
+
+			ImageScopeAttachmentDescriptor colorAttachment{};
+			colorAttachment.attachmentId = kColorOutputAttachment;
+
+			scheduler->UseAttachment(colorAttachment, ScopeAttachmentUsage::Color, ScopeAttachmentAccess::ReadWrite);
+
+		}
+		scheduler->EndScope();
+
+		scheduler->BeginScope("Transparent");
+		{
+			ImageScopeAttachmentDescriptor depthAttachment{};
+			depthAttachment.attachmentId = kDepthAttachment;
+
+			scheduler->UseAttachment(depthAttachment, ScopeAttachmentUsage::DepthStencil, ScopeAttachmentAccess::Read);
+
+			ImageScopeAttachmentDescriptor colorAttachment{};
+			colorAttachment.attachmentId = kColorOutputAttachment;
+
+			scheduler->UseAttachment(colorAttachment, ScopeAttachmentUsage::Color, ScopeAttachmentAccess::ReadWrite);
+		}
+		scheduler->EndScope();
+	}
+	scheduler->EndFrameGraph();
+}
+
+TEST(FrameGraphTest, Basic)
+{
+	TEST_BEGIN(true);
+
+	auto app = PlatformApplication::Get();
 	auto scheduler = RHI::FrameScheduler::Get();
 
-	BuildSampleRenderPipeline(scheduler);
+	auto swapChain = RHI::gDynamicRHI->CreateSwapChain(app->GetMainWindow(), RHI::SwapChainDescriptor{
+		2, { Format::R8G8B8A8_UNORM, Format::B8G8R8A8_UNORM }, 0, 0, false
+	});
+
+	BuildSampleRenderPipeline(scheduler, swapChain);
 
 	for (int t = 0; t <= scheduler->GetMaxTimelineLevel(); t++)
 	{
@@ -1374,21 +1501,28 @@ TEST(FrameGraphTest, Build)
 		{
 			EXPECT_TRUE(scopes.Exists([](Scope* s) { return s->GetId() == "Depth"; }));
 			EXPECT_TRUE(scopes.Exists([](Scope* s) { return s->GetId() == "Shadow"; }));
-		}
-		else if (t == 1)
-		{
 			EXPECT_TRUE(scopes.Exists([](Scope* s) { return s->GetId() == "Skybox"; }));
 			EXPECT_TRUE(scopes.Exists([](Scope* s) { return s->GetId() == "TileCulling" && s->GetOperation() == ScopeOperation::Compute; }));
 		}
-		else if (t == 2)
+		else if (t == 1)
 		{
 			EXPECT_TRUE(scopes.Exists([](Scope* s) { return s->GetId() == "Opaque"; }));
 		}
-		else if (t == 3)
+		else if (t == 2)
 		{
 			EXPECT_TRUE(scopes.Exists([](Scope* s) { return s->GetId() == "Transparent"; }));
 		}
 	}
+
+	while (!IsEngineRequestingExit())
+	{
+		app->Tick();
+		InputManager::Get().Tick();
+
+		
+	}
+
+	delete swapChain;
 	
 	TEST_END();
 }

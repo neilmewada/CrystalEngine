@@ -13,10 +13,8 @@ static void TestBegin(bool gui = false)
 	ModuleManager::Get().LoadModule("CoreMedia");
 	ModuleManager::Get().LoadModule("CoreRHI");
 
-#if PAL_TRAIT_VULKAN_SUPPORTED
 	ModuleManager::Get().LoadModule("VulkanRHI");
 	RHI::gDynamicRHI = new Vulkan::VulkanRHI;
-#endif
 
 	RHI::gDynamicRHI->Initialize();
 	RHI::gDynamicRHI->PostInitialize();
@@ -36,9 +34,7 @@ static void TestEnd()
 
 	delete RHI::gDynamicRHI; RHI::gDynamicRHI = nullptr;
 
-#if PAL_TRAIT_VULKAN_SUPPORTED
 	ModuleManager::Get().UnloadModule("VulkanRHI");
-#endif
 	ModuleManager::Get().UnloadModule("CoreRHI");
 	ModuleManager::Get().UnloadModule("CoreApplication");
 	ModuleManager::Get().UnloadModule("CoreMedia");
@@ -188,7 +184,7 @@ static void BuildSampleRenderPipeline(RHI::FrameScheduler* scheduler)
 
 TEST(FrameGraphTest, Build)
 {
-	TEST_BEGIN();
+	TEST_BEGIN(true);
 
 	auto scheduler = RHI::FrameScheduler::Get();
 
@@ -217,6 +213,8 @@ TEST(FrameGraphTest, Build)
 			EXPECT_TRUE(scopes.Exists([](Scope* s) { return s->GetId() == "Transparent"; }));
 		}
 	}
+
+	scheduler->Compile();
 	
 	TEST_END();
 }

@@ -24,6 +24,7 @@ namespace CE::RHI
 		scopes.Clear();
 		scopesById.Clear();
 		producers.Clear();
+		scopeGroups.Clear();
 		nodes.Clear();
 
 		attachmentDatabase.Clear();
@@ -177,7 +178,8 @@ namespace CE::RHI
 				endScopes.Add(scope);
 		}
 
-		// 1. Initialize
+		// - Timeline Levels -
+		
 		std::queue<RHI::Scope*> processQueue;
 		for (auto* scope : scopes) {
 			scope->timelineLevel = 0;
@@ -190,7 +192,6 @@ namespace CE::RHI
 			}
 		}
 
-		// 2. Process
 		while (!processQueue.empty()) {
 			RHI::Scope* current = processQueue.front();
 			processQueue.pop();
@@ -207,9 +208,12 @@ namespace CE::RHI
 			}
 		}
 
-		for (auto* scope : scopes) {
+		for (auto* scope : scopes) 
+		{
 			scopesByTimelineLevel[scope->timelineLevel].Add(scope);
 			maxTimelineLevel = Math::Max(maxTimelineLevel, scope->timelineLevel);
+
+			// TODO: Track min and max timeline per FrameAttachment for aliasing
 		}
 
 #if false

@@ -33,6 +33,8 @@ namespace CE::RHI
 		u32 GetFramesInFlight() const { return numFramesInFlight; }
 
 		void ResetFramesInFlight();
+		
+		u32 GetFrameIndex();
 
 		void BeginFrameGraph();
 

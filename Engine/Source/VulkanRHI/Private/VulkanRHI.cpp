@@ -55,9 +55,9 @@ namespace CE::Vulkan
     {
         if (pMemory != nullptr)
 	    {
+            LockGuard lock{ gAllocMutex };
 		    if (gAlignmentMap[pMemory] > 0)
 		    {
-                LockGuard lock{ gAllocMutex };
                 gAllocatedMemory -= Memory::AlignedBlockSize(pMemory, gAlignmentMap[pMemory], 0);
                 gAlignmentMap.Remove(pMemory);
 		    }
@@ -76,9 +76,9 @@ namespace CE::Vulkan
 
     VKAPI_ATTR static VkBool32 VulkanValidationCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT messageTypes,
+        [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageTypes,
         const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-        void* pUserData)
+        [[maybe_unused]] void* pUserData)
     {
         if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
         {

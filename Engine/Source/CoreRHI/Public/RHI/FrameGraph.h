@@ -34,8 +34,6 @@ namespace CE::RHI
         
         const Array<Scope*>& GetEndScopes() const { return endScopes; }
 
-    private:
-
 		void Clear();
         
 		bool Build();
@@ -113,13 +111,6 @@ namespace CE::RHI
 		Array<Scope*> endScopes{};
 		Scope* currentScope = nullptr;
 
-        friend class FrameAttachmentDatabase;
-		friend class FrameGraphCompiler;
-		friend class FrameGraphBuilder;
-		friend class FrameScheduler;
-		friend class FrameGraphExecuter;
-        friend class CE::Vulkan::FrameGraphCompiler;
-		friend class CE::Vulkan::FrameGraphExecuter;
     };
 
 } // namespace CE::RHI

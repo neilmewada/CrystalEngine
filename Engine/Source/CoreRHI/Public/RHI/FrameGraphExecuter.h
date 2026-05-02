@@ -21,6 +21,8 @@ namespace CE::RHI
 
 		virtual void WaitUntilIdle() = 0;
 
+		virtual u32 GetFrameIndex() = 0;
+
 		virtual u32 BeginExecution(const FrameGraphExecuteRequest& executeRequest) = 0;
 
 		virtual void EndExecution(const FrameGraphExecuteRequest& executeRequest) = 0;
