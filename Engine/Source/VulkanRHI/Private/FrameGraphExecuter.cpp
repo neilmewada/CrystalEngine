@@ -13,105 +13,11 @@ namespace CE::Vulkan
 		device->GetShaderResourceManager()->DestroyQueuedSRG();
 	}
 
-	bool FrameGraphExecuter::ExecuteInternal(const FrameGraphExecuteRequest& executeRequest)
-	{
-		ZoneScoped;
-
-		device->GetShaderResourceManager()->DestroyQueuedSRG();
-
-		FrameGraph* frameGraph = executeRequest.frameGraph;
-		compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
-		//Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
-		//auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
-		bool swapChainExists = frameGraph->presentSwapChains.NotEmpty();
-
-		const Array<RHI::Scope*>& producers = frameGraph->producers;
-		constexpr u64 u64Max = NumericLimits<u64>::Max();
-		VkResult result = VK_SUCCESS;
-		//currentImageIndices.Clear();
-
-		if (swapChainExists)
-		{
-            vkResetFences(device->GetHandle(), compiler->imageAcquiredFences[currentSubmissionIndex].GetSize(), 
-				compiler->imageAcquiredFences[currentSubmissionIndex].GetData());
-            
-			for (int i = 0; i < frameGraph->presentSwapChains.GetSize(); i++)
-			{
-				Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChains[i];
-
-				result = vkAcquireNextImageKHR(device->GetHandle(), 
-					swapChain->GetHandle(), u64Max,
-					compiler->imageAcquiredSemaphores[currentSubmissionIndex][i],
-					//compiler->imageAcquiredFences[currentSubmissionIndex],
-					nullptr,
-					&swapChain->currentImageIndex);
-
-				if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-				{
-					for (auto swapChainToRebuild : frameGraph->presentSwapChains)
-					{
-						((Vulkan::SwapChain*)swapChainToRebuild)->RebuildSwapChain();
-					}
-					return false; // TODO: Try acquiring image again next frame...
-				}
-
-				if (result != VK_SUCCESS)
-				{
-					return false;
-				}
-
-				if (i == 0)
-				{
-					// TODO: Switch to using currentSubmissionIndex instead
-					//currentImageIndex = swapChain->currentImageIndex;
-				}
-				//currentImageIndices.Add(swapChain->currentImageIndex);
-			}
-			
-			vkWaitForFences(device->GetHandle(),
-				compiler->graphExecutionFences[currentSubmissionIndex].GetSize(),
-				compiler->graphExecutionFences[currentSubmissionIndex].GetData(),
-				VK_TRUE, u64Max);
-
-		}
-		else
-		{
-			//currentImageIndex = currentSubmissionIndex;
-			//currentImageIndices.Add(currentImageIndex);
-		}
-
-		bool success = true;
-
-		HashSet<ScopeId> executedScopes{};
-		HashSet<Vulkan::SwapChain*> usedSwapChains{};
-
-		for (auto rhiScope : frameGraph->endScopes)
-		{
-			ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope, executedScopes, usedSwapChains);
-		}
-
-		currentSubmissionIndex = (currentSubmissionIndex + 1) % compiler->imageCount;
-		totalFramesSubmitted++;
-
-		return success && result == VK_SUCCESS;
-	}
-
 	void FrameGraphExecuter::WaitUntilIdle()
 	{
 		ZoneScoped;
 
 		vkDeviceWaitIdle(device->GetHandle());
-		return;
-
-		constexpr u64 u64Max = NumericLimits<u64>::Max();
-
-		for (int i = 0; i < compiler->graphExecutionFences.GetSize(); ++i)
-		{
-			vkWaitForFences(device->GetHandle(),
-				compiler->graphExecutionFences[i].GetSize(),
-				compiler->graphExecutionFences[i].GetData(),
-				VK_TRUE, u64Max);
-		}
 	}
 
 	u32 FrameGraphExecuter::BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest)
@@ -334,9 +240,6 @@ namespace CE::Vulkan
 							continue;
 						if (clearedAttachments.Exists(scopeAttachment->GetFrameAttachment()->GetId()))
 							continue;
-
-						RHI::ImageScopeAttachment* imageScopeAttachment = (RHI::ImageScopeAttachment*)scopeAttachment;
-						RHI::ImageFrameAttachment* imageFrameAttachment = (RHI::ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
 
 						VkClearValue clearValue{};
 
@@ -660,7 +563,7 @@ namespace CE::Vulkan
 
 							const auto& bufferLoadStore = bufferScopeAttachment->GetLoadStoreAction();
 
-							if (bufferLoadStore.loadAction == AttachmentLoadAction::Clear)
+							if (bufferLoadStore.loadAction == RHI::AttachmentLoadAction::Clear)
 							{
 								vkCmdFillBuffer(cmdBuffer, buffer->GetBuffer(), 0, buffer->GetBufferSize(), bufferLoadStore.clearValueBuffer);
 
@@ -790,12 +693,12 @@ namespace CE::Vulkan
 										commandList->SetRootConstants(0, (u32)drawItem->rootConstantSize / 4, drawItem->rootConstants);
 									}
 									
-									if (drawItem->arguments.type == DrawArgumentsIndexed)
+									if (drawItem->arguments.type == RHI::DrawArgumentsIndexed)
 									{
 										commandList->BindIndexBuffer(*drawItem->indexBufferView);
 										commandList->DrawIndexed(drawItem->arguments.indexedArgs);
 									}
-									else if (drawItem->arguments.type == DrawArgumentsLinear)
+									else if (drawItem->arguments.type == RHI::DrawArgumentsLinear)
 									{
 										commandList->DrawLinear(drawItem->arguments.linearArgs);
 									}
@@ -915,8 +818,8 @@ namespace CE::Vulkan
 
 					if (currentScope->readAttachments.NotEmpty() && currentScope->writeAttachments.NotEmpty())
 					{
-						ScopeAttachment* fromAttachment = currentScope->readAttachments[0];
-						ScopeAttachment* toAttachment = currentScope->writeAttachments[0];
+						RHI::ScopeAttachment* fromAttachment = currentScope->readAttachments[0];
+						RHI::ScopeAttachment* toAttachment = currentScope->writeAttachments[0];
 
 						if (fromAttachment->IsImageAttachment() && toAttachment->IsImageAttachment())
 						{

@@ -30,6 +30,9 @@ namespace CE::RHI
 		lastWrittenAttachmentToScope.Clear();
 		attachmentReadSchedule.Clear();
 		nodeDependencies.Clear();
+
+		scopesByTimelineLevel.Clear();
+		maxTimelineLevel = 0;
     }
 
 	bool FrameGraph::Build()
@@ -39,6 +42,9 @@ namespace CE::RHI
 		lastWrittenAttachmentToScope.Clear();
 		attachmentReadSchedule.Clear();
 		nodeDependencies.Clear();
+
+		scopesByTimelineLevel.Clear();
+		maxTimelineLevel = 0;
 
 		for (Scope* scope : scopes)
 		{
@@ -171,7 +177,42 @@ namespace CE::RHI
 				endScopes.Add(scope);
 		}
 
-#if true
+		// 1. Initialize
+		std::queue<RHI::Scope*> processQueue;
+		for (auto* scope : scopes) {
+			scope->timelineLevel = 0;
+			// Tracks how many producers we are still waiting on
+			scope->remainingProducers = scope->producers.GetSize();
+
+			// Start nodes have 0 producers
+			if (scope->remainingProducers == 0) {
+				processQueue.push(scope);
+			}
+		}
+
+		// 2. Process
+		while (!processQueue.empty()) {
+			RHI::Scope* current = processQueue.front();
+			processQueue.pop();
+
+			for (auto* consumer : current->consumers) {
+				// Level is always 1 higher than the furthest producer
+				consumer->timelineLevel = std::max(consumer->timelineLevel, current->timelineLevel + 1);
+
+				// Once all producers are visited, this scope is ready to be a producer itself
+				consumer->remainingProducers--;
+				if (consumer->remainingProducers == 0) {
+					processQueue.push(consumer);
+				}
+			}
+		}
+
+		for (auto* scope : scopes) {
+			scopesByTimelineLevel[scope->timelineLevel].Add(scope);
+			maxTimelineLevel = Math::Max(maxTimelineLevel, scope->timelineLevel);
+		}
+
+#if false
 
 		// For debugging
 		FileStream jsonFile = FileStream(PlatformDirectories::GetLaunchDir() / "Temp/FrameGraph.json", Stream::Permissions::WriteOnly);

@@ -10,6 +10,7 @@ namespace CE::RHI
 
 		frameGraph = new FrameGraph();
         transientMemoryPool = new TransientMemoryPool();
+		transientAttachmentPool = new TransientAttachmentPool();
 		numFramesInFlight = descriptor.numFramesInFlight;
         
         if (numFramesInFlight == 0 || numFramesInFlight > RHI::Limits::MaxSwapChainImageCount)
@@ -36,6 +37,7 @@ namespace CE::RHI
 		delete executer; executer = nullptr;
 		delete compiler; compiler = nullptr;
 		delete transientMemoryPool; transientMemoryPool = nullptr;
+		delete transientAttachmentPool; transientAttachmentPool = nullptr;
 		delete frameGraph; frameGraph = nullptr;
 	}
 
@@ -75,15 +77,6 @@ namespace CE::RHI
 		
         compiler->Compile(compileRequest);
     }
-
-	void FrameScheduler::Execute()
-	{
-		FrameGraphExecuteRequest executeRequest{};
-		executeRequest.frameGraph = frameGraph;
-		executeRequest.compiler = compiler;
-
-		executer->Execute(executeRequest);
-	}
 
 	u32 FrameScheduler::BeginExecution()
 	{

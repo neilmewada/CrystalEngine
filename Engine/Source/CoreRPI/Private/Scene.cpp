@@ -147,8 +147,8 @@ namespace CE::RPI
 
 			RHI::BufferDescriptor lightConstantsDesc{};
 			lightConstantsDesc.name = "LightConstants";
-			lightConstantsDesc.bindFlags = BufferBindFlags::ConstantBuffer;
-			lightConstantsDesc.defaultHeapType = MemoryHeapType::Upload;
+			lightConstantsDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+			lightConstantsDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			lightConstantsDesc.bufferSize = sizeof(lightConstants);
 
 			lightConstantsBuffer = new RPI::Buffer(lightConstantsDesc);
@@ -162,8 +162,8 @@ namespace CE::RPI
 
 			RHI::BufferDescriptor directionalLightDesc{};
 			directionalLightDesc.name = "DirectionalLightConstants";
-			directionalLightDesc.bindFlags = BufferBindFlags::ConstantBuffer;
-			directionalLightDesc.defaultHeapType = MemoryHeapType::Upload;
+			directionalLightDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+			directionalLightDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			directionalLightDesc.bufferSize = sizeof(directionalLightConstants) * RPI::Limits::MaxDirectionalLightsCount;
 			directionalLightDesc.structureByteStride = sizeof(directionalLightConstants);
 
@@ -183,9 +183,9 @@ namespace CE::RPI
 			shaderResourceGroup->Bind("_DefaultSampler", RPISystem::Get().FindOrCreateSampler(samplerDesc));
 
 			RHI::SamplerDescriptor shadowMapSampler{};
-			shadowMapSampler.addressModeU = shadowMapSampler.addressModeV = shadowMapSampler.addressModeW = SamplerAddressMode::ClampToEdge;
+			shadowMapSampler.addressModeU = shadowMapSampler.addressModeV = shadowMapSampler.addressModeW = RHI::SamplerAddressMode::ClampToEdge;
 			shadowMapSampler.enableAnisotropy = false;
-			shadowMapSampler.samplerFilterMode = FilterMode::Linear;
+			shadowMapSampler.samplerFilterMode = RHI::FilterMode::Linear;
 			shaderResourceGroup->Bind("_ShadowMapSampler", RPISystem::Get().FindOrCreateSampler(shadowMapSampler));
 
 			shaderResourceGroup->Bind("_BrdfLut", RPISystem::Get().GetBrdfLutTexture()->GetRhiTexture());
@@ -240,7 +240,7 @@ namespace CE::RPI
 		renderPacket.views.Clear();
 		renderPacket.imageIndex = imageIndex;
 
-		HashMap<View*, DrawListMask> uniqueViews{};
+		HashMap<View*, RHI::DrawListMask> uniqueViews{};
 		for (const auto& [name, sceneViews] : viewsByTag)
 		{
 			for (View* view : sceneViews.views)

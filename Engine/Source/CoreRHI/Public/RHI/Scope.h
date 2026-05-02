@@ -99,6 +99,8 @@ namespace CE::RHI
 		void SetShaderResourceGroups(const Array<RHI::ShaderResourceGroup*>& srgs);
 		void AddShaderResourceGroups(RHI::ShaderResourceGroup* srg);
 
+		int GetTimelineLevel() const { return timelineLevel; }
+
 	protected:
 
 		virtual bool CompileInternal(const FrameGraphCompileRequest& compileRequest) { return false; }
@@ -122,6 +124,9 @@ namespace CE::RHI
 
 		Scope* prevSubPass = nullptr;
 		Scope* nextSubPass = nullptr;
+
+		int timelineLevel = 0;
+		int remainingProducers = 0;
 
 		Array<Scope*> producers;
 		Array<Scope*> consumers;

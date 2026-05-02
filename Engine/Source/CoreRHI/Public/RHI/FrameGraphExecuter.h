@@ -19,8 +19,6 @@ namespace CE::RHI
 	public:
 		virtual ~FrameGraphExecuter();
 
-		bool Execute(const FrameGraphExecuteRequest& executeRequest);
-
 		virtual void WaitUntilIdle() = 0;
 
 		virtual u32 BeginExecution(const FrameGraphExecuteRequest& executeRequest) = 0;
@@ -33,8 +31,6 @@ namespace CE::RHI
 		FrameGraphExecuter() = default;
 
 	private:
-
-		virtual bool ExecuteInternal(const FrameGraphExecuteRequest& executeRequest) = 0;
 
 	};
 

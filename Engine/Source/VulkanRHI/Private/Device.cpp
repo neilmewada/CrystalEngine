@@ -11,7 +11,7 @@ namespace CE::Vulkan
 {
 	static void InitDescriptorPool(DescriptorPool& pool)
 	{
-		pool.Init(((VulkanRHI*)gDynamicRHI)->GetDevice(), 64, 64);
+		pool.Init(((VulkanRHI*)RHI::gDynamicRHI)->GetDevice(), 64, 64);
 	}
 
 	Device::Device(VkInstance instance, VulkanRHI* vulkanRhi)
@@ -603,6 +603,14 @@ namespace CE::Vulkan
 			{
 				primaryTransferQueue = queuesByFamily[familyIdx][queueCount - 2];
 			}
+		}
+
+		if (computeFamilyIdx == -1)
+			computeFamilyIdx = graphicsFamilyIdx;
+
+		if (primaryComputeQueue == nullptr)
+		{
+			primaryComputeQueue = queuesByFamily[computeFamilyIdx][0];
 		}
 
 		if (primaryTransferQueue == nullptr)

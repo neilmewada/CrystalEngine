@@ -94,7 +94,7 @@ namespace CE
 
 		bool temporaryScenesPresent = false;
 		bool rebuildFrameGraph = true;
-		bool recompileFrameGraph = true;
+		//bool recompileFrameGraph = true;
 
 		friend class SceneSubsystem;
 	};

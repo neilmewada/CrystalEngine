@@ -98,6 +98,8 @@ namespace CE::RHI
 
         Array<Scope*> scopes{};
 		HashMap<ScopeId, Scope*> scopesById{};
+		HashMap<int, Array<Scope*>> scopesByTimelineLevel{};
+		int maxTimelineLevel = 0;
 
 		//! Multiple scopes can be grouped together as subpasses in a single render pass.
 		Array<ScopeGroup> scopeGroups{};
@@ -118,9 +120,6 @@ namespace CE::RHI
 		friend class FrameGraphExecuter;
         friend class CE::Vulkan::FrameGraphCompiler;
 		friend class CE::Vulkan::FrameGraphExecuter;
-        friend class CE::Metal::FrameGraphCompiler;
-        friend class CE::Metal::FrameGraphExecuter;
-		friend class ::RHI_FrameGraphBuilder_Test;
     };
 
 } // namespace CE::RHI

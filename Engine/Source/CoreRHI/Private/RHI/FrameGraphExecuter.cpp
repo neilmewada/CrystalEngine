@@ -8,9 +8,5 @@ namespace CE::RHI
 
     }
 
-	bool FrameGraphExecuter::Execute(const FrameGraphExecuteRequest& executeRequest)
-	{
-		return ExecuteInternal(executeRequest);
-	}
 
 } // namespace CE::RHI

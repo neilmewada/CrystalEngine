@@ -15,5 +15,9 @@ ce_add_test(${PROJECT_NAME}
     SOURCES
         ${SRCS}
     BUILD_DEPENDENCIES
+        PRIVATE
+            CE::CoreApplication
+            ThirdParty::sdl
         TARGETS Config
 )
+

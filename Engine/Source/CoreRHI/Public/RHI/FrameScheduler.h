@@ -39,8 +39,6 @@ namespace CE::RHI
 		//! @brief Compile the transient attachments, and everything.
 		void Compile();
 
-		void Execute();
-
 		u32 BeginExecution();
 
 		void EndExecution();
@@ -66,6 +64,10 @@ namespace CE::RHI
 
 		IScopeProducer* FindScopeProducer(const Name& passName);
 
+		int GetMaxTimelineLevel() const { return frameGraph->maxTimelineLevel; }
+
+		ArrayView<Scope*> GetScopesAtTimelineLevel(int timelineLevel) const { return frameGraph->scopesByTimelineLevel[timelineLevel]; }
+
 	private:
 
 		u32 numFramesInFlight = 2;
@@ -75,6 +77,7 @@ namespace CE::RHI
 		Array<IScopeProducer*> scopeProducers{};
         
         TransientMemoryPool* transientMemoryPool = nullptr;
+		TransientAttachmentPool* transientAttachmentPool = nullptr;
 
 		FrameGraphCompiler* compiler = nullptr;
 		FrameGraphExecuter* executer = nullptr;

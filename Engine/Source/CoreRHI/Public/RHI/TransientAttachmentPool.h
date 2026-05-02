@@ -2,8 +2,8 @@
 
 namespace CE::RHI
 {
-    
-    class CORERHI_API TransientAttachmentPool : public IntrusiveBase
+
+    class CORERHI_API TransientAttachmentPool
     {
     public:
 
@@ -12,6 +12,8 @@ namespace CE::RHI
 
 
     protected:
+
+        
 
     };
 

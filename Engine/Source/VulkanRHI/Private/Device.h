@@ -77,6 +77,7 @@ namespace CE::Vulkan
         INLINE VkCommandPool GetGraphicsCommandPool() const { return gfxCommandPool; }
 
         INLINE CommandQueue* GetGraphicsQueue() const { return primaryGraphicsQueue; }
+        INLINE CommandQueue* GetComputeQueue() const { return primaryComputeQueue; }
         INLINE CommandQueue* GetPresentQueue() const { return presentQueue; }
 
         INLINE VkDevice GetHandle() const { return device; }
@@ -186,6 +187,7 @@ namespace CE::Vulkan
 
 		CommandBufferAllocator* commandAllocator = nullptr;
         CommandQueue* primaryGraphicsQueue = nullptr;
+        CommandQueue* primaryComputeQueue = nullptr;
         CommandQueue* primaryTransferQueue = nullptr;
         CommandQueue* presentQueue = nullptr;
 

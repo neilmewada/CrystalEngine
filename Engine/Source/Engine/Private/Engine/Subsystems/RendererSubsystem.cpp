@@ -10,8 +10,7 @@ namespace CE
 
     void RendererSubsystem::RebuildFrameGraph()
     {
-		rebuildFrameGraph = recompileFrameGraph = true;
-
+		rebuildFrameGraph = true;
     }
 
     f32 RendererSubsystem::GetTickPriority() const
@@ -161,36 +160,20 @@ namespace CE
 			return;
 		}
 
-		if (rebuildFrameGraph)
-		{
-			rebuildFrameGraph = false;
-			recompileFrameGraph = true;
+		submittedImageIndex = curImageIndex;
 
-			BuildFrameGraph();
-			submittedImageIndex = curImageIndex;
-		}
-
-		if (recompileFrameGraph)
-		{
-			recompileFrameGraph = false;
-
-			CompileFrameGraph();
-		}
+		BuildFrameGraph();
+		CompileFrameGraph();
+		rebuildFrameGraph = false;
 
 		if (IsEngineRequestingExit())
 		{
 			return;
 		}
 
-		if (rebuildFrameGraph || recompileFrameGraph)
-		{
-			RebuildFrameGraph();
-			return;
-		}
+		int frameIndex = scheduler->BeginExecution();
 
-		int imageIndex = scheduler->BeginExecution();
-
-		if (imageIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph || recompileFrameGraph)
+		if (frameIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph)
 		{
 			RebuildFrameGraph();
 			return;
@@ -223,7 +206,7 @@ namespace CE
     		}
     	}
 
-		curImageIndex = imageIndex;
+		curImageIndex = frameIndex;
 
 		// ---------------------------------------------------------
 		// - Enqueue draw packets to views
@@ -516,9 +499,6 @@ namespace CE
 	{
 		ZoneScoped;
 
-		rebuildFrameGraph = false;
-		recompileFrameGraph = true;
-
 		RPI::RPISystem::Get().SimulationTick(curImageIndex);
 		RPI::RPISystem::Get().RenderTick(curImageIndex);
 
@@ -687,16 +667,7 @@ namespace CE
 	{
 		ZoneScoped;
 
-		recompileFrameGraph = false;
-
 		scheduler->Compile();
-
-		RHI::TransientMemoryPool* pool = scheduler->GetTransientPool();
-		RHI::MemoryHeap* imageHeap = pool->GetImagePool();
-		if (imageHeap != nullptr)
-		{
-			//CE_LOG(Info, All, "Transient Image Pool: {} MB", (imageHeap->GetHeapSize() / 1024.0f / 1024.0f));
-		}
 	}
 
 	void RendererSubsystem::SubmitDrawPackets(int imageIndex)

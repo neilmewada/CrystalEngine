@@ -23,9 +23,9 @@ namespace CE
 	    for (int i = 0; i < cullingParamsBuffer.GetSize(); ++i)
 	    {
             RHI::BufferDescriptor desc{};
-            desc.bindFlags = BufferBindFlags::ConstantBuffer;
+            desc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
             desc.bufferSize = sizeof(CullingParams);
-            desc.defaultHeapType = MemoryHeapType::Upload;
+            desc.defaultHeapType = RHI::MemoryHeapType::Upload;
             desc.name = "CullingParams Buffer";
             cullingParamsBuffer[i] = RHI::gDynamicRHI->CreateBuffer(desc);
 	    }
@@ -170,60 +170,60 @@ namespace CE
 
     	// - Directional Shadow Map -
 
-        PassAttachment* directionalShadowMap;
+	    RPI::PassAttachment* directionalShadowMap;
 	    {
             RPI::PassImageAttachmentDesc directionalShadowMapDesc{};
             directionalShadowMapDesc.name = "DirectionalShadowMap";
             directionalShadowMapDesc.lifetime = RHI::AttachmentLifetimeType::Transient;
             directionalShadowMapDesc.sizeSource.fixedSizes = Vec3i(directionalShadowResolution, directionalShadowResolution, 1);
 
-            directionalShadowMapDesc.imageDescriptor.format = Format::D32_SFLOAT;
+            directionalShadowMapDesc.imageDescriptor.format = RHI::Format::D32_SFLOAT;
             directionalShadowMapDesc.imageDescriptor.mipCount = 1;
             directionalShadowMapDesc.imageDescriptor.arrayLayers = 1;
-            directionalShadowMapDesc.imageDescriptor.dimension = Dimension::Dim2D;
+            directionalShadowMapDesc.imageDescriptor.dimension = RHI::Dimension::Dim2D;
             directionalShadowMapDesc.imageDescriptor.sampleCount = 1;
-            directionalShadowMapDesc.imageDescriptor.bindFlags = TextureBindFlags::Depth | TextureBindFlags::ShaderRead;
-            directionalShadowMapDesc.fallbackFormats = { Format::D32_SFLOAT_S8_UINT, Format::D24_UNORM_S8_UINT, Format::D16_UNORM, Format::D16_UNORM_S8_UINT };
+            directionalShadowMapDesc.imageDescriptor.bindFlags = RHI::TextureBindFlags::Depth | RHI::TextureBindFlags::ShaderRead;
+            directionalShadowMapDesc.fallbackFormats = {RHI::Format::D32_SFLOAT_S8_UINT, RHI::Format::D24_UNORM_S8_UINT, RHI::Format::D16_UNORM, RHI::Format::D16_UNORM_S8_UINT };
             
             directionalShadowMap = renderPipeline->AddAttachment(directionalShadowMapDesc);
 	    }
 
         // _LightIndexPool
 
-		PassAttachment* lightIndexPool;
+	    RPI::PassAttachment* lightIndexPool;
 	    {
 			RPI::PassBufferAttachmentDesc lightIndexPoolDesc{};
             lightIndexPoolDesc.name = "LightIndexPool";
 			lightIndexPoolDesc.lifetime = RHI::AttachmentLifetimeType::Transient;
 
             lightIndexPoolDesc.bufferDescriptor.byteSize = RPI::Limits::LightIndexPoolCapacity * sizeof(u32);
-            lightIndexPoolDesc.bufferDescriptor.bindFlags = BufferBindFlags::StructuredBuffer;
+            lightIndexPoolDesc.bufferDescriptor.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
 
 			lightIndexPool = renderPipeline->AddAttachment(lightIndexPoolDesc);
 	    }
 
         // _TileHeaders
 
-		PassAttachment* tileHeaders;
+	    RPI::PassAttachment* tileHeaders;
 	    {
 		    RPI::PassBufferAttachmentDesc tileHeadersDesc{};
 			tileHeadersDesc.name = "TileHeaders";
             tileHeadersDesc.lifetime = RHI::AttachmentLifetimeType::Transient;
 
 			tileHeadersDesc.bufferDescriptor.byteSize = RPI::Limits::MaxNumTiles * sizeof(Vec2i);
-			tileHeadersDesc.bufferDescriptor.bindFlags = BufferBindFlags::StructuredBuffer;
+			tileHeadersDesc.bufferDescriptor.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
 
 			tileHeaders = renderPipeline->AddAttachment(tileHeadersDesc);
 	    }
 
-        PassAttachment* poolAlloc;
+	    RPI::PassAttachment* poolAlloc;
 	    {
 		    RPI::PassBufferAttachmentDesc poolAllocDesc{};
             poolAllocDesc.name = "PoolAlloc";
             poolAllocDesc.lifetime = RHI::AttachmentLifetimeType::Transient;
 
             poolAllocDesc.bufferDescriptor.byteSize = sizeof(u32) * 2;
-            poolAllocDesc.bufferDescriptor.bindFlags = BufferBindFlags::StructuredBuffer;
+            poolAllocDesc.bufferDescriptor.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
 
 			poolAlloc = renderPipeline->AddAttachment(poolAllocDesc);
 	    }
@@ -299,13 +299,13 @@ namespace CE
 
         RPI::RasterPass* directionalShadowPass = (RPI::RasterPass*)RPI::PassSystem::Get().CreatePass(this, "DirectionalShadowPass");
     	directionalShadowPass->SetViewTag("DirectionalLightShadow");
-        directionalShadowPass->SetDrawListTag(GetBuiltinDrawListTag(BuiltinDrawItemTag::Shadow));
+        directionalShadowPass->SetDrawListTag(GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag::Shadow));
 	    {
             // Directional Shadow Map
             {
-                PassAttachmentBinding shadowMapListBinding{};
-                shadowMapListBinding.slotType = PassSlotType::Output;
-                shadowMapListBinding.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
+	            RPI::PassAttachmentBinding shadowMapListBinding{};
+                shadowMapListBinding.slotType = RPI::PassSlotType::Output;
+                shadowMapListBinding.attachmentUsage = RHI::ScopeAttachmentUsage::DepthStencil;
                 shadowMapListBinding.attachment = directionalShadowMap;
                 shadowMapListBinding.name = "DepthOutput";
                 shadowMapListBinding.connectedBinding = shadowMapListBinding.fallbackBinding = nullptr;
@@ -334,9 +334,9 @@ namespace CE
                 lightIndexPoolSlot.name = "LightIndexPool";
                 lightIndexPoolSlot.slotType = RPI::PassSlotType::Output;
                 lightIndexPoolSlot.shaderInputName = "_LightIndexPool";
-                lightIndexPoolSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
-                lightIndexPoolSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-                lightIndexPoolSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+                lightIndexPoolSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+                lightIndexPoolSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                lightIndexPoolSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
                 tileCullingPass->AddSlot(lightIndexPoolSlot);
 
@@ -344,7 +344,7 @@ namespace CE
                 lightIndexPoolBinding.name = "LightIndexPool";
                 lightIndexPoolBinding.slotType = RPI::PassSlotType::Output;
                 lightIndexPoolBinding.attachment = lightIndexPool;
-                lightIndexPoolBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+                lightIndexPoolBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
                 lightIndexPoolBinding.connectedBinding = lightIndexPoolBinding.fallbackBinding = nullptr;
 
                 tileCullingPass->AddAttachmentBinding(lightIndexPoolBinding);
@@ -356,9 +356,9 @@ namespace CE
                 tileHeadersSlot.name = "TileHeaders";
                 tileHeadersSlot.slotType = RPI::PassSlotType::Output;
                 tileHeadersSlot.shaderInputName = "_TileHeaders";
-                tileHeadersSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
-                tileHeadersSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-                tileHeadersSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+                tileHeadersSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+                tileHeadersSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                tileHeadersSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
                 tileCullingPass->AddSlot(tileHeadersSlot);
 
@@ -366,7 +366,7 @@ namespace CE
                 tileHeadersBinding.name = "TileHeaders";
                 tileHeadersBinding.slotType = RPI::PassSlotType::Output;
                 tileHeadersBinding.attachment = tileHeaders;
-                tileHeadersBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+                tileHeadersBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
                 tileHeadersBinding.connectedBinding = tileHeadersBinding.fallbackBinding = nullptr;
 
                 tileCullingPass->AddAttachmentBinding(tileHeadersBinding);
@@ -378,10 +378,10 @@ namespace CE
                 poolAllocSlot.name = "PoolAlloc";
                 poolAllocSlot.slotType = RPI::PassSlotType::Output;
                 poolAllocSlot.shaderInputName = "_PoolAlloc";
-                poolAllocSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
-                poolAllocSlot.loadStoreAction.loadAction = AttachmentLoadAction::Clear;
+                poolAllocSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+                poolAllocSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
                 poolAllocSlot.loadStoreAction.clearValueBuffer = 0;
-                poolAllocSlot.loadStoreAction.storeAction = AttachmentStoreAction::DontCare;
+                poolAllocSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::DontCare;
 
                 tileCullingPass->AddSlot(poolAllocSlot);
 
@@ -389,7 +389,7 @@ namespace CE
                 poolAllocBinding.name = "PoolAlloc";
                 poolAllocBinding.slotType = RPI::PassSlotType::Output;
                 poolAllocBinding.attachment = poolAlloc;
-                poolAllocBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+                poolAllocBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
                 poolAllocBinding.connectedBinding = poolAllocBinding.fallbackBinding = nullptr;
 
                 tileCullingPass->AddAttachmentBinding(poolAllocBinding);
@@ -399,18 +399,18 @@ namespace CE
             {
 	            RPI::PassSlot depthMapSlot{};
                 depthMapSlot.name = "DepthMap";
-				depthMapSlot.slotType = PassSlotType::Input;
+				depthMapSlot.slotType = RPI::PassSlotType::Input;
 				depthMapSlot.shaderInputName = "_DepthMap";
-				depthMapSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
-				depthMapSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-				depthMapSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+				depthMapSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+				depthMapSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				depthMapSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
 				tileCullingPass->AddSlot(depthMapSlot);
 
 				RPI::PassAttachmentBinding depthMapBinding{};
 				depthMapBinding.name = "DepthMap";
-				depthMapBinding.slotType = PassSlotType::Input;
-				depthMapBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+				depthMapBinding.slotType = RPI::PassSlotType::Input;
+				depthMapBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
 				depthMapBinding.connectedBinding = depthCopyPass->FindOutputBinding("Output");
 
 				tileCullingPass->AddAttachmentBinding(depthMapBinding);
@@ -469,7 +469,7 @@ namespace CE
             {
                 RPI::PassSlot depthMapSlot{};
 				depthMapSlot.name = "DepthMap";
-                depthMapSlot.slotType = PassSlotType::Input;
+                depthMapSlot.slotType = RPI::PassSlotType::Input;
 				depthMapSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
 				depthMapSlot.dimensions = { RHI::Dimension::Dim2D };
                 depthMapSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
@@ -480,7 +480,7 @@ namespace CE
 
 				RPI::PassAttachmentBinding depthMapBinding{};
 				depthMapBinding.name = "DepthMap";
-				depthMapBinding.slotType = PassSlotType::Input;
+				depthMapBinding.slotType = RPI::PassSlotType::Input;
 				depthMapBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
                 depthMapBinding.connectedBinding = depthCopyPass->FindOutputBinding("Output");
 
@@ -714,16 +714,16 @@ namespace CE
     				textureSlot.name = "Texture";
     				textureSlot.slotType = RPI::PassSlotType::InputOutput;
     				textureSlot.shaderInputName = "_TextureTest";
-    				textureSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
-    				textureSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
-    				textureSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+    				textureSlot.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+    				textureSlot.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+    				textureSlot.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
     				computePass->AddSlot(textureSlot);
 
     				RPI::PassAttachmentBinding textureBinding{};
     				textureBinding.name = "Texture";
     				textureBinding.slotType = RPI::PassSlotType::InputOutput;
-    				textureBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+    				textureBinding.attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
     				textureBinding.connectedBinding = resolvePass->FindOutputBinding("Resolve");
     				textureBinding.fallbackBinding = nullptr;
 
