@@ -17,7 +17,6 @@ ce_add_test(${PROJECT_NAME}
     BUILD_DEPENDENCIES
         PRIVATE
             CE::CoreApplication
-            ThirdParty::sdl
         TARGETS Config
 )
 
