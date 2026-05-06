@@ -19,6 +19,7 @@ namespace CE::Vulkan
 		void WaitUntilIdle() override;
 
 		u32 BeginFrame() override;
+		bool Execute(const FrameGraphExecuteRequest& executeRequest) override;
 
 		u32 BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest) override;
 

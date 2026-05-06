@@ -162,6 +162,8 @@ namespace CE
 
 		submittedImageIndex = curImageIndex;
 
+		int frameIndex = scheduler->BeginFrame();
+
 		BuildFrameGraph();
 		CompileFrameGraph();
 		rebuildFrameGraph = false;
@@ -170,8 +172,6 @@ namespace CE
 		{
 			return;
 		}
-
-		int frameIndex = scheduler->BeginExecution();
 
 		if (frameIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph)
 		{

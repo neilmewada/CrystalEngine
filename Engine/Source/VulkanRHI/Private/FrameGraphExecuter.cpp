@@ -22,9 +22,81 @@ namespace CE::Vulkan
 
 	u32 FrameGraphExecuter::BeginFrame()
 	{
-		// TODO: Wait on fences, acquire SwapChain images
+		FrameGraph* frameGraph = FrameScheduler::Get()->GetFrameGraph();
+		bool swapChainExists = frameGraph->presentSwapChains.NotEmpty();
+
+		constexpr u64 u64Max = NumericLimits<u64>::Max();
+		constexpr u64 acquireTimeout = 100'000'000; // 0.1 second
+		VkResult result = VK_SUCCESS;
+
+		if (swapChainExists)
+		{
+			vkResetFences(device->GetHandle(),
+				compiler->imageAcquiredFences[currentSubmissionIndex].GetSize(),
+				compiler->imageAcquiredFences[currentSubmissionIndex].GetData());
+
+			{
+				ZoneNamedN(__graphExecution, "_GraphExecutionFences", true);
+				String val = String("Index: ") + currentSubmissionIndex;
+				ZoneText(val.GetCString(), val.GetLength());
+
+				vkWaitForFences(device->GetHandle(),
+					compiler->graphExecutionFences[currentSubmissionIndex].GetSize(),
+					compiler->graphExecutionFences[currentSubmissionIndex].GetData(),
+					VK_TRUE, u64Max);
+			}
+
+			for (int i = 0; i < frameGraph->presentSwapChains.GetSize(); i++)
+			{
+				auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChains[i];
+
+				{
+					ZoneNamedN(__acquireImage, "_AcquireNextImage", true);
+
+					result = vkAcquireNextImageKHR(device->GetHandle(),
+						swapChain->GetHandle(), acquireTimeout,
+						compiler->imageAcquiredSemaphores[currentSubmissionIndex][i],
+						nullptr,
+						&swapChain->currentImageIndex);
+				}
+
+				if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+				{
+					for (auto swapChainToRebuild : frameGraph->presentSwapChains)
+					{
+						ZoneNamedN(__rebuildSwapChain, "_RebuildSwapChain", true);
+
+						((Vulkan::SwapChain*)swapChain)->RebuildSwapChain();
+					}
+				}
+
+				if (result != VK_SUCCESS)
+				{
+					return RHI::Limits::MaxSwapChainImageCount;
+				}
+			}
+		}
 
 		return currentSubmissionIndex;
+	}
+
+	bool FrameGraphExecuter::Execute(const FrameGraphExecuteRequest& executeRequest)
+	{
+		ZoneScoped;
+		String value = String("Index: ") + currentSubmissionIndex;
+		ZoneText(value.GetCString(), value.GetLength());
+
+		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
+
+		HashSet<RHI::ScopeId> executedScopes{};
+		HashSet<Vulkan::SwapChain*> usedSwapChains{};
+
+		// TODO: Execute frame graph
+
+		currentSubmissionIndex = (currentSubmissionIndex + 1) % compiler->imageCount;
+		frameCounter++;
+
+		return true;
 	}
 
 	u32 FrameGraphExecuter::BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest)

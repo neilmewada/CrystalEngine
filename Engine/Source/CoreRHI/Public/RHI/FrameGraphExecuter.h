@@ -27,6 +27,8 @@ namespace CE::RHI
 
 		virtual u32 BeginFrame() = 0;
 
+		virtual bool Execute(const FrameGraphExecuteRequest& executeRequest) = 0;
+
 		virtual u32 BeginExecution(const FrameGraphExecuteRequest& executeRequest) = 0;
 
 		virtual void EndExecution(const FrameGraphExecuteRequest& executeRequest) = 0;
