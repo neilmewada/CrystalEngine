@@ -21,6 +21,7 @@ namespace CE::RHI
 		{
 			SIZE_T hash = CE::GetHash(bufferSize);
 			CombineHash(hash, bindFlags);
+			CombineHash(hash, alignment);
 			CombineHash(hash, structureByteStride);
 			return hash;
 		}

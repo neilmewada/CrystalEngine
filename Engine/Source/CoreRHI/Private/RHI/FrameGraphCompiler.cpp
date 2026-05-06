@@ -31,11 +31,38 @@ namespace CE::RHI
 		FrameGraph* frameGraph = compileRequest.frameGraph;
 		TransientAttachmentPool* pool = compileRequest.transientPool;
 		const u32 frameSlot = compileRequest.frameSlot;
+		const u64 frameNumber = compileRequest.frameNumber;
 
 		const Array<RHI::FrameAttachment*>& attachments = frameGraph->attachmentDatabase.GetAttachments();
 
-		// TODO: Implement memory aliasing later
+		pool->BeginFrame(frameNumber);
+		{
+			for (int i = 0; i < attachments.GetSize(); i++)
+			{
+				RHI::FrameAttachment* attachment = attachments[i];
+				if (attachment->GetLifetimeType() != AttachmentLifetimeType::Transient)
+					continue;
 
+				// Always reset the resource first, we will be reassigning it anyway.
+				attachment->SetResource(nullptr);
+
+				if (attachment->IsBufferAttachment())
+				{
+					auto bufferAttachment = (RHI::BufferFrameAttachment*)attachment;
+					const auto& desc = bufferAttachment->GetBufferDescriptor();
+					
+				}
+				else if (attachment->IsImageAttachment())
+				{
+					auto imageAttachment = (RHI::ImageFrameAttachment*)attachment;
+
+				}
+			}
+		}
+		pool->EndFrame();
+
+		// TODO: Implement memory aliasing later
+		/*
 		ResourceMemoryRequirements bufferReq = {};
 		u64 bufferOffset = 0;
 		ResourceMemoryRequirements imageReq = {};
@@ -123,7 +150,7 @@ namespace CE::RHI
 					imageAttachment->SetResource(imageIdx, image);
 				}
 			}
-		}
+		}*/
 	}
 
 } // namespace CE::RHI

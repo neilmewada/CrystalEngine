@@ -18,8 +18,8 @@ namespace CE::RHI
             RHI::TextureView* textureView = nullptr;
             RHI::TextureDescriptor textureDescriptor{};
             RHI::BufferDescriptor bufferDescriptor{};
-            ResourceHash descriptorHash = 0;
-            u64 memoryOffset = 0;
+            ResourceHash hash = 0;
+            VirtualAddress memoryOffset = 0;
             u64 lastUsedFrame = 0;
         };
 
@@ -41,7 +41,7 @@ namespace CE::RHI
                 {
 	                if (resource.resourceType != ResourceType::None)
 	                {
-                        available.Add(resource.descriptorHash);
+                        available.Add(resource.hash);
 	                }
                 }
             }
@@ -50,12 +50,30 @@ namespace CE::RHI
         TransientAttachmentPool(const HeapAllocationParameters& heapParams);
         virtual ~TransientAttachmentPool();
         
+        void BeginFrame(u64 frameNumber);
+        void EndFrame();
+
+        void AllocateBuffer(AttachmentID id, const RHI::BufferDescriptor& descriptor);
+        void AllocateTexture(AttachmentID id, const RHI::TextureDescriptor& descriptor);
+
     protected:
+
+        struct ResourceRequest
+        {
+            AttachmentID id{};
+            RHI::ResourceType resourceType = ResourceType::None;
+            RHI::BufferDescriptor bufferDescriptor{};
+            RHI::TextureDescriptor textureDescriptor{};
+            ResourceHash hash = 0;
+        };
 
         StaticArray<UniquePtr<ResourcePool>, RHI::Limits::MaxSwapChainImageCount> pools;
 
         UniquePtr<AliasedAttachmentAllocator> attachmentAllocator;
+
+        Array<ResourceRequest> requests;
         
+        u64 frameNumber = 0;
     };
 
 } // namespace CE::RHI
