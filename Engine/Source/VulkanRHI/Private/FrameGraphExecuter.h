@@ -12,7 +12,7 @@ namespace CE::Vulkan
 		FrameGraphExecuter(Device* device);
 		~FrameGraphExecuter() override;
 
-		u32 GetFrameIndex() override { return currentSubmissionIndex; }
+		u32 GetFrameSlot() override { return currentSubmissionIndex; }
 
 		u64 GetFrameCounter() override { return frameCounter; }
 

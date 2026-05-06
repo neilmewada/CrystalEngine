@@ -21,7 +21,7 @@ namespace CE::RHI
 
 		virtual void WaitUntilIdle() = 0;
 
-		virtual u32 GetFrameIndex() = 0;
+		virtual u32 GetFrameSlot() = 0;
 
 		virtual u64 GetFrameCounter() = 0;
 

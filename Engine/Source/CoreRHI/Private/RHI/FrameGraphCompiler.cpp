@@ -29,8 +29,8 @@ namespace CE::RHI
 		ZoneScoped;
 
 		FrameGraph* frameGraph = compileRequest.frameGraph;
-		TransientMemoryPool* pool = compileRequest.transientPool;
-		const u32 frameIndex = compileRequest.frameSlot;
+		TransientAttachmentPool* pool = compileRequest.transientPool;
+		const u32 frameSlot = compileRequest.frameSlot;
 
 		const Array<RHI::FrameAttachment*>& attachments = frameGraph->attachmentDatabase.GetAttachments();
 
@@ -60,7 +60,7 @@ namespace CE::RHI
 					ResourceMemoryRequirements req{};
 					RHI::gDynamicRHI->GetBufferMemoryRequirements(desc, req);
 					if (bufferOffset > 0)
-						bufferOffset = Memory::GetAlignedSize(bufferOffset, req.offsetAlignment);
+						bufferOffset = Memory::AlignUp(bufferOffset, req.offsetAlignment);
 					attachmentOffsets.Add(bufferOffset);
 					bufferReq.size = bufferOffset + req.size;
 					bufferOffset += req.size;
@@ -76,7 +76,7 @@ namespace CE::RHI
 					ResourceMemoryRequirements req{};
 					RHI::gDynamicRHI->GetTextureMemoryRequirements(desc, req);
 					if (imageOffset > 0)
-						imageOffset = Memory::GetAlignedSize(imageOffset, req.offsetAlignment);
+						imageOffset = Memory::AlignUp(imageOffset, req.offsetAlignment);
 					attachmentOffsets.Add(imageOffset);
 					imageReq.size = imageOffset + req.size;
 					imageOffset += req.size;

@@ -47,7 +47,7 @@ namespace CE::RHI
 
 	u32 FrameScheduler::GetFrameIndex()
 	{
-		return executer->GetFrameIndex();
+		return executer->GetFrameSlot();
 	}
 
 	u64 FrameScheduler::GetFrameCounter()
@@ -77,10 +77,10 @@ namespace CE::RHI
 
         FrameGraphCompileRequest compileRequest{};
         compileRequest.frameGraph = frameGraph;
-        compileRequest.transientPool = transientMemoryPool;
+        compileRequest.transientPool = transientAttachmentPool;
 		compileRequest.numFramesInFlight = numFramesInFlight;
 		compileRequest.shrinkPool = false;
-		compileRequest.frameSlot = executer->GetFrameIndex();
+		compileRequest.frameSlot = executer->GetFrameSlot();
 		
         compiler->Compile(compileRequest);
     }

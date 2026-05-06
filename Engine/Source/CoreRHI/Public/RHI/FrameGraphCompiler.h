@@ -8,7 +8,7 @@ namespace CE::RHI
 	{
 		FrameGraph* frameGraph = nullptr;
 
-		TransientMemoryPool* transientPool = nullptr;
+		TransientAttachmentPool* transientPool = nullptr;
 
 		u32 numFramesInFlight = 1;
 
