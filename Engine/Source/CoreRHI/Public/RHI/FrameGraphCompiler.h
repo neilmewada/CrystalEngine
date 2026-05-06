@@ -13,6 +13,9 @@ namespace CE::RHI
 		u32 numFramesInFlight = 1;
 
 		bool shrinkPool = false;
+
+		u32 frameSlot = 0;
+		u64 frameNumber = 0;
 	};
     
 	class CORERHI_API FrameGraphCompiler

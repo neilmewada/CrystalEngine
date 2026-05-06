@@ -25,6 +25,7 @@ namespace CE::RHI
         PipelineState,
 		ShaderResourceGroup,
 
+        AliasedHeap,
 		MemoryHeap,
         RenderTarget,
         RenderTargetBuffer,

@@ -21,7 +21,7 @@
 #include "Misc/Platform.h"
 #include "Memory/Memory.h"
 #include "Memory/IAllocator.h"
-#include "Memory/SystemAllocator.h"
+#include "Memory/OSAllocator.h"
 #include "Memory/FixedSizeAllocator.h"
 #include "Logger/Logger.h"
 #include "PAL/Common/PlatformMisc.h"

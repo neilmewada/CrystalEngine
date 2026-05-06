@@ -9,7 +9,7 @@ namespace CE::RHI
 
 	void DrawPacket::operator delete(void* p, size_t size)
 	{
-		reinterpret_cast<const DrawPacket*>(p)->allocator->AlignedFree(p);
+		reinterpret_cast<const DrawPacket*>(p)->allocator->deallocate(p);
 	}
 
 	DrawItemProperties DrawPacket::GetDrawItemProperties(SIZE_T index)

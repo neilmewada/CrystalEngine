@@ -308,17 +308,17 @@ namespace CE
 
         using FDrawIndex = u16;
 
-        using FCoordinateSpaceStack = StableDynamicArray<FCoordinateSpace, CoordinateStackItemIncrement, false>;
-        using FVertexArray = StableDynamicArray<FVertex, VertexArrayIncrement, false>;
-        using FIndexArray = StableDynamicArray<FDrawIndex, IndexArrayIncrement, false>;
-        using FPathArray = StableDynamicArray<Vec2, PathArrayIncrement, false>;
-        using FDrawCmdArray = StableDynamicArray<FDrawCmd, DrawCmdArrayIncrement, false>;
-        using FObjectDataArray = StableDynamicArray<FObjectData, ObjectDataArrayIncrement, false>;
-        using FClipRectArray = StableDynamicArray<FClipRect, ClipRectArrayIncrement, false>;
-        using FClipRectStack = StableDynamicArray<int, ClipRectArrayIncrement, false>;
-        using FDrawDataArray = StableDynamicArray<FDrawData, DrawDataArrayIncrement, false>;
-        using FOpacityStack = StableDynamicArray<f32, OpacityStackIncrement, false>;
-        using FGradientKeyArray = StableDynamicArray<FColorStop, GradientKeyArrayIncrement, false>;
+        using FCoordinateSpaceStack = StableGrowthArray<FCoordinateSpace, CoordinateStackItemIncrement, false>;
+        using FVertexArray = StableGrowthArray<FVertex, VertexArrayIncrement, false>;
+        using FIndexArray = StableGrowthArray<FDrawIndex, IndexArrayIncrement, false>;
+        using FPathArray = StableGrowthArray<Vec2, PathArrayIncrement, false>;
+        using FDrawCmdArray = StableGrowthArray<FDrawCmd, DrawCmdArrayIncrement, false>;
+        using FObjectDataArray = StableGrowthArray<FObjectData, ObjectDataArrayIncrement, false>;
+        using FClipRectArray = StableGrowthArray<FClipRect, ClipRectArrayIncrement, false>;
+        using FClipRectStack = StableGrowthArray<int, ClipRectArrayIncrement, false>;
+        using FDrawDataArray = StableGrowthArray<FDrawData, DrawDataArrayIncrement, false>;
+        using FOpacityStack = StableGrowthArray<f32, OpacityStackIncrement, false>;
+        using FGradientKeyArray = StableGrowthArray<FColorStop, GradientKeyArrayIncrement, false>;
 
         // - Draw Data -
 

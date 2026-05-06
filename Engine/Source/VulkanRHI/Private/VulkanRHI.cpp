@@ -143,7 +143,7 @@ namespace CE::Vulkan
 
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.apiVersion = VK_API_VERSION_1_2;
+        appInfo.apiVersion = VK_API_VERSION_1_3;
         appInfo.pEngineName = CE_ENGINE_NAME_STRING;
         appInfo.engineVersion = VK_MAKE_VERSION(CE_VERSION_MAJOR, CE_VERSION_MINOR, CE_VERSION_PATCH);
         appInfo.pApplicationName = gProjectName.GetCString();
@@ -396,6 +396,16 @@ namespace CE::Vulkan
 	void VulkanRHI::FreeMemoryHeap(RHI::MemoryHeap* memoryHeap)
 	{
 		delete memoryHeap;
+	}
+
+	RHI::AliasedHeap* VulkanRHI::AllocateAliasedHeap(const RHI::AliasedHeapDescriptor& desc)
+	{
+        return new AliasedHeap(device, desc);
+	}
+
+	void VulkanRHI::FreeAliasedHeap(RHI::AliasedHeap* heap)
+	{
+        delete heap;
 	}
 
 	RHI::Buffer* VulkanRHI::CreateBuffer(const RHI::BufferDescriptor& bufferDesc)

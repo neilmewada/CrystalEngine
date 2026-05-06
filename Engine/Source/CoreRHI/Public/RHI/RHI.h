@@ -125,6 +125,9 @@ namespace CE::RHI
 		virtual RHI::MemoryHeap* AllocateMemoryHeap(const RHI::MemoryHeapDescriptor& desc) = 0;
 		virtual void FreeMemoryHeap(RHI::MemoryHeap* memoryHeap) = 0;
 
+		virtual RHI::AliasedHeap* AllocateAliasedHeap(const RHI::AliasedHeapDescriptor& desc) = 0;
+		virtual void FreeAliasedHeap(RHI::AliasedHeap* heap) = 0;
+
 		virtual void GetBufferMemoryRequirements(const RHI::BufferDescriptor& bufferDesc, RHI::ResourceMemoryRequirements& outRequirements) = 0;
         virtual void GetTextureMemoryRequirements(const RHI::TextureDescriptor& textureDesc, RHI::ResourceMemoryRequirements& outRequirements) = 0;
 

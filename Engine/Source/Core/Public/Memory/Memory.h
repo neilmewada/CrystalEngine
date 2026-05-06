@@ -81,9 +81,9 @@ namespace CE
             return (baseSize + alignment - 1) & ~(alignment - 1);
         }
 
-        static inline SIZE_T AlignUp(SIZE_T baseSize, SIZE_T alignment)
+        static inline SIZE_T AlignUp(SIZE_T baseAddress, SIZE_T alignment)
         {
-            return (baseSize + alignment - 1) & ~(alignment - 1);
+            return (baseAddress + alignment - 1) & ~(alignment - 1);
         }
 
         static std::atomic<SIZE_T> totalAllocation;

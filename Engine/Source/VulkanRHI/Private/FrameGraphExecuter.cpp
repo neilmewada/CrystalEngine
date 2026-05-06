@@ -20,6 +20,13 @@ namespace CE::Vulkan
 		vkDeviceWaitIdle(device->GetHandle());
 	}
 
+	u32 FrameGraphExecuter::BeginFrame()
+	{
+		// TODO: Wait on fences, acquire SwapChain images
+
+		return currentSubmissionIndex;
+	}
+
 	u32 FrameGraphExecuter::BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest)
 	{
 		ZoneScoped;
@@ -104,7 +111,7 @@ namespace CE::Vulkan
 		}
 
 		currentSubmissionIndex = (currentSubmissionIndex + 1) % compiler->imageCount;
-		totalFramesSubmitted++;
+		frameCounter++;
 	}
 
 	void FrameGraphExecuter::ResetFramesInFlight()

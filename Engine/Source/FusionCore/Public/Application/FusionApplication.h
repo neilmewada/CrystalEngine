@@ -188,11 +188,11 @@ namespace CE
 
         IFusionAssetLoader* assetLoader = nullptr;
 
-        StableDynamicArray<SystemCursor, 32, false> cursorStack;
+        StableGrowthArray<SystemCursor, 32, false> cursorStack;
 
-        using FImageArray = StableDynamicArray<RHI::Texture*, 64, false>;
-        using FTextureArray = StableDynamicArray<RPI::Texture*, 64, false>;
-        using FSamplerArray = StableDynamicArray<RHI::Sampler*, 32, false>;
+        using FImageArray = StableGrowthArray<RHI::Texture*, 64, false>;
+        using FTextureArray = StableGrowthArray<RPI::Texture*, 64, false>;
+        using FSamplerArray = StableGrowthArray<RHI::Sampler*, 32, false>;
 
         FSamplerArray samplerArray;
         HashMap<RHI::Sampler*, int> samplerIndices;

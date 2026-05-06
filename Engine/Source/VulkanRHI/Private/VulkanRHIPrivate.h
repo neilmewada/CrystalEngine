@@ -49,6 +49,8 @@
 #include "RayTracingBlas.h"
 #include "RayTracingTlas.h"
 
+#include "AliasedHeap.h"
+
 // Frame
 #include "Scope.h"
 #include "TransientAttachmentPool.h"

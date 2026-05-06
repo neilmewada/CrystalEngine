@@ -28,6 +28,18 @@ namespace CE::RHI
 			CombineHash(hash, bindFlags);
 			return hash;
 		}
+
+		bool operator==(const TextureDescriptor& rhs) const
+		{
+			return width == rhs.width && height == rhs.height && depth == rhs.depth &&
+				dimension == rhs.dimension && mipLevels == rhs.mipLevels && arrayLayers == rhs.arrayLayers && 
+				sampleCount == rhs.sampleCount && bindFlags == rhs.bindFlags;
+		}
+
+		bool operator!=(const TextureDescriptor& rhs) const
+		{
+			return !operator==(rhs);
+		}
 	};
 
     using ImageDescriptor = TextureDescriptor;

@@ -129,7 +129,7 @@ namespace CE
             uint samplerIndex = 0;
         };
 
-        using FShapeItemList = StableDynamicArray<FShapeItem2D, ShapeItemIncrement, false>;
+        using FShapeItemList = StableGrowthArray<FShapeItem2D, ShapeItemIncrement, false>;
 
         struct alignas(8) FLineItem2D
         {
@@ -138,7 +138,7 @@ namespace CE
             float dashLength = 5.0f;
         };
 
-        using FLineItemList = StableDynamicArray<FLineItem2D, LineItemIncrement, false>;
+        using FLineItemList = StableGrowthArray<FLineItem2D, LineItemIncrement, false>;
 
         // Base draw item: Shape or text character
         struct alignas(16) FDrawItem2D
@@ -161,7 +161,7 @@ namespace CE
             int endClipIndex = -1;
         };
 
-        using FDrawItemList = StableDynamicArray<FDrawItem2D, DrawItemIncrement, false>;
+        using FDrawItemList = StableGrowthArray<FDrawItem2D, DrawItemIncrement, false>;
 
         struct alignas(16) FClipItem2D
         {
@@ -176,12 +176,12 @@ namespace CE
             int clipItemIndex = -1;
         };
 
-        using FClipItemList = StableDynamicArray<FClipItem2D, ClipItemIncrement, false>;
-        using FClipItemStack = StableDynamicArray<int, ClipItemIncrement, false>;
-        using FClipItemIndexList = StableDynamicArray<FClipItemIndexData, ClipItemIncrement, false>;
+        using FClipItemList = StableGrowthArray<FClipItem2D, ClipItemIncrement, false>;
+        using FClipItemStack = StableGrowthArray<int, ClipItemIncrement, false>;
+        using FClipItemIndexList = StableGrowthArray<FClipItemIndexData, ClipItemIncrement, false>;
 
-        using FCoordinateSpaceStack = StableDynamicArray<Matrix4x4, CoordinateStackItemIncrement, false>;
-        using FOpacityStack = StableDynamicArray<f32, OpacityStackItemIncrement, false>;
+        using FCoordinateSpaceStack = StableGrowthArray<Matrix4x4, CoordinateStackItemIncrement, false>;
+        using FOpacityStack = StableGrowthArray<f32, OpacityStackItemIncrement, false>;
 
         struct FDrawBatch
         {

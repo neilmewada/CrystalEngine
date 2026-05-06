@@ -10,7 +10,7 @@ namespace CE::RHI
 	DrawPacketBuilder::DrawPacketBuilder(IAllocator* allocator)
 	{
 		if (!allocator)
-			allocator = SystemAllocator::Get();
+			allocator = OSAllocator::Get();
 		this->allocator = allocator;
 	}
 
@@ -116,7 +116,7 @@ namespace CE::RHI
 
 		SIZE_T totalByteCount = byteOffsetCurrent;
 
-		u8* allocationData = (u8*)allocator->AlignedAlloc(totalByteCount, alignof(DrawPacket));
+		u8* allocationData = (u8*)allocator->allocate(totalByteCount, alignof(DrawPacket));
 
 		auto drawPacket = new(allocationData) DrawPacket();
 		drawPacket->allocator = allocator;

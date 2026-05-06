@@ -19,7 +19,9 @@ namespace CE::RHI
 		/// @brief Memory heap will be used to store buffers
 		Buffer = BIT(0),
 		/// @brief Memory heap will be used to store textures
-		Texture = BIT(1)
+		Texture = BIT(1),
+
+		All = Buffer | Texture
 	};
 	ENUM_CLASS_FLAGS(MemoryHeapUsageFlags);
 
@@ -28,7 +30,7 @@ namespace CE::RHI
 		Name debugName = "MemoryHeap";
 		MemoryHeapType heapType{};
 		u64 allocationSize = 0;
-		MemoryHeapUsageFlags usageFlags{};
+		MemoryHeapUsageFlags usageFlags = MemoryHeapUsageFlags::All;
 		u32 flags = 0;
 	};
 

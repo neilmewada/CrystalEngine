@@ -41,7 +41,7 @@ namespace CE
 
         void OnSelectionChanged();
 
-        using ListViewRowList = StableDynamicArray<FListViewRow*, 64, false>;
+        using ListViewRowList = StableGrowthArray<FListViewRow*, 64, false>;
 
         WeakRef<FListView> listView = nullptr;
         ListViewRowList children;

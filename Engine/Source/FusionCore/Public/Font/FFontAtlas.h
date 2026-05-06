@@ -108,7 +108,7 @@ namespace CE
             u32 mipIndex = 0;
         };
 
-        using FGlyphDataList = StableDynamicArray<FGlyphData, 256, false>;
+        using FGlyphDataList = StableGrowthArray<FGlyphData, 256, false>;
 
         FGlyphDataList glyphDataList;
         RPI::DynamicStructuredBuffer<FGlyphData> glyphBuffer;

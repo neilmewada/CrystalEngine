@@ -34,6 +34,12 @@
 #include "RHI/VertexBufferView.h"
 #include "RHI/TextureView.h"
 
+// Memory
+#include "RHI/Allocator.h"
+#include "RHI/FreeListAllocator.h"
+#include "RHI/AliasedHeap.h"
+#include "RHI/AliasedAttachmentAllocator.h"
+
 // Draw Data
 #include "RHI/DrawItem.h"
 #include "RHI/DrawList.h"

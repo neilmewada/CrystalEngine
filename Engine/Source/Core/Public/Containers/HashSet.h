@@ -42,6 +42,12 @@ namespace CE
 			return *impl.find(item);
 		}
 
+        template<class InputIt>
+        void Insert(InputIt first, InputIt last)
+        {
+            impl.insert(first, last);
+        }
+
         bool Exists(std::function<bool(const T&)> pred) const
         {
             for (auto it = impl.begin(); it != impl.end(); ++it)

@@ -40,3 +40,4 @@ typedef intptr_t PtrDiff;
     typedef size_t SIZE_T;
     typedef s32 SSIZE_T;
 #endif
+

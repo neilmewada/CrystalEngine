@@ -4,16 +4,16 @@ namespace CE
 {
     
     template<typename T, SIZE_T GrowthIncrement = 128, bool CallDestructor = true>
-    class StableDynamicArray
+    class StableGrowthArray
     {
-        CE_NO_COPY(StableDynamicArray);
+        CE_NO_COPY(StableGrowthArray);
         static_assert(GrowthIncrement > 0);
     public:
 
-        StableDynamicArray()
+        StableGrowthArray()
         {}
 
-        ~StableDynamicArray()
+        ~StableGrowthArray()
         {
             Free();
         }

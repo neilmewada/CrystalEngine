@@ -57,7 +57,7 @@ namespace CE
             return *this;
         }
 
-        using TreeViewRowList = StableDynamicArray<FTreeViewRow*, 64, false>;
+        using TreeViewRowList = StableGrowthArray<FTreeViewRow*, 64, false>;
         using TreeViewHashMap = HashMap<FModelIndex, FTreeViewRow*>;
 		using TreeViewGlobalRowIndexCache = HashMap<int, FModelIndex>;
 

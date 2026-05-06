@@ -24,6 +24,11 @@ namespace CE::RHI
 			CombineHash(hash, structureByteStride);
 			return hash;
 		}
+
+		bool operator==(const BufferDescriptor& rhs) const
+		{
+			return bufferSize == rhs.bufferSize && bindFlags == rhs.bindFlags && structureByteStride == rhs.structureByteStride;
+		}
 	};
 
 	class MemoryHeap;

@@ -23,6 +23,10 @@ namespace CE::RHI
 
 		virtual u32 GetFrameIndex() = 0;
 
+		virtual u64 GetFrameCounter() = 0;
+
+		virtual u32 BeginFrame() = 0;
+
 		virtual u32 BeginExecution(const FrameGraphExecuteRequest& executeRequest) = 0;
 
 		virtual void EndExecution(const FrameGraphExecuteRequest& executeRequest) = 0;

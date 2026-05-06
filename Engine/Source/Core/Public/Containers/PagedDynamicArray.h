@@ -13,7 +13,7 @@ namespace CE
     template<typename ValueType>
     class PagedDynamicArrayHandle;
 
-    template<typename T, SIZE_T ElementsPerPage = 512, class Allocator = SystemAllocator>
+    template<typename T, SIZE_T ElementsPerPage = 512, class Allocator = OSAllocator>
     class PagedDynamicArray
     {
     private:
@@ -327,7 +327,7 @@ namespace CE
         while (page != nullptr)
         {
             Page* next = page->nextPage;
-            allocator.AlignedFree(page, sizeof(Page));
+            allocator.deallocate(page, sizeof(Page), alignof(Page));
             page = next;
         }
 
@@ -381,7 +381,7 @@ namespace CE
     typename PagedDynamicArray<T, ElementsPerPage, Allocator>::Page*
         PagedDynamicArray<T, ElementsPerPage, Allocator>::AddPage()
     {
-        void* pageBlock = (Page*)allocator.AlignedAlloc(sizeof(Page), alignof(Page));
+        void* pageBlock = (Page*)allocator.allocate(sizeof(Page), alignof(Page));
         Page* page = new (pageBlock) Page();
         page->pageIndex = pageCounter++;
         page->container = this;

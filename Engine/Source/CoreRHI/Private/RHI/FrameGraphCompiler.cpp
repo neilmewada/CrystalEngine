@@ -30,6 +30,7 @@ namespace CE::RHI
 
 		FrameGraph* frameGraph = compileRequest.frameGraph;
 		TransientMemoryPool* pool = compileRequest.transientPool;
+		const u32 frameIndex = compileRequest.frameSlot;
 
 		const Array<RHI::FrameAttachment*>& attachments = frameGraph->attachmentDatabase.GetAttachments();
 

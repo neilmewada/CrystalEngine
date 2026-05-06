@@ -2,52 +2,6 @@
 
 namespace CE::Vulkan
 {
-
-    class QueueAllocator
-    {
-    public:
-        
-        void Init()
-        {
-            for (int familyIdx = 0; familyIdx < queuesByFamily.GetSize(); familyIdx++)
-            {
-				for (CommandQueue* queue : queuesByFamily[familyIdx])
-				{
-					auto mask = queue->GetQueueMask();
-					if (EnumHasFlag(mask, RHI::HardwareQueueClassMask::Graphics))
-					{
-						graphicsQueues.Add(queue);
-					}
-					else if (EnumHasFlag(mask, RHI::HardwareQueueClassMask::Compute))
-					{
-						computeQueues.Add(queue);
-					}
-					else if (EnumHasFlag(mask, RHI::HardwareQueueClassMask::Transfer))
-					{
-						transferQueues.Add(queue);
-					}
-				}
-            }
-        }
-        
-        CommandQueue* Acquire(int trackNumber, RHI::HardwareQueueClass queueClass, bool present = false)
-        {
-			if (trackNumber < graphicsQueues.GetSize())
-				return graphicsQueues[trackNumber];
-			else if (queueClass == RHI::HardwareQueueClass::Compute && (trackNumber - graphicsQueues.GetSize()) < computeQueues.GetSize())
-				return computeQueues[trackNumber - graphicsQueues.GetSize()];
-            return graphicsQueues.GetLast();
-        }
-        
-		Array<CommandQueue*> graphicsQueues{};
-		Array<CommandQueue*> computeQueues{};
-		Array<CommandQueue*> transferQueues{};
-        
-        CommandQueue* primaryQueue = nullptr;
-        CommandQueue* presentQueue = nullptr;
-        Array<CommandQueue*> queues{};
-        HashMap<int, Array<CommandQueue*>> queuesByFamily{};
-    };
     
 	FrameGraphCompiler::FrameGraphCompiler(Device* device) : device(device)
 	{
@@ -68,49 +22,6 @@ namespace CE::Vulkan
 		// Queue allocation logic...
 
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
-        QueueAllocator queueAllocator{};
-        queueAllocator.queuesByFamily = device->queuesByFamily;
-        queueAllocator.presentQueue = device->presentQueue;
-        queueAllocator.primaryQueue = device->primaryGraphicsQueue;
-        queueAllocator.queues = device->queues;
-        queueAllocator.Init();
-		
-        std::function<void(RHI::Scope*, int)> visitor = [&](RHI::Scope* rhiScope, int i)
-        {
-            Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
-            if (scope->queue == nullptr)
-			{
-#if PLATFORM_MAC
-                i = 0; // Temp code to force same queue
-#endif
-				scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
-			}
-
-			bool swapChainFound = false;
-
-			for (auto attachment : scope->attachments)
-			{
-				RHI::FrameAttachment* frameAttachment = attachment->GetFrameAttachment();
-				if (frameAttachment->IsSwapChainAttachment())
-				{
-					swapChainFound = true;
-					RHI::SwapChain* swapChain = ((RHI::SwapChainFrameAttachment*)frameAttachment)->GetSwapChain();
-					if (!scope->swapChainsUsedByAttachments.Exists(swapChain))
-						scope->swapChainsUsedByAttachments.Add(swapChain);
-				}
-			}
-
-			if (!swapChainFound)
-			{
-				scope->swapChainsUsedByAttachments.Clear();
-			}
-            
-            for (auto consumer : frameGraph->nodes[scope->id].consumers)
-            {
-				visitor(consumer, i);
-				i++;
-            }
-        };
 
 		auto graphicsQueue = device->GetGraphicsQueue();
 		auto computeQueue = device->GetComputeQueue();
@@ -121,19 +32,31 @@ namespace CE::Vulkan
 			
 			for (int i = 0; i < scopes.GetSize(); i++)
 			{
+				auto scope = scopes[i];
+
 				bool useComputeQueue = scopes.GetSize() > 1 && scopes[i]->IsComputePass();
 				((Vulkan::Scope*)scopes[i])->queue = useComputeQueue ? computeQueue : graphicsQueue;
+
+				bool swapChainFound = false;
+
+				for (auto attachment : scope->attachments)
+				{
+					RHI::FrameAttachment* frameAttachment = attachment->GetFrameAttachment();
+					if (frameAttachment->IsSwapChainAttachment())
+					{
+						swapChainFound = true;
+						RHI::SwapChain* swapChain = ((RHI::SwapChainFrameAttachment*)frameAttachment)->GetSwapChain();
+						if (!scope->swapChainsUsedByAttachments.Exists(swapChain))
+							scope->swapChainsUsedByAttachments.Add(swapChain);
+					}
+				}
+
+				if (!swapChainFound)
+				{
+					scope->swapChainsUsedByAttachments.Clear();
+				}
 			}
 		}
-        
-        int trackNumber = 0;
-        for (RHI::Scope* scope : frameGraph->producers)
-        {
-			visitor(scope, trackNumber);
-			trackNumber++;
-        }
-
-		trackNumber = 0;
 	}
 
 	void FrameGraphCompiler::CompileInternal(const RHI::FrameGraphCompileRequest& compileRequest)

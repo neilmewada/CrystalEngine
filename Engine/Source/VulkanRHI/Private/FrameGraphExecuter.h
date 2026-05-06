@@ -14,7 +14,11 @@ namespace CE::Vulkan
 
 		u32 GetFrameIndex() override { return currentSubmissionIndex; }
 
+		u64 GetFrameCounter() override { return frameCounter; }
+
 		void WaitUntilIdle() override;
+
+		u32 BeginFrame() override;
 
 		u32 BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest) override;
 
@@ -30,11 +34,8 @@ namespace CE::Vulkan
 		Device* device = nullptr;
 		FrameGraphCompiler* compiler = nullptr;
 
+		u64 frameCounter = 0;
 		u32 currentSubmissionIndex = 0;
-		//u32 currentImageIndex = 0;
-		//Array<u32> currentImageIndices{};
-
-		u64 totalFramesSubmitted = 0;
 	};
     
 } // namespace CE::Vulkan

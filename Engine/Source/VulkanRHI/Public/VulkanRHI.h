@@ -110,6 +110,9 @@ namespace CE::Vulkan
 		virtual RHI::MemoryHeap* AllocateMemoryHeap(const RHI::MemoryHeapDescriptor& desc) override;
 		virtual void FreeMemoryHeap(RHI::MemoryHeap* memoryHeap) override;
 
+        RHI::AliasedHeap* AllocateAliasedHeap(const RHI::AliasedHeapDescriptor& desc) override;
+        void FreeAliasedHeap(RHI::AliasedHeap* heap) override;
+
 		virtual void GetBufferMemoryRequirements(const RHI::BufferDescriptor& bufferDesc, RHI::ResourceMemoryRequirements& outRequirements) override;
         
         virtual void GetTextureMemoryRequirements(const RHI::TextureDescriptor& textureDesc, RHI::ResourceMemoryRequirements& outRequirements) override;

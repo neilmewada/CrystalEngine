@@ -10,13 +10,9 @@ namespace CE::RHI
 
 		frameGraph = new FrameGraph();
         transientMemoryPool = new TransientMemoryPool();
-		transientAttachmentPool = new TransientAttachmentPool();
+		transientAttachmentPool = new TransientAttachmentPool(descriptor.heapAllocationParameters);
 		numFramesInFlight = descriptor.numFramesInFlight;
-        
-        if (numFramesInFlight == 0 || numFramesInFlight > RHI::Limits::MaxSwapChainImageCount)
-        {
-            numFramesInFlight = RHI::Limits::MaxSwapChainImageCount;
-        }
+		heapAllocationParameters = descriptor.heapAllocationParameters;
 
 		compiler = RHI::gDynamicRHI->CreateFrameGraphCompiler();
 		executer = RHI::gDynamicRHI->CreateFrameGraphExecuter();
@@ -51,9 +47,12 @@ namespace CE::RHI
 
 	u32 FrameScheduler::GetFrameIndex()
 	{
-		if (!executer)
-			return 0;
 		return executer->GetFrameIndex();
+	}
+
+	u64 FrameScheduler::GetFrameCounter()
+	{
+		return executer->GetFrameCounter();
 	}
 
 	void FrameScheduler::BeginFrameGraph()
@@ -81,11 +80,17 @@ namespace CE::RHI
         compileRequest.transientPool = transientMemoryPool;
 		compileRequest.numFramesInFlight = numFramesInFlight;
 		compileRequest.shrinkPool = false;
+		compileRequest.frameSlot = executer->GetFrameIndex();
 		
         compiler->Compile(compileRequest);
     }
 
-	u32 FrameScheduler::BeginExecution()
+    bool FrameScheduler::BeginFrame()
+    {
+		return executer->BeginFrame();
+    }
+
+    u32 FrameScheduler::BeginExecution()
 	{
 		FrameGraphExecuteRequest executeRequest{};
 		executeRequest.frameGraph = frameGraph;

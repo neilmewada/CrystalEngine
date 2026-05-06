@@ -10,6 +10,8 @@ namespace CE::RHI
 	{
 		//! @brief Number of frames being rendered simultaneously (ex: triple buffering = 3).
 		u32 numFramesInFlight = 2;
+
+		HeapAllocationParameters heapAllocationParameters{};
 	};
 
 	//! FrameScheduler provides user facing API to construct, compile and execute FrameGraph.
@@ -35,11 +37,14 @@ namespace CE::RHI
 		void ResetFramesInFlight();
 		
 		u32 GetFrameIndex();
+		u64 GetFrameCounter();
 
 		void BeginFrameGraph();
 
 		//! @brief Compile the transient attachments, and everything.
 		void Compile();
+
+		bool BeginFrame();
 
 		u32 BeginExecution();
 
@@ -72,7 +77,10 @@ namespace CE::RHI
 
 	private:
 
+		u32 frameIndex = 0;
+
 		u32 numFramesInFlight = 2;
+		HeapAllocationParameters heapAllocationParameters{};
 
 		RHI::Scope* drawListScope = nullptr;
 
