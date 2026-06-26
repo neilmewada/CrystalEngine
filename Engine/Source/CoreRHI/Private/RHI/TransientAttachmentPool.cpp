@@ -47,11 +47,11 @@ namespace CE::RHI
         const auto& pool = pools[frameSlot];
         pool->Reset();
 
-        for (const ResourceRequest& request : requests)
+        for (const auto& request : requests)
         {
-	        if (!request.id.IsValid())
+            if (!request.id.IsValid())
                 continue;
-
+            
             auto resourceIdentifier = Pair{ request.id, request.descriptorHash };
 
             if (pool->availableResources.Exists(resourceIdentifier))
@@ -71,7 +71,7 @@ namespace CE::RHI
                 }
                 else if (request.resourceType == ResourceType::Buffer)
                 {
-	                attachmentAllocator->AllocateBuffer()
+	                
                 }
 
                 pool->allResources[resourceIdentifier] = PooledAttachment{
@@ -83,6 +83,16 @@ namespace CE::RHI
                     .memoryOffset = ,
                     .lastUsedFrame = frameNumber
                 };
+            }
+        }
+
+        for (const auto& [attachmentID, resourceHash] : pool->availableResources)
+        {
+            auto resourceIdentifier = Pair{ attachmentID, resourceHash };
+
+            if (frameNumber - pool->allResources[resourceIdentifier].lastUsedFrame > RHI::Limits::MaxSwapChainImageCount)
+            {
+	            // TODO: Free up this resource
             }
         }
     }
