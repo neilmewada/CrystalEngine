@@ -35,7 +35,7 @@ namespace CE::RHI
 
 		const Array<RHI::FrameAttachment*>& attachments = frameGraph->attachmentDatabase.GetAttachments();
 
-		pool->BeginFrame(frameNumber);
+		pool->BeginFrameAllocation(frameNumber);
 		{
 			for (int i = 0; i < attachments.GetSize(); i++)
 			{
@@ -51,17 +51,20 @@ namespace CE::RHI
 					auto bufferAttachment = (RHI::BufferFrameAttachment*)attachment;
 					const auto& desc = bufferAttachment->GetBufferDescriptor();
 					
+					pool->AllocateBuffer(bufferAttachment->GetId(), desc);
 				}
 				else if (attachment->IsImageAttachment())
 				{
 					auto imageAttachment = (RHI::ImageFrameAttachment*)attachment;
-
+					const auto& desc = imageAttachment->GetImageDescriptor();
+					
+					pool->AllocateTexture(imageAttachment->GetId(), desc);
 				}
 			}
 		}
-		pool->EndFrame();
-
-		// TODO: Implement memory aliasing later
+		pool->EndFrameAllocation();
+		
+		// Old code
 		/*
 		ResourceMemoryRequirements bufferReq = {};
 		u64 bufferOffset = 0;

@@ -81,6 +81,7 @@ namespace CE::RHI
 		compileRequest.numFramesInFlight = numFramesInFlight;
 		compileRequest.shrinkPool = false;
 		compileRequest.frameSlot = executer->GetFrameSlot();
+		compileRequest.frameNumber = executer->GetFrameCounter();
 		
         compiler->Compile(compileRequest);
     }

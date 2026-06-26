@@ -21,6 +21,9 @@ namespace CE::RHI
 
         MemoryHeapUsageFlags GetUsageFlags() const { return usageFlags; }
 
+        VirtualAddress Allocate(SIZE_T byteCount, SIZE_T byteAlignment = 1);
+        void DeAllocate(VirtualAddress address);
+
     protected:
 
         AliasedHeapDescriptor descriptor{};

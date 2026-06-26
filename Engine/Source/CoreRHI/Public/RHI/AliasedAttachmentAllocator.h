@@ -10,6 +10,7 @@ namespace CE::RHI
         u64 pageSize = kDefaultPageSize;
     };
 
+    // The allocated attachments are not aliased for now.
     class CORERHI_API AliasedAttachmentAllocator final
     {
     public:
@@ -22,7 +23,15 @@ namespace CE::RHI
         AliasedAttachmentAllocator(const Descriptor& desc);
         virtual ~AliasedAttachmentAllocator();
 
+        VirtualAddress AllocateBuffer(const RHI::BufferDescriptor& bufferDesc);
+
     private:
+
+        struct AllocationInfo
+        {
+            VirtualAddress address{};
+            ResourceType resourceType{};
+        };
 
         Ptr<AliasedHeap> AddHeapPage();
 

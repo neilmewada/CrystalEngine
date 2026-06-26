@@ -63,6 +63,8 @@ namespace CE::Vulkan
 	{
 		ZoneScoped;
 
+		// TODO: Reimplement this method entirely
+
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 
 		vkDeviceWaitIdle(device->GetHandle());
