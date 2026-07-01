@@ -6,7 +6,12 @@ namespace CE::RHI
 		: RHIResource(ResourceType::AliasedHeap)
 		, descriptor(desc)
 	{
-		
+		firstFitAllocator.Init({ 0, desc.allocationSize, FreeListStrategy::FirstFit });
+	}
+
+	AliasedHeap::~AliasedHeap()
+	{
+		firstFitAllocator.Shutdown();
 	}
 
 	VirtualAddress AliasedHeap::Allocate(SIZE_T byteCount, SIZE_T byteAlignment)

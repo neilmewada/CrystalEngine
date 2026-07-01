@@ -35,7 +35,7 @@ namespace CE::RHI
 
 		const Array<RHI::FrameAttachment*>& attachments = frameGraph->attachmentDatabase.GetAttachments();
 
-		pool->BeginFrameAllocation(frameNumber);
+		pool->ResetFrameAllocation(frameNumber);
 		{
 			for (int i = 0; i < attachments.GetSize(); i++)
 			{
@@ -62,7 +62,7 @@ namespace CE::RHI
 				}
 			}
 		}
-		pool->EndFrameAllocation();
+		pool->CommitFrameAllocation();
 		
 		// Old code
 		/*

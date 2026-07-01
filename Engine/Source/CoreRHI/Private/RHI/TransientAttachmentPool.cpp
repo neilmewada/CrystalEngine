@@ -34,13 +34,13 @@ namespace CE::RHI
         
     }
 
-    void TransientAttachmentPool::BeginFrameAllocation(u64 frameNumber)
+    void TransientAttachmentPool::ResetFrameAllocation(u64 frameNumber)
     {
         this->frameNumber = frameNumber;
         requests.Clear();
     }
 
-    void TransientAttachmentPool::EndFrameAllocation()
+    void TransientAttachmentPool::CommitFrameAllocation()
     {
         const u32 frameSlot = frameNumber % RHI::Limits::MaxSwapChainImageCount;
 
@@ -65,14 +65,18 @@ namespace CE::RHI
             {
                 CE_ASSERT(!pool->usedResources.Exists(resourceIdentifier), "The same resource is being allocated twice in TransientAttachmentPool.");
 
+                VirtualAddress address{};
+
                 if (request.resourceType == ResourceType::Texture)
                 {
-	                
+                    address = attachmentAllocator->AllocateTexture(request.textureDescriptor);
                 }
                 else if (request.resourceType == ResourceType::Buffer)
                 {
-	                
+                     address = attachmentAllocator->AllocateBuffer(request.bufferDescriptor);
                 }
+
+                CE_ASSERT(address.IsValid(), "Failed to allocate Buffer/Texture!");
 
                 pool->allResources[resourceIdentifier] = PooledAttachment{
                     .id = request.id,
@@ -80,7 +84,7 @@ namespace CE::RHI
                     .textureDescriptor = request.textureDescriptor,
                     .bufferDescriptor = request.bufferDescriptor,
                     .descriptorHash = request.descriptorHash,
-                    .memoryOffset = ,
+                    .memoryOffset = address,
                     .lastUsedFrame = frameNumber
                 };
             }

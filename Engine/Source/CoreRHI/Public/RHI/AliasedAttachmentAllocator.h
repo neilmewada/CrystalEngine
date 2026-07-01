@@ -5,7 +5,7 @@ namespace CE::RHI
 
     struct HeapAllocationParameters
     {
-        static constexpr u64 kDefaultPageSize = 256_MB;
+        static constexpr u64 kDefaultPageSize = 512_MB;
 
         u64 pageSize = kDefaultPageSize;
     };
@@ -24,6 +24,7 @@ namespace CE::RHI
         virtual ~AliasedAttachmentAllocator();
 
         VirtualAddress AllocateBuffer(const RHI::BufferDescriptor& bufferDesc);
+        VirtualAddress AllocateTexture(const RHI::TextureDescriptor& textureDesc);
 
     private:
 

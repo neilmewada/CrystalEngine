@@ -47,8 +47,8 @@ namespace CE::RHI
         TransientAttachmentPool(const HeapAllocationParameters& heapParams);
         virtual ~TransientAttachmentPool();
         
-        void BeginFrameAllocation(u64 frameNumber);
-        void EndFrameAllocation();
+        void ResetFrameAllocation(u64 frameNumber);
+        void CommitFrameAllocation();
 
         void AllocateBuffer(AttachmentID id, const RHI::BufferDescriptor& descriptor);
         void AllocateTexture(AttachmentID id, const RHI::TextureDescriptor& descriptor);

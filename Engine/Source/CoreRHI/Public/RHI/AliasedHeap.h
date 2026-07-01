@@ -15,7 +15,7 @@ namespace CE::RHI
 
         AliasedHeap(const AliasedHeapDescriptor& desc);
 
-        ~AliasedHeap() override {}
+        ~AliasedHeap() override;
 
         u64 GetHeapSize() const { return heapSize; }
 

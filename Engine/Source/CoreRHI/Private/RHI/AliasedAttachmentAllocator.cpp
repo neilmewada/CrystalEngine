@@ -22,7 +22,23 @@ namespace CE::RHI
 		}
 
 		AddHeapPage();
-		return pages.GetLast()->Allocate(bufferDesc.bufferSize, Math::Min<u64>(bufferDesc.alignment, 1));
+		return pages.GetLast()->Allocate(bufferDesc.bufferSize, Math::Max<u64>(bufferDesc.alignment, 1));
+	}
+
+	VirtualAddress AliasedAttachmentAllocator::AllocateTexture(const RHI::TextureDescriptor& textureDesc)
+	{
+		ResourceMemoryRequirements req{};
+		RHI::gDynamicRHI->GetTextureMemoryRequirements(textureDesc, req);
+
+		for (int i = 0; i < pages.GetSize(); i++)
+		{
+			VirtualAddress address = pages[i]->Allocate(req.size, Math::Max<u64>(req.offsetAlignment, 1));
+			if (address.IsValid())
+				return address;
+		}
+
+		AddHeapPage();
+		return pages.GetLast()->Allocate(req.size, Math::Max<u64>(req.offsetAlignment, 1));
 	}
 
 	Ptr<AliasedHeap> AliasedAttachmentAllocator::AddHeapPage()
