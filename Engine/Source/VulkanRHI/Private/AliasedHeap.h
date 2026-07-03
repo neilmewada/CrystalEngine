@@ -10,9 +10,12 @@ namespace CE::Vulkan
         AliasedHeap(VulkanDevice* device, const AliasedHeapDescriptor& desc);
         ~AliasedHeap() override;
 
+        RHI::MemoryHeap* GetAllocation() override { return allocation; }
+
     private:
 
-        VkDeviceMemory allocation{};
+        //VkDeviceMemory allocation{};
+        Vulkan::MemoryHeap* allocation = nullptr;
 
         VulkanDevice* device = nullptr;
         VkMemoryPropertyFlags memoryPropertyFlags{};

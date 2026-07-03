@@ -24,6 +24,8 @@ namespace CE::RHI
         VirtualAddress Allocate(SIZE_T byteCount, SIZE_T byteAlignment = 1);
         void DeAllocate(VirtualAddress address);
 
+        virtual RHI::MemoryHeap* GetAllocation() = 0;
+
     protected:
 
         AliasedHeapDescriptor descriptor{};

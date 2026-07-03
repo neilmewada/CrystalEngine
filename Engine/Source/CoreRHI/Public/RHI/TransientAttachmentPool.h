@@ -8,6 +8,7 @@ namespace CE::RHI
     public:
 
         using ResourceHash = SIZE_T;
+        using ResourceID = Pair<AttachmentID, ResourceHash>;
 
         struct PooledAttachment
         {
@@ -19,16 +20,16 @@ namespace CE::RHI
             RHI::TextureDescriptor textureDescriptor{};
             RHI::BufferDescriptor bufferDescriptor{};
             ResourceHash descriptorHash = 0;
-            VirtualAddress memoryOffset = 0;
+            VirtualAddress allocationAddress = 0;
             u64 lastUsedFrame = 0;
         };
 
         struct ResourcePool
         {
-            HashMap<Pair<AttachmentID, ResourceHash>, PooledAttachment> allResources;
+            HashMap<ResourceID, PooledAttachment> allResources;
 
-            HashSet<Pair<AttachmentID, ResourceHash>> availableResources;
-            HashSet<Pair<AttachmentID, ResourceHash>> usedResources;
+            HashSet<ResourceID> availableResources;
+            HashSet<ResourceID> usedResources;
 
             ~ResourcePool() noexcept;
 
@@ -57,7 +58,7 @@ namespace CE::RHI
 
         struct ResourceRequest
         {
-            AttachmentID id{};
+            AttachmentID attachmentId{};
             RHI::ResourceType resourceType = ResourceType::None;
             RHI::BufferDescriptor bufferDescriptor{};
             RHI::TextureDescriptor textureDescriptor{};

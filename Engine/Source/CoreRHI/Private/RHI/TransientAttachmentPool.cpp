@@ -49,12 +49,12 @@ namespace CE::RHI
 
         for (const auto& request : requests)
         {
-            if (!request.id.IsValid())
+            if (!request.attachmentId.IsValid())
                 continue;
             
-            auto resourceIdentifier = Pair{ request.id, request.descriptorHash };
+            auto resourceIdentifier = Pair{ request.attachmentId, request.descriptorHash };
 
-            if (pool->availableResources.Exists(resourceIdentifier))
+            if (pool->availableResources.Exists(resourceIdentifier)) // Reuse resource handle
             {
                 pool->availableResources.Remove(resourceIdentifier);
                 pool->usedResources.Add(resourceIdentifier);
@@ -63,48 +63,84 @@ namespace CE::RHI
             }
             else
             {
-                CE_ASSERT(!pool->usedResources.Exists(resourceIdentifier), "The same resource is being allocated twice in TransientAttachmentPool.");
+                CE_ASSERT(!pool->usedResources.Exists(resourceIdentifier), "The same resource ID is being allocated twice in TransientAttachmentPool.");
 
                 VirtualAddress address{};
 
+                RHI::Buffer* buffer = nullptr;
+                RHI::Texture* texture = nullptr;
+                RHI::TextureView* textureView = nullptr;
+
                 if (request.resourceType == ResourceType::Texture)
                 {
-                    address = attachmentAllocator->AllocateTexture(request.textureDescriptor);
+                    address = attachmentAllocator->AllocateTexture(request.textureDescriptor, &texture);
+
+                    CE_ASSERT(address.IsValid(), "Failed to allocate Texture!");
+
+                    textureView = RHI::gDynamicRHI->CreateDefaultTextureView(texture);
                 }
                 else if (request.resourceType == ResourceType::Buffer)
                 {
-                     address = attachmentAllocator->AllocateBuffer(request.bufferDescriptor);
+                	address = attachmentAllocator->AllocateBuffer(request.bufferDescriptor, &buffer);
+
+                    CE_ASSERT(address.IsValid(), "Failed to allocate Buffer!");
+                }
+                else
+                {
+                    CE_ASSERT(false, "Invalid transient resource type!");
                 }
 
-                CE_ASSERT(address.IsValid(), "Failed to allocate Buffer/Texture!");
-
                 pool->allResources[resourceIdentifier] = PooledAttachment{
-                    .id = request.id,
+                    .id = request.attachmentId,
                     .resourceType = request.resourceType,
+                    .buffer = buffer,
+                    .texture =  texture,
+                    .textureView = textureView,
                     .textureDescriptor = request.textureDescriptor,
                     .bufferDescriptor = request.bufferDescriptor,
                     .descriptorHash = request.descriptorHash,
-                    .memoryOffset = address,
+                    .allocationAddress = address,
                     .lastUsedFrame = frameNumber
                 };
             }
         }
 
+        HashSet<ResourceID> resourcesToFree{};
+
         for (const auto& [attachmentID, resourceHash] : pool->availableResources)
         {
             auto resourceIdentifier = Pair{ attachmentID, resourceHash };
-
+            
             if (frameNumber - pool->allResources[resourceIdentifier].lastUsedFrame > RHI::Limits::MaxSwapChainImageCount)
             {
-	            // TODO: Free up this resource
+                attachmentAllocator->DeAllocate(pool->allResources[resourceIdentifier].allocationAddress);
+
+                resourcesToFree.Add(resourceIdentifier);
             }
+        }
+
+        for (const auto& resourceId : resourcesToFree)
+        {
+            if (!pool->allResources.KeyExists(resourceId))
+                continue;
+
+            PooledAttachment& attachment = pool->allResources[resourceId];
+            
+            // Deleting the buffer/texture unbinds the memory from AliasedHeap
+            delete attachment.buffer; attachment.buffer = nullptr;
+            delete attachment.textureView; attachment.textureView = nullptr;
+            delete attachment.texture; attachment.texture = nullptr;
+
+            pool->allResources.Remove(resourceId);
+            pool->usedResources.Remove(resourceId);
+            pool->availableResources.Remove(resourceId);
         }
     }
 
     void TransientAttachmentPool::AllocateBuffer(AttachmentID id, const RHI::BufferDescriptor& descriptor)
     {
         requests.Add(ResourceRequest{
-            .id = id,
+            .attachmentId = id,
             .resourceType = ResourceType::Buffer,
             .bufferDescriptor = descriptor,
             .textureDescriptor = {},
@@ -115,7 +151,7 @@ namespace CE::RHI
     void TransientAttachmentPool::AllocateTexture(AttachmentID id, const RHI::TextureDescriptor& descriptor)
     {
         requests.Add(ResourceRequest{
-            .id = id,
+            .attachmentId = id,
             .resourceType = ResourceType::Texture,
             .bufferDescriptor = {},
             .textureDescriptor = descriptor,

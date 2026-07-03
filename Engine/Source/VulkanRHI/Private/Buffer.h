@@ -4,8 +4,9 @@
 
 namespace CE::Vulkan
 {
-    
-    class Buffer : public RHI::Buffer
+	class AliasedHeap;
+
+	class Buffer : public RHI::Buffer
     {
     public:
 		Buffer(Device* device, const RHI::BufferDescriptor& desc);

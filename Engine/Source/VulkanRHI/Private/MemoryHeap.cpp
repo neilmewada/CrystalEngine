@@ -81,6 +81,17 @@ namespace CE::Vulkan
 		}
 	}
 
+	MemoryHeap::MemoryHeap(VulkanDevice* device, VkDeviceMemory allocation, VkMemoryPropertyFlags memoryPropertyFlags,
+		u32 supportedMemoryTypeBitMask, u32 allocatedMemoryTypeIndex)
+		: device(device)
+		, allocation(allocation)
+		, memoryPropertyFlags(memoryPropertyFlags)
+		, supportedMemoryTypeBitMask(supportedMemoryTypeBitMask)
+		, allocatedMemoryTypeIndex(allocatedMemoryTypeIndex)
+	{
+
+	}
+
 	MemoryHeap::~MemoryHeap()
 	{
 		if (allocation != nullptr)

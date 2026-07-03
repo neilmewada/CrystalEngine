@@ -38,7 +38,6 @@ namespace CE::RHI
 		AllocationRecord record{};
 		if (!RemoveAllocation(alignedAddress, record))
 		{
-			CE_ASSERT(false, "Attempting to free unmanaged memory!");
 			return;
 		}
 

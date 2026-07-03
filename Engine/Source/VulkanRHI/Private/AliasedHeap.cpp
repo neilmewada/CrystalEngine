@@ -48,16 +48,20 @@ namespace CE::Vulkan
 
 		allocInfo.memoryTypeIndex = allocatedMemoryTypeIndex;
 
-		auto result = vkAllocateMemory(device->GetHandle(), &allocInfo, VULKAN_CPU_ALLOCATOR, &allocation);
+		VkDeviceMemory memoryAllocation{};
+
+		auto result = vkAllocateMemory(device->GetHandle(), &allocInfo, VULKAN_CPU_ALLOCATOR, &memoryAllocation);
 		if (result != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to allocate heap memory of size {}: {}", heapSize, debugName);
 			return;
 		}
+
+		allocation = new Vulkan::MemoryHeap(device, memoryAllocation, memoryPropertyFlags, supportedMemoryTypeBitMask, allocatedMemoryTypeIndex);
 	}
 
 	AliasedHeap::~AliasedHeap()
 	{
-		
+		delete allocation; allocation = nullptr;
 	}
 } // namespace CE::Vulkan

@@ -7,7 +7,8 @@ namespace CE::Vulkan
 	class MemoryHeap final : public RHI::MemoryHeap
 	{
 	public:
-		MemoryHeap(Device* device, const RHI::MemoryHeapDescriptor& desc);
+		MemoryHeap(VulkanDevice* device, const RHI::MemoryHeapDescriptor& desc);
+		MemoryHeap(VulkanDevice* device, VkDeviceMemory allocation, VkMemoryPropertyFlags memoryPropertyFlags, u32 supportedMemoryTypeBitMask = 0, u32 allocatedMemoryTypeIndex = 0);
 
 		~MemoryHeap();
 

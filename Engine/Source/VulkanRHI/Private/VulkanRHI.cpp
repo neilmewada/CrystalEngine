@@ -418,7 +418,12 @@ namespace CE::Vulkan
 		return new Buffer(device, bufferDesc, memoryDesc);
 	}
 
-    void VulkanRHI::DestroyBuffer(RHI::Buffer* buffer)
+	RHI::Buffer* VulkanRHI::CreateBufferAliased(const RHI::BufferDescriptor& bufferDesc, Ptr<RHI::AliasedHeap> aliasedHeap, u64 memoryOffset)
+	{
+        return new Buffer(device, bufferDesc, aliasedHeap, memoryOffset);
+	}
+
+	void VulkanRHI::DestroyBuffer(RHI::Buffer* buffer)
     {
         delete buffer;
     }
@@ -426,6 +431,22 @@ namespace CE::Vulkan
     RHI::TextureView* VulkanRHI::CreateTextureView(const RHI::TextureViewDescriptor& desc)
     {
         return new Vulkan::TextureView(device, desc);
+    }
+
+    RHI::TextureView* VulkanRHI::CreateDefaultTextureView(RHI::Texture* texture)
+    {
+        if (!texture)
+            return nullptr;
+
+        return new Vulkan::TextureView(device, RHI::TextureViewDescriptor{
+            .texture = texture,
+            .format = texture->GetFormat(),
+            .dimension = texture->GetDimension(),
+            .baseMipLevel = 0,
+            .mipLevelCount = (int)texture->GetMipLevelCount(),
+            .baseArrayLayer = 0,
+            .arrayLayerCount = (int)texture->GetArrayLayerCount()
+        });
     }
 
     void VulkanRHI::DestroyTextureView(RHI::TextureView* textureView)

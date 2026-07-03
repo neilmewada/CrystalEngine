@@ -23,8 +23,10 @@ namespace CE::RHI
         AliasedAttachmentAllocator(const Descriptor& desc);
         virtual ~AliasedAttachmentAllocator();
 
-        VirtualAddress AllocateBuffer(const RHI::BufferDescriptor& bufferDesc);
-        VirtualAddress AllocateTexture(const RHI::TextureDescriptor& textureDesc);
+        VirtualAddress AllocateBuffer(const RHI::BufferDescriptor& bufferDesc, RHI::Buffer** outBuffer);
+        VirtualAddress AllocateTexture(const RHI::TextureDescriptor& textureDesc, RHI::Texture** outTexture);
+
+        void DeAllocate(VirtualAddress address);
 
     private:
 
