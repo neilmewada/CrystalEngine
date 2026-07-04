@@ -418,11 +418,6 @@ namespace CE::Vulkan
 		return new Buffer(device, bufferDesc, memoryDesc);
 	}
 
-	RHI::Buffer* VulkanRHI::CreateBufferAliased(const RHI::BufferDescriptor& bufferDesc, Ptr<RHI::AliasedHeap> aliasedHeap, u64 memoryOffset)
-	{
-        return new Buffer(device, bufferDesc, aliasedHeap, memoryOffset);
-	}
-
 	void VulkanRHI::DestroyBuffer(RHI::Buffer* buffer)
     {
         delete buffer;

@@ -7,8 +7,8 @@ namespace CE::RHI
     {
     public:
 
-        using ResourceHash = SIZE_T;
-        using ResourceID = Pair<AttachmentID, ResourceHash>;
+        using DescriptorHash = SIZE_T;
+        using ResourceID = Pair<AttachmentID, DescriptorHash>;
 
         struct PooledAttachment
         {
@@ -19,7 +19,7 @@ namespace CE::RHI
             RHI::TextureView* textureView = nullptr;
             RHI::TextureDescriptor textureDescriptor{};
             RHI::BufferDescriptor bufferDescriptor{};
-            ResourceHash descriptorHash = 0;
+            DescriptorHash descriptorHash = 0;
             VirtualAddress allocationAddress = 0;
             u64 lastUsedFrame = 0;
         };
@@ -49,10 +49,13 @@ namespace CE::RHI
         virtual ~TransientAttachmentPool();
         
         void ResetFrameAllocation(u64 frameNumber);
+
+        void RequestBufferAllocation(AttachmentID id, const RHI::BufferDescriptor& descriptor);
+        void RequestTextureAllocation(AttachmentID id, const RHI::TextureDescriptor& descriptor);
+
         void CommitFrameAllocation();
 
-        void AllocateBuffer(AttachmentID id, const RHI::BufferDescriptor& descriptor);
-        void AllocateTexture(AttachmentID id, const RHI::TextureDescriptor& descriptor);
+        RHI::Buffer* GetAllocatedBuffer(AttachmentID attachmentId, DescriptorHash descriptorHash);
 
     protected:
 
@@ -62,7 +65,7 @@ namespace CE::RHI
             RHI::ResourceType resourceType = ResourceType::None;
             RHI::BufferDescriptor bufferDescriptor{};
             RHI::TextureDescriptor textureDescriptor{};
-            ResourceHash descriptorHash = 0;
+            DescriptorHash descriptorHash = 0;
         };
 
         StaticArray<UniquePtr<ResourcePool>, RHI::Limits::MaxSwapChainImageCount> pools;

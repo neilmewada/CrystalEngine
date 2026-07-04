@@ -135,7 +135,6 @@ namespace CE::RHI
 
 		virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc) = 0;
 		virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc, const RHI::ResourceMemoryDescriptor& memoryDesc) = 0;
-		virtual RHI::Buffer* CreateBufferAliased(const RHI::BufferDescriptor& bufferDesc, Ptr<RHI::AliasedHeap> aliasedHeap, u64 memoryOffset) = 0;
         virtual void DestroyBuffer(RHI::Buffer* buffer) = 0;
 
 		virtual RHI::TextureView* CreateTextureView(const RHI::TextureViewDescriptor& desc) = 0;
@@ -144,7 +143,6 @@ namespace CE::RHI
         
 		virtual RHI::Texture* CreateTexture(const RHI::TextureDescriptor& textureDesc) = 0;
 		virtual RHI::Texture* CreateTexture(const RHI::TextureDescriptor& textureDesc, const RHI::ResourceMemoryDescriptor& memoryDesc) = 0;
-		virtual RHI::Texture* CreateTextureAliased(const RHI::TextureDescriptor& textureDesc, Ptr<RHI::AliasedHeap> aliasedHeap, u64 memoryOffset) = 0;
         virtual void DestroyTexture(RHI::Texture* texture) = 0;
         
         virtual RHI::Sampler* CreateSampler(const SamplerDescriptor& samplerDesc) = 0;

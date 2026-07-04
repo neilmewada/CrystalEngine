@@ -51,18 +51,42 @@ namespace CE::RHI
 					auto bufferAttachment = (RHI::BufferFrameAttachment*)attachment;
 					const auto& desc = bufferAttachment->GetBufferDescriptor();
 					
-					pool->AllocateBuffer(bufferAttachment->GetId(), desc);
+					pool->RequestBufferAllocation(bufferAttachment->GetId(), desc);
 				}
 				else if (attachment->IsImageAttachment())
 				{
 					auto imageAttachment = (RHI::ImageFrameAttachment*)attachment;
 					const auto& desc = imageAttachment->GetImageDescriptor();
 					
-					pool->AllocateTexture(imageAttachment->GetId(), desc);
+					pool->RequestTextureAllocation(imageAttachment->GetId(), desc);
 				}
 			}
 		}
 		pool->CommitFrameAllocation();
+
+		for (RHI::FrameAttachment* attachment : attachments)
+		{
+			if (attachment->GetLifetimeType() != AttachmentLifetimeType::Transient)
+				continue;
+
+			if (attachment->IsBufferAttachment())
+			{
+				auto bufferAttachment = (RHI::BufferFrameAttachment*)attachment;
+				const auto& desc = bufferAttachment->GetBufferDescriptor();
+
+				RHI::Buffer* buffer = pool->GetAllocatedBuffer(bufferAttachment->GetId(), desc.GetHash());
+				CE_ASSERT(buffer != nullptr, "Transient buffer not allocated!");
+
+				attachment->SetResource(frameSlot, buffer);
+			}
+			else if (attachment->IsImageAttachment())
+			{
+				auto imageAttachment = (RHI::ImageFrameAttachment*)attachment;
+				const auto& desc = imageAttachment->GetImageDescriptor();
+
+				RHI::TextureView* textureView = pool->GetAllocatedTexture(imageAttachment->GetId(), desc.GetHash());
+			}
+		}
 		
 		// Old code
 		/*

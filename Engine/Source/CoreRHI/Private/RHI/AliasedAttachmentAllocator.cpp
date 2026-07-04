@@ -19,14 +19,14 @@ namespace CE::RHI
 			VirtualAddress address = pages[i]->Allocate(bufferDesc.bufferSize, Math::Min<u64>(bufferDesc.alignment, 1));
 			if (address.IsValid())
 			{
-				*outBuffer = RHI::gDynamicRHI->CreateBufferAliased(bufferDesc, pages[i], address);
+				*outBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc, {pages[i]->GetAllocation(), address});
 				return address;
 			}
 		}
 
 		AddHeapPage();
 		VirtualAddress address = pages.GetLast()->Allocate(bufferDesc.bufferSize, Math::Max<u64>(bufferDesc.alignment, 1));
-		*outBuffer = RHI::gDynamicRHI->CreateBufferAliased(bufferDesc, pages.GetLast(), address);
+		*outBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc, {pages.GetLast()->GetAllocation(), address});
 		return address;
 	}
 
@@ -40,7 +40,7 @@ namespace CE::RHI
 			VirtualAddress address = pages[i]->Allocate(req.size, Math::Max<u64>(req.offsetAlignment, 1));
 			if (address.IsValid())
 			{
-				*outTexture = RHI::gDynamicRHI->CreateTextureAliased(textureDesc, pages[i], address);
+				*outTexture = RHI::gDynamicRHI->CreateTexture(textureDesc, {pages[i]->GetAllocation(), address});
 				return address;
 			}
 			if (address.IsValid())
@@ -49,7 +49,7 @@ namespace CE::RHI
 
 		AddHeapPage();
 		VirtualAddress address = pages.GetLast()->Allocate(req.size, Math::Max<u64>(req.offsetAlignment, 1));
-		*outTexture = RHI::gDynamicRHI->CreateTextureAliased(textureDesc, pages.GetLast(), address);
+		*outTexture = RHI::gDynamicRHI->CreateTexture(textureDesc, {pages.GetLast()->GetAllocation(), address});
 		return address;
 	}
 

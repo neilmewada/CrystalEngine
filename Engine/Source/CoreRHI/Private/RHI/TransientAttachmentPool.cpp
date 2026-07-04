@@ -137,7 +137,23 @@ namespace CE::RHI
         }
     }
 
-    void TransientAttachmentPool::AllocateBuffer(AttachmentID id, const RHI::BufferDescriptor& descriptor)
+    RHI::Buffer* TransientAttachmentPool::GetAllocatedBuffer(AttachmentID attachmentId, DescriptorHash descriptorHash)
+    {
+        auto resourceIdentifier = Pair{ attachmentId, descriptorHash };
+
+        const u32 frameSlot = frameNumber % RHI::Limits::MaxSwapChainImageCount;
+
+        const auto& pool = pools[frameSlot];
+
+        if (pool->allResources.KeyExists(resourceIdentifier))
+        {
+            return pool->allResources[resourceIdentifier].buffer;
+        }
+
+        return nullptr;
+    }
+
+    void TransientAttachmentPool::RequestBufferAllocation(AttachmentID id, const RHI::BufferDescriptor& descriptor)
     {
         requests.Add(ResourceRequest{
             .attachmentId = id,
@@ -148,7 +164,7 @@ namespace CE::RHI
         });
     }
 
-    void TransientAttachmentPool::AllocateTexture(AttachmentID id, const RHI::TextureDescriptor& descriptor)
+    void TransientAttachmentPool::RequestTextureAllocation(AttachmentID id, const RHI::TextureDescriptor& descriptor)
     {
         requests.Add(ResourceRequest{
             .attachmentId = id,

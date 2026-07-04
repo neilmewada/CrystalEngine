@@ -121,7 +121,6 @@ namespace CE::Vulkan
 
         virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc) override;
 		virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc, const RHI::ResourceMemoryDescriptor& memoryDesc) override;
-        RHI::Buffer* CreateBufferAliased(const RHI::BufferDescriptor& bufferDesc, Ptr<RHI::AliasedHeap> aliasedHeap, u64 memoryOffset) override;
         virtual void DestroyBuffer(RHI::Buffer* buffer) override;
 
         virtual RHI::TextureView* CreateTextureView(const RHI::TextureViewDescriptor& desc) override;
