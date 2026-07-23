@@ -63,10 +63,27 @@ namespace CE::Vulkan
 	{
 		ZoneScoped;
 
-		// TODO: Reimplement this method entirely
-
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 
+		bool presentSwapChains = false;
+
+		if (frameGraph->presentSwapChains.NotEmpty())
+		{
+			imageCount = frameGraph->presentSwapChains[0]->GetImageCount();
+			numFramesInFlight = imageCount;
+			presentSwapChains = true;
+		}
+
+		for (auto scope : frameGraph->scopes)
+		{
+			delete scope->passShaderResourceGroup;
+			scope->passShaderResourceGroup = nullptr;
+			delete scope->subpassShaderResourceGroup;
+			scope->subpassShaderResourceGroup = nullptr;
+		}
+
+		// TODO: Reimplement this method entirely
+		/*
 		vkDeviceWaitIdle(device->GetHandle());
 
 		numFramesInFlight = compileRequest.numFramesInFlight;
@@ -181,7 +198,7 @@ namespace CE::Vulkan
 
 		// Compile barriers
 		CompileBarriers(compileRequest);
-
+		*/
 	}
 
     void FrameGraphCompiler::DestroySyncObjects()
