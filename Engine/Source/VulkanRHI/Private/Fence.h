@@ -6,7 +6,7 @@ namespace CE::Vulkan
     class Fence : public RHI::Fence
     {
     public:
-        Fence(Device* device, uint64_t initialValue);
+        Fence(Device* device, uint64_t initialValue = 0);
 
         virtual ~Fence();
 

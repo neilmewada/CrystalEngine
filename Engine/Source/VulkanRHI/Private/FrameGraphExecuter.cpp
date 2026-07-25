@@ -5,11 +5,12 @@ namespace CE::Vulkan
 
 	FrameGraphExecuter::FrameGraphExecuter(Device* device) : device(device)
 	{
-		
+		frameCompletionFence = new Vulkan::Fence(device);
 	}
 
 	FrameGraphExecuter::~FrameGraphExecuter()
 	{
+		delete frameCompletionFence; frameCompletionFence = nullptr;
 		device->GetShaderResourceManager()->DestroyQueuedSRG();
 	}
 

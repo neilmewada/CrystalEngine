@@ -32,8 +32,18 @@ namespace CE::Vulkan
 		bool ExecuteScope(const RHI::FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<RHI::ScopeId>& executedScopes, 
 			HashSet<Vulkan::SwapChain*>& usedSwapChains);
 
+		struct FrameSlotContext
+		{
+			u64 fenceCompleteValue = 0;
+			u64 frameNumber = 0;
+			u32 frameSlot = 0;
+		};
+
 		Device* device = nullptr;
 		FrameGraphCompiler* compiler = nullptr;
+
+		Vulkan::Fence* frameCompletionFence = nullptr;
+		StaticArray<FrameSlotContext, RHI::Limits::MaxFramesInFlight> frameSlots{};
 
 		u64 frameCounter = 0;
 		u32 currentSubmissionIndex = 0;
