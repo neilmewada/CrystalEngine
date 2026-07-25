@@ -69,7 +69,7 @@ namespace CE::Vulkan
 
 		if (frameGraph->presentSwapChains.NotEmpty())
 		{
-			imageCount = frameGraph->presentSwapChains[0]->GetImageCount();
+			imageCount = RHI::Limits::MaxSwapChainImageCount;
 			numFramesInFlight = imageCount;
 			presentSwapChains = true;
 		}

@@ -153,6 +153,23 @@ namespace CE::RHI
         return nullptr;
     }
 
+    RHI::TextureView* TransientAttachmentPool::GetAllocatedTexture(AttachmentID attachmentId,
+	    DescriptorHash descriptorHash)
+    {
+        auto resourceIdentifier = Pair{ attachmentId, descriptorHash };
+
+        const u32 frameSlot = frameNumber % RHI::Limits::MaxSwapChainImageCount;
+
+        const auto& pool = pools[frameSlot];
+
+        if (pool->allResources.KeyExists(resourceIdentifier))
+        {
+            return pool->allResources[resourceIdentifier].textureView;
+        }
+
+        return nullptr;
+    }
+
     void TransientAttachmentPool::RequestBufferAllocation(AttachmentID id, const RHI::BufferDescriptor& descriptor)
     {
         requests.Add(ResourceRequest{

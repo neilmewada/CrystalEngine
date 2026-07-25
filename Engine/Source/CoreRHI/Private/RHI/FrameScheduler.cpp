@@ -86,7 +86,17 @@ namespace CE::RHI
         compiler->Compile(compileRequest);
     }
 
-	FrameContext FrameScheduler::BeginFrame()
+    void FrameScheduler::Execute()
+    {
+		FrameGraphExecuteRequest executeRequest{};
+		executeRequest.frameGraph = frameGraph;
+		executeRequest.scheduler = this;
+		executeRequest.compiler = compiler;
+
+		executer->Execute(executeRequest);
+    }
+
+    FrameContext FrameScheduler::BeginFrame()
     {
 		FrameContext frame{};
 

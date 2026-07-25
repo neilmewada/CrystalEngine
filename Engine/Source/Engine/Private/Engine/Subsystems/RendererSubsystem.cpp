@@ -415,7 +415,7 @@ namespace CE
 			}
 		}
 
-		scheduler->EndExecution();
+		scheduler->Execute();
 
 		for (int i = sceneRenderers.GetSize() - 1; i >= 0; --i)
 		{

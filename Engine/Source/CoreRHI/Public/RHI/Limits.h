@@ -19,6 +19,8 @@ namespace CE::RHI
 		//! @brief Max number of back buffers (images) that can be used in swap chain.
 		constexpr u32 MaxSwapChainImageCount = 2;
 
+		constexpr u32 MaxFramesInFlight = 2;
+
 		namespace Pipeline
 		{
 			//! @brief Max number of vertex attributes

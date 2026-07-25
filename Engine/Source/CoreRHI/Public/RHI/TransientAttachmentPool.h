@@ -56,6 +56,7 @@ namespace CE::RHI
         void CommitFrameAllocation();
 
         RHI::Buffer* GetAllocatedBuffer(AttachmentID attachmentId, DescriptorHash descriptorHash);
+        RHI::TextureView* GetAllocatedTexture(AttachmentID attachmentId, DescriptorHash descriptorHash);
 
     protected:
 
