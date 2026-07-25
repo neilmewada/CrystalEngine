@@ -5,6 +5,13 @@ namespace CE::RHI
 	class FrameGraphCompiler;
 	class FrameGraphExecuter;
     struct IScopeProducer;
+
+	struct FrameContext
+	{
+		u64 frameNumber = 0;
+		u32 frameSlot = 0;
+		b8 isValid = false;
+	};
 	
 	struct FrameSchedulerDescriptor
 	{
@@ -44,7 +51,7 @@ namespace CE::RHI
 		//! @brief Compile the transient attachments, and everything.
 		void Compile();
 
-		bool BeginFrame();
+		FrameContext BeginFrame();
 
 		u32 BeginExecution();
 
@@ -77,7 +84,8 @@ namespace CE::RHI
 
 	private:
 
-		u32 frameIndex = 0;
+		u64 frameSlot = 0;
+		u64 frameNumber = 0;
 
 		u32 numFramesInFlight = 2;
 		HeapAllocationParameters heapAllocationParameters{};

@@ -86,9 +86,11 @@ namespace CE::RHI
         compiler->Compile(compileRequest);
     }
 
-    bool FrameScheduler::BeginFrame()
+	FrameContext FrameScheduler::BeginFrame()
     {
-		return executer->BeginFrame();
+		FrameContext frame{};
+
+		return frame;
     }
 
     u32 FrameScheduler::BeginExecution()

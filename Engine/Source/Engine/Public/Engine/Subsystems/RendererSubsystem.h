@@ -79,22 +79,18 @@ namespace CE
 
 		HashMap<ClassType*, SubClass<RPI::FeatureProcessor>> componentClassToFeatureProcessorClass{};
 		HashMap<u64, Vec2i> windowSizesById;
-		
-		u32 curImageIndex = 0;
 
 		Array<FGameWindow*> renderViewports;
 
-		HashSet<Uuid> previouslyVisibleViewports;
-
 		// - Frame Graph -
+
+		RHI::FrameContext currentFrame{};
 
 		RHI::FrameScheduler* scheduler = nullptr;
 
 		RHI::DrawListContext drawList{};
 
 		bool temporaryScenesPresent = false;
-		bool rebuildFrameGraph = true;
-		//bool recompileFrameGraph = true;
 
 		friend class SceneSubsystem;
 	};

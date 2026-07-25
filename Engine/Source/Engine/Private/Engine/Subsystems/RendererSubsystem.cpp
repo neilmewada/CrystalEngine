@@ -10,7 +10,6 @@ namespace CE
 
     void RendererSubsystem::RebuildFrameGraph()
     {
-		rebuildFrameGraph = true;
     }
 
     f32 RendererSubsystem::GetTickPriority() const
@@ -148,8 +147,6 @@ namespace CE
 
 		FusionApplication* fusion = FusionApplication::TryGet();
 
-		int submittedImageIndex = -1;
-
 		if (fusion)
 		{
 			fusion->Tick();
@@ -160,61 +157,14 @@ namespace CE
 			return;
 		}
 
-		submittedImageIndex = curImageIndex;
-
-		int frameIndex = scheduler->BeginFrame();
+		currentFrame = scheduler->BeginFrame();
 
 		BuildFrameGraph();
 		CompileFrameGraph();
-		rebuildFrameGraph = false;
 
 		if (IsEngineRequestingExit())
 		{
 			return;
-		}
-
-		if (frameIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph)
-		{
-			RebuildFrameGraph();
-			return;
-		}
-
-    	for (FGameWindow* renderViewport : renderViewports)
-    	{
-    		RPI::Scene* rpiScene = renderViewport->GetScene();
-    		CE::Scene* scene = sceneSubsystem->FindRpiSceneOwner(rpiScene);
-    		if (scene == nullptr || !scene->IsEnabled())// || !renderViewport->IsEnabledInHierarchy())
-    		{
-    			// A viewport that was previously visible is no longer visible!
-    			if (previouslyVisibleViewports.Exists(renderViewport->GetUuid()))
-    			{
-    				previouslyVisibleViewports.Remove(renderViewport->GetUuid());
-
-    				RebuildFrameGraph();
-    				return;
-    			}
-    			continue;
-    		}
-
-    		// A viewport that was previously disabled is now enabled!
-    		if (!previouslyVisibleViewports.Exists(renderViewport->GetUuid()))
-    		{
-    			previouslyVisibleViewports.Add(renderViewport->GetUuid());
-
-    			RebuildFrameGraph();
-    			return;
-    		}
-    	}
-
-		curImageIndex = frameIndex;
-
-		// ---------------------------------------------------------
-		// - Enqueue draw packets to views
-
-		if (submittedImageIndex != curImageIndex)
-		{
-			RPI::RPISystem::Get().SimulationTick(curImageIndex);
-			RPI::RPISystem::Get().RenderTick(curImageIndex);
 		}
 
 		// ---------------------------------------------------------
@@ -309,7 +259,7 @@ namespace CE
 
 		if (fusion)
 		{
-			fusion->EnqueueDrawPackets(drawList, curImageIndex);
+			fusion->EnqueueDrawPackets(drawList, currentFrame.frameSlot);
 		}
 
 		auto transparentTag = RPI::RPISystem::Get().GetBuiltinDrawListTag(RPI::BuiltinDrawItemTag::Transparent);
@@ -395,7 +345,7 @@ namespace CE
     
 		if (fusion) // FWidget Scopes & DrawLists
 		{
-			fusion->FlushDrawPackets(drawList, curImageIndex);
+			fusion->FlushDrawPackets(drawList, currentFrame.frameSlot);
 		}
 
 		for (FGameWindow* renderViewport : renderViewports)
@@ -487,20 +437,14 @@ namespace CE
 				awaitingSceneRenderers.RemoveAt(i);
 			}
 		}
-
-		if (temporaryScenesPresent)
-		{
-			temporaryScenesPresent = false;
-			RebuildFrameGraph();
-		}
 	}
 
 	void RendererSubsystem::BuildFrameGraph()
 	{
 		ZoneScoped;
 
-		RPI::RPISystem::Get().SimulationTick(curImageIndex);
-		RPI::RPISystem::Get().RenderTick(curImageIndex);
+		RPI::RPISystem::Get().SimulationTick(currentFrame.frameSlot);
+		RPI::RPISystem::Get().RenderTick(currentFrame.frameSlot);
 
 		RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
     	
@@ -512,9 +456,6 @@ namespace CE
 			{
 				// Emplace attachments from Fusion
 				app->EmplaceFrameAttachments();
-
-				// Cleanup first
-				previouslyVisibleViewports.Clear();
 
 				for (FGameWindow* renderViewport : renderViewports)
 				{
@@ -536,8 +477,6 @@ namespace CE
 						continue;
 					//if (!renderViewport->IsEnabledInHierarchy())
 					//	continue;
-
-					previouslyVisibleViewports.Add(renderViewport->GetUuid());
 
 					Ref<FNativeContext> nativeContext = renderViewport->GetNativeContext();
 					if (!nativeContext)

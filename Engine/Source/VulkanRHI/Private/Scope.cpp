@@ -10,8 +10,6 @@ namespace CE::Vulkan
 
 	Scope::~Scope()
 	{
-		vkDeviceWaitIdle(device->GetHandle());
-
 		for (int i = 0; i < commandListsByFamilyIndexPerImage.GetSize(); i++)
 		{
 			for (int j = 0; j < commandListsByFamilyIndexPerImage[i].GetSize(); j++)
@@ -133,11 +131,6 @@ namespace CE::Vulkan
 				vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &signalSemaphore);
 				signalSemaphores[i].Add(signalSemaphore);
 			}
-		}
-
-		if (operation == RHI::ScopeOperation::Compute)
-		{
-			String::IsAlphabet('a');
 		}
 
 		if (IsGraphicsPass())

@@ -82,6 +82,12 @@ namespace CE::Vulkan
 			scope->subpassShaderResourceGroup = nullptr;
 		}
 
+		// Compile sync objects for individual scopes
+		for (auto scope : frameGraph->scopes)
+		{
+			scope->Compile(compileRequest);
+		}
+
 		// TODO: Reimplement this method entirely
 		/*
 		vkDeviceWaitIdle(device->GetHandle());
