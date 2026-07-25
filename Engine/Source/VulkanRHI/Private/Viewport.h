@@ -13,7 +13,7 @@ namespace CE::Vulkan
     /*class Viewport : public RHI::Viewport
     {
     public:
-        Viewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
+        Viewport(VulkanRHI* vulkanRHI, Device* device, PlatformWindow* windowHandle,
             u32 width, u32 height,
             bool isFullscreen, const RHI::RenderTargetLayout& rtLayout);
         virtual ~Viewport();
@@ -55,7 +55,7 @@ namespace CE::Vulkan
 
         PlatformWindow* windowHandle = nullptr;
         VulkanRHI* vulkanRHI = nullptr;
-        VulkanDevice* device = nullptr;
+        Device* device = nullptr;
         RenderTarget* renderTarget = nullptr;
         SwapChain* swapChain = nullptr;
 

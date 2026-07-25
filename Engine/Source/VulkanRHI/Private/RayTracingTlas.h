@@ -8,7 +8,7 @@ namespace CE::Vulkan
         CE_NO_COPY(RayTracingTlas)
     public:
 
-        RayTracingTlas(VulkanDevice* device, const RHI::RayTracingTlasDescriptor& desc);
+        RayTracingTlas(Device* device, const RHI::RayTracingTlasDescriptor& desc);
 
 		~RayTracingTlas() override;
 
@@ -18,7 +18,7 @@ namespace CE::Vulkan
 
     private:
 
-        VulkanDevice* device = nullptr;
+        Device* device = nullptr;
 
 		Vulkan::Buffer* tlasBuffer = nullptr;
         Vulkan::Buffer* scratchBuffer = nullptr;

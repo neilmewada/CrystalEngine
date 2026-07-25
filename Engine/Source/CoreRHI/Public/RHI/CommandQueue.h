@@ -70,11 +70,6 @@ namespace CE::RHI
             return queueClass;
         }
 
-		HardwareQueueClass GetQueueClass() const
-		{
-			return queueClass;
-		}
-
 		bool SupportsOperation(HardwareQueueClass operationType) const
 		{
 			return (queueMask & (1 << (u32)operationType)) != 0;
@@ -85,7 +80,6 @@ namespace CE::RHI
 		HardwareQueueClass queueClass{};
 
 		HardwareQueueClassMask queueMask{};
-        HardwareQueueClass queueClass{};
 
 	};
     

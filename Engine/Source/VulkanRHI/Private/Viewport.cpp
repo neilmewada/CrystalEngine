@@ -6,7 +6,7 @@
 namespace CE::Vulkan
 {
     
-    /*Viewport::Viewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
+    /*Viewport::Viewport(VulkanRHI* vulkanRHI, Device* device, PlatformWindow* windowHandle,
         u32 width, u32 height,
         bool isFullscreen, const RHI::RenderTargetLayout& rtLayout)
         : vulkanRHI(vulkanRHI), device(device), windowHandle(windowHandle), isFullscreen(isFullscreen)

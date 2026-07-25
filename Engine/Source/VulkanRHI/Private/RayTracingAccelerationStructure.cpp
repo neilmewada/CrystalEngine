@@ -5,7 +5,7 @@
 namespace CE::Vulkan
 {
 
-	RayTracingAccelerationStructure::RayTracingAccelerationStructure(VulkanDevice* device, const VkAccelerationStructureCreateInfoKHR& createInfo) 
+	RayTracingAccelerationStructure::RayTracingAccelerationStructure(Device* device, const VkAccelerationStructureCreateInfoKHR& createInfo) 
 		: device(device)
 	{
 		device->vkCreateAccelerationStructureKHR(device->GetHandle(), &createInfo, VULKAN_CPU_ALLOCATOR, &accelerationStructure);

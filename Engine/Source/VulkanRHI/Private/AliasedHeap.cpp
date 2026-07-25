@@ -2,7 +2,7 @@
 
 namespace CE::Vulkan
 {
-	AliasedHeap::AliasedHeap(VulkanDevice* device, const AliasedHeapDescriptor& desc) 
+	AliasedHeap::AliasedHeap(Device* device, const AliasedHeapDescriptor& desc) 
 		: RHI::AliasedHeap(desc)
 		, device(device)
 	{

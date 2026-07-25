@@ -9,7 +9,7 @@ namespace CE::Vulkan
         CE_NO_COPY(RayTracingAccelerationStructure)
     public:
 
-        RayTracingAccelerationStructure(VulkanDevice* device, const VkAccelerationStructureCreateInfoKHR& createInfo);
+        RayTracingAccelerationStructure(Device* device, const VkAccelerationStructureCreateInfoKHR& createInfo);
 
         ~RayTracingAccelerationStructure();
 
@@ -17,7 +17,7 @@ namespace CE::Vulkan
 
     private:
 
-        VulkanDevice* device = nullptr;
+        Device* device = nullptr;
 
 		VkAccelerationStructureKHR accelerationStructure = nullptr;
         

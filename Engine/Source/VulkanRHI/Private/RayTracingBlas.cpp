@@ -82,7 +82,7 @@ namespace CE::Vulkan
 		return flags;
 	}
 
-	RayTracingBlas::RayTracingBlas(VulkanDevice* device, const RHI::RayTracingBlasDescriptor& desc)
+	RayTracingBlas::RayTracingBlas(Device* device, const RHI::RayTracingBlasDescriptor& desc)
 		: RHI::RayTracingBlas(desc), device(device)
 	{
 		Array<uint32_t> primitiveCounts;

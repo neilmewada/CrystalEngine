@@ -8,7 +8,7 @@ namespace CE::Vulkan
         CE_NO_COPY(RayTracingBlas)
 	public:
 
-        RayTracingBlas(VulkanDevice* device, const RHI::RayTracingBlasDescriptor& desc);
+        RayTracingBlas(Device* device, const RHI::RayTracingBlasDescriptor& desc);
 
 		~RayTracingBlas() override;
 
@@ -16,7 +16,7 @@ namespace CE::Vulkan
 
     private:
 
-        VulkanDevice* device = nullptr;
+        Device* device = nullptr;
 
         Vulkan::Buffer* blasBuffer = nullptr;
         Vulkan::Buffer* scratchBuffer = nullptr;

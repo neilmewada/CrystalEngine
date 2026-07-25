@@ -84,7 +84,7 @@ namespace CE::RHI
 				auto imageAttachment = (RHI::ImageFrameAttachment*)attachment;
 				const auto& desc = imageAttachment->GetImageDescriptor();
 
-				RHI::TextureView* textureView = pool->GetAllocatedTexture(imageAttachment->GetId(), desc.GetHash());
+				//RHI::TextureView* textureView = pool->GetAllocatedTexture(imageAttachment->GetId(), desc.GetHash());
 			}
 		}
 		

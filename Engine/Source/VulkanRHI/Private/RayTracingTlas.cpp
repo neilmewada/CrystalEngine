@@ -2,7 +2,7 @@
 
 namespace CE::Vulkan
 {
-	RayTracingTlas::RayTracingTlas(VulkanDevice* device, const RHI::RayTracingTlasDescriptor& desc)
+	RayTracingTlas::RayTracingTlas(Device* device, const RHI::RayTracingTlasDescriptor& desc)
 		: RHI::RayTracingTlas(desc)
 		, device(device)
 	{
