@@ -38,6 +38,7 @@
 #include "PipelineState.h"
 
 #include "FrameBuffer.h"
+#include "FrameBufferCache.h"
 #include "SwapChain.h"
 #include "ShaderResourceGroup.h"
 #include "Fence.h"

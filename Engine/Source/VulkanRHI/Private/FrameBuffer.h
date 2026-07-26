@@ -9,8 +9,7 @@ namespace CE::Vulkan
 
 	class FrameBuffer
 	{
-		CE_NO_COPY(FrameBuffer);
-		CE_NO_MOVE(FrameBuffer);
+		CE_NO_COPY_MOVE(FrameBuffer);
 	public:
 
 		FrameBuffer(Device* device, Scope* scope, u32 frameIndex, u32 imageIndex);

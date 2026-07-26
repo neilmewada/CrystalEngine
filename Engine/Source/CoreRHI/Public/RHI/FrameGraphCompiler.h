@@ -12,8 +12,9 @@ namespace CE::RHI
 
 		bool shrinkPool = false;
 
-		u32 frameSlot = 0;
 		u64 frameNumber = 0;
+		u32 frameSlot = 0;
+		u32 numFramesInFlight = RHI::Limits::MaxFramesInFlight;
 	};
     
 	class CORERHI_API FrameGraphCompiler

@@ -130,7 +130,7 @@ namespace CE::Vulkan
 			ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope, executedScopes, usedSwapChains);
 		}
 
-		frameSlot = (frameSlot + 1) % compiler->imageCount;
+		frameSlot = (frameSlot + 1) % compiler->numFramesInFlight;
 		frameNumber++;
 	}
 

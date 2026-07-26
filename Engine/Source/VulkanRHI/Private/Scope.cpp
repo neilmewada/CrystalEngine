@@ -25,14 +25,6 @@ namespace CE::Vulkan
             // No need to destroy it. RenderPassCache manages it.
         }
         renderPass = nullptr;
-
-		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
-		{
-			for (int j = 0; j < RHI::Limits::MaxSwapChainImageCount; j++)
-			{
-				delete frameBuffers[i][j]; frameBuffers[i][j] = nullptr;
-			}
-		}
         
 		DestroySyncObjects();
 
@@ -58,59 +50,6 @@ namespace CE::Vulkan
 		}
 
 		imageCount = Math::Min(imageCount, RHI::Limits::MaxSwapChainImageCount);
-
-		// Render Finished semaphores & fences
-		for (int i = 0; i < imageCount; i++)
-		{
-			VkSemaphoreCreateInfo semaphoreCI{};
-			semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-			VkResult result = VK_SUCCESS;
-
-			//VkSemaphore semaphore = nullptr;
-			//result = vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &semaphore);
-			if (result != VK_SUCCESS)
-			{
-				continue;
-			}
-			//renderFinishedSemaphores.Add(semaphore);
-
-			VkFenceCreateInfo fenceCI{};
-			fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-			fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-			
-			VkFence fence = nullptr;
-			result = vkCreateFence(device->GetHandle(), &fenceCI, VULKAN_CPU_ALLOCATOR, &fence);
-			if (result != VK_SUCCESS)
-			{
-				continue;
-			}
-
-			// 1 signal semaphore for 1 consumer
-			for (auto consumerRhiScope : consumers)
-			{
-				Vulkan::Scope* consumerScope = (Vulkan::Scope*)consumerRhiScope;
-				while (consumerScope->prevSubPass != nullptr)
-				{
-					consumerScope = (Vulkan::Scope*)consumerScope->prevSubPass;
-				}
-
-				if (signalSemaphoresByConsumerScope[i].KeyExists(consumerScope->id))
-					continue;
-
-				VkSemaphore signalSemaphore = nullptr;
-				vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &signalSemaphore);
-				signalSemaphores[i].Add(signalSemaphore);
-				signalSemaphoresByConsumerScope[i].Add(consumerScope->id, signalSemaphore);
-			}
-			// No consumers exist, then just signal 1 semaphore
-			if (consumers.IsEmpty())
-			{
-				VkSemaphore signalSemaphore = nullptr;
-				vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &signalSemaphore);
-				signalSemaphores[i].Add(signalSemaphore);
-			}
-		}
 
 		if (IsGraphicsPass())
 		{
