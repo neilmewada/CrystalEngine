@@ -12,13 +12,13 @@ namespace CE::Vulkan
 		FrameGraphExecuter(Device* device);
 		~FrameGraphExecuter() override;
 
-		u32 GetFrameSlot() override { return currentSubmissionIndex; }
+		u32 GetFrameSlot() override { return frameSlot; }
 
-		u64 GetFrameCounter() override { return frameCounter; }
+		u64 GetFrameNumber() override { return frameNumber; }
 
 		void WaitUntilIdle() override;
 
-		u32 BeginFrame() override;
+		FrameContext WaitForNextFrame() override;
 		bool Execute(const FrameGraphExecuteRequest& executeRequest) override;
 
 		u32 BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest) override;
@@ -32,7 +32,7 @@ namespace CE::Vulkan
 		bool ExecuteScope(const RHI::FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<RHI::ScopeId>& executedScopes, 
 			HashSet<Vulkan::SwapChain*>& usedSwapChains);
 
-		struct FrameSlotContext
+		struct FrameExecutionContext
 		{
 			u64 fenceCompleteValue = 0;
 			u64 frameNumber = 0;
@@ -43,10 +43,10 @@ namespace CE::Vulkan
 		FrameGraphCompiler* compiler = nullptr;
 
 		Vulkan::Fence* frameCompletionFence = nullptr;
-		StaticArray<FrameSlotContext, RHI::Limits::MaxFramesInFlight> frameSlots{};
+		StaticArray<FrameExecutionContext, RHI::Limits::MaxFramesInFlight> frameSlots{};
 
-		u64 frameCounter = 0;
-		u32 currentSubmissionIndex = 0;
+		u64 frameNumber = 0;
+		u32 frameSlot = 0;
 	};
     
 } // namespace CE::Vulkan

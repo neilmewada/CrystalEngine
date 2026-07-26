@@ -145,6 +145,11 @@ namespace CE
 
 		Super::Tick(delta);
 
+		if (IsEngineRequestingExit())
+		{
+			return;
+		}
+
 		FusionApplication* fusion = FusionApplication::TryGet();
 
 		if (fusion)
@@ -152,12 +157,11 @@ namespace CE
 			fusion->Tick();
 		}
 
-		if (IsEngineRequestingExit())
+		currentFrame = scheduler->BeginFrame();
+		if (!currentFrame.isValid)
 		{
 			return;
 		}
-
-		currentFrame = scheduler->BeginFrame();
 
 		BuildFrameGraph();
 		CompileFrameGraph();

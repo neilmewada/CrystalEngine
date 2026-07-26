@@ -10,10 +10,10 @@ namespace CE::RHI
 
     FrameGraph::~FrameGraph()
     {
-		Clear();
+		DeleteAll();
     }
 
-    void FrameGraph::Clear()
+    void FrameGraph::DeleteAll()
     {
 		presentingScopes.Clear();
 		presentSwapChains.Clear();

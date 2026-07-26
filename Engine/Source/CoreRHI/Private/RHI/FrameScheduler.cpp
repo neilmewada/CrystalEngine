@@ -52,7 +52,7 @@ namespace CE::RHI
 
 	u64 FrameScheduler::GetFrameCounter()
 	{
-		return executer->GetFrameCounter();
+		return executer->GetFrameNumber();
 	}
 
 	void FrameScheduler::BeginFrameGraph()
@@ -81,7 +81,7 @@ namespace CE::RHI
 		compileRequest.numFramesInFlight = numFramesInFlight;
 		compileRequest.shrinkPool = false;
 		compileRequest.frameSlot = executer->GetFrameSlot();
-		compileRequest.frameNumber = executer->GetFrameCounter();
+		compileRequest.frameNumber = executer->GetFrameNumber();
 		
         compiler->Compile(compileRequest);
     }
@@ -98,9 +98,7 @@ namespace CE::RHI
 
     FrameContext FrameScheduler::BeginFrame()
     {
-		FrameContext frame{};
-
-		return frame;
+		return executer->WaitForNextFrame();
     }
 
     u32 FrameScheduler::BeginExecution()

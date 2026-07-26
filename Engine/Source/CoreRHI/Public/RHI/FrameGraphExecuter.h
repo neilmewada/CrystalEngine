@@ -6,6 +6,7 @@ namespace CE::RHI
 	struct FrameGraphCompileRequest;
 	class FrameGraphCompiler;
 	class FrameScheduler;
+	struct FrameContext;
 
 	struct FrameGraphExecuteRequest
 	{
@@ -23,9 +24,9 @@ namespace CE::RHI
 
 		virtual u32 GetFrameSlot() = 0;
 
-		virtual u64 GetFrameCounter() = 0;
+		virtual u64 GetFrameNumber() = 0;
 
-		virtual u32 BeginFrame() = 0;
+		virtual FrameContext WaitForNextFrame() = 0;
 
 		virtual bool Execute(const FrameGraphExecuteRequest& executeRequest) = 0;
 

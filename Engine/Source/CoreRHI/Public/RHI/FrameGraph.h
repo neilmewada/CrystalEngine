@@ -34,7 +34,7 @@ namespace CE::RHI
         
         const Array<Scope*>& GetEndScopes() const { return endScopes; }
 
-		void Clear();
+		void DeleteAll();
         
 		bool Build();
 

@@ -5,7 +5,10 @@ namespace CE::Vulkan
     
 	FrameGraphCompiler::FrameGraphCompiler(Device* device) : device(device)
 	{
-
+		for (int i = 0; i < frameCompileContexts.GetSize(); ++i)
+		{
+			frameCompileContexts[i] = MakeUnique<FrameCompileContext>(device->GetHandle());
+		}
 	}
 
 	FrameGraphCompiler::~FrameGraphCompiler()
@@ -19,12 +22,12 @@ namespace CE::Vulkan
 	{
 		ZoneScoped;
 
-		// Queue allocation logic...
+		// Queue allocation logic
 
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 
-		auto graphicsQueue = device->GetGraphicsQueue();
-		auto computeQueue = device->GetComputeQueue();
+		CommandQueue* graphicsQueue = device->GetGraphicsQueue();
+		CommandQueue* computeQueue = graphicsQueue;//device->GetComputeQueue();
 
 		for (int t = 0; t <= frameGraph->maxTimelineLevel; t++)
 		{
@@ -69,8 +72,7 @@ namespace CE::Vulkan
 
 		if (frameGraph->presentSwapChains.NotEmpty())
 		{
-			imageCount = RHI::Limits::MaxSwapChainImageCount;
-			numFramesInFlight = imageCount;
+			numFramesInFlight = RHI::Limits::MaxFramesInFlight;
 			presentSwapChains = true;
 		}
 
@@ -209,24 +211,10 @@ namespace CE::Vulkan
 
     void FrameGraphCompiler::DestroySyncObjects()
     {
-		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
-		{
-			for (VkSemaphore semaphore : imageAcquiredSemaphores[i])
-			{
-				vkDestroySemaphore(device->GetHandle(), semaphore, VULKAN_CPU_ALLOCATOR);
-			}
-			imageAcquiredSemaphores[i].Clear();
-
-			for (VkFence fence : imageAcquiredFences[i])
-			{
-				vkDestroyFence(device->GetHandle(), fence, VULKAN_CPU_ALLOCATOR);
-			}
-			imageAcquiredFences[i].Clear();
-		}
+		
     }
 
-    //! If two scopes are executed one different queues and there's a dependency between them, then we
-	//! need to use a wait semaphore for it.
+    // If two scopes are executed one different queues and there's a cross queue dependency.
     void FrameGraphCompiler::CompileCrossQueueDependencies(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
 		HashSet<RHI::ScopeId> visitedScopes{};
@@ -254,6 +242,9 @@ namespace CE::Vulkan
 		{
 			Vulkan::Scope* producerScope = (Vulkan::Scope*)rhiScope;
 
+			if (producerScope->queue == current->queue)
+				continue;
+
 			HashMap<RHI::ScopeAttachment*, RHI::ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerScope, current);
 
 			VkPipelineStageFlags flags = 0;
@@ -278,11 +269,6 @@ namespace CE::Vulkan
 				}
 			}
 
-			for (int i = 0; i < imageCount; i++)
-			{
-				current->waitSemaphores[i].Add(producerScope->signalSemaphoresByConsumerScope[i][current->id]);
-			}
-			current->waitSemaphoreStageFlags.Add(flags);
 		}
 
 		for (RHI::Scope* consumer : current->consumers)
@@ -296,17 +282,8 @@ namespace CE::Vulkan
 		ZoneScoped;
 
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
-		for (int i = 0; i < visitedScopes.GetSize(); i++)
-		{
-			visitedScopes[i].Clear();
-		}
 
-		for (int i = 0; i < usedAttachments.GetSize(); i++)
-		{
-			usedAttachments[i].Clear();
-		}
-
-		for (int i = 0; i < imageCount; i++)
+		for (int i = 0; i < numFramesInFlight; i++)
 		{
 			for (RHI::Scope* scope : frameGraph->producers)
 			{
@@ -352,11 +329,6 @@ namespace CE::Vulkan
 
 		if (!visitedScopes[imageIndex].Exists(current->id))
 		{
-			if (current->operation == ScopeOperation::Compute)
-			{
-				String::IsAlphabet('a');
-			}
-
 			current->initialBarriers[imageIndex].Clear();
 			current->barriers[imageIndex].Clear();
 

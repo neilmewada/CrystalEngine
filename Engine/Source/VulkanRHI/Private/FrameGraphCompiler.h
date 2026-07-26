@@ -17,6 +17,28 @@ namespace CE::Vulkan
 		void CompileInternal(const RHI::FrameGraphCompileRequest& compileRequest) override;
 
 	private:
+
+		struct FrameCompileContext
+		{
+			CE_NO_COPY_MOVE(FrameCompileContext)
+		public:
+
+			FrameCompileContext(VkDevice device) : device(device)
+			{}
+
+			~FrameCompileContext()
+			{
+				for (VkSemaphore semaphore : imageAcquiredSemaphores)
+				{
+					vkDestroySemaphore(device, semaphore, VULKAN_CPU_ALLOCATOR);
+				}
+				imageAcquiredSemaphores.Clear();
+			}
+
+			VkDevice device = nullptr;
+			List<VkSemaphore> imageAcquiredSemaphores;
+			List<VkSemaphore> freeSemaphores;
+		};
         
 		void DestroySyncObjects();
 
@@ -31,18 +53,11 @@ namespace CE::Vulkan
 
 		Device* device = nullptr;
 
-		StaticArray<List<VkSemaphore>, RHI::Limits::MaxSwapChainImageCount> imageAcquiredSemaphores{};
-        StaticArray<List<VkFence>, RHI::Limits::MaxSwapChainImageCount> imageAcquiredFences{};
-
-		StaticArray<List<VkFence>, RHI::Limits::MaxSwapChainImageCount> graphExecutionFences{};
-
-		StaticArray<HashSet<RHI::ScopeId>, RHI::Limits::MaxSwapChainImageCount> visitedScopes{};
-		StaticArray<HashSet<RHI::AttachmentID>, RHI::Limits::MaxSwapChainImageCount> usedAttachments{};
+		StaticArray<UniquePtr<FrameCompileContext>, RHI::Limits::MaxFramesInFlight> frameCompileContexts{};
 
 		// Keep track of current family index of each attachment
 		HashMap<RHI::AttachmentID, u32> familyIndexByAttachment{};
 
-		u32 imageCount = 0;
 		u32 numFramesInFlight = 0;
 
 		friend class FrameGraphExecuter;

@@ -42,19 +42,6 @@ namespace CE::Vulkan
 
 	bool Scope::CompileInternal(const RHI::FrameGraphCompileRequest& compileRequest)
 	{
-		// TODO: Remove vkDeviceWaitIdle calls! They are bad for performance.
-		vkDeviceWaitIdle(device->GetHandle());
-
-		DestroySyncObjects();
-
-		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
-		{
-			for (int j = 0; j < RHI::Limits::MaxSwapChainImageCount; j++)
-			{
-				delete frameBuffers[i][j]; frameBuffers[i][j] = nullptr;
-			}
-		}
-
 		auto frameGraph = compileRequest.frameGraph;
 
 		u32 imageCount = Math::Clamp<u32>(compileRequest.numFramesInFlight, 1, RHI::Limits::MaxSwapChainImageCount);
@@ -72,13 +59,9 @@ namespace CE::Vulkan
 
 		imageCount = Math::Min(imageCount, RHI::Limits::MaxSwapChainImageCount);
 
-		waitSemaphores.Clear();
-
 		// Render Finished semaphores & fences
 		for (int i = 0; i < imageCount; i++)
 		{
-			waitSemaphores.Add({});
-
 			VkSemaphoreCreateInfo semaphoreCI{};
 			semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -102,10 +85,6 @@ namespace CE::Vulkan
 			{
 				continue;
 			}
-
-			renderFinishedFences.Add(fence);
-			signalSemaphores.Add({});
-			signalSemaphoresByConsumerScope.Add({});
 
 			// 1 signal semaphore for 1 consumer
 			for (auto consumerRhiScope : consumers)
@@ -135,73 +114,7 @@ namespace CE::Vulkan
 
 		if (IsGraphicsPass())
 		{
-			if (prevSubPass == nullptr && nextSubPass != nullptr)
-			{
-				// TODO: Fix RenderPass with multiple subpasses
-				Vulkan::Scope* next = this;
-				this->subpassIndex = 0;
-				int i = 0;
-
-				while (next != nullptr)
-				{
-					// Assign appropriate subpass indices
-					next->subpassIndex = i++;
-					next = (Vulkan::Scope*)next->nextSubPass;
-				}
-
-				RenderPassCache* rpCache = device->GetRenderPassCache();
-				VulkanRenderPass::Descriptor descriptor{};
-				VulkanRenderPass::BuildDescriptor(this, descriptor);
-				renderPass = rpCache->FindOrCreate(descriptor);
-
-				next = this;
-
-				while (next != nullptr)
-				{
-					bool foundPipelineLayout = false;
-					bool foundSubpassPipelineLayout = false;
-
-					for (RHI::PipelineState* rhiPipelineState : next->usePipelines)
-					{
-						auto pipelineState = (Vulkan::PipelineState*)rhiPipelineState;
-						Pipeline* pipeline = pipelineState->GetPipeline();
-						if (!pipeline || pipeline->GetPipelineType() != RHI::PipelineStateType::Graphics)
-							continue;
-						GraphicsPipeline* graphicsPipeline = (GraphicsPipeline*)pipeline;
-						graphicsPipeline->Compile(renderPass, subpassIndex);
-
-						// Setup SRG
-						auto pipelineLayout = (Vulkan::PipelineLayout*)rhiPipelineState->GetPipelineLayout();
-						if (pipelineLayout != nullptr && !foundPipelineLayout && pipelineLayout->srgLayouts.KeyExists(RHI::SRGType::PerPass))
-						{
-							foundPipelineLayout = true;
-							const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
-                            RHI::ShaderResourceGroupDescriptor srgDesc{};
-                            srgDesc.layout = srgLayout;
-                            
-							next->passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
-
-							// Bind Pass attachments to SRG
-						}
-
-						if (pipelineLayout != nullptr && !foundSubpassPipelineLayout && pipelineLayout->srgLayouts.KeyExists(RHI::SRGType::PerSubPass))
-						{
-							foundSubpassPipelineLayout = true;
-							const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerSubPass];
-                            RHI::ShaderResourceGroupDescriptor srgDesc{};
-                            srgDesc.layout = srgLayout;
-                            
-							next->subpassShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgDesc);
-
-							// Bind Pass attachments to SRG
-						}
-					}
-
-					next->renderPass = renderPass;
-					next = (Vulkan::Scope*)next->nextSubPass;
-				}
-			}
-			else if (!IsSubPass())
+			if (!IsSubPass())
 			{
 				// Compile Render Pass
 	            RenderPassCache* rpCache = device->GetRenderPassCache();
@@ -449,31 +362,7 @@ namespace CE::Vulkan
 
 	void Scope::DestroySyncObjects()
 	{
-		vkDeviceWaitIdle(device->GetHandle());
-
-		for (int i = 0; i < signalSemaphores.GetSize(); i++)
-		{
-			for (auto semaphore : signalSemaphores[i])
-			{
-				vkDestroySemaphore(device->GetHandle(), semaphore, VULKAN_CPU_ALLOCATOR);
-			}
-			signalSemaphores[i].Clear();
-			signalSemaphoresByConsumerScope[i].Clear();
-		}
-		signalSemaphores.Clear();
-		signalSemaphoresByConsumerScope.Clear();
-
-		//for (VkSemaphore semaphore : renderFinishedSemaphores)
-		//{
-		//	vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
-		//}
-		//renderFinishedSemaphores.Clear();
-
-		for (VkFence fence : renderFinishedFences)
-		{
-			vkDestroyFence(device->GetHandle(), fence, VULKAN_CPU_ALLOCATOR);
-		}
-		renderFinishedFences.Clear();
+		
 	}
 
 } // namespace CE::Vulkan

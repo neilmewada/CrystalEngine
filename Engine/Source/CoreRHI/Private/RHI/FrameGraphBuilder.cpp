@@ -8,7 +8,7 @@ namespace CE::RHI
 		ZoneScoped;
 
 		this->frameGraph = frameGraph;
-		frameGraph->Clear();
+		frameGraph->DeleteAll();
 
 		errorMessages.Clear();
 		success = true;
