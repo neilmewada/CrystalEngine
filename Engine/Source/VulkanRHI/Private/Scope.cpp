@@ -267,11 +267,11 @@ namespace CE::Vulkan
 				return true;
 			}
 
-			for (u32 frameIndex = 0; frameIndex < RHI::Limits::MaxSwapChainImageCount; frameIndex++)
+			for (u32 frameSlot = 0; frameSlot < RHI::Limits::MaxFramesInFlight; frameSlot++)
 			{
 				for (u32 imageIndex = 0; imageIndex < RHI::Limits::MaxSwapChainImageCount; imageIndex++)
 				{
-					frameBuffers[frameIndex][imageIndex] = new FrameBuffer(device, this, frameIndex, imageIndex);
+					frameBuffers[frameSlot][imageIndex] = new FrameBuffer(device, this, frameSlot, imageIndex);
 				}
 			}
 		}

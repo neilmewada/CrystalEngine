@@ -10,8 +10,6 @@ namespace CE::RHI
 
 		TransientAttachmentPool* transientPool = nullptr;
 
-		u32 numFramesInFlight = 1;
-
 		bool shrinkPool = false;
 
 		u32 frameSlot = 0;

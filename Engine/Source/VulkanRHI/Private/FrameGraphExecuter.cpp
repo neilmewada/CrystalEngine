@@ -23,51 +23,9 @@ namespace CE::Vulkan
 
 	FrameContext FrameGraphExecuter::WaitForNextFrame()
 	{
-		FrameGraph* frameGraph = FrameScheduler::Get()->GetFrameGraph();
-		bool swapChainExists = frameGraph->presentSwapChains.NotEmpty();
-
-		constexpr u64 u64Max = NumericLimits<u64>::Max();
-		constexpr u64 acquireTimeout = 100'000'000; // 0.1 second
-		VkResult result = VK_SUCCESS;
-
-		FrameContext frame{.frameNumber = frameNumber, .frameSlot = frameSlot, .isValid = true};
-
 		frameCompletionFence->WaitCPU(frameSlots[frameSlot].fenceCompleteValue);
 
-		if (swapChainExists)
-		{
-			for (int i = 0; i < frameGraph->presentSwapChains.GetSize(); i++)
-			{
-				auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChains[i];
-
-				{
-					ZoneNamedN(__acquireImage, "_AcquireNextImage", true);
-
-					result = vkAcquireNextImageKHR(device->GetHandle(),
-						swapChain->GetHandle(), acquireTimeout,
-						compiler->imageAcquiredSemaphores[frameSlot][i],
-						nullptr,
-						&swapChain->currentImageIndex);
-				}
-
-				if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-				{
-					for (auto swapChainToRebuild : frameGraph->presentSwapChains)
-					{
-						ZoneNamedN(__rebuildSwapChain, "_RebuildSwapChain", true);
-
-						((Vulkan::SwapChain*)swapChain)->RebuildSwapChain();
-					}
-				}
-
-				if (result != VK_SUCCESS)
-				{
-					return {};
-				}
-			}
-		}
-
-		return frame;
+		return FrameContext{ .frameNumber = frameNumber, .frameSlot = frameSlot, .isValid = true };
 	}
 
 	bool FrameGraphExecuter::Execute(const FrameGraphExecuteRequest& executeRequest)

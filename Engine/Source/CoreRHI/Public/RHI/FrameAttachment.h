@@ -13,9 +13,9 @@ namespace CE::RHI
 
 		void SetResource(RHIResource* resource);
 
-		void SetResource(int imageIndex, RHIResource* resource);
+		void SetResource(int frameSlot, RHIResource* resource);
 
-		RHIResource* GetResource(int imageIndex);
+		RHIResource* GetResource(int frameSlot);
 		RHIResource* GetResource();
         
         RHIResource** GetResourceArray() { return resources.GetData(); }

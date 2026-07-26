@@ -78,7 +78,6 @@ namespace CE::RHI
         FrameGraphCompileRequest compileRequest{};
         compileRequest.frameGraph = frameGraph;
         compileRequest.transientPool = transientAttachmentPool;
-		compileRequest.numFramesInFlight = numFramesInFlight;
 		compileRequest.shrinkPool = false;
 		compileRequest.frameSlot = executer->GetFrameSlot();
 		compileRequest.frameNumber = executer->GetFrameNumber();

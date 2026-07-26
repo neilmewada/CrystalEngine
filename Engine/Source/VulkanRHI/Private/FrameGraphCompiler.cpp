@@ -68,13 +68,9 @@ namespace CE::Vulkan
 
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 
-		bool presentSwapChains = false;
-
-		if (frameGraph->presentSwapChains.NotEmpty())
-		{
-			numFramesInFlight = RHI::Limits::MaxFramesInFlight;
-			presentSwapChains = true;
-		}
+		const u32 numSwapChains = frameGraph->presentSwapChains.GetSize();
+		const u32 frameSlot = compileRequest.frameSlot;
+		numFramesInFlight = RHI::Limits::MaxFramesInFlight;
 
 		for (auto scope : frameGraph->scopes)
 		{
@@ -90,9 +86,29 @@ namespace CE::Vulkan
 			scope->Compile(compileRequest);
 		}
 
+		CompileCrossQueueDependencies(compileRequest);
+
+		if (frameCompileContexts[frameSlot]->imageAcquiredSemaphores.GetSize() < numSwapChains)
+		{
+			u32 numExtraSwapChains = numSwapChains - (u32)frameCompileContexts[frameSlot]->imageAcquiredSemaphores.GetSize();
+
+			for (int j = 0; j < numExtraSwapChains; j++)
+			{
+				VkSemaphoreCreateInfo semaphoreCI{};
+				semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+				VkSemaphore semaphore = nullptr;
+				auto result = vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &semaphore);
+				CE_ASSERT(result == VK_SUCCESS, "Failed to create a VkSemaphore");
+
+				frameCompileContexts[frameSlot]->imageAcquiredSemaphores.Add(semaphore);
+			}
+		}
+
+		CompileBarriers(compileRequest);
+
 		// TODO: Reimplement this method entirely
 		/*
-		vkDeviceWaitIdle(device->GetHandle());
 
 		numFramesInFlight = compileRequest.numFramesInFlight;
 		imageCount = numFramesInFlight;
@@ -283,12 +299,11 @@ namespace CE::Vulkan
 
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 
-		for (int i = 0; i < numFramesInFlight; i++)
+		HashSet<RHI::ScopeId> visitedScopes;
+
+		for (RHI::Scope* scope : frameGraph->producers)
 		{
-			for (RHI::Scope* scope : frameGraph->producers)
-			{
-				CompileBarriers(i, compileRequest, (Vulkan::Scope*)scope);
-			}
+			CompileBarriers(visitedScopes, compileRequest, (Vulkan::Scope*)scope);
 		}
 	}
 
@@ -318,7 +333,7 @@ namespace CE::Vulkan
 		return false;
 	}
 
-	void FrameGraphCompiler::CompileBarriers(int imageIndex, const RHI::FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current)
+	void FrameGraphCompiler::CompileBarriers(HashSet<RHI::ScopeId>& visitedScopes, const RHI::FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current)
 	{
 		ZoneScoped;
 
@@ -326,11 +341,12 @@ namespace CE::Vulkan
 			return;
 
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
+		u32 frameSlot = compileRequest.frameSlot;
 
-		if (!visitedScopes[imageIndex].Exists(current->id))
+		if (!visitedScopes.Exists(current->id))
 		{
-			current->initialBarriers[imageIndex].Clear();
-			current->barriers[imageIndex].Clear();
+			current->initialBarriers.Clear();
+			current->barriers.Clear();
 
 			for (RHI::Scope* producerRhiScope : current->producers)
 			{
@@ -400,7 +416,7 @@ namespace CE::Vulkan
 						if (imageAttachment == nullptr)
 							continue;
 
-						RHI::RHIResource* resource = imageAttachment->GetResource(imageIndex);
+						RHI::RHIResource* resource = imageAttachment->GetResource(frameSlot);
 						if (resource == nullptr)
 							continue;
 
@@ -564,7 +580,7 @@ namespace CE::Vulkan
 						barrier.imageBarriers.Add(imageBarrier);
 						barrier.imageLayoutTransitions.Add(transition);
 						
-						producerScope->barriers[imageIndex].Add(barrier);
+						producerScope->barriers.Add(barrier);
 
 						if (isDifferentQueue)
 						{
@@ -576,7 +592,7 @@ namespace CE::Vulkan
 
 							barrier.imageBarriers.Add(imageBarrier);
 
-							current->initialBarriers[imageIndex].Add(barrier);
+							current->initialBarriers.Add(barrier);
 						}
 					}
 					// Buffer -> Buffer barrier
@@ -591,7 +607,7 @@ namespace CE::Vulkan
 						if (bufferAttachment == nullptr)
 							continue;
 
-						RHI::RHIResource* resource = bufferAttachment->GetResource(imageIndex);
+						RHI::RHIResource* resource = bufferAttachment->GetResource(frameSlot);
 						if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Buffer)
 							continue;
 
@@ -640,18 +656,18 @@ namespace CE::Vulkan
 						barrier.bufferBarriers.Add(bufferBarrier);
 						barrier.bufferFamilyTransitions.Add(transition);
 
-						producerScope->barriers[imageIndex].Add(barrier);
+						producerScope->barriers.Add(barrier);
 					}
 					
 				}
 			}
 		}
 
-		visitedScopes[imageIndex].Add(current->id);
+		visitedScopes.Add(current->id);
 
 		for (auto scope : current->consumers)
 		{
-			CompileBarriers(imageIndex, compileRequest, (Vulkan::Scope*)scope);
+			CompileBarriers(visitedScopes, compileRequest, (Vulkan::Scope*)scope);
 		}
 	}
 

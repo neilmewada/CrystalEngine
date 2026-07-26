@@ -49,7 +49,7 @@ namespace CE::Vulkan
 
 		void CompileBarriers(const RHI::FrameGraphCompileRequest& compileRequest);
 
-		void CompileBarriers(int imageIndex, const RHI::FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current);
+		void CompileBarriers(HashSet<RHI::ScopeId>& visitedScopes, const RHI::FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current);
 
 		Device* device = nullptr;
 
