@@ -568,6 +568,7 @@ namespace CE::Vulkan
 		frameSlot = 0;
 	}
 
+	/*
 	bool FrameGraphExecuter::ExecuteScope(const RHI::FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, 
 	                                      HashSet<RHI::ScopeId>& executedScopes,
 	                                      HashSet<Vulkan::SwapChain*>& usedSwapChains)
@@ -1477,6 +1478,7 @@ namespace CE::Vulkan
 
 		return result == VK_SUCCESS;
 	}
+	*/
 
 	Optional<VkBufferMemoryBarrier2> FrameGraphExecuter::ResolveBufferBarrier(const FrameGraphCompiler::BufferBarrier& bufferBarrier, u32 frameSlot)
 	{

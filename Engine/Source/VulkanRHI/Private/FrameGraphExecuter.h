@@ -25,9 +25,6 @@ namespace CE::Vulkan
 
 	private:
 
-		bool ExecuteScope(const RHI::FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<RHI::ScopeId>& executedScopes, 
-			HashSet<Vulkan::SwapChain*>& usedSwapChains);
-
 		Optional<VkBufferMemoryBarrier2> ResolveBufferBarrier(const FrameGraphCompiler::BufferBarrier& bufferBarrier, u32 frameSlot);
 		Optional<VkImageMemoryBarrier2> ResolveImageBarrier(const FrameGraphCompiler::ImageBarrier& imageBarrier, u32 frameSlot);
 

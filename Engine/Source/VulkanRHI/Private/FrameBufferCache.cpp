@@ -45,7 +45,7 @@ namespace CE::Vulkan
 		key.layers = 1;
 		key.renderPassHash = renderPass->GetHash();
 
-		Array<VkImageView> imageViews{};
+		List<VkImageView> imageViews{};
 
 		for (const VulkanRenderPass::AttachmentBinding& binding : renderPass->GetDescriptor().attachments)
 		{

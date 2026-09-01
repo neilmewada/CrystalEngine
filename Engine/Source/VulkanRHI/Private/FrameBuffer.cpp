@@ -124,7 +124,7 @@ namespace CE::Vulkan
 		device = nullptr;
 	}
 
-	FrameBuffer::FrameBuffer(Device* device, const Array<VkImageView>& imageViews,
+	FrameBuffer::FrameBuffer(Device* device, const List<VkImageView>& imageViews,
 		VulkanRenderPass* renderPass, u32 width, u32 height, u32 layers)
 		: device(device), width(width), height(height)
 	{
