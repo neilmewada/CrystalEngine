@@ -423,8 +423,9 @@ namespace CE::Vulkan
 					if (!required.initialized)
 						continue;
 
+					const bool isFirstUse = !imageStates.KeyExists(imageAttachment);
 					ImageState previous{};
-					if (imageStates.KeyExists(imageAttachment))
+					if (!isFirstUse)
 					{
 						previous = imageStates[imageAttachment];
 					}
@@ -453,6 +454,7 @@ namespace CE::Vulkan
 
 						ImageBarrier compiledBarrier{};
 						compiledBarrier.attachment = imageAttachment;
+						compiledBarrier.resolveOldLayoutFromResource = isFirstUse;
 						compiledBarrier.barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
 						compiledBarrier.barrier.srcStageMask = previous.stages;
 						compiledBarrier.barrier.srcAccessMask = previous.access;

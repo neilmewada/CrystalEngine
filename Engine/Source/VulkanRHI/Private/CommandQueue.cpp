@@ -63,6 +63,7 @@ namespace CE::Vulkan
 		{
 			VkSubmitInfo submitInfo{};
 			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			submitInfo.pNext = submitInfos[i].pNext;
 			submitInfo.commandBufferCount = infos[i].commandBuffers.GetSize();
 			submitInfo.pCommandBuffers = infos[i].commandBuffers.GetData();
 

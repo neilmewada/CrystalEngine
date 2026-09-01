@@ -39,6 +39,7 @@ namespace CE::Vulkan
 		{
 			RHI::ImageFrameAttachment* attachment = nullptr;
 			VkImageMemoryBarrier2 barrier{};
+			bool resolveOldLayoutFromResource = false;
 		};
 
 		struct BarrierBatch

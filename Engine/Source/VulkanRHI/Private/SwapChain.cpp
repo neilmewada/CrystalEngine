@@ -371,7 +371,7 @@ namespace CE::Vulkan
 			imageDesc.sampleCount = 1;
 			imageDesc.bindFlags = RHI::TextureBindFlags::Color;
 
-			Vulkan::Texture* image = new Vulkan::Texture(device, swapChainImage, imageDesc, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+			Vulkan::Texture* image = new Vulkan::Texture(device, swapChainImage, imageDesc, VK_IMAGE_LAYOUT_UNDEFINED);
 			images.Add(image);
 
 			String imageName = String::Format("SwapChain Image {}", idx);

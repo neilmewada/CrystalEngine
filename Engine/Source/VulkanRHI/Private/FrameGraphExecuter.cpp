@@ -514,6 +514,44 @@ namespace CE::Vulkan
 				return false;
 			}
 
+			auto applyImageLayoutTransitions = [this](const FrameGraphCompiler::BarrierBatch& barriers)
+			{
+				for (const FrameGraphCompiler::ImageLayoutTransition& transition : barriers.imageLayoutTransitions)
+				{
+					if (!transition.attachment)
+						continue;
+
+					Vulkan::Texture* image = nullptr;
+					if (transition.attachment->IsSwapChainAttachment())
+					{
+						auto swapChainAttachment = (RHI::SwapChainFrameAttachment*)transition.attachment;
+						auto swapChain = (Vulkan::SwapChain*)swapChainAttachment->GetSwapChain();
+						if (swapChain)
+							image = swapChain->GetCurrentImage();
+					}
+					else
+					{
+						RHI::RHIResource* resource = transition.attachment->GetResource(frameSlot);
+						if (resource && resource->GetResourceType() == ResourceType::Texture)
+							image = (Vulkan::Texture*)resource;
+						else if (resource && resource->GetResourceType() == ResourceType::TextureView)
+							image = (Vulkan::Texture*)((Vulkan::TextureView*)resource)->GetTexture();
+					}
+
+					if (image)
+					{
+						image->curImageLayout = transition.layout;
+						image->curFamilyIndex = transition.queueFamilyIndex;
+					}
+				}
+			};
+
+			for (const FrameGraphCompiler::ExecutionStep& step : submission.steps)
+			{
+				applyImageLayoutTransitions(step.preBarriers);
+				applyImageLayoutTransitions(step.postBarriers);
+			}
+
 			cmdListIndex++;
 		}
 
@@ -1532,6 +1570,8 @@ namespace CE::Vulkan
 
 		VkImageMemoryBarrier2 vkBarrier = imageBarrier.barrier;
 		vkBarrier.image = image->GetImage();
+		if (imageBarrier.resolveOldLayoutFromResource)
+			vkBarrier.oldLayout = image->GetCurrentImageLayout();
 
 		if (vkBarrier.image == VK_NULL_HANDLE)
 			return {};
