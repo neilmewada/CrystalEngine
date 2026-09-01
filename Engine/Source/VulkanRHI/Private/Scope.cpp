@@ -78,7 +78,9 @@ namespace CE::Vulkan
 							if (frameAttachment->IsImageAttachment())
 							{
 								RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
-								if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+								if (resource == nullptr ||
+									(resource->GetResourceType() != RHI::ResourceType::Texture &&
+									 resource->GetResourceType() != RHI::ResourceType::TextureView))
 									break;
 
 								if (resource->GetResourceType() == ResourceType::Texture)

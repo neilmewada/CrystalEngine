@@ -7,11 +7,11 @@ namespace CE::RHI
 	{
 		ZoneScoped;
 
-		// 1. Compile scope
-		CompileScopes(compileRequest);
-
-		// 2. Compile transient attachments (also allocates heap memory)
+		// 1. Compile transient attachments (also allocates heap memory)
 		CompileTransientAttachments(compileRequest);
+
+		// 2. Compile scopes after their transient resources are available
+		CompileScopes(compileRequest);
 
 		// Platform specific compilation
 		CompileInternal(compileRequest);
