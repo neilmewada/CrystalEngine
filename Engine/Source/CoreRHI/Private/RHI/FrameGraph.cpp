@@ -182,31 +182,36 @@ namespace CE::RHI
 
 		// - Timeline Levels -
 		
-		std::queue<RHI::Scope*> processQueue;
-		for (auto* scope : scopes) {
+		Queue<RHI::Scope*> processQueue;
+		for (auto* scope : scopes) 
+		{
 			scope->timelineLevel = 0;
 			// Tracks how many producers we are still waiting on
 			scope->remainingProducers = scope->producers.GetSize();
 
 			// Start nodes have 0 producers
-			if (scope->remainingProducers == 0) {
-				processQueue.push(scope);
+			if (scope->remainingProducers == 0) 
+			{
+				processQueue.PushBack(scope);
 			}
 		}
 
-		while (!processQueue.empty()) {
-			RHI::Scope* current = processQueue.front();
-			processQueue.pop();
+		while (!processQueue.IsEmpty()) 
+		{
+			RHI::Scope* current = processQueue.GetFront();
+			processQueue.PopFront();
 			topologicallySortedScopes.Add(current);
 
-			for (auto* consumer : current->consumers) {
+			for (auto* consumer : current->consumers) 
+			{
 				// Level is always 1 higher than the furthest producer
 				consumer->timelineLevel = std::max(consumer->timelineLevel, current->timelineLevel + 1);
 
 				// Once all producers are visited, this scope is ready to be a producer itself
 				consumer->remainingProducers--;
-				if (consumer->remainingProducers == 0) {
-					processQueue.push(consumer);
+				if (consumer->remainingProducers == 0) 
+				{
+					processQueue.PushBack(consumer);
 				}
 			}
 		}
