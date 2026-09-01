@@ -78,7 +78,7 @@ namespace CE::Vulkan
 		
 		StaticArray<VkImageLayout, RHI::Limits::MaxSwapChainImageCount> swapChainInitialImageLayouts{};
 		StaticArray<VkSemaphore, RHI::Limits::MaxSwapChainImageCount> imageAcquiredSemaphores{};
-		StaticArray<VkSemaphore, RHI::Limits::MaxSwapChainImageCount> renderFinishedSemaphores{};
+		StaticArray<VkSemaphore, RHI::Limits::MaxSwapChainImageCount> presentReadySemaphores{};
 
 		List<VkSurfaceFormatKHR> surfaceFormats{};
 		VkSurfaceCapabilitiesKHR surfaceCapabilities{};

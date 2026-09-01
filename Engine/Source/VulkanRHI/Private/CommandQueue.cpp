@@ -137,7 +137,7 @@ namespace CE::Vulkan
 			waitStages.Add(presentSwapChain->IsFrameBufferOnly() ? VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT : VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
 			waitValues.Add(0);
 
-			VkSemaphore renderFinishedSemaphore = presentSwapChain->renderFinishedSemaphores[presentSwapChain->currentImageIndex];
+			VkSemaphore renderFinishedSemaphore = presentSwapChain->presentReadySemaphores[presentSwapChain->currentImageIndex];
 			signalSemaphores.Add(renderFinishedSemaphore);
 			signalValues.Add(0);
 

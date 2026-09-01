@@ -36,6 +36,10 @@ namespace CE::Vulkan
 
 		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
 		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
+		const auto& submissions = compiler->executionPlan.submissions;
+
+		if (submissions.IsEmpty())
+			return false;
 
 		for (int i = 0; i < frameGraph->presentSwapChains.GetSize(); i++)
 		{
@@ -46,10 +50,14 @@ namespace CE::Vulkan
 		}
 
 		int cmdListIndex = 0;
-		bool isFirstSubmission = true;
+		u64 frameCompleteValue = 0;
 
-		for (const FrameGraphCompiler::Submission& submission : compiler->executionPlan.submissions)
+		for (u32 submissionIndex = 0; submissionIndex < submissions.GetSize(); ++submissionIndex)
 		{
+			const FrameGraphCompiler::Submission& submission = submissions[submissionIndex];
+			const bool isFirstSubmission = submissionIndex == 0;
+			const bool isLastSubmission = submissionIndex == submissions.GetSize() - 1;
+
 			List<List<VkBufferMemoryBarrier2>> preBufferBarriersPerStep{};
 			List<List<VkImageMemoryBarrier2>> preImageBarriersPerStep{};
 			List<List<VkBufferMemoryBarrier2>> postBufferBarriersPerStep{};
@@ -118,6 +126,9 @@ namespace CE::Vulkan
 
 					Vulkan::Scope* currentScope = step.scope;
 
+					commandList->currentPass = nullptr;
+					commandList->currentSubpass = 0;
+
 					VkDependencyInfo dependencyInfo{};
 					dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
 					dependencyInfo.dependencyFlags = 0;
@@ -134,6 +145,9 @@ namespace CE::Vulkan
 
 					if (currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
 					{
+						commandList->currentPass = currentScope->renderPass;
+						commandList->currentSubpass = currentScope->subpassIndex;
+
 						VulkanRenderPass* renderPass = currentScope->renderPass;
 						FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
 						HashSet<RHI::AttachmentID> clearedAttachments{};
@@ -321,6 +335,16 @@ namespace CE::Vulkan
 							RHI::ScopeAttachment* fromAttachment = currentScope->readAttachments[0];
 							RHI::ScopeAttachment* toAttachment = currentScope->writeAttachments[0];
 
+							CE_ASSERT(fromAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy &&
+								toAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy,
+								"Transfer attachments must use Copy usage!");
+							CE_ASSERT(fromAttachment->GetAccess() == RHI::ScopeAttachmentAccess::Read,
+								"Transfer source attachment must be read-only!");
+							CE_ASSERT(toAttachment->GetAccess() == RHI::ScopeAttachmentAccess::Write,
+								"Transfer destination attachment must be write-only!");
+							CE_ASSERT(fromAttachment->GetFrameAttachment() != toAttachment->GetFrameAttachment(),
+								"Transfer source and destination attachments must be different!");
+
 							if (fromAttachment->IsImageAttachment() && toAttachment->IsImageAttachment())
 							{
 								RHI::RHIResource* fromResource = fromAttachment->GetFrameAttachment()->GetResource(frameSlot);
@@ -355,10 +379,10 @@ namespace CE::Vulkan
 												copyRegion.extent.height = Math::Max<u32>(1, fromImage->GetHeight(mip));
 												copyRegion.extent.depth = Math::Max<u32>(1, fromImage->GetDepth(mip));
 
-												vkCmdCopyImage(cmdBuffer,
-													fromImage->GetImage(), fromImage->curImageLayout,
-													toImage->GetImage(), toImage->curImageLayout,
-													1, &copyRegion);
+														vkCmdCopyImage(cmdBuffer,
+															fromImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+															toImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+															1, &copyRegion);
 											}
 											else if (fromImage->GetSampleCount() > 1 && toImage->GetSampleCount() == 1)
 											{
@@ -379,9 +403,9 @@ namespace CE::Vulkan
 												resolveRegion.extent.height = Math::Max<u32>(1, fromImage->GetHeight(mip));
 												resolveRegion.extent.depth = Math::Max<u32>(1, fromImage->GetDepth(mip));
 
-												vkCmdResolveImage(cmdBuffer, fromImage->GetImage(), fromImage->curImageLayout,
-													toImage->GetImage(), toImage->curImageLayout,
-													1, &resolveRegion);
+														vkCmdResolveImage(cmdBuffer, fromImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+															toImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+															1, &resolveRegion);
 											}
 										}
 									}
@@ -415,6 +439,9 @@ namespace CE::Vulkan
 						}
 					}
 
+					commandList->currentPass = nullptr;
+					commandList->currentSubpass = 0;
+
 					dependencyInfo.dependencyFlags = 0;
 					dependencyInfo.bufferMemoryBarrierCount = postBufferBarriersPerStep[i].GetSize();
 					dependencyInfo.pBufferMemoryBarriers = postBufferBarriersPerStep[i].GetData();
@@ -431,6 +458,8 @@ namespace CE::Vulkan
 			List<VkSemaphore> waitSemaphores{};
 			List<VkPipelineStageFlags> waitStages{};
 			List<uint64_t> waitValues{};
+			List<VkSemaphore> signalSemaphores{};
+			List<uint64_t> signalValues{};
 
 			if (isFirstSubmission)
 			{
@@ -454,18 +483,29 @@ namespace CE::Vulkan
 			submitInfo.commandBufferCount = 1;
 			submitInfo.pCommandBuffers = &cmdBuffer;
 			
-			VkSemaphore signalSemaphore = frameCompletionFence->GetHandle();
-			submitInfo.signalSemaphoreCount = 1;
-			submitInfo.pSignalSemaphores = &signalSemaphore;
-			
-			const u64 fenceCompleteValue = frameCompletionFence->NextSignalValue();
+			if (isLastSubmission)
+			{
+				frameCompleteValue = frameCompletionFence->NextSignalValue();
+				signalSemaphores.Add(frameCompletionFence->GetHandle());
+				signalValues.Add(frameCompleteValue);
+
+				for (auto presentSwapChain : frameGraph->presentSwapChains)
+				{
+					Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)presentSwapChain;
+					signalSemaphores.Add(swapChain->presentReadySemaphores[swapChain->currentImageIndex]);
+					signalValues.Add(0); // Binary semaphore always uses 0
+				}
+			}
+
+			submitInfo.signalSemaphoreCount = signalSemaphores.GetSize();
+			submitInfo.pSignalSemaphores = signalSemaphores.IsEmpty() ? nullptr : signalSemaphores.GetData();
 
 			VkTimelineSemaphoreSubmitInfo timelineSemaphoreSubmitInfo{};
 			timelineSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
 			timelineSemaphoreSubmitInfo.waitSemaphoreValueCount = static_cast<uint32_t>(waitValues.GetSize());
-			timelineSemaphoreSubmitInfo.pWaitSemaphoreValues = waitValues.GetData();
-			timelineSemaphoreSubmitInfo.signalSemaphoreValueCount = 1;
-			timelineSemaphoreSubmitInfo.pSignalSemaphoreValues = &fenceCompleteValue;
+			timelineSemaphoreSubmitInfo.pWaitSemaphoreValues = waitValues.IsEmpty() ? nullptr : waitValues.GetData();
+			timelineSemaphoreSubmitInfo.signalSemaphoreValueCount = static_cast<uint32_t>(signalValues.GetSize());
+			timelineSemaphoreSubmitInfo.pSignalSemaphoreValues = signalValues.IsEmpty() ? nullptr : signalValues.GetData();
 
 			submitInfo.pNext = &timelineSemaphoreSubmitInfo;
 
@@ -474,10 +514,47 @@ namespace CE::Vulkan
 				return false;
 			}
 
-			frameSlots[frameSlot].fenceCompleteValue = fenceCompleteValue;
-
 			cmdListIndex++;
-			isFirstSubmission = false;
+		}
+
+		frameSlots[frameSlot].fenceCompleteValue = frameCompleteValue;
+
+		if (frameGraph->presentSwapChains.NotEmpty())
+		{
+			List<VkSwapchainKHR> swapChains{};
+			List<u32> imageIndices{};
+			List<VkSemaphore> waitSemaphores{};
+
+			for (auto presentSwapChain : frameGraph->presentSwapChains)
+			{
+				Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)presentSwapChain;
+				swapChains.Add(swapChain->GetHandle());
+				imageIndices.Add(swapChain->currentImageIndex);
+				waitSemaphores.Add(swapChain->presentReadySemaphores[swapChain->currentImageIndex]);
+			}
+
+			VkPresentInfoKHR presentInfo{};
+			presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+			presentInfo.waitSemaphoreCount = waitSemaphores.GetSize();
+			presentInfo.pWaitSemaphores = waitSemaphores.GetData();
+			presentInfo.swapchainCount = swapChains.GetSize();
+			presentInfo.pSwapchains = swapChains.GetData();
+			presentInfo.pImageIndices = imageIndices.GetData();
+
+			CommandQueue* presentQueue = device->GetPresentQueue();
+			LockGuard guard{ presentQueue->GetMutex() };
+			VkResult result = vkQueuePresentKHR(presentQueue->GetHandle(), &presentInfo);
+
+			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+			{
+				for (auto presentSwapChain : frameGraph->presentSwapChains)
+				{
+					((Vulkan::SwapChain*)presentSwapChain)->shouldRebuild = true;
+				}
+			}
+
+			if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+				return false;
 		}
 
 		frameSlot = (frameSlot + 1) % compiler->numFramesInFlight;

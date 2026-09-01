@@ -27,7 +27,7 @@ namespace CE::Vulkan
 
 		windowResizeCallback = PlatformApplication::Get()->onWindowDrawableSizeChanged.AddDelegateInstance(MemberDelegate(&SwapChain::OnWindowResized, this));
 
-		for (int i = 0; i < renderFinishedSemaphores.GetSize(); i++)
+		for (int i = 0; i < presentReadySemaphores.GetSize(); i++)
 		{
 			VkSemaphoreCreateInfo semaphoreCI{};
 			semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -35,7 +35,7 @@ namespace CE::Vulkan
 
 			VkSemaphore semaphore = nullptr;
 			vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &semaphore);
-			renderFinishedSemaphores[i] = semaphore;
+			presentReadySemaphores[i] = semaphore;
 
 			VkSemaphore imageAcquired = nullptr;
 			vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &imageAcquired);
@@ -53,7 +53,7 @@ namespace CE::Vulkan
 		}
 		images.Clear();
 
-		for (int i = 0; i < renderFinishedSemaphores.GetSize(); i++)
+		for (int i = 0; i < presentReadySemaphores.GetSize(); i++)
 		{
 			if (imageAcquiredSemaphores[i] != nullptr)
 			{
@@ -61,10 +61,10 @@ namespace CE::Vulkan
 				imageAcquiredSemaphores[i] = nullptr;
 			}
 
-			if (renderFinishedSemaphores[i] != nullptr)
+			if (presentReadySemaphores[i] != nullptr)
 			{
-				vkDestroySemaphore(device->GetHandle(), renderFinishedSemaphores[i], VULKAN_CPU_ALLOCATOR);
-				renderFinishedSemaphores[i] = nullptr;
+				vkDestroySemaphore(device->GetHandle(), presentReadySemaphores[i], VULKAN_CPU_ALLOCATOR);
+				presentReadySemaphores[i] = nullptr;
 			}
 		}
 
