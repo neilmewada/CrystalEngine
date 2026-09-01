@@ -82,8 +82,6 @@ namespace CE::Vulkan
 
 		void CompileBarriers(const RHI::FrameGraphCompileRequest& compileRequest);
 
-		void CompileBarriers(HashSet<RHI::ScopeId>& visitedScopes, const RHI::FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current);
-
 		Device* device = nullptr;
 
 		// Keep track of current family index of each attachment

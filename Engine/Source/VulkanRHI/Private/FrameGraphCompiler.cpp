@@ -283,378 +283,288 @@ namespace CE::Vulkan
 		ZoneScoped;
 
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
-
-		HashSet<RHI::ScopeId> visitedScopes;
-
 		executionPlan.submissions.Clear();
 
-		for (RHI::Scope* scope : frameGraph->producers)
-		{
-			CompileBarriers(visitedScopes, compileRequest, (Vulkan::Scope*)scope);
-		}
-	}
-
-	static bool RequiresDependency(RHI::ScopeAttachment* from, RHI::ScopeAttachment* to)
-	{
-		if (from == nullptr || to == nullptr)
-			return false;
-
-		if (EnumHasFlag(to->GetAccess(), RHI::ScopeAttachmentAccess::Write) ||
-			EnumHasFlag(from->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-			return true;
-
-		switch (to->GetUsage())
-		{
-		case RHI::ScopeAttachmentUsage::Color:
-		case RHI::ScopeAttachmentUsage::Resolve:
-			return true;
-		}
-
-		switch (from->GetUsage())
-		{
-		case RHI::ScopeAttachmentUsage::Color:
-		case RHI::ScopeAttachmentUsage::Resolve:
-			return true;
-		}
-
-		return false;
-	}
-
-	void FrameGraphCompiler::CompileBarriers(HashSet<RHI::ScopeId>& visitedScopes, const RHI::FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current)
-	{
-		ZoneScoped;
-
-		if (current == nullptr)
+		if (frameGraph == nullptr || frameGraph->GetTopologicallySortedScopes().IsEmpty())
 			return;
 
-		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
-		u32 frameSlot = compileRequest.frameSlot;
-
-		if (!visitedScopes.Exists(current->id))
+		struct ImageState
 		{
-			current->initialBarriers.Clear();
-			current->barriers.Clear();
+			VkPipelineStageFlags2 stages = VK_PIPELINE_STAGE_2_NONE;
+			VkAccessFlags2 access = VK_ACCESS_2_NONE;
+			VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
+			bool initialized = false;
+		};
 
-			for (RHI::Scope* producerRhiScope : current->producers)
+		struct BufferState
+		{
+			VkPipelineStageFlags2 stages = VK_PIPELINE_STAGE_2_NONE;
+			VkAccessFlags2 access = VK_ACCESS_2_NONE;
+			bool initialized = false;
+		};
+
+		auto getShaderStages = [](const Vulkan::Scope* scope)
+		{
+			if (scope->IsComputePass())
+				return VkPipelineStageFlags2(VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT);
+			if (scope->IsGraphicsPass())
+				return VkPipelineStageFlags2(VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
+			return VkPipelineStageFlags2(VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT);
+		};
+
+		auto getImageState = [&getShaderStages](const Vulkan::Scope* scope, const RHI::ScopeAttachment* attachment)
+		{
+			ImageState state{};
+			const bool reads = EnumHasFlag(attachment->GetAccess(), RHI::ScopeAttachmentAccess::Read);
+			const bool writes = EnumHasFlag(attachment->GetAccess(), RHI::ScopeAttachmentAccess::Write);
+
+			switch (attachment->GetUsage())
 			{
-				Vulkan::Scope* producerScope = (Vulkan::Scope*)producerRhiScope;
+			case RHI::ScopeAttachmentUsage::Color:
+			case RHI::ScopeAttachmentUsage::Resolve:
+				state.stages = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+				state.access = (reads ? VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT : 0) |
+					(writes ? VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT : 0);
+				state.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+				break;
+			case RHI::ScopeAttachmentUsage::DepthStencil:
+				state.stages = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT |
+					VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT;
+				state.access = (reads ? VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT : 0) |
+					(writes ? VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT : 0);
+				state.layout = writes ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL :
+					VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+				break;
+			case RHI::ScopeAttachmentUsage::Copy:
+				state.stages = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+				state.access = (reads ? VK_ACCESS_2_TRANSFER_READ_BIT : 0) |
+					(writes ? VK_ACCESS_2_TRANSFER_WRITE_BIT : 0);
+				state.layout = reads && writes ? VK_IMAGE_LAYOUT_GENERAL :
+					(reads ? VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL : VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+				break;
+			case RHI::ScopeAttachmentUsage::Shader:
+				state.stages = getShaderStages(scope);
+				state.access = (reads ? VK_ACCESS_2_SHADER_READ_BIT : 0) |
+					(writes ? VK_ACCESS_2_SHADER_WRITE_BIT : 0);
+				state.layout = writes ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				break;
+			case RHI::ScopeAttachmentUsage::SubpassInput:
+				state.stages = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+				state.access = VK_ACCESS_2_INPUT_ATTACHMENT_READ_BIT;
+				state.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				break;
+			default:
+				return state;
+			}
 
-				bool isDifferentQueue = producerScope->queue != current->queue;
+			state.initialized = true;
+			return state;
+		};
 
-				HashMap<RHI::ScopeAttachment*, RHI::ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerRhiScope, current);
+		auto getBufferState = [&getShaderStages](const Vulkan::Scope* scope, const RHI::ScopeAttachment* attachment)
+		{
+			BufferState state{};
+			const bool reads = EnumHasFlag(attachment->GetAccess(), RHI::ScopeAttachmentAccess::Read);
+			const bool writes = EnumHasFlag(attachment->GetAccess(), RHI::ScopeAttachmentAccess::Write);
 
-				for (auto [from, to] : commonAttachments)
+			switch (attachment->GetUsage())
+			{
+			case RHI::ScopeAttachmentUsage::Copy:
+				state.stages = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+				state.access = (reads ? VK_ACCESS_2_TRANSFER_READ_BIT : 0) |
+					(writes ? VK_ACCESS_2_TRANSFER_WRITE_BIT : 0);
+				break;
+			case RHI::ScopeAttachmentUsage::Shader:
+				state.stages = getShaderStages(scope);
+				state.access = (reads ? VK_ACCESS_2_SHADER_READ_BIT : 0) |
+					(writes ? VK_ACCESS_2_SHADER_WRITE_BIT : 0);
+				break;
+			default:
+				return state;
+			}
+
+			state.initialized = true;
+			return state;
+		};
+
+		auto hasWriteAccess = [](VkAccessFlags2 access)
+		{
+			constexpr VkAccessFlags2 writeAccess = VK_ACCESS_2_MEMORY_WRITE_BIT |
+				VK_ACCESS_2_SHADER_WRITE_BIT |
+				VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT |
+				VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT |
+				VK_ACCESS_2_TRANSFER_WRITE_BIT;
+			return (access & writeAccess) != 0;
+		};
+
+		HashMap<RHI::ImageFrameAttachment*, ImageState> imageStates{};
+		HashMap<RHI::BufferFrameAttachment*, BufferState> bufferStates{};
+
+		executionPlan.submissions.Add({});
+		Submission& submission = executionPlan.submissions[0];
+		submission.queue = device->GetGraphicsQueue();
+
+		for (RHI::Scope* rhiScope : frameGraph->GetTopologicallySortedScopes())
+		{
+			Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
+			ExecutionStep step{};
+			step.scope = scope;
+
+			for (RHI::ScopeAttachment* scopeAttachment : scope->GetAttachments())
+			{
+				RHI::FrameAttachment* frameAttachment = scopeAttachment->GetFrameAttachment();
+				if (frameAttachment == nullptr)
+					continue;
+
+				if (scopeAttachment->IsImageAttachment() && frameAttachment->IsImageAttachment())
 				{
-					Scope::Barrier barrier{};
+					auto imageAttachment = (RHI::ImageFrameAttachment*)frameAttachment;
+					ImageState required = getImageState(scope, scopeAttachment);
+					if (!required.initialized)
+						continue;
 
-					switch (from->GetUsage())
+					ImageState previous{};
+					if (imageStates.KeyExists(imageAttachment))
 					{
-					case ScopeAttachmentUsage::Color:
-						barrier.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-						break;
-					case ScopeAttachmentUsage::DepthStencil:
-						barrier.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-						break;
-					case ScopeAttachmentUsage::Copy:
-						barrier.srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
-						break;
-					case ScopeAttachmentUsage::SubpassInput:
-					case ScopeAttachmentUsage::Shader:
-						barrier.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-						break;
-					case ScopeAttachmentUsage::Resolve:
-						barrier.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-						break;
-					default:
-						break;
+						previous = imageStates[imageAttachment];
+					}
+					else
+					{
+						previous.initialized = true;
+						previous.stages = imageAttachment->IsSwapChainAttachment() ?
+							VK_PIPELINE_STAGE_2_NONE : VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+						previous.access = imageAttachment->IsSwapChainAttachment() ?
+							VK_ACCESS_2_NONE : VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT;
+						previous.layout = imageAttachment->IsSwapChainAttachment() ?
+							VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_UNDEFINED;
 					}
 
-					switch (to->GetUsage())
+					const bool needsBarrier = previous.layout != required.layout ||
+						hasWriteAccess(previous.access) || hasWriteAccess(required.access);
+
+					if (needsBarrier)
 					{
-					case ScopeAttachmentUsage::Color:
-						barrier.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-						break;
-					case ScopeAttachmentUsage::DepthStencil:
-						barrier.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-						break;
-					case ScopeAttachmentUsage::Copy:
-						barrier.dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
-						break;
-					case ScopeAttachmentUsage::Shader:
-					case ScopeAttachmentUsage::SubpassInput:
-						barrier.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-						break;
-					case ScopeAttachmentUsage::Resolve:
-						barrier.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-						break;
-					default:
-						break;
+						const RHI::ImageDescriptor& descriptor = imageAttachment->GetImageDescriptor();
+						VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+						if (IsDepthStencilFormat(descriptor.format))
+							aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+						else if (IsDepthFormat(descriptor.format))
+							aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+						ImageBarrier compiledBarrier{};
+						compiledBarrier.attachment = imageAttachment;
+						compiledBarrier.barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+						compiledBarrier.barrier.srcStageMask = previous.stages;
+						compiledBarrier.barrier.srcAccessMask = previous.access;
+						compiledBarrier.barrier.dstStageMask = required.stages;
+						compiledBarrier.barrier.dstAccessMask = required.access;
+						compiledBarrier.barrier.oldLayout = previous.layout;
+						compiledBarrier.barrier.newLayout = required.layout;
+						compiledBarrier.barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+						compiledBarrier.barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+						compiledBarrier.barrier.image = VK_NULL_HANDLE;
+						compiledBarrier.barrier.subresourceRange.aspectMask = aspectMask;
+						compiledBarrier.barrier.subresourceRange.baseMipLevel = 0;
+						compiledBarrier.barrier.subresourceRange.levelCount = descriptor.mipLevels;
+						compiledBarrier.barrier.subresourceRange.baseArrayLayer = 0;
+						compiledBarrier.barrier.subresourceRange.layerCount = descriptor.arrayLayers;
+
+						step.preBarriers.imageBarriers.Add(compiledBarrier);
+						step.preBarriers.imageLayoutTransitions.Add({ imageAttachment, required.layout,
+							submission.queue->GetFamilyIndex() });
 					}
 
-					// Image -> Image barrier
-					if (from->IsImageAttachment() && to->IsImageAttachment() && RequiresDependency(from, to))
+					imageStates[imageAttachment] = required;
+				}
+				else if (scopeAttachment->IsBufferAttachment() && frameAttachment->IsBufferAttachment())
+				{
+					auto bufferAttachment = (RHI::BufferFrameAttachment*)frameAttachment;
+					BufferState required = getBufferState(scope, scopeAttachment);
+					if (!required.initialized)
+						continue;
+
+					BufferState previous{};
+					if (bufferStates.KeyExists(bufferAttachment))
 					{
-						RHI::ImageScopeAttachment* fromImage = (RHI::ImageScopeAttachment*)from;
-						RHI::ImageScopeAttachment* toImage = (RHI::ImageScopeAttachment*)to;
-						VkImageMemoryBarrier imageBarrier{};
-						imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-
-						RHI::ImageFrameAttachment* imageAttachment = (RHI::ImageFrameAttachment*)fromImage->GetFrameAttachment();
-						if (imageAttachment == nullptr)
-							continue;
-
-						RHI::RHIResource* resource = imageAttachment->GetResource(frameSlot);
-						if (resource == nullptr)
-							continue;
-
-						Texture* image = nullptr;
-
-						if (resource->GetResourceType() == RHI::ResourceType::Texture)
-						{
-							image = dynamic_cast<Texture*>(resource);
-						}
-						else if (resource->GetResourceType() == RHI::ResourceType::TextureView)
-						{
-							TextureView* imageView = dynamic_cast<TextureView*>(resource);
-							image = (Texture*)imageView->GetTexture();
-						}
-						else
-						{
-							continue;
-						}
-
-						if (image == nullptr || image->GetImage() == nullptr)
-							continue;
-
-						imageBarrier.image = image->GetImage();
-						imageBarrier.srcQueueFamilyIndex = producerScope->queue->GetFamilyIndex();
-						imageBarrier.dstQueueFamilyIndex = current->queue->GetFamilyIndex();
-
-						imageBarrier.subresourceRange.aspectMask = image->GetAspectMask();
-						imageBarrier.subresourceRange.baseArrayLayer = 0;
-						imageBarrier.subresourceRange.layerCount = image->GetArrayLayerCount();
-						imageBarrier.subresourceRange.baseMipLevel = 0;
-						imageBarrier.subresourceRange.levelCount = image->GetMipLevelCount();
-
-						switch (fromImage->GetUsage())
-						{
-						case RHI::ScopeAttachmentUsage::Color:
-							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-							imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-							break;
-						case RHI::ScopeAttachmentUsage::DepthStencil:
-							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-							imageBarrier.srcAccessMask = 0;
-							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-							{
-								imageBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-							}
-							else // Read only
-							{
-								imageBarrier.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-								imageBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-							}
-							break;
-						case RHI::ScopeAttachmentUsage::SubpassInput:
-						case RHI::ScopeAttachmentUsage::Shader:
-							imageBarrier.srcAccessMask = 0;
-							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-							{
-								imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
-								imageBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL; // You can only write to general layouts in shader
-							}
-							else // Read only
-							{
-								imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-								if (producerScope->GetOperation() == RHI::ScopeOperation::Compute)
-									imageBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-								else
-									imageBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-							}
-							break;
-						case RHI::ScopeAttachmentUsage::Copy:
-							imageBarrier.srcAccessMask = 0;
-							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
-							{
-								imageBarrier.srcAccessMask |= VK_ACCESS_MEMORY_READ_BIT;
-								imageBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-							}
-							else if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-							{
-								imageBarrier.srcAccessMask |= VK_ACCESS_MEMORY_WRITE_BIT;
-								imageBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-							}
-							break;
-						case RHI::ScopeAttachmentUsage::Resolve:
-							imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-							break;
-						default:
-							continue;
-						}
-
-						switch (toImage->GetUsage())
-						{
-						case RHI::ScopeAttachmentUsage::Color:
-							imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-							imageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-							break;
-						case RHI::ScopeAttachmentUsage::DepthStencil:
-							imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-							imageBarrier.dstAccessMask = 0;
-							if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-							{
-								imageBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-							}
-							else // Read only
-							{
-								imageBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-								imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-							}
-							break;
-						case RHI::ScopeAttachmentUsage::SubpassInput:
-						case RHI::ScopeAttachmentUsage::Shader:
-							imageBarrier.dstAccessMask = 0;
-							if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-							{
-								imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
-								imageBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-							}
-							else // Read only
-							{
-								imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-								if (current->GetOperation() == RHI::ScopeOperation::Compute)
-									imageBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-								else
-									imageBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-							}
-							break;
-						case RHI::ScopeAttachmentUsage::Copy:
-							imageBarrier.dstAccessMask = 0;
-							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
-							{
-								imageBarrier.dstAccessMask |= VK_ACCESS_MEMORY_READ_BIT;
-								imageBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-							}
-							else if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-							{
-								imageBarrier.dstAccessMask |= VK_ACCESS_MEMORY_WRITE_BIT;
-								imageBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-							}
-							break;
-						case RHI::ScopeAttachmentUsage::Resolve:
-							imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-							imageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-							break;
-						default:
-							continue;
-						}
-
-						VkPipelineStageFlags originalDstStageMask = barrier.dstStageMask;
-						VkAccessFlags originalDstAccessMask = imageBarrier.dstAccessMask;
-
-						if (isDifferentQueue)
-						{
-							barrier.dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-							imageBarrier.dstAccessMask = 0;
-						}
-
-						Scope::ImageLayoutTransition transition{};
-						transition.image = image;
-						transition.layout = imageBarrier.newLayout;
-						transition.queueFamilyIndex = current->queue->GetFamilyIndex();
-
-						barrier.imageBarriers.Add(imageBarrier);
-						barrier.imageLayoutTransitions.Add(transition);
-						
-						producerScope->barriers.Add(barrier);
-
-						if (isDifferentQueue)
-						{
-							barrier.imageBarriers.Clear();
-							barrier.dstStageMask = originalDstStageMask;
-							imageBarrier.dstAccessMask = originalDstAccessMask;
-							barrier.srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-							imageBarrier.srcAccessMask = 0;
-
-							barrier.imageBarriers.Add(imageBarrier);
-
-							current->initialBarriers.Add(barrier);
-						}
+						previous = bufferStates[bufferAttachment];
 					}
-					// Buffer -> Buffer barrier
-					else if (from->IsBufferAttachment() && to->IsBufferAttachment() && RequiresDependency(from, to))
+					else
 					{
-						RHI::BufferScopeAttachment* fromBuffer = (RHI::BufferScopeAttachment*)from;
-						RHI::BufferScopeAttachment* toBuffer = (RHI::BufferScopeAttachment*)to;
-						VkBufferMemoryBarrier bufferBarrier{};
-						bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-
-						RHI::BufferFrameAttachment* bufferAttachment = (RHI::BufferFrameAttachment*)fromBuffer->GetFrameAttachment();
-						if (bufferAttachment == nullptr)
-							continue;
-
-						RHI::RHIResource* resource = bufferAttachment->GetResource(frameSlot);
-						if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Buffer)
-							continue;
-
-						Vulkan::Buffer* buffer = dynamic_cast<Vulkan::Buffer*>(resource);
-						if (buffer == nullptr || buffer->GetBuffer() == nullptr)
-							continue;
-
-						bufferBarrier.buffer = buffer->GetBuffer();
-						bufferBarrier.srcQueueFamilyIndex = producerScope->queue->GetFamilyIndex();
-						bufferBarrier.dstQueueFamilyIndex = current->queue->GetFamilyIndex();
-						bufferBarrier.offset = 0;
-						bufferBarrier.size = buffer->GetBufferSize();
-
-						switch (fromBuffer->GetUsage())
-						{
-						case RHI::ScopeAttachmentUsage::Copy:
-						case RHI::ScopeAttachmentUsage::Shader:
-							bufferBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-							if (EnumHasFlag(fromBuffer->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-							{
-								bufferBarrier.srcAccessMask |= VK_ACCESS_MEMORY_WRITE_BIT;
-							}
-							break;
-						default:
-							continue;
-						}
-
-						switch (toBuffer->GetUsage())
-						{
-						case RHI::ScopeAttachmentUsage::Copy:
-						case RHI::ScopeAttachmentUsage::Shader:
-							bufferBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-							if (EnumHasFlag(toBuffer->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-							{
-								bufferBarrier.dstAccessMask |= VK_ACCESS_MEMORY_WRITE_BIT;
-							}
-							break;
-						default:
-							continue;
-						}
-
-						Scope::BufferFamilyTransition transition{};
-						transition.buffer = buffer;
-						transition.queueFamilyIndex = current->queue->GetFamilyIndex();
-						
-						barrier.bufferBarriers.Add(bufferBarrier);
-						barrier.bufferFamilyTransitions.Add(transition);
-
-						producerScope->barriers.Add(barrier);
+						previous.initialized = true;
+						previous.stages = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+						previous.access = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT;
 					}
-					
+
+					if (hasWriteAccess(previous.access) || hasWriteAccess(required.access))
+					{
+						BufferBarrier compiledBarrier{};
+						compiledBarrier.attachment = bufferAttachment;
+						compiledBarrier.barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2;
+						compiledBarrier.barrier.srcStageMask = previous.stages;
+						compiledBarrier.barrier.srcAccessMask = previous.access;
+						compiledBarrier.barrier.dstStageMask = required.stages;
+						compiledBarrier.barrier.dstAccessMask = required.access;
+						compiledBarrier.barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+						compiledBarrier.barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+						compiledBarrier.barrier.buffer = VK_NULL_HANDLE;
+						compiledBarrier.barrier.offset = 0;
+						compiledBarrier.barrier.size = VK_WHOLE_SIZE;
+
+						step.preBarriers.bufferBarriers.Add(compiledBarrier);
+						step.preBarriers.bufferFamilyTransitions.Add({ bufferAttachment,
+							submission.queue->GetFamilyIndex() });
+					}
+
+					bufferStates[bufferAttachment] = required;
 				}
 			}
-		}
 
-		visitedScopes.Add(current->id);
+			if (scope->PresentsSwapChain())
+			{
+				for (RHI::ScopeAttachment* scopeAttachment : scope->GetAttachments())
+				{
+					RHI::FrameAttachment* frameAttachment = scopeAttachment->GetFrameAttachment();
+					if (frameAttachment == nullptr || !frameAttachment->IsSwapChainAttachment())
+						continue;
 
-		for (auto scope : current->consumers)
-		{
-			CompileBarriers(visitedScopes, compileRequest, (Vulkan::Scope*)scope);
+					auto imageAttachment = (RHI::ImageFrameAttachment*)frameAttachment;
+					if (!imageStates.KeyExists(imageAttachment))
+						continue;
+
+					ImageState previous = imageStates[imageAttachment];
+					if (previous.layout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
+						continue;
+
+					ImageBarrier compiledBarrier{};
+					compiledBarrier.attachment = imageAttachment;
+					compiledBarrier.barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+					compiledBarrier.barrier.srcStageMask = previous.stages;
+					compiledBarrier.barrier.srcAccessMask = previous.access;
+					compiledBarrier.barrier.dstStageMask = VK_PIPELINE_STAGE_2_NONE;
+					compiledBarrier.barrier.dstAccessMask = VK_ACCESS_2_NONE;
+					compiledBarrier.barrier.oldLayout = previous.layout;
+					compiledBarrier.barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+					compiledBarrier.barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+					compiledBarrier.barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+					compiledBarrier.barrier.image = VK_NULL_HANDLE;
+					compiledBarrier.barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+					compiledBarrier.barrier.subresourceRange.baseMipLevel = 0;
+					compiledBarrier.barrier.subresourceRange.levelCount = 1;
+					compiledBarrier.barrier.subresourceRange.baseArrayLayer = 0;
+					compiledBarrier.barrier.subresourceRange.layerCount = 1;
+
+					step.postBarriers.imageBarriers.Add(compiledBarrier);
+					step.postBarriers.imageLayoutTransitions.Add({ imageAttachment,
+						VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, submission.queue->GetFamilyIndex() });
+
+					previous.stages = VK_PIPELINE_STAGE_2_NONE;
+					previous.access = VK_ACCESS_2_NONE;
+					previous.layout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+					imageStates[imageAttachment] = previous;
+				}
+			}
+
+			submission.steps.Add(step);
 		}
 	}
 
