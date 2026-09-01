@@ -152,16 +152,6 @@ namespace CE::RHI
 		return frameSchedulerInstance;
 	}
 
-	void FrameScheduler::SetFrameGraphVariable(const Name& variableName, const RHI::FrameGraphVariable& value)
-	{
-		frameGraph->SetVariable(variableName, value);
-	}
-
-	void FrameScheduler::SetFrameGraphVariable(int imageIndex, const Name& variableName, const RHI::FrameGraphVariable& value)
-	{
-		frameGraph->SetVariable(imageIndex, variableName, value);
-	}
-
 	void FrameScheduler::AddScopeProducer(IScopeProducer* scopeProducer)
 	{
 		scopeProducers.Add(scopeProducer);

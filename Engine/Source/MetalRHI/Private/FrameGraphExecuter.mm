@@ -207,37 +207,8 @@ namespace CE::Metal
                     scopeLoop = (Metal::Scope*)scopeLoop->nextSubPass;
                 }
                 
-                bool shouldNotExecuteAtAll = false;
-                bool shouldNotExecuteButShouldClear = false;
-
-                for (const auto& cond : currentScope->executeConditions)
-                {
-                    if (!frameGraph->VariableExists(cond.variableName))
-                    {
-                        shouldNotExecuteAtAll = true;
-                        break;
-                    }
-                    const auto& value = frameGraph->GetVariable(currentSubmissionIndex, cond.variableName);
-                    bool result = cond.Compare(value);
-
-                    if (!result)
-                    {
-                        if (cond.shouldClear)
-                        {
-                            shouldNotExecuteButShouldClear = true;
-                            shouldNotExecuteAtAll = false;
-                        }
-                        else
-                        {
-                            shouldNotExecuteButShouldClear = false;
-                            shouldNotExecuteAtAll = true;
-                        }
-                        break;
-                    }
-                }
-                
                 // Graphics operation
-                if (!shouldNotExecuteAtAll && currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
+                if (currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
                 {
                     cmdList->ClearShaderResourceGroups();
                     
@@ -258,7 +229,7 @@ namespace CE::Metal
                         scissor.height = viewport.height;
                         cmdList->SetScissors(1, &scissor);
                         
-                        while (!shouldNotExecuteButShouldClear && currentScope != nullptr)
+                        while (currentScope != nullptr)
                         {
                             RHI::DrawList* drawList = currentScope->drawList;
                             
@@ -326,11 +297,6 @@ namespace CE::Metal
                             
                             if (currentScope->nextSubPass == nullptr) // No more subpasses left
                             {
-                                for (const auto& [variableName, value] : currentScope->setVariablesAfterExecutionPerFrame)
-                                {
-                                    scheduler->SetFrameGraphVariable(currentSubmissionIndex, variableName, value);
-                                }
-
                                 cmdList->ClearShaderResourceGroups();
                                 break;
                             }

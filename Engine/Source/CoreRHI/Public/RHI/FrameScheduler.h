@@ -71,9 +71,6 @@ namespace CE::RHI
 
 		static FrameScheduler* Get();
 
-		void SetFrameGraphVariable(const Name& variableName, const RHI::FrameGraphVariable& value);
-		void SetFrameGraphVariable(int imageIndex, const Name& variableName, const RHI::FrameGraphVariable& value);
-
 		void AddScopeProducer(IScopeProducer* scopeProducer);
 
 		const auto& GetScopeProducers() const { return scopeProducers; }

@@ -137,50 +137,6 @@ namespace CE::RHI
 		return true;
 	}
 
-	bool FrameGraphBuilder::ExecuteOnlyIf(const Name& variableName, FrameGraphVariableComparison comparisonOp, 
-		const FrameGraphVariable& comparisonValue, 
-		bool shouldClear)
-	{
-		if (!currentScope || !frameGraph)
-			return false;
-
-		ExecuteCondition cond{};
-		cond.variableName = variableName;
-		cond.comparisonOperation = comparisonOp;
-		cond.comparisonValue = comparisonValue;
-		cond.shouldClear = shouldClear;
-
-		currentScope->executeConditions.Add(cond);
-
-		return true;
-	}
-
-	bool FrameGraphBuilder::SetVariableAfterExecution(const Name& variableName, const FrameGraphVariable& value)
-	{
-		if (!currentScope || !frameGraph)
-			return false;
-		
-		currentScope->setVariablesAfterExecutionPerFrame.Add(variableName, value);
-		
-		return true;
-	}
-
-	bool FrameGraphBuilder::SetVariableAfterExecutionForAllFrames(const Name& variableName, const FrameGraphVariable& value)
-	{
-		if (!currentScope || !frameGraph)
-			return false;
-
-		currentScope->setVariablesAfterExecutionAllFrames.Add(variableName, value);
-
-		return true;
-	}
-
-	bool FrameGraphBuilder::SetVariableInitialValue(const Name& variableName, const FrameGraphVariable& value)
-	{
-		frameGraph->SetVariable(variableName, value);
-		return true;
-	}
-
 	bool FrameGraphBuilder::SetDispatchGroupCount(u32 groupCountX, u32 groupCountY, u32 groupCountZ)
 	{
 		if (!currentScope || !frameGraph)

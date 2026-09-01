@@ -525,36 +525,6 @@ namespace CE::Vulkan
 					}
 				}
 
-				bool shouldNotExecuteAtAll = false;
-				bool shouldNotExecuteButShouldClear = false;
-
-				for (const auto& cond : currentScope->executeConditions)
-				{
-					if (!frameGraph->VariableExists(cond.variableName))
-					{
-						shouldNotExecuteAtAll = true;
-						break;
-					}
-					const auto& value = frameGraph->GetVariable(frameSlot, cond.variableName);
-					bool result = cond.Compare(value);
-
-					if (!result)
-					{
-						if (cond.shouldClear)
-						{
-							shouldNotExecuteButShouldClear = true;
-							shouldNotExecuteAtAll = false;
-						}
-						else
-						{
-							shouldNotExecuteButShouldClear = false;
-							shouldNotExecuteAtAll = true;
-						}
-						break;
-					}
-				}
-
-				if (!shouldNotExecuteAtAll)
 				{
 					Vulkan::Scope* currentSubPassScope = currentScope;
 					HashSet<RHI::AttachmentID> initializedAttachmentIds{};
@@ -613,7 +583,7 @@ namespace CE::Vulkan
 				}
 
 				// Graphics operation
-				if (!shouldNotExecuteAtAll && currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
+				if (currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
 				{
 					commandList->ClearShaderResourceGroups();
 
@@ -653,7 +623,7 @@ namespace CE::Vulkan
 						scissor.extent.height = viewport.height;
 						vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
-						while (!shouldNotExecuteButShouldClear && currentScope != nullptr)
+						while (currentScope != nullptr)
 						{
 							RHI::DrawList* drawList = currentScope->drawList;
 
@@ -766,11 +736,6 @@ namespace CE::Vulkan
 
 								commandList->currentSubpass = 0;
 
-								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecutionPerFrame)
-								{
-									scheduler->SetFrameGraphVariable(frameSlot, variableName, value);
-								}
-
 								commandList->ClearShaderResourceGroups();
 								break;
 							}
@@ -782,18 +747,6 @@ namespace CE::Vulkan
 								commandList->currentSubpass++;
 								commandList->ClearShaderResourceGroups();
 
-								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecutionPerFrame)
-								{
-									scheduler->SetFrameGraphVariable(frameSlot, variableName, value);
-								}
-
-								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecutionAllFrames)
-								{
-									for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
-									{
-										scheduler->SetFrameGraphVariable(i, variableName, value);
-									}
-								}
 							}
 						}
 					}

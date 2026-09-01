@@ -16,8 +16,6 @@ namespace CE::RHI
 {
 	class FrameGraph;
 	struct FrameGraphCompileRequest;
-	struct ExecuteCondition;
-	class FrameGraphVariable;
 
 	enum class ScopeOperation
 	{
@@ -138,11 +136,7 @@ namespace CE::RHI
 
 		DrawList* drawList = nullptr;
 
-		Array<ExecuteCondition> executeConditions;
 		RHI::ShaderResourceGroupLayout passSrgLayout;
-		
-		HashMap<Name, FrameGraphVariable> setVariablesAfterExecutionPerFrame{};
-		HashMap<Name, FrameGraphVariable> setVariablesAfterExecutionAllFrames{};
 
 		RHI::ShaderResourceGroup* passShaderResourceGroup = nullptr;
 		RHI::ShaderResourceGroup* subpassShaderResourceGroup = nullptr;

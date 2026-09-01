@@ -65,7 +65,6 @@
 #include "RHI/Scope.h"
 #include "RHI/TransientMemoryPool.h"
 #include "RHI/TransientAttachmentPool.h"
-#include "RHI/FrameGraphVariable.h"
 #include "RHI/FrameGraph.h"
 #include "RHI/FrameGraphBuilder.h"
 #include "RHI/FrameGraphCompiler.h"
