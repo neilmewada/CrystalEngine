@@ -1493,6 +1493,24 @@ TEST(FrameGraphTest, Basic)
 
 	BuildSampleRenderPipeline(scheduler, swapChain);
 
+	const auto& sortedScopes = scheduler->GetFrameGraph()->GetTopologicallySortedScopes();
+	EXPECT_EQ(sortedScopes.GetSize(), 6);
+
+	auto findScopeIndex = [&sortedScopes](const Name& scopeId)
+	{
+		for (int i = 0; i < sortedScopes.GetSize(); ++i)
+		{
+			if (sortedScopes[i]->GetId() == scopeId)
+				return i;
+		}
+		return -1;
+	};
+
+	EXPECT_LT(findScopeIndex("Depth"), findScopeIndex("Opaque"));
+	EXPECT_LT(findScopeIndex("Shadow"), findScopeIndex("Opaque"));
+	EXPECT_LT(findScopeIndex("TileCulling"), findScopeIndex("Opaque"));
+	EXPECT_LT(findScopeIndex("Opaque"), findScopeIndex("Transparent"));
+
 	for (int t = 0; t <= scheduler->GetMaxTimelineLevel(); t++)
 	{
 		Array scopes = scheduler->GetScopesAtTimelineLevel(t);

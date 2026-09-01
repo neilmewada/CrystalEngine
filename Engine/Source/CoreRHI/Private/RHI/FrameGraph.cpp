@@ -22,6 +22,7 @@ namespace CE::RHI
 			delete scope;
 		}
 		scopes.Clear();
+		topologicallySortedScopes.Clear();
 		scopesById.Clear();
 		producers.Clear();
 		scopeGroups.Clear();
@@ -33,6 +34,7 @@ namespace CE::RHI
 		nodeDependencies.Clear();
 
 		scopesByTimelineLevel.Clear();
+		topologicallySortedScopes.Clear();
 		maxTimelineLevel = 0;
     }
 
@@ -195,6 +197,7 @@ namespace CE::RHI
 		while (!processQueue.empty()) {
 			RHI::Scope* current = processQueue.front();
 			processQueue.pop();
+			topologicallySortedScopes.Add(current);
 
 			for (auto* consumer : current->consumers) {
 				// Level is always 1 higher than the furthest producer

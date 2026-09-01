@@ -32,6 +32,8 @@ namespace CE::RHI
         
         const Array<Scope*>& GetEndScopes() const { return endScopes; }
 
+		const Array<Scope*>& GetTopologicallySortedScopes() const { return topologicallySortedScopes; }
+
 		void DeleteAll();
         
 		bool Build();
@@ -71,6 +73,7 @@ namespace CE::RHI
         FrameAttachmentDatabase attachmentDatabase{};
 
         Array<Scope*> scopes{};
+		Array<Scope*> topologicallySortedScopes{};
 		HashMap<ScopeId, Scope*> scopesById{};
 		HashMap<int, Array<Scope*>> scopesByTimelineLevel{};
 		int maxTimelineLevel = 0;
