@@ -374,11 +374,6 @@ namespace CE::Vulkan
 				deviceExtensionNames.Add(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 			}
 
-			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME) == 0)
-			{
-				deviceExtensionNames.Add(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
-			}
-
 			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_MAINTENANCE3_EXTENSION_NAME) == 0)
 			{
 				deviceExtensionNames.Add(VK_KHR_MAINTENANCE3_EXTENSION_NAME);
@@ -437,8 +432,32 @@ namespace CE::Vulkan
 		VkPhysicalDeviceFeatures deviceFeaturesToUse{};
 		deviceFeaturesToUse.samplerAnisotropy = VK_TRUE;
 
+		VkPhysicalDeviceVulkan13Features supportedVulkan13Features{};
+		supportedVulkan13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+
+		VkPhysicalDeviceFeatures2 supportedFeatures{};
+		supportedFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		supportedFeatures.pNext = &supportedVulkan13Features;
+
+		vkGetPhysicalDeviceFeatures2(gpu, &supportedFeatures);
+
+		if (!supportedVulkan13Features.synchronization2)
+		{
+			CE_LOG(Error, All, "Vulkan device does not support synchronization2.");
+			return;
+		}
+
+		VkPhysicalDeviceVulkan13Features vulkan13Features{};
+		vulkan13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		vulkan13Features.synchronization2 = VK_TRUE;
+
 		VkPhysicalDeviceVulkan12Features vulkan12Features{};
 		vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+
+		vulkan13Features.pNext = &vulkan12Features;
+		vulkan12Features.pNext = nullptr;
+
+		deviceCI.pNext = &vulkan13Features;
 
 #if PLATFORM_DESKTOP
 		deviceFeaturesToUse.textureCompressionBC = VK_TRUE;
@@ -446,7 +465,6 @@ namespace CE::Vulkan
 #endif
 
 #if PLATFORM_DESKTOP
-		vulkan12Features.pNext = nullptr;
 		vulkan12Features.timelineSemaphore = VK_TRUE;
 
 		vulkan12Features.descriptorIndexing = VK_TRUE;
@@ -454,8 +472,6 @@ namespace CE::Vulkan
 		vulkan12Features.runtimeDescriptorArray = VK_TRUE;
 		vulkan12Features.descriptorBindingVariableDescriptorCount = VK_TRUE;
 		vulkan12Features.descriptorBindingPartiallyBound = VK_TRUE;
-
-		deviceCI.pNext = &vulkan12Features;
 
 		VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures{};
 		accelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;

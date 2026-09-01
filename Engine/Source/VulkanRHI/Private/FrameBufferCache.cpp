@@ -47,24 +47,16 @@ namespace CE::Vulkan
 
 		List<VkImageView> imageViews{};
 
-		for (const VulkanRenderPass::AttachmentBinding& binding : renderPass->GetDescriptor().attachments)
+		for (RHI::ScopeAttachment* attachment : scope->GetAttachments())
 		{
-			RHI::FrameAttachment* frameAttachment = nullptr;
-			Vulkan::Scope* current = scope;
+			if (!attachment->IsImageAttachment())
+				continue;
 
-			while (current != nullptr && frameAttachment == nullptr)
-			{
-				for (RHI::ScopeAttachment* attachment : current->GetAttachments())
-				{
-					if (attachment->GetFrameAttachment() != nullptr &&
-						attachment->GetFrameAttachment()->GetId() == binding.attachmentId)
-					{
-						frameAttachment = attachment->GetFrameAttachment();
-						break;
-					}
-				}
-				current = (Vulkan::Scope*)current->GetNextSubPass();
-			}
+			if (attachment->GetUsage() == RHI::ScopeAttachmentUsage::Shader ||
+				attachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy)
+				continue;
+
+			RHI::FrameAttachment* frameAttachment = attachment->GetFrameAttachment();
 
 			if (frameAttachment == nullptr)
 				return nullptr;
