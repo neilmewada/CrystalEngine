@@ -73,8 +73,8 @@ namespace CE::Vulkan
 						Name attachmentName = scopeAttachment->GetShaderInputName();
 						RHI::FrameAttachment* frameAttachment = scopeAttachment->GetFrameAttachment();
 
-						for (int imageIdx = 0; imageIdx < RHI::Limits::MaxSwapChainImageCount; imageIdx++)
 						{
+							const u32 imageIdx = compileRequest.frameSlot;
 							if (frameAttachment->IsImageAttachment())
 							{
 								RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
@@ -151,8 +151,8 @@ namespace CE::Vulkan
 
 							RHI::FrameAttachment* frameAttachment = scopeAttachment->GetFrameAttachment();
 
-							for (int imageIdx = 0; imageIdx < RHI::Limits::MaxSwapChainImageCount; imageIdx++)
 							{
+								const u32 imageIdx = compileRequest.frameSlot;
 								if (frameAttachment->IsImageAttachment())
 								{
 									RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
@@ -237,8 +237,8 @@ namespace CE::Vulkan
 
 						RHI::FrameAttachment* frameAttachment = scopeAttachment->GetFrameAttachment();
 
-						for (int imageIdx = 0; imageIdx < RHI::Limits::MaxSwapChainImageCount; imageIdx++)
-						{
+					{
+						const u32 imageIdx = compileRequest.frameSlot;
 							if (frameAttachment->IsImageAttachment())
 							{
 								RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
