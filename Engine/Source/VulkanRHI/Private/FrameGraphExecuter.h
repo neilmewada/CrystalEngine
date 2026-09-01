@@ -21,10 +21,6 @@ namespace CE::Vulkan
 		FrameContext WaitForNextFrame() override;
 		bool Execute(const FrameGraphExecuteRequest& executeRequest) override;
 
-		u32 BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest) override;
-
-		void EndExecution(const RHI::FrameGraphExecuteRequest& executeRequest) override;
-
 		void ResetFramesInFlight() override;
 
 	private:
@@ -40,7 +36,7 @@ namespace CE::Vulkan
 		};
 
 		Device* device = nullptr;
-		FrameGraphCompiler* compiler = nullptr;
+		//FrameGraphCompiler* compiler = nullptr;
 
 		FrameBufferCache frameBufferCache{};
 

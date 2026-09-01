@@ -30,6 +30,8 @@ namespace CE::Vulkan
 
 		bool AcquireNextImage() override;
 
+		VkSemaphore GetImageAcquiredSemaphore() const { return imageAcquiredSemaphores[currentImageAcquiredSemaphoreIndex]; }
+
 		inline VkSwapchainKHR GetHandle() const { return swapChain; }
 
 		PlatformWindow* GetNativeWindow() override { return window; }

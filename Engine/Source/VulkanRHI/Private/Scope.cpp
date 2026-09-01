@@ -10,16 +10,6 @@ namespace CE::Vulkan
 
 	Scope::~Scope()
 	{
-		for (int i = 0; i < commandListsByFamilyIndexPerImage.GetSize(); i++)
-		{
-			for (int j = 0; j < commandListsByFamilyIndexPerImage[i].GetSize(); j++)
-			{
-				delete commandListsByFamilyIndexPerImage[i][j];
-			}
-			commandListsByFamilyIndexPerImage[i].Clear();
-		}
-		commandListsByFamilyIndexPerImage.Clear();
-
         if (renderPass)
         {
             // No need to destroy it. RenderPassCache manages it.

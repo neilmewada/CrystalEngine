@@ -8,6 +8,8 @@ namespace CE::Vulkan
         CE_NO_COPY(FrameBufferCache);
     public:
 
+        FrameBufferCache() = default;
+
         struct Key
         {
             SIZE_T renderPassHash = 0;

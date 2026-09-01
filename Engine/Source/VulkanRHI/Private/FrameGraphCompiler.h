@@ -28,15 +28,9 @@ namespace CE::Vulkan
 
 			~FrameCompileContext()
 			{
-				for (VkSemaphore semaphore : imageAcquiredSemaphores)
-				{
-					vkDestroySemaphore(device, semaphore, VULKAN_CPU_ALLOCATOR);
-				}
-				imageAcquiredSemaphores.Clear();
 			}
 
 			VkDevice device = nullptr;
-			List<VkSemaphore> imageAcquiredSemaphores;
 			List<VkSemaphore> freeSemaphores;
 		};
         

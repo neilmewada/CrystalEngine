@@ -102,6 +102,8 @@ namespace CE::Vulkan
 
 	bool SwapChain::AcquireNextImage()
 	{
+		ZoneScoped;
+
 		if (shouldRebuild)
 		{
 			RebuildSwapChain();
@@ -123,6 +125,11 @@ namespace CE::Vulkan
 				RebuildSwapChain();
 			}
 			return false;
+		}
+
+		if (result == VK_SUBOPTIMAL_KHR)
+		{
+			shouldRebuild = true;
 		}
 
 		return true;

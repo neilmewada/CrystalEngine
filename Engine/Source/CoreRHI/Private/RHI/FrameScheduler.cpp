@@ -100,26 +100,6 @@ namespace CE::RHI
 		return executer->WaitForNextFrame();
     }
 
-    u32 FrameScheduler::BeginExecution()
-	{
-		FrameGraphExecuteRequest executeRequest{};
-		executeRequest.frameGraph = frameGraph;
-		executeRequest.scheduler = this;
-		executeRequest.compiler = compiler;
-
-		return executer->BeginExecution(executeRequest);
-	}
-
-	void FrameScheduler::EndExecution()
-	{
-		FrameGraphExecuteRequest executeRequest{};
-		executeRequest.frameGraph = frameGraph;
-		executeRequest.scheduler = this;
-		executeRequest.compiler = compiler;
-
-		executer->EndExecution(executeRequest);
-	}
-
 	void FrameScheduler::SetScopeDrawList(const ScopeId& scopeId, DrawList* drawList)
 	{
 		if (!frameGraph->scopesById.KeyExists(scopeId))

@@ -55,10 +55,6 @@ namespace CE::RHI
 
 		FrameContext BeginFrame();
 
-		u32 BeginExecution();
-
-		void EndExecution();
-
 		void SetScopeDrawList(const ScopeId& scopeId, DrawList* drawList);
 
 		RHI::Scope* FindScope(const ScopeId& scopeId);

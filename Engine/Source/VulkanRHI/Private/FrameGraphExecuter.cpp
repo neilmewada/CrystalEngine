@@ -35,92 +35,15 @@ namespace CE::Vulkan
 		ZoneText(value.GetCString(), value.GetLength());
 
 		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
+		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
 
-		HashSet<RHI::ScopeId> executedScopes{};
-		HashSet<Vulkan::SwapChain*> usedSwapChains{};
-
-		// TODO: Execute frame graph
-
-		frameSlot = (frameSlot + 1) % compiler->numFramesInFlight;
-		frameNumber++;
-
-		return true;
-	}
-
-	u32 FrameGraphExecuter::BeginExecution(const RHI::FrameGraphExecuteRequest& executeRequest)
-	{
-		ZoneScoped;
-
-		device->GetShaderResourceManager()->DestroyQueuedSRG();
-
-		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
-		compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
-		bool swapChainExists = frameGraph->presentSwapChains.NotEmpty();
-
-		const Array<RHI::Scope*>& producers = frameGraph->producers;
-		constexpr u64 u64Max = NumericLimits<u64>::Max();
-        constexpr u64 acquireTimeout = 100'000'000; // 0.1 second
-		VkResult result = VK_SUCCESS;
-
-		/*if (swapChainExists)
+		for (int i = 0; i < frameGraph->presentSwapChains.GetSize(); i++)
 		{
-			vkResetFences(device->GetHandle(),
-				compiler->imageAcquiredFences[frameSlot].GetSize(),
-				compiler->imageAcquiredFences[frameSlot].GetData());
+			auto swapChain = frameGraph->presentSwapChains[i];
 
-			{
-				ZoneNamedN(__graphExecution, "_GraphExecutionFences", true);
-				String val = String("Index: ") + frameSlot;
-				ZoneText(val.GetCString(), val.GetLength());
-
-				vkWaitForFences(device->GetHandle(),
-				   compiler->graphExecutionFences[frameSlot].GetSize(),
-				   compiler->graphExecutionFences[frameSlot].GetData(),
-				   VK_TRUE, u64Max);
-			}
-
-			for (int i = 0; i < frameGraph->presentSwapChains.GetSize(); i++)
-			{
-				auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChains[i];
-
-				{
-					ZoneNamedN(__acquireImage, "_AcquireNextImage", true);
-
-					result = vkAcquireNextImageKHR(device->GetHandle(),
-					   swapChain->GetHandle(), acquireTimeout,
-					   compiler->imageAcquiredSemaphores[frameSlot][i],
-					   //compiler->imageAcquiredFences[currentSubmissionIndex][i],
-					   nullptr,
-					   &swapChain->currentImageIndex);
-				}
-
-				if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-				{
-					for (auto swapChainToRebuild : frameGraph->presentSwapChains)
-					{
-						ZoneNamedN(__rebuildSwapChain, "_RebuildSwapChain", true);
-
-						((Vulkan::SwapChain*)swapChain)->RebuildSwapChain();
-					}
-				}
-
-				if (result != VK_SUCCESS)
-				{
-					return RHI::Limits::MaxSwapChainImageCount;
-				}
-			}
-		}*/
-
-		return frameSlot;
-	}
-
-	void FrameGraphExecuter::EndExecution(const RHI::FrameGraphExecuteRequest& executeRequest)
-	{
-		ZoneScoped;
-		String value = String("Index: ") + frameSlot;
-		ZoneText(value.GetCString(), value.GetLength());
-
-		RHI::FrameGraph* frameGraph = executeRequest.frameGraph;
+			if (!swapChain->AcquireNextImage())
+				return false;
+		}
 
 		HashSet<RHI::ScopeId> executedScopes{};
 		HashSet<Vulkan::SwapChain*> usedSwapChains{};
@@ -132,6 +55,8 @@ namespace CE::Vulkan
 
 		frameSlot = (frameSlot + 1) % compiler->numFramesInFlight;
 		frameNumber++;
+
+		return true;
 	}
 
 	void FrameGraphExecuter::ResetFramesInFlight()
@@ -171,10 +96,6 @@ namespace CE::Vulkan
 		
 		constexpr u64 u64Max = NumericLimits<u64>::Max();
 		VkResult result = VK_SUCCESS;
-
-		// Wait for rendering from earlier submission to finish.
-		// We cannot record new commands into a command buffer that is currently being executed.
-		result = vkWaitForFences(device->GetHandle(), 1, &scope->renderFinishedFences[frameSlot], VK_TRUE, u64Max);
 		
 		u32 familyIndex = scope->queue->GetFamilyIndex();
 		CommandList* commandList = scope->commandListsByFamilyIndexPerImage[frameSlot][familyIndex];
@@ -893,27 +814,24 @@ namespace CE::Vulkan
 				}
 
 				// Execute compiled pipeline barriers (exit barriers)
-				if (currentScope->barriers[frameSlot].NotEmpty())
+				for (const auto& barrier : currentScope->barriers)
 				{
-					for (const auto& barrier : currentScope->barriers[frameSlot])
+					vkCmdPipelineBarrier(cmdBuffer,
+						barrier.srcStageMask, barrier.dstStageMask,
+						0,
+						barrier.memoryBarriers.GetSize(), barrier.memoryBarriers.GetData(),
+						barrier.bufferBarriers.GetSize(), barrier.bufferBarriers.GetData(),
+						barrier.imageBarriers.GetSize(), barrier.imageBarriers.GetData());
+
+					for (const auto& transition : barrier.imageLayoutTransitions)
 					{
-						vkCmdPipelineBarrier(cmdBuffer,
-							barrier.srcStageMask, barrier.dstStageMask,
-							0,
-							barrier.memoryBarriers.GetSize(), barrier.memoryBarriers.GetData(),
-							barrier.bufferBarriers.GetSize(), barrier.bufferBarriers.GetData(),
-							barrier.imageBarriers.GetSize(), barrier.imageBarriers.GetData());
+						transition.image->curImageLayout = transition.layout;
+						transition.image->curFamilyIndex = transition.queueFamilyIndex;
+					}
 
-						for (const auto& transition : barrier.imageLayoutTransitions)
-						{
-							transition.image->curImageLayout = transition.layout;
-							transition.image->curFamilyIndex = transition.queueFamilyIndex;
-						}
-
-						for (const auto& bufferTransition : barrier.bufferFamilyTransitions)
-						{
-							bufferTransition.buffer->curFamilyIndex = bufferTransition.queueFamilyIndex;
-						}
+					for (const auto& bufferTransition : barrier.bufferFamilyTransitions)
+					{
+						bufferTransition.buffer->curFamilyIndex = bufferTransition.queueFamilyIndex;
 					}
 				}
 			}

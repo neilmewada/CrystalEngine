@@ -93,23 +93,6 @@ namespace CE::Vulkan
 
 		CompileCrossQueueDependencies(compileRequest);
 
-		if (frameCompileContexts[frameSlot]->imageAcquiredSemaphores.GetSize() < numSwapChains)
-		{
-			u32 numExtraSwapChains = numSwapChains - (u32)frameCompileContexts[frameSlot]->imageAcquiredSemaphores.GetSize();
-
-			for (int j = 0; j < numExtraSwapChains; j++)
-			{
-				VkSemaphoreCreateInfo semaphoreCI{};
-				semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-				VkSemaphore semaphore = nullptr;
-				auto result = vkCreateSemaphore(device->GetHandle(), &semaphoreCI, VULKAN_CPU_ALLOCATOR, &semaphore);
-				CE_ASSERT(result == VK_SUCCESS, "Failed to create a VkSemaphore");
-
-				frameCompileContexts[frameSlot]->imageAcquiredSemaphores.Add(semaphore);
-			}
-		}
-
 		CompileBarriers(compileRequest);
 
 		// TODO: Reimplement this method entirely

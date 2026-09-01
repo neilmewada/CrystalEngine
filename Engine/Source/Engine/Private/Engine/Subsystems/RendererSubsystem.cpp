@@ -158,6 +158,7 @@ namespace CE
 		}
 
 		currentFrame = scheduler->BeginFrame();
+
 		if (!currentFrame.isValid)
 		{
 			return;
