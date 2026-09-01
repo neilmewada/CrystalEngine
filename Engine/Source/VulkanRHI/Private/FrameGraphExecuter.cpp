@@ -45,10 +45,8 @@ namespace CE::Vulkan
 				return false;
 		}
 
-		HashSet<RHI::ScopeId> executedScopes{};
-		HashSet<Vulkan::SwapChain*> usedSwapChains{};
-
 		int cmdListIndex = 0;
+		bool isFirstSubmission = true;
 
 		for (const FrameGraphCompiler::Submission& submission : compiler->executionPlan.submissions)
 		{
@@ -108,7 +106,6 @@ namespace CE::Vulkan
 			}
 
 			Vulkan::CommandList* commandList = frameSlots[frameSlot].commandLists[cmdListIndex];
-			RHI::CommandList* rhiCommandList = commandList;
 			VkCommandBuffer cmdBuffer = commandList->GetCommandBuffer();
 			
 			commandList->Begin();
@@ -433,17 +430,54 @@ namespace CE::Vulkan
 
 			List<VkSemaphore> waitSemaphores{};
 			List<VkPipelineStageFlags> waitStages{};
+			List<uint64_t> waitValues{};
+
+			if (isFirstSubmission)
+			{
+				for (auto presentSwapChain : frameGraph->presentSwapChains)
+				{
+					Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)presentSwapChain;
+					
+					waitSemaphores.Add(swapChain->GetImageAcquiredSemaphore());
+					waitStages.Add(VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+					waitValues.Add(0); // Binary semaphore always uses 0
+				}
+			}
 
 			VkSubmitInfo submitInfo{};
 			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-			u64 fenceCompleteValue = frameCompletionFence->NextSignalValue();
+			submitInfo.waitSemaphoreCount = waitSemaphores.GetSize();
+			submitInfo.pWaitSemaphores = waitSemaphores.GetData();
+			submitInfo.pWaitDstStageMask = waitStages.GetData();
 
+			submitInfo.commandBufferCount = 1;
+			submitInfo.pCommandBuffers = &cmdBuffer;
 			
+			VkSemaphore signalSemaphore = frameCompletionFence->GetHandle();
+			submitInfo.signalSemaphoreCount = 1;
+			submitInfo.pSignalSemaphores = &signalSemaphore;
+			
+			const u64 fenceCompleteValue = frameCompletionFence->NextSignalValue();
+
+			VkTimelineSemaphoreSubmitInfo timelineSemaphoreSubmitInfo{};
+			timelineSemaphoreSubmitInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+			timelineSemaphoreSubmitInfo.waitSemaphoreValueCount = static_cast<uint32_t>(waitValues.GetSize());
+			timelineSemaphoreSubmitInfo.pWaitSemaphoreValues = waitValues.GetData();
+			timelineSemaphoreSubmitInfo.signalSemaphoreValueCount = 1;
+			timelineSemaphoreSubmitInfo.pSignalSemaphoreValues = &fenceCompleteValue;
+
+			submitInfo.pNext = &timelineSemaphoreSubmitInfo;
+
+			if (!submission.queue->Submit(1, &submitInfo, VK_NULL_HANDLE))
+			{
+				return false;
+			}
 
 			frameSlots[frameSlot].fenceCompleteValue = fenceCompleteValue;
 
 			cmdListIndex++;
+			isFirstSubmission = false;
 		}
 
 		frameSlot = (frameSlot + 1) % compiler->numFramesInFlight;
