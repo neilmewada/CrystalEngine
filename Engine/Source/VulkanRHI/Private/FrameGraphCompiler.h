@@ -43,8 +43,6 @@ namespace CE::Vulkan
 
 		struct BarrierBatch
 		{
-			VkDependencyFlags dependencyFlags = 0;
-
 			List<VkMemoryBarrier2> memoryBarriers{};
 			List<BufferBarrier> bufferBarriers{};
 			List<ImageBarrier> imageBarriers{};

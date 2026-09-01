@@ -210,7 +210,7 @@ namespace CE::Vulkan
 		*/
 	}
 
-    void FrameGraphCompiler::DestroySyncObjects()
+	void FrameGraphCompiler::DestroySyncObjects()
     {
 		
     }

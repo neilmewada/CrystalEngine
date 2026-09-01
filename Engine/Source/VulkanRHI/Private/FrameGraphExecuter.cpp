@@ -48,9 +48,402 @@ namespace CE::Vulkan
 		HashSet<RHI::ScopeId> executedScopes{};
 		HashSet<Vulkan::SwapChain*> usedSwapChains{};
 
-		for (auto rhiScope : frameGraph->endScopes)
+		int cmdListIndex = 0;
+
+		for (const FrameGraphCompiler::Submission& submission : compiler->executionPlan.submissions)
 		{
-			ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope, executedScopes, usedSwapChains);
+			List<List<VkBufferMemoryBarrier2>> preBufferBarriersPerStep{};
+			List<List<VkImageMemoryBarrier2>> preImageBarriersPerStep{};
+			List<List<VkBufferMemoryBarrier2>> postBufferBarriersPerStep{};
+			List<List<VkImageMemoryBarrier2>> postImageBarriersPerStep{};
+
+			for (const FrameGraphCompiler::ExecutionStep& step : submission.steps)
+			{
+				preBufferBarriersPerStep.Add({});
+				preImageBarriersPerStep.Add({});
+				postBufferBarriersPerStep.Add({});
+				postImageBarriersPerStep.Add({});
+
+				for (const FrameGraphCompiler::BufferBarrier& bufferBarrier : step.preBarriers.bufferBarriers)
+				{
+					Optional<VkBufferMemoryBarrier2> vkBufferBarrierOpt = ResolveBufferBarrier(bufferBarrier, frameSlot);
+					if (!vkBufferBarrierOpt.HasValue())
+						continue;
+
+					preBufferBarriersPerStep.GetLast().Add(vkBufferBarrierOpt.GetValue());
+				}
+
+				for (const FrameGraphCompiler::BufferBarrier& bufferBarrier : step.postBarriers.bufferBarriers)
+				{
+					Optional<VkBufferMemoryBarrier2> vkBufferBarrierOpt = ResolveBufferBarrier(bufferBarrier, frameSlot);
+					if (!vkBufferBarrierOpt.HasValue())
+						continue;
+
+					postBufferBarriersPerStep.GetLast().Add(vkBufferBarrierOpt.GetValue());
+				}
+
+				for (const FrameGraphCompiler::ImageBarrier& imageBarrier : step.preBarriers.imageBarriers)
+				{
+					Optional<VkImageMemoryBarrier2> vkImageBarrierOpt = ResolveImageBarrier(imageBarrier, frameSlot);
+					if (!vkImageBarrierOpt.HasValue())
+						continue;
+
+					preImageBarriersPerStep.GetLast().Add(vkImageBarrierOpt.GetValue());
+				}
+
+				for (const FrameGraphCompiler::ImageBarrier& imageBarrier : step.postBarriers.imageBarriers)
+				{
+					Optional<VkImageMemoryBarrier2> vkImageBarrierOpt = ResolveImageBarrier(imageBarrier, frameSlot);
+					if (!vkImageBarrierOpt.HasValue())
+						continue;
+
+					postImageBarriersPerStep.GetLast().Add(vkImageBarrierOpt.GetValue());
+				}
+			}
+
+			while (cmdListIndex >= frameSlots[frameSlot].commandLists.GetSize())
+			{
+				Vulkan::CommandList* newCommandList = (Vulkan::CommandList*)gDynamicRHI->AllocateCommandList(submission.queue);
+				frameSlots[frameSlot].commandLists.Add(newCommandList);
+			}
+
+			Vulkan::CommandList* commandList = frameSlots[frameSlot].commandLists[cmdListIndex];
+			RHI::CommandList* rhiCommandList = commandList;
+			VkCommandBuffer cmdBuffer = commandList->GetCommandBuffer();
+			
+			commandList->Begin();
+			{
+				commandList->SetFrameIndex(frameSlot);
+
+				for (int i = 0; i < submission.steps.GetSize(); ++i)
+				{
+					const FrameGraphCompiler::ExecutionStep& step = submission.steps[i];
+
+					Vulkan::Scope* currentScope = step.scope;
+
+					VkDependencyInfo dependencyInfo{};
+					dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+					dependencyInfo.dependencyFlags = 0;
+					dependencyInfo.bufferMemoryBarrierCount = preBufferBarriersPerStep[i].GetSize();
+					dependencyInfo.pBufferMemoryBarriers = preBufferBarriersPerStep[i].GetData();
+					dependencyInfo.imageMemoryBarrierCount = preImageBarriersPerStep[i].GetSize();
+					dependencyInfo.pImageMemoryBarriers = preImageBarriersPerStep[i].GetData();
+					dependencyInfo.memoryBarrierCount = 0;
+					dependencyInfo.pMemoryBarriers = nullptr;
+
+					vkCmdPipelineBarrier2(cmdBuffer, &dependencyInfo);
+
+					commandList->ClearShaderResourceGroups();
+
+					if (currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
+					{
+						VulkanRenderPass* renderPass = currentScope->renderPass;
+						FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
+						HashSet<RHI::AttachmentID> clearedAttachments{};
+
+						for (auto scopeAttachment : currentScope->attachments)
+						{
+							if (!scopeAttachment->IsImageAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
+								!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
+								continue;
+							if (scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Shader ||
+								scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy)
+								continue;
+							if (clearedAttachments.Exists(scopeAttachment->GetFrameAttachment()->GetId()))
+								continue;
+
+							VkClearValue clearValue{};
+
+							if (scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::DepthStencil)
+							{
+								clearValue.depthStencil.depth = scopeAttachment->GetLoadStoreAction().clearValueDepth;
+								clearValue.depthStencil.stencil = scopeAttachment->GetLoadStoreAction().clearValueStencil;
+							}
+							else
+							{
+								const RHI::AttachmentLoadStoreAction& loadStoreAction = scopeAttachment->GetLoadStoreAction();
+								memcpy(clearValue.color.float32, loadStoreAction.clearValue.xyzw, sizeof(f32[4]));
+							}
+
+							clearedAttachments.Add(scopeAttachment->GetFrameAttachment()->GetId());
+
+							clearValues.Add(clearValue);
+						}
+
+						int imageIndex = 0;
+
+						if (currentScope->presentSwapChains.GetSize() == 1)
+						{
+							imageIndex = ((Vulkan::SwapChain*)currentScope->presentSwapChains[0])->currentImageIndex;
+						}
+
+						FrameBuffer* frameBuffer = frameBufferCache.FindOrCreate(device, currentScope, frameSlot, imageIndex);
+						CE_ASSERT(frameBuffer != nullptr, "Failed to find or create FrameBuffer!");
+
+						VkRenderPassBeginInfo beginInfo{};
+						beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+						beginInfo.renderPass = renderPass->GetHandle();
+						beginInfo.framebuffer = frameBuffer->GetHandle();
+						beginInfo.clearValueCount = clearValues.GetSize();
+						beginInfo.pClearValues = clearValues.GetData();
+						
+						beginInfo.renderArea.offset.x = 0;
+						beginInfo.renderArea.offset.y = 0;
+						beginInfo.renderArea.extent.width = frameBuffer->GetWidth();
+						beginInfo.renderArea.extent.height = frameBuffer->GetHeight();
+
+						vkCmdBeginRenderPass(cmdBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+						{
+							VkViewport viewport{};
+							viewport.x = viewport.y = 0;
+							viewport.width = frameBuffer->GetWidth();
+							viewport.height = frameBuffer->GetHeight();
+							viewport.minDepth = 0.0f;
+							viewport.maxDepth = 1.0f;
+							vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
+
+							VkRect2D scissor{};
+							scissor.offset.x = scissor.offset.y = 0;
+							scissor.extent.width = viewport.width;
+							scissor.extent.height = viewport.height;
+							vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
+
+							RHI::DrawList* drawList = currentScope->drawList;
+
+							// Submit draw items
+							for (int i = 0; drawList != nullptr && i < drawList->GetDrawItemCount(); i++)
+							{
+								for (auto srg : currentScope->externalShaderResourceGroups)
+								{
+									commandList->SetShaderResourceGroup(srg);
+								}
+
+								if (currentScope->passShaderResourceGroup)
+								{
+									commandList->SetShaderResourceGroup(currentScope->passShaderResourceGroup);
+								}
+								if (currentScope->subpassShaderResourceGroup)
+								{
+									commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
+								}
+
+								const auto& drawItemProperties = drawList->GetDrawItem(i);
+								const RHI::DrawItem* drawItem = drawItemProperties.item;
+
+								if (drawItem->enabled)
+								{
+									// TODO: Try using pipelineCollection instead of pipelineState
+
+									// Bind Pipeline
+									RHI::PipelineState* pipeline = drawItem->pipelineState;
+									if (pipeline)
+									{
+										commandList->BindPipelineState(pipeline);
+									}
+
+									// Bind SRGs
+									for (int j = 0; j < drawItem->shaderResourceGroupCount; j++)
+									{
+										if (drawItem->shaderResourceGroups[j] != nullptr)
+										{
+											commandList->SetShaderResourceGroup(drawItem->shaderResourceGroups[j]);
+										}
+									}
+
+									for (int j = 0; j < drawItem->uniqueShaderResourceGroupCount; j++)
+									{
+										if (drawItem->uniqueShaderResourceGroups[j] != nullptr)
+										{
+											commandList->SetShaderResourceGroup(drawItem->uniqueShaderResourceGroups[j]);
+										}
+									}
+
+									// Commit SRGs
+									commandList->CommitShaderResources();
+
+									// Draw Indexed
+									commandList->BindVertexBuffers(0, drawItem->vertexBufferViewCount, drawItem->vertexBufferViews);
+
+									if (drawItem->rootConstantSize > 0 && drawItem->rootConstants != nullptr &&
+										(int)drawItem->rootConstantSize % 4 == 0)
+									{
+										commandList->SetRootConstants(0, (u32)drawItem->rootConstantSize / 4, drawItem->rootConstants);
+									}
+
+									if (drawItem->arguments.type == RHI::DrawArgumentsIndexed)
+									{
+										commandList->BindIndexBuffer(*drawItem->indexBufferView);
+										commandList->DrawIndexed(drawItem->arguments.indexedArgs);
+									}
+									else if (drawItem->arguments.type == RHI::DrawArgumentsLinear)
+									{
+										commandList->DrawLinear(drawItem->arguments.linearArgs);
+									}
+								}
+							}
+						}
+						vkCmdEndRenderPass(cmdBuffer);
+					}
+					else if (currentScope->queueClass == HardwareQueueClass::Compute)
+					{
+						RHI::PipelineState* pipelineToUse = nullptr;
+
+						for (RHI::PipelineState* pipeline : currentScope->usePipelines)
+						{
+							if (pipeline != nullptr && pipeline->GetPipelineType() == RHI::PipelineStateType::Compute)
+							{
+								pipelineToUse = pipeline;
+							}
+						}
+
+						if (pipelineToUse != nullptr)
+						{
+							commandList->BindPipelineState(pipelineToUse);
+
+							for (auto srg : currentScope->externalShaderResourceGroups)
+							{
+								commandList->SetShaderResourceGroup(srg);
+							}
+
+							if (currentScope->passShaderResourceGroup)
+								commandList->SetShaderResourceGroup(currentScope->passShaderResourceGroup);
+							if (currentScope->subpassShaderResourceGroup)
+								commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
+
+							commandList->CommitShaderResources();
+
+							commandList->Dispatch(Math::Max((u32)1, currentScope->groupCountX),
+								Math::Max((u32)1, currentScope->groupCountY),
+								Math::Max((u32)1, currentScope->groupCountZ));
+						}
+					}
+					else if (currentScope->queueClass == HardwareQueueClass::Transfer)
+					{
+						if (currentScope->readAttachments.NotEmpty() && currentScope->writeAttachments.NotEmpty())
+						{
+							RHI::ScopeAttachment* fromAttachment = currentScope->readAttachments[0];
+							RHI::ScopeAttachment* toAttachment = currentScope->writeAttachments[0];
+
+							if (fromAttachment->IsImageAttachment() && toAttachment->IsImageAttachment())
+							{
+								RHI::RHIResource* fromResource = fromAttachment->GetFrameAttachment()->GetResource(frameSlot);
+								RHI::RHIResource* toResource = toAttachment->GetFrameAttachment()->GetResource(frameSlot);
+
+								if (fromResource != nullptr && toResource != nullptr &&
+									fromResource->GetResourceType() == RHI::ResourceType::Texture &&
+									toResource->GetResourceType() == RHI::ResourceType::Texture)
+								{
+									Vulkan::Texture* fromImage = (Vulkan::Texture*)fromResource;
+									Vulkan::Texture* toImage = (Vulkan::Texture*)toResource;
+									if (fromImage->GetImage() != VK_NULL_HANDLE && toImage->GetImage() != VK_NULL_HANDLE)
+									{
+										for (int mip = 0; mip < fromImage->GetMipLevelCount(); mip++)
+										{
+											if (fromImage->GetSampleCount() == toImage->GetSampleCount())
+											{
+												VkImageCopy copyRegion{};
+												copyRegion.srcOffset = { 0, 0, 0 };
+												copyRegion.srcSubresource.baseArrayLayer = 0;
+												copyRegion.srcSubresource.layerCount = fromImage->GetArrayLayerCount();
+												copyRegion.srcSubresource.mipLevel = mip;
+												copyRegion.srcSubresource.aspectMask = fromImage->aspectMask;
+
+												copyRegion.dstOffset = { 0, 0, 0 };
+												copyRegion.dstSubresource.baseArrayLayer = 0;
+												copyRegion.dstSubresource.layerCount = toImage->GetArrayLayerCount();
+												copyRegion.dstSubresource.mipLevel = mip;
+												copyRegion.dstSubresource.aspectMask = toImage->aspectMask;
+
+												copyRegion.extent.width = Math::Max<u32>(1, fromImage->GetWidth(mip));
+												copyRegion.extent.height = Math::Max<u32>(1, fromImage->GetHeight(mip));
+												copyRegion.extent.depth = Math::Max<u32>(1, fromImage->GetDepth(mip));
+
+												vkCmdCopyImage(cmdBuffer,
+													fromImage->GetImage(), fromImage->curImageLayout,
+													toImage->GetImage(), toImage->curImageLayout,
+													1, &copyRegion);
+											}
+											else if (fromImage->GetSampleCount() > 1 && toImage->GetSampleCount() == 1)
+											{
+												VkImageResolve resolveRegion{};
+												resolveRegion.srcOffset = { 0, 0, 0 };
+												resolveRegion.srcSubresource.baseArrayLayer = 0;
+												resolveRegion.srcSubresource.layerCount = fromImage->GetArrayLayerCount();
+												resolveRegion.srcSubresource.mipLevel = mip;
+												resolveRegion.srcSubresource.aspectMask = fromImage->aspectMask;
+
+												resolveRegion.dstOffset = { 0, 0, 0 };
+												resolveRegion.dstSubresource.baseArrayLayer = 0;
+												resolveRegion.dstSubresource.layerCount = toImage->GetArrayLayerCount();
+												resolveRegion.dstSubresource.mipLevel = mip;
+												resolveRegion.dstSubresource.aspectMask = toImage->aspectMask;
+
+												resolveRegion.extent.width = Math::Max<u32>(1, fromImage->GetWidth(mip));
+												resolveRegion.extent.height = Math::Max<u32>(1, fromImage->GetHeight(mip));
+												resolveRegion.extent.depth = Math::Max<u32>(1, fromImage->GetDepth(mip));
+
+												vkCmdResolveImage(cmdBuffer, fromImage->GetImage(), fromImage->curImageLayout,
+													toImage->GetImage(), toImage->curImageLayout,
+													1, &resolveRegion);
+											}
+										}
+									}
+								}
+							}
+							else if (fromAttachment->IsBufferAttachment() && toAttachment->IsBufferAttachment())
+							{
+								RHI::RHIResource* fromResource = fromAttachment->GetFrameAttachment()->GetResource(frameSlot);
+								RHI::RHIResource* toResource = toAttachment->GetFrameAttachment()->GetResource(frameSlot);
+
+								if (fromResource != nullptr && toResource != nullptr &&
+									fromResource->GetResourceType() == RHI::ResourceType::Buffer &&
+									toResource->GetResourceType() == RHI::ResourceType::Buffer)
+								{
+									Vulkan::Buffer* fromBuffer = (Vulkan::Buffer*)fromResource;
+									Vulkan::Buffer* toBuffer = (Vulkan::Buffer*)toResource;
+									if (fromBuffer->GetBuffer() != VK_NULL_HANDLE && toBuffer->GetBuffer() != VK_NULL_HANDLE)
+									{
+										VkBufferCopy copyRegion{};
+										copyRegion.srcOffset = 0;
+										copyRegion.dstOffset = 0;
+										copyRegion.size = Math::Min(fromBuffer->GetBufferSize(), toBuffer->GetBufferSize());
+
+										vkCmdCopyBuffer(cmdBuffer,
+											fromBuffer->GetBuffer(),
+											toBuffer->GetBuffer(),
+											1, &copyRegion);
+									}
+								}
+							}
+						}
+					}
+
+					dependencyInfo.dependencyFlags = 0;
+					dependencyInfo.bufferMemoryBarrierCount = postBufferBarriersPerStep[i].GetSize();
+					dependencyInfo.pBufferMemoryBarriers = postBufferBarriersPerStep[i].GetData();
+					dependencyInfo.imageMemoryBarrierCount = postImageBarriersPerStep[i].GetSize();
+					dependencyInfo.pImageMemoryBarriers = postImageBarriersPerStep[i].GetData();
+					dependencyInfo.memoryBarrierCount = 0;
+					dependencyInfo.pMemoryBarriers = nullptr;
+
+					vkCmdPipelineBarrier2(cmdBuffer, &dependencyInfo);
+				}
+			}
+			commandList->End();
+
+			List<VkSemaphore> waitSemaphores{};
+			List<VkPipelineStageFlags> waitStages{};
+
+			VkSubmitInfo submitInfo{};
+			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+			u64 fenceCompleteValue = frameCompletionFence->NextSignalValue();
+
+			
+
+			frameSlots[frameSlot].fenceCompleteValue = fenceCompleteValue;
+
+			cmdListIndex++;
 		}
 
 		frameSlot = (frameSlot + 1) % compiler->numFramesInFlight;
@@ -91,8 +484,6 @@ namespace CE::Vulkan
 		auto presentQueue = device->GetPresentQueue();
 
 		Array<RHI::SwapChain*> presentSwapChains = frameGraph->presentSwapChains;
-		
-		const RHI::FrameGraph::GraphNode& graphNode = frameGraph->nodes[scope->id];
 		
 		constexpr u64 u64Max = NumericLimits<u64>::Max();
 		VkResult result = VK_SUCCESS;
@@ -706,7 +1097,7 @@ namespace CE::Vulkan
 						commandList->Dispatch(Math::Max((u32)1, currentScope->groupCountX),
 							Math::Max((u32)1, currentScope->groupCountY),
 							Math::Max((u32)1, currentScope->groupCountZ));
-					}					
+					}
 				}
 				else if (currentScope->queueClass == RHI::HardwareQueueClass::Transfer)
 				{
@@ -975,5 +1366,64 @@ namespace CE::Vulkan
 
 		return result == VK_SUCCESS;
 	}
-    
+
+	Optional<VkBufferMemoryBarrier2> FrameGraphExecuter::ResolveBufferBarrier(const FrameGraphCompiler::BufferBarrier& bufferBarrier, u32 frameSlot)
+	{
+		if (!bufferBarrier.attachment)
+			return {};
+
+		RHI::RHIResource* resource = bufferBarrier.attachment->GetResource(frameSlot);
+		if (!resource || resource->GetResourceType() != ResourceType::Buffer)
+			return {};
+
+		auto buffer = (Vulkan::Buffer*)resource;
+
+		VkBufferMemoryBarrier2 vkBarrier = bufferBarrier.barrier;
+		vkBarrier.buffer = buffer->GetBuffer();
+
+		if (vkBarrier.buffer == VK_NULL_HANDLE)
+			return {};
+
+		return vkBarrier;
+	}
+
+	Optional<VkImageMemoryBarrier2> FrameGraphExecuter::ResolveImageBarrier(const FrameGraphCompiler::ImageBarrier& imageBarrier, u32 frameSlot)
+	{
+		if (!imageBarrier.attachment)
+			return {};
+
+		Vulkan::Texture* image = nullptr;
+		RHI::RHIResource* resource = imageBarrier.attachment->GetResource(frameSlot);
+
+		if (imageBarrier.attachment->IsSwapChainAttachment())
+		{
+			auto swapChainAttachment = (RHI::SwapChainFrameAttachment*)imageBarrier.attachment;
+			auto swapChain = (Vulkan::SwapChain*)swapChainAttachment->GetSwapChain();
+			if (!swapChain)
+				return {};
+
+			image = swapChain->GetCurrentImage();
+		}
+		else if (resource && resource->GetResourceType() == ResourceType::Texture)
+		{
+			image = (Vulkan::Texture*)resource;
+		}
+		else if (resource && resource->GetResourceType() == ResourceType::TextureView)
+		{
+			auto textureView = (Vulkan::TextureView*)resource;
+			image = (Vulkan::Texture*)textureView->GetTexture();
+		}
+
+		if (!image)
+			return {};
+
+		VkImageMemoryBarrier2 vkBarrier = imageBarrier.barrier;
+		vkBarrier.image = image->GetImage();
+
+		if (vkBarrier.image == VK_NULL_HANDLE)
+			return {};
+
+		return vkBarrier;
+	}
+
 } // namespace CE::Vulkan

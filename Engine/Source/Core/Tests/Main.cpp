@@ -974,6 +974,36 @@ TEST(Containers, FixedArray)
 	TEST_END;
 }
 
+TEST(Containers, Optional)
+{
+	TEST_BEGIN;
+
+	Optional<String> value;
+	EXPECT_FALSE(value.HasValue());
+	EXPECT_FALSE(static_cast<bool>(value));
+
+	value.Emplace("Crystal");
+	EXPECT_TRUE(value.HasValue());
+	EXPECT_EQ(value.GetValue(), "Crystal");
+	EXPECT_EQ(*value, "Crystal");
+	EXPECT_EQ(value->GetLength(), 7);
+
+	Optional<String> copy = value;
+	EXPECT_EQ(copy.GetValue(), "Crystal");
+
+	value.Reset();
+	EXPECT_FALSE(value.HasValue());
+	EXPECT_EQ(value.ValueOr("Fallback"), "Fallback");
+
+	value = String("Engine");
+	EXPECT_EQ(value.GetValue(), "Engine");
+
+	value = NullOpt;
+	EXPECT_FALSE(value.HasValue());
+
+	TEST_END;
+}
+
 struct PagedElement
 {
 	String name = "";

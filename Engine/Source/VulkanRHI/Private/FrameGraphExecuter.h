@@ -28,11 +28,15 @@ namespace CE::Vulkan
 		bool ExecuteScope(const RHI::FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<RHI::ScopeId>& executedScopes, 
 			HashSet<Vulkan::SwapChain*>& usedSwapChains);
 
+		Optional<VkBufferMemoryBarrier2> ResolveBufferBarrier(const FrameGraphCompiler::BufferBarrier& bufferBarrier, u32 frameSlot);
+		Optional<VkImageMemoryBarrier2> ResolveImageBarrier(const FrameGraphCompiler::ImageBarrier& imageBarrier, u32 frameSlot);
+
 		struct FrameExecutionContext
 		{
 			u64 fenceCompleteValue = 0;
 			u64 frameNumber = 0;
 			u32 frameSlot = 0;
+			Array<Vulkan::CommandList*> commandLists{};
 		};
 
 		Device* device = nullptr;
