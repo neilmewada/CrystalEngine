@@ -5,10 +5,7 @@ namespace CE::Vulkan
     
 	FrameGraphCompiler::FrameGraphCompiler(Device* device) : device(device)
 	{
-		for (int i = 0; i < frameCompileContexts.GetSize(); ++i)
-		{
-			frameCompileContexts[i] = MakeUnique<FrameCompileContext>(device->GetHandle());
-		}
+		
 	}
 
 	FrameGraphCompiler::~FrameGraphCompiler()
@@ -288,6 +285,8 @@ namespace CE::Vulkan
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 
 		HashSet<RHI::ScopeId> visitedScopes;
+
+		executionPlan.submissions.Clear();
 
 		for (RHI::Scope* scope : frameGraph->producers)
 		{

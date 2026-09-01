@@ -4,7 +4,7 @@ namespace CE::Vulkan
 {
 	class Scope;
 	class CommandList;
-    
+
 	class VULKANRHI_API FrameGraphCompiler final : public RHI::FrameGraphCompiler
 	{
 	public:
@@ -16,23 +16,50 @@ namespace CE::Vulkan
 		
 		void CompileInternal(const RHI::FrameGraphCompileRequest& compileRequest) override;
 
-	private:
-
-		struct FrameCompileContext
+		struct ImageLayoutTransition
 		{
-			CE_NO_COPY_MOVE(FrameCompileContext)
-		public:
-
-			FrameCompileContext(VkDevice device) : device(device)
-			{}
-
-			~FrameCompileContext()
-			{
-			}
-
-			VkDevice device = nullptr;
-			List<VkSemaphore> freeSemaphores;
+			Vulkan::Texture* image{};
+			VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
+			u32 queueFamilyIndex = 0;
 		};
+
+		struct BufferFamilyTransition
+		{
+			Vulkan::Buffer* buffer = nullptr;
+			u32 queueFamilyIndex = 0;
+		};
+
+		struct BarrierBatch
+		{
+			VkDependencyFlags dependencyFlags = 0;
+
+			List<VkMemoryBarrier2> memoryBarriers{};
+			List<VkBufferMemoryBarrier2> bufferBarriers{};
+			List<VkImageMemoryBarrier2> imageBarriers{};
+
+			List<ImageLayoutTransition> imageLayoutTransitions{};
+			List<BufferFamilyTransition> bufferFamilyTransitions{};
+		};
+
+		struct ExecutionStep
+		{
+			Vulkan::Scope* scope = nullptr;
+			BarrierBatch preBarriers;
+			BarrierBatch postBarriers;
+		};
+
+		struct Submission
+		{
+			Vulkan::CommandQueue* queue = nullptr;
+			Array<ExecutionStep> steps;
+		};
+
+		struct ExecutionPlan
+		{
+			Array<Submission> submissions{};
+		};
+
+	private:
         
 		void DestroySyncObjects();
 
@@ -47,12 +74,12 @@ namespace CE::Vulkan
 
 		Device* device = nullptr;
 
-		StaticArray<UniquePtr<FrameCompileContext>, RHI::Limits::MaxFramesInFlight> frameCompileContexts{};
-
 		// Keep track of current family index of each attachment
 		HashMap<RHI::AttachmentID, u32> familyIndexByAttachment{};
 
 		u32 numFramesInFlight = 0;
+
+		ExecutionPlan executionPlan;
 
 		friend class FrameGraphExecuter;
 	};
