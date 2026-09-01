@@ -18,15 +18,27 @@ namespace CE::Vulkan
 
 		struct ImageLayoutTransition
 		{
-			Vulkan::Texture* image{};
+			RHI::ImageFrameAttachment* attachment = nullptr;
 			VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
-			u32 queueFamilyIndex = 0;
+			u32 queueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		};
 
 		struct BufferFamilyTransition
 		{
-			Vulkan::Buffer* buffer = nullptr;
-			u32 queueFamilyIndex = 0;
+			RHI::BufferFrameAttachment* attachment = nullptr;
+			u32 queueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		};
+
+		struct BufferBarrier
+		{
+			RHI::BufferFrameAttachment* attachment = nullptr;
+			VkBufferMemoryBarrier2 barrier{};
+		};
+
+		struct ImageBarrier
+		{
+			RHI::ImageFrameAttachment* attachment = nullptr;
+			VkImageMemoryBarrier2 barrier{};
 		};
 
 		struct BarrierBatch
@@ -34,8 +46,8 @@ namespace CE::Vulkan
 			VkDependencyFlags dependencyFlags = 0;
 
 			List<VkMemoryBarrier2> memoryBarriers{};
-			List<VkBufferMemoryBarrier2> bufferBarriers{};
-			List<VkImageMemoryBarrier2> imageBarriers{};
+			List<BufferBarrier> bufferBarriers{};
+			List<ImageBarrier> imageBarriers{};
 
 			List<ImageLayoutTransition> imageLayoutTransitions{};
 			List<BufferFamilyTransition> bufferFamilyTransitions{};
