@@ -396,8 +396,15 @@ namespace CE::RPI
             }
             rtCommandList->End();
             
-            rtCommandQueue->Execute(1, &rtCommandList, rtFence);
-            rtFence->WaitForFence();
+            RHI::CommandQueueSubmission submission{};
+            submission.numCommandLists = 1;
+            submission.commandLists = &rtCommandList;
+            submission.signalFence = rtFence;
+            submission.signalFenceValue = rtFence->NextSignalValue();
+
+            rtCommandQueue->Submit(submission);
+            
+            rtFence->WaitCPU(submission.signalFenceValue);
             blasBuilds.Clear();
         }
 

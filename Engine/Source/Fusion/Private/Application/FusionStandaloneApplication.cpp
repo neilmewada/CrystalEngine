@@ -399,7 +399,7 @@ namespace CE
 			return;
 		}
 
-		int imageIndex = scheduler->BeginExecution();
+		int imageIndex = 0;// scheduler->BeginExecution();
 
 		if (imageIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph || recompileFrameGraph)
 		{
@@ -460,7 +460,7 @@ namespace CE
 		}
 
 
-		scheduler->EndExecution();
+		//scheduler->EndExecution();
 	}
 
 	void FusionStandaloneApplication::RebuildFrameGraph()
