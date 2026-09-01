@@ -18,14 +18,16 @@ namespace CE::Vulkan
             SIZE_T GetHash() const;
         };
 
-        struct Entry
-        {
-            SharedPtr<FrameBuffer> frameBuffer;
-        };
+        Ptr<FrameBuffer> FindOrCreate(Device* device, Scope* scope, u32 frameSlot, u32 imageIndex);
 
     private:
 
-        HashMap<Key, Entry> cache{};
+        struct Entry
+        {
+            Ptr<FrameBuffer> frameBuffer;
+        };
+
+        HashMap<Key, Entry> cachedFrameBuffers{};
 
     };
 

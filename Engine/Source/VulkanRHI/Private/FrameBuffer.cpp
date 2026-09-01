@@ -3,7 +3,7 @@
 namespace CE::Vulkan
 {
 
-	FrameBuffer::FrameBuffer(Device* device, Scope* scope, u32 frameIndex, u32 imageIndex)
+	FrameBuffer::FrameBuffer(Device* device, Scope* scope, u32 frameSlot, u32 imageIndex)
 		: device(device)
 		, imageIndex(imageIndex)
 	{
@@ -51,7 +51,7 @@ namespace CE::Vulkan
 				}
 				else
 				{
-					resource = frameAttachment->GetResource(frameIndex);
+					resource = frameAttachment->GetResource(frameSlot);
 				}
 
 				if (!resource)

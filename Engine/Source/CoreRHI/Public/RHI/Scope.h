@@ -59,6 +59,8 @@ namespace CE::RHI
 
 		ScopeAttachment* FindScopeAttachment(const Name& id);
 
+		const Array<ScopeAttachment*>& GetAttachments() const { return attachments; }
+
 		template<typename ScopeAttachmentType, typename DescriptorType = typename ScopeAttachmentType::DescriptorType> requires TIsBaseClassOf<ScopeAttachment, ScopeAttachmentType>::Value
 		ScopeAttachmentType* EmplaceScopeAttachment(FrameAttachment* attachment,
 			ScopeAttachmentUsage usage,

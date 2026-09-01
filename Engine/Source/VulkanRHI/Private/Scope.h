@@ -42,6 +42,8 @@ namespace CE::Vulkan
 
 		virtual bool CompileInternal(const RHI::FrameGraphCompileRequest& compileRequest) override;
 
+		VulkanRenderPass* GetVulkanRenderPass() const { return renderPass; }
+
 	private:
 
 		void DestroySyncObjects();

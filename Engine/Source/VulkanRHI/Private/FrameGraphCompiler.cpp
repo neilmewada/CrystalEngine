@@ -27,7 +27,7 @@ namespace CE::Vulkan
 		RHI::FrameGraph* frameGraph = compileRequest.frameGraph;
 
 		CommandQueue* graphicsQueue = device->GetGraphicsQueue();
-		CommandQueue* computeQueue = graphicsQueue;//device->GetComputeQueue();
+		CommandQueue* computeQueue = graphicsQueue;
 
 		for (int t = 0; t <= frameGraph->maxTimelineLevel; t++)
 		{
@@ -84,6 +84,11 @@ namespace CE::Vulkan
 		for (auto scope : frameGraph->scopes)
 		{
 			scope->Compile(compileRequest);
+		}
+
+		for (auto scope : frameGraph->scopes)
+		{
+			
 		}
 
 		CompileCrossQueueDependencies(compileRequest);

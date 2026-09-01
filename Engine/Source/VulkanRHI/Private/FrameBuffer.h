@@ -7,12 +7,12 @@ namespace CE::Vulkan
 	class RenderTarget;
 	class Texture;
 
-	class FrameBuffer
+	class FrameBuffer : public IntrusiveBase
 	{
 		CE_NO_COPY_MOVE(FrameBuffer);
 	public:
 
-		FrameBuffer(Device* device, Scope* scope, u32 frameIndex, u32 imageIndex);
+		FrameBuffer(Device* device, Scope* scope, u32 frameSlot, u32 imageIndex);
 		virtual ~FrameBuffer();
 
 		FrameBuffer(Device* device, const Array<Vulkan::Texture*>& images, VulkanRenderPass* renderPass, u32 imageIndex = 0);
