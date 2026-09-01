@@ -5,6 +5,7 @@ namespace CE::Vulkan
     
     class FrameBufferCache final
     {
+        CE_NO_COPY(FrameBufferCache);
     public:
 
         struct Key
@@ -16,6 +17,8 @@ namespace CE::Vulkan
             u32 layers = 1;
 
             SIZE_T GetHash() const;
+
+			bool operator==(const Key& rhs) const;
         };
 
         Ptr<FrameBuffer> FindOrCreate(Device* device, Scope* scope, u32 frameSlot, u32 imageIndex);

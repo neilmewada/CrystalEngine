@@ -42,6 +42,8 @@ namespace CE::Vulkan
 		Device* device = nullptr;
 		FrameGraphCompiler* compiler = nullptr;
 
+		FrameBufferCache frameBufferCache{};
+
 		Vulkan::Fence* frameCompletionFence = nullptr;
 		StaticArray<FrameExecutionContext, RHI::Limits::MaxFramesInFlight> frameSlots{};
 

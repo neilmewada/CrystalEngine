@@ -205,14 +205,6 @@ namespace CE::Vulkan
 			{
 				return true;
 			}
-
-			for (u32 frameSlot = 0; frameSlot < RHI::Limits::MaxFramesInFlight; frameSlot++)
-			{
-				for (u32 imageIndex = 0; imageIndex < RHI::Limits::MaxSwapChainImageCount; imageIndex++)
-				{
-					frameBuffers[frameSlot][imageIndex] = new FrameBuffer(device, this, frameSlot, imageIndex);
-				}
-			}
 		}
 		else if (IsComputePass())
 		{

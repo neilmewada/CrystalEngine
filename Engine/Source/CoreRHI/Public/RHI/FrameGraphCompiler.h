@@ -19,6 +19,7 @@ namespace CE::RHI
     
 	class CORERHI_API FrameGraphCompiler
 	{
+		CE_NO_COPY(FrameGraphCompiler);
 	protected:
 		FrameGraphCompiler() = default;
 

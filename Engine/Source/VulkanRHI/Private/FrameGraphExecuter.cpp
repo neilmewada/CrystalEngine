@@ -290,27 +290,24 @@ namespace CE::Vulkan
 				}
 
 				// Execute compiled pipeline barriers (initial barriers)
-				if (currentScope->initialBarriers[frameSlot].NotEmpty())
+				for (const auto& barrier : currentScope->initialBarriers)
 				{
-					for (const auto& barrier : currentScope->initialBarriers[frameSlot])
+					vkCmdPipelineBarrier(cmdBuffer,
+						barrier.srcStageMask, barrier.dstStageMask,
+						0,
+						barrier.memoryBarriers.GetSize(), barrier.memoryBarriers.GetData(),
+						barrier.bufferBarriers.GetSize(), barrier.bufferBarriers.GetData(),
+						barrier.imageBarriers.GetSize(), barrier.imageBarriers.GetData());
+
+					for (const auto& transition : barrier.imageLayoutTransitions)
 					{
-						vkCmdPipelineBarrier(cmdBuffer,
-							barrier.srcStageMask, barrier.dstStageMask,
-							0,
-							barrier.memoryBarriers.GetSize(), barrier.memoryBarriers.GetData(),
-							barrier.bufferBarriers.GetSize(), barrier.bufferBarriers.GetData(),
-							barrier.imageBarriers.GetSize(), barrier.imageBarriers.GetData());
+						transition.image->curImageLayout = transition.layout;
+						transition.image->curFamilyIndex = transition.queueFamilyIndex;
+					}
 
-						for (const auto& transition : barrier.imageLayoutTransitions)
-						{
-							transition.image->curImageLayout = transition.layout;
-							transition.image->curFamilyIndex = transition.queueFamilyIndex;
-						}
-
-						for (const auto& bufferTransition : barrier.bufferFamilyTransitions)
-						{
-							bufferTransition.buffer->curFamilyIndex = bufferTransition.queueFamilyIndex;
-						}
+					for (const auto& bufferTransition : barrier.bufferFamilyTransitions)
+					{
+						bufferTransition.buffer->curFamilyIndex = bufferTransition.queueFamilyIndex;
 					}
 				}
 
@@ -630,7 +627,7 @@ namespace CE::Vulkan
 					VkRenderPassBeginInfo beginInfo{};
 					beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 					beginInfo.renderPass = renderPass->GetHandle();
-					FrameBuffer* frameBuffer = currentScope->frameBuffers[frameSlot][imageIndex];
+					FrameBuffer* frameBuffer = frameBufferCache.FindOrCreate(device, currentScope, frameSlot, imageIndex);
 					beginInfo.framebuffer = frameBuffer->GetHandle();
 					beginInfo.clearValueCount = clearValues.GetSize();
 					beginInfo.pClearValues = clearValues.GetData();

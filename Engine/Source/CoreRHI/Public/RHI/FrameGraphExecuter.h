@@ -17,6 +17,7 @@ namespace CE::RHI
     
 	class CORERHI_API FrameGraphExecuter
 	{
+		CE_NO_COPY(FrameGraphExecuter);
 	public:
 		virtual ~FrameGraphExecuter();
 

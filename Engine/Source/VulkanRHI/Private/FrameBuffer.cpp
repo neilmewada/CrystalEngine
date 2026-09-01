@@ -124,6 +124,22 @@ namespace CE::Vulkan
 		device = nullptr;
 	}
 
+	FrameBuffer::FrameBuffer(Device* device, const Array<VkImageView>& imageViews,
+		VulkanRenderPass* renderPass, u32 width, u32 height, u32 layers)
+		: device(device), width(width), height(height)
+	{
+		VkFramebufferCreateInfo framebufferCI{};
+		framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferCI.renderPass = renderPass->GetHandle();
+		framebufferCI.attachmentCount = imageViews.GetSize();
+		framebufferCI.pAttachments = imageViews.GetData();
+		framebufferCI.width = width;
+		framebufferCI.height = height;
+		framebufferCI.layers = layers;
+
+		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, VULKAN_CPU_ALLOCATOR, &frameBuffer);
+	}
+
 	FrameBuffer::FrameBuffer(Device* device, const Array<Vulkan::Texture*>& images, VulkanRenderPass* renderPass, u32 imageIndex)
 		: device(device), imageIndex(imageIndex)
 	{
