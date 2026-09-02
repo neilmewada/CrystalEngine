@@ -20,13 +20,19 @@ namespace CE::RHI
             HeapAllocationParameters params{};
         };
 
+        struct Allocation
+        {
+            Ptr<AliasedHeap> page;
+            VirtualAddress address{};
+        };
+
         AliasedAttachmentAllocator(const Descriptor& desc);
         virtual ~AliasedAttachmentAllocator();
 
-        VirtualAddress AllocateBuffer(const RHI::BufferDescriptor& bufferDesc, RHI::Buffer** outBuffer);
-        VirtualAddress AllocateTexture(const RHI::TextureDescriptor& textureDesc, RHI::Texture** outTexture);
+        Allocation AllocateBuffer(const RHI::BufferDescriptor& bufferDesc, RHI::Buffer** outBuffer);
+        Allocation AllocateTexture(const RHI::TextureDescriptor& textureDesc, RHI::Texture** outTexture);
 
-        void DeAllocate(VirtualAddress address);
+        void DeAllocate(Allocation allocation);
 
     private:
 

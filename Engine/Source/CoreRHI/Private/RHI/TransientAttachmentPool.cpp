@@ -65,7 +65,7 @@ namespace CE::RHI
             {
                 CE_ASSERT(!pool->usedResources.Exists(resourceIdentifier), "The same resource ID is being allocated twice in TransientAttachmentPool.");
 
-                VirtualAddress address{};
+                AliasedAttachmentAllocator::Allocation allocation{};
 
                 RHI::Buffer* buffer = nullptr;
                 RHI::Texture* texture = nullptr;
@@ -73,17 +73,17 @@ namespace CE::RHI
 
                 if (request.resourceType == ResourceType::Texture)
                 {
-                    address = attachmentAllocator->AllocateTexture(request.textureDescriptor, &texture);
+                    allocation = attachmentAllocator->AllocateTexture(request.textureDescriptor, &texture);
 
-                    CE_ASSERT(address.IsValid(), "Failed to allocate Texture!");
+                    CE_ASSERT(allocation.address.IsValid(), "Failed to allocate Texture!");
 
                     textureView = RHI::gDynamicRHI->CreateDefaultTextureView(texture);
                 }
                 else if (request.resourceType == ResourceType::Buffer)
                 {
-                	address = attachmentAllocator->AllocateBuffer(request.bufferDescriptor, &buffer);
+                	allocation = attachmentAllocator->AllocateBuffer(request.bufferDescriptor, &buffer);
 
-                    CE_ASSERT(address.IsValid(), "Failed to allocate Buffer!");
+                    CE_ASSERT(allocation.address.IsValid(), "Failed to allocate Buffer!");
                 }
                 else
                 {
@@ -99,7 +99,8 @@ namespace CE::RHI
                     .textureDescriptor = request.textureDescriptor,
                     .bufferDescriptor = request.bufferDescriptor,
                     .descriptorHash = request.descriptorHash,
-                    .allocationAddress = address,
+                    .allocationAddress = allocation.address,
+                    .allocationPage = allocation.page,
                     .lastUsedFrame = frameNumber
                 };
             }
@@ -113,7 +114,7 @@ namespace CE::RHI
             
             if (frameNumber - pool->allResources[resourceIdentifier].lastUsedFrame > RHI::Limits::MaxSwapChainImageCount)
             {
-                attachmentAllocator->DeAllocate(pool->allResources[resourceIdentifier].allocationAddress);
+                attachmentAllocator->DeAllocate({ pool->allResources[resourceIdentifier].allocationPage, pool->allResources[resourceIdentifier].allocationAddress });
 
                 resourcesToFree.Add(resourceIdentifier);
             }

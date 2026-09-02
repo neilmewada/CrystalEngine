@@ -12,7 +12,7 @@ namespace CE::RHI
 		pages.Clear();
 	}
 
-	VirtualAddress AliasedAttachmentAllocator::AllocateBuffer(const RHI::BufferDescriptor& bufferDesc, RHI::Buffer** outBuffer)
+	AliasedAttachmentAllocator::Allocation AliasedAttachmentAllocator::AllocateBuffer(const RHI::BufferDescriptor& bufferDesc, RHI::Buffer** outBuffer)
 	{
 		RHI::ResourceMemoryRequirements bufferRequirements{};
 		RHI::gDynamicRHI->GetBufferMemoryRequirements(bufferDesc, bufferRequirements);
@@ -26,17 +26,17 @@ namespace CE::RHI
 			if (address.IsValid())
 			{
 				*outBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc, {pages[i]->GetAllocation(), address});
-				return address;
+				return { pages[i], address };
 			}
 		}
 
 		AddHeapPage(bufferRequirements.compatibleMemoryTypes);
 		VirtualAddress address = pages.GetLast()->Allocate(bufferRequirements.size, Math::Max<u64>(bufferRequirements.offsetAlignment, 1));
 		*outBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc, {pages.GetLast()->GetAllocation(), address});
-		return address;
+		return { pages.GetLast(), address};
 	}
 
-	VirtualAddress AliasedAttachmentAllocator::AllocateTexture(const RHI::TextureDescriptor& textureDesc, RHI::Texture** outTexture)
+	AliasedAttachmentAllocator::Allocation AliasedAttachmentAllocator::AllocateTexture(const RHI::TextureDescriptor& textureDesc, RHI::Texture** outTexture)
 	{
 		RHI::ResourceMemoryRequirements textureRequirements{};
 		RHI::gDynamicRHI->GetTextureMemoryRequirements(textureDesc, textureRequirements);
@@ -50,23 +50,21 @@ namespace CE::RHI
 			if (address.IsValid())
 			{
 				*outTexture = RHI::gDynamicRHI->CreateTexture(textureDesc, {pages[i]->GetAllocation(), address});
-				return address;
+				return { pages[i], address };
 			}
-			if (address.IsValid())
-				return address;
 		}
 
 		AddHeapPage(textureRequirements.compatibleMemoryTypes);
 		VirtualAddress address = pages.GetLast()->Allocate(textureRequirements.size, Math::Max<u64>(textureRequirements.offsetAlignment, 1));
 		*outTexture = RHI::gDynamicRHI->CreateTexture(textureDesc, {pages.GetLast()->GetAllocation(), address});
-		return address;
+		return { pages.GetLast(), address };
 	}
 
-	void AliasedAttachmentAllocator::DeAllocate(VirtualAddress address)
+	void AliasedAttachmentAllocator::DeAllocate(Allocation allocation)
 	{
-		for (int i = 0; i < pages.GetSize(); i++)
+		if (allocation.page)
 		{
-			pages[i]->DeAllocate(address);
+			allocation.page->DeAllocate(allocation.address);
 		}
 	}
 

@@ -21,6 +21,7 @@ namespace CE::RHI
             RHI::BufferDescriptor bufferDescriptor{};
             DescriptorHash descriptorHash = 0;
             VirtualAddress allocationAddress = 0;
+            Ptr<AliasedHeap> allocationPage{};
             u64 lastUsedFrame = 0;
         };
 

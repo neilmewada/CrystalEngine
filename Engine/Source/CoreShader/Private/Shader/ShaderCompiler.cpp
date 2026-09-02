@@ -18,6 +18,8 @@
 #include <dxc/dxcapi.h>
 
 #define SHADER_COMPILATION_SUPPORTED 1
+#else
+struct DxcBuffer {};
 #endif
 
 #include <locale>
@@ -41,6 +43,7 @@ namespace CE
 		return wideString;
 	}
 
+#if SHADER_COMPILATION_SUPPORTED
     static spv::ExecutionModel ShaderStageToExecutionModel(RHI::ShaderStage stage)
     {
         switch (stage) {
@@ -56,9 +59,11 @@ namespace CE
                 return spv::ExecutionModelMax;
         }
     }
+#endif
 	
 	struct ShaderCompiler::Impl
 	{
+#if SHADER_COMPILATION_SUPPORTED
 		CComPtr<IDxcUtils> utils;
 		CComPtr<IDxcCompiler3> compiler;
 		CComPtr<IDxcIncludeHandler> includeHandler;
@@ -69,16 +74,19 @@ namespace CE
 			compiler.Release();
 			includeHandler.Release();
 		}
+#endif
 	};
 
 	ShaderCompiler::ShaderCompiler()
 	{
 		impl = new Impl();
+#if SHADER_COMPILATION_SUPPORTED
 
 		DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&impl->utils));
 		DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&impl->compiler));
 		
 		impl->utils->CreateDefaultIncludeHandler(&impl->includeHandler);
+#endif
 	}
 
 	ShaderCompiler::~ShaderCompiler()
@@ -218,6 +226,10 @@ namespace CE
 
     ShaderCompiler::ErrorCode ShaderCompiler::CompileMSL(const IO::Path& hlslPath, ShaderCompilationInfo& config)
     {
+#if !SHADER_COMPILATION_SUPPORTED
+        return ERR_UnsupportedPlatform;
+#else
+
         if (!hlslPath.Exists())
             return ERR_FileNotFound;
         if (hlslPath.IsDirectory())
@@ -243,10 +255,14 @@ namespace CE
         buffer.Encoding = DXC_CP_UTF8;
         
         return CompileMSL(buffer, config);
+#endif
     }
 
     ShaderCompiler::ErrorCode ShaderCompiler::CompileMSL(const void* data, u32 dataSize, ShaderCompilationInfo& config)
     {
+#if !SHADER_COMPILATION_SUPPORTED
+        return ERR_UnsupportedPlatform;
+#else
         HRESULT status = 0;
 
         CComPtr<IDxcBlobEncoding> source = nullptr;
@@ -265,10 +281,14 @@ namespace CE
         buffer.Encoding = DXC_CP_UTF8;
         
         return CompileMSL(buffer, config);
+#endif
     }
 
     ShaderCompiler::ErrorCode ShaderCompiler::CompileSpirv(const IO::Path& hlslPath, ShaderCompilationInfo& config)
     {
+#if !SHADER_COMPILATION_SUPPORTED
+        return ERR_UnsupportedPlatform;
+#else
         if (!hlslPath.Exists())
             return ERR_FileNotFound;
         if (hlslPath.IsDirectory())
@@ -294,10 +314,14 @@ namespace CE
         buffer.Encoding = DXC_CP_UTF8;
 
         return CompileSpirv(buffer, config);
+#endif
     }
 
     ShaderCompiler::ErrorCode ShaderCompiler::CompileSpirv(const void* data, u32 dataSize, ShaderCompilationInfo& config)
     {
+#if !SHADER_COMPILATION_SUPPORTED
+        return ERR_UnsupportedPlatform;
+#else
         HRESULT status = 0;
 
         CComPtr<IDxcBlobEncoding> source = nullptr;
@@ -316,6 +340,7 @@ namespace CE
         buffer.Encoding = DXC_CP_UTF8;
 
         return CompileSpirv(buffer, config);
+#endif
     }
 
     ShaderCompiler::ErrorCode ShaderCompiler::Compile(ShaderBlobFormat outFormat, const IO::Path& hlslPath,
@@ -379,6 +404,9 @@ namespace CE
 
     ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 	{
+#if !SHADER_COMPILATION_SUPPORTED
+        return ERR_UnsupportedPlatform;
+#else
 		if (!hlslPath.Exists())
 			return ERR_FileNotFound;
 		if (hlslPath.IsDirectory())
@@ -405,6 +433,7 @@ namespace CE
 		buffer.Encoding = DXC_CP_UTF8;
 
 		return BuildSpirv(buffer, config, outByteCode, extraArgs);
+#endif
 	}
 
 	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, 
@@ -657,6 +686,9 @@ namespace CE
 
     ShaderCompiler::ErrorCode ShaderCompiler::CompileSpirv(DxcBuffer buffer, ShaderCompilationInfo& config)
     {
+#if !SHADER_COMPILATION_SUPPORTED
+        return ERR_UnsupportedPlatform;
+#else
         HRESULT status = 0;
 
         if (config.outReflection == nullptr)
@@ -780,6 +812,7 @@ namespace CE
         }
 
         return ERR_Success;
+#endif
     }
 
     ShaderCompiler::ErrorCode ShaderCompiler::Compile(ShaderBlobFormat outFormat, DxcBuffer buffer,
@@ -799,6 +832,9 @@ namespace CE
 
     ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(DxcBuffer buffer, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 	{
+#if !SHADER_COMPILATION_SUPPORTED
+        return ERR_UnsupportedPlatform;
+#else
 		HRESULT status = 0;
 		ShaderBuildConfig& config = const_cast<ShaderBuildConfig&>(buildConfig);
 
@@ -896,6 +932,7 @@ namespace CE
 		outByteCode.LoadData(blob->GetBufferPointer(), blob->GetBufferSize());
 
 		return ERR_Success;
+#endif
     }
 
 
