@@ -129,7 +129,8 @@ namespace CE::Vulkan
 
 					// Setup SRG
 					auto pipelineLayout = (Vulkan::PipelineLayout*)rhiPipelineState->GetPipelineLayout();
-					if (pipelineLayout != nullptr && !foundPipelineLayout && pipelineLayout->srgLayouts.KeyExists(RHI::SRGType::PerPass))
+					if (pipelineLayout != nullptr && passShaderResourceGroup == nullptr && !foundPipelineLayout &&
+						pipelineLayout->srgLayouts.KeyExists(RHI::SRGType::PerPass))
 					{
 						foundPipelineLayout = true;
 						const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
