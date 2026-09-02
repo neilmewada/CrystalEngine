@@ -7,6 +7,7 @@ namespace CE::RHI
         Name debugName = "Aliased Heap";
         u64 allocationSize = 0;
         MemoryHeapUsageFlags usageFlags = MemoryHeapUsageFlags::All;
+        MemoryTypeMask compatibleMemoryTypes{};
     };
     
     class CORERHI_API AliasedHeap : public RHIResource, public IntrusiveBase
@@ -25,6 +26,8 @@ namespace CE::RHI
         void DeAllocate(VirtualAddress address);
 
         virtual RHI::MemoryHeap* GetAllocation() = 0;
+
+        virtual bool IsCompatible(MemoryTypeMask resourceMask) = 0;
 
     protected:
 

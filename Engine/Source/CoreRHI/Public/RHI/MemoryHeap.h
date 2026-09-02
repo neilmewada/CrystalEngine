@@ -40,7 +40,7 @@ namespace CE::RHI
 		MemoryHeapType heapType{};
 		u64 allocationSize = 0;
 		MemoryHeapUsageFlags usageFlags = MemoryHeapUsageFlags::All;
-		MemoryTypeMask memoryTypeMask{};
+		MemoryTypeMask compatibleMemoryTypes{};
 	};
 
 	class CORERHI_API MemoryHeap : public RHIResource

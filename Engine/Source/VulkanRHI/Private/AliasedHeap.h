@@ -12,6 +12,11 @@ namespace CE::Vulkan
 
         RHI::MemoryHeap* GetAllocation() override { return allocation; }
 
+        bool IsCompatible(MemoryTypeMask resourceMask) override
+        {
+            return (resourceMask.value & (1u << allocatedMemoryTypeIndex)) != 0;
+        }
+
     private:
 
         //VkDeviceMemory allocation{};

@@ -28,22 +28,28 @@ namespace CE::Vulkan
 		}
 
 		VkPhysicalDeviceMemoryProperties memoryProps = device->GetMemoryProperties();
+		const u32 compatibleMemoryTypes = desc.compatibleMemoryTypes.value;
+		bool memoryTypeFound = false;
 
 		for (int i = 0; i < memoryProps.memoryTypeCount; i++)
 		{
-			if ((memoryProps.memoryTypes[i].propertyFlags & memoryPropertyFlags) == memoryPropertyFlags)
+			const u32 memoryTypeBit = 1u << i;
+			if ((compatibleMemoryTypes & memoryTypeBit) != 0 &&
+				(memoryProps.memoryTypes[i].propertyFlags & memoryPropertyFlags) == memoryPropertyFlags)
 			{
-				supportedMemoryTypeBitMask |= (1 << i);
+				supportedMemoryTypeBitMask |= memoryTypeBit;
+				if (!memoryTypeFound)
+				{
+					allocatedMemoryTypeIndex = i;
+					memoryTypeFound = true;
+				}
 			}
 		}
 
-		for (int i = 0; i < memoryProps.memoryTypeCount; i++)
+		if (!memoryTypeFound)
 		{
-			if ((memoryProps.memoryTypes[i].propertyFlags & memoryPropertyFlags) == memoryPropertyFlags)
-			{
-				allocatedMemoryTypeIndex = i;
-				break;
-			}
+			CE_LOG(Error, All, "No compatible device-local memory type found for aliased heap {}", debugName);
+			return;
 		}
 
 		allocInfo.memoryTypeIndex = allocatedMemoryTypeIndex;

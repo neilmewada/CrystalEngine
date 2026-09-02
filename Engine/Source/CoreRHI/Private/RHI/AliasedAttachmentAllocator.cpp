@@ -4,7 +4,7 @@ namespace CE::RHI
 {
 	AliasedAttachmentAllocator::AliasedAttachmentAllocator(const Descriptor& desc) : parameters(desc.params)
 	{
-		AddHeapPage();
+
 	}
 
 	AliasedAttachmentAllocator::~AliasedAttachmentAllocator()
@@ -14,9 +14,15 @@ namespace CE::RHI
 
 	VirtualAddress AliasedAttachmentAllocator::AllocateBuffer(const RHI::BufferDescriptor& bufferDesc, RHI::Buffer** outBuffer)
 	{
+		RHI::ResourceMemoryRequirements bufferRequirements{};
+		RHI::gDynamicRHI->GetBufferMemoryRequirements(bufferDesc, bufferRequirements);
+
 		for (int i = 0; i < pages.GetSize(); i++)
 		{
-			VirtualAddress address = pages[i]->Allocate(bufferDesc.bufferSize, Math::Max<u64>(bufferDesc.alignment, 1));
+			if (!pages[i]->IsCompatible(bufferRequirements.compatibleMemoryTypes))
+				continue;
+
+			VirtualAddress address = pages[i]->Allocate(bufferRequirements.size, Math::Max<u64>(bufferRequirements.offsetAlignment, 1));
 			if (address.IsValid())
 			{
 				*outBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc, {pages[i]->GetAllocation(), address});
@@ -24,20 +30,23 @@ namespace CE::RHI
 			}
 		}
 
-		AddHeapPage();
-		VirtualAddress address = pages.GetLast()->Allocate(bufferDesc.bufferSize, Math::Max<u64>(bufferDesc.alignment, 1));
+		AddHeapPage(bufferRequirements.compatibleMemoryTypes);
+		VirtualAddress address = pages.GetLast()->Allocate(bufferRequirements.size, Math::Max<u64>(bufferRequirements.offsetAlignment, 1));
 		*outBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc, {pages.GetLast()->GetAllocation(), address});
 		return address;
 	}
 
 	VirtualAddress AliasedAttachmentAllocator::AllocateTexture(const RHI::TextureDescriptor& textureDesc, RHI::Texture** outTexture)
 	{
-		ResourceMemoryRequirements req{};
-		RHI::gDynamicRHI->GetTextureMemoryRequirements(textureDesc, req);
+		RHI::ResourceMemoryRequirements textureRequirements{};
+		RHI::gDynamicRHI->GetTextureMemoryRequirements(textureDesc, textureRequirements);
 
 		for (int i = 0; i < pages.GetSize(); i++)
 		{
-			VirtualAddress address = pages[i]->Allocate(req.size, Math::Max<u64>(req.offsetAlignment, 1));
+			if (!pages[i]->IsCompatible(textureRequirements.compatibleMemoryTypes))
+				continue;
+
+			VirtualAddress address = pages[i]->Allocate(textureRequirements.size, Math::Max<u64>(textureRequirements.offsetAlignment, 1));
 			if (address.IsValid())
 			{
 				*outTexture = RHI::gDynamicRHI->CreateTexture(textureDesc, {pages[i]->GetAllocation(), address});
@@ -47,8 +56,8 @@ namespace CE::RHI
 				return address;
 		}
 
-		AddHeapPage();
-		VirtualAddress address = pages.GetLast()->Allocate(req.size, Math::Max<u64>(req.offsetAlignment, 1));
+		AddHeapPage(textureRequirements.compatibleMemoryTypes);
+		VirtualAddress address = pages.GetLast()->Allocate(textureRequirements.size, Math::Max<u64>(textureRequirements.offsetAlignment, 1));
 		*outTexture = RHI::gDynamicRHI->CreateTexture(textureDesc, {pages.GetLast()->GetAllocation(), address});
 		return address;
 	}
@@ -61,12 +70,13 @@ namespace CE::RHI
 		}
 	}
 
-	Ptr<AliasedHeap> AliasedAttachmentAllocator::AddHeapPage()
+	Ptr<AliasedHeap> AliasedAttachmentAllocator::AddHeapPage(MemoryTypeMask compatibleMemoryTypes)
 	{
 		RHI::AliasedHeapDescriptor heapDesc{};
 		heapDesc.debugName = "Aliased Attachment Heap";
 		heapDesc.usageFlags = MemoryHeapUsageFlags::All;
 		heapDesc.allocationSize = parameters.pageSize;
+		heapDesc.compatibleMemoryTypes = compatibleMemoryTypes;
 
 		AliasedHeap* page = gDynamicRHI->AllocateAliasedHeap(heapDesc);
 		pages.Add(page);
