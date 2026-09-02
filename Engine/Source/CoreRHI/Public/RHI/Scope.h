@@ -22,7 +22,8 @@ namespace CE::RHI
 		Rasterization = 0,
 		Compute,
 		RayTracing,
-		Transfer
+		Transfer,
+		AccelerationStructureBuild
 	};
 
 	struct ScopeDescriptor

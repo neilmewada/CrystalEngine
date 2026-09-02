@@ -67,6 +67,8 @@ namespace CE::RHI
 		Resolve,
 		//! Subpass input attachment
 		SubpassInput,
+		//! Acceleration structure build input/output attachment
+		AccelerationStructureBuild,
 		COUNT
 	};
 	ENUM_CLASS(ScopeAttachmentUsage);

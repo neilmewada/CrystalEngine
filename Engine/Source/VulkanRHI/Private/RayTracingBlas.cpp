@@ -203,7 +203,7 @@ namespace CE::Vulkan
 
 		accelerationStructure = new RayTracingAccelerationStructure(device, accelCreateInfo);
 
-		buildInfo.dstAccelerationStructure = (VkAccelerationStructureKHR)accelerationStructure->GetHandle();
+		buildInfo.dstAccelerationStructure = accelerationStructure->GetHandle();
 
 		addressInfo.buffer = scratchBuffer->GetBuffer();
 		buildInfo.scratchData.deviceAddress = device->vkGetBufferDeviceAddressKHR(device->GetHandle(), &addressInfo);
