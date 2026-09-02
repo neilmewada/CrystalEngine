@@ -176,10 +176,6 @@ void EditorLoop::PostInit()
 	RHI::gDynamicRHI->Initialize();
 	RHI::gDynamicRHI->PostInitialize();
 
-	RHI::FrameSchedulerDescriptor desc{};
-	desc.numFramesInFlight = 2;
-	RHI::FrameScheduler::Create(desc);
-
 	RPI::RPISystem::Get().Initialize();
 
 	FusionApplication* fApp = FusionApplication::Get();
