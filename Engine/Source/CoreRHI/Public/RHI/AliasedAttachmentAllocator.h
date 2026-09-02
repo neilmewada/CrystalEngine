@@ -42,7 +42,7 @@ namespace CE::RHI
             ResourceType resourceType{};
         };
 
-        Ptr<AliasedHeap> AddHeapPage(MemoryTypeMask compatibleMemoryTypes);
+        Ptr<AliasedHeap> AddHeapPage(MemoryTypeMask compatibleMemoryTypes, u64 minimumSize);
 
         HeapAllocationParameters parameters{};
 

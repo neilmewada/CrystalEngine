@@ -30,7 +30,7 @@ namespace CE::RHI
 			}
 		}
 
-		AddHeapPage(bufferRequirements.compatibleMemoryTypes);
+		AddHeapPage(bufferRequirements.compatibleMemoryTypes, bufferRequirements.size);
 		VirtualAddress address = pages.GetLast()->Allocate(bufferRequirements.size, Math::Max<u64>(bufferRequirements.offsetAlignment, 1));
 		*outBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc, {pages.GetLast()->GetAllocation(), address});
 		return { pages.GetLast(), address};
@@ -54,7 +54,7 @@ namespace CE::RHI
 			}
 		}
 
-		AddHeapPage(textureRequirements.compatibleMemoryTypes);
+		AddHeapPage(textureRequirements.compatibleMemoryTypes, textureRequirements.size);
 		VirtualAddress address = pages.GetLast()->Allocate(textureRequirements.size, Math::Max<u64>(textureRequirements.offsetAlignment, 1));
 		*outTexture = RHI::gDynamicRHI->CreateTexture(textureDesc, {pages.GetLast()->GetAllocation(), address});
 		return { pages.GetLast(), address };
@@ -68,12 +68,12 @@ namespace CE::RHI
 		}
 	}
 
-	Ptr<AliasedHeap> AliasedAttachmentAllocator::AddHeapPage(MemoryTypeMask compatibleMemoryTypes)
+	Ptr<AliasedHeap> AliasedAttachmentAllocator::AddHeapPage(MemoryTypeMask compatibleMemoryTypes, u64 minimumSize)
 	{
 		RHI::AliasedHeapDescriptor heapDesc{};
 		heapDesc.debugName = "Aliased Attachment Heap";
 		heapDesc.usageFlags = MemoryHeapUsageFlags::All;
-		heapDesc.allocationSize = parameters.pageSize;
+		heapDesc.allocationSize = Math::Max<u64>(parameters.pageSize, minimumSize);
 		heapDesc.compatibleMemoryTypes = compatibleMemoryTypes;
 
 		AliasedHeap* page = gDynamicRHI->AllocateAliasedHeap(heapDesc);
