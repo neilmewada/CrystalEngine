@@ -246,7 +246,7 @@ namespace CE::Vulkan
 							imageIndex = ((Vulkan::SwapChain*)currentScope->presentSwapChains[0])->currentImageIndex;
 						}
 
-						FrameBuffer* frameBuffer = frameBufferCache.FindOrCreate(device, currentScope, frameSlot, imageIndex);
+						FrameBuffer* frameBuffer = frameBufferCache.FindOrCreate(device, currentScope, frameSlot);
 						CE_ASSERT(frameBuffer != nullptr, "Failed to find or create FrameBuffer!");
 
 						VkRenderPassBeginInfo beginInfo{};

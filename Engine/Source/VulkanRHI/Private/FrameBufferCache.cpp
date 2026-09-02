@@ -35,7 +35,7 @@ namespace CE::Vulkan
 		return true;
 	}
 
-	Ptr<FrameBuffer> FrameBufferCache::FindOrCreate(Device* device, Scope* scope, u32 frameSlot, u32 imageIndex)
+	Ptr<FrameBuffer> FrameBufferCache::FindOrCreate(Device* device, Scope* scope, u32 frameSlot)
 	{
 		if (device == nullptr || scope == nullptr || scope->GetVulkanRenderPass() == nullptr)
 			return nullptr;
@@ -66,7 +66,7 @@ namespace CE::Vulkan
 			{
 				auto swapChainAttachment = (RHI::SwapChainFrameAttachment*)frameAttachment;
 				auto vulkanSwapChain = (Vulkan::SwapChain*)swapChainAttachment->GetSwapChain();
-				resource = vulkanSwapChain->GetImage(imageIndex);
+				resource = vulkanSwapChain->GetCurrentImage();
 			}
 			else
 			{

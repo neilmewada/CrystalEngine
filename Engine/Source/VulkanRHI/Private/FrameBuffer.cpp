@@ -5,7 +5,6 @@ namespace CE::Vulkan
 
 	FrameBuffer::FrameBuffer(Device* device, Scope* scope, u32 frameSlot, u32 imageIndex)
 		: device(device)
-		, imageIndex(imageIndex)
 	{
 		VkFramebufferCreateInfo framebufferCI{};
 		framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -140,8 +139,8 @@ namespace CE::Vulkan
 		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, VULKAN_CPU_ALLOCATOR, &frameBuffer);
 	}
 
-	FrameBuffer::FrameBuffer(Device* device, const Array<Vulkan::Texture*>& images, VulkanRenderPass* renderPass, u32 imageIndex)
-		: device(device), imageIndex(imageIndex)
+	FrameBuffer::FrameBuffer(Device* device, const Array<Vulkan::Texture*>& images, VulkanRenderPass* renderPass)
+		: device(device)
 	{
 		FixedArray<VkImageView, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
 
@@ -182,8 +181,8 @@ namespace CE::Vulkan
 		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, VULKAN_CPU_ALLOCATOR, &frameBuffer);
 	}
 
-	FrameBuffer::FrameBuffer(Device* device, const Array<Vulkan::TextureView*>& imageViews, VulkanRenderPass* renderPass, u32 imageIndex)
-		: device(device), imageIndex(imageIndex)
+	FrameBuffer::FrameBuffer(Device* device, const Array<Vulkan::TextureView*>& imageViews, VulkanRenderPass* renderPass)
+		: device(device)
 	{
 		FixedArray<VkImageView, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
 

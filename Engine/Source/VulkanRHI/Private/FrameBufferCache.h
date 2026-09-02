@@ -23,7 +23,7 @@ namespace CE::Vulkan
 			bool operator==(const Key& rhs) const;
         };
 
-        Ptr<FrameBuffer> FindOrCreate(Device* device, Scope* scope, u32 frameSlot, u32 imageIndex);
+        Ptr<FrameBuffer> FindOrCreate(Device* device, Scope* scope, u32 frameSlot);
 
     private:
 

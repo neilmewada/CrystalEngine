@@ -18,9 +18,9 @@ namespace CE::Vulkan
 		FrameBuffer(Device* device, const List<VkImageView>& imageViews, VulkanRenderPass* renderPass,
 			u32 width, u32 height, u32 layers = 1);
 
-		FrameBuffer(Device* device, const Array<Vulkan::Texture*>& images, VulkanRenderPass* renderPass, u32 imageIndex = 0);
+		FrameBuffer(Device* device, const Array<Vulkan::Texture*>& images, VulkanRenderPass* renderPass);
 
-		FrameBuffer(Device* device, const Array<Vulkan::TextureView*>& imageViews, VulkanRenderPass* renderPass, u32 imageIndex = 0);
+		FrameBuffer(Device* device, const Array<Vulkan::TextureView*>& imageViews, VulkanRenderPass* renderPass);
 
 		inline VkFramebuffer GetHandle() const { return frameBuffer; }
 
@@ -34,8 +34,6 @@ namespace CE::Vulkan
 
 		u32 width = 0;
 		u32 height = 0;
-		u32 imageIndex = 0;
-		u32 frameIndex = 0;
 	};
     
 } // namespace CE::Vulkan

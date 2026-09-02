@@ -83,11 +83,6 @@ namespace CE::Vulkan
 			scope->Compile(compileRequest);
 		}
 
-		for (auto scope : frameGraph->scopes)
-		{
-			
-		}
-
 		CompileCrossQueueDependencies(compileRequest);
 
 		CompileBarriers(compileRequest);
