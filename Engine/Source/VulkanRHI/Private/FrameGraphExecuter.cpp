@@ -239,13 +239,6 @@ namespace CE::Vulkan
 							clearValues.Add(clearValue);
 						}
 
-						int imageIndex = 0;
-
-						if (currentScope->presentSwapChains.GetSize() == 1)
-						{
-							imageIndex = ((Vulkan::SwapChain*)currentScope->presentSwapChains[0])->currentImageIndex;
-						}
-
 						FrameBuffer* frameBuffer = frameBufferCache.FindOrCreate(device, currentScope, frameSlot);
 						CE_ASSERT(frameBuffer != nullptr, "Failed to find or create FrameBuffer!");
 
