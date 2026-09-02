@@ -24,6 +24,7 @@ namespace CE::Vulkan
 	FrameContext FrameGraphExecuter::WaitForNextFrame()
 	{
 		frameCompletionFence->WaitCPU(frameSlots[frameSlot].fenceCompleteValue);
+		device->GetShaderResourceManager()->DestroyQueuedSRG();
 
 		return FrameContext{ .frameNumber = frameNumber, .frameSlot = frameSlot, .isValid = true };
 	}
