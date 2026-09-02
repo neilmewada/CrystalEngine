@@ -16,7 +16,7 @@ namespace CE::RHI
 	{
 		for (int i = 0; i < pages.GetSize(); i++)
 		{
-			VirtualAddress address = pages[i]->Allocate(bufferDesc.bufferSize, Math::Min<u64>(bufferDesc.alignment, 1));
+			VirtualAddress address = pages[i]->Allocate(bufferDesc.bufferSize, Math::Max<u64>(bufferDesc.alignment, 1));
 			if (address.IsValid())
 			{
 				*outBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc, {pages[i]->GetAllocation(), address});

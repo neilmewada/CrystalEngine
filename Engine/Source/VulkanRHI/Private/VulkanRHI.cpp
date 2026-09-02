@@ -656,7 +656,7 @@ namespace CE::Vulkan
         
         RHI::ResourceMemoryRequirements result{};
         u64 offset = 0;
-        result.flags = requirementsList[0].flags;
+        result.compatibleMemoryTypes.value = requirementsList[0].compatibleMemoryTypes.value;
         result.size = requirementsList[0].size;
         result.offsetAlignment = requirementsList[0].offsetAlignment;
         if (outOffsetsList)
@@ -666,7 +666,7 @@ namespace CE::Vulkan
         for (int i = 1; i < count; i++)
         {
             result.offsetAlignment = 0;
-            result.flags &= requirementsList[i].flags;
+            result.compatibleMemoryTypes.value &= requirementsList[i].compatibleMemoryTypes.value;
 
             if (offset > 0)
                 offset = Memory::GetAlignedSize(offset, requirementsList[i].offsetAlignment);

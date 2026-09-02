@@ -59,12 +59,12 @@ namespace CE::Vulkan
 
 		for (int i = 0; i < memoryProps.memoryTypeCount; i++)
 		{
-			if (desc.flags == 0 && ((memoryProps.memoryTypes[i].propertyFlags & memoryPropertyFlags) == memoryPropertyFlags))
+			if (desc.memoryTypeMask.value == 0 && ((memoryProps.memoryTypes[i].propertyFlags & memoryPropertyFlags) == memoryPropertyFlags))
 			{
 				allocatedMemoryTypeIndex = i;
 				break;
 			}
-			else if ((desc.flags & (1 << i)) && ((memoryProps.memoryTypes[i].propertyFlags & memoryPropertyFlags) == memoryPropertyFlags))
+			else if ((desc.memoryTypeMask.value & (1 << i)) && ((memoryProps.memoryTypes[i].propertyFlags & memoryPropertyFlags) == memoryPropertyFlags))
 			{
 				allocatedMemoryTypeIndex = i;
 				break;

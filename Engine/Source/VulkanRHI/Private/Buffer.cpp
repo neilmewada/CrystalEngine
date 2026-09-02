@@ -79,7 +79,7 @@ namespace CE::Vulkan
 		vkGetBufferMemoryRequirements(device->GetHandle(), tempBuffer, &bufferRequirements);
 		outRequirements.size = bufferRequirements.size;
 		outRequirements.offsetAlignment = bufferRequirements.alignment;
-		outRequirements.flags = bufferRequirements.memoryTypeBits;
+		outRequirements.compatibleMemoryTypes.value = bufferRequirements.memoryTypeBits;
 
 		bufferMemoryRequirementCache[hash] = outRequirements;
 		

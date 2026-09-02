@@ -285,7 +285,7 @@ namespace CE::Vulkan
         
         outRequirements.size = memoryRequirements.size;
         outRequirements.offsetAlignment = memoryRequirements.alignment;
-        outRequirements.flags = memoryRequirements.memoryTypeBits;
+        outRequirements.compatibleMemoryTypes.value = memoryRequirements.memoryTypeBits;
 
 		imageMemoryRequirementCache[hash] = outRequirements;
         

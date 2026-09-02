@@ -2,6 +2,15 @@
 
 namespace CE::RHI
 {
+	struct MemoryTypeMask
+	{
+		u32 value = 0;
+
+		bool IsCompatibleWith(const MemoryTypeMask& other) const
+		{
+			return (value & other.value) != 0;
+		}
+	};
 
 	enum class MemoryHeapType
 	{
@@ -31,7 +40,7 @@ namespace CE::RHI
 		MemoryHeapType heapType{};
 		u64 allocationSize = 0;
 		MemoryHeapUsageFlags usageFlags = MemoryHeapUsageFlags::All;
-		u32 flags = 0;
+		MemoryTypeMask memoryTypeMask{};
 	};
 
 	class CORERHI_API MemoryHeap : public RHIResource

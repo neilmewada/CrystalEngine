@@ -38,8 +38,7 @@ namespace CE::RHI
 	{
 		SIZE_T size = 0;
 		SIZE_T offsetAlignment = 0;
-        /// @brief For internal use only!
-		u32 flags = 0;
+		MemoryTypeMask compatibleMemoryTypes{};
 	};
 
 	struct ResourceMemoryDescriptor
