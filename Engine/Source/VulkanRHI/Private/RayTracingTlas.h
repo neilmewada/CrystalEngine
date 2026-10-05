@@ -12,7 +12,7 @@ namespace CE::Vulkan
 
 		~RayTracingTlas() override;
 
-		RayTracingAccelerationStructure* GetAccelerationStructure() const { return accelerationStructure; }
+		RayTracingAccelerationStructureOld* GetAccelerationStructure() const { return accelerationStructure; }
 
         void SetInstances(u32 numInstances, RayTracingTlasInstance* instances) override;
 
@@ -22,7 +22,7 @@ namespace CE::Vulkan
 
 		Vulkan::Buffer* tlasBuffer = nullptr;
         Vulkan::Buffer* scratchBuffer = nullptr;
-        RayTracingAccelerationStructure* accelerationStructure = nullptr;
+        RayTracingAccelerationStructureOld* accelerationStructure = nullptr;
         Array<VkAccelerationStructureInstanceKHR> vkInstances;
         Vulkan::Buffer* tlasInstancesBuffer = nullptr;
 

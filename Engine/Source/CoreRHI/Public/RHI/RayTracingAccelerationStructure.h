@@ -2,7 +2,9 @@
 
 namespace CE::RHI
 {
-    enum class RayTracingBuildFlags
+    class RayTracingAccelerationStructure;
+
+    enum class RayTracingAccelerationStructureFlags
     {
 		None = 0,
 		AllowUpdate = BIT(0),
@@ -10,7 +12,14 @@ namespace CE::RHI
 		FastTrace = BIT(2),
 		FastBuild = BIT(3)
     };
-	ENUM_CLASS_FLAGS(RayTracingBuildFlags);
+	ENUM_CLASS_FLAGS(RayTracingAccelerationStructureFlags);
+
+    enum class RayTracingAccelerationStructureType
+    {
+	    TopLevel = 0,
+        BottomLevel
+    };
+    ENUM_CLASS(RayTracingAccelerationStructureType);
 
     struct RayTracingGeometryDescriptor
     {
@@ -24,25 +33,7 @@ namespace CE::RHI
     {
         Array<RayTracingGeometryDescriptor> geometries;
 		Aabb aabb{}; // aabb will be used if no geometries are provided
-		RayTracingBuildFlags buildFlags = RayTracingBuildFlags::FastTrace;
-    };
-
-    class CORERHI_API RayTracingBlas : RHI::RHIResource, public IDeviceObject
-    {
-    protected:
-		RayTracingBlas(const RHI::RayTracingBlasDescriptor& desc) 
-    		: RHIResource(ResourceType::RayTracingBlas)
-			, IDeviceObject(DeviceObjectType::Blas)
-    		, geometries(desc.geometries)
-		{}
-
-    public:
-
-        const Array<RayTracingGeometryDescriptor>& GetGeometries() const { return geometries; }
-
-    protected:
-
-        Array<RayTracingGeometryDescriptor> geometries;
+		RayTracingAccelerationStructureFlags flags = RayTracingAccelerationStructureFlags::FastTrace;
     };
 
     struct RayTracingTlasInstance
@@ -52,29 +43,35 @@ namespace CE::RHI
 		u32 instanceMask = 0xFF;
 		Matrix4x4 transform = Matrix4x4::Identity();
 		bool transparent = false;
-		RayTracingBlas* blas = nullptr;
+        RayTracingAccelerationStructure* blas = nullptr;
 	};
 
     struct RayTracingTlasDescriptor
     {
-		Array<RayTracingTlasInstance> initialInstances;
-
+        u32 maxInstanceCount = 0;
+        RayTracingAccelerationStructureFlags flags = RayTracingAccelerationStructureFlags::AllowUpdate | RayTracingAccelerationStructureFlags::FastTrace;
     };
+    
 
-    class CORERHI_API RayTracingTlas : RHI::RHIResource, public IDeviceObject
+    class CORERHI_API RayTracingAccelerationStructure : public RHI::RHIResource, public IDeviceObject
     {
-	protected:
-		RayTracingTlas(const RHI::RayTracingTlasDescriptor& desc)
-			: RHIResource(ResourceType::RayTracingTlas)
-			, IDeviceObject(DeviceObjectType::Tlas)
-		{}
+        CE_NO_COPY(RayTracingAccelerationStructure)
+    protected:
+        RayTracingAccelerationStructure()
+            : RHIResource(ResourceType::RayTracingAccelerationStructure)
+            , IDeviceObject(DeviceObjectType::RayTracingAccelerationStructure)
+        {}
 
     public:
 
-        virtual void SetInstances(u32 numInstances, RayTracingTlasInstance* instances) = 0;
+        RayTracingAccelerationStructureType GetType() const { return accelerationStructureType; }
+
+        RayTracingAccelerationStructureFlags GetFlags() const { return flags; }
 
     protected:
 
+        RayTracingAccelerationStructureType accelerationStructureType = RayTracingAccelerationStructureType::TopLevel;
+        RayTracingAccelerationStructureFlags flags = RayTracingAccelerationStructureFlags::None;
 
     };
     

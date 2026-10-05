@@ -40,6 +40,7 @@ namespace CE::RHI
         CommandList,
 
 		// Ray Tracing
+        RayTracingAccelerationStructure,
         RayTracingBlas,
         RayTracingTlas,
     };
@@ -51,6 +52,7 @@ namespace CE::RHI
         Texture,
         SwapChain,
         TextureView,
+        RayTracingAccelerationStructure,
         Blas,
         Tlas,
     };

@@ -12,7 +12,7 @@ namespace CE::Vulkan
 
 		~RayTracingBlas() override;
 
-		RayTracingAccelerationStructure* GetAccelerationStructure() const { return accelerationStructure; }
+		RayTracingAccelerationStructureOld* GetAccelerationStructure() const { return accelerationStructure; }
 
     private:
 
@@ -20,7 +20,7 @@ namespace CE::Vulkan
 
         Vulkan::Buffer* blasBuffer = nullptr;
         Vulkan::Buffer* scratchBuffer = nullptr;
-        RayTracingAccelerationStructure* accelerationStructure = nullptr;
+        RayTracingAccelerationStructureOld* accelerationStructure = nullptr;
 
         Array<VkAccelerationStructureGeometryKHR> geometryDescriptors;
         Array<VkAccelerationStructureBuildRangeInfoKHR> rangeInfos;

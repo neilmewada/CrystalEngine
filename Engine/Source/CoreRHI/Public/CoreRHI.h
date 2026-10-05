@@ -34,6 +34,9 @@
 #include "RHI/VertexBufferView.h"
 #include "RHI/TextureView.h"
 
+// RayTracing
+#include "RHI/RayTracingAccelerationStructure.h"
+
 // Memory
 #include "RHI/Allocator.h"
 #include "RHI/FreeListAllocator.h"
@@ -49,9 +52,6 @@
 
 // Draw Data dependents
 #include "RHI/CommandList.h"
-
-// RayTracing
-#include "RHI/RayTracingAccelerationStructure.h"
 
 // Frame Graph
 #include "RHI/FrameAttachment.h"

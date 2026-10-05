@@ -114,7 +114,7 @@ namespace CE::Vulkan
 		accelerationStructureCreateInfo.offset = 0;
 		accelerationStructureCreateInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
 		
-		accelerationStructure = new RayTracingAccelerationStructure(device, accelerationStructureCreateInfo);
+		accelerationStructure = new RayTracingAccelerationStructureOld(device, accelerationStructureCreateInfo);
 
 		buildInfo.dstAccelerationStructure = accelerationStructure->GetHandle();
 

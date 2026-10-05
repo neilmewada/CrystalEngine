@@ -55,26 +55,26 @@ namespace CE::Vulkan
 		return VK_FORMAT_UNDEFINED;
 	}
 
-	static VkBuildAccelerationStructureFlagsKHR GetVkAccelerationStructureBuildFlags(RHI::RayTracingBuildFlags buildFlags)
+	static VkBuildAccelerationStructureFlagsKHR GetVkAccelerationStructureBuildFlags(RHI::RayTracingAccelerationStructureFlags buildFlags)
 	{
 		VkBuildAccelerationStructureFlagsKHR flags = 0;
 
-		if (EnumHasFlag(buildFlags, RayTracingBuildFlags::AllowCompaction))
+		if (EnumHasFlag(buildFlags, RayTracingAccelerationStructureFlags::AllowCompaction))
 		{
 			flags |= VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR;
 		}
 
-		if (EnumHasFlag(buildFlags, RayTracingBuildFlags::AllowUpdate))
+		if (EnumHasFlag(buildFlags, RayTracingAccelerationStructureFlags::AllowUpdate))
 		{
 			flags |= VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR;
 		}
 
-		if (EnumHasFlag(buildFlags, RayTracingBuildFlags::FastBuild))
+		if (EnumHasFlag(buildFlags, RayTracingAccelerationStructureFlags::FastBuild))
 		{
 			flags |= VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR;
 		}
 
-		if (EnumHasFlag(buildFlags, RayTracingBuildFlags::FastTrace))
+		if (EnumHasFlag(buildFlags, RayTracingAccelerationStructureFlags::FastTrace))
 		{
 			flags |= VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
 		}
@@ -153,7 +153,7 @@ namespace CE::Vulkan
 
 		buildInfo = {};
 		buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
-		buildInfo.flags = GetVkAccelerationStructureBuildFlags(desc.buildFlags);
+		buildInfo.flags = GetVkAccelerationStructureBuildFlags(desc.flags);
 		buildInfo.geometryCount = static_cast<uint32_t>(geometryDescriptors.GetSize());
 		buildInfo.pGeometries = geometryDescriptors.GetData();
 		buildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
@@ -201,7 +201,7 @@ namespace CE::Vulkan
 
 		accelCreateInfo.buffer = (VkBuffer)blasBuffer->GetHandle();
 
-		accelerationStructure = new RayTracingAccelerationStructure(device, accelCreateInfo);
+		accelerationStructure = new RayTracingAccelerationStructureOld(device, accelCreateInfo);
 
 		buildInfo.dstAccelerationStructure = accelerationStructure->GetHandle();
 

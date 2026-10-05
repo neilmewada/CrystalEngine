@@ -2,16 +2,33 @@
 
 namespace CE::Vulkan
 {
- 
-	//! Vulkan RAII class for Ray Tracing Acceleration Structure
-    class RayTracingAccelerationStructure
+
+    class RayTracingAccelerationStructure : public RHI::RayTracingAccelerationStructure
     {
-        CE_NO_COPY(RayTracingAccelerationStructure)
     public:
 
-        RayTracingAccelerationStructure(Device* device, const VkAccelerationStructureCreateInfoKHR& createInfo);
+        RayTracingAccelerationStructure(Device* device, const RHI::RayTracingBlasDescriptor& blasDescriptor);
+        RayTracingAccelerationStructure(Device* device, const RHI::RayTracingTlasDescriptor& tlasDescriptor);
 
         ~RayTracingAccelerationStructure();
+
+    private:
+
+        Device* device = nullptr;
+        VkAccelerationStructureKHR accelerationStructure = VK_NULL_HANDLE;
+        VkBuildAccelerationStructureFlagsKHR accelerationStructureFlags = 0;
+
+    };
+ 
+	//! Vulkan RAII class for Ray Tracing Acceleration Structure
+    class RayTracingAccelerationStructureOld
+    {
+        CE_NO_COPY(RayTracingAccelerationStructureOld)
+    public:
+
+        RayTracingAccelerationStructureOld(Device* device, const VkAccelerationStructureCreateInfoKHR& createInfo);
+
+        ~RayTracingAccelerationStructureOld();
 
         VkAccelerationStructureKHR GetHandle() const { return accelerationStructure; }
 
